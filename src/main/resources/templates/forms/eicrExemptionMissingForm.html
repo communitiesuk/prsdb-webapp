@@ -4,6 +4,7 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="rcpElectricalInfoUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rcpElectricalRegisterUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <header>
@@ -34,5 +35,5 @@
         <p class="govuk-body" th:text="#{forms.eicrExemptionMissing.subsection.paragraph.one}">forms.eicrExemptionMissing.subsection.paragraph.one</p>
         <p class="govuk-body" th:text="#{forms.eicrExemptionMissing.subsection.paragraph.two}">forms.eicrExemptionMissing.subsection.paragraph.two</p>
     </section>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinueToEPC})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
