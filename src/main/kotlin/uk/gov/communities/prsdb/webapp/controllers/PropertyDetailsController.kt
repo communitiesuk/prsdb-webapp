@@ -26,9 +26,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyComplianceDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -72,7 +72,7 @@ class PropertyDetailsController(
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
-                PropertyComplianceDetailsViewModel(
+                PropertyComplianceViewModel(
                     propertyCompliance = propertyCompliance,
                     withActionLinks = true,
                     withNotificationMessages = true,
