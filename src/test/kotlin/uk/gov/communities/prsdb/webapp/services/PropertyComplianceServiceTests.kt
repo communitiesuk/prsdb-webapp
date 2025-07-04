@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
@@ -74,24 +76,45 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `getComplianceForProperty retrieves the compliance record for the given property ownership ID`() {
+    fun `getComplianceForPropertyOrNull retrieves the compliance record for the given property ownership ID`() {
         val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
             .thenReturn(expectedPropertyCompliance)
 
-        val returnedPropertyCompliance = propertyComplianceService.getComplianceForProperty(expectedPropertyCompliance.propertyOwnership.id)
+        val returnedPropertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(expectedPropertyCompliance.propertyOwnership.id)
 
         assertEquals(returnedPropertyCompliance, returnedPropertyCompliance)
     }
 
     @Test
-    fun `getComplianceForProperty returns null when no compliance record exists for the given property ownership ID`() {
+    fun `getComplianceForPropertyOrNull returns null when no compliance record exists for the given property ownership ID`() {
         val propertyOwnershipId = 123L
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
 
-        val returnedPropertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
+        val returnedPropertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         assertNull(returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `getComplianceForProperty retrieves the compliance record for the given property ownership ID`() {
+        val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
+            .thenReturn(expectedPropertyCompliance)
+
+        val returnedPropertyCompliance =
+            propertyComplianceService.getComplianceForProperty(expectedPropertyCompliance.propertyOwnership.id)
+
+        assertEquals(expectedPropertyCompliance, returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `getComplianceForProperty throws an exception when no compliance record exists for the given property ownership ID`() {
+        val propertyOwnershipId = 123L
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
+
+        assertThrows<EntityNotFoundException> { propertyComplianceService.getComplianceForProperty(propertyOwnershipId) }
     }
 
     @Test

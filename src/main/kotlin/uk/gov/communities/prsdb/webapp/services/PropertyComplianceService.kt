@@ -62,16 +62,18 @@ class PropertyComplianceService(
         )
     }
 
-    fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance? =
+    fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
+
+    fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
+        getComplianceForPropertyOrNull(propertyOwnershipId)
+            ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
     fun updatePropertyCompliance(
         propertyOwnershipId: Long,
         update: PropertyComplianceUpdateModel,
     ) {
-        val propertyCompliance =
-            getComplianceForProperty(propertyOwnershipId)
-                ?: throw EntityNotFoundException("No compliance found for property ownership ID: $propertyOwnershipId")
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
 
         if (update.gasSafetyCertUpdate != null) {
             propertyCompliance.gasSafetyCertS3Key = update.gasSafetyCertUpdate.s3Key
