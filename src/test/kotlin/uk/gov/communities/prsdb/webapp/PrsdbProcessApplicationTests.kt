@@ -11,9 +11,17 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.config.S3Config
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
+import uk.gov.communities.prsdb.webapp.services.AwsS3FileDequarantiner
+import uk.gov.communities.prsdb.webapp.services.LocalFileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
+import kotlin.jvm.java
 import kotlin.reflect.KClass
 
 @Import(TestcontainersConfiguration::class)
@@ -25,6 +33,12 @@ class PrsdbProcessApplicationTests {
     @Autowired
     private var context: ConfigurableApplicationContext? = null
 
+    @MockitoBean
+    lateinit var s3: S3TransferManager
+
+    @MockitoBean
+    lateinit var s3client: S3Client
+
     @Test
     fun `only necessary PRSDB beans are available in non web mode`() {
         val expectedBeansByName =
@@ -34,6 +48,10 @@ class PrsdbProcessApplicationTests {
                 EmailNotificationStubService::class.java.simpleName,
                 NotifyEmailNotificationService::class.java.simpleName,
                 NotifyConfig::class.java.simpleName,
+                S3Config::class.java.simpleName,
+                AwsS3FileDequarantiner::class.java.simpleName,
+                LocalFileDequarantiner::class.java.simpleName,
+                VirusScanProcessingService::class.java.simpleName,
                 // Beans with explicit names can retrieve their name by reflecting on the annotation using the `getExplicitBeanName` function
                 // e.g. getExplicitBeanName<Component>(YourComponentClassName::class),
                 // Beans added by @Import annotations use their fully qualified class name as the bean name by default
