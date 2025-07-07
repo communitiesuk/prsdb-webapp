@@ -15,17 +15,17 @@ class FileNameInfoTests {
             listOf(
                 Arguments.of(
                     "property_123_eicr.pdf",
-                    FileNameInfo(
+                    PropertyFileNameInfo(
                         propertyOwnershipId = 123L,
-                        fileCategory = FileNameInfo.FileCategory.Eirc,
+                        fileCategory = PropertyFileNameInfo.FileCategory.Eirc,
                         extension = "pdf",
                     ),
                 ),
                 Arguments.of(
                     "ignored_456_gas_safety_certificate.jpg",
-                    FileNameInfo(
+                    PropertyFileNameInfo(
                         propertyOwnershipId = 456L,
-                        fileCategory = FileNameInfo.FileCategory.GasSafetyCert,
+                        fileCategory = PropertyFileNameInfo.FileCategory.GasSafetyCert,
                         extension = "jpg",
                     ),
                 ),
@@ -47,9 +47,9 @@ class FileNameInfoTests {
     @FieldSource("validFilenames")
     fun `correctly parses valid filenames`(
         filename: String,
-        expected: FileNameInfo,
+        expected: PropertyFileNameInfo,
     ) {
-        val fileNameInfo = FileNameInfo.Companion.parse(filename)
+        val fileNameInfo = PropertyFileNameInfo.Companion.parse(filename)
 
         Assertions.assertEquals(expected, fileNameInfo)
     }
@@ -57,6 +57,6 @@ class FileNameInfoTests {
     @ParameterizedTest
     @FieldSource("invalidFilenames")
     fun `throws for invalid filenames`(filename: String) {
-        assertThrows<PrsdbWebException> { FileNameInfo.Companion.parse(filename) }
+        assertThrows<PrsdbWebException> { PropertyFileNameInfo.Companion.parse(filename) }
     }
 }

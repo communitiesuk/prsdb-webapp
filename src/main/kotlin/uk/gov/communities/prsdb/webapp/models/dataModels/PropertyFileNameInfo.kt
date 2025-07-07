@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
-data class FileNameInfo(
+data class PropertyFileNameInfo(
     val propertyOwnershipId: Long,
     val fileCategory: FileCategory,
     val extension: String,
@@ -22,7 +22,7 @@ data class FileNameInfo(
     }
 
     companion object {
-        fun parse(fileName: String): FileNameInfo {
+        fun parse(fileName: String): PropertyFileNameInfo {
             val nameAndExtension = fileName.split('.')
             if (nameAndExtension.size != 2) {
                 throw invalidFilenameException(fileName)
@@ -38,7 +38,7 @@ data class FileNameInfo(
             val categoryString = nameParts.drop(2).joinToString("_") { it }
             val fileCategory = FileCategory.fromCategoryNameOrNull(categoryString) ?: throw invalidFilenameException(fileName)
 
-            return FileNameInfo(
+            return PropertyFileNameInfo(
                 propertyOwnershipId,
                 fileCategory,
                 extension,

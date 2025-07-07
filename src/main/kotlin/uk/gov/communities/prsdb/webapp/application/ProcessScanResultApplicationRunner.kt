@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.models.dataModels.FileNameInfo
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.system.exitProcess
@@ -36,7 +36,7 @@ class ProcessScanResultApplicationRunner(
             throw PrsdbWebException("Invocation from scan on unexpected bucket: $eventBucketName")
         }
 
-        val fileNameInfo = FileNameInfo.parse(objectKey)
+        val fileNameInfo = PropertyFileNameInfo.parse(objectKey)
         val scanStatus =
             ScanResult.fromStringValueOrNull(scanResultStatus)
                 ?: throw PrsdbWebException("Unknown guard duty status: $scanResultStatus")

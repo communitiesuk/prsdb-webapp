@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.models.dataModels.FileNameInfo
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 
 @Service
@@ -10,7 +10,7 @@ class VirusScanProcessingService(
     private val dequarantiner: FileDequarantiner,
 ) {
     fun processScan(
-        fileNameInfo: FileNameInfo,
+        fileNameInfo: PropertyFileNameInfo,
         scanResultStatus: ScanResult,
     ) {
         when (scanResultStatus) {
