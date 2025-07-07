@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
@@ -73,11 +73,11 @@ class RegisterLandlordController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         model: Model,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
     ): ModelAndView =
         landlordRegistrationJourneyFactory
             .create()
-            .getModelAndViewForStep(stepName, subpage, changingAnswersForStep = changingAnswerFor)
+            .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
 
     @PostMapping("/{stepName}")
     fun postJourneyData(
@@ -86,7 +86,7 @@ class RegisterLandlordController(
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
     ): ModelAndView =
         landlordRegistrationJourneyFactory
             .create()
@@ -95,7 +95,7 @@ class RegisterLandlordController(
                 formData,
                 subpage,
                 principal,
-                changingAnswersForStep = changingAnswerFor,
+                checkingAnswersForStep = checkingAnswersForStep,
             )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")

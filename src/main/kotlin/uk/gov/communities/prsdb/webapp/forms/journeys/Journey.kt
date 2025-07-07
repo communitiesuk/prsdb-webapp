@@ -40,14 +40,14 @@ abstract class Journey<T : StepId>(
         stepPathSegment: String,
         subPageNumber: Int?,
         submittedPageData: PageData? = null,
-        changingAnswersForStep: String? = null,
+        checkingAnswersForStep: String? = null,
     ): ModelAndView {
         val requestedStep = getStep(stepPathSegment)
         if (!isStepReachable(requestedStep, subPageNumber)) {
             return ModelAndView("redirect:$unreachableStepRedirect")
         }
         val prevStepDetails = getPrevStep(requestedStep, subPageNumber)
-        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, changingAnswersForStep?.let { getStep(it) }?.id)
+        val prevStepUrl = buildPreviousStepUrl(prevStepDetails, checkingAnswersForStep?.let { getStep(it) }?.id)
         val pageData =
             submittedPageData
                 ?: JourneyDataHelper.getPageData(journeyDataService.getJourneyDataFromSession(), requestedStep.name, subPageNumber)
@@ -68,7 +68,7 @@ abstract class Journey<T : StepId>(
         formData: PageData,
         subPageNumber: Int?,
         principal: Principal,
-        changingAnswersForStep: String? = null,
+        checkingAnswersForStep: String? = null,
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
 
@@ -94,25 +94,25 @@ abstract class Journey<T : StepId>(
             journeyDataService.saveJourneyData(journeyDataContextId, journeyData, journeyType, principal)
         }
 
-        val changingAnswersForId = changingAnswersForStep?.let { getStep(it).id }
+        val checkingAnswersForId = checkingAnswersForStep?.let { getStep(it).id }
         if (currentStep.handleSubmitAndRedirect != null) {
             return ModelAndView(
-                "redirect:${currentStep.handleSubmitAndRedirect.invoke(newFilteredJourneyData, subPageNumber, changingAnswersForId)}",
+                "redirect:${currentStep.handleSubmitAndRedirect.invoke(newFilteredJourneyData, subPageNumber, checkingAnswersForId)}",
             )
         }
 
-        val redirectUrl = getRedirectForNextStep(currentStep, newFilteredJourneyData, subPageNumber, changingAnswersForId)
+        val redirectUrl = getRedirectForNextStep(currentStep, newFilteredJourneyData, subPageNumber, checkingAnswersForId)
         return ModelAndView("redirect:$redirectUrl")
     }
 
     private fun buildPreviousStepUrl(
         prevStepDetails: StepDetails<T>?,
-        changingAnswersFor: T?,
+        checkingAnswersFor: T?,
     ): String? =
-        if (changingAnswersFor == null ||
-            stepRouter.isDestinationAllowedWhenChangingAnswerTo(prevStepDetails?.step?.id, changingAnswersFor)
+        if (checkingAnswersFor == null ||
+            stepRouter.isDestinationAllowedWhenCheckingAnswersFor(prevStepDetails?.step?.id, checkingAnswersFor)
         ) {
-            prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber, changingAnswersFor) }
+            prevStepDetails?.let { Step.generateUrl(it.step.id, it.subPageNumber, checkingAnswersFor) }
         } else {
             checkYourAnswersStepId?.let { Step.generateUrl(it, null, null) }
         }
@@ -121,7 +121,7 @@ abstract class Journey<T : StepId>(
         currentStep: Step<T>,
         filteredJourneyData: JourneyData,
         subPageNumber: Int?,
-        changingAnswersFor: T? = null,
+        checkingAnswersFor: T? = null,
         overriddenRedirectStepId: T? = null,
         overriddenRedirectSubPageNumber: Int? = null,
     ): String {
@@ -132,11 +132,11 @@ abstract class Journey<T : StepId>(
                 Pair(overriddenRedirectStepId, overriddenRedirectSubPageNumber)
             }
 
-        return if (changingAnswersFor == null || stepRouter.isDestinationAllowedWhenChangingAnswerTo(newStepId, changingAnswersFor)) {
+        return if (checkingAnswersFor == null || stepRouter.isDestinationAllowedWhenCheckingAnswersFor(newStepId, checkingAnswersFor)) {
             if (newStepId == null) {
                 throw IllegalStateException("Cannot compute next step from step ${currentStep.id.urlPathSegment}")
             }
-            Step.generateUrl(newStepId, newSubPageNumber, changingAnswersFor)
+            Step.generateUrl(newStepId, newSubPageNumber, checkingAnswersFor)
         } else {
             // Assigning to localCheckYourAnswersStep allows the null check here to smart cast from T? to T
             val localCheckYourAnswersStep =

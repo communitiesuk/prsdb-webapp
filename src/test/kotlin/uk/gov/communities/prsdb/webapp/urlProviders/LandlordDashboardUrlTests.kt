@@ -278,7 +278,7 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 AbsoluteUrlProvider(),
-                changingAnswerFor = null,
+                checkingAnswersForStep = null,
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
 

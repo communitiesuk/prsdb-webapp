@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
@@ -96,7 +96,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         principal: Principal,
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -105,8 +105,8 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceJourneyFactory
-                .create(propertyOwnershipId, changingAnswerFor)
-                .getModelAndViewForStep(stepName, subpage, changingAnswersForStep = changingAnswerFor)
+                .create(propertyOwnershipId, checkingAnswersForStep)
+                .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
 
         if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
             val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
@@ -121,7 +121,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestParam formData: PageData,
         principal: Principal,
     ): ModelAndView {
@@ -132,8 +132,8 @@ class PropertyComplianceController(
         val annotatedFormData = formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, changingAnswerFor)
-            .completeStep(stepName, annotatedFormData, subpage, principal, changingAnswerFor)
+            .create(propertyOwnershipId, checkingAnswersForStep)
+            .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -141,7 +141,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
@@ -187,13 +187,13 @@ class PropertyComplianceController(
                 ).toPageData()
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, changingAnswerFor)
+            .create(propertyOwnershipId, checkingAnswersForStep)
             .completeStep(
                 stepName,
                 formData,
                 subpage,
                 principal,
-                changingAnswerFor,
+                checkingAnswersForStep,
             )
     }
 

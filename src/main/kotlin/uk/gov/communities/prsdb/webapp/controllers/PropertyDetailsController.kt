@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
@@ -81,12 +81,12 @@ class PropertyDetailsController(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam(CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerForStep: String?,
+        @RequestParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String?,
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
-                .getModelAndViewForStep(changingAnswersForStep = changingAnswerForStep)
+                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
+                .getModelAndViewForStep(checkingAnswersForStep = checkingAnswersForStep)
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -102,12 +102,12 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
-        @RequestParam(CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerForStep: String?,
+        @RequestParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String?,
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
-                .completeStep(formData, principal, changingAnswerForStep)
+                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
+                .completeStep(formData, principal, checkingAnswersForStep)
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
