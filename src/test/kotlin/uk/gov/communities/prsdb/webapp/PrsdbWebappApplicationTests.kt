@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import software.amazon.awssdk.services.s3.S3AsyncClient
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
@@ -58,7 +58,7 @@ class PrsdbWebappApplicationTests {
     lateinit var s3: S3TransferManager
 
     @MockitoBean
-    lateinit var s3client: S3AsyncClient
+    lateinit var s3client: S3Client
 
     @MockitoBean
     lateinit var epcConfig: EpcRegisterConfig

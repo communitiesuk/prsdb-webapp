@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import software.amazon.awssdk.services.s3.S3AsyncClient
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
@@ -37,7 +37,7 @@ class PrsdbProcessApplicationTests {
     lateinit var s3: S3TransferManager
 
     @MockitoBean
-    lateinit var s3client: S3AsyncClient
+    lateinit var s3client: S3Client
 
     @Test
     fun `only necessary PRSDB beans are available in non web mode`() {

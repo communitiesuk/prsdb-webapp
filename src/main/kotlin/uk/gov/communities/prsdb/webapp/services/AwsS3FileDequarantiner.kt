@@ -2,13 +2,13 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import software.amazon.awssdk.services.s3.S3AsyncClient
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 
 @Service
 class AwsS3FileDequarantiner(
     private val transferManager: S3TransferManager,
-    private val s3Client: S3AsyncClient,
+    private val s3Client: S3Client,
 ) : FileDequarantiner {
     @Value("\${aws.s3.quarantineBucket}")
     lateinit var quarantineBucketName: String
@@ -39,7 +39,7 @@ class AwsS3FileDequarantiner(
             s3Client
                 .deleteObject { request ->
                     request.bucket(quarantineBucketName).key(objectKey)
-                }.join()
+                }
 
         return deleteResponse.sdkHttpResponse().isSuccessful
     }
