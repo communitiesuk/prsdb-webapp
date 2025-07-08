@@ -20,6 +20,11 @@ class DateTimeHelper(
         return getDateInUK(now)
     }
 
+    fun getCurrentDateTimeInUK(): LocalDateTime {
+        val now = clock.instant().toKotlinInstant()
+        return getDateTimeInUk(now)
+    }
+
     fun getAgeFromBirthDate(birthDate: LocalDate): Int = birthDate.yearsUntil(getCurrentDateInUK())
 
     fun isDateInPast(date: LocalDate): Boolean = date < getCurrentDateInUK()

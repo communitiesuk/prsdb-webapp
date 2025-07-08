@@ -1,6 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -12,10 +16,11 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import java.time.Instant
 import java.util.UUID
 
 class LocalAuthorityInvitationServiceTests {
@@ -34,7 +39,7 @@ class LocalAuthorityInvitationServiceTests {
 
     @Test
     fun `createInviteToken saves the created invite token for the given authority`() {
-        val authority = LocalAuthority()
+        val authority = MockLocalAuthorityData.createLocalAuthority()
 
         val token = inviteService.createInvitationToken("email", authority)
 
@@ -48,9 +53,10 @@ class LocalAuthorityInvitationServiceTests {
     @Test
     fun `getAuthorityForToken returns the authority the token was created with`() {
         val testUuid = UUID.randomUUID()
-        val testEmail = "test@example.com"
-        val testAuthority = LocalAuthority()
-        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
+        val testAuthority = MockLocalAuthorityData.createLocalAuthority(id = 789)
+
+        whenever(mockLaInviteRepository.findByToken(testUuid))
+            .thenReturn(MockLocalAuthorityData.createLocalAuthorityInvitation(invitingAuthority = testAuthority, token = testUuid))
 
         val authority = inviteService.getAuthorityForToken(testUuid.toString())
 
@@ -61,8 +67,8 @@ class LocalAuthorityInvitationServiceTests {
     fun `getEmailAddressForToken returns the email the invitation was send to`() {
         val testUuid = UUID.randomUUID()
         val testEmail = "test@example.com"
-        val testAuthority = LocalAuthority()
-        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
+        whenever(mockLaInviteRepository.findByToken(testUuid))
+            .thenReturn(MockLocalAuthorityData.createLocalAuthorityInvitation(email = testEmail, token = testUuid))
 
         val email = inviteService.getEmailAddressForToken(testUuid.toString())
 
@@ -72,10 +78,9 @@ class LocalAuthorityInvitationServiceTests {
     @Test
     fun `getInvitationFromToken returns an invitation if the token is in the database`() {
         val testUuid = UUID.randomUUID()
-        val testEmail = "test@example.com"
-        val testAuthority = LocalAuthority()
-        val testInvitation = LocalAuthorityInvitation(testUuid, testEmail, testAuthority)
-        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(testInvitation)
+        val testInvitation = MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid)
+        whenever(mockLaInviteRepository.findByToken(testUuid))
+            .thenReturn(testInvitation)
 
         val invitation = inviteService.getInvitationFromToken(testUuid.toString())
 
@@ -88,17 +93,54 @@ class LocalAuthorityInvitationServiceTests {
         whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(null)
 
         val thrown = assertThrows(TokenNotFoundException::class.java) { inviteService.getInvitationFromToken(testUuid.toString()) }
-        assertEquals("Token not found in database", thrown.message)
+        assertEquals("Invitation token not found in database", thrown.message)
     }
 
     @Test
-    fun `tokenIsValid returns true if the token is in the database`() {
+    fun `getInvitationHasExpired returns true if the invitation has expired`() {
         val testUuid = UUID.randomUUID()
-        val testEmail = "test@example.com"
-        val testAuthority = LocalAuthority()
-        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(LocalAuthorityInvitation(testUuid, testEmail, testAuthority))
+        val createdDate =
+            LocalDateTime(2024, 1, 1, 0, 0)
+                .toInstant(TimeZone.of("Europe/London"))
+                .toJavaInstant()
+
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate)
+
+        assertTrue(inviteService.getInvitationHasExpired(invitation))
+    }
+
+    @Test
+    fun `getInvitationHasExpired returns false if the invitation has not expired`() {
+        val testUuid = UUID.randomUUID()
+        val createdDate = Instant.now()
+
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate)
+
+        assertFalse(inviteService.getInvitationHasExpired(invitation))
+    }
+
+    @Test
+    fun `tokenIsValid returns true if the token is in the database and has not expired`() {
+        val testUuid = UUID.randomUUID()
+        val createdDate = Instant.now()
+        whenever(mockLaInviteRepository.findByToken(testUuid))
+            .thenReturn(MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate))
 
         assertTrue(inviteService.tokenIsValid(testUuid.toString()))
+    }
+
+    @Test
+    fun `tokenIsValid returns false if the token is in the database but has expired`() {
+        val testUuid = UUID.randomUUID()
+        val createdDate =
+            LocalDateTime(2024, 1, 1, 0, 0)
+                .toInstant(TimeZone.of("Europe/London"))
+                .toJavaInstant()
+
+        whenever(mockLaInviteRepository.findByToken(testUuid))
+            .thenReturn(MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate))
+
+        assertFalse(inviteService.tokenIsValid(testUuid.toString()))
     }
 
     @Test
@@ -112,12 +154,7 @@ class LocalAuthorityInvitationServiceTests {
     @Test
     fun `getInvitationById returns an invitation if the id is in the database`() {
         val testId = 123.toLong()
-        val invitationFromDatabase =
-            LocalAuthorityInvitation(
-                UUID.randomUUID(),
-                "test@example.com",
-                LocalAuthority(),
-            )
+        val invitationFromDatabase = MockLocalAuthorityData.createLocalAuthorityInvitation(id = testId)
 
         whenever(mockLaInviteRepository.getReferenceById(testId)).thenReturn(invitationFromDatabase)
 

@@ -68,14 +68,12 @@ class LocalAuthorityInvitationService(
 
     fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getReferenceById(id)
 
-    fun getInvitationExpiryTime(invitation: LocalAuthorityInvitation) =
-        DateTimeHelper.getNHoursFromInstant(
-            invitation.createdDate.toKotlinInstant(),
-            LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS,
-        )
-
     fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
-        val expiryTime = getInvitationExpiryTime(invitation)
-        return DateTimeHelper.getDateTimeInUk(invitation.createdDate.toKotlinInstant()) > expiryTime
+        val expiresAtTime =
+            DateTimeHelper.getNHoursFromInstant(
+                invitation.createdDate.toKotlinInstant(),
+                LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS,
+            )
+        return DateTimeHelper().getCurrentDateTimeInUK() > expiresAtTime
     }
 }
