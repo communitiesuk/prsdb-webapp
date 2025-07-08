@@ -35,7 +35,7 @@ class EicrViewModelBuilder {
                     } else {
                         addRow(
                             key = "propertyDetails.complianceInformation.exemption",
-                            value = getExemptionReasonValue(propertyCompliance),
+                            value = getExemptionReasonValue(propertyCompliance.eicrExemptionReason),
                         )
                     }
                 }.toList()
@@ -55,16 +55,11 @@ class EicrViewModelBuilder {
                 "propertyDetails.complianceInformation.notAdded"
             }
 
-        private fun getExemptionReasonValue(propertyCompliance: PropertyCompliance): Any =
-            when (propertyCompliance.eicrExemptionReason) {
+        private fun getExemptionReasonValue(exemptionReason: EicrExemptionReason?): Any =
+            when (exemptionReason) {
                 null -> "propertyDetails.complianceInformation.noExemption"
-                EicrExemptionReason.OTHER ->
-                    listOf(
-                        MessageKeyConverter.convert(EicrExemptionReason.OTHER),
-                        propertyCompliance.eicrExemptionOtherReason,
-                    )
-
-                else -> MessageKeyConverter.convert(propertyCompliance.eicrExemptionReason!!)
+                EicrExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(EicrExemptionReason.OTHER), exemptionReason)
+                else -> MessageKeyConverter.convert(exemptionReason)
             }
 
         // TODO PRSD-976 add link to download certificate and appropriate messages when required
