@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
-import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
+import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import java.util.UUID
 
 @PrsdbWebService
@@ -30,7 +30,8 @@ class LocalAuthorityInvitationService(
 
     fun getInvitationFromToken(token: String): LocalAuthorityInvitation {
         val tokenUuid = UUID.fromString(token)
-        val invitation = invitationRepository.findByToken(tokenUuid) ?: throw InvalidTokenException("Token not found in database")
+        val invitation =
+            invitationRepository.findByToken(tokenUuid) ?: throw TokenNotFoundException("Invitation token not found in database")
 
         return invitation
     }
@@ -46,7 +47,7 @@ class LocalAuthorityInvitationService(
     fun tokenIsValid(token: String): Boolean {
         try {
             getInvitationFromToken(token)
-        } catch (e: InvalidTokenException) {
+        } catch (e: TokenNotFoundException) {
             return false
         }
 
