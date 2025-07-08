@@ -70,11 +70,14 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val hasResponsibilityToTenantsDeclaration: Boolean = true
 
-    val hasGasSafetyExemption = gasSafetyCertExemptionReason != null
+    val hasGasSafetyExemption: Boolean
+        get() = gasSafetyCertExemptionReason != null
 
-    val hasEicrExemption = eicrExemptionReason != null
+    val hasEicrExemption: Boolean
+        get() = eicrExemptionReason != null
 
-    val hasEpcExemption = epcExemptionReason != null
+    val hasEpcExemption: Boolean
+        get() = epcExemptionReason != null
 
     val gasSafetyCertExpiryDate: LocalDate?
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
