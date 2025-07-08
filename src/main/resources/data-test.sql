@@ -160,6 +160,7 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
        (16,'2025-04-09 14:23:39.070368+00',null,'urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE'),
        (17,'2025-04-17 09:49:19.826514+00',null,'urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY'),
        (18,'2025-04-22 10:55:55.704192+00',null,'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'),
-       (19,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0');
+       (19,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'),
+       (20,'2025-07-08 13:58:19.927000+00',null,'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA');
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
