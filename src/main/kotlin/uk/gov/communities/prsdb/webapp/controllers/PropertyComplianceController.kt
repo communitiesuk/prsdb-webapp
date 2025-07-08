@@ -213,10 +213,11 @@ class PropertyComplianceController(
         }
 
         val propertyCompliance =
-            propertyComplianceService.getComplianceForProperty(propertyOwnershipId) ?: throw ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "No property compliance found for property ownership $propertyOwnershipId",
-            )
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+                ?: throw ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No property compliance found for property ownership $propertyOwnershipId",
+                )
 
         val confirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
 
