@@ -39,7 +39,7 @@ class GasSafetyViewModelBuilder {
                     } else {
                         addRow(
                             key = "propertyDetails.complianceInformation.exemption",
-                            value = getExemptionReasonValue(propertyCompliance),
+                            value = getExemptionReasonValue(propertyCompliance.gasSafetyCertExemptionReason),
                         )
                     }
                 }.toList()
@@ -59,16 +59,11 @@ class GasSafetyViewModelBuilder {
                 "propertyDetails.complianceInformation.notAdded"
             }
 
-        private fun getExemptionReasonValue(propertyCompliance: PropertyCompliance): Any =
-            when (propertyCompliance.gasSafetyCertExemptionReason) {
+        private fun getExemptionReasonValue(exemptionReason: GasSafetyExemptionReason?): Any =
+            when (exemptionReason) {
                 null -> "propertyDetails.complianceInformation.noExemption"
-                GasSafetyExemptionReason.OTHER ->
-                    listOf(
-                        MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER),
-                        propertyCompliance.gasSafetyCertExemptionOtherReason,
-                    )
-
-                else -> MessageKeyConverter.convert(propertyCompliance.gasSafetyCertExemptionReason!!)
+                GasSafetyExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER), exemptionReason)
+                else -> MessageKeyConverter.convert(exemptionReason)
             }
 
         // TODO PRSD-976 add link to download certificate and appropriate messages when required
