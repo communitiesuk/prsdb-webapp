@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinInstant
@@ -23,8 +25,10 @@ class DateTimeHelper(
     fun isDateInPast(date: LocalDate): Boolean = date < getCurrentDateInUK()
 
     companion object {
+        fun getDateTimeInUk(instant: Instant): LocalDateTime = instant.toLocalDateTime(TimeZone.of("Europe/London"))
+
         fun getDateInUK(instant: Instant): LocalDate {
-            val dateTimeInUK = instant.toLocalDateTime(TimeZone.of("Europe/London"))
+            val dateTimeInUK = getDateTimeInUk(instant)
             return dateTimeInUK.date
         }
 
@@ -40,5 +44,10 @@ class DateTimeHelper(
             }
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
+
+        fun getNHoursFromInstant(
+            instant: Instant,
+            nHours: Int,
+        ): LocalDateTime = instant.plus(nHours, DateTimeUnit.HOUR).toLocalDateTime(TimeZone.of("Europe/London"))
     }
 }

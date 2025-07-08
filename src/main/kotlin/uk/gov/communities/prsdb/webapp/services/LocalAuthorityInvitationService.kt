@@ -1,12 +1,15 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.util.UUID
 
 @PrsdbWebService
@@ -46,12 +49,11 @@ class LocalAuthorityInvitationService(
 
     fun tokenIsValid(token: String): Boolean {
         try {
-            getInvitationFromToken(token)
+            val invitation = getInvitationFromToken(token)
+            return !getInvitationHasExpired(invitation)
         } catch (e: TokenNotFoundException) {
             return false
         }
-
-        return true
     }
 
     fun storeTokenInSession(token: String) {
@@ -65,4 +67,15 @@ class LocalAuthorityInvitationService(
     }
 
     fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getReferenceById(id)
+
+    fun getInvitationExpiryTime(invitation: LocalAuthorityInvitation) =
+        DateTimeHelper.getNHoursFromInstant(
+            invitation.createdDate.toKotlinInstant(),
+            LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS,
+        )
+
+    fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
+        val expiryTime = getInvitationExpiryTime(invitation)
+        return DateTimeHelper.getDateTimeInUk(invitation.createdDate.toKotlinInstant()) > expiryTime
+    }
 }
