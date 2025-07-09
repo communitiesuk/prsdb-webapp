@@ -45,7 +45,7 @@ class ProcessScanResultApplicationRunner(
 
         val code =
             SpringApplication.exit(context, { 0 }).also {
-                println("Example email sent successfully. Application will exit now.")
+                println("Virus scan result processed successfully. Application will exit now.")
             }
         exitProcess(code)
     }
