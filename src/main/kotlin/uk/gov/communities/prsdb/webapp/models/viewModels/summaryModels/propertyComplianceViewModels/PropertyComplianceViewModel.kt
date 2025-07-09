@@ -42,8 +42,14 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isEicrMissing) {
                     add("propertyDetails.complianceInformation.notificationMessage.eicr.missing")
                 }
-                // TODO an EPC with a rating below E but no MEES exemption
-                // TODO not added an EPC and have no exemption from requiring one
-                // TODO an expired EPC and have declared a tenancy starting after the EPC’s expiry
+                if (propertyCompliance.isEpcExpired == true) {
+                    add("propertyDetails.complianceInformation.notificationMessage.epc.expired")
+                }
+                if (propertyCompliance.isEpcRatingLow == true) {
+                    add("propertyDetails.complianceInformation.notificationMessage.epc.lowRating")
+                }
+                if (propertyCompliance.isEpcMissing) {
+                    add("propertyDetails.complianceInformation.notificationMessage.epc.missing")
+                }
             }.toList()
 }
