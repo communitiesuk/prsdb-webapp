@@ -1,0 +1,49 @@
+package uk.gov.communities.prsdb.webapp.services
+
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo.FileCategory
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
+
+@Service
+class VirusAlertSender(
+    private val emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
+) {
+    fun sendAlerts(
+        ownership: PropertyOwnership,
+        fileNameInfo: PropertyFileNameInfo,
+    ) {
+        val email = buildAlertEmail(ownership, fileNameInfo.fileCategory)
+        emailNotificationService.sendEmail(ownership.primaryLandlord.email, email)
+        emailNotificationService.sendEmail(virusMonitoringEmail, email)
+    }
+
+    private fun buildAlertEmail(
+        propertyOwnership: PropertyOwnership,
+        fileCategory: FileCategory,
+    ): VirusScanUnsuccessfulEmail =
+        VirusScanUnsuccessfulEmail(
+            certificateDescriptionForHeading(fileCategory),
+            certificateDescriptionForBody(fileCategory),
+            propertyOwnership.property.address.singleLineAddress,
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+            absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+        )
+
+    private fun certificateDescriptionForHeading(category: FileCategory): String =
+        when (category) {
+            FileCategory.GasSafetyCert -> "gas safety certificate"
+            FileCategory.Eirc -> "Electrical Installation Condition Report (EICR)"
+        }
+
+    private fun certificateDescriptionForBody(category: FileCategory): String =
+        when (category) {
+            FileCategory.GasSafetyCert -> "gas compliance certificate"
+            FileCategory.Eirc -> "EICR"
+        }
+}

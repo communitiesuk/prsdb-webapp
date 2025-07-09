@@ -25,13 +25,16 @@ class VirusScanProcessingServiceTests {
 
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
     private lateinit var complianceRepository: PropertyComplianceRepository
+    private lateinit var virusAlertSender: VirusAlertSender
 
     @BeforeEach
     fun setup() {
         dequarantiner = mock()
         propertyOwnershipRepository = mock()
         complianceRepository = mock()
-        virusScanProcessingService = VirusScanProcessingService(propertyOwnershipRepository, complianceRepository, dequarantiner)
+        virusAlertSender = mock()
+        virusScanProcessingService =
+            VirusScanProcessingService(propertyOwnershipRepository, complianceRepository, dequarantiner, virusAlertSender)
 
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(anyLong())).thenAnswer { invocation ->
             val ownership = mock<PropertyOwnership>()

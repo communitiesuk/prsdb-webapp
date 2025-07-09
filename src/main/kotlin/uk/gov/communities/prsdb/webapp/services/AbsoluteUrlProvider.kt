@@ -1,15 +1,15 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import java.net.URI
 
-@PrsdbWebService
+@Service
 class AbsoluteUrlProvider {
     fun buildLandlordDashboardUri(): URI =
         MvcUriComponentsBuilder

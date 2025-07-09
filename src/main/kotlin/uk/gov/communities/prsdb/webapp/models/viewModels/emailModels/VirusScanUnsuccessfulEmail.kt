@@ -1,17 +1,13 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo.FileCategory
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import java.net.URI
 
-@ConsistentCopyVisibility
-data class VirusScanUnsuccessfulEmail private constructor(
+data class VirusScanUnsuccessfulEmail(
     val headingCertificateType: String,
     val bodyCertificateType: String,
     val singleLineAddress: String,
     val registrationNumber: String,
-    val propertyUrl: String,
+    val propertyUrl: URI,
 ) : EmailTemplateModel {
     private val headingCertificateTypeKey = "heading certificate type"
     private val bodyCertificateTypeKey = "body certificate type"
@@ -27,33 +23,6 @@ data class VirusScanUnsuccessfulEmail private constructor(
             bodyCertificateTypeKey to bodyCertificateType,
             singleLineAddressKey to singleLineAddress,
             registrationNumberKey to registrationNumber,
-            propertyUrlKey to propertyUrl,
+            propertyUrlKey to propertyUrl.toASCIIString(),
         )
-
-    companion object {
-        fun fromPropertyOwnershipAndFileCategory(
-            propertyOwnership: PropertyOwnership,
-            fileCategory: FileCategory,
-        ): VirusScanUnsuccessfulEmail =
-            VirusScanUnsuccessfulEmail(
-                headingForCertificateType(fileCategory),
-                bodyForCertificateType(fileCategory),
-                propertyOwnership.property.address.singleLineAddress,
-                RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                // TODO 1284: Add id tag to open correct tab in property details page
-                PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id),
-            )
-
-        private fun headingForCertificateType(category: FileCategory): String =
-            when (category) {
-                FileCategory.GasSafetyCert -> "gas safety certificate"
-                FileCategory.Eirc -> "Electrical Installation Condition Report (EICR)"
-            }
-
-        private fun bodyForCertificateType(category: FileCategory): String =
-            when (category) {
-                FileCategory.GasSafetyCert -> "gas compliance certificate"
-                FileCategory.Eirc -> "EICR"
-            }
-    }
 }

@@ -14,6 +14,7 @@ class VirusScanProcessingService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val complianceRepository: PropertyComplianceRepository,
     private val dequarantiner: FileDequarantiner,
+    private val virusAlertSender: VirusAlertSender,
 ) {
     fun processScan(
         fileNameInfo: PropertyFileNameInfo,
@@ -32,6 +33,7 @@ class VirusScanProcessingService(
             ScanResult.Unsupported,
             ScanResult.Failed,
             -> {
+                virusAlertSender.sendAlerts(ownership, fileNameInfo)
                 if (!dequarantiner.delete(fileNameInfo.toString())) {
                     throw PrsdbWebException("Failed to delete unsafe file: $fileNameInfo")
                 }
