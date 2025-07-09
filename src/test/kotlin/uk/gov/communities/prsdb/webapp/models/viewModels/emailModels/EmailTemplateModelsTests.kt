@@ -5,6 +5,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
 class EmailTemplateModelsTests {
@@ -72,6 +74,13 @@ class EmailTemplateModelsTests {
                         "https://emample.com",
                     ),
                     "/emails/PartialPropertyComplianceConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    VirusScanUnsuccessfulEmail.fromPropertyOwnershipAndFileCategory(
+                        MockLandlordData.createPropertyOwnership(),
+                        PropertyFileNameInfo.FileCategory.GasSafetyCert,
+                    ),
+                    "/emails/VirusScanUnsuccessful.md",
                 ),
             )
 
