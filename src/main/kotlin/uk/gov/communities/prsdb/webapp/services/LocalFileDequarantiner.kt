@@ -13,4 +13,13 @@ class LocalFileDequarantiner : FileDequarantiner {
         val localFile = File(".local-uploads/$objectKey")
         return localFile.exists()
     }
+
+    override fun delete(objectKey: String): Boolean {
+        val localFile = File(".local-uploads/$objectKey")
+        return if (localFile.exists()) {
+            localFile.delete()
+        } else {
+            false
+        }
+    }
 }

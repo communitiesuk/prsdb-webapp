@@ -35,6 +35,10 @@ class AwsS3FileDequarantiner(
             return false
         }
 
+        return delete(objectKey)
+    }
+
+    override fun delete(objectKey: String): Boolean {
         val deleteResponse =
             s3Client
                 .deleteObject { request ->

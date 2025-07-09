@@ -98,16 +98,27 @@ class VirusScanProcessingServiceTests {
     @EnumSource(ScanResult::class)
     @ParameterizedTest
     fun `processScan throws an error for each scan result other than NoThreats`(scanResultStatus: ScanResult) {
-        // Ignore NoThreats case since it is already tested
-        if (scanResultStatus == ScanResult.NoThreats) {
+        // Ignore NoThreats and AccessDenied cases since they are tested separately
+        if (scanResultStatus == ScanResult.NoThreats || scanResultStatus == ScanResult.AccessDenied) {
             return
         }
 
         // Arrange
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
-        val scanResultStatus = scanResultStatus
+        whenever(dequarantiner.delete(fileNameInfo.toString())).thenReturn(true)
 
-        // TODO PRSD-1284
-        assertThrows<NotImplementedError> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
+        // Act
+        virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
+
+        // Assert
+        verify(dequarantiner).delete(fileNameInfo.toString())
+    }
+
+    @Test
+    fun `processScan throws an exception for AccessDenied scan result`() {
+        val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
+        val scanResultStatus = ScanResult.AccessDenied
+
+        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
     }
 }

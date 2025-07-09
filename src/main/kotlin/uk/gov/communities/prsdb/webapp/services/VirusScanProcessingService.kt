@@ -28,10 +28,15 @@ class VirusScanProcessingService(
                     throw PrsdbWebException("Failed to dequarantine file: $fileNameInfo")
                 }
             }
-            ScanResult.Threats -> TODO("PRSD-1284")
-            ScanResult.Unsupported -> TODO("PRSD-1284")
-            ScanResult.AccessDenied -> TODO("PRSD-1284")
-            ScanResult.Failed -> TODO("PRSD-1284")
+            ScanResult.Threats,
+            ScanResult.Unsupported,
+            ScanResult.Failed,
+            -> {
+                if (!dequarantiner.delete(fileNameInfo.toString())) {
+                    throw PrsdbWebException("Failed to delete unsafe file: $fileNameInfo")
+                }
+            }
+            ScanResult.AccessDenied -> throw PrsdbWebException("GuardDuty does not have access to scan $fileNameInfo")
         }
     }
 
