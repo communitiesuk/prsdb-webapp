@@ -63,11 +63,16 @@ class PropertyComplianceUpdateJourney(
                     content =
                         mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety step"),
                 ),
+            saveAfterSubmit = false,
         )
 
+    // TODO PRSD-1245, 1247, 1313 - add this as the handleSubmitAndRedirect method
     private fun updateComplianceAndRedirect(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
+        // TODO PRSD-1245: Add gas safety updates from journeyData to complianceUpdate
+        // TODO PRSD-1247: Add EICR updates from journeyData to complianceUpdate
+        // TODO PRSD-1313: Add EPC updates from journeyData to complianceUpdate
         val complianceUpdate = PropertyComplianceUpdateModel()
 
         propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate)
