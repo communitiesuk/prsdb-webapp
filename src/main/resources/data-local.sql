@@ -293,7 +293,7 @@ VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null, 2),
        (5, true, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null, null),
        (6, false, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null, null),
        (7, true, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1, 4),
-       (8, true, 0, 1, 0, 0, 40, 1, 8, '05/02/25', '01/15/25', null, null),
+       (8, true, 0, 1, 1, 1, 40, 1, 8, '05/02/25', '01/15/25', null, null),
        (9, true, 0, 1, 0, 0, 41, 1, 9, '05/02/25', '01/15/25', null, null),
        (10, true, 0, 1, 0, 0, 42, 1, 10, '05/02/25', '01/15/25', null, null),
        (11, true, 0, 1, 0, 0, 43, 1, 11, '05/02/25', '01/15/25', null, null),
@@ -329,3 +329,8 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
        (2,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0');
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
+
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
+VALUES (1, 8, '01/01/25', '01/01/25', true, true, true);
+
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
