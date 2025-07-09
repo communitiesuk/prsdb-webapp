@@ -87,7 +87,7 @@ class DateTimeHelperTests {
             )
 
         @JvmStatic
-        private fun provideDateTimesForGetNHoursFromInstant() =
+        private fun provideDateTimesForGetDateTimeNHoursFromInstant() =
             listOf(
                 Arguments.of(
                     LocalDateTime(2024, 12, 31, 15, 40, 0).toInstant(TimeZone.of("Europe/London")),
@@ -177,13 +177,13 @@ class DateTimeHelperTests {
     }
 
     @ParameterizedTest(name = "{2} for {1} hoursd after {0}")
-    @MethodSource("provideDateTimesForGetNHoursFromInstant")
-    fun `getNHoursFromInstant returns correct date and time`(
+    @MethodSource("provideDateTimesForGetDateTimeNHoursFromInstant")
+    fun `getDateTimeNHoursFromInstant returns correct date and time`(
         instant: Instant,
         nHours: Int,
         expectedDateTime: LocalDateTime,
     ) {
-        val result = DateTimeHelper.getNHoursFromInstant(instant, nHours)
+        val result = DateTimeHelper.getDateTimeNHoursFromInstant(instant, nHours)
 
         assertEquals(expectedDateTime, result)
     }

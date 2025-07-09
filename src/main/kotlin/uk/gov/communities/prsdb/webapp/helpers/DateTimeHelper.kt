@@ -50,9 +50,9 @@ class DateTimeHelper(
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
 
-        fun getNHoursFromInstant(
+        fun getDateTimeNHoursFromInstant(
             instant: Instant,
             nHours: Int,
-        ): LocalDateTime = instant.plus(nHours, DateTimeUnit.HOUR).toLocalDateTime(TimeZone.of("Europe/London"))
+        ): LocalDateTime = getDateTimeInUk(instant.plus(nHours, DateTimeUnit.HOUR))
     }
 }

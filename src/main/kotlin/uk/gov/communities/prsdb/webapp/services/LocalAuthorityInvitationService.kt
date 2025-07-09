@@ -70,7 +70,7 @@ class LocalAuthorityInvitationService(
 
     fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
         val expiresAtTime =
-            DateTimeHelper.getNHoursFromInstant(
+            DateTimeHelper.getDateTimeNHoursFromInstant(
                 invitation.createdDate.toKotlinInstant(),
                 LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS,
             )
