@@ -9,7 +9,7 @@ class PropertyComplianceViewModel(
     private val withNotificationMessages: Boolean = true,
 ) {
     // TODO PRSD-1297 add update links to notification messages
-    var notifications: List<String> = if (withNotificationMessages) getNotificationMessageKeys() else emptyList()
+    var notificationMessages: List<String> = if (withNotificationMessages) getNotificationMessageKeys() else emptyList()
 
     val gasSafetySummaryList: List<SummaryListRowViewModel> =
         GasSafetyViewModelBuilder.fromEntity(

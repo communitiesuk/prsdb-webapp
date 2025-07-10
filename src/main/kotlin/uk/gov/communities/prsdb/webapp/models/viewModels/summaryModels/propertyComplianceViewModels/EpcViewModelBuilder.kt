@@ -50,6 +50,7 @@ class EpcViewModelBuilder {
                         addRow(
                             key = "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
+                            actionText = "forms.links.change",
                             // TODO PRSD-1312 add Update EPC Compliance Link
                             actionLink = "#",
                             withActionLink = withActionLinks,

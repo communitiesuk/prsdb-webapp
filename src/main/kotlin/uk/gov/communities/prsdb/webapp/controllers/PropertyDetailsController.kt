@@ -54,7 +54,7 @@ class PropertyDetailsController(
             LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
-        val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
+        val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         val propertyDetails =
             PropertyDetailsViewModel(

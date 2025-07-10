@@ -16,8 +16,8 @@ class EicrViewModelBuilder {
                 .apply {
                     addRow(
                         key = "propertyDetails.complianceInformation.electricalSafety.eicr",
+                        // TODO PRSD-976 add link to download certificate and appropriate messages when required
                         value = getEicrMessageKey(propertyCompliance),
-                        valueUrl = getDownloadLinkOrNull(propertyCompliance.eicrS3Key != null),
                         actionText = "forms.links.change",
                         // TODO PRSD-1246 add Update EICR Compliance Link
                         actionLink = "#",

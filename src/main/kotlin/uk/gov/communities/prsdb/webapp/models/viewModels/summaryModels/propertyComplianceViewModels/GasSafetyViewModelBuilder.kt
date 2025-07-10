@@ -16,8 +16,8 @@ class GasSafetyViewModelBuilder {
                 .apply {
                     addRow(
                         key = "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
+                        // TODO PRSD-976 add link to download certificate and appropriate messages when required
                         value = getGasCertificateMessageKey(propertyCompliance),
-                        valueUrl = getDownloadLinkOrNull(propertyCompliance.gasSafetyCertS3Key != null),
                         actionText = "forms.links.change",
                         // TODO PRSD-1244 add Update Gas Compliance Link
                         actionLink = "#",
@@ -65,8 +65,5 @@ class GasSafetyViewModelBuilder {
                 GasSafetyExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER), exemptionReason)
                 else -> MessageKeyConverter.convert(exemptionReason)
             }
-
-        // TODO PRSD-976 add link to download certificate and appropriate messages when required
-        private fun getDownloadLinkOrNull(hasCert: Boolean): String? = if (hasCert) "#" else null
     }
 }
