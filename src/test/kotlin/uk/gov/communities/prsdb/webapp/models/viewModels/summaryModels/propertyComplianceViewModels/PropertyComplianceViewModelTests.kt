@@ -1,172 +1,238 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import org.junit.jupiter.api.Named.named
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments.arguments
-import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PropertyComplianceViewModelTests {
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("providePropertyComplianceAndExpectedMessages")
-    fun `notificationMessages returns correctly populated list when`(
-        propertyCompliance: PropertyCompliance,
-        expectedNotificationMessages: List<String>,
-    ) {
+    @Test
+    fun `notificationMessages returns correctly populated list when property is compliant`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+
+        val expectedNotificationMessages = emptyList<String>()
+
         val result = PropertyComplianceViewModel(propertyCompliance)
 
         assertEquals(result.notificationMessages, expectedNotificationMessages)
     }
 
-    companion object {
-        @JvmStatic
-        private fun providePropertyComplianceAndExpectedMessages() =
-            arrayOf(
-                arguments(
-                    named("property is compliant", PropertyComplianceBuilder.createWithInDateCerts()),
-                    emptyList<String>(),
-                ),
-                arguments(
-                    named("all certs are expired", PropertyComplianceBuilder.createWithExpiredCerts()),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
-                        "propertyDetails.complianceInformation.notificationMessage.epc.expired",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "gas and eicr certs are expired",
-                        PropertyComplianceBuilder.createWithGasAndEicrExpiredCerts(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "gas and epc certs are expired",
-                        PropertyComplianceBuilder.createWithGasAndEpcExpiredCerts(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                        "propertyDetails.complianceInformation.notificationMessage.epc.expired",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "eicr and epc certs are expired",
-                        PropertyComplianceBuilder.createWithEicrAndEpcExpiredCerts(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
-                        "propertyDetails.complianceInformation.notificationMessage.epc.expired",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "gas cert is expired",
-                        PropertyComplianceBuilder.createWithGasCertExpiredAfterUpload(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "eicr cert is expired",
-                        PropertyComplianceBuilder.createWithEicrExpiredAfterUpload(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "epc cert is expired",
-                        PropertyComplianceBuilder.createWithOnlyEpcExpiredCert(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.epc.expired",
-                    ),
-                ),
-                arguments(
-                    named("all certs are missing", PropertyComplianceBuilder.createWithMissingCerts()),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
-                        "propertyDetails.complianceInformation.notificationMessage.epc.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "gas and eicr certs are missing",
-                        PropertyComplianceBuilder.createWithGasAndEicrMissingCerts(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "gas and epc certs are missing",
-                        PropertyComplianceBuilder.createWithGasAndEpcMissingCerts(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                        "propertyDetails.complianceInformation.notificationMessage.epc.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "eicr and epc certs are missing",
-                        PropertyComplianceBuilder.createWithEicrAndEpcMissingCerts(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
-                        "propertyDetails.complianceInformation.notificationMessage.epc.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "gas cert is missing",
-                        PropertyComplianceBuilder.createWithOnlyGasMissingCert(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "eicr cert is missing",
-                        PropertyComplianceBuilder.createWithOnlyEicrMissingCert(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "epc cert is missing",
-                        PropertyComplianceBuilder.createWithOnlyEpcMissingCert(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.epc.missing",
-                    ),
-                ),
-                arguments(
-                    named(
-                        "epc rating is low",
-                        PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(),
-                    ),
-                    listOf(
-                        "propertyDetails.complianceInformation.notificationMessage.epc.lowRating",
-                    ),
-                ),
+    @Test
+    fun `notificationMessages returns correctly populated list when all certs are expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
+                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
             )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when gas and eicr certs are expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEicrExpiredCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when gas and epc certs are expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEpcExpiredCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when eicr and epc certs are expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithEicrAndEpcExpiredCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
+                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when gas cert is expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithGasCertExpiredAfterUpload()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when eicr cert is expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithEicrExpiredAfterUpload()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when epc cert is expired`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when all certs are missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
+                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when gas and eicr certs are missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEicrMissingCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when gas and epc certs are missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEpcMissingCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when eicr and epc certs are missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithEicrAndEpcMissingCerts()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
+                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when gas cert is missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithOnlyGasMissingCert()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when eicr cert is missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEicrMissingCert()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when epc cert is missing`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEpcMissingCert()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
+    }
+
+    @Test
+    fun `notificationMessages returns correctly populated list when epc rating is low`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
+
+        val expectedNotificationMessages =
+            listOf(
+                "propertyDetails.complianceInformation.notificationMessage.epc.lowRating",
+            )
+
+        val result = PropertyComplianceViewModel(propertyCompliance)
+
+        assertEquals(result.notificationMessages, expectedNotificationMessages)
     }
 }

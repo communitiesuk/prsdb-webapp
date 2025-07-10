@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBu
 
 class EicrViewModelBuilderTests {
     @ParameterizedTest(name = "{0} and {1}")
-    @MethodSource("provideSEicrRows")
+    @MethodSource("providesEicrRows")
     fun `fromEntity returns the correct summary rows`(
         propertyCompliance: PropertyCompliance,
         withActionLinks: Boolean,
@@ -37,7 +37,7 @@ class EicrViewModelBuilderTests {
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
 
         @JvmStatic
-        private fun provideSEicrRows() =
+        private fun providesEicrRows() =
             arrayOf(
                 arguments(
                     named(
