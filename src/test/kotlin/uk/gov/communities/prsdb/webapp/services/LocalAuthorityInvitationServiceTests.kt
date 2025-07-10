@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -16,12 +14,15 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import java.time.Instant
 import java.util.UUID
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 class LocalAuthorityInvitationServiceTests {
     private lateinit var mockLaInviteRepository: LocalAuthorityInvitationRepository
@@ -100,8 +101,10 @@ class LocalAuthorityInvitationServiceTests {
     fun `getInvitationHasExpired returns true if the invitation has expired`() {
         val testUuid = UUID.randomUUID()
         val createdDate =
-            LocalDateTime(2024, 1, 1, 0, 0)
-                .toInstant(TimeZone.of("Europe/London"))
+            Clock.System
+                .now()
+                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .minus(1.minutes)
                 .toJavaInstant()
 
         val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate)
@@ -133,8 +136,10 @@ class LocalAuthorityInvitationServiceTests {
     fun `tokenIsValid returns false if the token is in the database but has expired`() {
         val testUuid = UUID.randomUUID()
         val createdDate =
-            LocalDateTime(2024, 1, 1, 0, 0)
-                .toInstant(TimeZone.of("Europe/London"))
+            Clock.System
+                .now()
+                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .minus(1.minutes)
                 .toJavaInstant()
 
         whenever(mockLaInviteRepository.findByToken(testUuid))

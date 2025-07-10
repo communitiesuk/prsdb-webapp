@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinInstant
@@ -20,20 +18,13 @@ class DateTimeHelper(
         return getDateInUK(now)
     }
 
-    fun getCurrentDateTimeInUK(): LocalDateTime {
-        val now = clock.instant().toKotlinInstant()
-        return getDateTimeInUk(now)
-    }
-
     fun getAgeFromBirthDate(birthDate: LocalDate): Int = birthDate.yearsUntil(getCurrentDateInUK())
 
     fun isDateInPast(date: LocalDate): Boolean = date < getCurrentDateInUK()
 
     companion object {
-        fun getDateTimeInUk(instant: Instant): LocalDateTime = instant.toLocalDateTime(TimeZone.of("Europe/London"))
-
         fun getDateInUK(instant: Instant): LocalDate {
-            val dateTimeInUK = getDateTimeInUk(instant)
+            val dateTimeInUK = instant.toLocalDateTime(TimeZone.of("Europe/London"))
             return dateTimeInUK.date
         }
 
@@ -49,10 +40,5 @@ class DateTimeHelper(
             }
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
-
-        fun getDateTimeNHoursFromInstant(
-            instant: Instant,
-            nHours: Int,
-        ): LocalDateTime = getDateTimeInUk(instant.plus(nHours, DateTimeUnit.HOUR))
     }
 }

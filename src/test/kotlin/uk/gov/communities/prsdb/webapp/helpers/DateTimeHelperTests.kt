@@ -85,26 +85,6 @@ class DateTimeHelperTests {
                 Arguments.of(LocalDate(2024, 2, 1), LocalDate(2024, 2, 29)),
                 Arguments.of(LocalDate(2024, 2, 2), LocalDate(2024, 3, 1)),
             )
-
-        @JvmStatic
-        private fun provideDateTimesForGetDateTimeNHoursFromInstant() =
-            listOf(
-                Arguments.of(
-                    LocalDateTime(2024, 12, 31, 15, 40, 0).toInstant(TimeZone.of("Europe/London")),
-                    24,
-                    LocalDateTime(2025, 1, 1, 15, 40, 0),
-                ),
-                Arguments.of(
-                    LocalDateTime(2024, 2, 27, 23, 59, 59).toInstant(TimeZone.of("Europe/London")),
-                    48,
-                    LocalDateTime(2024, 2, 29, 23, 59, 59),
-                ),
-                Arguments.of(
-                    LocalDateTime(2025, 2, 27, 0, 0, 0).toInstant(TimeZone.of("Europe/London")),
-                    48,
-                    LocalDateTime(2025, 3, 1, 0, 0, 0),
-                ),
-            )
     }
 
     @ParameterizedTest(name = "on a {0} in {1}")
@@ -147,14 +127,6 @@ class DateTimeHelperTests {
         assertEquals(expectedDate, DateTimeHelper.getDateInUK(instant))
     }
 
-    @ParameterizedTest(name = "for a {0}")
-    @MethodSource("provideInstants")
-    fun `getDateTimeInUk returns the date and time in the UK for the instant specified`(instant: Instant) {
-        val expectedDateTime = instant.toLocalDateTime(TimeZone.of("Europe/London"))
-
-        assertEquals(expectedDateTime, DateTimeHelper.getDateTimeInUk(instant))
-    }
-
     @ParameterizedTest(name = "{1} for {0}")
     @MethodSource("provideDateStringsAndDates")
     fun `parseDateOrNull returns`(
@@ -174,18 +146,6 @@ class DateTimeHelperTests {
         val result = DateTimeHelper.get28DaysFromDate(date)
 
         assertEquals(expectedDate, result)
-    }
-
-    @ParameterizedTest(name = "{2} for {1} hoursd after {0}")
-    @MethodSource("provideDateTimesForGetDateTimeNHoursFromInstant")
-    fun `getDateTimeNHoursFromInstant returns correct date and time`(
-        instant: Instant,
-        nHours: Int,
-        expectedDateTime: LocalDateTime,
-    ) {
-        val result = DateTimeHelper.getDateTimeNHoursFromInstant(instant, nHours)
-
-        assertEquals(expectedDateTime, result)
     }
 
     @ParameterizedTest(name = "{1} when {0}")
