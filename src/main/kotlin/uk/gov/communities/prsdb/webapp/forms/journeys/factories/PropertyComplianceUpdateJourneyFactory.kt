@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
@@ -26,5 +26,7 @@ class PropertyComplianceUpdateJourneyFactory(
         propertyComplianceService = propertyComplianceService,
     )
 
-    private fun getJourneyDataKey(propertyOwnershipId: Long) = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+    private fun getJourneyDataKey(propertyOwnershipId: Long) =
+        PropertyComplianceController
+            .getUpdatePropertyCompliancePath(propertyOwnershipId)
 }

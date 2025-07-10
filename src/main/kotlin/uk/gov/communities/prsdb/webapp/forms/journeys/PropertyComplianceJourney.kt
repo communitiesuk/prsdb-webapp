@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
@@ -37,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyComplianceCheckAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceSharedSteps
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
@@ -65,11 +65,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
@@ -88,12 +85,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiry
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
@@ -216,16 +208,16 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.GasSafety,
                 setOf(
                     gasSafetyStep,
-                    gasSafetyIssueDateStep,
-                    gasSafetyEngineerNumStep,
-                    gasSafetyUploadStep,
-                    gasSafetyUploadConfirmationStep,
-                    gasSafetyOutdatedStep,
-                    gasSafetyExemptionStep,
-                    gasSafetyExemptionReasonStep,
-                    gasSafetyExemptionOtherReasonStep,
-                    gasSafetyExemptionConfirmationStep,
-                    gasSafetyExemptionMissingStep,
+                    PropertyComplianceSharedSteps.gasSafetyIssueDateStep,
+                    PropertyComplianceSharedSteps.gasSafetyEngineerNumStep,
+                    PropertyComplianceSharedSteps.gasSafetyUploadStep,
+                    PropertyComplianceSharedSteps.gasSafetyUploadConfirmationStep(eicrTask.startingStepId, isCheckingAnswers),
+                    PropertyComplianceSharedSteps.gasSafetyOutdatedStep(eicrTask.startingStepId, isCheckingAnswers),
+                    PropertyComplianceSharedSteps.gasSafetyExemptionStep,
+                    PropertyComplianceSharedSteps.gasSafetyExemptionReasonStep,
+                    PropertyComplianceSharedSteps.gasSafetyExemptionOtherReasonStep,
+                    PropertyComplianceSharedSteps.gasSafetyExemptionConfirmationStep(eicrTask.startingStepId, isCheckingAnswers),
+                    PropertyComplianceSharedSteps.gasSafetyExemptionMissingStep(eicrTask.startingStepId, isCheckingAnswers),
                 ),
                 "propertyCompliance.taskList.upload.gasSafety",
             )
@@ -315,212 +307,6 @@ class PropertyComplianceJourney(
                             ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> gasSafetyStepNextAction(filteredJourneyData) },
-            )
-
-    private val gasSafetyIssueDateStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyIssueDate,
-                page =
-                    Page(
-                        formModel = TodayOrPastDateFormModel::class,
-                        templateName = "forms/dateForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHeading",
-                                "fieldSetHint" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHint",
-                                "submitButtonText" to "forms.buttons.saveAndContinue",
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> gasSafetyIssueDateStepNextAction(filteredJourneyData) },
-            )
-
-    private val gasSafetyEngineerNumStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyEngineerNum,
-                page =
-                    Page(
-                        formModel = GasSafeEngineerNumFormModel::class,
-                        templateName = "forms/gasSafeEngineerNumForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.gasSafeEngineerNum.fieldSetHeading",
-                                "fieldSetHint" to "forms.gasSafeEngineerNum.fieldSetHint",
-                                "gasSafeRegisterURL" to GAS_SAFE_REGISTER,
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUpload, null) },
-            )
-
-    private val gasSafetyUploadStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyUpload,
-                page =
-                    FileUploadPage(
-                        formModel = GasSafetyUploadCertificateFormModel::class,
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
-                                "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
-            )
-
-    private val gasSafetyUploadConfirmationStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyUploadConfirmation,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/uploadCertificateConfirmationForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
-            )
-
-    private val gasSafetyOutdatedStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyOutdated,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/gasSafetyOutdatedForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
-            )
-
-    private val gasSafetyExemptionStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyExemption,
-                page =
-                    Page(
-                        formModel = GasSafetyExemptionFormModel::class,
-                        templateName = "forms/exemptionForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.gasSafetyExemption.fieldSetHeading",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> gasSafetyExemptionStepNextAction(filteredJourneyData) },
-            )
-
-    private val gasSafetyExemptionReasonStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyExemptionReason,
-                page =
-                    Page(
-                        formModel = GasSafetyExemptionReasonFormModel::class,
-                        templateName = "forms/exemptionReasonForm.html",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.gasSafetyExemptionReason.fieldSetHeading",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = GasSafetyExemptionReason.NO_GAS_SUPPLY,
-                                            labelMsgKey = "forms.gasSafetyExemptionReason.radios.noGas.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = GasSafetyExemptionReason.LONG_LEASE,
-                                            labelMsgKey = "forms.gasSafetyExemptionReason.radios.longLease.label",
-                                            hintMsgKey = "forms.gasSafetyExemptionReason.radios.longLease.hint",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = GasSafetyExemptionReason.OTHER,
-                                            labelMsgKey = "forms.gasSafetyExemptionReason.radios.other.label",
-                                            hintMsgKey = "forms.gasSafetyExemptionReason.radios.other.hint",
-                                        ),
-                                    ),
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> gasSafetyExemptionReasonStepNextAction(filteredJourneyData) },
-            )
-
-    private val gasSafetyExemptionOtherReasonStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyExemptionOtherReason,
-                page =
-                    Page(
-                        formModel = GasSafetyExemptionOtherReasonFormModel::class,
-                        templateName = "forms/exemptionOtherReasonForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
-                                "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
-                                "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null) },
-            )
-
-    private val gasSafetyExemptionConfirmationStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyExemptionConfirmation,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/gasSafetyExemptionConfirmationForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
-            )
-
-    private val gasSafetyExemptionMissingStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.GasSafetyExemptionMissing,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/gasSafetyExemptionMissingForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
     private val eicrStep
@@ -1299,27 +1085,6 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemption, null)
-        }
-
-    private fun gasSafetyIssueDateStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getIsGasSafetyCertOutdated()!!) {
-            Pair(PropertyComplianceStepId.GasSafetyOutdated, null)
-        } else {
-            Pair(PropertyComplianceStepId.GasSafetyEngineerNum, null)
-        }
-
-    private fun gasSafetyExemptionStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getHasGasSafetyCertExemption()!!) {
-            Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
-        } else {
-            Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
-        }
-
-    private fun gasSafetyExemptionReasonStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getIsGasSafetyExemptionReasonOther()!!) {
-            Pair(PropertyComplianceStepId.GasSafetyExemptionOtherReason, null)
-        } else {
-            Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
     private fun eicrStepNextAction(filteredJourneyData: JourneyData) =

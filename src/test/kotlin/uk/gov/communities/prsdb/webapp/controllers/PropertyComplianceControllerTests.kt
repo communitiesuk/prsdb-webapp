@@ -35,7 +35,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJo
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceUpdateStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.services.FileUploader
@@ -90,7 +89,7 @@ class PropertyComplianceControllerTests(
     private val validPropertyComplianceUpdateInitialStepUrl =
         "$validPropertyComplianceUpdateUrl/${PropertyComplianceUpdateJourney.initialStepId.urlPathSegment}"
     private val validPropertyComplianceUpdateFileUploadUrl =
-        "$validPropertyComplianceUpdateUrl/${PropertyComplianceUpdateStepId.UpdateGasSafety.urlPathSegment}"
+        "$validPropertyComplianceUpdateUrl/${PropertyComplianceStepId.UpdateGasSafety.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
     private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
@@ -671,7 +670,7 @@ class PropertyComplianceControllerTests(
 
             whenever(
                 propertyComplianceUpdateJourney.completeStep(
-                    eq(PropertyComplianceUpdateStepId.GasSafetyUpload.urlPathSegment),
+                    eq(PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
                     argWhere { pageData -> UploadCertificateFormModel::class.memberProperties.all { it.name in pageData.keys } },
                     eq(null),
                     anyOrNull(),

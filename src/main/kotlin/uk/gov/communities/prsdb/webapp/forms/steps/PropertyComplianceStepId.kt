@@ -5,8 +5,10 @@ import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: PropertyComplianceGroupIdentifier,
-) : GroupedStepId<PropertyComplianceGroupIdentifier> {
+    override val isCheckYourAnswersStepId: Boolean = false,
+) : GroupedUpdateStepId<PropertyComplianceGroupIdentifier> {
     GasSafety("gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
+    UpdateGasSafety("update-gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyIssueDate("gas-safety-certificate-issue-date", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyEngineerNum("gas-safety-certificate-engineer-number", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyUpload("gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING", PropertyComplianceGroupIdentifier.GasSafety),
@@ -17,6 +19,7 @@ enum class PropertyComplianceStepId(
     GasSafetyExemptionOtherReason("gas-safety-certificate-exemption-other-reason", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyExemptionConfirmation("gas-safety-certificate-exemption-confirmation", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing", PropertyComplianceGroupIdentifier.GasSafety),
+    GasSafetyUpdateCheckYourAnswers("gas-safety-certificate-check-your-answers", PropertyComplianceGroupIdentifier.GasSafety, true),
     EICR("eicr", PropertyComplianceGroupIdentifier.Eicr),
     EicrIssueDate("eicr-issue-date", PropertyComplianceGroupIdentifier.Eicr),
     EicrUpload("eicr-$FILE_UPLOAD_URL_SUBSTRING", PropertyComplianceGroupIdentifier.Eicr),
