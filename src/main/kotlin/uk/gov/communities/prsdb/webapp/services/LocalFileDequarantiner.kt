@@ -9,12 +9,12 @@ import java.io.File
 @Primary
 @Profile("local")
 class LocalFileDequarantiner : FileDequarantiner {
-    override fun dequarantine(objectKey: String): Boolean {
+    override fun dequarantineFile(objectKey: String): Boolean {
         val localFile = File(".local-uploads/$objectKey")
         return localFile.exists()
     }
 
-    override fun delete(objectKey: String): Boolean {
+    override fun deleteFile(objectKey: String): Boolean {
         val localFile = File(".local-uploads/$objectKey")
         return if (localFile.exists()) {
             localFile.delete()

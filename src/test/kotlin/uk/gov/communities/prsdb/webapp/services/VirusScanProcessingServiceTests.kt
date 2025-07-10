@@ -49,13 +49,13 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(true)
+        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(true)
 
         // Act
         virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
 
         // Assert
-        verify(dequarantiner).dequarantine(fileNameInfo.toString())
+        verify(dequarantiner).dequarantineFile(fileNameInfo.toString())
     }
 
     @EnumSource(FileCategory::class)
@@ -65,7 +65,7 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = PropertyFileNameInfo(5L, category, "jpg")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(true)
+        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(true)
         whenever(complianceRepository.findByPropertyOwnership_Id(fileNameInfo.propertyOwnershipId)).thenReturn(PropertyCompliance())
 
         // Act
@@ -92,7 +92,7 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(false)
+        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(false)
 
         // Act & Assert
         assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
@@ -108,13 +108,13 @@ class VirusScanProcessingServiceTests {
 
         // Arrange
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
-        whenever(dequarantiner.delete(fileNameInfo.toString())).thenReturn(true)
+        whenever(dequarantiner.deleteFile(fileNameInfo.toString())).thenReturn(true)
 
         // Act
         virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
 
         // Assert
-        verify(dequarantiner).delete(fileNameInfo.toString())
+        verify(dequarantiner).deleteFile(fileNameInfo.toString())
     }
 
     @Test

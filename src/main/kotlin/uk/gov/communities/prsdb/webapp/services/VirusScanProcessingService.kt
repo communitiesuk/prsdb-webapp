@@ -23,7 +23,7 @@ class VirusScanProcessingService(
         val ownership = getOwnershipForFileInfo(fileNameInfo)
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
-                if (dequarantiner.dequarantine(fileNameInfo.toString())) {
+                if (dequarantiner.dequarantineFile(fileNameInfo.toString())) {
                     addFileToComplianceRecordIfPresent(fileNameInfo, ownership)
                 } else {
                     throw PrsdbWebException("Failed to dequarantine file: $fileNameInfo")
@@ -34,7 +34,7 @@ class VirusScanProcessingService(
             ScanResult.Failed,
             -> {
                 virusAlertSender.sendAlerts(ownership, fileNameInfo)
-                if (!dequarantiner.delete(fileNameInfo.toString())) {
+                if (!dequarantiner.deleteFile(fileNameInfo.toString())) {
                     throw PrsdbWebException("Failed to delete unsafe file: $fileNameInfo")
                 }
             }
