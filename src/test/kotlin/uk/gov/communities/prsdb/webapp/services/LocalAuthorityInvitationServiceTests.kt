@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
-import java.time.Instant
 import java.util.UUID
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -115,7 +114,12 @@ class LocalAuthorityInvitationServiceTests {
     @Test
     fun `getInvitationHasExpired returns false if the invitation has not expired`() {
         val testUuid = UUID.randomUUID()
-        val createdDate = Instant.now()
+        val createdDate =
+            Clock.System
+                .now()
+                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .plus(30.minutes)
+                .toJavaInstant()
 
         val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate)
 
@@ -125,7 +129,12 @@ class LocalAuthorityInvitationServiceTests {
     @Test
     fun `tokenIsValid returns true if the token is in the database and has not expired`() {
         val testUuid = UUID.randomUUID()
-        val createdDate = Instant.now()
+        val createdDate =
+            Clock.System
+                .now()
+                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .plus(30.minutes)
+                .toJavaInstant()
         whenever(mockLaInviteRepository.findByToken(testUuid))
             .thenReturn(MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate))
 
