@@ -46,6 +46,11 @@ class RegisterLAUserController(
             return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
         }
 
+        val invitation = invitationService.getInvitationFromToken(token)
+        if (invitationService.getInvitationHasExpired(invitation)) {
+            invitationService.deleteInvitation(invitation)
+        }
+
         return "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
     }
 

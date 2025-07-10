@@ -542,7 +542,7 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `confirmCancelInvitation returns a 200 for system operator`() {
         setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
-        val invitation = createLocalAuthorityInvitation(localAuthorityId = NON_ADMIN_LA_ID)
+        val invitation = createLocalAuthorityInvitation(invitingAuthority = createLocalAuthority(id = NON_ADMIN_LA_ID))
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
@@ -574,7 +574,7 @@ class ManageLocalAuthorityUsersControllerTests(
     fun `confirmCancelInvitation returns 403 for admin user accessing an invitation from another LA`() {
         setupDefaultLocalAuthorityForLaAdmin()
 
-        val invitation = createLocalAuthorityInvitation(localAuthorityId = 789)
+        val invitation = createLocalAuthorityInvitation(invitingAuthority = createLocalAuthority(id = 789))
         whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
         mvc
