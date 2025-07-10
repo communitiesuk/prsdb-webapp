@@ -54,6 +54,7 @@ class VirusAlertSenderTests {
 
         val expectedEmail =
             VirusScanUnsuccessfulEmail(
+                "A gas safety certificate",
                 "gas safety certificate",
                 "gas compliance certificate",
                 "123 Main St, Anytown",

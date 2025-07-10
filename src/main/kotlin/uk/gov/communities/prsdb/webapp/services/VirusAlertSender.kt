@@ -28,12 +28,19 @@ class VirusAlertSender(
         fileCategory: FileCategory,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
+            certificateDescriptionForSubject(fileCategory),
             certificateDescriptionForHeading(fileCategory),
             certificateDescriptionForBody(fileCategory),
             propertyOwnership.property.address.singleLineAddress,
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
             absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
         )
+
+    private fun certificateDescriptionForSubject(category: FileCategory): String =
+        when (category) {
+            FileCategory.GasSafetyCert -> "A gas safety certificate"
+            FileCategory.Eirc -> "An EICR"
+        }
 
     private fun certificateDescriptionForHeading(category: FileCategory): String =
         when (category) {

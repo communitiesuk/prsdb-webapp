@@ -77,6 +77,7 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
+                        "Subject for certificate",
                         "Heading for certificate",
                         "Body for certificate",
                         "1 Street Name, Town, Country, AB1 2CD",

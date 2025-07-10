@@ -68,7 +68,7 @@
   {
     "id": "7bed4d38-1551-4049-8c06-2b42594b5a73",
     "name": "Virus Scan Unsuccessful",
-    "subject": "There is an issue with your ((heading certificate type))",
+    "subject": "((subject certificate type)) for a property failed our virus scan",
     "bodyLocation": "/emails/VirusScanUnsuccessful.md"
   }
 ]
