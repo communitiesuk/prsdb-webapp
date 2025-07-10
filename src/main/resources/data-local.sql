@@ -66,11 +66,15 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 2, '10/07/24', '10/07/24', 'Ford Pref
         'PRSDB La User',
         'Team-PRSDB+lauser@softwire.com');
 
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, invited_as_admin)
-VALUES ('invited.user@example.com', 2, gen_random_uuid(), false),
-       ('user.invited@example.com', 2, gen_random_uuid(), false),
-       ('further.user@example.com', 2, gen_random_uuid(), false),
-       ('another.user@example.com', 2, gen_random_uuid(), false);
+SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
+
+INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, invited_as_admin, created_date)
+VALUES ('expired.invitation+a@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111a', false, '05/05/2025'),
+       ('expired.invitation+b@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111b', false, '05/05/2025'),
+       ('expired.invitation+c@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111c', false, '05/05/2025'),
+       ('expired.invitation+d@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111d', false, '05/05/2025');
+
+SELECT setval(pg_get_serial_sequence('local_authority_invitation', 'id'), (SELECT MAX(id) FROM local_authority_invitation));
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
