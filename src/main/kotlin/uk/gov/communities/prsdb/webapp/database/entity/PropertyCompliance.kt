@@ -70,6 +70,15 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val hasResponsibilityToTenantsDeclaration: Boolean = true
 
+    val hasGasSafetyExemption: Boolean
+        get() = gasSafetyCertExemptionReason != null
+
+    val hasEicrExemption: Boolean
+        get() = eicrExemptionReason != null
+
+    val hasEpcExemption: Boolean
+        get() = epcExemptionReason != null
+
     val gasSafetyCertExpiryDate: LocalDate?
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
@@ -80,13 +89,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isGasSafetyCertMissing: Boolean
-        get() = gasSafetyCertIssueDate == null && gasSafetyCertExemptionReason == null
+        get() = gasSafetyCertIssueDate == null && !hasGasSafetyExemption
 
     val isEicrExpired: Boolean?
         get() = eicrExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isEicrMissing: Boolean
-        get() = eicrIssueDate == null && eicrExemptionReason == null
+        get() = eicrIssueDate == null && !hasEicrExemption
 
     val isEpcExpired: Boolean?
         get() {
@@ -109,7 +118,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         }
 
     val isEpcMissing: Boolean
-        get() = epcUrl == null && epcExemptionReason == null
+        get() = epcUrl == null && !hasEpcExemption
 
     constructor(
         propertyOwnership: PropertyOwnership,
