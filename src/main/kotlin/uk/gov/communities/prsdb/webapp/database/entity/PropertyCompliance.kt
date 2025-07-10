@@ -95,7 +95,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = eicrExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isEicrMissing: Boolean
-        get() = eicrIssueDate == null && eicrExemptionReason == null
+        get() = eicrIssueDate == null && !hasEicrExemption
 
     val isEpcExpired: Boolean?
         get() {
@@ -118,7 +118,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         }
 
     val isEpcMissing: Boolean
-        get() = epcUrl == null && epcExemptionReason == null
+        get() = epcUrl == null && !hasEpcExemption
 
     constructor(
         propertyOwnership: PropertyOwnership,
