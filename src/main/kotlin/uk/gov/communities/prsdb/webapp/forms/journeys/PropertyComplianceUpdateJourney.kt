@@ -22,7 +22,7 @@ class PropertyComplianceUpdateJourney(
     private val propertyComplianceService: PropertyComplianceService,
 ) : GroupedUpdateJourney<PropertyComplianceUpdateStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
-        initialStepId = PropertyComplianceUpdateStepId.UpdateGasSafety,
+        initialStepId = initialStepId,
         validator = validator,
         journeyDataService = journeyDataService,
         stepName = stepName,
@@ -63,6 +63,20 @@ class PropertyComplianceUpdateJourney(
                     content =
                         mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety step"),
                 ),
+            nextAction = { _, _ -> Pair(PropertyComplianceUpdateStepId.GasSafetyUpload, null) },
+            saveAfterSubmit = false,
+        )
+
+    private val gasSafetyUploadStep =
+        Step(
+            id = PropertyComplianceUpdateStepId.GasSafetyUpload,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "forms/todo",
+                    content =
+                        mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety upload step"),
+                ),
             saveAfterSubmit = false,
         )
 
@@ -80,5 +94,9 @@ class PropertyComplianceUpdateJourney(
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 
         return PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+    }
+
+    companion object {
+        val initialStepId = PropertyComplianceUpdateStepId.UpdateGasSafety
     }
 }
