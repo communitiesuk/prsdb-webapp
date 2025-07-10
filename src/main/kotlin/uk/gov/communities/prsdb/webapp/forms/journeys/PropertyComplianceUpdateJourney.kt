@@ -5,9 +5,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceUpdateStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceSharedSteps
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
+import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -20,7 +22,7 @@ class PropertyComplianceUpdateJourney(
     isCheckingAnswers: Boolean,
     private val propertyOwnershipId: Long,
     private val propertyComplianceService: PropertyComplianceService,
-) : GroupedUpdateJourney<PropertyComplianceUpdateStepId>(
+) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
         initialStepId = initialStepId,
         validator = validator,
@@ -45,40 +47,77 @@ class PropertyComplianceUpdateJourney(
         return originalJourneyData
     }
 
-    override val sections: List<JourneySection<PropertyComplianceUpdateStepId>>
+    override val sections: List<JourneySection<PropertyComplianceStepId>> =
+        listOf(
+            JourneySection(
+                listOf(
+                    gasSafetyTask,
+                ),
+            ),
+        )
+
+    private val gasSafetyTask
         get() =
-            createSingleSectionWithSingleTaskFromSteps(
-                initialStepId,
-                setOf(gasSafetyStep),
+            JourneyTask(
+                PropertyComplianceStepId.UpdateGasSafety,
+                setOf(
+                    updateGasSafetyStep,
+                    PropertyComplianceSharedSteps.gasSafetyIssueDateStep,
+                    PropertyComplianceSharedSteps.gasSafetyEngineerNumStep,
+                    PropertyComplianceSharedSteps.gasSafetyUploadStep,
+                    PropertyComplianceSharedSteps.gasSafetyUploadConfirmationStep(
+                        PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    PropertyComplianceSharedSteps.gasSafetyOutdatedStep(
+                        PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    PropertyComplianceSharedSteps.gasSafetyExemptionStep,
+                    PropertyComplianceSharedSteps.gasSafetyExemptionReasonStep,
+                    PropertyComplianceSharedSteps.gasSafetyExemptionOtherReasonStep,
+                    PropertyComplianceSharedSteps.gasSafetyExemptionConfirmationStep(
+                        PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    PropertyComplianceSharedSteps.gasSafetyExemptionMissingStep(
+                        PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    gasSafetyCheckYourAnswersStep,
+                ),
             )
 
     // TODO PRSD-1244: Implement gas safety step
-    private val gasSafetyStep =
-        Step(
-            id = PropertyComplianceUpdateStepId.UpdateGasSafety,
-            page =
-                Page(
-                    formModel = NoInputFormModel::class,
-                    templateName = "forms/todo",
-                    content =
-                        mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety step"),
-                ),
-            nextAction = { _, _ -> Pair(PropertyComplianceUpdateStepId.GasSafetyUpload, null) },
-            saveAfterSubmit = false,
-        )
+    private val updateGasSafetyStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateGasSafety,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/todo",
+                        content =
+                            mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety step"),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyIssueDate, null) },
+                saveAfterSubmit = false,
+            )
 
-    private val gasSafetyUploadStep =
-        Step(
-            id = PropertyComplianceUpdateStepId.GasSafetyUpload,
-            page =
-                Page(
-                    formModel = NoInputFormModel::class,
-                    templateName = "forms/todo",
-                    content =
-                        mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety upload step"),
-                ),
-            saveAfterSubmit = false,
-        )
+    // TODO PRSD-1245: Implement gas safety check your answers step
+    private val gasSafetyCheckYourAnswersStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/todo",
+                        content =
+                            mapOf("todoComment" to "TODO PRSD-1245: Implement gas safety Check Your Answers step"),
+                    ),
+                saveAfterSubmit = false,
+            )
 
     // TODO PRSD-1245, 1247, 1313 - add this as the handleSubmitAndRedirect method
     private fun updateComplianceAndRedirect(): String {
@@ -97,6 +136,6 @@ class PropertyComplianceUpdateJourney(
     }
 
     companion object {
-        val initialStepId = PropertyComplianceUpdateStepId.UpdateGasSafety
+        val initialStepId = PropertyComplianceStepId.UpdateGasSafety
     }
 }
