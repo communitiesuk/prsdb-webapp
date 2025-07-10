@@ -31,7 +31,9 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
@@ -59,6 +61,9 @@ class PropertyComplianceControllerTests(
     private lateinit var propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
 
     @MockitoBean
+    private lateinit var propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory
+
+    @MockitoBean
     private lateinit var validator: Validator
 
     @MockitoBean
@@ -66,6 +71,9 @@ class PropertyComplianceControllerTests(
 
     @Mock
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
+
+    @Mock
+    private lateinit var propertyComplianceUpdateJourney: PropertyComplianceUpdateJourney
 
     private val propertyComplianceJourneyRedirectUrl = "any-url"
 
@@ -95,6 +103,9 @@ class PropertyComplianceControllerTests(
         ).thenReturn(validFileUploadCookie)
 
         whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), anyOrNull())).thenReturn(propertyComplianceJourney)
+
+        whenever(propertyComplianceUpdateJourneyFactory.create(any(), any(), eq(validPropertyOwnershipId)))
+            .thenReturn(propertyComplianceUpdateJourney)
     }
 
     @Nested

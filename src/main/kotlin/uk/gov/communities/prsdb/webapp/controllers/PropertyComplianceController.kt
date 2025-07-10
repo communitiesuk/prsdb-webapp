@@ -223,8 +223,6 @@ class PropertyComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        // TODO: PRSD-1244 - can we put checkingAnswersForStep != null into a helper? Copied from PropertyComplianceJourney
-
         val stepModelAndView =
             propertyComplianceUpdateJourneyFactory
                 .create(stepName, JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep), propertyOwnershipId)
