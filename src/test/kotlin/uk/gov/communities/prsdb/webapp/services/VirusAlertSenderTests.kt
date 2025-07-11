@@ -56,7 +56,7 @@ class VirusAlertSenderTests {
             VirusScanUnsuccessfulEmail(
                 "A gas safety certificate",
                 "gas safety certificate",
-                "gas compliance certificate",
+                "gas safety certificate",
                 "123 Main St, Anytown",
                 registrationNumber.toString(),
                 complianceUri,
