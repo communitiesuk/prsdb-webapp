@@ -15,13 +15,19 @@ class UserRolesService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
     val systemOperatorRepository: SystemOperatorRepository,
 ) {
-    fun getRolesForSubjectId(subjectId: String): List<String> {
+    fun getLandlordRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
         val matchingLandlordUser = landlordRepository.findByBaseUser_Id(subjectId)
         if (matchingLandlordUser != null) {
             roles.add(ROLE_LANDLORD)
         }
+
+        return roles
+    }
+
+    fun getLocalAuthorityRolesForSubjectId(subjectId: String): List<String> {
+        val roles = mutableListOf<String>()
 
         val matchingLocalAuthorityUser = localAuthorityUserRepository.findByBaseUser_Id(subjectId)
         if (matchingLocalAuthorityUser != null) {
@@ -38,6 +44,10 @@ class UserRolesService(
 
         return roles
     }
+
+    fun getRolesForSubjectId(subjectId: String): List<String> =
+        getLandlordRolesForSubjectId(subjectId) +
+            getLocalAuthorityRolesForSubjectId(subjectId)
 
     fun getHasLandlordUserRole(subjectId: String): Boolean {
         val roles = getRolesForSubjectId(subjectId)
