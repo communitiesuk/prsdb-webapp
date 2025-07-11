@@ -4,6 +4,13 @@
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper">
         <div id="page-contents">
+            <div id="notification-banner"
+                 th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0 } ? ~{fragments/banners/notificationBanner ::
+                notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
+                <ul class="govuk-list govuk-list--bullet" th:each="message: ${complianceDetails.notificationMessages}">
+                    <li th:utext="#{${message}}"></li>
+                </ul>
+            </div>
             <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
             <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{::#delete-record-button})}">
                 <th:block th:if="${deleteRecordLink != null}" id="delete-record-button">
@@ -32,9 +39,22 @@
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
                 </div>
 
-                <!--TODO PRSD-1033: Implement tab-->
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
-                    <h2 class="govuk-heading-m">TODO: PRSD-1033</h2>
+                   <div th:if="${complianceDetails != null}">
+                       <p class="govuk-hint" th:text="#{propertyDetails.complianceInformation.hintText}">propertyDetails.complianceInformation.hintText</p>
+                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.gasSafety.heading}">propertyDetails.complianceInformation.gasSafety.heading</h2>
+                       <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.gasSafetySummaryList})}"></dl>
+
+                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.electricalSafety.heading}">propertyDetails.complianceInformation.electricalSafety.heading</h2>
+                       <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.eicrSummaryList})}"></dl>
+
+                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.energyPerformance.heading}">propertyDetails.complianceInformation.energyPerformance.heading</h2>
+                       <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.epcSummaryList})}"></dl>
+
+                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.landlordResponsibilities.heading}">propertyDetails.complianceInformation.landlordResponsibilities.heading</h2>
+                       <p class="govuk-hint" th:text="#{propertyDetails.complianceInformation.landlordResponsibilities.hintText}">propertyDetails.complianceInformation.landlordResponsibilities.hintText</p>
+                       <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.landlordResponsibilitiesSummaryList})}"></dl>
+                   </div>
                 </div>
             </div>
         </div>

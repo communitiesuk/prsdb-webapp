@@ -22,9 +22,9 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
-                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.expired",
+                "propertyDetails.complianceInformation.notificationBanner.epc.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -38,8 +38,8 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -53,8 +53,8 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
-                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationBanner.epc.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -68,8 +68,8 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
-                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.expired",
+                "propertyDetails.complianceInformation.notificationBanner.epc.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -83,7 +83,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.expired",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -97,7 +97,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.eicr.expired",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -111,7 +111,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.epc.expired",
+                "propertyDetails.complianceInformation.notificationBanner.epc.expired",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -125,9 +125,9 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
-                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.missing",
+                "propertyDetails.complianceInformation.notificationBanner.epc.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -141,8 +141,8 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -156,8 +156,8 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
-                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationBanner.epc.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -171,8 +171,8 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
-                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.missing",
+                "propertyDetails.complianceInformation.notificationBanner.epc.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -186,7 +186,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.gasCert.missing",
+                "propertyDetails.complianceInformation.notificationBanner.gasCert.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -200,7 +200,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.eicr.missing",
+                "propertyDetails.complianceInformation.notificationBanner.eicr.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -214,7 +214,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.epc.missing",
+                "propertyDetails.complianceInformation.notificationBanner.epc.missing",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
@@ -228,7 +228,7 @@ class PropertyComplianceViewModelTests {
 
         val expectedNotificationMessages =
             listOf(
-                "propertyDetails.complianceInformation.notificationMessage.epc.lowRating",
+                "propertyDetails.complianceInformation.notificationBanner.epc.lowRating",
             )
 
         val result = PropertyComplianceViewModel(propertyCompliance)
