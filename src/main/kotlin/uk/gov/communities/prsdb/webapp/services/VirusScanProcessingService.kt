@@ -14,6 +14,7 @@ class VirusScanProcessingService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val complianceRepository: PropertyComplianceRepository,
     private val dequarantiner: FileDequarantiner,
+    private val virusAlertSender: VirusAlertSender,
 ) {
     fun processScan(
         fileNameInfo: PropertyFileNameInfo,
@@ -22,16 +23,22 @@ class VirusScanProcessingService(
         val ownership = getOwnershipForFileInfo(fileNameInfo)
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
-                if (dequarantiner.dequarantine(fileNameInfo.toString())) {
+                if (dequarantiner.dequarantineFile(fileNameInfo.toString())) {
                     addFileToComplianceRecordIfPresent(fileNameInfo, ownership)
                 } else {
                     throw PrsdbWebException("Failed to dequarantine file: $fileNameInfo")
                 }
             }
-            ScanResult.Threats -> TODO("PRSD-1284")
-            ScanResult.Unsupported -> TODO("PRSD-1284")
-            ScanResult.AccessDenied -> TODO("PRSD-1284")
-            ScanResult.Failed -> TODO("PRSD-1284")
+            ScanResult.Threats,
+            ScanResult.Unsupported,
+            ScanResult.Failed,
+            -> {
+                virusAlertSender.sendAlerts(ownership, fileNameInfo)
+                if (!dequarantiner.deleteFile(fileNameInfo.toString())) {
+                    throw PrsdbWebException("Failed to delete unsafe file: $fileNameInfo")
+                }
+            }
+            ScanResult.AccessDenied -> throw PrsdbWebException("GuardDuty does not have access to scan $fileNameInfo")
         }
     }
 

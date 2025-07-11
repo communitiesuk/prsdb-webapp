@@ -64,5 +64,11 @@
     "name": "Partial Property Compliance Confirmation",
     "subject": "GOV.UK – You need to take action to provide compliance for a property",
     "bodyLocation": "/emails/PartialPropertyComplianceConfirmation.md"
+  },
+  {
+    "id": "7bed4d38-1551-4049-8c06-2b42594b5a73",
+    "name": "Virus Scan Unsuccessful",
+    "subject": "((subject certificate type)) for a property failed our virus scan",
+    "bodyLocation": "/emails/VirusScanUnsuccessful.md"
   }
 ]

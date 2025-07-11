@@ -16,7 +16,7 @@ class AwsS3FileDequarantiner(
     @Value("\${aws.s3.safeBucket}")
     lateinit var safeBucketName: String
 
-    override fun dequarantine(objectKey: String): Boolean {
+    override fun dequarantineFile(objectKey: String): Boolean {
         val copyResponse =
             transferManager
                 .copy { builder ->
@@ -35,6 +35,10 @@ class AwsS3FileDequarantiner(
             return false
         }
 
+        return deleteFile(objectKey)
+    }
+
+    override fun deleteFile(objectKey: String): Boolean {
         val deleteResponse =
             s3Client
                 .deleteObject { request ->

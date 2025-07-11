@@ -17,9 +17,11 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3FileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.LocalFileDequarantiner
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.jvm.java
 import kotlin.reflect.KClass
@@ -52,6 +54,8 @@ class PrsdbProcessApplicationTests {
                 AwsS3FileDequarantiner::class.java.simpleName,
                 LocalFileDequarantiner::class.java.simpleName,
                 VirusScanProcessingService::class.java.simpleName,
+                AbsoluteUrlProvider::class.java.simpleName,
+                VirusAlertSender::class.java.simpleName,
                 // Beans with explicit names can retrieve their name by reflecting on the annotation using the `getExplicitBeanName` function
                 // e.g. getExplicitBeanName<Component>(YourComponentClassName::class),
                 // Beans added by @Import annotations use their fully qualified class name as the bean name by default

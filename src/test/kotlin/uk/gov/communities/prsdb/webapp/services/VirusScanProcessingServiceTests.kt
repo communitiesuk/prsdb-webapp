@@ -25,13 +25,16 @@ class VirusScanProcessingServiceTests {
 
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
     private lateinit var complianceRepository: PropertyComplianceRepository
+    private lateinit var virusAlertSender: VirusAlertSender
 
     @BeforeEach
     fun setup() {
         dequarantiner = mock()
         propertyOwnershipRepository = mock()
         complianceRepository = mock()
-        virusScanProcessingService = VirusScanProcessingService(propertyOwnershipRepository, complianceRepository, dequarantiner)
+        virusAlertSender = mock()
+        virusScanProcessingService =
+            VirusScanProcessingService(propertyOwnershipRepository, complianceRepository, dequarantiner, virusAlertSender)
 
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(anyLong())).thenAnswer { invocation ->
             val ownership = mock<PropertyOwnership>()
@@ -46,13 +49,13 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(true)
+        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(true)
 
         // Act
         virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
 
         // Assert
-        verify(dequarantiner).dequarantine(fileNameInfo.toString())
+        verify(dequarantiner).dequarantineFile(fileNameInfo.toString())
     }
 
     @EnumSource(FileCategory::class)
@@ -62,7 +65,7 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = PropertyFileNameInfo(5L, category, "jpg")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(true)
+        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(true)
         whenever(complianceRepository.findByPropertyOwnership_Id(fileNameInfo.propertyOwnershipId)).thenReturn(PropertyCompliance())
 
         // Act
@@ -89,7 +92,7 @@ class VirusScanProcessingServiceTests {
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantine(fileNameInfo.toString())).thenReturn(false)
+        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(false)
 
         // Act & Assert
         assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
@@ -98,16 +101,27 @@ class VirusScanProcessingServiceTests {
     @EnumSource(ScanResult::class)
     @ParameterizedTest
     fun `processScan throws an error for each scan result other than NoThreats`(scanResultStatus: ScanResult) {
-        // Ignore NoThreats case since it is already tested
-        if (scanResultStatus == ScanResult.NoThreats) {
+        // Ignore NoThreats and AccessDenied cases since they are tested separately
+        if (scanResultStatus == ScanResult.NoThreats || scanResultStatus == ScanResult.AccessDenied) {
             return
         }
 
         // Arrange
         val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
-        val scanResultStatus = scanResultStatus
+        whenever(dequarantiner.deleteFile(fileNameInfo.toString())).thenReturn(true)
 
-        // TODO PRSD-1284
-        assertThrows<NotImplementedError> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
+        // Act
+        virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
+
+        // Assert
+        verify(dequarantiner).deleteFile(fileNameInfo.toString())
+    }
+
+    @Test
+    fun `processScan throws an exception for AccessDenied scan result`() {
+        val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
+        val scanResultStatus = ScanResult.AccessDenied
+
+        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
     }
 }
