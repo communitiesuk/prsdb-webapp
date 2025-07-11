@@ -1,0 +1,30 @@
+package uk.gov.communities.prsdb.webapp.forms.journeys.factories
+
+import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
+
+@PrsdbWebService
+class PropertyComplianceUpdateJourneyFactory(
+    val validator: Validator,
+    val journeyDataServiceFactory: JourneyDataServiceFactory,
+    val propertyComplianceService: PropertyComplianceService,
+) {
+    fun create(
+        stepName: String,
+        isCheckingAnswers: Boolean,
+        propertyOwnershipId: Long,
+    ) = PropertyComplianceUpdateJourney(
+        validator = validator,
+        journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
+        stepName = stepName,
+        isCheckingAnswers = isCheckingAnswers,
+        propertyOwnershipId = propertyOwnershipId,
+        propertyComplianceService = propertyComplianceService,
+    )
+
+    private fun getJourneyDataKey(propertyOwnershipId: Long) = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+}
