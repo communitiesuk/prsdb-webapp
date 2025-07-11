@@ -857,7 +857,7 @@ class JourneyTests {
     }
 
     @Nested
-    inner class ChangingAnswersTests {
+    inner class CheckingAnswersTests {
         @Test
         fun `getModelAndViewForStep returns back button to check your answers page when changing answers`() {
             // Arrange

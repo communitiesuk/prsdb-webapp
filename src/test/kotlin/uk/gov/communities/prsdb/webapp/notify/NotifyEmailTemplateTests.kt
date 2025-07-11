@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.notify
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.condition.EnabledIf
@@ -12,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
@@ -35,7 +34,6 @@ class NotifyEmailTemplateTests {
     private lateinit var notifyClient: NotificationClient
 
     companion object NotifyTestsCompanion {
-        val jsonMetadataList = javaClass.getResource("/emails/emailTemplates.json")?.readText() ?: ""
         lateinit var notifyTemplates: TemplateList
 
         fun haveNotifyTemplatesBeenFetched() = ::notifyTemplates.isInitialized
@@ -46,9 +44,6 @@ class NotifyEmailTemplateTests {
 
         @JvmStatic
         fun canFetchNotifyTemplates(): Boolean = System.getenv("EMAILNOTIFICATIONS_APIKEY") != null
-
-        @JvmStatic
-        fun getMetadataList() = Json.decodeFromString<List<EmailTemplateMetadata>>(jsonMetadataList)
     }
 
     @BeforeEach
@@ -67,13 +62,13 @@ class NotifyEmailTemplateTests {
     @ParameterizedTest(name = "{0}")
     @EnumSource(EmailTemplateId::class)
     fun `there is a source controlled copy for each template id`(id: EmailTemplateId) {
-        var metadataList = Json.decodeFromString<List<EmailTemplateMetadata>>(jsonMetadataList)
+        var metadataList = EmailTemplateMetadata.metadataList
 
         metadataList.single { templateMetadata -> templateMetadata.id == id.idValue }
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("getMetadataList")
+    @MethodSource("uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata#getMetadataList")
     fun `all source controlled templates match their notify equivalent`(metadata: EmailTemplateMetadata) {
         // Act
         var templateId = metadata.id
@@ -103,15 +98,5 @@ class NotifyEmailTemplateTests {
         var cleanedNotifyBody = notifyBody.replace("\r", "")
 
         Assertions.assertEquals(cleanedStoredBody, cleanedNotifyBody, "Notify template body did not match")
-    }
-
-    @Serializable
-    data class EmailTemplateMetadata(
-        val id: String,
-        val name: String,
-        val subject: String,
-        val bodyLocation: String,
-    ) {
-        override fun toString() = name
     }
 }

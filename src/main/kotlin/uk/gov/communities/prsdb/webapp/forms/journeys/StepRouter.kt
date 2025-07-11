@@ -6,29 +6,29 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 
 interface StepRouter<T : StepId> {
-    fun isDestinationAllowedWhenChangingAnswerTo(
+    fun isDestinationAllowedWhenCheckingAnswersFor(
         destinationStep: T?,
-        stepBeingChanged: T?,
+        stepBeingChecked: T?,
     ): Boolean
 }
 
 open class IsolatedStepRouter<T : StepId> : StepRouter<T> {
-    override fun isDestinationAllowedWhenChangingAnswerTo(
+    override fun isDestinationAllowedWhenCheckingAnswersFor(
         destinationStep: T?,
-        stepBeingChanged: T?,
-    ): Boolean = destinationStep != null && destinationStep == stepBeingChanged
+        stepBeingChecked: T?,
+    ): Boolean = destinationStep != null && destinationStep == stepBeingChecked
 }
 
 open class GroupedStepRouter<T : GroupedStepId<*>>(
     private val steps: Iterable<StepDetails<T>>,
 ) : StepRouter<T> {
-    override fun isDestinationAllowedWhenChangingAnswerTo(
+    override fun isDestinationAllowedWhenCheckingAnswersFor(
         destinationStep: T?,
-        stepBeingChanged: T?,
+        stepBeingChecked: T?,
     ): Boolean =
         destinationStep != null &&
-            destinationStep.groupIdentifier == stepBeingChanged?.groupIdentifier &&
-            isDestinationNotBeforeOtherStep(destinationStep, stepBeingChanged)
+            destinationStep.groupIdentifier == stepBeingChecked?.groupIdentifier &&
+            isDestinationNotBeforeOtherStep(destinationStep, stepBeingChecked)
 
     private fun isDestinationNotBeforeOtherStep(
         destinationStep: T?,
@@ -48,10 +48,10 @@ open class GroupedStepRouter<T : GroupedStepId<*>>(
 open class GroupedUpdateStepRouter<T : GroupedUpdateStepId<*>>(
     steps: Iterable<StepDetails<T>>,
 ) : GroupedStepRouter<T>(steps) {
-    override fun isDestinationAllowedWhenChangingAnswerTo(
+    override fun isDestinationAllowedWhenCheckingAnswersFor(
         destinationStep: T?,
-        stepBeingChanged: T?,
+        stepBeingChecked: T?,
     ): Boolean =
         destinationStep?.isCheckYourAnswersStepId != true &&
-            super.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
+            super.isDestinationAllowedWhenCheckingAnswersFor(destinationStep, stepBeingChecked)
 }

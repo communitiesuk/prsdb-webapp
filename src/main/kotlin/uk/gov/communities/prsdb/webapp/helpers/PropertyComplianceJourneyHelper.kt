@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import org.apache.commons.io.FilenameUtils
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo.FileCategory
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 
@@ -21,11 +23,11 @@ class PropertyComplianceJourneyHelper {
         ): String {
             val certificateType =
                 when (stepName) {
-                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment -> "gas_safety_certificate"
-                    PropertyComplianceStepId.EicrUpload.urlPathSegment -> "eicr"
+                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment -> FileCategory.GasSafetyCert
+                    PropertyComplianceStepId.EicrUpload.urlPathSegment -> FileCategory.Eirc
                     else -> throw IllegalStateException("Invalid file upload step name: $stepName")
                 }
-            return "property_${propertyOwnershipId}_$certificateType.${FilenameUtils.getExtension(originalFileName)}"
+            return PropertyFileNameInfo(propertyOwnershipId, certificateType, FilenameUtils.getExtension(originalFileName)).toString()
         }
     }
 }

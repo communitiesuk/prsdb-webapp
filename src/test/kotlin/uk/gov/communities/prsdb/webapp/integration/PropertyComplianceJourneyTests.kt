@@ -218,7 +218,10 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-962 - test checkAndSubmitPage
+        // Check Answers page
+        BaseComponent
+            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
         // Confirmation page
@@ -379,7 +382,10 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-962 - test checkAndSubmitPage
+        // Check Answers page
+        BaseComponent
+            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
         // Confirmation page
@@ -501,7 +507,10 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-962 - test checkAndSubmitPage
+        // Check Answers page
+        BaseComponent
+            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
         // Confirmation page
@@ -592,7 +601,10 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
-        // TODO PRSD-962 - test checkAndSubmitPage
+        // Check Answers page
+        BaseComponent
+            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
         // Confirmation page

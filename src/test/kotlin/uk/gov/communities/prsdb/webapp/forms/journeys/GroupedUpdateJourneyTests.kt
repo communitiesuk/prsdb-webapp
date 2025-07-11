@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -50,7 +50,7 @@ class GroupedUpdateJourneyTests {
             AlwaysTrueValidator(),
             journeyDataService,
             currentStep.urlPathSegment,
-            isChangingAnswer = true,
+            isCheckingAnswers = true,
         ) {
         override val sections =
             createSingleSectionWithSingleTaskFromSteps(
@@ -86,9 +86,9 @@ class GroupedUpdateJourneyTests {
     }
 
     @Nested
-    inner class ChangingAnswersTests {
+    inner class CheckingAnswersTests {
         @Test
-        fun `completeStep redirects to next step with same changingAnswerFor when not reaching end of group`() {
+        fun `completeStep redirects to next step with same checkingAnswersFor when not reaching end of group`() {
             // Arrange
             val groupedUpdateJourney = TestGroupedUpdateJourney(mockJourneyDataService, TestGroupedUpdateStepId.GroupOneStepOne)
 
@@ -98,12 +98,12 @@ class GroupedUpdateJourneyTests {
                     .completeStep(
                         formData = emptyMap(),
                         principal = { "testPrincipalId" },
-                        changingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
+                        checkingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
                     ).viewName!!
 
             // Assert
             assertEquals(TestGroupedUpdateStepId.GroupOneStepTwo.urlPathSegment, result.getPath())
-            assertEquals(TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment, result.getQueryParam(CHANGE_ANSWER_FOR_PARAMETER_NAME))
+            assertEquals(TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment, result.getQueryParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME))
         }
 
         @Test
@@ -117,16 +117,16 @@ class GroupedUpdateJourneyTests {
                     .completeStep(
                         formData = emptyMap(),
                         principal = { "testPrincipalId" },
-                        changingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
+                        checkingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
                     ).viewName!!
 
             // Assert
             assertEquals(TestGroupedUpdateStepId.GroupOneCyaStep.urlPathSegment, result.getPath())
-            assertNull(result.getQueryParam(CHANGE_ANSWER_FOR_PARAMETER_NAME))
+            assertNull(result.getQueryParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME))
         }
 
         @Test
-        fun `getModelAndViewForStep yields a back link to the previous step with same changingAnswerFor if not at start of group`() {
+        fun `getModelAndViewForStep yields a back link to the previous step with same checkingAnswersFor if not at start of group`() {
             // Arrange
             whenever(mockJourneyDataService.getJourneyDataFromSession())
                 .thenReturn(mapOf(TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment to emptyMap<String, Any>()))
@@ -137,13 +137,13 @@ class GroupedUpdateJourneyTests {
                 groupedUpdateJourney
                     .getModelAndViewForStep(
                         submittedPageData = null,
-                        changingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
+                        checkingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
                     ).model[BACK_URL_ATTR_NAME]
                     .toString()
 
             // Assert
             assertEquals(TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment, result.getPath())
-            assertEquals(TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment, result.getQueryParam(CHANGE_ANSWER_FOR_PARAMETER_NAME))
+            assertEquals(TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment, result.getQueryParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME))
         }
 
         @Test
@@ -156,13 +156,13 @@ class GroupedUpdateJourneyTests {
                 groupedUpdateJourney
                     .getModelAndViewForStep(
                         submittedPageData = null,
-                        changingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
+                        checkingAnswersForStep = TestGroupedUpdateStepId.GroupOneStepOne.urlPathSegment,
                     ).model[BACK_URL_ATTR_NAME]
                     .toString()
 
             // Assert
             assertEquals(TestGroupedUpdateStepId.GroupOneCyaStep.urlPathSegment, result.getPath())
-            assertNull(result.getQueryParam(CHANGE_ANSWER_FOR_PARAMETER_NAME))
+            assertNull(result.getQueryParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME))
         }
     }
 

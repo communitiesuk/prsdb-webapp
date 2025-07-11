@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
 import java.net.URI
 
 class EmailTemplateModelsTests {
@@ -73,6 +76,17 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PartialPropertyComplianceConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    VirusScanUnsuccessfulEmail(
+                        "Subject for certificate",
+                        "Heading for certificate",
+                        "Body for certificate",
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 12345L).toString(),
+                        URI("https://example.com/property/12345"),
+                    ),
+                    "/emails/VirusScanUnsuccessful.md",
+                ),
             )
 
         private fun createLocalAuthority(
@@ -98,11 +112,15 @@ class EmailTemplateModelsTests {
     @MethodSource("templateList")
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
         // Arrange
-        var storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
-        var parameters = getParametersFromBody(storedBody).distinct()
+        val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
+        val storedMetadata = EmailTemplateMetadata.metadataList.single { metadata -> metadata.id == testData.model.templateId.idValue }
+
+        val subjectParameters = extractParameters(storedMetadata.subject)
+        val bodyParameters = extractParameters(storedBody)
+        val parameters = (subjectParameters + bodyParameters).distinct()
 
         // Act
-        var modelHashMap = testData.model.toHashMap()
+        val modelHashMap = testData.model.toHashMap()
 
         // Assert
         Assertions.assertEquals(parameters.size, modelHashMap.size)
@@ -111,7 +129,7 @@ class EmailTemplateModelsTests {
         }
     }
 
-    private fun getParametersFromBody(body: String): List<String> {
+    private fun extractParameters(body: String): List<String> {
         val parameterRegex = Regex("\\(\\(.*\\)\\)")
         return parameterRegex.findAll(body).map { result -> result.value.trim(')').trim('(') }.toList()
     }

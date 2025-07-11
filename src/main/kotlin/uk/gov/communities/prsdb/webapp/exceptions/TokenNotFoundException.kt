@@ -1,5 +1,5 @@
 package uk.gov.communities.prsdb.webapp.exceptions
 
-class InvalidTokenException(
+class TokenNotFoundException(
     message: String,
 ) : PrsdbWebException(message)

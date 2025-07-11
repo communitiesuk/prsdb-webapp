@@ -93,6 +93,6 @@ class CheckAnswersPageTests {
         const val SUMMARY_ROW_KEY = "summaryListRowKey"
 
         private fun createSummaryList(journeyData: JourneyData) =
-            listOf(SummaryListRowViewModel(SUMMARY_ROW_KEY, journeyData[SUMMARY_ROW_KEY]!!, changeUrl = null))
+            listOf(SummaryListRowViewModel(SUMMARY_ROW_KEY, journeyData[SUMMARY_ROW_KEY]!!, action = null))
     }
 }

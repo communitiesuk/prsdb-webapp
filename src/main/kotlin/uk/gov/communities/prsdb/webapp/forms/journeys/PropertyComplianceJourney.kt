@@ -5,7 +5,6 @@ import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
@@ -37,12 +36,14 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
+import uk.gov.communities.prsdb.webapp.forms.pages.PropertyComplianceCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
@@ -125,6 +126,7 @@ class PropertyComplianceJourney(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
+    checkingAnswersForStep: String?,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -148,26 +150,25 @@ class PropertyComplianceJourney(
         }
     }
 
+    private val isCheckingAnswers = checkingAnswersForStep != null
+    private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
+
+    override val stepRouter = GroupedStepRouter(this)
+    override val checkYourAnswersStepId = PropertyComplianceStepId.CheckAndSubmit
     override val sections =
         listOf(
-            JourneySection(uploadTasks, "propertyCompliance.taskList.upload.heading", "upload-certificates"),
+            JourneySection(
+                uploadTasks,
+                "propertyCompliance.taskList.upload.heading",
+                "upload-certificates",
+            ),
             JourneySection(
                 landlordResponsibilities,
                 "propertyCompliance.taskList.landlordResponsibilities.heading",
                 "landlord-responsibilities",
             ),
-            // TODO PRSD-962: Implement check and submit task
             JourneySection.withOneTask(
-                JourneyTask.withOneStep(
-                    placeholderStep(
-                        PropertyComplianceStepId.CheckAndSubmit,
-                        "TODO PRSD-962: Implement check and submit task",
-                        handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
-                            checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData)
-                        },
-                    ),
-                    "propertyCompliance.taskList.checkAndSubmit.check",
-                ),
+                JourneyTask.withOneStep(checkAndSubmitStep, "propertyCompliance.taskList.checkAndSubmit.check"),
                 "propertyCompliance.taskList.checkAndSubmit.heading",
                 "check-and-submit",
             ),
@@ -310,8 +311,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                                BACK_URL_ATTR_NAME to taskListUrlSegment,
-                            ),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> gasSafetyStepNextAction(filteredJourneyData) },
             )
@@ -382,7 +382,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "submitButtonText" to "forms.buttons.saveAndContinueToEICR",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -399,6 +399,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -498,6 +499,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -514,6 +516,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEICR"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
@@ -545,8 +548,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                                BACK_URL_ATTR_NAME to taskListUrlSegment,
-                            ),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> eicrStepNextAction(filteredJourneyData) },
             )
@@ -598,7 +600,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -617,6 +619,7 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -720,6 +723,7 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -738,6 +742,7 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
                                 "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
@@ -774,8 +779,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.epc.radios.option.notRequired.label",
                                         ),
                                     ),
-                                BACK_URL_ATTR_NAME to taskListUrlSegment,
-                            ),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
                     ) { mapOf("address" to getPropertyAddress()) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcStepHandleSubmitAndRedirect(filteredJourneyData) },
                 nextAction = { filteredJourneyData, _ -> epcStepNextAction(filteredJourneyData) },
@@ -794,6 +798,10 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "findEpcUrl" to FIND_EPC_URL,
                                 "getNewEpcUrl" to GET_NEW_EPC_URL,
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -937,6 +945,10 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1030,6 +1042,10 @@ class PropertyComplianceJourney(
                                 "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                                 "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
                                 "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1137,6 +1153,10 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1155,6 +1175,10 @@ class PropertyComplianceJourney(
                                 "title" to "propertyCompliance.title",
                                 "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
                                 "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                                "submitButtonText" to
+                                    getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                        "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    ),
                             ),
                     ),
                 nextAction = { _, _ -> Pair(landlordResponsibilities.first().startingStepId, null) },
@@ -1185,8 +1209,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                                BACK_URL_ATTR_NAME to taskListUrlSegment,
-                            ),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
                     ),
                 nextAction = { filteredJourneyData, _ -> fireSafetyDeclarationStepNextAction(filteredJourneyData) },
             )
@@ -1262,17 +1285,13 @@ class PropertyComplianceJourney(
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckAndSubmit, null) },
             )
 
-    private fun placeholderStep(
-        stepId: PropertyComplianceStepId,
-        todoComment: String,
-        nextStepId: PropertyComplianceStepId? = null,
-        handleSubmitAndRedirect: ((JourneyData, Int?, PropertyComplianceStepId?) -> String)? = null,
-    ) = Step(
-        id = stepId,
-        page = Page(formModel = NoInputFormModel::class, templateName = "forms/todo", content = mapOf("todoComment" to todoComment)),
-        nextAction = { _, _ -> Pair(nextStepId, null) },
-        handleSubmitAndRedirect = handleSubmitAndRedirect,
-    )
+    private val checkAndSubmitStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.CheckAndSubmit,
+                page = PropertyComplianceCheckAnswersPage(journeyDataService, epcCertificateUrlProvider) { getPropertyAddress() },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
+            )
 
     private fun gasSafetyStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasGasSafetyCert()!!) {
@@ -1342,7 +1361,7 @@ class PropertyComplianceJourney(
             return updateEpcDetailsInSessionAndRedirectToNextStep(epcStep, filteredJourneyData, epcDetails, autoMatchedEpc = true)
         }
 
-        return getRedirectForNextStep(epcStep, filteredJourneyData, null)
+        return getRedirectForNextStep(epcStep, filteredJourneyData, null, checkingAnswersFor)
     }
 
     private fun updateEpcDetailsInSessionAndRedirectToNextStep(
@@ -1353,7 +1372,7 @@ class PropertyComplianceJourney(
     ): String {
         val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
         journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
-        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null)
+        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
     private fun resetCheckMatchedEpcInSessionIfChangedEpcDetails(newEpcDetails: EpcDataModel?) {
@@ -1415,10 +1434,11 @@ class PropertyComplianceJourney(
                 checkMatchedEpcStep,
                 filteredJourneyData,
                 null,
-                overriddenRedirectStepId = PropertyComplianceStepId.EpcLookup,
+                checkingAnswersFor,
+                PropertyComplianceStepId.EpcLookup,
             )
         }
-        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null)
+        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null, checkingAnswersFor)
     }
 
     private fun epcLookupStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
@@ -1559,6 +1579,13 @@ class PropertyComplianceJourney(
         propertyOwnershipService
             .getPropertyOwnership(propertyOwnershipId)
             .property.address.singleLineAddress
+
+    private fun getSubmitButtonTextOrDefaultIfCheckingAnswers(submitButtonText: String) =
+        if (isCheckingAnswers) {
+            "forms.buttons.saveAndContinue"
+        } else {
+            submitButtonText
+        }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
         val landlordEmail = propertyCompliance.propertyOwnership.primaryLandlord.email

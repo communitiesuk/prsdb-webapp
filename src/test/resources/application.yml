@@ -10,6 +10,7 @@ spring:
 
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
+  support-email: support@example.com
 
 os-places:
   api-key: ${OS_PLACES_API_KEY}
@@ -17,3 +18,4 @@ os-places:
 aws:
   s3:
     quarantineBucket: 'quarantine-bucket'
+    safeBucket: 'safe-bucket'

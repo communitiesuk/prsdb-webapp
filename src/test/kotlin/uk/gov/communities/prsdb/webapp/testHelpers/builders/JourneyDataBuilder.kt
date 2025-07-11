@@ -513,6 +513,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withGasSafetyCertUploadConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment] = emptyMap<String, Any>()
+        return this
+    }
+
     fun withGasSafetyCertExemptionStatus(hasGasSafetyCertExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyExemption.urlPathSegment] =
             mapOf(GasSafetyExemptionFormModel::hasExemption.name to hasGasSafetyCertExemption)
@@ -529,6 +534,11 @@ class JourneyDataBuilder(
         withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
         journeyData[PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment] =
             mapOf(GasSafetyExemptionOtherReasonFormModel::otherReason.name to otherReason)
+        return this
+    }
+
+    fun withGasSafetyCertExemptionConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -560,6 +570,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEicrUploadConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment] = emptyMap<String, Any>()
+        return this
+    }
+
     fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
             mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
@@ -576,6 +591,11 @@ class JourneyDataBuilder(
         withEicrExemptionReason(EicrExemptionReason.OTHER)
         journeyData[PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment] =
             mapOf(EicrExemptionOtherReasonFormModel::otherReason.name to otherReason)
+        return this
+    }
+
+    fun withEicrExemptionConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 

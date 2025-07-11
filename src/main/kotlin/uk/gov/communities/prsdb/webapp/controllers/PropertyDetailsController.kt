@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
@@ -28,7 +28,9 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsU
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -38,6 +40,7 @@ class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory,
     private val backLinkStorageService: BackUrlStorageService,
+    private val propertyComplianceService: PropertyComplianceService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -50,6 +53,8 @@ class PropertyDetailsController(
         val landlordDetailsUrl =
             LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
+
+        val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         val propertyDetails =
             PropertyDetailsViewModel(
@@ -65,9 +70,19 @@ class PropertyDetailsController(
                 landlordDetailsUrl,
             )
 
+        val propertyComplianceDetails =
+            propertyCompliance?.let {
+                PropertyComplianceViewModel(
+                    propertyCompliance = propertyCompliance,
+                    withActionLinks = true,
+                    withNotificationMessages = true,
+                )
+            }
+
         val modelAndView = ModelAndView("propertyDetailsView")
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("landlordDetails", landlordViewModel)
+        modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         modelAndView.addObject("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
@@ -81,12 +96,12 @@ class PropertyDetailsController(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam(CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerForStep: String?,
+        @RequestParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String?,
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
-                .getModelAndViewForStep(changingAnswersForStep = changingAnswerForStep)
+                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
+                .getModelAndViewForStep(checkingAnswersForStep = checkingAnswersForStep)
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -102,12 +117,12 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
-        @RequestParam(CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerForStep: String?,
+        @RequestParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String?,
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isChangingAnswer = changingAnswerForStep != null)
-                .completeStep(formData, principal, changingAnswerForStep)
+                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
+                .completeStep(formData, principal, checkingAnswersForStep)
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,

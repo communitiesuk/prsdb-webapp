@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -77,7 +77,7 @@ class RegisterPropertyController(
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         model: Model,
         principal: Principal,
     ): ModelAndView =
@@ -86,7 +86,7 @@ class RegisterPropertyController(
             .getModelAndViewForStep(
                 stepName,
                 subpage,
-                changingAnswersForStep = changingAnswerFor,
+                checkingAnswersForStep = checkingAnswersForStep,
             )
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
@@ -99,7 +99,7 @@ class RegisterPropertyController(
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHANGE_ANSWER_FOR_PARAMETER_NAME, required = false) changingAnswerFor: String? = null,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestParam formData: PageData,
         model: Model,
         principal: Principal,
@@ -111,7 +111,7 @@ class RegisterPropertyController(
                 formData,
                 subpage,
                 principal,
-                changingAnswerFor,
+                checkingAnswersForStep,
             )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")

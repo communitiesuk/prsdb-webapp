@@ -199,7 +199,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
-        viewModel.forEach { personalDetails -> assertNull(personalDetails.changeUrl) }
+        viewModel.forEach { personalDetails -> assertNull(personalDetails.action) }
     }
 
     @Test

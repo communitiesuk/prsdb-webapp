@@ -28,20 +28,23 @@ class PropertyComplianceJourneyFactory(
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    fun create(propertyOwnershipId: Long) =
-        PropertyComplianceJourney(
-            validator,
-            journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
-            propertyOwnershipService,
-            epcLookupService,
-            propertyComplianceService,
-            propertyOwnershipId,
-            epcCertificateUrlProvider,
-            messageSource,
-            fullPropertyComplianceConfirmationEmailService,
-            partialPropertyComplianceConfirmationEmailService,
-            absoluteUrlProvider,
-        )
+    fun create(
+        propertyOwnershipId: Long,
+        checkingAnswersFor: String? = null,
+    ) = PropertyComplianceJourney(
+        validator,
+        journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
+        propertyOwnershipService,
+        epcLookupService,
+        propertyComplianceService,
+        propertyOwnershipId,
+        epcCertificateUrlProvider,
+        messageSource,
+        fullPropertyComplianceConfirmationEmailService,
+        partialPropertyComplianceConfirmationEmailService,
+        absoluteUrlProvider,
+        checkingAnswersFor,
+    )
 
     companion object {
         fun getJourneyDataKey(propertyOwnershipId: Long): String =

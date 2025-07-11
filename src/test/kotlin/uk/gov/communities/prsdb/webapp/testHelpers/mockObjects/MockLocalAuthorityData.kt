@@ -1,10 +1,12 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import java.time.Instant
 import java.util.UUID
 
 class MockLocalAuthorityData {
@@ -42,12 +44,26 @@ class MockLocalAuthorityData {
 
         const val DEFAULT_LA_INVITATION_ID = 123L
 
-        fun createLocalAuthorityInvitation(localAuthorityId: Int = DEFAULT_LA_ID): LocalAuthorityInvitation =
-            LocalAuthorityInvitation(
-                DEFAULT_LA_INVITATION_ID,
-                UUID.randomUUID(),
-                "invited.email@example.com",
-                createLocalAuthority(localAuthorityId),
-            )
+        fun createLocalAuthorityInvitation(
+            id: Long = DEFAULT_LA_INVITATION_ID,
+            token: UUID = UUID.randomUUID(),
+            email: String = "invited.email@example.com",
+            invitingAuthority: LocalAuthority = createLocalAuthority(DEFAULT_LA_ID),
+            invitedAsAdmin: Boolean = false,
+            createdDate: Instant = Instant.now(),
+        ): LocalAuthorityInvitation {
+            val localAuthorityInvitation =
+                LocalAuthorityInvitation(
+                    id = id,
+                    token = token,
+                    email = email,
+                    invitingAuthority = invitingAuthority,
+                    invitedAsAdmin = invitedAsAdmin,
+                )
+
+            ReflectionTestUtils.setField(localAuthorityInvitation, "createdDate", createdDate)
+
+            return localAuthorityInvitation
+        }
     }
 }

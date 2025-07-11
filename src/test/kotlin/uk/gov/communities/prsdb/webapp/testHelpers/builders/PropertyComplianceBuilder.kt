@@ -36,8 +36,10 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withGasSafetyCertExemption(): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY
+    fun withGasSafetyCertExemption(
+        exemption: GasSafetyExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY,
+    ): PropertyComplianceBuilder {
+        propertyCompliance.gasSafetyCertExemptionReason = exemption
         return this
     }
 
@@ -52,8 +54,8 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withEicrExemption(): PropertyComplianceBuilder {
-        propertyCompliance.eicrExemptionReason = EicrExemptionReason.LIVE_IN_LANDLORD
+    fun withEicrExemption(exemption: EicrExemptionReason = EicrExemptionReason.LIVE_IN_LANDLORD): PropertyComplianceBuilder {
+        propertyCompliance.eicrExemptionReason = exemption
         return this
     }
 
@@ -72,8 +74,8 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withEpcExemption(): PropertyComplianceBuilder {
-        propertyCompliance.epcExemptionReason = EpcExemptionReason.LISTED_BUILDING
+    fun withEpcExemption(exemption: EpcExemptionReason = EpcExemptionReason.LISTED_BUILDING): PropertyComplianceBuilder {
+        propertyCompliance.epcExemptionReason = exemption
         return this
     }
 
@@ -82,8 +84,13 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withMeesExemption(): PropertyComplianceBuilder {
-        propertyCompliance.epcMeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION
+    fun withMeesExemption(exemption: MeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION): PropertyComplianceBuilder {
+        propertyCompliance.epcMeesExemptionReason = exemption
+        return this
+    }
+
+    fun withoutFireSafetyDeclaration(hasDeclared: Boolean = true): PropertyComplianceBuilder {
+        propertyCompliance.hasFireSafetyDeclaration = hasDeclared
         return this
     }
 
@@ -96,6 +103,35 @@ class PropertyComplianceBuilder {
                 .withEpc()
                 .build()
 
+        fun createWithInDateCertsAndLowEpcRating() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withEicr()
+                .withEpc()
+                .withLowEpcRating()
+                .build()
+
+        fun createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(
+            exemption: MeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
+        ) = PropertyComplianceBuilder()
+            .withPropertyOwnership()
+            .withGasSafetyCert()
+            .withEicr()
+            .withEpc()
+            .withMeesExemption(exemption)
+            .withLowEpcRating()
+            .build()
+
+        fun createWithInDateCertsAndSetFireSafetyDeclaration(hasDeclared: Boolean) =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withEicr()
+                .withEpc()
+                .withoutFireSafetyDeclaration(hasDeclared)
+                .build()
+
         fun createWithExpiredCerts() =
             PropertyComplianceBuilder()
                 .withPropertyOwnership()
@@ -104,17 +140,125 @@ class PropertyComplianceBuilder {
                 .withExpiredEpc()
                 .build()
 
-        fun createWithCertExemptions() =
+        fun createWithGasAndEicrExpiredCerts() =
             PropertyComplianceBuilder()
                 .withPropertyOwnership()
-                .withGasSafetyCertExemption()
-                .withEicrExemption()
-                .withEpcExemption()
+                .withExpiredGasSafetyCert()
+                .withExpiredEicr()
+                .withEpc()
                 .build()
+
+        fun createWithGasAndEpcExpiredCerts() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withExpiredGasSafetyCert()
+                .withEicr()
+                .withExpiredEpc()
+                .build()
+
+        fun createWithEicrAndEpcExpiredCerts() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withExpiredEicr()
+                .withExpiredEpc()
+                .build()
+
+        fun createWithGasCertExpiredBeforeUpload() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withExpiredGasSafetyCert()
+                .withEicr()
+                .withEpc()
+                .build()
+
+        fun createWithEicrExpiredBeforeUpload() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withExpiredEicr()
+                .withEpc()
+                .build()
+
+        fun createWithGasCertExpiredAfterUpload() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withExpiredGasSafetyCert()
+                .withEicr()
+                .withEpc()
+                .build()
+
+        fun createWithEicrExpiredAfterUpload() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withEicr()
+                .withExpiredEicr()
+                .withEpc()
+                .build()
+
+        fun createWithOnlyEpcExpiredCert() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withEicr()
+                .withExpiredEpc()
+                .build()
+
+        fun createWithCertExemptions(
+            gasExemption: GasSafetyExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY,
+            eicrExemption: EicrExemptionReason = EicrExemptionReason.LIVE_IN_LANDLORD,
+            epcExemption: EpcExemptionReason = EpcExemptionReason.LISTED_BUILDING,
+        ) = PropertyComplianceBuilder()
+            .withPropertyOwnership()
+            .withGasSafetyCertExemption(gasExemption)
+            .withEicrExemption(eicrExemption)
+            .withEpcExemption(epcExemption)
+            .build()
 
         fun createWithMissingCerts() =
             PropertyComplianceBuilder()
                 .withPropertyOwnership()
+                .build()
+
+        fun createWithGasAndEicrMissingCerts() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withEpc()
+                .build()
+
+        fun createWithGasAndEpcMissingCerts() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withEicr()
+                .build()
+
+        fun createWithEicrAndEpcMissingCerts() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .build()
+
+        fun createWithOnlyGasMissingCert() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withEicr()
+                .withEpc()
+                .build()
+
+        fun createWithOnlyEicrMissingCert() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withEpc()
+                .build()
+
+        fun createWithOnlyEpcMissingCert() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert()
+                .withEicr()
                 .build()
     }
 }

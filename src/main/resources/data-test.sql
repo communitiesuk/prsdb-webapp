@@ -61,6 +61,20 @@ VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022
 
 SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
 
+INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, created_date)
+VALUES ('expired.invitation+1@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11111',  '05/05/2025'),
+       ('expired.invitation+2@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11112',  '05/05/2025'),
+       ('expired.invitation+3@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11113', '05/05/2025'),
+       ('expired.invitation+4@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11114',  '05/05/2025'),
+       ('expired.invitation+5@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11115',  '05/05/2025'),
+       ('expired.invitation+6@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11116',  '05/05/2025'),
+       ('expired.invitation+7@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11117',  '05/05/2025'),
+       ('expired.invitation+8@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11118',  '05/05/2025'),
+       ('expired.invitation+9@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11119',  '05/05/2025'),
+       ('expired.invitation+a@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111a',  '05/05/2025');
+
+SELECT setval(pg_get_serial_sequence('local_authority_invitation', 'id'), (SELECT MAX(id) FROM local_authority_invitation));
+
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (2,'2024-10-15 00:00:00+00',3002001002,1),

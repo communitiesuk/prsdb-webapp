@@ -20,14 +20,14 @@ class PropertyDetailsUpdateJourneyFactory(
     fun create(
         propertyOwnershipId: Long,
         stepName: String,
-        isChangingAnswer: Boolean,
+        isCheckingAnswer: Boolean,
     ) = PropertyDetailsUpdateJourney(
         validator,
         journeyDataServiceFactory,
         propertyOwnershipService,
         propertyOwnershipId,
         stepName,
-        isChangingAnswer,
+        isCheckingAnswer,
     )
 
     companion object {

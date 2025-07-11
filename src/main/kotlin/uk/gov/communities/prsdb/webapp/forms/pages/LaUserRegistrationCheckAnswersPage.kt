@@ -31,17 +31,17 @@ class LaUserRegistrationCheckAnswersPage(
             }
 
         return listOf(
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLaUser.checkAnswers.rowHeading.localAuthority",
                 localAuthority.name,
                 null,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLaUser.checkAnswers.rowHeading.name",
                 LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
                 RegisterLaUserStepId.Name.urlPathSegment,
             ),
-            SummaryListRowViewModel(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLaUser.checkAnswers.rowHeading.email",
                 LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
                 RegisterLaUserStepId.Email.urlPathSegment,

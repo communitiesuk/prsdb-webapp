@@ -62,15 +62,15 @@ class LandlordRegistrationJourney(
     protected class LandlordRegistrationStepRouter(
         journey: Iterable<StepDetails<LandlordRegistrationStepId>>,
     ) : GroupedStepRouter<LandlordRegistrationStepId>(journey) {
-        override fun isDestinationAllowedWhenChangingAnswerTo(
+        override fun isDestinationAllowedWhenCheckingAnswersFor(
             destinationStep: LandlordRegistrationStepId?,
-            stepBeingChanged: LandlordRegistrationStepId?,
+            stepBeingChecked: LandlordRegistrationStepId?,
         ): Boolean =
-            when (stepBeingChanged) {
+            when (stepBeingChecked) {
                 LandlordRegistrationStepId.NonEnglandOrWalesAddress ->
                     destinationStep ==
                         LandlordRegistrationStepId.NonEnglandOrWalesAddress
-                else -> super.isDestinationAllowedWhenChangingAnswerTo(destinationStep, stepBeingChanged)
+                else -> super.isDestinationAllowedWhenCheckingAnswersFor(destinationStep, stepBeingChecked)
             }
     }
 
