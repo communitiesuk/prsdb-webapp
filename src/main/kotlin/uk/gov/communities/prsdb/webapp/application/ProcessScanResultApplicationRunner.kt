@@ -32,21 +32,26 @@ class ProcessScanResultApplicationRunner(
     private lateinit var quarantineBucketName: String
 
     override fun run(args: ApplicationArguments?) {
-        if (quarantineBucketName != eventBucketName) {
-            throw PrsdbWebException("Invocation from scan on unexpected bucket: $eventBucketName")
-        }
-
-        val fileNameInfo = PropertyFileNameInfo.parse(objectKey)
-        val scanStatus =
-            ScanResult.fromStringValueOrNull(scanResultStatus)
-                ?: throw PrsdbWebException("Unknown guard duty status: $scanResultStatus")
-
-        service.processScan(fileNameInfo, scanStatus)
-
-        val code =
-            SpringApplication.exit(context, { 0 }).also {
-                println("Virus scan result processed successfully. Application will exit now.")
+        try {
+            if (quarantineBucketName != eventBucketName) {
+                throw PrsdbWebException("Invocation from scan on unexpected bucket: $eventBucketName")
             }
-        exitProcess(code)
+
+            val fileNameInfo = PropertyFileNameInfo.parse(objectKey)
+            val scanStatus =
+                ScanResult.fromStringValueOrNull(scanResultStatus)
+                    ?: throw PrsdbWebException("Unknown guard duty status: $scanResultStatus")
+
+            service.processScan(fileNameInfo, scanStatus)
+
+            val code =
+                SpringApplication.exit(context, { 0 }).also {
+                    println("Virus scan result processed successfully. Application will exit now.")
+                }
+            exitProcess(code)
+        } catch (prsdbWebException: PrsdbWebException) {
+            println("Error processing scan result: ${prsdbWebException.message}")
+            throw prsdbWebException
+        }
     }
 }
