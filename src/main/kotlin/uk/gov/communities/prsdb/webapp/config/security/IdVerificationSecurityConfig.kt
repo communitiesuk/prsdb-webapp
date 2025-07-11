@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.config
+package uk.gov.communities.prsdb.webapp.config.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.core.annotation.Order
