@@ -2,7 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.times
@@ -32,10 +33,25 @@ class VirusAlertSenderTests {
         virusAlertSender = VirusAlertSender(emailNotificationService, absoluteUrlProvider, virusMonitoringEmail)
     }
 
-    @Test
-    fun `sendAlerts sends email to landlord and virus monitoring`() {
+    companion object {
+        @JvmStatic
+        fun certificateTestParameters(): List<Array<Any>> =
+            listOf(
+                arrayOf(FileCategory.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
+                arrayOf(FileCategory.Eirc, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
+            )
+    }
+
+    @ParameterizedTest
+    @MethodSource("certificateTestParameters")
+    fun `sendAlerts sends email to landlord and virus monitoring`(
+        testCategory: FileCategory,
+        expectedSubject: String,
+        expectedHeading: String,
+        expectedBody: String,
+    ) {
         // Arrange
-        val fileNameInfo = PropertyFileNameInfo(1L, FileCategory.GasSafetyCert, "file.txt")
+        val fileNameInfo = PropertyFileNameInfo(1L, testCategory, "file.txt")
         val landlordEmail = "landlord@example.com"
         val registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 37L)
 
@@ -54,9 +70,9 @@ class VirusAlertSenderTests {
 
         val expectedEmail =
             VirusScanUnsuccessfulEmail(
-                "A gas safety certificate",
-                "gas safety certificate",
-                "gas safety certificate",
+                expectedSubject,
+                expectedHeading,
+                expectedBody,
                 "123 Main St, Anytown",
                 registrationNumber.toString(),
                 complianceUri,

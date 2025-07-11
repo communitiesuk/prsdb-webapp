@@ -50,7 +50,7 @@ class VirusAlertSender(
 
     private fun certificateDescriptionForBody(category: FileCategory): String =
         when (category) {
-            FileCategory.GasSafetyCert -> "gas compliance certificate"
+            FileCategory.GasSafetyCert -> "gas safety certificate"
             FileCategory.Eirc -> "EICR"
         }
 }
