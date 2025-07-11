@@ -115,7 +115,9 @@ class EmailTemplateModelsTests {
         val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
         val storedMetadata = EmailTemplateMetadata.metadataList.single { metadata -> metadata.id == testData.model.templateId.idValue }
 
-        val parameters = getParametersFromBody(storedMetadata.subject + "\n\n" + storedBody).distinct()
+        val subjectParameters = extractParameters(storedMetadata.subject)
+        val bodyParameters = extractParameters(storedBody)
+        val parameters = (subjectParameters + bodyParameters).distinct()
 
         // Act
         val modelHashMap = testData.model.toHashMap()
@@ -127,7 +129,7 @@ class EmailTemplateModelsTests {
         }
     }
 
-    private fun getParametersFromBody(body: String): List<String> {
+    private fun extractParameters(body: String): List<String> {
         val parameterRegex = Regex("\\(\\(.*\\)\\)")
         return parameterRegex.findAll(body).map { result -> result.value.trim(')').trim('(') }.toList()
     }
