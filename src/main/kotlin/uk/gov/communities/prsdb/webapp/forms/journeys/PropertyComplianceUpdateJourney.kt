@@ -117,19 +117,21 @@ class PropertyComplianceUpdateJourney(
                 ),
             )
 
-    private val epcLookupStep =
-        propertyComplianceSharedStepFactory.createGetEpcLookupStep(
-            handleSubmitAndRedirect = { filteredJourneyData ->
-                epcLookupStepHandleSubmitAndRedirect(filteredJourneyData)
-            },
-        )
+    private val epcLookupStep
+        get() =
+            propertyComplianceSharedStepFactory.createGetEpcLookupStep(
+                handleSubmitAndRedirect = { filteredJourneyData ->
+                    epcLookupStepHandleSubmitAndRedirect(filteredJourneyData)
+                },
+            )
 
-    private val checkMatchedEpcStep =
-        propertyComplianceSharedStepFactory.createCheckMatchedEpcStep(
-            handleSubmitAndRedirect = { filteredJourneyData ->
-                checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
-            },
-        )
+    private val checkMatchedEpcStep
+        get() =
+            propertyComplianceSharedStepFactory.createCheckMatchedEpcStep(
+                handleSubmitAndRedirect = { filteredJourneyData ->
+                    checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
+                },
+            )
 
     private val epcTask
         get() =
