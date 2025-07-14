@@ -134,10 +134,11 @@ class MockOneLoginController {
         @RequestParam vtr: String?,
     ): ResponseEntity<Unit> {
         lastReceivedNonce = nonce
+
         val locationURI: URI =
             UriComponentsBuilder
                 .newInstance()
-                .uri(URI.create(redirect_uri))
+                .uri(updateRedirectUri(redirect_uri))
                 .query("code=SplxlOBeZQQYbYS6WxSbIA")
                 .queryParam("state", state)
                 .build()
@@ -148,6 +149,21 @@ class MockOneLoginController {
         }
 
         return ResponseEntity.status(302).location(locationURI).build()
+    }
+
+    @Value("\${local.base-path-component}")
+    lateinit var basePathComponent: String
+
+    // Normally locally we want to give ourselves all roles, but to simulate only having access for a specific
+    // deployed service change the basePathComponent as required.
+    private fun updateRedirectUri(redirect_uri: String): URI {
+        val originalRedirectUri = URI.create(redirect_uri)
+
+        return UriComponentsBuilder
+            .fromUri(originalRedirectUri)
+            .replacePath(basePathComponent + originalRedirectUri.path)
+            .build()
+            .toUri()
     }
 
     @PostMapping("/token")
