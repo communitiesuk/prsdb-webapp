@@ -89,7 +89,7 @@ class PropertyComplianceControllerTests(
     private val validPropertyComplianceUpdateInitialStepUrl =
         "$validPropertyComplianceUpdateUrl/${PropertyComplianceUpdateJourney.initialStepId.urlPathSegment}"
     private val validPropertyComplianceUpdateFileUploadUrl =
-        "$validPropertyComplianceUpdateUrl/${PropertyComplianceStepId.UpdateGasSafety.urlPathSegment}"
+        "$validPropertyComplianceUpdateUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
     private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
@@ -114,6 +114,9 @@ class PropertyComplianceControllerTests(
 
         whenever(
             tokenCookieService.createCookieForValue(validFileUploadCookie.name, validPropertyComplianceFileUploadUrl),
+        ).thenReturn(validFileUploadCookie)
+        whenever(
+            tokenCookieService.createCookieForValue(validFileUploadCookie.name, validPropertyComplianceUpdateFileUploadUrl),
         ).thenReturn(validFileUploadCookie)
 
         whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), anyOrNull())).thenReturn(propertyComplianceJourney)
@@ -574,12 +577,12 @@ class PropertyComplianceControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getUpdateJourneyStep returns 200 with a cookie for a valid file-upload request`() {
-            mvc.get("$validPropertyComplianceUpdateInitialStepUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}").andExpect {
+            mvc.get(validPropertyComplianceUpdateFileUploadUrl).andExpect {
                 status { isOk() }
                 cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
             }
 
-            verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceUpdateInitialStepUrl)
+            verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceUpdateFileUploadUrl)
         }
     }
 
@@ -811,7 +814,7 @@ class PropertyComplianceControllerTests(
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
             verify(fileUploader).uploadFile(any(), any())
-            verify(tokenCookieService, never()).createCookieForValue(any(), any())
+            verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
         }
     }
 }
