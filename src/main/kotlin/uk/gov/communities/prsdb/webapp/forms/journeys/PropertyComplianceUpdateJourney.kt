@@ -52,6 +52,7 @@ class PropertyComplianceUpdateJourney(
             JourneySection(
                 listOf(
                     gasSafetyTask,
+                    eicrTask,
                 ),
             ),
         )
@@ -98,6 +99,27 @@ class PropertyComplianceUpdateJourney(
                 PropertyComplianceStepId.UpdateEICR,
                 setOf(
                     updateEICRStep,
+                    PropertyComplianceSharedSteps.eicrIssueDateStep(),
+                    PropertyComplianceSharedSteps.eicrUploadStep(),
+                    PropertyComplianceSharedSteps.eicrUploadConfirmationStep(
+                        PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    PropertyComplianceSharedSteps.eicrOutdatedStep(
+                        PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    PropertyComplianceSharedSteps.eicrExemptionStep(),
+                    PropertyComplianceSharedSteps.eicrExemptionReasonStep(),
+                    PropertyComplianceSharedSteps.eicrExemptionOtherReasonStep(),
+                    PropertyComplianceSharedSteps.eicrExemptionConfirmationStep(
+                        PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
+                    PropertyComplianceSharedSteps.eicrExemptionMissingStep(
+                        PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+                        isCheckingAnswers = true,
+                    ),
                     eicrCheckYourAnswersStep,
                 ),
             )

@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
@@ -19,20 +18,15 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATIN
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyComplianceCheckAnswersPage
@@ -62,11 +56,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
@@ -75,11 +66,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
@@ -91,7 +78,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -228,15 +214,15 @@ class PropertyComplianceJourney(
                 PropertyComplianceStepId.EICR,
                 setOf(
                     eicrStep,
-                    eicrIssueDateStep,
-                    eicrUploadStep,
-                    eicrUploadConfirmationStep,
-                    eicrOutdatedStep,
-                    eicrExemptionStep,
-                    eicrExemptionReasonStep,
-                    eicrExemptionOtherReasonStep,
-                    eicrExemptionConfirmationStep,
-                    eicrExemptionMissingStep,
+                    PropertyComplianceSharedSteps.eicrIssueDateStep(),
+                    PropertyComplianceSharedSteps.eicrUploadStep(),
+                    PropertyComplianceSharedSteps.eicrUploadConfirmationStep(epcTask.startingStepId, isCheckingAnswers),
+                    PropertyComplianceSharedSteps.eicrOutdatedStep(epcTask.startingStepId, isCheckingAnswers),
+                    PropertyComplianceSharedSteps.eicrExemptionStep(),
+                    PropertyComplianceSharedSteps.eicrExemptionReasonStep(),
+                    PropertyComplianceSharedSteps.eicrExemptionOtherReasonStep(),
+                    PropertyComplianceSharedSteps.eicrExemptionConfirmationStep(epcTask.startingStepId, isCheckingAnswers),
+                    PropertyComplianceSharedSteps.eicrExemptionMissingStep(epcTask.startingStepId, isCheckingAnswers),
                 ),
                 "propertyCompliance.taskList.upload.eicr",
             )
@@ -338,201 +324,6 @@ class PropertyComplianceJourney(
                             ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> eicrStepNextAction(filteredJourneyData) },
-            )
-
-    private val eicrIssueDateStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrIssueDate,
-                page =
-                    Page(
-                        formModel = TodayOrPastDateFormModel::class,
-                        templateName = "forms/dateForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.todayOrPastDate.eicr.fieldSetHeading",
-                                "fieldSetHint" to "forms.todayOrPastDate.eicr.fieldSetHint",
-                                "submitButtonText" to "forms.buttons.saveAndContinue",
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> eicrIssueDateStepNextAction(filteredJourneyData) },
-            )
-
-    private val eicrUploadStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrUpload,
-                page =
-                    FileUploadPage(
-                        formModel = EicrUploadCertificateFormModel::class,
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
-                                "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
-            )
-
-    private val eicrUploadConfirmationStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrUploadConfirmation,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/uploadCertificateConfirmationForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
-            )
-
-    private val eicrOutdatedStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrOutdated,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/eicrOutdatedForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                                "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
-            )
-
-    private val eicrExemptionStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrExemption,
-                page =
-                    Page(
-                        formModel = EicrExemptionFormModel::class,
-                        templateName = "forms/exemptionForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.eicrExemption.fieldSetHeading",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
-                                        ),
-                                    ),
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> eicrExemptionStepNextAction(filteredJourneyData) },
-            )
-
-    private val eicrExemptionReasonStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrExemptionReason,
-                page =
-                    Page(
-                        formModel = EicrExemptionReasonFormModel::class,
-                        templateName = "forms/exemptionReasonForm.html",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.eicrExemptionReason.fieldSetHeading",
-                                "radioOptions" to
-                                    listOf(
-                                        RadiosButtonViewModel(
-                                            value = GasSafetyExemptionReason.LONG_LEASE,
-                                            labelMsgKey = "forms.eicrExemptionReason.radios.longLease.label",
-                                            hintMsgKey = "forms.eicrExemptionReason.radios.longLease.hint",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = EicrExemptionReason.STUDENT_ACCOMMODATION,
-                                            labelMsgKey = "forms.eicrExemptionReason.radios.studentAccommodation.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = EicrExemptionReason.LIVE_IN_LANDLORD,
-                                            labelMsgKey = "forms.eicrExemptionReason.radios.liveInLandlord.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = GasSafetyExemptionReason.OTHER,
-                                            labelMsgKey = "forms.eicrExemptionReason.radios.other.label",
-                                            hintMsgKey = "forms.eicrExemptionReason.radios.other.hint",
-                                        ),
-                                    ),
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> eicrExemptionReasonStepNextAction(filteredJourneyData) },
-            )
-
-    private val eicrExemptionOtherReasonStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrExemptionOtherReason,
-                page =
-                    Page(
-                        formModel = EicrExemptionOtherReasonFormModel::class,
-                        templateName = "forms/exemptionOtherReasonForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "fieldSetHeading" to "forms.eicrExemptionOtherReason.fieldSetHeading",
-                                "fieldSetHint" to "forms.eicrExemptionOtherReason.fieldSetHint",
-                                "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null) },
-            )
-
-    private val eicrExemptionConfirmationStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrExemptionConfirmation,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/eicrExemptionConfirmationForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
-            )
-
-    private val eicrExemptionMissingStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.EicrExemptionMissing,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/eicrExemptionMissingForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
-                                "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                                "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
-                                "submitButtonText" to getSubmitButtonTextOrDefaultIfCheckingAnswers("forms.buttons.saveAndContinueToEPC"),
-                            ),
-                    ),
-                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
             )
 
     private val epcStep
@@ -1092,27 +883,6 @@ class PropertyComplianceJourney(
             Pair(PropertyComplianceStepId.EicrIssueDate, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemption, null)
-        }
-
-    private fun eicrIssueDateStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getIsEicrOutdated()!!) {
-            Pair(PropertyComplianceStepId.EicrOutdated, null)
-        } else {
-            Pair(PropertyComplianceStepId.EicrUpload, null)
-        }
-
-    private fun eicrExemptionStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getHasEicrExemption()!!) {
-            Pair(PropertyComplianceStepId.EicrExemptionReason, null)
-        } else {
-            Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
-        }
-
-    private fun eicrExemptionReasonStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getIsEicrExemptionReasonOther()!!) {
-            Pair(PropertyComplianceStepId.EicrExemptionOtherReason, null)
-        } else {
-            Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null)
         }
 
     private fun epcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
