@@ -116,6 +116,18 @@ class PropertyComplianceJourney(
 
     override val stepRouter = GroupedStepRouter(this)
     override val checkYourAnswersStepId = PropertyComplianceStepId.CheckAndSubmit
+
+    private val propertyComplianceSharedStepFactory =
+        PropertyComplianceSharedStepFactory(
+            defaultSaveAfterSubmit = true,
+            nextActionAfterGasSafetyTask = PropertyComplianceStepId.EICR,
+            nextActionAfterEicrTask = PropertyComplianceStepId.EPC,
+            nextActionAfterEpcTask = landlordResponsibilities.first().startingStepId,
+            isCheckingAnswers = isCheckingAnswers,
+            journeyDataService = journeyDataService,
+            epcCertificateUrlProvider = epcCertificateUrlProvider,
+        )
+
     override val sections =
         listOf(
             JourneySection(
@@ -169,17 +181,6 @@ class PropertyComplianceJourney(
                     "propertyCompliance.taskList.landlordResponsibilities.tenants",
                 ),
             )
-
-    private val propertyComplianceSharedStepFactory =
-        PropertyComplianceSharedStepFactory(
-            defaultSaveAfterSubmit = true,
-            nextActionAfterGasSafetyTask = PropertyComplianceStepId.EICR,
-            nextActionAfterEicrTask = PropertyComplianceStepId.EPC,
-            nextActionAfterEpcTask = landlordResponsibilities.first().startingStepId,
-            isCheckingAnswers = isCheckingAnswers,
-            journeyDataService = journeyDataService,
-            epcCertificateUrlProvider = epcCertificateUrlProvider,
-        )
 
     private val gasSafetyTask
         get() =

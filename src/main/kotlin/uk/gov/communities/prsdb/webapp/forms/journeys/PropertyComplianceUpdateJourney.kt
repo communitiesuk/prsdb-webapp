@@ -62,17 +62,6 @@ class PropertyComplianceUpdateJourney(
         return originalJourneyData
     }
 
-    override val sections: List<JourneySection<PropertyComplianceStepId>> =
-        listOf(
-            JourneySection(
-                listOf(
-                    gasSafetyTask,
-                    eicrTask,
-                    epcTask,
-                ),
-            ),
-        )
-
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = false,
@@ -82,6 +71,17 @@ class PropertyComplianceUpdateJourney(
             isCheckingAnswers = isCheckingAnswers,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
+        )
+
+    override val sections: List<JourneySection<PropertyComplianceStepId>> =
+        listOf(
+            JourneySection(
+                listOf(
+                    gasSafetyTask,
+                    eicrTask,
+                    epcTask,
+                ),
+            ),
         )
 
     private val gasSafetyTask
@@ -228,7 +228,7 @@ class PropertyComplianceUpdateJourney(
     private val updateEPCStep
         get() =
             Step(
-                id = PropertyComplianceStepId.UpdateEICR,
+                id = PropertyComplianceStepId.UpdateEpc,
                 page =
                     Page(
                         formModel = NoInputFormModel::class,
