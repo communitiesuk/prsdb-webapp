@@ -92,6 +92,23 @@ class PropertyComplianceUpdateJourney(
                 ),
             )
 
+    private val eicrTask
+        get() =
+            JourneyTask(
+                PropertyComplianceStepId.UpdateEICR,
+                setOf(
+                    updateEICRStep,
+                    eicrCheckYourAnswersStep,
+                ),
+            )
+
+    private val epcTask
+        get() =
+            JourneyTask(
+                PropertyComplianceStepId.UpdateEpc,
+                setOf(),
+            )
+
     // TODO PRSD-1244: Implement gas safety step
     private val updateGasSafetyStep
         get() =
@@ -119,6 +136,71 @@ class PropertyComplianceUpdateJourney(
                         templateName = "forms/todo",
                         content =
                             mapOf("todoComment" to "TODO PRSD-1245: Implement gas safety Check Your Answers step"),
+                    ),
+                saveAfterSubmit = false,
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+            )
+
+    // TODO PRSD-1246: Implement gas safety step
+    private val updateEICRStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateEICR,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/todo",
+                        content =
+                            mapOf("todoComment" to "TODO PRSD-1246: Implement new EICR or exemption step"),
+                    ),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrIssueDate, null) },
+                saveAfterSubmit = false,
+            )
+
+    // TODO: PRSD-1247: Implement EICR check your answers step
+    private val eicrCheckYourAnswersStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/todo",
+                        content =
+                            mapOf("todoComment" to "TODO PRSD-1247:: Implement EICR Check Your Answers step"),
+                    ),
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+                saveAfterSubmit = false,
+            )
+
+    // TODO PRSD-1312: Implement new epc or exemption step
+    private val updateEPCStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateEICR,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/todo",
+                        content =
+                            mapOf("todoComment" to "TODO PRSD-1312: Implement new EPC or exemption step"),
+                    ),
+                // For PRSD-1312 - need search by uprn as part of handleSubmitAndRedirect
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcNotAutoMatched, null) },
+                saveAfterSubmit = false,
+            )
+
+    // TODO PRSD-1313: Implement EPC check your answers step
+    private val epcCheckYourAnswersStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
+                page =
+                    Page(
+                        formModel = NoInputFormModel::class,
+                        templateName = "forms/todo",
+                        content =
+                            mapOf("todoComment" to "TODO PRSD-1313:: Implement EICR Check Your Answers step"),
                     ),
                 saveAfterSubmit = false,
             )
