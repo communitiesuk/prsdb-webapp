@@ -50,17 +50,17 @@ class UserRolesService(
             getLocalAuthorityRolesForSubjectId(subjectId)
 
     fun getHasLandlordUserRole(subjectId: String): Boolean {
-        val roles = getAllRolesForSubjectId(subjectId)
+        val roles = getLandlordRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LANDLORD)
     }
 
     fun getHasLocalAuthorityRole(subjectId: String): Boolean {
-        val roles = getAllRolesForSubjectId(subjectId)
+        val roles = getLocalAuthorityRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LA_USER) || roles.contains(ROLE_LA_ADMIN)
     }
 
     fun getHasLocalAuthorityAdminRole(subjectId: String): Boolean {
-        val roles = getAllRolesForSubjectId(subjectId)
+        val roles = getLocalAuthorityRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LA_ADMIN)
     }
 }
