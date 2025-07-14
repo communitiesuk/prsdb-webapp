@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
-class CustomSecurityConfig(
+class DefaultSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
     @Bean

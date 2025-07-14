@@ -14,14 +14,14 @@ import org.springframework.web.filter.UrlHandlerFilter
 import uk.gov.communities.prsdb.webapp.config.BackLinkInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
-import uk.gov.communities.prsdb.webapp.config.security.CustomSecurityConfig
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LocalAuthoritySecurityConfig
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
-    CustomSecurityConfig::class,
+    DefaultSecurityConfig::class,
     LandlordSecurityConfig::class,
     LocalAuthoritySecurityConfig::class,
     CustomErrorConfig::class,
