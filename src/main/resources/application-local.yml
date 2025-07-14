@@ -62,6 +62,10 @@ local:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
+
+base-url:
+  landlord: http://localhost:8080/landlord
+  local-authority: http://localhost:8080/local-authority
 ---
 
 spring:
