@@ -4,7 +4,7 @@ enum class ScanResult(
     val value: String,
 ) {
     NoThreats("NO_THREATS_FOUND"),
-    Threats(" THREATS_FOUND"),
+    Threats("THREATS_FOUND"),
     Unsupported("UNSUPPORTED"),
     AccessDenied("ACCESS_DENIED"),
     Failed("FAILED"),
