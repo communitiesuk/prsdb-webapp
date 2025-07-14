@@ -4,6 +4,8 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
@@ -12,6 +14,8 @@ class PropertyComplianceUpdateJourneyFactory(
     val validator: Validator,
     val journeyDataServiceFactory: JourneyDataServiceFactory,
     val propertyComplianceService: PropertyComplianceService,
+    val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    val epcLookupService: EpcLookupService,
 ) {
     fun create(
         stepName: String,
@@ -24,6 +28,8 @@ class PropertyComplianceUpdateJourneyFactory(
         isCheckingAnswers = isCheckingAnswers,
         propertyOwnershipId = propertyOwnershipId,
         propertyComplianceService = propertyComplianceService,
+        epcCertificateUrlProvider = epcCertificateUrlProvider,
+        epcLookupService = epcLookupService,
     )
 
     private fun getJourneyDataKey(propertyOwnershipId: Long) =
