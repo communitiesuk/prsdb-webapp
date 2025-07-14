@@ -61,7 +61,7 @@ local:
   emails:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
-
+  base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
 ---
 
 spring:

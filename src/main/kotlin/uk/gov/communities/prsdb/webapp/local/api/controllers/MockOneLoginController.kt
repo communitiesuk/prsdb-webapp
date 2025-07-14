@@ -151,7 +151,7 @@ class MockOneLoginController {
         return ResponseEntity.status(302).location(locationURI).build()
     }
 
-    @Value("\${local.base-path-component:}")
+    @Value("\${local.base-path-component}")
     lateinit var basePathComponent: String
 
     // Normally locally we want to give ourselves all roles, but to simulate only having access for a specific
