@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyContextHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
@@ -27,11 +28,10 @@ class PropertyComplianceUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     stepName: String,
-    isCheckingAnswers: Boolean,
     private val propertyOwnershipId: Long,
     private val propertyComplianceService: PropertyComplianceService,
     private val epcLookupService: EpcLookupService,
-    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    epcCertificateUrlProvider: EpcCertificateUrlProvider,
     checkingAnswersForStep: String?,
 ) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
@@ -39,7 +39,7 @@ class PropertyComplianceUpdateJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         stepName = stepName,
-        isCheckingAnswers = isCheckingAnswers,
+        isCheckingAnswers = JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep),
     ) {
     init {
         initializeOriginalJourneyDataIfNotInitialized()

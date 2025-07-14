@@ -41,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.helpers.JourneyContextHelper
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
@@ -225,7 +224,7 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceUpdateJourneyFactory
-                .create(stepName, JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep), propertyOwnershipId)
+                .create(stepName, propertyOwnershipId, checkingAnswersForStep)
                 .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
 
         addCookieIfStepIsFileUploadStep(stepName, request, response)
@@ -247,7 +246,7 @@ class PropertyComplianceController(
         val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
 
         return propertyComplianceUpdateJourneyFactory
-            .create(stepName, JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep), propertyOwnershipId)
+            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
             .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
     }
 
@@ -275,7 +274,7 @@ class PropertyComplianceController(
             )
 
         return propertyComplianceUpdateJourneyFactory
-            .create(stepName, JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep), propertyOwnershipId)
+            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
             .completeStep(
                 stepName,
                 formData,

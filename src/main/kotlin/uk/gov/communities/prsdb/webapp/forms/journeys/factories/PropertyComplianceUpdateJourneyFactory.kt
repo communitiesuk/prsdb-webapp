@@ -19,17 +19,17 @@ class PropertyComplianceUpdateJourneyFactory(
 ) {
     fun create(
         stepName: String,
-        isCheckingAnswers: Boolean,
         propertyOwnershipId: Long,
+        checkingAnswersFor: String? = null,
     ) = PropertyComplianceUpdateJourney(
         validator = validator,
         journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
         stepName = stepName,
-        isCheckingAnswers = isCheckingAnswers,
         propertyOwnershipId = propertyOwnershipId,
         propertyComplianceService = propertyComplianceService,
         epcCertificateUrlProvider = epcCertificateUrlProvider,
         epcLookupService = epcLookupService,
+        checkingAnswersForStep = checkingAnswersFor,
     )
 
     private fun getJourneyDataKey(propertyOwnershipId: Long) =

@@ -121,7 +121,7 @@ class PropertyComplianceControllerTests(
 
         whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), anyOrNull())).thenReturn(propertyComplianceJourney)
 
-        whenever(propertyComplianceUpdateJourneyFactory.create(any(), any(), eq(validPropertyOwnershipId)))
+        whenever(propertyComplianceUpdateJourneyFactory.create(any(), eq(validPropertyOwnershipId), any()))
             .thenReturn(propertyComplianceUpdateJourney)
     }
 
