@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
@@ -35,8 +37,8 @@ class AbsoluteUrlProvider {
 
         val baseUrl =
             when (methodCallUriComponents.pathSegments[0]) {
-                "landlord" -> landlordBaseUrl
-                "local-authority" -> localAuthorityBaseUrl
+                LANDLORD_PATH_SEGMENT -> landlordBaseUrl
+                LOCAL_AUTHORITY_PATH_SEGMENT -> localAuthorityBaseUrl
                 else -> throw IllegalArgumentException("Unknown base URL for path: ${methodCallUriComponents.path}")
             }
 
