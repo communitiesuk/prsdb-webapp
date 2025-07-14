@@ -11,12 +11,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceS
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyContextHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -123,6 +117,20 @@ class PropertyComplianceUpdateJourney(
                 ),
             )
 
+    private val epcLookupStep =
+        propertyComplianceSharedStepFactory.createGetEpcLookupStep(
+            handleSubmitAndRedirect = { filteredJourneyData ->
+                epcLookupStepHandleSubmitAndRedirect(filteredJourneyData)
+            },
+        )
+
+    private val checkMatchedEpcStep =
+        propertyComplianceSharedStepFactory.createCheckMatchedEpcStep(
+            handleSubmitAndRedirect = { filteredJourneyData ->
+                checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
+            },
+        )
+
     private val epcTask
         get() =
             JourneyTask(
@@ -131,16 +139,8 @@ class PropertyComplianceUpdateJourney(
                     updateEPCStep,
                     propertyComplianceSharedStepFactory.createEpcNotAutoMatchedStep(),
                     propertyComplianceSharedStepFactory.createCheckAutoMatchedEpcStep(),
-                    propertyComplianceSharedStepFactory.createGetEpcLookupStep(
-                        handleSubmitAndRedirect = { filteredJourneyData ->
-                            epcLookupStepHandleSubmitAndRedirect(filteredJourneyData)
-                        },
-                    ),
-                    propertyComplianceSharedStepFactory.createCheckMatchedEpcStep(
-                        handleSubmitAndRedirect = { filteredJourneyData ->
-                            checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
-                        },
-                    ),
+                    epcLookupStep,
+                    checkMatchedEpcStep,
                     propertyComplianceSharedStepFactory.createEpcNotFoundStep(),
                     propertyComplianceSharedStepFactory.createEpcSupersededStep(
                         handleSubmitAndRedirect = { filteredJourneyData ->
@@ -258,52 +258,31 @@ class PropertyComplianceUpdateJourney(
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val nextAction = propertyComplianceSharedStepFactory.checkMatchedEpcStepNextAction(filteredJourneyData)
-        val checkMatchedEpcStep = steps.single { it.id == PropertyComplianceStepId.CheckMatchedEpc }
-        if (nextAction.first == null) {
-            return getRedirectForNextStep(
-                checkMatchedEpcStep,
-                filteredJourneyData,
-                null,
-                checkingAnswersFor,
-                PropertyComplianceStepId.EpcLookup,
-            )
-        }
-        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null, checkingAnswersFor)
+        val overriddenRedirectStepId =
+            PropertyComplianceJourney.getRedirectStepOverrideForCheckMatchedEpcStepHandleSubmitAndRedirect(nextAction)
+
+        return getRedirectForNextStep(checkMatchedEpcStep, filteredJourneyData, null, checkingAnswersFor, overriddenRedirectStepId)
     }
 
     private fun epcLookupStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val certificateNumber = filteredJourneyData.getEpcLookupCertificateNumber()!!
-        val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
-        val lookedUpEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
-        resetCheckMatchedEpcInSessionIfChangedEpcDetails(lookedUpEpc)
-        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, lookedUpEpc, autoMatchedEpc = false)
+        val newFilteredJourneyData =
+            PropertyComplianceJourney.epcLookupStepHandleSubmit(
+                filteredJourneyData,
+                journeyDataService,
+                epcLookupService,
+            )
+        return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
     private fun epcSupersededHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val certificateNumber = filteredJourneyData.getLatestEpcCertificateNumber()!!
-        val epcLookupStep = steps.single { it.id == PropertyComplianceStepId.EpcLookup }
-        val latestEpc = epcLookupService.getEpcByCertificateNumber(certificateNumber)
-        resetCheckMatchedEpcInSessionIfChangedEpcDetails(latestEpc)
-        return updateEpcDetailsInSessionAndRedirectToNextStep(epcLookupStep, filteredJourneyData, latestEpc, autoMatchedEpc = false)
-    }
+        val newFilteredJourneyData =
+            PropertyComplianceJourney.epcSupersededStepHandleSubmit(
+                filteredJourneyData,
+                journeyDataService,
+                epcLookupService,
+            )
 
-    private fun resetCheckMatchedEpcInSessionIfChangedEpcDetails(newEpcDetails: EpcDataModel?) {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-        if (newEpcDetails != journeyData.getEpcDetails(autoMatched = false)) {
-            val newJourneyData = journeyData.withResetCheckMatchedEpc()
-            journeyDataService.setJourneyDataInSession(newJourneyData)
-        }
-    }
-
-    private fun updateEpcDetailsInSessionAndRedirectToNextStep(
-        currentStep: Step<PropertyComplianceStepId>,
-        filteredJourneyData: JourneyData,
-        epcDetails: EpcDataModel?,
-        autoMatchedEpc: Boolean,
-    ): String {
-        val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
-        journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
-        return getRedirectForNextStep(currentStep, newFilteredJourneyData, null, checkingAnswersFor)
+        return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
     // TODO PRSD-1245, 1247, 1313 - add this as the handleSubmitAndRedirect method and test
