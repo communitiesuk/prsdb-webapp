@@ -253,7 +253,7 @@ class PropertyComplianceUpdateJourney(
                         formModel = NoInputFormModel::class,
                         templateName = "forms/todo",
                         content =
-                            mapOf("todoComment" to "TODO PRSD-1313:: Implement EICR Check Your Answers step"),
+                            mapOf("todoComment" to "TODO PRSD-1313: Implement EPC Check Your Answers step"),
                     ),
                 saveAfterSubmit = false,
             )
