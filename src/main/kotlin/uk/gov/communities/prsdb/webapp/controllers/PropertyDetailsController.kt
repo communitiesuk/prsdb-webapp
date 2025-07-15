@@ -75,7 +75,7 @@ class PropertyDetailsController(
                 PropertyComplianceViewModel(
                     propertyCompliance = propertyCompliance,
                     withActionLinks = true,
-                    withNotificationMessages = true,
+                    withNotificationLinks = true,
                 )
             }
 
@@ -147,6 +147,8 @@ class PropertyDetailsController(
                 .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
+        val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
@@ -161,10 +163,20 @@ class PropertyDetailsController(
                 primaryLandlordDetailsUrl,
             )
 
+        val propertyComplianceDetails =
+            propertyCompliance?.let {
+                PropertyComplianceViewModel(
+                    propertyCompliance = propertyCompliance,
+                    withActionLinks = false,
+                    withNotificationLinks = false,
+                )
+            }
+
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
         model.addAttribute("landlordDetails", landlordViewModel)
+        model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 

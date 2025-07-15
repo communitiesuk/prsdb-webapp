@@ -8,7 +8,10 @@
                  th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0 } ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
                 <ul class="govuk-list govuk-list--bullet" th:each="message: ${complianceDetails.notificationMessages}">
-                    <li th:utext="#{${message}}"></li>
+                    <li>
+                        <span th:utext="#{${message.mainText}}"></span>
+                        <span th:if="${message.linkText != null}" th:text="#{${message.linkText}}"></span>
+                    </li>
                 </ul>
             </div>
             <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>

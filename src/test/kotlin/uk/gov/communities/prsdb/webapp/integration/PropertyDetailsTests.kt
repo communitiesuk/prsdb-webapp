@@ -173,6 +173,14 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
         }
 
         @Test
+        fun `loading the landlord details page and clicking compliance information tab shows the compliance information tab`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            detailsPage.tabs.goToComplianceInformation()
+
+            assertEquals(detailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
+        }
+
+        @Test
         fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
             detailsPage.tabs.goToLandlordDetails()
@@ -219,6 +227,63 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
             val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
 
             assertThat(detailsPage.insetText).containsText("updated these details on")
+        }
+
+        @Nested
+        inner class NotificationBanner {
+            @Test
+            fun `is visible and includes correct messages when all certs are missing`(page: Page) {
+                val propertyOwnershipId = 8
+                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText(
+                    "This property is missing a gas safety certificate.\n" +
+                        "This property is missing a Electrical Installation Condition Report (EICR).\n" +
+                        "This property is missing an energy performance certificate (EPC).",
+                )
+            }
+
+            @Test
+            fun `is visible and includes correct messages when all certs are expired`(page: Page) {
+                val propertyOwnershipId = 9
+                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText(
+                    "The gas safety certificate for this property has expired.\n" +
+                        "The Electrical Installation Condition Report (EICR) for this property has expired.\n" +
+                        "The energy performance certificate (EPC) for this property has expired.",
+                )
+            }
+
+            @Test
+            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
+                val propertyOwnershipId = 10
+                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText(
+                    "This property’s energy performance certificate (EPC) is below E.",
+                )
+            }
+
+            @Test
+            fun `is not visible when all certs are compliant`(page: Page) {
+                val propertyOwnershipId = 11
+                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isHidden()
+            }
         }
     }
 }
