@@ -11,6 +11,7 @@ data class SummaryListRowViewModel(
     val fieldValue: Any?,
     val action: SummaryListRowActionViewModel? = null,
     val valueUrl: String? = null,
+    val valueUrlOpensNewTab: Boolean = false,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {

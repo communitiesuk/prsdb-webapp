@@ -20,6 +20,7 @@ class EpcViewModelBuilder {
                         key = "propertyDetails.complianceInformation.energyPerformance.epc",
                         value = getEpcMessageKey(propertyCompliance),
                         valueUrl = propertyCompliance.epcUrl,
+                        valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
                         actionText = "forms.links.change",
                         // TODO PRSD-1312 add Update EPC Compliance Link
                         actionLink = "#",

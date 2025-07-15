@@ -10,9 +10,10 @@ fun MutableList<SummaryListRowViewModel>.addRow(
     actionLink: String? = null,
     withActionLink: Boolean = true,
     valueUrl: String? = null,
+    valueUrlOpensNewTab: Boolean = false,
 ) {
     val actionOrNull = if (withActionLink) getActionOrNull(actionText, actionLink) else null
-    add(SummaryListRowViewModel(key, value, actionOrNull, valueUrl))
+    add(SummaryListRowViewModel(key, value, actionOrNull, valueUrl, valueUrlOpensNewTab))
 }
 
 fun MutableList<SummaryListRowViewModel>.addRow(

@@ -54,6 +54,7 @@ class EpcViewModelBuilderTests {
                             // TODO PRSD-1312 add Update EPC Compliance Link
                             SummaryListRowActionViewModel("forms.links.change", "#"),
                             compliant.epcUrl,
+                            true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -77,6 +78,7 @@ class EpcViewModelBuilderTests {
                             "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText",
                             action = null,
                             valueUrl = expired.epcUrl,
+                            valueUrlOpensNewTab = true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -142,6 +144,7 @@ class EpcViewModelBuilderTests {
                             // TODO PRSD-1312 add Update EPC Compliance Link
                             SummaryListRowActionViewModel("forms.links.change", "#"),
                             meesCompliant.epcUrl,
+                            true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -171,6 +174,7 @@ class EpcViewModelBuilderTests {
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
                             action = null,
                             valueUrl = meesMissingExemptionReason.epcUrl,
+                            valueUrlOpensNewTab = true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
