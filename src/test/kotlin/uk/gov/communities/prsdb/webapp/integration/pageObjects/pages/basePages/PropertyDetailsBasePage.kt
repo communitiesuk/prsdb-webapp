@@ -29,6 +29,10 @@ abstract class PropertyDetailsBasePage(
         fun goToPropertyDetails() {
             goToTab("Property details")
         }
+
+        fun goToComplianceInformation() {
+            goToTab("Compliance information")
+        }
     }
 
     class PropertyDetailsSummaryList(

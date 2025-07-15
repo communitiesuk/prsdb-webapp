@@ -31,25 +31,25 @@ class PropertyComplianceViewModel(
         mutableListOf<String>()
             .apply {
                 if (propertyCompliance.isGasSafetyCertExpired == true) {
-                    add("propertyDetails.complianceInformation.notificationMessage.gasCert.expired")
+                    add("propertyDetails.complianceInformation.notificationBanner.gasCert.expired")
                 }
                 if (propertyCompliance.isGasSafetyCertMissing) {
-                    add("propertyDetails.complianceInformation.notificationMessage.gasCert.missing")
+                    add("propertyDetails.complianceInformation.notificationBanner.gasCert.missing")
                 }
                 if (propertyCompliance.isEicrExpired == true) {
-                    add("propertyDetails.complianceInformation.notificationMessage.eicr.expired")
+                    add("propertyDetails.complianceInformation.notificationBanner.eicr.expired")
                 }
                 if (propertyCompliance.isEicrMissing) {
-                    add("propertyDetails.complianceInformation.notificationMessage.eicr.missing")
+                    add("propertyDetails.complianceInformation.notificationBanner.eicr.missing")
                 }
                 if (propertyCompliance.isEpcExpired == true) {
-                    add("propertyDetails.complianceInformation.notificationMessage.epc.expired")
+                    add("propertyDetails.complianceInformation.notificationBanner.epc.expired")
                 }
                 if (propertyCompliance.isEpcRatingLow == true) {
-                    add("propertyDetails.complianceInformation.notificationMessage.epc.lowRating")
+                    add("propertyDetails.complianceInformation.notificationBanner.epc.lowRating")
                 }
                 if (propertyCompliance.isEpcMissing) {
-                    add("propertyDetails.complianceInformation.notificationMessage.epc.missing")
+                    add("propertyDetails.complianceInformation.notificationBanner.epc.missing")
                 }
             }.toList()
 }
