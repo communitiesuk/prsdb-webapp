@@ -15,13 +15,19 @@ class UserRolesService(
     val localAuthorityUserRepository: LocalAuthorityUserRepository,
     val systemOperatorRepository: SystemOperatorRepository,
 ) {
-    fun getRolesForSubjectId(subjectId: String): List<String> {
+    fun getLandlordRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
         val matchingLandlordUser = landlordRepository.findByBaseUser_Id(subjectId)
         if (matchingLandlordUser != null) {
             roles.add(ROLE_LANDLORD)
         }
+
+        return roles
+    }
+
+    fun getLocalAuthorityRolesForSubjectId(subjectId: String): List<String> {
+        val roles = mutableListOf<String>()
 
         val matchingLocalAuthorityUser = localAuthorityUserRepository.findByBaseUser_Id(subjectId)
         if (matchingLocalAuthorityUser != null) {
@@ -39,18 +45,22 @@ class UserRolesService(
         return roles
     }
 
+    fun getAllRolesForSubjectId(subjectId: String): List<String> =
+        getLandlordRolesForSubjectId(subjectId) +
+            getLocalAuthorityRolesForSubjectId(subjectId)
+
     fun getHasLandlordUserRole(subjectId: String): Boolean {
-        val roles = getRolesForSubjectId(subjectId)
+        val roles = getLandlordRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LANDLORD)
     }
 
     fun getHasLocalAuthorityRole(subjectId: String): Boolean {
-        val roles = getRolesForSubjectId(subjectId)
+        val roles = getLocalAuthorityRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LA_USER) || roles.contains(ROLE_LA_ADMIN)
     }
 
     fun getHasLocalAuthorityAdminRole(subjectId: String): Boolean {
-        val roles = getRolesForSubjectId(subjectId)
+        val roles = getLocalAuthorityRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LA_ADMIN)
     }
 }
