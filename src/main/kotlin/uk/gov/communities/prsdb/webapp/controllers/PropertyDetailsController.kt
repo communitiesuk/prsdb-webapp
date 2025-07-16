@@ -186,6 +186,9 @@ class PropertyDetailsController(
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 
+        fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
+            UriTemplate("$LANDLORD_PROPERTY_DETAILS_ROUTE#$COMPLIANCE_INFO_FRAGMENT").expand(propertyOwnershipId).toASCIIString()
+
         fun getUpdatePropertyDetailsPath(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }

@@ -5,8 +5,10 @@ import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: PropertyComplianceGroupIdentifier,
-) : GroupedStepId<PropertyComplianceGroupIdentifier> {
+    override val isCheckYourAnswersStepId: Boolean = false,
+) : GroupedUpdateStepId<PropertyComplianceGroupIdentifier> {
     GasSafety("gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
+    UpdateGasSafety("update-gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyIssueDate("gas-safety-certificate-issue-date", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyEngineerNum("gas-safety-certificate-engineer-number", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyUpload("gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING", PropertyComplianceGroupIdentifier.GasSafety),
@@ -17,7 +19,9 @@ enum class PropertyComplianceStepId(
     GasSafetyExemptionOtherReason("gas-safety-certificate-exemption-other-reason", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyExemptionConfirmation("gas-safety-certificate-exemption-confirmation", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing", PropertyComplianceGroupIdentifier.GasSafety),
+    GasSafetyUpdateCheckYourAnswers("gas-safety-certificate-check-your-answers", PropertyComplianceGroupIdentifier.GasSafety, true),
     EICR("eicr", PropertyComplianceGroupIdentifier.Eicr),
+    UpdateEICR("update-eicr", PropertyComplianceGroupIdentifier.Eicr),
     EicrIssueDate("eicr-issue-date", PropertyComplianceGroupIdentifier.Eicr),
     EicrUpload("eicr-$FILE_UPLOAD_URL_SUBSTRING", PropertyComplianceGroupIdentifier.Eicr),
     EicrUploadConfirmation("eicr-upload-confirmation", PropertyComplianceGroupIdentifier.Eicr),
@@ -27,6 +31,8 @@ enum class PropertyComplianceStepId(
     EicrExemptionOtherReason("eicr-exemption-other-reason", PropertyComplianceGroupIdentifier.Eicr),
     EicrExemptionConfirmation("eicr-exemption-confirmation", PropertyComplianceGroupIdentifier.Eicr),
     EicrExemptionMissing("eicr-exemption-missing", PropertyComplianceGroupIdentifier.Eicr),
+    UpdateEicrCheckYourAnswers("eicr-check-your-answers", PropertyComplianceGroupIdentifier.Eicr, true),
+    UpdateEpc("update-epc", PropertyComplianceGroupIdentifier.Epc),
     EPC("epc", PropertyComplianceGroupIdentifier.Epc),
     EpcNotAutoMatched("epc-not-automatched", PropertyComplianceGroupIdentifier.Epc),
     CheckAutoMatchedEpc("check-auto-matched-epc", PropertyComplianceGroupIdentifier.Epc),
@@ -43,6 +49,7 @@ enum class PropertyComplianceStepId(
     MeesExemptionReason("mees-exemption-reason", PropertyComplianceGroupIdentifier.Epc),
     MeesExemptionConfirmation("mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Epc),
     LowEnergyRating("low-energy-rating", PropertyComplianceGroupIdentifier.Epc),
+    UpdateEpcCheckYourAnswers("epc-check-your-answers", PropertyComplianceGroupIdentifier.Epc, true),
     FireSafetyDeclaration("fire-safety-declaration", PropertyComplianceGroupIdentifier.FireSafety),
     FireSafetyRisk("fire-safety-risk", PropertyComplianceGroupIdentifier.FireSafety),
     KeepPropertySafe("keep-property-safe", PropertyComplianceGroupIdentifier.KeepPropertySafe),
