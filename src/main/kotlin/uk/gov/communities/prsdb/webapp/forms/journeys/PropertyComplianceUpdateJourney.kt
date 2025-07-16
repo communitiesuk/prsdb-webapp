@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -26,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
-import kotlin.reflect.KFunction
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,
@@ -55,32 +55,33 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
-    private fun mapOfNotNull(vararg pairs: Pair<String, PageData>?) = pairs.filterNotNull().toMap()
-
     override fun createOriginalJourneyData(): JourneyData {
         val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
 
-        infix fun <T : FormModel?> StepId.toPageDataOrNull(fromRecordFunc: KFunction<T>): Pair<String, PageData>? =
-            fromRecordFunc.call(propertyCompliance)?.let {
+        infix fun <T : FormModel?> StepId.toPageDataOrNull(fromRecordFunc: (PropertyCompliance) -> T): Pair<String, PageData>? =
+            fromRecordFunc(propertyCompliance)?.let {
                 this.urlPathSegment to it.toPageData()
             }
 
-        val originalGasSafetyJourneyData =
+        fun mapOfNotNull(vararg pairs: Pair<String, PageData>?) = pairs.filterNotNull().toMap()
+
+        val originalGasSafetyJourneyData: JourneyData =
             mapOfNotNull(
                 PropertyComplianceStepId.UpdateGasSafety toPageDataOrNull GasSafetyFormModel::fromComplianceRecord,
                 PropertyComplianceStepId.GasSafetyIssueDate toPageDataOrNull TodayOrPastDateFormModel::fromComplianceRecord,
                 PropertyComplianceStepId.GasSafetyEngineerNum toPageDataOrNull GasSafeEngineerNumFormModel::fromComplianceRecord,
                 PropertyComplianceStepId.GasSafetyUpload toPageDataOrNull GasSafetyUploadCertificateFormModel::fromComplianceRecord,
+                PropertyComplianceStepId.GasSafetyUploadConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyOutdated toPageDataOrNull { NoInputFormModel() },
                 PropertyComplianceStepId.GasSafetyExemption toPageDataOrNull GasSafetyExemptionFormModel::fromComplianceRecord,
                 PropertyComplianceStepId.GasSafetyExemptionReason toPageDataOrNull GasSafetyExemptionReasonFormModel::fromComplianceRecord,
                 PropertyComplianceStepId.GasSafetyExemptionOtherReason toPageDataOrNull
                     GasSafetyExemptionOtherReasonFormModel::fromComplianceRecord,
-                if (propertyCompliance.gasSafetyCertExemptionReason != null) {
-                    PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment to NoInputFormModel().toPageData()
-                } else {
-                    PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment to NoInputFormModel().toPageData()
-                },
+                PropertyComplianceStepId.GasSafetyExemptionConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyExemptionMissing toPageDataOrNull { NoInputFormModel() },
             )
+        // TODO PRSD-1245: Add gas safety check your answers step data
+
         // TODO PRSD-1246: Add original EICR step data
         val originalEicrJourneyData = emptyMap<String, PageData>()
         // TODO: PRSD-1312: Add original EPC step data
