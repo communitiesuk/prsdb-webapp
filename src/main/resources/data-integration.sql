@@ -111,7 +111,7 @@ VALUES (1, true, 0, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2),
        (5, true, 0, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null),
        (6, true, 0, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null),
        (7, true, 0, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null),
-       (8, true, 0, 1, 1, 2, 16, 1, 7, '2024-10-15 00:00:00+00', null, null);
+       (8, true, 0, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
