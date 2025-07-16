@@ -146,13 +146,14 @@ class PropertyComplianceController(
         request: HttpServletRequest,
         response: HttpServletResponse,
     ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
         val formData =
             uploadFileAndReturnFormModel(
                 propertyOwnershipId,
                 stepName,
                 fileInputIterator,
                 token,
-                principal,
                 request,
                 response,
             )
@@ -262,13 +263,14 @@ class PropertyComplianceController(
         request: HttpServletRequest,
         response: HttpServletResponse,
     ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
         val formData =
             uploadFileAndReturnFormModel(
                 propertyOwnershipId,
                 stepName,
                 fileInputIterator,
                 token,
-                principal,
                 request,
                 response,
             )
@@ -301,12 +303,9 @@ class PropertyComplianceController(
         stepName: String,
         fileInputIterator: FileItemInputIterator,
         token: String,
-        principal: Principal,
         request: HttpServletRequest,
         response: HttpServletResponse,
     ): PageData {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
         if (tokenCookieService.isTokenForCookieValue(token, request.requestURI)) {
             tokenCookieService.useToken(token)
         } else {
