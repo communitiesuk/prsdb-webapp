@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.JourneyContextHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -86,7 +85,7 @@ class PropertyDetailsController(
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isCheckingAnswer = JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep))
+                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
                 .getModelAndViewForStep(checkingAnswersForStep = checkingAnswersForStep)
         } else {
             throw ResponseStatusException(
@@ -107,7 +106,7 @@ class PropertyDetailsController(
     ): ModelAndView =
         if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
             propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isCheckingAnswer = JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep))
+                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
                 .completeStep(formData, principal, checkingAnswersForStep)
         } else {
             throw ResponseStatusException(

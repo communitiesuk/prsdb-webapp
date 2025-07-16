@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
-import uk.gov.communities.prsdb.webapp.helpers.JourneyContextHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -33,7 +32,7 @@ class PropertyComplianceUpdateJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         stepName = stepName,
-        isCheckingAnswers = JourneyContextHelper.isCheckingAnswers(checkingAnswersForStep),
+        isCheckingAnswers = checkingAnswersForStep != null,
     ) {
     init {
         initializeOriginalJourneyDataIfNotInitialized()
