@@ -61,7 +61,7 @@ class PropertyComplianceUpdateJourney(
             nextActionAfterGasSafetyTask = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
             nextActionAfterEicrTask = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
             nextActionAfterEpcTask = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-            isCheckingAnswers = isCheckingAnswers,
+            isCheckingOrUpdatingAnswers = true,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
         )
