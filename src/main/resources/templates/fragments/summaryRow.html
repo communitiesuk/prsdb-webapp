@@ -1,8 +1,13 @@
-<div th:fragment="summaryRow(heading, values, action, valueUrl)" class="govuk-summary-list__row">
+<div th:fragment="summaryRow(heading, values, action, valueUrl, valueUrlOpensNewTab)" class="govuk-summary-list__row">
     <dt class="govuk-summary-list__key" th:text="#{${heading}}">
     </dt>
     <dd  class="govuk-summary-list__value" >
-        <a th:if="${valueUrl} != null" class="govuk-link" th:href="@{${valueUrl}}" th:text="${#messages.msgOrNull(values)} ?: ${{values}}"></a>
+        <a th:href="@{${valueUrl}}"
+           th:if="${valueUrl} != null"
+           th:attr="target=${valueUrlOpensNewTab} ? '_blank' : null, rel=${valueUrlOpensNewTab} ? 'noreferrer noopener' : null"
+           class="govuk-link"
+           th:text="${#messages.msgOrNull(values)} ?: ${{values}}">
+        </a>
         <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
         <p th:unless="${valueUrl} != null" th:remove="${iteratorStatus.size == 1} ? tag : none"
            th:each="value, iteratorStatus: ${values}" class="govuk-body"
