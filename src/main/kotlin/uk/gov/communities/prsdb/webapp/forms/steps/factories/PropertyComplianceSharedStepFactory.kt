@@ -616,7 +616,7 @@ class PropertyComplianceSharedStepFactory(
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
-    fun createGetEpcLookupStep(handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String)) =
+    fun createEpcLookupStep(handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String)) =
         Step(
             id = PropertyComplianceStepId.EpcLookup,
             page =

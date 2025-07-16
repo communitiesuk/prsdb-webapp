@@ -222,7 +222,7 @@ class PropertyComplianceJourney(
 
     private val epcLookupStep
         get() =
-            propertyComplianceSharedStepFactory.createGetEpcLookupStep(
+            propertyComplianceSharedStepFactory.createEpcLookupStep(
                 handleSubmitAndRedirect = { filteredJourneyData ->
                     epcLookupStepHandleSubmitAndRedirect(filteredJourneyData)
                 },
