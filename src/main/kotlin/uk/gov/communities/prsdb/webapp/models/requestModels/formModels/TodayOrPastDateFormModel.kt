@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
@@ -178,5 +179,16 @@ class TodayOrPastDateFormModel : DateFormModel() {
         val date = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
         val today = DateTimeHelper().getCurrentDateInUK()
         return date <= today
+    }
+
+    companion object {
+        fun fromComplianceRecord(complianceRecord: PropertyCompliance): TodayOrPastDateFormModel? =
+            complianceRecord.gasSafetyCertIssueDate?.let {
+                TodayOrPastDateFormModel().apply {
+                    day = it.dayOfMonth.toString()
+                    month = it.monthValue.toString()
+                    year = it.year.toString()
+                }
+            }
     }
 }
