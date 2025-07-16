@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.LengthConstraintValidator
@@ -23,4 +24,13 @@ class GasSafetyExemptionOtherReasonFormModel : FormModel {
         ],
     )
     var otherReason: String = ""
+
+    companion object {
+        fun fromComplianceRecord(record: PropertyCompliance): GasSafetyExemptionOtherReasonFormModel? =
+            record.gasSafetyCertExemptionOtherReason?.let {
+                GasSafetyExemptionOtherReasonFormModel().apply {
+                    this.otherReason = it
+                }
+            }
+    }
 }

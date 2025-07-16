@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
@@ -16,4 +17,12 @@ class GasSafetyFormModel : FormModel {
         ],
     )
     var hasCert: Boolean? = null
+
+    companion object {
+        fun fromComplianceRecord(record: PropertyCompliance): GasSafetyFormModel =
+            GasSafetyFormModel().apply {
+                hasCert =
+                    record.gasSafetyCertIssueDate != null
+            }
+    }
 }
