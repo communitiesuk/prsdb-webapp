@@ -59,8 +59,6 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
-    private fun mapOfNotNull(vararg pairs: Pair<String, PageData>?) = pairs.filterNotNull().toMap()
-
     override fun createOriginalJourneyData(): JourneyData {
         val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
 
