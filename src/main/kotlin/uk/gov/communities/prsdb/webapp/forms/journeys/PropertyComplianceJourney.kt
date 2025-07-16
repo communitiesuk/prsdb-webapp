@@ -122,7 +122,7 @@ class PropertyComplianceJourney(
             nextActionAfterGasSafetyTask = PropertyComplianceStepId.EICR,
             nextActionAfterEicrTask = PropertyComplianceStepId.EPC,
             nextActionAfterEpcTask = landlordResponsibilities.first().startingStepId,
-            isCheckingAnswers = isCheckingAnswers,
+            isCheckingOrUpdatingAnswers = isCheckingAnswers,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
         )
