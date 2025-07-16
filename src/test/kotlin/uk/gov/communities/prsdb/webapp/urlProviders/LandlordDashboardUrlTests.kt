@@ -10,7 +10,9 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -65,7 +67,9 @@ import kotlin.test.Test
         RegisterPropertyController::class,
         PropertyComplianceController::class,
     ],
+    properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
+@Import(AbsoluteUrlProvider::class)
 class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
@@ -115,6 +119,9 @@ class LandlordDashboardUrlTests(
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
+    @Autowired
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 
     @Test
@@ -127,7 +134,7 @@ class LandlordDashboardUrlTests(
                 mockJourneyDataService,
                 mock(),
                 mockLandlordService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
                 mockEmailNotificationService,
                 mock(),
             )
@@ -186,7 +193,7 @@ class LandlordDashboardUrlTests(
                 mockPropertyRegistrationService,
                 mock(),
                 mockLandlordService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
                 mockEmailNotificationService,
             )
         whenever(mockPropertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
@@ -277,7 +284,7 @@ class LandlordDashboardUrlTests(
                 MockMessageSource(),
                 mockEmailNotificationService,
                 mockEmailNotificationService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
                 checkingAnswersForStep = null,
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
