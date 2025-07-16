@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -57,6 +56,8 @@ class PropertyComplianceUpdateJourney(
     override val unreachableStepRedirect = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
+
+    private fun mapOfNotNull(vararg pairs: Pair<String, PageData>?) = pairs.filterNotNull().toMap()
 
     override fun createOriginalJourneyData(): JourneyData {
         val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
