@@ -10,7 +10,9 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -40,12 +42,19 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBu
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 
-@WebMvcTest(controllers = [PropertyComplianceController::class, PropertyDetailsController::class])
+@WebMvcTest(
+    controllers = [PropertyComplianceController::class, PropertyDetailsController::class],
+    properties = ["base-url.landlord=http://localhost:8080/landlord"],
+)
+@Import(AbsoluteUrlProvider::class)
 class PropertyComplianceInfoUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
     @MockitoBean
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Autowired
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockitoBean
     private lateinit var mockTokenCookieService: TokenCookieService
@@ -128,7 +137,7 @@ class PropertyComplianceInfoUrlTests(
                 MockMessageSource(),
                 mockEmailNotificationService,
                 mockEmailNotificationService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
                 checkingAnswersForStep = null,
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)

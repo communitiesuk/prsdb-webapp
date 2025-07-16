@@ -15,6 +15,10 @@ notify:
 os-places:
   api-key: ${OS_PLACES_API_KEY}
 
+base-url:
+  landlord: example.com
+  local-authority: example.com
+
 aws:
   s3:
     quarantineBucket: 'quarantine-bucket'
