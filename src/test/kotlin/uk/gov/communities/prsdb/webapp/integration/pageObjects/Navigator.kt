@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrati
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
@@ -104,6 +105,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEicrPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
@@ -940,6 +942,23 @@ class Navigator(
         return createValidPage(
             page,
             UpdateGasSafetyPagePropertyComplianceUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyComplianceUpdateUpdateEicrPage(propertyOwnershipId: Long): UpdateEicrPagePropertyComplianceUpdate {
+        // TODO PRSD-1246 - once the original journey data is set up in the journey, we shouldn't need to set it in the session here
+        setJourneyDataInSession(
+            PropertyComplianceUpdateJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyPageDataBuilder.beforePropertyComplianceEicr().build(),
+        )
+        navigate(
+            PropertyComplianceController.getUpdatePropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.UpdateEICR.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            UpdateEicrPagePropertyComplianceUpdate::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

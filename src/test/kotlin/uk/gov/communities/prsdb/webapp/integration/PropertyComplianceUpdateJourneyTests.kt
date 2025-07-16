@@ -15,6 +15,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrCheckYourAnswersPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrIssueDatePagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrUploadConfirmationPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrUploadPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafeEngineerNumPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyCheckYourAnswersPropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyExemptionConfirmationPagePropertyComplianceUpdate
@@ -156,6 +160,41 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Gas Safety Check Your Answers page
         // TODO PRSD-1245 - check this page, should return to the Property Record page
+    }
+
+    @Test
+    fun `User can navigate the EICR update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
+        // Update certificate or add exemption page
+        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
+        updateEicrPage.continueButton.clickAndWait()
+        // TODO: PRSD-1246 - go to Issue Date only if user has submitted "Add a new gas safety certificate"
+        val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyComplianceUpdate::class, urlArguments)
+
+        // EICR Issue Date page
+        eicrIssueDatePage.submitDate(currentDate)
+        val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyComplianceUpdate::class, urlArguments)
+
+        // EICR Upload page
+        whenever(
+            fileUploader.uploadFile(
+                eq(
+                    PropertyComplianceJourneyHelper.getCertFilename(
+                        PROPERTY_OWNERSHIP_ID,
+                        PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                        "validFile.png",
+                    ),
+                ),
+                any(),
+            ),
+        ).thenReturn(true)
+        eicrUploadPage.uploadCertificate("validFile.png")
+        val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyComplianceUpdate::class, urlArguments)
+
+        // EICR Upload Confirmation page
+        assertThat(eicrUploadConfirmationPage.heading).containsText("Your file is being scanned")
+        eicrUploadConfirmationPage.saveAndContinueButton.clickAndWait()
+
+        assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
     }
 
     companion object {

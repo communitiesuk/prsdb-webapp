@@ -396,6 +396,9 @@ class PropertyComplianceController(
             stepId: PropertyComplianceStepId,
         ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
 
+        fun getUpdatePropertyComplianceEicrPath(propertyOwnershipId: Long): String =
+            "${getUpdatePropertyCompliancePath(propertyOwnershipId)}/${PropertyComplianceStepId.UpdateEICR.urlPathSegment}"
+
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }
 }
