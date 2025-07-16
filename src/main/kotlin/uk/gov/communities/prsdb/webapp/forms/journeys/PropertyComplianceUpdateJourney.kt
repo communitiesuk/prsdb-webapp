@@ -65,17 +65,7 @@ class PropertyComplianceUpdateJourney(
                 this.urlPathSegment to it.toPageData()
             }
 
-        infix fun StepId.withNoInputIfPresent(property: Any?): Pair<String, PageData>? =
-            if (property != null) {
-                this.urlPathSegment to NoInputFormModel().toPageData()
-            } else {
-                null
-            }
-
-        fun noInputFormModelIfValueIsPresent(subject: Any?): NoInputFormModel? = if (subject != null) NoInputFormModel() else null
-        // TODO PRSD-1246: Add original EICR step data
-        // TODO: PRSD-1312: Add original EPC step data
-        val originalJourneyData =
+        val originalGasSafetyJourneyData =
             mapOfNotNull(
                 PropertyComplianceStepId.UpdateGasSafety toPageDataOrNull GasSafetyFormModel::fromComplianceRecord,
                 PropertyComplianceStepId.GasSafetyIssueDate toPageDataOrNull TodayOrPastDateFormModel::fromComplianceRecord,
@@ -91,8 +81,14 @@ class PropertyComplianceUpdateJourney(
                     PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment to NoInputFormModel().toPageData()
                 },
             )
+        // TODO PRSD-1246: Add original EICR step data
+        val originalEicrJourneyData = emptyMap<String, PageData>()
+        // TODO: PRSD-1312: Add original EPC step data
+        val originalEpcJourneyData = emptyMap<String, PageData>()
 
-        return originalJourneyData
+        return originalGasSafetyJourneyData +
+            originalEicrJourneyData +
+            originalEpcJourneyData
     }
 
     private val propertyComplianceSharedStepFactory =
