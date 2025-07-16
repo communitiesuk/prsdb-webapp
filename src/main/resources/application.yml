@@ -98,8 +98,8 @@ spring:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
 
 base-url:
-  landlord: ${LANDLORD_BASE_URL:https://integration.register-home-to-rent.test.communities.gov.uk}
-  local-authority: ${LOCAL_AUTHORITY_BASE_URL:https://integration.search-landlord-home-information.test.communities.gov.uk}
+  landlord: ${LANDLORD_BASE_URL}
+  local-authority: ${LOCAL_AUTHORITY_BASE_URL}
 ---
 
 spring:
