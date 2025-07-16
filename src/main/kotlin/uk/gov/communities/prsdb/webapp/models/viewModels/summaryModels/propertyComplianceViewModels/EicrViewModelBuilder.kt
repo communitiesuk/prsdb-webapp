@@ -35,7 +35,11 @@ class EicrViewModelBuilder {
                     } else {
                         addRow(
                             key = "propertyDetails.complianceInformation.exemption",
-                            value = getExemptionReasonValue(propertyCompliance.eicrExemptionReason),
+                            value =
+                                getExemptionReasonValue(
+                                    propertyCompliance.eicrExemptionReason,
+                                    propertyCompliance.eicrExemptionOtherReason,
+                                ),
                         )
                     }
                 }.toList()
@@ -55,10 +59,13 @@ class EicrViewModelBuilder {
                 "propertyDetails.complianceInformation.notAdded"
             }
 
-        private fun getExemptionReasonValue(exemptionReason: EicrExemptionReason?): Any =
+        private fun getExemptionReasonValue(
+            exemptionReason: EicrExemptionReason?,
+            exemptionOtherReason: String?,
+        ): Any =
             when (exemptionReason) {
                 null -> "propertyDetails.complianceInformation.noExemption"
-                EicrExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(EicrExemptionReason.OTHER), exemptionReason)
+                EicrExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(EicrExemptionReason.OTHER), exemptionOtherReason)
                 else -> MessageKeyConverter.convert(exemptionReason)
             }
 
