@@ -97,6 +97,9 @@ spring:
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
 
+base-url:
+  landlord: ${LANDLORD_BASE_URL}
+  local-authority: ${LOCAL_AUTHORITY_BASE_URL}
 ---
 
 spring:
