@@ -85,7 +85,10 @@ class PropertyComplianceControllerTests(
     private val validPropertyComplianceFileUploadUrl =
         "$validPropertyComplianceUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
     private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
-    private val validPropertyComplianceUpdateUrl = PropertyComplianceController.getUpdatePropertyCompliancePath(validPropertyOwnershipId)
+    private val validPropertyComplianceUpdateUrl =
+        PropertyComplianceController.getUpdatePropertyComplianceBasePath(
+            validPropertyOwnershipId,
+        )
     private val validPropertyComplianceUpdateInitialStepUrl =
         "$validPropertyComplianceUpdateUrl/${PropertyComplianceUpdateJourney.initialStepId.urlPathSegment}"
     private val validPropertyComplianceUpdateFileUploadUrl =
@@ -99,7 +102,7 @@ class PropertyComplianceControllerTests(
         "$invalidPropertyComplianceUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
     private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
     private val invalidPropertyComplianceUpdateUrl =
-        PropertyComplianceController.getUpdatePropertyCompliancePath(
+        PropertyComplianceController.getUpdatePropertyComplianceBasePath(
             invalidPropertyOwnershipId,
         )
     private val invalidPropertyComplianceUpdateInitialStepUrl =

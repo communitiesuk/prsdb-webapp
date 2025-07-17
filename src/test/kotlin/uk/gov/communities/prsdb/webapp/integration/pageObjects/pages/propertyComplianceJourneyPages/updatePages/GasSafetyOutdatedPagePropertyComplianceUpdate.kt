@@ -12,8 +12,10 @@ class GasSafetyOutdatedPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.GasSafetyOutdated,
+        ),
     ) {
     val heading: Locator = page.locator(".govuk-heading-l")
     val saveAndContinueButton = Button.byText(page, "Save and continue")

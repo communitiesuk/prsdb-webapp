@@ -10,6 +10,8 @@ class GasSafeEngineerNumPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : GasSafeEngineerNumBasePage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.GasSafetyEngineerNum,
+        ),
     )

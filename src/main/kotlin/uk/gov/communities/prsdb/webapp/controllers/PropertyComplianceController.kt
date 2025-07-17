@@ -388,11 +388,13 @@ class PropertyComplianceController(
         fun getPropertyComplianceTaskListPath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_TASK_LIST_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
-        fun getUpdatePropertyCompliancePath(propertyOwnershipId: Long): String =
+        fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
-        fun getUpdatePropertyComplianceGasSafetyPath(propertyOwnershipId: Long): String =
-            "${getUpdatePropertyCompliancePath(propertyOwnershipId)}/${PropertyComplianceStepId.UpdateGasSafety.urlPathSegment}"
+        fun getUpdatePropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            stepId: PropertyComplianceStepId,
+        ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
 
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }

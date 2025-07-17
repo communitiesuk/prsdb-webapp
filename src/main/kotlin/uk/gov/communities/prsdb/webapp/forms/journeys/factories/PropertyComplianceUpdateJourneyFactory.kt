@@ -34,5 +34,5 @@ class PropertyComplianceUpdateJourneyFactory(
 
     private fun getJourneyDataKey(propertyOwnershipId: Long) =
         PropertyComplianceController
-            .getUpdatePropertyCompliancePath(propertyOwnershipId)
+            .getUpdatePropertyComplianceBasePath(propertyOwnershipId)
 }
