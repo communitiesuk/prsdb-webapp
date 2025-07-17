@@ -11,8 +11,10 @@ class GasSafetyCheckYourAnswersPropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+        ),
     ) {
     val continueButton = Button.byText(page, "Continue")
 }

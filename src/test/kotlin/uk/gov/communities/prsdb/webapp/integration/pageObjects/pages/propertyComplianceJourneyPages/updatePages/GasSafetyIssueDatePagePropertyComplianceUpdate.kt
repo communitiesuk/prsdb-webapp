@@ -10,6 +10,8 @@ class GasSafetyIssueDatePagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : DateFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.GasSafetyIssueDate,
+        ),
     )

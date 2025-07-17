@@ -10,6 +10,8 @@ class GasSafetyUploadPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : UploadCertificateFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.GasSafetyUpload,
+        ),
     )
