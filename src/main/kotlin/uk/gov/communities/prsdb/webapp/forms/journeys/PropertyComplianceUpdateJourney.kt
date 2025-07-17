@@ -3,15 +3,29 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -47,12 +61,55 @@ class PropertyComplianceUpdateJourney(
     override fun createOriginalJourneyData(): JourneyData {
         val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
 
-        // TODO PRSD-1244: Add original gas safety step data
-        // TODO PRSD-1246: Add original EICR step data
-        // TODO: PRSD-1312: Add original EPC step data
-        val originalJourneyData = emptyMap<String, Any>()
+        infix fun <T : FormModel?> StepId.toPageDataOrNull(fromRecordFunc: (PropertyCompliance) -> T): Pair<String, PageData>? =
+            fromRecordFunc(propertyCompliance)?.let {
+                this.urlPathSegment to it.toPageData()
+            }
 
-        return originalJourneyData
+        fun mapOfNotNull(vararg pairs: Pair<String, PageData>?) = pairs.filterNotNull().toMap()
+
+        val originalGasSafetyJourneyData: JourneyData =
+            mapOfNotNull(
+                PropertyComplianceStepId.UpdateGasSafety toPageDataOrNull GasSafetyFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyIssueDate toPageDataOrNull
+                    { TodayOrPastDateFormModel.fromDateOrNull(it.gasSafetyCertIssueDate) },
+                PropertyComplianceStepId.GasSafetyEngineerNum toPageDataOrNull GasSafeEngineerNumFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyUpload toPageDataOrNull GasSafetyUploadCertificateFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyUploadConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyOutdated toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyExemption toPageDataOrNull GasSafetyExemptionFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyExemptionReason toPageDataOrNull
+                    GasSafetyExemptionReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyExemptionOtherReason toPageDataOrNull
+                    GasSafetyExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyExemptionConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyExemptionMissing toPageDataOrNull { NoInputFormModel() },
+                // TODO PRSD-1245: Add gas safety check your answers step data
+                PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers toPageDataOrNull { NoInputFormModel() },
+            )
+
+        val originalEicrJourneyData =
+            mapOfNotNull(
+                PropertyComplianceStepId.UpdateEICR toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrIssueDate toPageDataOrNull
+                    { TodayOrPastDateFormModel.fromDateOrNull(it.eicrIssueDate) },
+                PropertyComplianceStepId.EicrUpload toPageDataOrNull EicrUploadCertificateFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.EicrUploadConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrOutdated toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrExemptionReason toPageDataOrNull EicrExemptionReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.EicrExemptionOtherReason toPageDataOrNull
+                    EicrExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.EicrExemptionConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrExemptionMissing toPageDataOrNull { NoInputFormModel() },
+                // TODO PRSD-1247: Add EICR check your answers step data
+                PropertyComplianceStepId.UpdateEicrCheckYourAnswers toPageDataOrNull { NoInputFormModel() },
+            )
+        // TODO: PRSD-1312: Add original EPC step data
+        val originalEpcJourneyData = emptyMap<String, PageData>()
+
+        return originalGasSafetyJourneyData +
+            originalEicrJourneyData +
+            originalEpcJourneyData
     }
 
     private val propertyComplianceSharedStepFactory =
