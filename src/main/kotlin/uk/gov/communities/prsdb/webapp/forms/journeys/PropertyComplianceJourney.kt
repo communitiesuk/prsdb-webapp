@@ -284,12 +284,13 @@ class PropertyComplianceJourney(
                 page =
                     PageWithContentProvider(
                         formModel = GasSafetyFormModel::class,
-                        templateName = "forms/certificateForm",
+                        templateName = "forms/simpleRadiosForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
                                 "fieldSetHeading" to "forms.gasSafety.fieldSetHeading",
                                 "fieldSetHint" to "forms.gasSafety.fieldSetHint",
+                                "radioVariableName" to GasSafetyFormModel::hasCert.name,
                                 "radioOptions" to
                                     listOf(
                                         RadiosButtonViewModel(
@@ -315,12 +316,13 @@ class PropertyComplianceJourney(
                 page =
                     PageWithContentProvider(
                         formModel = EicrFormModel::class,
-                        templateName = "forms/certificateForm",
+                        templateName = "forms/simpleRadiosForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
                                 "fieldSetHeading" to "forms.eicr.fieldSetHeading",
                                 "fieldSetHint" to "forms.eicr.fieldSetHint",
+                                "radioVariableName" to EicrFormModel::hasCert.name,
                                 "radioOptions" to
                                     listOf(
                                         RadiosButtonViewModel(
@@ -346,12 +348,13 @@ class PropertyComplianceJourney(
                 page =
                     PageWithContentProvider(
                         formModel = EpcFormModel::class,
-                        templateName = "forms/certificateForm",
+                        templateName = "forms/simpleRadiosForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
                                 "fieldSetHeading" to "forms.epc.fieldSetHeading",
                                 "fieldSetHint" to "forms.epc.fieldSetHint",
+                                "radioVariableName" to EpcFormModel::hasCert.name,
                                 "radioOptions" to
                                     listOf(
                                         RadiosButtonViewModel(
