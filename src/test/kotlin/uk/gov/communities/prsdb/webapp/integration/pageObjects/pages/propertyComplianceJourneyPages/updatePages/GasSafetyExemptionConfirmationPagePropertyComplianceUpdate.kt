@@ -12,7 +12,7 @@ class GasSafetyExemptionConfirmationPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment}",
     ) {
     val heading: Locator = page.locator(".govuk-heading-l")
