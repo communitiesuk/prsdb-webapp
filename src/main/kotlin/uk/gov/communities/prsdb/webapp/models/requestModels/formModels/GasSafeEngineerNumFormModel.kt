@@ -24,7 +24,7 @@ class GasSafeEngineerNumFormModel : FormModel {
     var engineerNumber: String = ""
 
     companion object {
-        fun fromComplianceRecord(record: PropertyCompliance): GasSafeEngineerNumFormModel? =
+        fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafeEngineerNumFormModel? =
             record.gasSafetyCertEngineerNum?.let {
                 GasSafeEngineerNumFormModel().apply {
                     this.engineerNumber = it

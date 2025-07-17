@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
+import java.time.LocalDate
 
 @IsValidPrioritised
 class TodayOrPastDateFormModel : DateFormModel() {
@@ -182,12 +182,12 @@ class TodayOrPastDateFormModel : DateFormModel() {
     }
 
     companion object {
-        fun fromComplianceRecord(complianceRecord: PropertyCompliance): TodayOrPastDateFormModel? =
-            complianceRecord.gasSafetyCertIssueDate?.let {
+        fun fromDateOrNull(date: LocalDate?): TodayOrPastDateFormModel? =
+            date?.let {
                 TodayOrPastDateFormModel().apply {
-                    day = it.dayOfMonth.toString()
-                    month = it.monthValue.toString()
-                    year = it.year.toString()
+                    day = date.dayOfMonth.toString()
+                    month = date.monthValue.toString()
+                    year = date.year.toString()
                 }
             }
     }

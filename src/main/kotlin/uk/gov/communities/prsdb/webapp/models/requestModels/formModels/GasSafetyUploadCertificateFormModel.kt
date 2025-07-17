@@ -35,7 +35,7 @@ class GasSafetyUploadCertificateFormModel : UploadCertificateFormModel() {
     override val certificate = null
 
     companion object {
-        fun fromComplianceRecord(record: PropertyCompliance): GasSafetyUploadCertificateFormModel? =
+        fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyUploadCertificateFormModel? =
             record.gasSafetyCertS3Key?.let {
                 GasSafetyUploadCertificateFormModel().apply {
                     this.name = it

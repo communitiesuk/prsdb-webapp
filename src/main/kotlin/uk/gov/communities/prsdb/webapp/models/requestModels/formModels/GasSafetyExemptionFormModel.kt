@@ -19,7 +19,7 @@ class GasSafetyExemptionFormModel : FormModel {
     var hasExemption: Boolean? = null
 
     companion object {
-        fun fromComplianceRecord(record: PropertyCompliance): GasSafetyExemptionFormModel? =
+        fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyExemptionFormModel? =
             if (record.gasSafetyCertIssueDate == null) {
                 GasSafetyExemptionFormModel().apply {
                     this.hasExemption = record.hasGasSafetyExemption

@@ -19,7 +19,7 @@ class GasSafetyFormModel : FormModel {
     var hasCert: Boolean? = null
 
     companion object {
-        fun fromComplianceRecord(record: PropertyCompliance): GasSafetyFormModel =
+        fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyFormModel =
             GasSafetyFormModel().apply {
                 hasCert =
                     record.gasSafetyCertIssueDate != null
