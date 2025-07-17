@@ -10,6 +10,8 @@ class GasSafetyExemptionPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : ExemptionFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyExemption.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.GasSafetyExemption,
+        ),
     )

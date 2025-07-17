@@ -935,8 +935,7 @@ class Navigator(
 
     fun goToPropertyComplianceUpdateUpdateGasSafetyPage(propertyOwnershipId: Long): UpdateGasSafetyPagePropertyComplianceUpdate {
         navigate(
-            PropertyComplianceController.getUpdatePropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.UpdateGasSafety.urlPathSegment}",
+            PropertyComplianceController.getUpdatePropertyComplianceStepPath(propertyOwnershipId, PropertyComplianceStepId.UpdateGasSafety),
         )
         return createValidPage(
             page,
