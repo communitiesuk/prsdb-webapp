@@ -13,16 +13,19 @@ class GasSafetyViewModelBuilder {
         fun fromEntity(
             propertyCompliance: PropertyCompliance,
             withActionLinks: Boolean,
-        ): List<SummaryListRowViewModel> {
-            val baseUrl = PropertyComplianceController.getUpdatePropertyCompliancePath(propertyCompliance.propertyOwnership.id)
-            return mutableListOf<SummaryListRowViewModel>()
+        ): List<SummaryListRowViewModel> =
+            mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
                         key = "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                         // TODO PRSD-976 add link to download certificate and appropriate messages when required
                         value = getGasCertificateMessageKey(propertyCompliance),
                         actionText = "forms.links.change",
-                        actionLink = "$baseUrl/${PropertyComplianceStepId.UpdateGasSafety.urlPathSegment}",
+                        actionLink =
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     if (propertyCompliance.gasSafetyCertIssueDate != null) {
@@ -49,7 +52,6 @@ class GasSafetyViewModelBuilder {
                         )
                     }
                 }.toList()
-        }
 
         private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String =
             if (propertyCompliance.gasSafetyCertS3Key != null) {
