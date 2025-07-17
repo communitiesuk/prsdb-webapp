@@ -10,6 +10,8 @@ class EicrUploadConfirmationPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : UploadConfirmationFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.EicrUploadConfirmation,
+        ),
     )

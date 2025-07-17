@@ -12,8 +12,10 @@ class EicrExemptionConfirmationPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.EicrExemptionConfirmation,
+        ),
     ) {
     val heading: Locator = page.locator(".govuk-heading-l")
     val saveAndContinueButton = Button.byText(page, "Save and continue")

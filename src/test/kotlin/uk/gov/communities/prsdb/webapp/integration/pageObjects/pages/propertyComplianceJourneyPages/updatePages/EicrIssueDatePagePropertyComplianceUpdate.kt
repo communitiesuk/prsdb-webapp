@@ -10,6 +10,8 @@ class EicrIssueDatePagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : DateFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.EicrIssueDate,
+        ),
     )

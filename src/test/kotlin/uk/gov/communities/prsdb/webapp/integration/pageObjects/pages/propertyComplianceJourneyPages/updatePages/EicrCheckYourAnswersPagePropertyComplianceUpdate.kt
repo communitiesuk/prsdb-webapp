@@ -11,8 +11,10 @@ class EicrCheckYourAnswersPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.UpdateEicrCheckYourAnswers.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+        ),
     ) {
     val continueButton = Button.byText(page, "Continue")
 }

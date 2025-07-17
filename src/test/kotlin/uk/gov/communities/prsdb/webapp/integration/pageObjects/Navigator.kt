@@ -947,8 +947,7 @@ class Navigator(
 
     fun goToPropertyComplianceUpdateUpdateEicrPage(propertyOwnershipId: Long): UpdateEicrPagePropertyComplianceUpdate {
         navigate(
-            PropertyComplianceController.getUpdatePropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.UpdateEICR.urlPathSegment}",
+            PropertyComplianceController.getUpdatePropertyComplianceStepPath(propertyOwnershipId, PropertyComplianceStepId.UpdateEICR),
         )
         return createValidPage(
             page,

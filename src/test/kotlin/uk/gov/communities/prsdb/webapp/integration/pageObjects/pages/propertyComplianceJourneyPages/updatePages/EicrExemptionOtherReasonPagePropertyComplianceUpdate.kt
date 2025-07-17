@@ -10,6 +10,8 @@ class EicrExemptionOtherReasonPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : ReasonFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment}",
+        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+            PropertyComplianceStepId.EicrExemptionOtherReason,
+        ),
     )
