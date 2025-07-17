@@ -33,8 +33,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.hasNewCertificateRadios.selectValue("true")
-        updateGasSafetyPage.continueButton.clickAndWait()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
+        updateGasSafetyPage.form.submit()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -79,8 +79,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new outdated certificate)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.hasNewCertificateRadios.selectValue("true")
-        updateGasSafetyPage.continueButton.clickAndWait()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
+        updateGasSafetyPage.form.submit()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -101,8 +101,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can add a new gas safety exemption if the pages are filled in correctly`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.hasNewCertificateRadios.selectValue("false")
-        updateGasSafetyPage.continueButton.clickAndWait()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
+        updateGasSafetyPage.form.submit()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
@@ -124,8 +124,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can add a new gas safety exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.hasNewCertificateRadios.selectValue("false")
-        updateGasSafetyPage.continueButton.clickAndWait()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
+        updateGasSafetyPage.form.submit()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
