@@ -39,7 +39,11 @@ class GasSafetyViewModelBuilder {
                     } else {
                         addRow(
                             key = "propertyDetails.complianceInformation.exemption",
-                            value = getExemptionReasonValue(propertyCompliance.gasSafetyCertExemptionReason),
+                            value =
+                                getExemptionReasonValue(
+                                    propertyCompliance.gasSafetyCertExemptionReason,
+                                    propertyCompliance.gasSafetyCertExemptionOtherReason,
+                                ),
                         )
                     }
                 }.toList()
@@ -59,10 +63,13 @@ class GasSafetyViewModelBuilder {
                 "propertyDetails.complianceInformation.notAdded"
             }
 
-        private fun getExemptionReasonValue(exemptionReason: GasSafetyExemptionReason?): Any =
+        private fun getExemptionReasonValue(
+            exemptionReason: GasSafetyExemptionReason?,
+            exemptionOtherReason: String?,
+        ): Any =
             when (exemptionReason) {
                 null -> "propertyDetails.complianceInformation.noExemption"
-                GasSafetyExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER), exemptionReason)
+                GasSafetyExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER), exemptionOtherReason)
                 else -> MessageKeyConverter.convert(exemptionReason)
             }
     }
