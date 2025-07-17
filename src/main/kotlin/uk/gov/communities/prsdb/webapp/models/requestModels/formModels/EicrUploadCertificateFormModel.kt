@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -32,4 +33,14 @@ class EicrUploadCertificateFormModel : UploadCertificateFormModel() {
         ],
     )
     override val certificate = null
+
+    companion object {
+        fun fromComplianceRecordOrNull(record: PropertyCompliance) =
+            record.eicrS3Key?.let {
+                EicrUploadCertificateFormModel().apply {
+                    this.name = it
+                    this.isMetadataOnly = false
+                }
+            }
+    }
 }

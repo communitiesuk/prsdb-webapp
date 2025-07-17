@@ -7,6 +7,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -36,7 +37,11 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorit
 import java.net.URLEncoder
 import kotlin.test.Test
 
-@WebMvcTest(ManageLocalAuthorityUsersController::class, RegisterLAUserController::class)
+@WebMvcTest(
+    controllers = [ManageLocalAuthorityUsersController::class, RegisterLAUserController::class],
+    properties = ["base-url.local-authority=http://localhost:8080/local-authority"],
+)
+@Import(AbsoluteUrlProvider::class)
 class InvitationUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
@@ -45,9 +50,6 @@ class InvitationUrlTests(
 
     @MockitoBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
-
-    @MockitoBean
-    lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockitoBean
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -85,7 +87,6 @@ class InvitationUrlTests(
 
         whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
         whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
-        whenever(absoluteUrlProvider.buildInvitationUri(testToken)).thenCallRealMethod()
         whenever(localAuthorityInvitationService.tokenIsValid(testToken)).thenReturn(true)
 
         val invitationCaptor = argumentCaptor<LocalAuthorityInvitationEmail>()

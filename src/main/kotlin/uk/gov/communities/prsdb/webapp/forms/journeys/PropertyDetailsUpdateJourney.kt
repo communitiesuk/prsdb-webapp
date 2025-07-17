@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpdateJourneyStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedUpdateJourneyExtensions.Companion.withBackUrlIfNotNullAndNotChangingAnswer
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberStepIdAndFormModel
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberUpdateIfPresent
@@ -55,7 +55,7 @@ class PropertyDetailsUpdateJourney(
         validator = validator,
         journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId, stepName)),
         stepName = stepName,
-        isChangingAnswer = isChangingAnswer,
+        isCheckingAnswers = isChangingAnswer,
     ) {
     override val stepRouter = GroupedUpdateStepRouter(this)
 
@@ -192,7 +192,7 @@ class PropertyDetailsUpdateJourney(
                                         labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
                                     ),
                                 ),
-                        ).withBackUrlIfNotNullAndNotChangingAnswer(RELATIVE_PROPERTY_DETAILS_PATH, isChangingAnswer),
+                        ).withBackUrlIfNotNullAndNotCheckingAnswers(RELATIVE_PROPERTY_DETAILS_PATH, isChangingAnswer),
                 ),
             nextAction = { filteredJourneyData, _ -> licensingTypeNextAction(filteredJourneyData) },
             saveAfterSubmit = false,

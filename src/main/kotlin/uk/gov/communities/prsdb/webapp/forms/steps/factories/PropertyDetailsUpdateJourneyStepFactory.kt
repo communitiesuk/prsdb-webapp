@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfP
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedUpdateJourneyExtensions.Companion.withBackUrlIfNotNullAndNotChangingAnswer
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getIsOccupiedUpdateIfPresent
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLatestNumberOfHouseholds
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getOriginalIsOccupied
@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
  */
 class PropertyDetailsUpdateJourneyStepFactory(
     stepName: String,
-    private val isChangingAnswer: Boolean,
+    private val isCheckingAnswers: Boolean,
     private val propertyDetailsPath: String,
     private val journeyDataService: JourneyDataService,
 ) {
@@ -81,7 +81,7 @@ class PropertyDetailsUpdateJourneyStepFactory(
                                         hintMsgKey = "forms.occupancy.radios.option.no.hint",
                                     ),
                                 ),
-                        ).withBackUrlIfNotNullAndNotChangingAnswer(propertyDetailsPath, isChangingAnswer),
+                        ).withBackUrlIfNotNullAndNotCheckingAnswers(propertyDetailsPath, isCheckingAnswers),
                 ),
             nextAction = { filteredJourneyData, _ -> occupancyNextAction(filteredJourneyData) },
             saveAfterSubmit = false,
@@ -137,7 +137,7 @@ class PropertyDetailsUpdateJourneyStepFactory(
                         "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to fieldSetHeadingKey,
                         "label" to "forms.numberOfHouseholds.label",
-                    ).withBackUrlIfNotNullAndNotChangingAnswer(backUrl, isChangingAnswer),
+                    ).withBackUrlIfNotNullAndNotCheckingAnswers(backUrl, isCheckingAnswers),
             ),
         nextAction = { _, _ -> Pair(numberOfPeopleStepId, null) },
         saveAfterSubmit = false,
@@ -158,7 +158,7 @@ class PropertyDetailsUpdateJourneyStepFactory(
                         "fieldSetHeading" to fieldSetHeadingKey,
                         "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                         "label" to "forms.numberOfPeople.label",
-                    ).withBackUrlIfNotNullAndNotChangingAnswer(backUrl, isChangingAnswer),
+                    ).withBackUrlIfNotNullAndNotCheckingAnswers(backUrl, isCheckingAnswers),
                 latestNumberOfHouseholds = getLatestNumberOfHouseholds(),
             ),
         nextAction = { _, _ -> Pair(checkOccupancyAnswersStepId, null) },

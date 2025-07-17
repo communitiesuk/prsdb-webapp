@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintVal
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
+import java.time.LocalDate
 
 @IsValidPrioritised
 class TodayOrPastDateFormModel : DateFormModel() {
@@ -178,5 +179,16 @@ class TodayOrPastDateFormModel : DateFormModel() {
         val date = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
         val today = DateTimeHelper().getCurrentDateInUK()
         return date <= today
+    }
+
+    companion object {
+        fun fromDateOrNull(date: LocalDate?): TodayOrPastDateFormModel? =
+            date?.let {
+                TodayOrPastDateFormModel().apply {
+                    day = date.dayOfMonth.toString()
+                    month = date.monthValue.toString()
+                    year = date.year.toString()
+                }
+            }
     }
 }

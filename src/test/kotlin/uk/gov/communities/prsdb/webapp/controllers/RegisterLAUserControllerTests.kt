@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -40,6 +41,8 @@ class RegisterLAUserControllerTests(
     private val validToken = "token123"
 
     private val invalidToken = "invalid-token"
+
+    private val expiredToken = "expired-token"
 
     @BeforeEach
     fun setupMocks() {
@@ -64,10 +67,28 @@ class RegisterLAUserControllerTests(
     fun `acceptInvitation endpoint rejects invalid token`() {
         mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$invalidToken").andExpect {
             status { is3xxRedirection() }
+            redirectedUrl(RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
         }
 
         verify(invitationService).tokenIsValid(invalidToken)
         verify(invitationService, never()).storeTokenInSession(invalidToken)
+    }
+
+    @Test
+    @WithMockUser
+    fun `acceptInvitation endpoints deletes an expired token from the database and redirects to the invalid link page`() {
+        val returnedInvitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
+        whenever(invitationService.tokenIsValid(expiredToken)).thenReturn(false)
+        whenever(invitationService.getInvitationFromToken(expiredToken)).thenReturn(returnedInvitation)
+        whenever(invitationService.getInvitationHasExpired(returnedInvitation)).thenReturn(true)
+
+        mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$expiredToken").andExpect {
+            status { is3xxRedirection() }
+            redirectedUrl(RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+        }
+
+        verify(invitationService).deleteInvitation(returnedInvitation)
+        verify(invitationService, never()).storeTokenInSession(expiredToken)
     }
 
     @Test
@@ -118,6 +139,20 @@ class RegisterLAUserControllerTests(
     }
 
     @Test
+    @WithMockUser
+    fun `getLandingPage redirects if there is no valid token in the session and clears any token from the session`() {
+        whenever(invitationService.getTokenFromSession()).thenReturn(null)
+        mvc
+            .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+            }
+
+        verify(invitationService).clearTokenFromSession()
+    }
+
+    @Test
     @WithMockUser(roles = ["LA_USER"])
     fun `getLandingPage returns 302 for authenticated user with Local Authority role`() {
         whenever(userRolesService.getHasLocalAuthorityRole(any())).thenReturn(true)
@@ -128,5 +163,34 @@ class RegisterLAUserControllerTests(
                 status { is3xxRedirection() }
                 redirectedUrl(LocalAuthorityDashboardController.LOCAL_AUTHORITY_DASHBOARD_URL)
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_USER"])
+    fun `getLandingPage deletes the invitation for authenticated user with Local Authority role`() {
+        val invitation = LocalAuthorityInvitation()
+        whenever(invitationService.getInvitationFromToken(validToken)).thenReturn(invitation)
+        whenever(userRolesService.getHasLocalAuthorityRole(any())).thenReturn(true)
+        mvc
+            .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
+                with(oidcLogin())
+            }
+
+        verify(invitationService).deleteInvitation(invitation)
+        verify(invitationService).clearTokenFromSession()
+    }
+
+    @Test
+    @WithMockUser
+    fun `getJourneyStep redirects if there is no valid token in the session and clears any token from the session`() {
+        whenever(invitationService.getTokenFromSession()).thenReturn(null)
+        mvc
+            .get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/name")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+            }
+
+        verify(invitationService).clearTokenFromSession()
     }
 }

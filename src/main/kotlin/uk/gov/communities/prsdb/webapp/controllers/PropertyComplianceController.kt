@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
@@ -33,11 +34,14 @@ import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
@@ -59,6 +63,7 @@ class PropertyComplianceController(
     private val tokenCookieService: TokenCookieService,
     private val fileUploader: FileUploader,
     private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
+    private val propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory,
     private val validator: Validator,
     private val propertyComplianceService: PropertyComplianceService,
 ) {
@@ -95,6 +100,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         principal: Principal,
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -103,13 +109,10 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceJourneyFactory
-                .create(propertyOwnershipId)
-                .getModelAndViewForStep(stepName, subpage)
+                .create(propertyOwnershipId, checkingAnswersForStep)
+                .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
 
-        if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
-            val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
-            response.addCookie(cookie)
-        }
+        addCookieIfStepIsFileUploadStep(stepName, request, response)
 
         return stepModelAndView
     }
@@ -119,18 +122,17 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestParam formData: PageData,
         principal: Principal,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
-        // postJourneyData() is used for a file upload endpoint.
-        val annotatedFormData = formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
+        val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
-            .completeStep(stepName, annotatedFormData, subpage, principal)
+            .create(propertyOwnershipId, checkingAnswersForStep)
+            .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -138,6 +140,7 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
@@ -146,6 +149,164 @@ class PropertyComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
+        val formData =
+            uploadFileAndReturnFormModel(
+                propertyOwnershipId,
+                stepName,
+                fileInputIterator,
+                token,
+                request,
+                response,
+            )
+
+        return propertyComplianceJourneyFactory
+            .create(propertyOwnershipId, checkingAnswersForStep)
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+                checkingAnswersForStep,
+            )
+    }
+
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    fun getConfirmation(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No property compliance was added for property ownership $propertyOwnershipId in this session",
+            )
+        }
+
+        val propertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+                ?: throw ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No property compliance found for property ownership $propertyOwnershipId",
+                )
+
+        val confirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
+
+        model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.property.address.singleLineAddress)
+        model.addAttribute("confirmationMessageKeys", confirmationMessageKeys)
+        model.addAttribute("gasSafeRegisterUrl", GAS_SAFE_REGISTER)
+        model.addAttribute("rcpElectricalInfoUrl", RCP_ELECTRICAL_INFO_URL)
+        model.addAttribute("rcpElectricalRegisterUrl", RCP_ELECTRICAL_REGISTER_URL)
+        model.addAttribute("electricalSafetyStandardsUrl", ELECTRICAL_SAFETY_STANDARDS_URL)
+        model.addAttribute("getNewEpcUrl", GET_NEW_EPC_URL)
+        model.addAttribute("registerMeesExemptionUrl", REGISTER_PRS_EXEMPTION_URL)
+        model.addAttribute("propertiesWithoutComplianceUrl", INCOMPLETE_COMPLIANCES_URL)
+        model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        return if (confirmationMessageKeys.nonCompliantMsgKeys.isEmpty()) {
+            "fullyCompliantPropertyConfirmation"
+        } else {
+            "partiallyCompliantPropertyConfirmation"
+        }
+    }
+
+    @GetMapping("/$UPDATE_PATH_SEGMENT/{stepName}")
+    fun getUpdateJourneyStep(
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable("stepName") stepName: String,
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
+        principal: Principal,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        val stepModelAndView =
+            propertyComplianceUpdateJourneyFactory
+                .create(stepName, propertyOwnershipId, checkingAnswersForStep)
+                .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
+
+        addCookieIfStepIsFileUploadStep(stepName, request, response)
+
+        return stepModelAndView
+    }
+
+    @PostMapping("/$UPDATE_PATH_SEGMENT/{stepName}", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    fun postUpdateJourneyData(
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable("stepName") stepName: String,
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
+        @RequestParam formData: PageData,
+        principal: Principal,
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
+
+        return propertyComplianceUpdateJourneyFactory
+            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
+            .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
+    }
+
+    @PostMapping("/$UPDATE_PATH_SEGMENT/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun postFileUploadUpdateJourneyData(
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable("stepName") stepName: String,
+        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
+        @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
+        @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
+        principal: Principal,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        val formData =
+            uploadFileAndReturnFormModel(
+                propertyOwnershipId,
+                stepName,
+                fileInputIterator,
+                token,
+                request,
+                response,
+            )
+
+        return propertyComplianceUpdateJourneyFactory
+            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
+            .completeStep(
+                stepName,
+                formData,
+                subpage,
+                principal,
+                checkingAnswersForStep,
+            )
+    }
+
+    private fun throwErrorIfUserIsNotAuthorized(
+        baseUserId: String,
+        propertyOwnershipId: Long,
+    ) {
+        if (!propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, baseUserId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "User $baseUserId is not authorized to provide compliance for property ownership $propertyOwnershipId",
+            )
+        }
+    }
+
+    private fun uploadFileAndReturnFormModel(
+        propertyOwnershipId: Long,
+        stepName: String,
+        fileInputIterator: FileItemInputIterator,
+        token: String,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): PageData {
         if (tokenCookieService.isTokenForCookieValue(token, request.requestURI)) {
             tokenCookieService.useToken(token)
         } else {
@@ -173,76 +334,13 @@ class PropertyComplianceController(
             response.addCookie(cookie)
         }
 
-        val formData =
-            UploadCertificateFormModel
-                .fromFileItemInput(
-                    formModelClass,
-                    file,
-                    request.contentLengthLong,
-                    isUploadSuccessfulOrNull,
-                ).toPageData()
-
-        return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
-            .completeStep(
-                stepName,
-                formData,
-                subpage,
-                principal,
-            )
-    }
-
-    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-        model: Model,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No property compliance was added for property ownership $propertyOwnershipId in this session",
-            )
-        }
-
-        val propertyCompliance =
-            propertyComplianceService.getComplianceForProperty(propertyOwnershipId) ?: throw ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "No property compliance found for property ownership $propertyOwnershipId",
-            )
-
-        val confirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
-
-        model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.property.address.singleLineAddress)
-        model.addAttribute("confirmationMessageKeys", confirmationMessageKeys)
-        model.addAttribute("gasSafeRegisterUrl", GAS_SAFE_REGISTER)
-        model.addAttribute("rcpElectricalInfoUrl", RCP_ELECTRICAL_INFO_URL)
-        model.addAttribute("rcpElectricalRegisterUrl", RCP_ELECTRICAL_REGISTER_URL)
-        model.addAttribute("electricalSafetyStandardsUrl", ELECTRICAL_SAFETY_STANDARDS_URL)
-        model.addAttribute("getNewEpcUrl", GET_NEW_EPC_URL)
-        model.addAttribute("registerMeesExemptionUrl", REGISTER_PRS_EXEMPTION_URL)
-        model.addAttribute("propertiesWithoutComplianceUrl", INCOMPLETE_COMPLIANCES_URL)
-        model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
-
-        return if (confirmationMessageKeys.nonCompliantMsgKeys.isEmpty()) {
-            "fullyCompliantPropertyConfirmation"
-        } else {
-            "partiallyCompliantPropertyConfirmation"
-        }
-    }
-
-    private fun throwErrorIfUserIsNotAuthorized(
-        baseUserId: String,
-        propertyOwnershipId: Long,
-    ) {
-        if (!propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, baseUserId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "User $baseUserId is not authorized to provide compliance for property ownership $propertyOwnershipId",
-            )
-        }
+        return UploadCertificateFormModel
+            .fromFileItemInput(
+                formModelClass,
+                file,
+                request.contentLengthLong,
+                isUploadSuccessfulOrNull,
+            ).toPageData()
     }
 
     private fun isFileValid(
@@ -260,8 +358,27 @@ class PropertyComplianceController(
         fileLength: Long,
     ): Boolean = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
 
+    private fun addCookieIfStepIsFileUploadStep(
+        stepName: String,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ) {
+        if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
+            val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
+            response.addCookie(cookie)
+        }
+    }
+
+    private fun annotateFormDataForMetadataOnlyFileUpload(formData: PageData): PageData {
+        // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
+        // postJourneyData() is used for a file upload endpoint.
+        return formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
+    }
+
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
+
+        const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
 
@@ -270,6 +387,14 @@ class PropertyComplianceController(
 
         fun getPropertyComplianceTaskListPath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_TASK_LIST_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =
+            UriTemplate(UPDATE_PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getUpdatePropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            stepId: PropertyComplianceStepId,
+        ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
 
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }

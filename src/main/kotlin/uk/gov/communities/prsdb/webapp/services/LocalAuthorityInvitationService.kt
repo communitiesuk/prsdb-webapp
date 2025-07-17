@@ -1,13 +1,17 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import kotlinx.datetime.Clock
+import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
-import uk.gov.communities.prsdb.webapp.exceptions.InvalidTokenException
+import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import java.util.UUID
+import kotlin.time.Duration.Companion.hours
 
 @PrsdbWebService
 class LocalAuthorityInvitationService(
@@ -30,7 +34,8 @@ class LocalAuthorityInvitationService(
 
     fun getInvitationFromToken(token: String): LocalAuthorityInvitation {
         val tokenUuid = UUID.fromString(token)
-        val invitation = invitationRepository.findByToken(tokenUuid) ?: throw InvalidTokenException("Token not found in database")
+        val invitation =
+            invitationRepository.findByToken(tokenUuid) ?: throw TokenNotFoundException("Invitation token not found in database")
 
         return invitation
     }
@@ -45,12 +50,11 @@ class LocalAuthorityInvitationService(
 
     fun tokenIsValid(token: String): Boolean {
         try {
-            getInvitationFromToken(token)
-        } catch (e: InvalidTokenException) {
+            val invitation = getInvitationFromToken(token)
+            return !getInvitationHasExpired(invitation)
+        } catch (e: TokenNotFoundException) {
             return false
         }
-
-        return true
     }
 
     fun storeTokenInSession(token: String) {
@@ -64,4 +68,13 @@ class LocalAuthorityInvitationService(
     }
 
     fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getReferenceById(id)
+
+    fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
+        val expiresAtInstant =
+            invitation.createdDate
+                .toKotlinInstant()
+                .plus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+
+        return Clock.System.now() > expiresAtInstant
+    }
 }

@@ -2,15 +2,16 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
-import uk.gov.communities.prsdb.webapp.constants.CHANGE_ANSWER_FOR_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class SummaryListRowViewModel(
     val fieldHeading: String,
     val fieldValue: Any?,
-    val changeUrl: String?,
+    val action: SummaryListRowActionViewModel? = null,
     val valueUrl: String? = null,
+    val valueUrlOpensNewTab: Boolean = false,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {
@@ -32,14 +33,26 @@ data class SummaryListRowViewModel(
         fun forCheckYourAnswersPage(
             fieldHeading: String,
             fieldValue: Any?,
-            changeUrl: String?,
+            actionUrl: String?,
             valueUrl: String? = null,
+            actionValue: String = "forms.links.change",
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
                 fieldValue = fieldValue,
-                changeUrl = changeUrl?.let { "$it?$CHANGE_ANSWER_FOR_PARAMETER_NAME=$it" },
+                action =
+                    actionUrl?.let {
+                        SummaryListRowActionViewModel(
+                            actionValue,
+                            "$it?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=$it",
+                        )
+                    },
                 valueUrl = valueUrl,
             )
     }
 }
+
+data class SummaryListRowActionViewModel(
+    val text: String,
+    val url: String,
+)

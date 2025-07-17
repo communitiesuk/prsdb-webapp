@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
@@ -14,9 +16,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
+import java.time.LocalDate
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -70,24 +76,119 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `getComplianceForProperty retrieves the compliance record for the given property ownership ID`() {
+    fun `getComplianceForPropertyOrNull retrieves the compliance record for the given property ownership ID`() {
         val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
             .thenReturn(expectedPropertyCompliance)
 
-        val returnedPropertyCompliance = propertyComplianceService.getComplianceForProperty(expectedPropertyCompliance.propertyOwnership.id)
+        val returnedPropertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(expectedPropertyCompliance.propertyOwnership.id)
 
         assertEquals(returnedPropertyCompliance, returnedPropertyCompliance)
     }
 
     @Test
-    fun `getComplianceForProperty returns null when no compliance record exists for the given property ownership ID`() {
+    fun `getComplianceForPropertyOrNull returns null when no compliance record exists for the given property ownership ID`() {
         val propertyOwnershipId = 123L
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
 
-        val returnedPropertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
+        val returnedPropertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         assertNull(returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `getComplianceForProperty retrieves the compliance record for the given property ownership ID`() {
+        val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
+            .thenReturn(expectedPropertyCompliance)
+
+        val returnedPropertyCompliance =
+            propertyComplianceService.getComplianceForProperty(expectedPropertyCompliance.propertyOwnership.id)
+
+        assertEquals(expectedPropertyCompliance, returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `getComplianceForProperty throws an exception when no compliance record exists for the given property ownership ID`() {
+        val propertyOwnershipId = 123L
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
+
+        assertThrows<EntityNotFoundException> { propertyComplianceService.getComplianceForProperty(propertyOwnershipId) }
+    }
+
+    @Test
+    fun `updatePropertyCompliance changes the certificates associated with the given update model's non-null values`() {
+        // Arrange
+        val propertyCompliance =
+            MockPropertyComplianceData.createPropertyCompliance(
+                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertEngineerNum = "1234567",
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+            )
+
+        val updateModel =
+            PropertyComplianceUpdateModel(
+                gasSafetyCertUpdate =
+                    GasSafetyCertUpdateModel(
+                        exemptionReason = GasSafetyExemptionReason.OTHER,
+                        exemptionOtherReason = "Other reason",
+                    ),
+            )
+
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
+            .thenReturn(propertyCompliance)
+
+        // Act
+        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel)
+
+        // Assert
+        assertEquals(updateModel.gasSafetyCertUpdate?.s3Key, propertyCompliance.gasSafetyCertS3Key)
+        assertEquals(updateModel.gasSafetyCertUpdate?.issueDate, propertyCompliance.gasSafetyCertIssueDate)
+        assertEquals(updateModel.gasSafetyCertUpdate?.engineerNum, propertyCompliance.gasSafetyCertEngineerNum)
+        assertEquals(updateModel.gasSafetyCertUpdate?.exemptionReason, propertyCompliance.gasSafetyCertExemptionReason)
+        assertEquals(updateModel.gasSafetyCertUpdate?.exemptionOtherReason, propertyCompliance.gasSafetyCertExemptionOtherReason)
+    }
+
+    @Test
+    fun `updatePropertyCompliance does not change the certificates associated with the given update model's null values`() {
+        // Arrange
+        val propertyCompliance =
+            MockPropertyComplianceData.createPropertyCompliance(
+                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertEngineerNum = "1234567",
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+            )
+
+        val originalEicrS3Key = propertyCompliance.eicrS3Key
+        val originalEicrIssueDate = propertyCompliance.eicrIssueDate
+        val originalEicrExemptionReason = propertyCompliance.eicrExemptionReason
+        val originalEicrExemptionOtherReason = propertyCompliance.eicrExemptionOtherReason
+
+        val updateModel =
+            PropertyComplianceUpdateModel(
+                gasSafetyCertUpdate =
+                    GasSafetyCertUpdateModel(
+                        exemptionReason = GasSafetyExemptionReason.OTHER,
+                        exemptionOtherReason = "Other reason",
+                    ),
+            )
+
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
+            .thenReturn(propertyCompliance)
+
+        // Act
+        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel)
+
+        // Assert
+        assertEquals(originalEicrS3Key, propertyCompliance.eicrS3Key)
+        assertEquals(originalEicrIssueDate, propertyCompliance.eicrIssueDate)
+        assertEquals(originalEicrExemptionReason, propertyCompliance.eicrExemptionReason)
+        assertEquals(originalEicrExemptionOtherReason, propertyCompliance.eicrExemptionOtherReason)
     }
 
     @Test

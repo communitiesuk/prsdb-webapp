@@ -10,7 +10,9 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -30,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -65,7 +68,9 @@ import kotlin.test.Test
         RegisterPropertyController::class,
         PropertyComplianceController::class,
     ],
+    properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
+@Import(AbsoluteUrlProvider::class)
 class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
@@ -110,10 +115,16 @@ class LandlordDashboardUrlTests(
     private lateinit var mockPropertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
 
     @MockitoBean
+    private lateinit var mockPropertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory
+
+    @MockitoBean
     private lateinit var mockValidator: Validator
 
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @Autowired
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 
@@ -127,7 +138,7 @@ class LandlordDashboardUrlTests(
                 mockJourneyDataService,
                 mock(),
                 mockLandlordService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
                 mockEmailNotificationService,
                 mock(),
             )
@@ -186,7 +197,7 @@ class LandlordDashboardUrlTests(
                 mockPropertyRegistrationService,
                 mock(),
                 mockLandlordService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
                 mockEmailNotificationService,
             )
         whenever(mockPropertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
@@ -277,9 +288,10 @@ class LandlordDashboardUrlTests(
                 MockMessageSource(),
                 mockEmailNotificationService,
                 mockEmailNotificationService,
-                AbsoluteUrlProvider(),
+                absoluteUrlProvider,
+                checkingAnswersForStep = null,
             )
-        whenever(mockPropertyComplianceJourneyFactory.create(any())).thenReturn(propertyComplianceJourney)
+        whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
 
         // Act, Assert
         mvc
