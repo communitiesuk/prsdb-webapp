@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -11,16 +13,16 @@ class GasSafetyViewModelBuilder {
         fun fromEntity(
             propertyCompliance: PropertyCompliance,
             withActionLinks: Boolean,
-        ): List<SummaryListRowViewModel> =
-            mutableListOf<SummaryListRowViewModel>()
+        ): List<SummaryListRowViewModel> {
+            val baseUrl = PropertyComplianceController.getUpdatePropertyCompliancePath(propertyCompliance.propertyOwnership.id)
+            return mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
                         key = "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                         // TODO PRSD-976 add link to download certificate and appropriate messages when required
                         value = getGasCertificateMessageKey(propertyCompliance),
                         actionText = "forms.links.change",
-                        // TODO PRSD-1244 add Update Gas Compliance Link
-                        actionLink = "#",
+                        actionLink = "$baseUrl/${PropertyComplianceStepId.UpdateGasSafety.urlPathSegment}",
                         withActionLink = withActionLinks,
                     )
                     if (propertyCompliance.gasSafetyCertIssueDate != null) {
@@ -43,6 +45,7 @@ class GasSafetyViewModelBuilder {
                         )
                     }
                 }.toList()
+        }
 
         private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String =
             if (propertyCompliance.gasSafetyCertS3Key != null) {

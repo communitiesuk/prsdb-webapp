@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsAddingNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
@@ -23,6 +25,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -198,19 +202,43 @@ class PropertyComplianceUpdateJourney(
                 ),
             )
 
-    // TODO PRSD-1244: Implement gas safety step
     private val updateGasSafetyStep
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateGasSafety,
                 page =
                     Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
+                        formModel = UpdateGasSafetyCertificateFormModel::class,
+                        templateName = "forms/simpleRadiosForm",
                         content =
-                            mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety step"),
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.update.gasSafetyType.fieldSetHeading",
+                                "fieldSetHint" to "forms.gasSafety.fieldSetHint",
+                                "radioVariableName" to UpdateGasSafetyCertificateFormModel::isUploadingNewCertificate.name,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            labelMsgKey = "forms.update.gasSafetyType.certificate",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            labelMsgKey = "forms.update.gasSafetyType.exemption",
+                                        ),
+                                    ),
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                                BACK_URL_ATTR_NAME to
+                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ),
                     ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyIssueDate, null) },
+                nextAction = { journeyData, _ ->
+                    if (journeyData.getIsAddingNewGasSafetyCertificate()) {
+                        Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
+                    } else {
+                        Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
+                    }
+                },
                 saveAfterSubmit = false,
             )
 

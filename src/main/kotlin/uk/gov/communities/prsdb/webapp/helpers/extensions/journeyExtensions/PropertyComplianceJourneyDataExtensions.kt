@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
     companion object {
@@ -43,6 +44,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.GasSafety.urlPathSegment,
                 GasSafetyFormModel::hasCert.name,
             )
+
+        fun JourneyData.getIsAddingNewGasSafetyCertificate() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
+                UpdateGasSafetyCertificateFormModel::isUploadingNewCertificate.name,
+            ) ?: false
 
         fun JourneyData.getGasSafetyCertIssueDate() =
             this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
