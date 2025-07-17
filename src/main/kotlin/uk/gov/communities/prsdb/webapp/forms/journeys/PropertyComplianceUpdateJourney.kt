@@ -30,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
-import kotlin.reflect.KFunction
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,

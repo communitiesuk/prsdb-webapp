@@ -198,7 +198,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     }
 
     companion object {
-        private const val PROPERTY_OWNERSHIP_ID = 8L
+        private const val PROPERTY_OWNERSHIP_ID = 9L
 
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
 

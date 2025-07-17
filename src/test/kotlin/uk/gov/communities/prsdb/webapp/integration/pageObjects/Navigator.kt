@@ -29,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrati
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
@@ -947,11 +946,6 @@ class Navigator(
     }
 
     fun goToPropertyComplianceUpdateUpdateEicrPage(propertyOwnershipId: Long): UpdateEicrPagePropertyComplianceUpdate {
-        // TODO PRSD-1246 - once the original journey data is set up in the journey, we shouldn't need to set it in the session here
-        setJourneyDataInSession(
-            PropertyComplianceUpdateJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicr().build(),
-        )
         navigate(
             PropertyComplianceController.getUpdatePropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.UpdateEICR.urlPathSegment}",
