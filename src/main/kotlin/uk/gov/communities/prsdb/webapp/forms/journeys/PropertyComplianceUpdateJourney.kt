@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsAddingNewGasSafetyCertificate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -235,7 +235,7 @@ class PropertyComplianceUpdateJourney(
                                 "title" to "propertyCompliance.title",
                                 "fieldSetHeading" to "forms.update.gasSafetyType.fieldSetHeading",
                                 "fieldSetHint" to "forms.gasSafety.fieldSetHint",
-                                "radioVariableName" to UpdateGasSafetyCertificateFormModel::isUploadingNewCertificate.name,
+                                "radioVariableName" to UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
                                 "radioOptions" to
                                     listOf(
                                         RadiosButtonViewModel(
@@ -253,7 +253,7 @@ class PropertyComplianceUpdateJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ ->
-                    if (journeyData.getIsAddingNewGasSafetyCertificate()) {
+                    if (journeyData.getHasNewGasSafetyCertificate()) {
                         Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
                     } else {
                         Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)

@@ -15,5 +15,5 @@ class UpdateGasSafetyCertificateFormModel : FormModel {
             ),
         ],
     )
-    var isUploadingNewCertificate: Boolean? = null
+    var hasNewCertificate: Boolean? = null
 }

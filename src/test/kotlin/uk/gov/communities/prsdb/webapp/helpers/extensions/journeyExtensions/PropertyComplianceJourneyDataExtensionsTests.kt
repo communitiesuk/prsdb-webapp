@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
@@ -123,6 +124,16 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedHasGasSafetyCert = testJourneyData.getHasGasSafetyCert()
 
         assertEquals(hasGasSafetyCert, retrievedHasGasSafetyCert)
+    }
+
+    @Test
+    fun `getHasNewGasSafetyCertificate returns a boolean if the corresponding page is in journeyData`() {
+        val hasNewGasSafetyCert = true
+        val testJourneyData = journeyDataBuilder.withNewGasSafetyCertStatus(hasNewGasSafetyCert).build()
+
+        val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
+
+        assertEquals(hasNewGasSafetyCert, retrievedHasGasSafetyCert)
     }
 
     @Test

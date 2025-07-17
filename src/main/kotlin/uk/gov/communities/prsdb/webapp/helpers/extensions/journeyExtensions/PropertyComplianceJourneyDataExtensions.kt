@@ -45,11 +45,11 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 GasSafetyFormModel::hasCert.name,
             )
 
-        fun JourneyData.getIsAddingNewGasSafetyCertificate() =
+        fun JourneyData.getHasNewGasSafetyCertificate() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
-                UpdateGasSafetyCertificateFormModel::isUploadingNewCertificate.name,
+                UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
             ) ?: false
 
         fun JourneyData.getGasSafetyCertIssueDate() =
