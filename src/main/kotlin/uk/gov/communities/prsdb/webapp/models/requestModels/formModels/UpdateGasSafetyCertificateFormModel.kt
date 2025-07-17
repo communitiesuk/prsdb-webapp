@@ -10,7 +10,7 @@ class UpdateGasSafetyCertificateFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.gasSafety.error.missing",
+                messageKey = "forms.update.gasSafetyType.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],
