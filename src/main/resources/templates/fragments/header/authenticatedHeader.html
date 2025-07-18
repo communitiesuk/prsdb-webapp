@@ -90,7 +90,7 @@
                             th:classappend="${navLink.isActive ? 'govuk-service-navigation__item--active' : ''}">
                             <a class="govuk-service-navigation__link" th:href="@{${navLink.href}}"
                                th:text="#{${navLink.messageProperty}}"
-                               th:attr="aria-current=${navLink.isActive ? 'true' : ''}">
+                               th:attr="aria-current=${navLink.isActive ? 'page' : ''}">
                                 Service link
                             </a>
                         </li>
