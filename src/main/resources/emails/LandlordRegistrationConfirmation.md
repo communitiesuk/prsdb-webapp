@@ -6,5 +6,5 @@ Your landlord registration number (LRN) is:
 
 [Sign into the database](((PRSD URL))) to view your landlord record and register your properties.
 
-
+---
 This is an automated email - do not reply.
