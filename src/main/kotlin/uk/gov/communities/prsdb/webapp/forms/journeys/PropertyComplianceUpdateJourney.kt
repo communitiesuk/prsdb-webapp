@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -15,7 +16,14 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
@@ -253,7 +261,7 @@ class PropertyComplianceUpdateJourney(
                             ),
                     ),
                 nextAction = { journeyData, _ ->
-                    if (journeyData.getHasNewGasSafetyCertificate()) {
+                    if (journeyData.getHasNewGasSafetyCertificate()!!) {
                         Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
                     } else {
                         Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
@@ -270,6 +278,9 @@ class PropertyComplianceUpdateJourney(
                 page = CheckUpdateGasSafetyAnswersPage(journeyDataService),
                 saveAfterSubmit = false,
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect()
+                },
             )
 
     // TODO PRSD-1246: Implement new EICR or exemption step
@@ -364,15 +375,40 @@ class PropertyComplianceUpdateJourney(
 
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
+    /*
+    Example update and redirect method from the landlord journey:
+
+    private fun updateLandlordWithChangesAndRedirect(): String {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+
+        val landlordUpdate =
+            LandlordUpdateModel(
+                email = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
+                name = LandlordDetailsUpdateJourneyDataHelper.getNameUpdateIfPresent(journeyData),
+                phoneNumber = LandlordDetailsUpdateJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
+                address = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(journeyData),
+                dateOfBirth = LandlordDetailsUpdateJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
+            )
+
+        landlordService.updateLandlordForBaseUserId(
+            SecurityContextHolder.getContext().authentication.name,
+            landlordUpdate,
+        )
+
+        journeyDataService.removeJourneyDataAndContextIdFromSession()
+
+        return LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
+    }
+     */
 
     // TODO PRSD-1245, 1247, 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
-        // TODO PRSD-1245: Add gas safety updates from journeyData to complianceUpdate
+        val gasSafetyUpdate = createGasSafetyUpdateOrNull(journeyData, propertyOwnershipId)
         // TODO PRSD-1247: Add EICR updates from journeyData to complianceUpdate
         // TODO PRSD-1313: Add EPC updates from journeyData to complianceUpdate
-        val complianceUpdate = PropertyComplianceUpdateModel()
+        val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate)
 
         propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate)
 
@@ -380,6 +416,27 @@ class PropertyComplianceUpdateJourney(
 
         return PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
     }
+
+    fun createGasSafetyUpdateOrNull(
+        journeyData: JourneyData,
+        propertyOwnershipId: Long,
+    ): GasSafetyCertUpdateModel? =
+        journeyData.getHasNewGasSafetyCertificate()?.let { data ->
+            GasSafetyCertUpdateModel(
+                s3Key =
+                    journeyData.getGasSafetyCertOriginalName()?.let {
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            propertyOwnershipId,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            it,
+                        )
+                    },
+                issueDate = journeyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
+                engineerNum = journeyData.getGasSafetyCertEngineerNum(),
+                exemptionReason = journeyData.getGasSafetyCertExemptionReason(),
+                exemptionOtherReason = journeyData.getGasSafetyCertExemptionOtherReason(),
+            )
+        }
 
     companion object {
         val initialStepId = PropertyComplianceStepId.UpdateGasSafety

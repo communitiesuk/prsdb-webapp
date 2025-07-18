@@ -146,12 +146,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getHasNewGasSafetyCertificate returns false if the corresponding page is not in journeyData`() {
+    fun `getHasNewGasSafetyCertificate returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
 
-        assertEquals(false, retrievedHasGasSafetyCert)
+        assertNull(retrievedHasGasSafetyCert)
     }
 
     @Test

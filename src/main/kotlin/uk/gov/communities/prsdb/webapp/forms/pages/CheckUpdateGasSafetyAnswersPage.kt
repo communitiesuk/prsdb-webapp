@@ -20,7 +20,7 @@ class CheckUpdateGasSafetyAnswersPage(
     ) {
     val gasSafetyDataFactory =
         GasSafetySummaryRowsFactory(
-            doesDataHaveGasSafetyCert = { data -> data.getHasNewGasSafetyCertificate() },
+            doesDataHaveGasSafetyCert = { data -> data.getHasNewGasSafetyCertificate()!! },
             gasSafetyStartingStep = PropertyComplianceStepId.UpdateGasSafety,
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemptionReason,
         )

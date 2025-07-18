@@ -50,7 +50,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
                 UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
-            ) ?: false
+            )
 
         fun JourneyData.getGasSafetyCertIssueDate() =
             this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
