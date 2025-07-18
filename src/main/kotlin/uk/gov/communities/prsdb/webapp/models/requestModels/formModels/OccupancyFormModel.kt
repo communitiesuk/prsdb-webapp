@@ -1,21 +1,12 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import jakarta.validation.constraints.NotNull
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
-import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class OccupancyFormModel : FormModel {
-    @ValidatedBy(
-        constraints = [
-            ConstraintDescriptor(
-                messageKey = "forms.occupancy.radios.error.missing",
-                validatorType = NotNullConstraintValidator::class,
-            ),
-        ],
-    )
+    @NotNull(message = "forms.occupancy.radios.error.missing")
     var occupied: Boolean? = null
 
     companion object {
