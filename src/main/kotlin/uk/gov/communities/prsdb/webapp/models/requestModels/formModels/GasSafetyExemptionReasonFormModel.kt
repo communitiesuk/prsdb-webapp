@@ -12,10 +12,8 @@ class GasSafetyExemptionReasonFormModel : FormModel {
 
     companion object {
         fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyExemptionReasonFormModel? =
-            record.gasSafetyCertExemptionReason?.let {
-                GasSafetyExemptionReasonFormModel().apply {
-                    this.exemptionReason = it
-                }
+            GasSafetyExemptionReasonFormModel().apply {
+                this.exemptionReason = record.gasSafetyCertExemptionReason ?: GasSafetyExemptionReason.OTHER
             }
     }
 }
