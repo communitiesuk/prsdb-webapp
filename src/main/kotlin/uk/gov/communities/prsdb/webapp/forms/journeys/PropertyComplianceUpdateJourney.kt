@@ -229,7 +229,7 @@ class PropertyComplianceUpdateJourney(
                 page =
                     Page(
                         formModel = UpdateGasSafetyCertificateFormModel::class,
-                        templateName = "forms/simpleRadiosForm",
+                        templateName = "forms/updateGasSafetyForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
