@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -19,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyCheckYourAnswersPropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyExemptionConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyExemptionOtherReasonPagePropertyComplianceUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyExemptionPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyExemptionReasonPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyIssueDatePagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyOutdatedPagePropertyComplianceUpdate
@@ -35,8 +33,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        // TODO: PRSD-1244 - check page content, go to Issue Date only if user has submitted "Add a new gas safety certificate"
-        updateGasSafetyPage.continueButton.clickAndWait()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
+        updateGasSafetyPage.form.submit()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -81,8 +79,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new outdated certificate)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        // TODO: PRSD-1244 - go to Issue Date only if user has submitted "Add a new gas safety certificate"
-        updateGasSafetyPage.continueButton.clickAndWait()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
+        updateGasSafetyPage.form.submit()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -99,17 +97,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1245 - check this page, should return to the Property Record page
     }
 
-    @Disabled
     @Test
     fun `User can add a new gas safety exemption if the pages are filled in correctly`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        // TODO: PRSD-1244 - go to Exemption only if user has submitted "Add an exemption"
-        updateGasSafetyPage.continueButton.clickAndWait()
-        val gasSafetyExemptionPage = assertPageIs(page, GasSafetyExemptionPagePropertyComplianceUpdate::class, urlArguments)
-
-        // Gas Safety Exemption page
-        gasSafetyExemptionPage.submitHasExemption()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
+        updateGasSafetyPage.form.submit()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
@@ -127,17 +120,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1245 - check this page, should return to the Property Record page
     }
 
-    @Disabled
     @Test
     fun `User can add a new gas safety exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        // TODO: PRSD-1244 - go to Exemption only if user has submitted "Add an exemption"
-        updateGasSafetyPage.continueButton.clickAndWait()
-        val gasSafetyExemptionPage = assertPageIs(page, GasSafetyExemptionPagePropertyComplianceUpdate::class, urlArguments)
-
-        // Gas Safety Exemption page
-        gasSafetyExemptionPage.submitHasExemption()
+        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
+        updateGasSafetyPage.form.submit()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page

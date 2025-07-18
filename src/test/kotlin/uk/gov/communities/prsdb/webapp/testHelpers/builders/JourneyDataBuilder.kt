@@ -53,6 +53,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
@@ -488,6 +489,12 @@ class JourneyDataBuilder(
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
+        return this
+    }
+
+    fun withNewGasSafetyCertStatus(hasNewGasSafetyCert: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
+            mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
         return this
     }
 

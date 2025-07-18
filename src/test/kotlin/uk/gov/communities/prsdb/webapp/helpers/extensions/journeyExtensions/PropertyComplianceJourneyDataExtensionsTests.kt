@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
@@ -126,12 +127,31 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `getHasNewGasSafetyCertificate returns a boolean if the corresponding page is in journeyData`() {
+        val hasNewGasSafetyCert = true
+        val testJourneyData = journeyDataBuilder.withNewGasSafetyCertStatus(hasNewGasSafetyCert).build()
+
+        val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
+
+        assertEquals(hasNewGasSafetyCert, retrievedHasGasSafetyCert)
+    }
+
+    @Test
     fun `getHasGasSafetyCert returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasGasSafetyCert = testJourneyData.getHasGasSafetyCert()
 
         assertNull(retrievedHasGasSafetyCert)
+    }
+
+    @Test
+    fun `getHasNewGasSafetyCertificate returns false if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
+
+        assertEquals(false, retrievedHasGasSafetyCert)
     }
 
     @Test

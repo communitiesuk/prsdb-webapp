@@ -26,7 +26,7 @@ class GasSafetyViewModelBuilderTests {
                 withActionLinks = withActionLinks,
             )
 
-        assertIterableEquals(gasSafetyRows, expectedRows)
+        assertIterableEquals(expectedRows, gasSafetyRows)
     }
 
     companion object {
@@ -49,8 +49,11 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                            // TODO PRSD-1244 add Update Gas Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                "/landlord/provide-compliance-certificates/" +
+                                    "${compliant.propertyOwnership.id}/update/update-gas-safety-certificate",
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -102,8 +105,11 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
-                            // TODO PRSD-1244 add Update Gas Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                "/landlord/provide-compliance-certificates/" +
+                                    "${expiredBeforeUpload.propertyOwnership.id}/update/update-gas-safety-certificate",
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -147,8 +153,11 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PRSD-1244 add Update Gas Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                "/landlord/provide-compliance-certificates/" +
+                                    "${missing.propertyOwnership.id}/update/update-gas-safety-certificate",
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
