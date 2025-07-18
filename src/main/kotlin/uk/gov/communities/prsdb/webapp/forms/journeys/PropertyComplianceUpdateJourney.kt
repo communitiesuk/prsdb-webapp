@@ -263,7 +263,6 @@ class PropertyComplianceUpdateJourney(
                 saveAfterSubmit = false,
             )
 
-    // TODO PRSD-1245: Implement gas safety check your answers step
     private val gasSafetyCheckYourAnswersStep
         get() =
             Step(
@@ -271,7 +270,7 @@ class PropertyComplianceUpdateJourney(
                 page = CheckUpdateGasSafetyAnswersPage(journeyDataService),
                 saveAfterSubmit = false,
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
-                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                handleSubmitAndRedirect = { _, _, _ ->
                     updateComplianceAndRedirect()
                 },
             )
@@ -394,7 +393,7 @@ class PropertyComplianceUpdateJourney(
     }
      */
 
-    // TODO PRSD-1245, 1247, 1313 - add this as the handleSubmitAndRedirect method and test
+    // TODO 1247, 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
 

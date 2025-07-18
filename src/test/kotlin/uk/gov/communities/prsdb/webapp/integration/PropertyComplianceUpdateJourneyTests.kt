@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafeEngineerNumPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyCheckYourAnswersPropertyComplianceUpdate
@@ -69,10 +70,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Gas Safety Cert. Upload Confirmation page
         assertThat(gasSafetyUploadConfirmationPage.heading).containsText("Your file is being scanned")
         gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("TODO PRSD-976")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test
@@ -91,10 +94,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Gas Safety Outdated page
         assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
         gasSafetyOutdatedPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Expired")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test
@@ -116,8 +121,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         gasSafetyExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test
@@ -142,8 +151,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         gasSafetyExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     companion object {
