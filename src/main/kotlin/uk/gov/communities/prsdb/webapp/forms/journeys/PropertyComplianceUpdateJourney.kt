@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -266,13 +267,7 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
-                        content =
-                            mapOf("todoComment" to "TODO PRSD-1245: Implement gas safety Check Your Answers step"),
-                    ),
+                page = CheckUpdateGasSafetyAnswersPage(journeyDataService),
                 saveAfterSubmit = false,
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )

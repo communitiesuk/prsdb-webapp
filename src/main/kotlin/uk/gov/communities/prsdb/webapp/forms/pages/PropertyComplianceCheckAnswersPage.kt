@@ -5,10 +5,9 @@ import kotlinx.datetime.plus
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.GasSafetySummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
@@ -16,10 +15,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionMissing
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrUploadConfirmation
@@ -27,9 +22,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcExpired
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcMissing
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcNotFound
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionConfirmation
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionMissing
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyUploadConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
@@ -47,6 +39,13 @@ class PropertyComplianceCheckAnswersPage(
         journeyDataService = journeyDataService,
         templateName = "forms/propertyComplianceCheckAnswersForm",
     ) {
+    val gasSafetyDataFactory =
+        GasSafetySummaryRowsFactory(
+            doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },
+            gasSafetyStartingStep = PropertyComplianceStepId.GasSafety,
+            changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
+        )
+
     override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> = emptyList()
 
     override fun furtherEnrichModel(
@@ -54,22 +53,11 @@ class PropertyComplianceCheckAnswersPage(
         filteredJourneyData: JourneyData,
     ) {
         modelAndView.addObject("propertyAddress", propertyAddressProvider())
-        modelAndView.addObject("gasSafetyData", getGasSafetyData(filteredJourneyData))
+        modelAndView.addObject("gasSafetyData", gasSafetyDataFactory.createRows(filteredJourneyData))
         modelAndView.addObject("eicrData", getEicrData(filteredJourneyData))
         modelAndView.addObject("epcData", getEpcData(filteredJourneyData))
         modelAndView.addObject("responsibilityData", getResponsibilityData(filteredJourneyData))
     }
-
-    private fun getGasSafetyData(filteredJourneyData: JourneyData) =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                add(getGasSafetyCertStatusRow(filteredJourneyData))
-                if (filteredJourneyData.getHasGasSafetyCert()!!) {
-                    addAll(getGasSafetyCertDetailRows(filteredJourneyData))
-                } else {
-                    add(getGasSafetyExemptionRow(filteredJourneyData))
-                }
-            }.toList()
 
     private fun getEicrData(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
@@ -113,72 +101,6 @@ class PropertyComplianceCheckAnswersPage(
                 actionValue = "forms.links.view",
             ),
         )
-
-    private fun getGasSafetyCertStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
-        val fieldValue =
-            // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-            if (filteredJourneyData.getHasCompletedGasSafetyUploadConfirmation()) {
-                "forms.checkComplianceAnswers.gasSafety.download"
-            } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionConfirmation()) {
-                "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
-            } else {
-                "forms.checkComplianceAnswers.certificate.expired"
-            }
-
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkComplianceAnswers.gasSafety.certificate",
-            fieldValue,
-            PropertyComplianceStepId.GasSafety.urlPathSegment,
-        )
-    }
-
-    private fun getGasSafetyCertDetailRows(filteredJourneyData: JourneyData) =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                val issueDate = filteredJourneyData.getGasSafetyCertIssueDate()!!
-                addAll(
-                    listOf(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkComplianceAnswers.certificate.issueDate",
-                            issueDate,
-                            PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment,
-                        ),
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkComplianceAnswers.certificate.validUntil",
-                            issueDate.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS)),
-                            null,
-                        ),
-                    ),
-                )
-
-                val engineerNum = filteredJourneyData.getGasSafetyCertEngineerNum()
-                if (engineerNum != null) {
-                    add(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkComplianceAnswers.gasSafety.engineerNumber",
-                            engineerNum,
-                            PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment,
-                        ),
-                    )
-                }
-            }.toList()
-
-    private fun getGasSafetyExemptionRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
-        val fieldValue: Any =
-            when (val exemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason()) {
-                null -> "commonText.none"
-                GasSafetyExemptionReason.OTHER -> listOf(exemptionReason, filteredJourneyData.getGasSafetyCertExemptionOtherReason())
-                else -> exemptionReason
-            }
-
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkComplianceAnswers.certificate.exemption",
-            fieldValue,
-            PropertyComplianceStepId.GasSafetyExemption.urlPathSegment,
-        )
-    }
 
     private fun getEicrStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
         val fieldValue =
