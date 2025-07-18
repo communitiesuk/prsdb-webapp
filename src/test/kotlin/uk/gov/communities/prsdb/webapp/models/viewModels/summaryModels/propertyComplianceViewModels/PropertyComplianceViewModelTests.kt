@@ -17,6 +17,28 @@ class PropertyComplianceViewModelTests {
         assertEquals(result.notificationMessages, expectedNotificationMessages)
     }
 
+    @Test
+    fun `landlordResponsibilitiesHintText returns correct message when landlord view is true`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+
+        val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
+
+        val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
+
+        assertEquals(result.landlordResponsibilitiesHintText, expectedMessage)
+    }
+
+    @Test
+    fun `landlordResponsibilitiesHintText returns  returns correct message when landlord view is false`() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+
+        val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.localAuthority.hintText"
+
+        val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
+
+        assertEquals(result.landlordResponsibilitiesHintText, expectedMessage)
+    }
+
     @Nested
     inner class WithNotificationLinks {
         @Test
@@ -39,7 +61,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -60,7 +82,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -81,7 +103,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -102,7 +124,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -119,7 +141,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -136,7 +158,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -153,7 +175,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -178,7 +200,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -199,7 +221,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -220,7 +242,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -241,7 +263,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -258,7 +280,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -275,7 +297,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -292,7 +314,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -309,7 +331,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = true)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = true)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -337,7 +359,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -358,7 +380,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -379,7 +401,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -400,7 +422,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -417,7 +439,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -434,7 +456,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -451,7 +473,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -476,7 +498,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -497,7 +519,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -518,7 +540,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -539,7 +561,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -556,7 +578,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -573,7 +595,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -590,7 +612,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
@@ -607,7 +629,7 @@ class PropertyComplianceViewModelTests {
                     ),
                 )
 
-            val result = PropertyComplianceViewModel(propertyCompliance, withNotificationLinks = false)
+            val result = PropertyComplianceViewModel(propertyCompliance, landlordView = false)
 
             assertEquals(result.notificationMessages, expectedNotificationMessages)
         }
