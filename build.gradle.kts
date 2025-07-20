@@ -113,7 +113,7 @@ val frontendAssetsSpec: CopySpec =
 tasks.register<Copy>("copyBuiltAssets") {
     into(layout.buildDirectory.dir("resources/main/static/assets"))
     with(frontendAssetsSpec)
-    upToDateWhen { false }
+    outputs.upToDateWhen { false }
 }
 
 tasks.withType<KotlinCompile> {
