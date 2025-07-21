@@ -291,7 +291,7 @@ class PropertyComplianceUpdateJourney(
                         content =
                             mapOf("todoComment" to "TODO PRSD-1246: Implement new EICR or exemption step"),
                     ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrIssueDate, null) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemption, null) },
                 saveAfterSubmit = false,
             )
 
