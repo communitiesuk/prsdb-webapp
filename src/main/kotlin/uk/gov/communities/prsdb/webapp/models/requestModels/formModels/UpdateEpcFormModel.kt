@@ -5,6 +5,6 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
 class UpdateEpcFormModel : FormModel {
-    @NotNull(message = "forms.update.gasSafetyType.error.missing")
+    @NotNull(message = "forms.update.epc.error.missing")
     var hasNewCertificate: Boolean? = null
 }
