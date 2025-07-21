@@ -55,7 +55,7 @@
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.epcSummaryList})}"></dl>
 
                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.landlordResponsibilities.heading}">propertyDetails.complianceInformation.landlordResponsibilities.heading</h2>
-                       <p class="govuk-hint" th:text="#{propertyDetails.complianceInformation.landlordResponsibilities.hintText}">propertyDetails.complianceInformation.landlordResponsibilities.hintText</p>
+                       <p class="govuk-hint" th:text="#{${complianceDetails.landlordResponsibilitiesHintText}}">the hint text for landlord responsibilities</p>
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.landlordResponsibilitiesSummaryList})}"></dl>
                    </div>
                 </div>
