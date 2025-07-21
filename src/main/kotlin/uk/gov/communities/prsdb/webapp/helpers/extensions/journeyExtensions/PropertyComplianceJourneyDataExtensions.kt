@@ -152,7 +152,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 EicrFormModel::hasCert.name,
             )
 
-        fun JourneyData.getHasNewEpc() =
+        fun JourneyData.getHasNewEPC() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 PropertyComplianceStepId.UpdateEpc.urlPathSegment,

@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceS
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEpc
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
@@ -368,7 +368,7 @@ class PropertyComplianceUpdateJourney(
             )
 
     private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
-        if (filteredJourneyData.getHasNewEpc()) {
+        if (filteredJourneyData.getHasNewEPC()) {
             if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
                 Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
             } else {

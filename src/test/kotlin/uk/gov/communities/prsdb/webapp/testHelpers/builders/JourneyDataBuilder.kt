@@ -53,6 +53,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -616,6 +617,12 @@ class JourneyDataBuilder(
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
+        return this
+    }
+
+    fun withNewEpcStatus(hasNewEpc: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateEpc.urlPathSegment] =
+            mapOf(UpdateEpcFormModel::hasNewCertificate.name to hasNewEpc)
         return this
     }
 
