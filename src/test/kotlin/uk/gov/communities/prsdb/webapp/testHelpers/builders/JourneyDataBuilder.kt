@@ -487,6 +487,12 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withUpdateGasSafetyCertificateStatus(hasNewGasSafetyCert: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
+            mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
+        return this
+    }
+
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
@@ -557,8 +563,19 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withGasSafetyUpdateCheckAnswers(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
+        return this
+    }
+
+    fun withUpdateEicrStatus(hasNewCertificate: Boolean): JourneyDataBuilder {
+        // TODO PRSD-1246: Update this to use the correct form model
+        journeyData[PropertyComplianceStepId.UpdateEICR.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -611,6 +628,11 @@ class JourneyDataBuilder(
         withEicrStatus(false)
         withEicrExemptionStatus(false)
         journeyData[PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withEicrUpdateCheckAnswers(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateEicrCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 

@@ -110,6 +110,14 @@ class JourneyPageDataBuilder {
         fun beforePropertyComplianceEicrExemptionOtherReason() =
             beforePropertyComplianceEicrExemptionReason().withEicrExemptionReason(EicrExemptionReason.OTHER)
 
+        // TODO PRSD-1312 - this should get built from originalJourneyData but currently tasks after GasSafety are unreachable
+        fun beforePropertyComplianceUpdateEpc() =
+            JourneyDataBuilder()
+                .withUpdateGasSafetyCertificateStatus(false)
+                .withGasSafetyUpdateCheckAnswers()
+                .withUpdateEicrStatus(false)
+                .withEicrUpdateCheckAnswers()
+
         fun beforePropertyComplianceEpc() = beforePropertyComplianceEicr().withMissingEicrExemption()
 
         fun beforePropertyComplianceEpcExemptionReason() = beforePropertyComplianceEpc().withEpcStatus(HasEpc.NOT_REQUIRED)

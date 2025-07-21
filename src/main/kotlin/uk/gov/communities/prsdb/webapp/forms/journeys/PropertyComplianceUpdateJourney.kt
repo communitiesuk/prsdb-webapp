@@ -379,16 +379,19 @@ class PropertyComplianceUpdateJourney(
         }
 
     private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
+        if (filteredJourneyData.getHasNewEPC()) {
+            val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
 
-        val newFilteredJourneyData =
-            updateEpcDetailsInSessionAndReturnUpdatedJourneyData(
-                journeyDataService,
-                filteredJourneyData,
-                epcDetails,
-                autoMatchedEpc = true,
-            )
-        return getRedirectForNextStep(updateEPCStep, newFilteredJourneyData, null, checkingAnswersFor)
+            val newFilteredJourneyData =
+                updateEpcDetailsInSessionAndReturnUpdatedJourneyData(
+                    journeyDataService,
+                    filteredJourneyData,
+                    epcDetails,
+                    autoMatchedEpc = true,
+                )
+            return getRedirectForNextStep(updateEPCStep, newFilteredJourneyData, null, checkingAnswersFor)
+        }
+        return getRedirectForNextStep(updateEPCStep, filteredJourneyData, null, checkingAnswersFor)
     }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
