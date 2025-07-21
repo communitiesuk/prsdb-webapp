@@ -58,7 +58,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyComplianceSharedStepFactory(
     private val defaultSaveAfterSubmit: Boolean,
-    private val isCheckingAnswers: Boolean,
+    private val isCheckingOrUpdatingAnswers: Boolean,
     private val nextActionAfterGasSafetyTask: PropertyComplianceStepId,
     private val nextActionAfterEicrTask: PropertyComplianceStepId,
     private val nextActionAfterEpcTask: PropertyComplianceStepId?,
@@ -131,9 +131,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -152,9 +152,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -256,9 +256,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -277,9 +277,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -334,9 +334,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -357,9 +357,9 @@ class PropertyComplianceSharedStepFactory(
                             "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
                             "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -465,9 +465,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -488,9 +488,9 @@ class PropertyComplianceSharedStepFactory(
                             "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
                             "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -606,9 +606,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingAnswers = isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -670,9 +670,9 @@ class PropertyComplianceSharedStepFactory(
                             "findEpcUrl" to FIND_EPC_URL,
                             "getNewEpcUrl" to GET_NEW_EPC_URL,
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingAnswers = isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -727,9 +727,9 @@ class PropertyComplianceSharedStepFactory(
                             "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
                             "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingAnswers = isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -839,9 +839,9 @@ class PropertyComplianceSharedStepFactory(
                         mapOf(
                             "title" to "propertyCompliance.title",
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingAnswers = isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -862,9 +862,9 @@ class PropertyComplianceSharedStepFactory(
                             "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
                             "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             "submitButtonText" to
-                                getSubmitButtonTextOrDefaultIfCheckingAnswers(
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingAnswers = isCheckingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
                                 ),
                         ),
                 ),
@@ -893,10 +893,10 @@ class PropertyComplianceSharedStepFactory(
             Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
-    private fun getSubmitButtonTextOrDefaultIfCheckingAnswers(
+    private fun getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
         submitButtonText: String,
-        isCheckingAnswers: Boolean,
-    ) = if (isCheckingAnswers) {
+        isCheckingOrUpdatingAnswers: Boolean,
+    ) = if (isCheckingOrUpdatingAnswers) {
         "forms.buttons.saveAndContinue"
     } else {
         submitButtonText

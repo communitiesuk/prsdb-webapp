@@ -1,17 +1,35 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -47,12 +65,55 @@ class PropertyComplianceUpdateJourney(
     override fun createOriginalJourneyData(): JourneyData {
         val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
 
-        // TODO PRSD-1244: Add original gas safety step data
-        // TODO PRSD-1246: Add original EICR step data
-        // TODO: PRSD-1312: Add original EPC step data
-        val originalJourneyData = emptyMap<String, Any>()
+        infix fun <T : FormModel?> StepId.toPageDataOrNull(fromRecordFunc: (PropertyCompliance) -> T): Pair<String, PageData>? =
+            fromRecordFunc(propertyCompliance)?.let {
+                this.urlPathSegment to it.toPageData()
+            }
 
-        return originalJourneyData
+        fun mapOfNotNull(vararg pairs: Pair<String, PageData>?) = pairs.filterNotNull().toMap()
+
+        val originalGasSafetyJourneyData: JourneyData =
+            mapOfNotNull(
+                PropertyComplianceStepId.UpdateGasSafety toPageDataOrNull GasSafetyFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyIssueDate toPageDataOrNull
+                    { TodayOrPastDateFormModel.fromDateOrNull(it.gasSafetyCertIssueDate) },
+                PropertyComplianceStepId.GasSafetyEngineerNum toPageDataOrNull GasSafeEngineerNumFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyUpload toPageDataOrNull GasSafetyUploadCertificateFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyUploadConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyOutdated toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyExemption toPageDataOrNull GasSafetyExemptionFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyExemptionReason toPageDataOrNull
+                    GasSafetyExemptionReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyExemptionOtherReason toPageDataOrNull
+                    GasSafetyExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.GasSafetyExemptionConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.GasSafetyExemptionMissing toPageDataOrNull { NoInputFormModel() },
+                // TODO PRSD-1245: Add gas safety check your answers step data
+                PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers toPageDataOrNull { NoInputFormModel() },
+            )
+
+        val originalEicrJourneyData =
+            mapOfNotNull(
+                PropertyComplianceStepId.UpdateEICR toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrIssueDate toPageDataOrNull
+                    { TodayOrPastDateFormModel.fromDateOrNull(it.eicrIssueDate) },
+                PropertyComplianceStepId.EicrUpload toPageDataOrNull EicrUploadCertificateFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.EicrUploadConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrOutdated toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrExemptionReason toPageDataOrNull EicrExemptionReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.EicrExemptionOtherReason toPageDataOrNull
+                    EicrExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.EicrExemptionConfirmation toPageDataOrNull { NoInputFormModel() },
+                PropertyComplianceStepId.EicrExemptionMissing toPageDataOrNull { NoInputFormModel() },
+                // TODO PRSD-1247: Add EICR check your answers step data
+                PropertyComplianceStepId.UpdateEicrCheckYourAnswers toPageDataOrNull { NoInputFormModel() },
+            )
+        // TODO: PRSD-1312: Add original EPC step data
+        val originalEpcJourneyData = emptyMap<String, PageData>()
+
+        return originalGasSafetyJourneyData +
+            originalEicrJourneyData +
+            originalEpcJourneyData
     }
 
     private val propertyComplianceSharedStepFactory =
@@ -61,7 +122,7 @@ class PropertyComplianceUpdateJourney(
             nextActionAfterGasSafetyTask = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
             nextActionAfterEicrTask = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
             nextActionAfterEpcTask = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-            isCheckingAnswers = isCheckingAnswers,
+            isCheckingOrUpdatingAnswers = true,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
         )
@@ -161,19 +222,43 @@ class PropertyComplianceUpdateJourney(
                 ),
             )
 
-    // TODO PRSD-1244: Implement gas safety step
     private val updateGasSafetyStep
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateGasSafety,
                 page =
                     Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
+                        formModel = UpdateGasSafetyCertificateFormModel::class,
+                        templateName = "forms/updateGasSafetyForm",
                         content =
-                            mapOf("todoComment" to "TODO PRSD-1244: Implement gas safety step"),
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.update.gasSafetyType.fieldSetHeading",
+                                "fieldSetHint" to "forms.gasSafety.fieldSetHint",
+                                "radioVariableName" to UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            labelMsgKey = "forms.update.gasSafetyType.certificate",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            labelMsgKey = "forms.update.gasSafetyType.exemption",
+                                        ),
+                                    ),
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                                BACK_URL_ATTR_NAME to
+                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ),
                     ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyIssueDate, null) },
+                nextAction = { journeyData, _ ->
+                    if (journeyData.getHasNewGasSafetyCertificate()) {
+                        Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
+                    } else {
+                        Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
+                    }
+                },
                 saveAfterSubmit = false,
             )
 
