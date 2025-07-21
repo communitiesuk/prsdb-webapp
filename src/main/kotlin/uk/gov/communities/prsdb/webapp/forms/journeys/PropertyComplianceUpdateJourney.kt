@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoCertOrExemption
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -42,6 +43,20 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+
+class OriginalGasSafetyCertificateFormModel : UpdateGasSafetyCertificateFormModel() {
+    var originallyNotIncluded: Boolean = false
+
+    companion object {
+        fun fromComplianceRecordOrNull(record: PropertyCompliance): OriginalGasSafetyCertificateFormModel =
+            OriginalGasSafetyCertificateFormModel().apply {
+                hasNewCertificate = record.gasSafetyCertIssueDate != null
+                originallyNotIncluded =
+                    record.gasSafetyCertIssueDate == null &&
+                    record.gasSafetyCertExemptionReason == null
+            }
+    }
+}
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,
@@ -77,7 +92,7 @@ class PropertyComplianceUpdateJourney(
 
         val originalGasSafetyJourneyData: JourneyData =
             mapOf(
-                PropertyComplianceStepId.UpdateGasSafety toPageData UpdateGasSafetyCertificateFormModel::fromComplianceRecordOrNull,
+                PropertyComplianceStepId.UpdateGasSafety toPageData OriginalGasSafetyCertificateFormModel::fromComplianceRecordOrNull,
                 PropertyComplianceStepId.GasSafetyIssueDate toPageData
                     { TodayOrPastDateFormModel.fromDateOrNull(it.gasSafetyCertIssueDate) },
                 PropertyComplianceStepId.GasSafetyEngineerNum toPageData GasSafeEngineerNumFormModel::fromComplianceRecordOrNull,
@@ -256,6 +271,8 @@ class PropertyComplianceUpdateJourney(
                 nextAction = { journeyData, _ ->
                     if (journeyData.getHasNewGasSafetyCertificate()!!) {
                         Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
+                    } else if (journeyData.getStillHasNoCertOrExemption() ?: false) {
+                        Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
                     } else {
                         Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
                     }
