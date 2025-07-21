@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -229,7 +230,7 @@ class PropertyComplianceUpdateJourney(
                 page =
                     Page(
                         formModel = UpdateGasSafetyCertificateFormModel::class,
-                        templateName = "forms/updateGasSafetyForm",
+                        templateName = "forms/updateComplianceCertificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
@@ -317,10 +318,29 @@ class PropertyComplianceUpdateJourney(
                 id = PropertyComplianceStepId.UpdateEpc,
                 page =
                     Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
+                        formModel = UpdateEpcFormModel::class,
+                        templateName = "forms/updateComplianceCertificateForm",
                         content =
-                            mapOf("todoComment" to "TODO PRSD-1312: Implement new EPC or exemption step"),
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.update.epc.fieldSetHeading",
+                                "fieldSetHint" to "forms.epc.fieldSetHint",
+                                "radioVariableName" to UpdateEpcFormModel::hasNewCertificate.name,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            labelMsgKey = "forms.update.epc.certificate",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            labelMsgKey = "forms.update.epc.exemption",
+                                        ),
+                                    ),
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                                BACK_URL_ATTR_NAME to
+                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ),
                     ),
                 // For PRSD-1312 - need search by uprn as part of handleSubmitAndRedirect
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcNotAutoMatched, null) },
