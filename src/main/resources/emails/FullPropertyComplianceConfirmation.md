@@ -17,3 +17,6 @@ You must update this information if:
 During the pilot, you are not required to add compliance information to the database. But it will likely be a legal requirement in the future.
 
 [Sign into your account on the database](((dashboard URL)))
+
+---
+This is an automated email - do not reply.

@@ -15,7 +15,6 @@ class EmailTemplateModelsTests {
         @JvmStatic
         private fun templateList() =
             listOf(
-                EmailTemplateTestData(ExampleEmail("test string"), "/emails/ExampleEmail.md"),
                 EmailTemplateTestData(
                     LocalAuthorityInvitationEmail(createLocalAuthority(1, "name"), URI("https://example.com")),
                     "/emails/LocalAuthorityInvitation.md",
