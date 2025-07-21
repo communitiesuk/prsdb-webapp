@@ -7,6 +7,8 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -14,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEpc
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
@@ -35,12 +39,14 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     stepName: String,
     private val propertyOwnershipId: Long,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val epcLookupService: EpcLookupService,
     epcCertificateUrlProvider: EpcCertificateUrlProvider,
@@ -311,7 +317,6 @@ class PropertyComplianceUpdateJourney(
                 saveAfterSubmit = false,
             )
 
-    // TODO PRSD-1312: Implement new epc or exemption step
     private val updateEPCStep
         get() =
             Step(
@@ -342,8 +347,8 @@ class PropertyComplianceUpdateJourney(
                                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                             ),
                     ),
-                // For PRSD-1312 - need search by uprn as part of handleSubmitAndRedirect
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcNotAutoMatched, null) },
+                nextAction = { filteredJourneyData, _ -> updateEpcStepNextAction(filteredJourneyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> updateEpcStepHandleSubmitAndRedirect(filteredJourneyData) },
                 saveAfterSubmit = false,
             )
 
@@ -361,6 +366,30 @@ class PropertyComplianceUpdateJourney(
                     ),
                 saveAfterSubmit = false,
             )
+
+    private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
+        if (filteredJourneyData.getHasNewEpc()) {
+            if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
+                Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
+            } else {
+                Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
+            }
+        } else {
+            Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+        }
+
+    private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
+
+        val newFilteredJourneyData =
+            updateEpcDetailsInSessionAndReturnUpdatedJourneyData(
+                journeyDataService,
+                filteredJourneyData,
+                epcDetails,
+                autoMatchedEpc = true,
+            )
+        return getRedirectForNextStep(updateEPCStep, newFilteredJourneyData, null, checkingAnswersFor)
+    }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val nextAction = propertyComplianceSharedStepFactory.checkMatchedEpcStepNextAction(filteredJourneyData)

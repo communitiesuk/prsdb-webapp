@@ -359,10 +359,15 @@ VALUES (1, 8, '01/01/25', '01/01/25',
         null, null, 1, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2030-12-03', null, 'c', null, null,
         true, true, true),
-    (5, 12, '01/01/25', null,
+        (5, 12, '01/01/25', null,
         null, null, null, 0, null,
-     null, null, 1, null,
-     null, null, null, null, 1, null,
-     true, true, true);
+        null, null, 1, null,
+        null, null, null, null, 1, null,
+        true, true, true),
+       (6, 33, '01/01/25', null,
+        null, null, null, 0, null,
+        null, null, 1, null,
+        null, null, null, null, 1, null,
+        true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
