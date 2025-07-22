@@ -216,7 +216,6 @@ class PropertyComplianceController(
     fun getUpdateJourneyStep(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         principal: Principal,
         request: HttpServletRequest,
@@ -227,7 +226,7 @@ class PropertyComplianceController(
         val stepModelAndView =
             propertyComplianceUpdateJourneyFactory
                 .create(stepName, propertyOwnershipId, checkingAnswersForStep)
-                .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
+                .getModelAndViewForStep(checkingAnswersForStep = checkingAnswersForStep)
 
         addCookieIfStepIsFileUploadStep(stepName, request, response)
 
@@ -238,7 +237,6 @@ class PropertyComplianceController(
     fun postUpdateJourneyData(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestParam formData: PageData,
         principal: Principal,
@@ -249,14 +247,13 @@ class PropertyComplianceController(
 
         return propertyComplianceUpdateJourneyFactory
             .create(stepName, propertyOwnershipId, checkingAnswersForStep)
-            .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
+            .completeStep(annotatedFormData, principal, checkingAnswersForStep)
     }
 
     @PostMapping("/$UPDATE_PATH_SEGMENT/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadUpdateJourneyData(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
@@ -278,13 +275,7 @@ class PropertyComplianceController(
 
         return propertyComplianceUpdateJourneyFactory
             .create(stepName, propertyOwnershipId, checkingAnswersForStep)
-            .completeStep(
-                stepName,
-                formData,
-                subpage,
-                principal,
-                checkingAnswersForStep,
-            )
+            .completeStep(formData, principal, checkingAnswersForStep)
     }
 
     private fun throwErrorIfUserIsNotAuthorized(
