@@ -14,7 +14,6 @@ abstract class GroupedUpdateJourney<T : GroupedUpdateStepId<*>>(
     validator: Validator,
     journeyDataService: JourneyDataService,
     stepName: String,
-    protected val isCheckingAnswers: Boolean,
 ) : UpdateJourney<T>(journeyType, initialStepId, validator, journeyDataService, stepName) {
     abstract override val stepRouter: GroupedUpdateStepRouter<T>
 

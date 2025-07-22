@@ -50,7 +50,6 @@ class PropertyComplianceUpdateJourney(
         validator = validator,
         journeyDataService = journeyDataService,
         stepName = stepName,
-        isCheckingAnswers = checkingAnswersForStep != null,
     ) {
     init {
         initializeOriginalJourneyDataIfNotInitialized()
