@@ -24,8 +24,6 @@ class PropertyRegistrationCheckAnswersPage(
         templateName = "forms/propertyRegistrationCheckAnswersForm",
         shouldDisplaySectionHeader = true,
     ) {
-    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> = emptyList()
-
     override fun furtherEnrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,

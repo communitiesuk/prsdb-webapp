@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpdateJourneyStepFactory
@@ -22,7 +23,14 @@ class CheckOccupancyAnswersPage(
             ),
         journeyDataService = journeyDataService,
     ) {
-    override fun getSummaryList(filteredJourneyData: JourneyData) =
+    override fun furtherEnrichModel(
+        modelAndView: ModelAndView,
+        filteredJourneyData: JourneyData,
+    ) {
+        modelAndView.addObject("summaryListData", getSummaryList(filteredJourneyData))
+    }
+
+    private fun getSummaryList(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = filteredJourneyData.getIsOccupiedUpdateIfPresent(stepGroupId)!!

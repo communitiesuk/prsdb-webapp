@@ -47,8 +47,6 @@ class PropertyComplianceCheckAnswersPage(
         journeyDataService = journeyDataService,
         templateName = "forms/propertyComplianceCheckAnswersForm",
     ) {
-    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> = emptyList()
-
     override fun furtherEnrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,

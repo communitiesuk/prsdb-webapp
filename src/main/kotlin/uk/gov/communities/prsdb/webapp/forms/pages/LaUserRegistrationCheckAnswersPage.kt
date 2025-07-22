@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -20,7 +21,14 @@ class LaUserRegistrationCheckAnswersPage(
             ),
         journeyDataService = journeyDataService,
     ) {
-    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
+    override fun furtherEnrichModel(
+        modelAndView: ModelAndView,
+        filteredJourneyData: JourneyData,
+    ) {
+        modelAndView.addObject("summaryListData", getSummaryList(filteredJourneyData))
+    }
+
+    private fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
         val sessionToken = invitationService.getTokenFromSession()
 
         val localAuthority =

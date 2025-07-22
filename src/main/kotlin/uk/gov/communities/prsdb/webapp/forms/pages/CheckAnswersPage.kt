@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 abstract class CheckAnswersPage(
@@ -25,17 +24,14 @@ abstract class CheckAnswersPage(
         filteredJourneyData: JourneyData?,
     ) {
         filteredJourneyData!!
-        modelAndView.addObject("summaryListData", getSummaryList(filteredJourneyData))
         modelAndView.addObject("submittedFilteredJourneyData", CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
         furtherEnrichModel(modelAndView, filteredJourneyData)
     }
 
-    protected abstract fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel>
-
-    protected open fun furtherEnrichModel(
+    protected abstract fun furtherEnrichModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
-    ) {}
+    )
 
     override fun enrichFormData(formData: PageData?): PageData? {
         if (formData == null) return null

@@ -14,7 +14,6 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import kotlin.test.assertEquals
@@ -32,13 +31,12 @@ class CheckAnswersPageTests {
     private lateinit var mockBindingResult: BindingResult
 
     @Test
-    fun `enrichModel adds summaryList and filteredJourneyData to the model, then calls furtherEnrichModel`() {
+    fun `enrichModel adds filteredJourneyData to the model, then calls furtherEnrichModel`() {
         val modelAndView = ModelAndView()
-        val filteredJourneyData = mapOf(SUMMARY_ROW_KEY to "summaryRowValue", "furtherEnrichModelKey" to "furtherEnrichModelValue")
+        val filteredJourneyData = mapOf("furtherEnrichModelKey" to "furtherEnrichModelValue")
 
         checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
-        assertEquals(modelAndView.modelMap["summaryListData"], createSummaryList(filteredJourneyData))
         assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
         assertEquals(modelAndView.modelMap["furtherEnrichModelKey"], "furtherEnrichModelValue")
     }
@@ -75,24 +73,11 @@ class CheckAnswersPageTests {
     class TestCheckAnswersPage(
         journeyDataService: JourneyDataService,
     ) : CheckAnswersPage(content = emptyMap(), journeyDataService) {
-        override fun getSummaryList(filteredJourneyData: JourneyData) = createSummaryList(filteredJourneyData)
-
         override fun furtherEnrichModel(
             modelAndView: ModelAndView,
             filteredJourneyData: JourneyData,
         ) {
-            filteredJourneyData.entries.forEach { (key, value) ->
-                if (key != SUMMARY_ROW_KEY) {
-                    modelAndView.addObject(key, value)
-                }
-            }
+            filteredJourneyData.entries.forEach { (key, value) -> modelAndView.addObject(key, value) }
         }
-    }
-
-    companion object {
-        const val SUMMARY_ROW_KEY = "summaryListRowKey"
-
-        private fun createSummaryList(journeyData: JourneyData) =
-            listOf(SummaryListRowViewModel(SUMMARY_ROW_KEY, journeyData[SUMMARY_ROW_KEY]!!, action = null))
     }
 }
