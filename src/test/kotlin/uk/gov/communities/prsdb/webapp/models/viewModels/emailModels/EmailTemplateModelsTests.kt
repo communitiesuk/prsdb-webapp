@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_BASE_URL
+import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -21,7 +21,7 @@ class EmailTemplateModelsTests {
                         localAuthority = createLocalAuthority(1, "name"),
                         invitationUri = URI("https://example.com"),
                         prsdUrl = "https://example.com",
-                        oneLoginUrl = ONE_LOGIN_BASE_URL,
+                        oneLoginUrl = ONE_LOGIN_INFO_URL,
                     ),
                     "/emails/LocalAuthorityInvitation.md",
                 ),
