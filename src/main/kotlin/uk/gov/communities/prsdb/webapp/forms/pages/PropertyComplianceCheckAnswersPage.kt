@@ -46,9 +46,7 @@ class PropertyComplianceCheckAnswersPage(
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
         )
 
-    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> = emptyList()
-
-    override fun furtherEnrichModel(
+    override fun addPageContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
     ) {
