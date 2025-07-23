@@ -18,9 +18,12 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.CheckAutoMatchedEpcPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.CheckMatchedEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExemptionConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExemptionReasonPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcLookupPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcNotAutoMatchedPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafeEngineerNumPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyCheckYourAnswersPropertyComplianceUpdate
@@ -201,6 +204,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     @Test
     fun `User can add a new looked up EPC if the pages are filled in correctly`(page: Page) {
         val propertyOwnershipId = 33L
+        val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
         whenever(epcRegisterClient.getByUprn(100090154792L))
             .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
@@ -208,16 +212,33 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
         updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
         updateEpcPage.form.submit()
-        val epcNotAutomatchedPage =
-            assertPageIs(
-                page,
-                EpcNotAutoMatchedPagePropertyComplianceUpdate::class,
-                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-            )
+        val epcNotAutomatchedPage = assertPageIs(page, EpcNotAutoMatchedPagePropertyComplianceUpdate::class, urlArguments)
 
         // Epc Not Auto Matched page
         epcNotAutomatchedPage.continueButton.clickAndWait()
-        // val epcLookuptPage =
+        val epcLookupPage = assertPageIs(page, EpcLookupPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Lookup page
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = LocalDate(currentDate.year + 5, 1, 5),
+                ),
+            )
+        epcLookupPage.submitCurrentEpcNumber()
+        val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Matched EPC page
+        checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+
+        // Epc Check Your Answers page
+        assertPageIs(
+            page,
+            UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+
+        // TODO PRSD-1313 - CYA page checks, should return to the Property Record page
     }
 
     @Test
