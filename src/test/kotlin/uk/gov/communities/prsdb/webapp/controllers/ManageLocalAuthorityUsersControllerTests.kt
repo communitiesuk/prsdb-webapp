@@ -185,7 +185,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https:gov.uk"))
+        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
 
         postToSendInvitationAndAssertSuccess(DEFAULT_LA_ID)
     }
@@ -198,7 +198,7 @@ class ManageLocalAuthorityUsersControllerTests(
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https:gov.uk"))
+        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
 
         postToSendInvitationAndAssertSuccess(NON_ADMIN_LA_ID)
     }
