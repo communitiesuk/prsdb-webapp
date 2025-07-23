@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class CheckUpdateGasSafetyAnswersPage(
     journeyDataService: JourneyDataService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "propertyDetails.update.title",
