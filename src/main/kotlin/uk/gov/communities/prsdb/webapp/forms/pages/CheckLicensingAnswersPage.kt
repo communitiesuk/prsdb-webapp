@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class CheckLicensingAnswersPage(
     journeyDataService: JourneyDataService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "propertyDetails.update.title",
@@ -29,7 +29,7 @@ class CheckLicensingAnswersPage(
             ),
         )
 
-    override fun furtherEnrichModel(
+    override fun addExtraContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
     ) {
