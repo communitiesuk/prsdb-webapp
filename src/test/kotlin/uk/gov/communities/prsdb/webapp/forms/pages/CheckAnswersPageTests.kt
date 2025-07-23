@@ -31,14 +31,14 @@ class CheckAnswersPageTests {
     private lateinit var mockBindingResult: BindingResult
 
     @Test
-    fun `enrichModel adds filteredJourneyData to the model, then calls furtherEnrichModel`() {
+    fun `enrichModel adds filteredJourneyData to the model, then calls addPageContentToModel`() {
         val modelAndView = ModelAndView()
-        val filteredJourneyData = mapOf("furtherEnrichModelKey" to "furtherEnrichModelValue")
+        val filteredJourneyData = mapOf("pageContentKey" to "pageContentValue")
 
         checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
         assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
-        assertEquals(modelAndView.modelMap["furtherEnrichModelKey"], "furtherEnrichModelValue")
+        assertEquals(modelAndView.modelMap["pageContentKey"], "pageContentValue")
     }
 
     @Test
@@ -72,8 +72,8 @@ class CheckAnswersPageTests {
 
     class TestCheckAnswersPage(
         journeyDataService: JourneyDataService,
-    ) : CheckAnswersPage(content = emptyMap(), journeyDataService) {
-        override fun furtherEnrichModel(
+    ) : CheckAnswersPage(content = emptyMap(), journeyDataService, templateName = "anyTemplate") {
+        override fun addPageContentToModel(
             modelAndView: ModelAndView,
             filteredJourneyData: JourneyData,
         ) {

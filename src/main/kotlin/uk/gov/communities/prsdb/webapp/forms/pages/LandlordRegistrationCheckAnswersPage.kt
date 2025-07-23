@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
-import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
@@ -9,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class LandlordRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "registerAsALandlord.title",
@@ -19,14 +18,7 @@ class LandlordRegistrationCheckAnswersPage(
         journeyDataService = journeyDataService,
         shouldDisplaySectionHeader = true,
     ) {
-    override fun furtherEnrichModel(
-        modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData,
-    ) {
-        modelAndView.addObject("summaryListData", getSummaryList(filteredJourneyData))
-    }
-
-    private fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
+    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
         getIdentityRows(filteredJourneyData) +
             getEmailAndPhoneRows(filteredJourneyData) +
             getAddressRows(filteredJourneyData)

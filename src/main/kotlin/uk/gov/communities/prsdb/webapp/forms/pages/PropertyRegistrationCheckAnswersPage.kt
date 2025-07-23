@@ -24,7 +24,7 @@ class PropertyRegistrationCheckAnswersPage(
         templateName = "forms/propertyRegistrationCheckAnswersForm",
         shouldDisplaySectionHeader = true,
     ) {
-    override fun furtherEnrichModel(
+    override fun addPageContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
     ) {

@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 abstract class CheckAnswersPage(
     content: Map<String, Any>,
     private val journeyDataService: JourneyDataService,
-    templateName: String = "forms/checkAnswersForm",
+    templateName: String,
     shouldDisplaySectionHeader: Boolean = false,
 ) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
@@ -25,10 +25,10 @@ abstract class CheckAnswersPage(
     ) {
         filteredJourneyData!!
         modelAndView.addObject("submittedFilteredJourneyData", CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
-        furtherEnrichModel(modelAndView, filteredJourneyData)
+        addPageContentToModel(modelAndView, filteredJourneyData)
     }
 
-    protected abstract fun furtherEnrichModel(
+    protected abstract fun addPageContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
     )

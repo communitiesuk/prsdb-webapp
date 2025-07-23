@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class CheckLicensingAnswersPage(
     journeyDataService: JourneyDataService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "propertyDetails.update.title",
@@ -20,22 +20,7 @@ class CheckLicensingAnswersPage(
             ),
         journeyDataService = journeyDataService,
     ) {
-    override fun furtherEnrichModel(
-        modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData,
-    ) {
-        modelAndView.addObject("summaryName", getSummaryName(filteredJourneyData))
-        modelAndView.addObject("summaryListData", getSummaryList(filteredJourneyData))
-    }
-
-    private fun getSummaryName(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getLicensingTypeUpdateIfPresent()!! == LicensingType.NO_LICENSING) {
-            "forms.update.checkLicensing.remove.summaryName"
-        } else {
-            "forms.update.checkLicensing.update.summaryName"
-        }
-
-    private fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
+    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.licensing",
@@ -43,6 +28,13 @@ class CheckLicensingAnswersPage(
                 UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
             ),
         )
+
+    override fun addExtraContentToModel(
+        modelAndView: ModelAndView,
+        filteredJourneyData: JourneyData,
+    ) {
+        modelAndView.addObject("summaryName", getSummaryName(filteredJourneyData))
+    }
 
     private fun getLicensingSummaryValue(filteredJourneyData: JourneyData): Any {
         val licensingType = filteredJourneyData.getLicensingTypeUpdateIfPresent()!!
@@ -52,4 +44,11 @@ class CheckLicensingAnswersPage(
             listOf(licensingType, filteredJourneyData.getLicenceNumberUpdateIfPresent()!!)
         }
     }
+
+    private fun getSummaryName(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getLicensingTypeUpdateIfPresent()!! == LicensingType.NO_LICENSING) {
+            "forms.update.checkLicensing.remove.summaryName"
+        } else {
+            "forms.update.checkLicensing.update.summaryName"
+        }
 }

@@ -47,7 +47,7 @@ class PropertyComplianceCheckAnswersPage(
         journeyDataService = journeyDataService,
         templateName = "forms/propertyComplianceCheckAnswersForm",
     ) {
-    override fun furtherEnrichModel(
+    override fun addPageContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
     ) {
