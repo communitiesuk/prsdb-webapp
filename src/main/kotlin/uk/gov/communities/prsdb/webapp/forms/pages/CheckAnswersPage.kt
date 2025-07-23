@@ -23,7 +23,6 @@ abstract class CheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        // When displaying the check answer page, ensure that only data that will be submitted can be shown
         val submittableJourneyData = journeyDataService.getJourneyDataFromSession()
         modelAndView.addObject(
             "submittedFilteredJourneyData",
