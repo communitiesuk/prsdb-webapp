@@ -34,11 +34,12 @@ class CheckAnswersPageTests {
     fun `enrichModel adds filteredJourneyData to the model, then calls addPageContentToModel`() {
         val modelAndView = ModelAndView()
         val filteredJourneyData = mapOf("pageContentKey" to "pageContentValue")
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(filteredJourneyData)
 
         checkAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
-        assertEquals(modelAndView.modelMap["submittedFilteredJourneyData"], CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
-        assertEquals(modelAndView.modelMap["pageContentKey"], "pageContentValue")
+        assertEquals(CheckAnswersFormModel.serializeJourneyData(filteredJourneyData), modelAndView.modelMap["submittedFilteredJourneyData"])
+        assertEquals("pageContentValue", modelAndView.modelMap["pageContentKey"])
     }
 
     @Test

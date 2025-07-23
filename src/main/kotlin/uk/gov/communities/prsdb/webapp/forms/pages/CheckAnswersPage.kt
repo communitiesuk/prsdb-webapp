@@ -29,7 +29,7 @@ abstract class CheckAnswersPage(
             "submittedFilteredJourneyData",
             CheckAnswersFormModel.serializeJourneyData(submittableJourneyData),
         )
-        addPageContentToModel(modelAndView, submittableJourneyData)
+        addPageContentToModel(modelAndView, filteredJourneyData!!)
     }
 
     protected abstract fun addPageContentToModel(

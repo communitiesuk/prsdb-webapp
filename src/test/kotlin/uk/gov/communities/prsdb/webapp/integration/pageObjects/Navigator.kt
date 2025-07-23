@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsU
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
@@ -134,6 +135,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
@@ -992,6 +994,38 @@ class Navigator(
             PropertyDetailsPageLocalAuthorityView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
+    }
+
+    fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
+        propertyOwnershipId: Long,
+    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
+        setJourneyDataInSession(
+            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
+                propertyOwnershipId,
+                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
+            ),
+            JourneyDataBuilder()
+                .withIsOccupiedUpdate(true)
+                .withHouseholds(1)
+                .withTenants(3)
+                .build(),
+        )
+        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
+    }
+
+    fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
+        propertyOwnershipId: Long,
+    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
+        setJourneyDataInSession(
+            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
+                propertyOwnershipId,
+                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
+            ),
+            JourneyDataBuilder()
+                .withIsOccupiedUpdate(false)
+                .build(),
+        )
+        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
 
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {

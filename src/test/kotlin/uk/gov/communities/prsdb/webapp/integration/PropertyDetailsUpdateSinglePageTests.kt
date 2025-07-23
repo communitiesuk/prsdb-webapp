@@ -63,12 +63,11 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         val (page1, navigator1) = createPageAndNavigator(browserContext)
         val (_, navigator2) = createPageAndNavigator(browserContext)
 
-        // Navigate to the occupancy check answers page on page1
-        val checkOccupancyAnswersPage = navigator1.goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
+        // Navigate to the occupancy check answers page on page1 with an occupied property
+        val checkOccupancyAnswersPage = navigator1.skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(propertyOwnershipId)
 
         // Update occupancy to vacant on page2
-        val occupancyUpdatePage = navigator2.goToPropertyDetailsUpdateOccupancy(propertyOwnershipId)
-        occupancyUpdatePage.submitIsVacant()
+        navigator2.skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(propertyOwnershipId)
 
         // Submit the occupancy check answers page on page1
         checkOccupancyAnswersPage.form.submit()

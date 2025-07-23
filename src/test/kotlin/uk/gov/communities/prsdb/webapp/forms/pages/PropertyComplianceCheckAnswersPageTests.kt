@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
@@ -40,10 +41,12 @@ class PropertyComplianceCheckAnswersPageTests {
         if (expectEpcUrl) {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(any())).thenReturn(certificateUrl)
         }
+        val mockJourneyDataService: JourneyDataService = mock()
+        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(filteredJourneyData)
 
         val propertyComplianceCheckAnswersPage =
             PropertyComplianceCheckAnswersPage(
-                journeyDataService = mock(),
+                journeyDataService = mockJourneyDataService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
             ) { "any address" }
         val modelAndView = ModelAndView()
