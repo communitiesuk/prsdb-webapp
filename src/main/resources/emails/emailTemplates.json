@@ -6,9 +6,9 @@
     "bodyLocation": "/emails/LocalAuthorityInvitation.md"
   },
   {
-    "id": "2e6bba9d-22e4-4032-a3bc-b4f7f18662a8",
+    "id": "72b0d2ac-3684-48c6-8ece-d27c2d89047d",
     "name": "LA User Invitation Cancellation",
-    "subject": "PRD - Your invite to register on the database is cancelled",
+    "subject": "GOV.UK - Your invite to register on the PRS Database has been cancelled",
     "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   },
   {
