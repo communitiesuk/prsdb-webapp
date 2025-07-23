@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
-open class UpdateGasSafetyCertificateFormModel : FormModel {
+class UpdateGasSafetyCertificateFormModel : FormModel {
     @NotNull(message = "forms.update.gasSafetyType.error.missing")
     var hasNewCertificate: Boolean? = null
 }

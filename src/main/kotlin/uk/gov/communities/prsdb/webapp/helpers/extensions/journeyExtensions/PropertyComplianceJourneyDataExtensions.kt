@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.OriginalGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -53,11 +52,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
             )
 
+        const val ORIGINALLY_NOT_INCLUDED_KEY = "originallyNotIncluded"
+
         fun JourneyData.getStillHasNoCertOrExemption() =
             JourneyDataHelper.getFieldBooleanValue(
                 this,
                 PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
-                OriginalGasSafetyCertificateFormModel::originallyNotIncluded.name,
+                ORIGINALLY_NOT_INCLUDED_KEY,
             )
 
         fun JourneyData.getGasSafetyCertIssueDate() =
