@@ -35,7 +35,9 @@ class PropertyComplianceUpdateJourneyFactory(
         checkingAnswersForStep = checkingAnswersFor,
     )
 
-    private fun getJourneyDataKey(propertyOwnershipId: Long) =
-        PropertyComplianceController
-            .getUpdatePropertyComplianceBasePath(propertyOwnershipId)
+    companion object {
+        fun getJourneyDataKey(propertyOwnershipId: Long) =
+            PropertyComplianceController
+                .getUpdatePropertyComplianceBasePath(propertyOwnershipId)
+    }
 }
