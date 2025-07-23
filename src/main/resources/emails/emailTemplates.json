@@ -1,7 +1,7 @@
 [
   {
-    "id": "ffc5143a-de6c-443b-8b0f-129fb933856c",
-    "name": "LA Admin Invitation V2",
+    "id": "c99546f8-a2b7-4da4-96dd-fea5ce42fd53",
+    "name": "LA User Invitation V2",
     "subject": "GOV.UK - You’ve been invited by a local council to register on the PRS Database",
     "bodyLocation": "/emails/LocalAuthorityInvitation.md"
   },
