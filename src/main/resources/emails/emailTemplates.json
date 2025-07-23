@@ -2,7 +2,7 @@
   {
     "id": "66924ee6-40a3-4330-b502-0dbf288f71e5",
     "name": "LA User Invitation",
-    "subject": "PRD - You've been invited by a local authority to register on the Privately Rented Database",
+    "subject": "GOV.UK - You’ve been invited by a local council to register on the PRS Database",
     "bodyLocation": "/emails/LocalAuthorityInvitation.md"
   },
   {

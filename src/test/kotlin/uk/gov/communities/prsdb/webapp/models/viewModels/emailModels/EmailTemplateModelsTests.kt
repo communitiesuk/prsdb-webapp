@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_BASE_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -16,7 +17,12 @@ class EmailTemplateModelsTests {
         private fun templateList() =
             listOf(
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationEmail(createLocalAuthority(1, "name"), URI("https://example.com")),
+                    LocalAuthorityInvitationEmail(
+                        localAuthority = createLocalAuthority(1, "name"),
+                        invitationUri = URI("https://example.com"),
+                        prsdUrl = "https://example.com",
+                        oneLoginUrl = ONE_LOGIN_BASE_URL,
+                    ),
                     "/emails/LocalAuthorityInvitation.md",
                 ),
                 EmailTemplateTestData(
@@ -129,7 +135,7 @@ class EmailTemplateModelsTests {
     }
 
     private fun extractParameters(body: String): List<String> {
-        val parameterRegex = Regex("\\(\\(.*\\)\\)")
+        val parameterRegex = Regex("\\(\\((.*?)\\)\\)")
         return parameterRegex.findAll(body).map { result -> result.value.trim(')').trim('(') }.toList()
     }
 }
