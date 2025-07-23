@@ -7,7 +7,7 @@
   },
   {
     "id": "72b0d2ac-3684-48c6-8ece-d27c2d89047d",
-    "name": "LA User Invitation Cancellation",
+    "name": "LA User Invitation Cancellation V2",
     "subject": "GOV.UK - Your invite to register on the PRS Database has been cancelled",
     "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   },
