@@ -9,13 +9,11 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 class AwsS3FileDequarantiner(
     private val transferManager: S3TransferManager,
     private val s3Client: S3Client,
-) : FileDequarantiner {
     @Value("\${aws.s3.quarantineBucket}")
-    lateinit var quarantineBucketName: String
-
+    val quarantineBucketName: String,
     @Value("\${aws.s3.safeBucket}")
-    lateinit var safeBucketName: String
-
+    val safeBucketName: String,
+) : FileDequarantiner {
     override fun dequarantineFile(objectKey: String): Boolean {
         val copyResponse =
             transferManager

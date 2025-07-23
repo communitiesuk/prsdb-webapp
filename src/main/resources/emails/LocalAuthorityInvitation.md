@@ -16,3 +16,6 @@ It's a legal requirement for landlords and letting agents to register on the dat
 
 ## Before you register
 You must sign up using a GOV.UK One Login linked to this email address.
+
+---
+This is an automated email - do not reply.

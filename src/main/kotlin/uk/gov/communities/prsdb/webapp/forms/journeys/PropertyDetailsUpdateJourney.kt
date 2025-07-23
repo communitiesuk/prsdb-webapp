@@ -55,7 +55,6 @@ class PropertyDetailsUpdateJourney(
         validator = validator,
         journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId, stepName)),
         stepName = stepName,
-        isCheckingAnswers = isChangingAnswer,
     ) {
     override val stepRouter = GroupedUpdateStepRouter(this)
 

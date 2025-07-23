@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
-class PropertyDeregistrationAreYouSureFormModel : FormModel {
-    @NotNull(message = "forms.areYouSure.propertyDeregistration.radios.error.missing")
-    var wantsToProceed: Boolean? = null
+class UpdateEpcFormModel : FormModel {
+    @NotNull(message = "forms.update.epc.error.missing")
+    var hasNewCertificate: Boolean? = null
 }

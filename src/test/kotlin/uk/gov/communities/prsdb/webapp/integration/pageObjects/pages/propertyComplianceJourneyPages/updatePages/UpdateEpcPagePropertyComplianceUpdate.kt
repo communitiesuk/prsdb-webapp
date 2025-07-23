@@ -7,19 +7,19 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class UpdateGasSafetyPagePropertyComplianceUpdate(
+class UpdateEpcPagePropertyComplianceUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
         PropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.UpdateGasSafety,
+            PropertyComplianceStepId.UpdateEpc,
         ),
     ) {
-    val form = UpdateGasSafetyForm(page)
+    val form = UpdateEpcForm(page)
 
-    class UpdateGasSafetyForm(
+    class UpdateEpcForm(
         page: Page,
     ) : PostForm(page) {
         val hasNewCertificateRadios = Radios(locator)

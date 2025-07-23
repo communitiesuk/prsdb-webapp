@@ -50,7 +50,6 @@ class GroupedUpdateJourneyTests {
             AlwaysTrueValidator(),
             journeyDataService,
             currentStep.urlPathSegment,
-            isCheckingAnswers = true,
         ) {
         override val sections =
             createSingleSectionWithSingleTaskFromSteps(

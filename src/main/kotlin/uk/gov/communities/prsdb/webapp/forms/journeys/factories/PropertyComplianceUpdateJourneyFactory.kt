@@ -7,12 +7,14 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJo
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
 class PropertyComplianceUpdateJourneyFactory(
     val validator: Validator,
     val journeyDataServiceFactory: JourneyDataServiceFactory,
+    val propertyOwnershipService: PropertyOwnershipService,
     val propertyComplianceService: PropertyComplianceService,
     val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     val epcLookupService: EpcLookupService,
@@ -26,6 +28,7 @@ class PropertyComplianceUpdateJourneyFactory(
         journeyDataService = journeyDataServiceFactory.create(getJourneyDataKey(propertyOwnershipId)),
         stepName = stepName,
         propertyOwnershipId = propertyOwnershipId,
+        propertyOwnershipService = propertyOwnershipService,
         propertyComplianceService = propertyComplianceService,
         epcCertificateUrlProvider = epcCertificateUrlProvider,
         epcLookupService = epcLookupService,

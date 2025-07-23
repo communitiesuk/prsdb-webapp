@@ -6,8 +6,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 class PropertyComplianceViewModel(
     private val propertyCompliance: PropertyCompliance,
-    private val withActionLinks: Boolean = true,
-    private val withNotificationLinks: Boolean = true,
+    private val landlordView: Boolean = true,
 ) {
     // TODO PRSD-1297 add update links to notification messages
     var notificationMessages: List<PropertyComplianceNotificationMessage> = getNotificationMessageKeys()
@@ -15,18 +14,25 @@ class PropertyComplianceViewModel(
     val gasSafetySummaryList: List<SummaryListRowViewModel> =
         GasSafetyViewModelBuilder.fromEntity(
             propertyCompliance,
-            withActionLinks,
+            landlordView,
         )
 
-    val eicrSummaryList: List<SummaryListRowViewModel> = EicrViewModelBuilder.fromEntity(propertyCompliance, withActionLinks)
+    val eicrSummaryList: List<SummaryListRowViewModel> = EicrViewModelBuilder.fromEntity(propertyCompliance, landlordView)
 
-    val epcSummaryList: List<SummaryListRowViewModel> = EpcViewModelBuilder.fromEntity(propertyCompliance, withActionLinks)
+    val epcSummaryList: List<SummaryListRowViewModel> = EpcViewModelBuilder.fromEntity(propertyCompliance, landlordView)
 
     val landlordResponsibilitiesSummaryList: List<SummaryListRowViewModel> =
         LandlordResponsibilitiesViewModelBuilder.fromEntity(
             propertyCompliance,
-            withActionLinks,
+            landlordView,
         )
+
+    val landlordResponsibilitiesHintText =
+        if (landlordView) {
+            "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
+        } else {
+            "propertyDetails.complianceInformation.landlordResponsibilities.localAuthority.hintText"
+        }
 
     private fun getNotificationMessageKeys(): List<PropertyComplianceNotificationMessage> =
         mutableListOf<PropertyComplianceNotificationMessage>()
@@ -35,49 +41,49 @@ class PropertyComplianceViewModel(
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
                 if (propertyCompliance.isGasSafetyCertMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
                 if (propertyCompliance.isEicrExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
                 if (propertyCompliance.isEicrMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
                 if (propertyCompliance.isEpcExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
                 if (propertyCompliance.isEpcRatingLow == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
                 if (propertyCompliance.isEpcMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
-                        withNotificationLinks,
+                        landlordView,
                     )
                 }
             }.toList()
