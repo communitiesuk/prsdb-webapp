@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class LandlordRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "registerAsALandlord.title",

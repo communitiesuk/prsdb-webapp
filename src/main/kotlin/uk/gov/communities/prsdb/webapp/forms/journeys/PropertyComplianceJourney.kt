@@ -501,12 +501,7 @@ class PropertyComplianceJourney(
 
     private fun epcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         if (filteredJourneyData.getHasEPC() == HasEpc.YES) {
-            val uprn =
-                propertyOwnershipService
-                    .getPropertyOwnership(propertyOwnershipId)
-                    .property.address.uprn
-
-            val epcDetails = uprn?.let { epcLookupService.getEpcByUprn(it) }
+            val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
 
             val newFilteredJourneyData =
                 updateEpcDetailsInSessionAndReturnUpdatedJourneyData(
@@ -658,6 +653,18 @@ class PropertyComplianceJourney(
 
     companion object {
         val initialStepId = PropertyComplianceStepId.GasSafety
+
+        fun getAutomatchedEpc(
+            propertyOwnershipId: Long,
+            epcLookupService: EpcLookupService,
+            propertyOwnershipService: PropertyOwnershipService,
+        ): EpcDataModel? {
+            val uprn =
+                propertyOwnershipService
+                    .getPropertyOwnership(propertyOwnershipId)
+                    .property.address.uprn
+            return uprn?.let { epcLookupService.getEpcByUprn(it) }
+        }
 
         fun getRedirectStepOverrideForCheckMatchedEpcStepHandleSubmitAndRedirect(nextAction: Pair<PropertyComplianceStepId?, Int?>) =
             if (nextAction.first == null) {

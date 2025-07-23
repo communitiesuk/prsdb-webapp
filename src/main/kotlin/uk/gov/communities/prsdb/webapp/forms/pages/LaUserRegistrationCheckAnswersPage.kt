@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 class LaUserRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
     private val invitationService: LocalAuthorityInvitationService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "registerLAUser.title",
