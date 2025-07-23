@@ -595,9 +595,7 @@ class PropertyComplianceControllerTests(
         fun setUp() {
             whenever(
                 propertyComplianceUpdateJourney.completeStep(
-                    eq(PropertyComplianceUpdateJourney.initialStepId.urlPathSegment),
                     anyOrNull(),
-                    eq(null),
                     anyOrNull(),
                     anyOrNull(),
                 ),
@@ -676,9 +674,7 @@ class PropertyComplianceControllerTests(
 
             whenever(
                 propertyComplianceUpdateJourney.completeStep(
-                    eq(PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
                     argWhere { pageData -> UploadCertificateFormModel::class.memberProperties.all { it.name in pageData.keys } },
-                    eq(null),
                     anyOrNull(),
                     anyOrNull(),
                 ),
