@@ -104,6 +104,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
@@ -940,6 +941,17 @@ class Navigator(
         return createValidPage(
             page,
             UpdateGasSafetyPagePropertyComplianceUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId: Long): UpdateEpcPagePropertyComplianceUpdate {
+        navigate(
+            PropertyComplianceController.getUpdatePropertyComplianceStepPath(propertyOwnershipId, PropertyComplianceStepId.UpdateEpc),
+        )
+        return createValidPage(
+            page,
+            UpdateEpcPagePropertyComplianceUpdate::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
