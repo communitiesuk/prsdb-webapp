@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.CheckAutoMatchedEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExemptionConfirmationPagePropertyComplianceUpdate
@@ -172,19 +173,34 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
         updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
         updateEpcPage.form.submit()
+        val checkAutoMatchedEpcPage =
+            assertPageIs(
+                page,
+                CheckAutoMatchedEpcPagePropertyComplianceUpdate::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+
+        // Check Auto Matched EPC page
+        val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
+        BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January")
+        checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+
+        // Epc Check Your Answers page
         assertPageIs(
             page,
-            CheckAutoMatchedEpcPagePropertyComplianceUpdate::class,
+            UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
 
-        // Check Auto Matched EPC page
-        // TODO PRSD-1312 - continue journey test
+        // TODO PRSD-1313 - CYA page checks, should return to the Property Record page
     }
 
     @Test
     fun `User can add a new looked up EPC if the pages are filled in correctly`(page: Page) {
-        val propertyOwnershipId = 33L // EPC should be auto-matched to this property ownership ID
+        val propertyOwnershipId = 33L
         whenever(epcRegisterClient.getByUprn(100090154792L))
             .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
@@ -192,14 +208,16 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
         updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
         updateEpcPage.form.submit()
-        assertPageIs(
-            page,
-            EpcNotAutoMatchedPagePropertyComplianceUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
+        val epcNotAutomatchedPage =
+            assertPageIs(
+                page,
+                EpcNotAutoMatchedPagePropertyComplianceUpdate::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
 
         // Epc Not Auto Matched page
-        // TODO PRSD-1312 - continue journey test
+        epcNotAutomatchedPage.continueButton.clickAndWait()
+        // val epcLookuptPage =
     }
 
     @Test
