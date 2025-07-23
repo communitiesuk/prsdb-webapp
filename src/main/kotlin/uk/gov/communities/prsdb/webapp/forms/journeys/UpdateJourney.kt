@@ -62,4 +62,19 @@ abstract class UpdateJourney<T : StepId>(
     }
 
     private fun isOriginalJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
+
+    protected fun validateUpdateBeforeSubmission(submittedData: JourneyData): Boolean {
+        val originalJourneyData = createOriginalJourneyData()
+        val combinedJourneyData = originalJourneyData + submittedData
+
+        val iterableJourney =
+            object : Iterable<StepDetails<T>> {
+                override fun iterator() = ReachableStepDetailsIterator(combinedJourneyData, steps, initialStepId, validator)
+            }
+
+        val lastStep = iterableJourney.last()
+        val subPageData = JourneyDataHelper.getPageData(combinedJourneyData, lastStep.step.name, lastStep.subPageNumber)
+        val bindingResult = lastStep.step.page.bindDataToFormModel(validator, subPageData)
+        return subPageData != null && lastStep.step.isSatisfied(bindingResult)
+    }
 }

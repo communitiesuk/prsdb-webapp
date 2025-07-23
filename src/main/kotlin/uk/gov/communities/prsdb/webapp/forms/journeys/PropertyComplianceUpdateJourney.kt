@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -373,6 +374,10 @@ class PropertyComplianceUpdateJourney(
     // TODO PRSD-1245, 1247, 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
+
+        if (!validateUpdateBeforeSubmission(journeyData)) {
+            throw PrsdbWebException("The property compliance update journey data is not valid for submission")
+        }
 
         // TODO PRSD-1245: Add gas safety updates from journeyData to complianceUpdate
         // TODO PRSD-1247: Add EICR updates from journeyData to complianceUpdate

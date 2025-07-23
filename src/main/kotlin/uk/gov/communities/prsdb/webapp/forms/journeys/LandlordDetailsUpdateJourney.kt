@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -322,6 +323,10 @@ class LandlordDetailsUpdateJourney(
 
     private fun updateLandlordWithChangesAndRedirect(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
+
+        if (!validateUpdateBeforeSubmission(journeyData)) {
+            throw PrsdbWebException("The landlord details update journey data is not valid for submission")
+        }
 
         val landlordUpdate =
             LandlordUpdateModel(
