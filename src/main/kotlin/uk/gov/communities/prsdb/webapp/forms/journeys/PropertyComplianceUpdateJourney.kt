@@ -384,31 +384,6 @@ class PropertyComplianceUpdateJourney(
 
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
-    /*
-    Example update and redirect method from the landlord journey:
-
-    private fun updateLandlordWithChangesAndRedirect(): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
-
-        val landlordUpdate =
-            LandlordUpdateModel(
-                email = LandlordDetailsUpdateJourneyDataHelper.getEmailUpdateIfPresent(journeyData),
-                name = LandlordDetailsUpdateJourneyDataHelper.getNameUpdateIfPresent(journeyData),
-                phoneNumber = LandlordDetailsUpdateJourneyDataHelper.getPhoneNumberIfPresent(journeyData),
-                address = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(journeyData),
-                dateOfBirth = LandlordDetailsUpdateJourneyDataHelper.getDateOfBirthIfPresent(journeyData),
-            )
-
-        landlordService.updateLandlordForBaseUserId(
-            SecurityContextHolder.getContext().authentication.name,
-            landlordUpdate,
-        )
-
-        journeyDataService.removeJourneyDataAndContextIdFromSession()
-
-        return LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
-    }
-     */
 
     // TODO 1247, 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(): String {
