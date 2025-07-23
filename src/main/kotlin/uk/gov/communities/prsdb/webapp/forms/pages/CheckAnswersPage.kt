@@ -23,9 +23,13 @@ abstract class CheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        filteredJourneyData!!
-        modelAndView.addObject("submittedFilteredJourneyData", CheckAnswersFormModel.serializeJourneyData(filteredJourneyData))
-        addPageContentToModel(modelAndView, filteredJourneyData)
+        // When displaying the check answer page, ensure that only data that will be submitted can be shown
+        val submittableJourneyData = journeyDataService.getJourneyDataFromSession()
+        modelAndView.addObject(
+            "submittedFilteredJourneyData",
+            CheckAnswersFormModel.serializeJourneyData(submittableJourneyData),
+        )
+        addPageContentToModel(modelAndView, submittableJourneyData)
     }
 
     protected abstract fun addPageContentToModel(
