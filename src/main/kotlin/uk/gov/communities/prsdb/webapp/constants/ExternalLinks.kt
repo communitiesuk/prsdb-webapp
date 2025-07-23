@@ -55,4 +55,4 @@ const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/ho
 
 const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"
 
-const val ONE_LOGIN_BASE_URL = "https://signin.account.gov.uk/sign-in-or-create"
+const val ONE_LOGIN_BASE_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
