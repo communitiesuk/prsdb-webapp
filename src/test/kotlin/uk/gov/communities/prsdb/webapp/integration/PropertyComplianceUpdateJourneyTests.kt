@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -29,6 +32,16 @@ import uk.gov.communities.prsdb.webapp.services.FileUploader
 class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
     private lateinit var fileUploader: FileUploader
+
+    private val dateFormat =
+        LocalDate
+            .Format {
+                dayOfMonth()
+                char(' ')
+                monthName(MonthNames.ENGLISH_FULL)
+                char(' ')
+                year()
+            }
 
     @Test
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
@@ -74,6 +87,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Gas Safety Check Your Answers page
         assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("TODO PRSD-976")
+        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
+        assertThat(cyaPage.form.summaryList.engineerRow.value).containsText("1234567")
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -98,6 +113,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Gas Safety Check Your Answers page
         assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Expired")
+        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -125,6 +141,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Gas Safety Check Your Answers page
         assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("It does not have a gas supply")
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -155,6 +172,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Gas Safety Check Your Answers page
         assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("Other")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("valid reason")
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }

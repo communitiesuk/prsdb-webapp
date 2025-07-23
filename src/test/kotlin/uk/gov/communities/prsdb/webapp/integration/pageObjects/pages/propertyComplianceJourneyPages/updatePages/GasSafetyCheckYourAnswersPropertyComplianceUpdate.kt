@@ -34,5 +34,8 @@ class GasSafetyCheckYourAnswersPropertyComplianceUpdate(
         locator: Locator,
     ) : SummaryList(locator) {
         val gasSafetyRow = getRow("Gas safety certificate")
+        val issueDateRow = getRow("Issue date")
+        val engineerRow = getRow("Gas Safe engineer number")
+        val exemptionRow = getRow("Exemption")
     }
 }
