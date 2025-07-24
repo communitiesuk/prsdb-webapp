@@ -6,7 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -49,8 +51,13 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadEicr",
-                            // TODO PRSD-1246 add Update EICR Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    compliant.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateEICR,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -94,8 +101,13 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.expired",
-                            // TODO PRSD-1246 add Update EICR Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    expiredBeforeUpload.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateEICR,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -135,8 +147,13 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PRSD-1246 add Update EICR Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    missing.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateEICR,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
