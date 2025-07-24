@@ -286,7 +286,6 @@ class PropertyComplianceUpdateJourney(
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
             )
 
-    // TODO PRSD-1246: Implement new EICR or exemption step
     private val updateEICRStep
         get() =
             Step(
