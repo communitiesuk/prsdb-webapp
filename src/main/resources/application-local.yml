@@ -66,6 +66,11 @@ local:
 base-url:
   landlord: http://localhost:8080/landlord
   local-authority: http://localhost:8080/local-authority
+
+aws:
+  s3:
+    quarantineBucket: ${AWS_QUARANTINE_BUCKET:prsdb-quarantine-integration}
+    safeBucket: ${S3_SAFE_BUCKET_KEY:prsdb-uploaded-files-integration}
 ---
 
 spring:

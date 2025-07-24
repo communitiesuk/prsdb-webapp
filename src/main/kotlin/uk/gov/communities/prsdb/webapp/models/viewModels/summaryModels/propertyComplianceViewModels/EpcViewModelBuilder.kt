@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -22,8 +24,11 @@ class EpcViewModelBuilder {
                         valueUrl = propertyCompliance.epcUrl,
                         valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
                         actionText = "forms.links.change",
-                        // TODO PRSD-1312 add Update EPC Compliance Link
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     if (propertyCompliance.epcUrl != null) {
@@ -52,7 +57,7 @@ class EpcViewModelBuilder {
                             key = "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
                             actionText = "forms.links.change",
-                            // TODO PRSD-1312 add Update EPC Compliance Link
+                            // TODO PRSD-1392 add Update EPC Compliance Link to MEES exemption reason step
                             actionLink = "#",
                             withActionLink = withActionLinks,
                         )

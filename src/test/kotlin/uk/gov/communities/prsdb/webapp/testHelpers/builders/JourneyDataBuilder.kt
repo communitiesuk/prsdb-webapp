@@ -53,6 +53,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
@@ -485,9 +487,21 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withUpdateGasSafetyCertificateStatus(hasNewGasSafetyCert: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
+            mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
+        return this
+    }
+
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
+        return this
+    }
+
+    fun withNewGasSafetyCertStatus(hasNewGasSafetyCert: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
+            mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
         return this
     }
 
@@ -549,8 +563,19 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withGasSafetyUpdateCheckAnswers(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
+        return this
+    }
+
+    fun withUpdateEicrStatus(hasNewCertificate: Boolean): JourneyDataBuilder {
+        // TODO PRSD-1246: Update this to use the correct form model
+        journeyData[PropertyComplianceStepId.UpdateEICR.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -606,9 +631,20 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEicrUpdateCheckAnswers(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateEicrCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
+        return this
+    }
+
+    fun withNewEpcStatus(hasNewEpc: Boolean): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateEpc.urlPathSegment] =
+            mapOf(UpdateEpcFormModel::hasNewCertificate.name to hasNewEpc)
         return this
     }
 

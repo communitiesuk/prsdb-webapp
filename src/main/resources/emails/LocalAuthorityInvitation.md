@@ -1,18 +1,20 @@
-((name of council)) invites you to register as a local authority user on the [Private Rented Sector Database (PRS Database)](https://example.com).
+# You’ve been invited to register on the PRS Database as a local council user for ((name of council))
 
-[Register on the database](((invitation url)))
+A local council admin for ((name of council)) has invited you to register on the [PRS Database](((prsd url))).
+
+To accept this invite, you must [register on the database](((invitation url))) using your ((name of council)) email address.
+
+If you think this invite was a mistake and you do not work for this local council, you should ignore this email.
 
 ## What happens next
-You'll be asked for your work details like your name and work email address.
 
-Once you've registered you can view:
-* property records
-* landlord records
-* reports from the public about the database
+Once you’ve registered, you can search and view:
 
-You can only view these records that fall within your local authority area ((name of council)).
-
-It's a legal requirement for landlords and letting agents to register on the database, so you can get a better picture of housing in your local authority area.
+* registered property information
+* registered landlord information
 
 ## Before you register
-You must sign up using a GOV.UK One Login linked to this email address.
+You must register or sign in using the [GOV.UK One Login](((one login url))) linked to this email address.
+
+---
+This is an automated email - do not reply.

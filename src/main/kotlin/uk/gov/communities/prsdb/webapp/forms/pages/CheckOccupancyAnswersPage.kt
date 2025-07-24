@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 class CheckOccupancyAnswersPage(
     private val stepGroupId: UpdatePropertyDetailsGroupIdentifier,
     journeyDataService: JourneyDataService,
-) : CheckAnswersPage(
+) : BasicCheckAnswersPage(
         content =
             mapOf(
                 "title" to "propertyDetails.update.title",

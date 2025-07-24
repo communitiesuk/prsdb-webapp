@@ -34,14 +34,14 @@ class NotifyEmailNotificationServiceTests {
     ) : EmailTemplateModel {
         override fun toHashMap(): HashMap<String, String> = hashMap
 
-        constructor() : this(hashMapOf(), EmailTemplateId.EXAMPLE_EMAIL)
+        constructor() : this(hashMapOf(), EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL)
     }
 
     @Test
     fun `sendEmail sends a matching email using the notification client`() {
         // Arrange
         val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
-        val expectedTemplateId = EmailTemplateId.EXAMPLE_EMAIL
+        val expectedTemplateId = EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL
         val email = TestEmailTemplate(expectedHashmap, expectedTemplateId)
         val recipientEmail = "an email address"
 

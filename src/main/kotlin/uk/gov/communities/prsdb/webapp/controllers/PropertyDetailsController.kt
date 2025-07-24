@@ -74,8 +74,7 @@ class PropertyDetailsController(
             propertyCompliance?.let {
                 PropertyComplianceViewModel(
                     propertyCompliance = propertyCompliance,
-                    withActionLinks = true,
-                    withNotificationLinks = true,
+                    landlordView = true,
                 )
             }
 
@@ -167,8 +166,7 @@ class PropertyDetailsController(
             propertyCompliance?.let {
                 PropertyComplianceViewModel(
                     propertyCompliance = propertyCompliance,
-                    withActionLinks = false,
-                    withNotificationLinks = false,
+                    landlordView = false,
                 )
             }
 

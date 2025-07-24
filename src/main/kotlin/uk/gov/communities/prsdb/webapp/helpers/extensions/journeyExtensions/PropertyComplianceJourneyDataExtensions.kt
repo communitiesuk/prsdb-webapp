@@ -34,6 +34,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
     companion object {
@@ -43,6 +45,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.GasSafety.urlPathSegment,
                 GasSafetyFormModel::hasCert.name,
             )
+
+        fun JourneyData.getHasNewGasSafetyCertificate() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
+                UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
+            ) ?: false
 
         fun JourneyData.getGasSafetyCertIssueDate() =
             this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
@@ -142,6 +151,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.EPC.urlPathSegment,
                 EicrFormModel::hasCert.name,
             )
+
+        fun JourneyData.getHasNewEPC() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEpc.urlPathSegment,
+                UpdateEpcFormModel::hasNewCertificate.name,
+            ) ?: false
 
         fun JourneyData.getEpcLookupCertificateNumber(): String? =
             JourneyDataHelper.getFieldStringValue(
