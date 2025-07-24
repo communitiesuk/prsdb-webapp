@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.validation.BindingResult
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.view.RedirectView
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -13,6 +14,7 @@ abstract class CheckAnswersPage(
     private val journeyDataService: JourneyDataService,
     templateName: String,
     shouldDisplaySectionHeader: Boolean = false,
+    private val missingAnswersRedirect: String,
 ) : AbstractPage(
         formModel = CheckAnswersFormModel::class,
         templateName = templateName,
@@ -28,7 +30,12 @@ abstract class CheckAnswersPage(
             "submittedFilteredJourneyData",
             CheckAnswersFormModel.serializeJourneyData(submittableJourneyData),
         )
-        addPageContentToModel(modelAndView, filteredJourneyData!!)
+
+        try {
+            addPageContentToModel(modelAndView, submittableJourneyData)
+        } catch (_: NullPointerException) {
+            modelAndView.view = RedirectView(missingAnswersRedirect)
+        }
     }
 
     protected abstract fun addPageContentToModel(

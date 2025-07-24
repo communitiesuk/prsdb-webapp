@@ -114,7 +114,7 @@ class LaUserRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterLaUserStepId.CheckAnswers,
-            page = LaUserRegistrationCheckAnswersPage(journeyDataService, invitationService),
+            page = LaUserRegistrationCheckAnswersPage(journeyDataService, invitationService, unreachableStepRedirect),
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )

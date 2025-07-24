@@ -48,6 +48,7 @@ class PropertyComplianceCheckAnswersPageTests {
             PropertyComplianceCheckAnswersPage(
                 journeyDataService = mockJourneyDataService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
+                missingAnswersRedirect = "/property-compliance/missing-answers",
             ) { "any address" }
         val modelAndView = ModelAndView()
 

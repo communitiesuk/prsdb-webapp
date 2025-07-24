@@ -267,7 +267,7 @@ class PropertyDetailsUpdateJourney(
     private val checkLicensingAnswers =
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
-            page = CheckLicensingAnswersPage(journeyDataService),
+            page = CheckLicensingAnswersPage(journeyDataService, unreachableStepRedirect),
             nextAction = { _, _ -> Pair(stepFactory.occupancyStepId, null) },
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
         )
@@ -281,7 +281,7 @@ class PropertyDetailsUpdateJourney(
     private val checkOccupancyAnswers =
         Step(
             id = stepFactory.checkOccupancyAnswersStepId,
-            page = CheckOccupancyAnswersPage(stepFactory.stepGroupId, journeyDataService),
+            page = CheckOccupancyAnswersPage(stepFactory.stepGroupId, journeyDataService, unreachableStepRedirect),
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
             saveAfterSubmit = false,
         )

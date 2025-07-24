@@ -71,9 +71,15 @@ class CheckAnswersPageTests {
         verify(mockJourneyDataService).removeJourneyDataAndContextIdFromSession()
     }
 
+    @Suppress("ktlint:standard:max-line-length")
     class TestCheckAnswersPage(
         journeyDataService: JourneyDataService,
-    ) : CheckAnswersPage(content = emptyMap(), journeyDataService, templateName = "anyTemplate") {
+    ) : CheckAnswersPage(
+            content = emptyMap(),
+            journeyDataService,
+            templateName = "anyTemplate",
+            missingAnswersRedirect = "/missing-answers",
+        ) {
         override fun addPageContentToModel(
             modelAndView: ModelAndView,
             filteredJourneyData: JourneyData,

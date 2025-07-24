@@ -37,7 +37,7 @@ class PropertyRegistrationCheckAnswersPageTests {
     fun setup() {
         localAuthorityService = mock()
         journeyDataService = mock()
-        page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService)
+        page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService, "/redirect")
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
