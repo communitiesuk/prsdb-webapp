@@ -115,6 +115,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckPeopleAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
@@ -1017,6 +1018,18 @@ class Navigator(
             page,
             PropertyDetailsPageLocalAuthorityView::class,
             mapOf("propertyOwnershipId" to id.toString()),
+        )
+    }
+
+    fun goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId: Long): OwnershipTypeFormPagePropertyDetailsUpdate {
+        navigate(
+            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
+                "/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            OwnershipTypeFormPagePropertyDetailsUpdate::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
 
