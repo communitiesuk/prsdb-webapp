@@ -1,9 +1,8 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.basePages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 open class GasSafeEngineerNumBasePage(
     page: Page,
