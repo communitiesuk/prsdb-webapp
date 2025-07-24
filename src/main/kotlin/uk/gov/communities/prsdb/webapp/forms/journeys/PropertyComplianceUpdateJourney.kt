@@ -114,7 +114,7 @@ class PropertyComplianceUpdateJourney(
                 // TODO PRSD-1247: Add EICR check your answers step data
                 PropertyComplianceStepId.UpdateEicrCheckYourAnswers toPageDataOrNull { NoInputFormModel() },
             )
-        // TODO: PRSD-1312: Add original EPC step data
+        // TODO: PRSD-1313: Add original EPC step data
         val originalEpcJourneyData = emptyMap<String, PageData>()
 
         return originalGasSafetyJourneyData +

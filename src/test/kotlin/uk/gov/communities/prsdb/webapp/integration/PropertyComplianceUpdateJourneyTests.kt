@@ -443,8 +443,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1313 - check this page, should return to the Property Record page
     }
 
-    // TODO PRSD-1312 - add journey test covering adding a MEES exemption in the same update as adding a low energy EPC
-
     // TODO PRSD-1392 - add journey test covering adding a MEES exemption from a link on the Property Record page
 
     companion object {
