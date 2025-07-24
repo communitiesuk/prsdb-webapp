@@ -9,12 +9,14 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
 class PropertyComplianceUpdateJourneyFactory(
     val validator: Validator,
     val journeyDataServiceFactory: JourneyDataServiceFactory,
+    val propertyOwnershipService: PropertyOwnershipService,
     val propertyComplianceService: PropertyComplianceService,
     val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     val epcLookupService: EpcLookupService,
@@ -34,15 +36,18 @@ class PropertyComplianceUpdateJourneyFactory(
             ),
         stepName = stepName,
         propertyOwnershipId = propertyOwnershipId,
+        propertyOwnershipService = propertyOwnershipService,
         propertyComplianceService = propertyComplianceService,
         epcCertificateUrlProvider = epcCertificateUrlProvider,
         epcLookupService = epcLookupService,
         checkingAnswersForStep = checkingAnswersFor,
     )
 
-    private fun getJourneyDataKey(
-        propertyOwnershipId: Long,
-        stepGroupId: PropertyComplianceGroupIdentifier,
-    ) = PropertyComplianceController
-        .getUpdatePropertyComplianceBasePath(propertyOwnershipId) + stepGroupId.name
+    companion object {
+        fun getJourneyDataKey(
+            propertyOwnershipId: Long,
+            stepGroupId: PropertyComplianceGroupIdentifier,
+        ) = PropertyComplianceController
+            .getUpdatePropertyComplianceBasePath(propertyOwnershipId) + stepGroupId.name
+    }
 }

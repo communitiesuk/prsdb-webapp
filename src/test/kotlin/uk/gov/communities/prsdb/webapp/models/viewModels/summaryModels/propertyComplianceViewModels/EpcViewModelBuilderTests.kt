@@ -7,7 +7,9 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -51,8 +53,13 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            // TODO PRSD-1312 add Update EPC Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    compliant.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateEpc,
+                                ),
+                            ),
                             compliant.epcUrl,
                             true,
                         ),
@@ -122,8 +129,13 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PRSD-1312 add Update EPC Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    missing.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateEpc,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -141,8 +153,13 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            // TODO PRSD-1312 add Update EPC Compliance Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    meesCompliant.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateEpc,
+                                ),
+                            ),
                             meesCompliant.epcUrl,
                             true,
                         ),
@@ -157,7 +174,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
-                            // TODO PRSD-1312 add Update EPC Compliance Link
+                            // TODO PRSD-1392 add Update MEES exemption Link
                             SummaryListRowActionViewModel("forms.links.change", "#"),
                         ),
                     ),

@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 
 class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
@@ -159,6 +160,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.EPC.urlPathSegment,
                 EicrFormModel::hasCert.name,
             )
+
+        fun JourneyData.getHasNewEPC() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEpc.urlPathSegment,
+                UpdateEpcFormModel::hasNewCertificate.name,
+            ) ?: false
 
         fun JourneyData.getEpcLookupCertificateNumber(): String? =
             JourneyDataHelper.getFieldStringValue(

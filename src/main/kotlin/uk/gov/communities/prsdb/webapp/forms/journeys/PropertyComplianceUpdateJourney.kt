@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -18,11 +20,13 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoCertOrExemption
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
@@ -38,18 +42,21 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     stepName: String,
     private val propertyOwnershipId: Long,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val epcLookupService: EpcLookupService,
     epcCertificateUrlProvider: EpcCertificateUrlProvider,
@@ -244,7 +251,7 @@ class PropertyComplianceUpdateJourney(
                 page =
                     Page(
                         formModel = UpdateGasSafetyCertificateFormModel::class,
-                        templateName = "forms/updateGasSafetyForm",
+                        templateName = "forms/updateComplianceCertificateForm",
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
@@ -303,7 +310,7 @@ class PropertyComplianceUpdateJourney(
                         content =
                             mapOf("todoComment" to "TODO PRSD-1246: Implement new EICR or exemption step"),
                     ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrIssueDate, null) },
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionReason, null) },
                 saveAfterSubmit = false,
             )
 
@@ -323,20 +330,38 @@ class PropertyComplianceUpdateJourney(
                 saveAfterSubmit = false,
             )
 
-    // TODO PRSD-1312: Implement new epc or exemption step
     private val updateEPCStep
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEpc,
                 page =
                     Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
+                        formModel = UpdateEpcFormModel::class,
+                        templateName = "forms/updateComplianceCertificateForm",
                         content =
-                            mapOf("todoComment" to "TODO PRSD-1312: Implement new EPC or exemption step"),
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.update.epc.fieldSetHeading",
+                                "fieldSetHint" to "forms.epc.fieldSetHint",
+                                "radioVariableName" to UpdateEpcFormModel::hasNewCertificate.name,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            labelMsgKey = "forms.update.epc.certificate",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            labelMsgKey = "forms.update.epc.exemption",
+                                        ),
+                                    ),
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                                BACK_URL_ATTR_NAME to
+                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ),
                     ),
-                // For PRSD-1312 - need search by uprn as part of handleSubmitAndRedirect
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcNotAutoMatched, null) },
+                nextAction = { filteredJourneyData, _ -> updateEpcStepNextAction(filteredJourneyData) },
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ -> updateEpcStepHandleSubmitAndRedirect(filteredJourneyData) },
                 saveAfterSubmit = false,
             )
 
@@ -354,6 +379,33 @@ class PropertyComplianceUpdateJourney(
                     ),
                 saveAfterSubmit = false,
             )
+
+    private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
+        if (filteredJourneyData.getHasNewEPC()) {
+            if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
+                Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
+            } else {
+                Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
+            }
+        } else {
+            Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+        }
+
+    private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+        if (filteredJourneyData.getHasNewEPC()) {
+            val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
+
+            val newFilteredJourneyData =
+                updateEpcDetailsInSessionAndReturnUpdatedJourneyData(
+                    journeyDataService,
+                    filteredJourneyData,
+                    epcDetails,
+                    autoMatchedEpc = true,
+                )
+            return getRedirectForNextStep(updateEPCStep, newFilteredJourneyData, null, checkingAnswersFor)
+        }
+        return getRedirectForNextStep(updateEPCStep, filteredJourneyData, null, checkingAnswersFor)
+    }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val nextAction = propertyComplianceSharedStepFactory.checkMatchedEpcStepNextAction(filteredJourneyData)
