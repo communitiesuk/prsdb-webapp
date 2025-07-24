@@ -101,7 +101,7 @@ class LandlordViewModel(
                         changeLinkMessageKey,
                         "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}",
                         // TODO PRSD-355: Set to withActionLinks
-                        withActionLink = false,
+                        withActionLink = true,
                     )
                 } else {
                     addRow(

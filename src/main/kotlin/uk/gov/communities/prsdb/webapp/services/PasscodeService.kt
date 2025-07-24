@@ -38,7 +38,7 @@ class PasscodeService(
 
     private fun generateRandomPasscodeString(): String {
         return (1..PASSCODE_LENGTH)
-            .map { SAFE_CHARACTERS_CHARSET[SAFE_CHARACTERS_CHARSET.indices.random()] }
+            .map { SAFE_CHARACTERS_CHARSET.random() }
             .joinToString("")
     }
 }
