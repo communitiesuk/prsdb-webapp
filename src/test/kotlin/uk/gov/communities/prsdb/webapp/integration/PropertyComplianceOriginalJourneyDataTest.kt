@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginalJourneyDataFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginalJourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFact
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
 @Import(Validator::class)
-class PropertyComplianceOriginalJourneyDataFactoryTest {
+class PropertyComplianceOriginalJourneyDataTest {
     companion object {
         @JvmStatic
         fun getOriginalJourneyDataTestCases(): List<PropertyCompliance> =
@@ -95,10 +95,7 @@ class PropertyComplianceOriginalJourneyDataFactoryTest {
     @MethodSource("getOriginalJourneyDataTestCases")
     fun getOriginalJourneyData(originalRecord: PropertyCompliance) {
         // Arrange
-        val propertyComplianceService = mock<PropertyComplianceService>()
-        whenever(propertyComplianceService.getComplianceForProperty(1L)).thenReturn(originalRecord)
-
-        val originalJourneyData = PropertyComplianceOriginalJourneyDataFactory(propertyComplianceService, 1L).originalJourneyData
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)

@@ -64,14 +64,10 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
-    override fun createOriginalJourneyData(): JourneyData {
-        val factory =
-            PropertyComplianceOriginalJourneyDataFactory(
-                propertyComplianceService,
-                propertyOwnershipId,
-            )
-        return factory.originalJourneyData
-    }
+    override fun createOriginalJourneyData(): JourneyData =
+        PropertyComplianceOriginalJourneyData.fromPropertyCompliance(
+            propertyComplianceService.getComplianceForProperty(propertyOwnershipId),
+        )
 
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(

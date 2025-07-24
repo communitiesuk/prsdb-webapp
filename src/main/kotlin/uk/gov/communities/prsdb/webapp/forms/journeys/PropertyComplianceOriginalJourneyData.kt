@@ -18,14 +18,15 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import kotlin.collections.plus
 
-class PropertyComplianceOriginalJourneyDataFactory(
-    propertyComplianceService: PropertyComplianceService,
-    propertyOwnershipId: Long,
+class PropertyComplianceOriginalJourneyData private constructor(
+    private val propertyCompliance: PropertyCompliance,
 ) {
-    private val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
+    companion object {
+        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): JourneyData =
+            PropertyComplianceOriginalJourneyData(propertyCompliance).asJourneyData
+    }
 
     private infix fun <T : FormModel?> StepId.toPageData(fromRecordFunc: (PropertyCompliance) -> T): Pair<String, PageData> =
         this.urlPathSegment to (fromRecordFunc(propertyCompliance)?.toPageData() ?: emptyMap())
@@ -83,7 +84,7 @@ class PropertyComplianceOriginalJourneyDataFactory(
     // TODO: PRSD-1312: Add original EPC step data
     private val originalEpcJourneyData = emptyMap<String, PageData>()
 
-    val originalJourneyData: JourneyData =
+    val asJourneyData: JourneyData =
         originalGasSafetyJourneyData +
             originalEicrJourneyData +
             originalEpcJourneyData
