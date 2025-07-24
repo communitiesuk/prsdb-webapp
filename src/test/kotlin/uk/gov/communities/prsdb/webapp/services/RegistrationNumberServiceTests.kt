@@ -47,3 +47,4 @@ class RegistrationNumberServiceTests {
         verify(mockRegNumRepository, times(2)).existsByNumber(any(Long::class.java))
     }
 }
+// test
