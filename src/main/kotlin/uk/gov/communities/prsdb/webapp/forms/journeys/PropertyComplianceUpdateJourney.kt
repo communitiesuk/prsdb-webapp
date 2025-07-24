@@ -205,10 +205,10 @@ class PropertyComplianceUpdateJourney(
                                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                             ),
                     ),
-                nextAction = { journeyData, _ ->
-                    if (journeyData.getHasNewGasSafetyCertificate()!!) {
+                nextAction = { filteredJourneyData, _ ->
+                    if (filteredJourneyData.getHasNewGasSafetyCertificate()!!) {
                         Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
-                    } else if (journeyData.getStillHasNoCertOrExemption() ?: false) {
+                    } else if (filteredJourneyData.getStillHasNoCertOrExemption() ?: false) {
                         Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
                     } else {
                         Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
