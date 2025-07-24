@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper">
+        <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+            <h1 class="govuk-heading-l">TODO: Implement cookies page</h1>
+        </div>
+    </main>
+</html>
