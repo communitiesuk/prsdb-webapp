@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -291,10 +292,29 @@ class PropertyComplianceUpdateJourney(
                 id = PropertyComplianceStepId.UpdateEICR,
                 page =
                     Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
+                        formModel = UpdateEicrFormModel::class,
+                        templateName = "forms/updateComplianceCertificateForm",
                         content =
-                            mapOf("todoComment" to "TODO PRSD-1246: Implement new EICR or exemption step"),
+                            mapOf(
+                                "title" to "propertyCompliance.title",
+                                "fieldSetHeading" to "forms.update.eicr.fieldSetHeading",
+                                "fieldSetHint" to "forms.eicr.fieldSetHint",
+                                "radioVariableName" to UpdateEicrFormModel::hasNewCertificate.name,
+                                "radioOptions" to
+                                    listOf(
+                                        RadiosButtonViewModel(
+                                            value = true,
+                                            labelMsgKey = "forms.update.eicr.certificate",
+                                        ),
+                                        RadiosButtonViewModel(
+                                            value = false,
+                                            labelMsgKey = "forms.update.eicr.exemption",
+                                        ),
+                                    ),
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                                BACK_URL_ATTR_NAME to
+                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionReason, null) },
                 saveAfterSubmit = false,
