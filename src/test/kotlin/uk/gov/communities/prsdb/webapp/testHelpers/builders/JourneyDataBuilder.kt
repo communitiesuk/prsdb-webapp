@@ -487,12 +487,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withUpdateGasSafetyCertificateStatus(hasNewGasSafetyCert: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
-            mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
-        return this
-    }
-
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
@@ -521,9 +515,15 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOriginalGasSafetyCertName(originalName: String): JourneyDataBuilder {
+    fun withOriginalGasSafetyCertName(
+        originalName: String,
+        metadataOnly: Boolean = false,
+    ): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyUpload.urlPathSegment] =
-            mapOf(GasSafetyUploadCertificateFormModel::name.name to originalName)
+            mapOf(
+                GasSafetyUploadCertificateFormModel::name.name to originalName,
+                GasSafetyUploadCertificateFormModel::isMetadataOnly.name to metadataOnly,
+            )
         return this
     }
 
