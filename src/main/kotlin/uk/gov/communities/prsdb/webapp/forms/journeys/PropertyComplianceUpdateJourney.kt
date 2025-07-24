@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceS
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
@@ -316,7 +317,14 @@ class PropertyComplianceUpdateJourney(
                                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                             ),
                     ),
-                nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionReason, null) },
+                // TODO PRSD-1246: Update this to match GasSafety version after PRSD-1245 is implemented
+                nextAction = { journeyData, _ ->
+                    if (journeyData.getHasNewEICR()) {
+                        Pair(PropertyComplianceStepId.EicrIssueDate, null)
+                    } else {
+                        Pair(PropertyComplianceStepId.EicrExemptionReason, null)
+                    }
+                },
                 saveAfterSubmit = false,
             )
 
