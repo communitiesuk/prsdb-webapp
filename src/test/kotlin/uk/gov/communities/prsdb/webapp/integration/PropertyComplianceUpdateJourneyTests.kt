@@ -5,7 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -167,7 +166,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1245 - check this page, should return to the Property Record page
     }
 
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Property details before update
@@ -212,7 +210,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1247 - submit page, should return to the Property Record page
     }
 
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new expired certificate)`(page: Page) {
         // Property details before update
