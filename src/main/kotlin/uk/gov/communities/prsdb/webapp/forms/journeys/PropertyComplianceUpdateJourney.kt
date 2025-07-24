@@ -261,13 +261,7 @@ class PropertyComplianceUpdateJourney(
                                 isCheckingAnswers = checkingAnswersForStep != null,
                             ),
                     ),
-                nextAction = { journeyData, _ ->
-                    if (journeyData.getHasNewGasSafetyCertificate()) {
-                        Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
-                    } else {
-                        Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
-                    }
-                },
+                nextAction = { filteredJourneyData, _ -> updateGasSafetyNextAction(filteredJourneyData) },
                 saveAfterSubmit = false,
             )
 
@@ -318,14 +312,7 @@ class PropertyComplianceUpdateJourney(
                                 isCheckingAnswers = checkingAnswersForStep != null,
                             ),
                     ),
-                // TODO PRSD-1246: Update this to match GasSafety version after PRSD-1245 is implemented
-                nextAction = { journeyData, _ ->
-                    if (journeyData.getHasNewEICR()) {
-                        Pair(PropertyComplianceStepId.EicrIssueDate, null)
-                    } else {
-                        Pair(PropertyComplianceStepId.EicrExemptionReason, null)
-                    }
-                },
+                nextAction = { filteredJourneyData, _ -> updateEicrNextAction(filteredJourneyData) },
                 saveAfterSubmit = false,
             )
 
@@ -380,6 +367,22 @@ class PropertyComplianceUpdateJourney(
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> updateEpcStepHandleSubmitAndRedirect(filteredJourneyData) },
                 saveAfterSubmit = false,
             )
+
+    // TODO: PRSD-1245 - update this
+    private fun updateGasSafetyNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
+        if (filteredJourneyData.getHasNewGasSafetyCertificate()) {
+            Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
+        } else {
+            Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
+        }
+
+    // TODO PRSD-1246: Update this to match GasSafety version after PRSD-1245 is implemented
+    private fun updateEicrNextAction(filteredJourneyData: JourneyData) =
+        if (filteredJourneyData.getHasNewEICR()) {
+            Pair(PropertyComplianceStepId.EicrIssueDate, null)
+        } else {
+            Pair(PropertyComplianceStepId.EicrExemptionReason, null)
+        }
 
     // TODO PRSD-1313: Implement EPC check your answers step
     private val epcCheckYourAnswersStep
