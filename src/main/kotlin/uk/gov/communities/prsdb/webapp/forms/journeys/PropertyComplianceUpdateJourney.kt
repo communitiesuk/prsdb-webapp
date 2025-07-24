@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -16,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
@@ -52,7 +52,7 @@ class PropertyComplianceUpdateJourney(
     private val propertyComplianceService: PropertyComplianceService,
     private val epcLookupService: EpcLookupService,
     epcCertificateUrlProvider: EpcCertificateUrlProvider,
-    checkingAnswersForStep: String?,
+    private val checkingAnswersForStep: String?,
 ) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
         initialStepId = initialStepId,
@@ -256,8 +256,9 @@ class PropertyComplianceUpdateJourney(
                                         ),
                                     ),
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
-                                BACK_URL_ATTR_NAME to
-                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(
+                                PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                                isCheckingAnswers = checkingAnswersForStep != null,
                             ),
                     ),
                 nextAction = { journeyData, _ ->
@@ -312,8 +313,9 @@ class PropertyComplianceUpdateJourney(
                                         ),
                                     ),
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
-                                BACK_URL_ATTR_NAME to
-                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(
+                                PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                                isCheckingAnswers = checkingAnswersForStep != null,
                             ),
                     ),
                 // TODO PRSD-1246: Update this to match GasSafety version after PRSD-1245 is implemented
@@ -369,8 +371,9 @@ class PropertyComplianceUpdateJourney(
                                         ),
                                     ),
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
-                                BACK_URL_ATTR_NAME to
-                                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                            ).withBackUrlIfNotNullAndNotCheckingAnswers(
+                                PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                                isCheckingAnswers = checkingAnswersForStep != null,
                             ),
                     ),
                 nextAction = { filteredJourneyData, _ -> updateEpcStepNextAction(filteredJourneyData) },
