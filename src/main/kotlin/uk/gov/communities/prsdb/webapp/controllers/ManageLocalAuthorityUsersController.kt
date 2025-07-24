@@ -247,7 +247,11 @@ class ManageLocalAuthorityUsersController(
             val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
             invitationEmailSender.sendEmail(
                 emailModel.email,
-                LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
+                LocalAuthorityInvitationEmail(
+                    currentAuthority,
+                    invitationLinkAddress,
+                    absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+                ),
             )
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)

@@ -93,6 +93,6 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
         confirmationPage.returnToDashboardButton.clickAndWait()
         val dashboard = assertPageIs(page, LocalAuthorityDashboardPage::class)
 
-        assertThat(dashboard.bannerSubHeading).containsText("Local authority")
+        assertThat(dashboard.bannerSubHeading).containsText("Local council")
     }
 }
