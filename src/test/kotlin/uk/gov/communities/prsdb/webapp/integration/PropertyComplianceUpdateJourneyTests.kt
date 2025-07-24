@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
@@ -44,6 +45,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyOutdatedPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyUploadConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyUploadPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.MeesExemptionCheckPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.MeesExemptionConfirmationPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.MeesExemptionReasonPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -285,12 +289,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     }
 
     @Test
-    fun `User can add a new automatched EPC if the pages are filled in correctly`(page: Page) {
+    fun `User can add an automatched EPC and MEES exemption if the pages are filled in correctly`(page: Page) {
         val propertyOwnershipId = 33L // EPC should be auto-matched to this property ownership ID
+        val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
         whenever(epcRegisterClient.getByUprn(100090154792L))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
                     expiryDate = LocalDate(currentDate.year + 5, 1, 5),
+                    energyRating = "F",
                 ),
             )
 
@@ -309,11 +315,26 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
         BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
         assertThat(checkAutoMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("F")
         assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January")
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+        val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyComplianceUpdate::class, urlArguments)
 
-        // Epc Check Your Answers page
+        // MEES exemption check page
+        meesExemptionCheckPage.submitHasExemption()
+        val meesExemptionReasonPage =
+            assertPageIs(
+                page,
+                MeesExemptionReasonPagePropertyComplianceUpdate::class,
+                urlArguments,
+            )
+
+        // MEES exemption reason page
+        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
+        val meesExemptionConfirmationPage = assertPageIs(page, MeesExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
+
+        // MEES exemption confirmation page
+        meesExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         assertPageIs(
             page,
             UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class,
@@ -385,6 +406,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Check Your Answers page
         // TODO PRSD-1313 - check this page, should return to the Property Record page
     }
+
     // TODO PRSD-1312 - add journey test covering adding a MEES exemption in the same update as adding a low energy EPC
 
     // TODO PRSD-1392 - add journey test covering adding a MEES exemption from a link on the Property Record page
