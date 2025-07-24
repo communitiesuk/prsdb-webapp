@@ -58,6 +58,10 @@ class LandlordController(
         val numberOfIncompleteCompliances =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name)
 
+        val numberOfOutstandingActionsOfMultipleTypes: Int =
+            getNumberOfOutstandingActionsOfMultipleTypes(numberOfIncompleteProperties, numberOfIncompleteCompliances)
+
+        model.addAttribute("numberOfOutstandingActions", numberOfOutstandingActionsOfMultipleTypes)
         model.addAttribute("numberOfIncompleteProperties", numberOfIncompleteProperties)
         model.addAttribute("numberOfIncompleteCompliances", numberOfIncompleteCompliances)
 
@@ -204,6 +208,17 @@ class LandlordController(
         )
         model.addAttribute("singleLineAddress", singleLineAddress)
         model.addAttribute(BACK_URL_ATTR_NAME, INCOMPLETE_PROPERTIES_URL)
+    }
+
+    private fun getNumberOfOutstandingActionsOfMultipleTypes(
+        numberOfIncompleteProperties: Int,
+        numberOfIncompleteCompliances: Int,
+    ) = if (numberOfIncompleteProperties == 0 ||
+        numberOfIncompleteCompliances == 0
+    ) {
+        0
+    } else {
+        numberOfIncompleteProperties + numberOfIncompleteCompliances
     }
 
     companion object {
