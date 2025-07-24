@@ -140,6 +140,14 @@ class PropertyComplianceBuilder {
                 .withExpiredEpc()
                 .build()
 
+        fun createWithNaturallyExpiredCerts() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withGasSafetyCert(issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong() + 1))
+                .withEicr(issueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong() + 1))
+                .withEpc()
+                .build()
+
         fun createWithGasAndEicrExpiredCerts() =
             PropertyComplianceBuilder()
                 .withPropertyOwnership()

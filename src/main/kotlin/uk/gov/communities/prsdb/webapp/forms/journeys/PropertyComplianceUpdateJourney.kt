@@ -5,21 +5,17 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
@@ -31,17 +27,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoCertOrExemption
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -79,63 +65,12 @@ class PropertyComplianceUpdateJourney(
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
     override fun createOriginalJourneyData(): JourneyData {
-        val propertyCompliance = propertyComplianceService.getComplianceForProperty(propertyOwnershipId)
-
-        infix fun <T : FormModel?> StepId.toPageData(fromRecordFunc: (PropertyCompliance) -> T): Pair<String, PageData> =
-            this.urlPathSegment to (fromRecordFunc(propertyCompliance)?.toPageData() ?: emptyMap())
-
-        // Although the user cannot update their gas safety record to no certificate or exemption, if they have not previously added either then we need
-        // to include a route through the journey in case they navigate to the check your answers page without adding a new certificate or exemption.
-        val updateGasCertificateFormModel =
-            object : FormModel {
-                override fun toPageData() =
-                    mapOf(
-                        UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to (propertyCompliance.gasSafetyCertIssueDate != null),
-                        ORIGINALLY_NOT_INCLUDED_KEY to
-                            (propertyCompliance.gasSafetyCertIssueDate == null && propertyCompliance.gasSafetyCertExemptionReason == null),
-                    )
-            }
-
-        val originalGasSafetyJourneyData: JourneyData =
-            mapOf(
-                PropertyComplianceStepId.UpdateGasSafety toPageData { _ -> updateGasCertificateFormModel },
-                PropertyComplianceStepId.GasSafetyIssueDate toPageData
-                    { TodayOrPastDateFormModel.fromDateOrNull(it.gasSafetyCertIssueDate) },
-                PropertyComplianceStepId.GasSafetyEngineerNum toPageData GasSafeEngineerNumFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.GasSafetyUpload toPageData GasSafetyUploadCertificateFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.GasSafetyUploadConfirmation toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.GasSafetyOutdated toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.GasSafetyExemptionReason toPageData
-                    GasSafetyExemptionReasonFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.GasSafetyExemptionOtherReason toPageData
-                    GasSafetyExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.GasSafetyExemptionConfirmation toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.GasSafetyExemptionMissing toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers toPageData { CheckAnswersFormModel() },
+        val factory =
+            PropertyComplianceOriginalJourneyDataFactory(
+                propertyComplianceService,
+                propertyOwnershipId,
             )
-
-        val originalEicrJourneyData =
-            mapOf(
-                PropertyComplianceStepId.UpdateEICR toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.EicrIssueDate toPageData
-                    { TodayOrPastDateFormModel.fromDateOrNull(it.eicrIssueDate) },
-                PropertyComplianceStepId.EicrUpload toPageData EicrUploadCertificateFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.EicrUploadConfirmation toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.EicrOutdated toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.EicrExemptionReason toPageData EicrExemptionReasonFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.EicrExemptionOtherReason toPageData
-                    EicrExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
-                PropertyComplianceStepId.EicrExemptionConfirmation toPageData { NoInputFormModel() },
-                PropertyComplianceStepId.EicrExemptionMissing toPageData { NoInputFormModel() },
-                // TODO PRSD-1247: Add EICR check your answers step data
-                PropertyComplianceStepId.UpdateEicrCheckYourAnswers toPageData { NoInputFormModel() },
-            )
-        // TODO: PRSD-1312: Add original EPC step data
-        val originalEpcJourneyData = emptyMap<String, PageData>()
-
-        return originalGasSafetyJourneyData +
-            originalEicrJourneyData +
-            originalEpcJourneyData
+        return factory.originalJourneyData
     }
 
     private val propertyComplianceSharedStepFactory =
