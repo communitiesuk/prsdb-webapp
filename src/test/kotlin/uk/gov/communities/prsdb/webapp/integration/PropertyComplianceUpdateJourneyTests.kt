@@ -72,8 +72,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateGasSafetyPage = assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, urlArguments)
 
         // Update certificate or add exemption page
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewCertificate()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -125,8 +124,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateGasSafetyPage = assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, urlArguments)
 
         // Update certificate or add exemption page
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewCertificate()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -154,8 +152,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateGasSafetyPage = assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, urlArguments)
 
         // Update certificate or add exemption page
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewExemption()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
@@ -184,8 +181,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val updateGasSafetyPage = assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, urlArguments)
 
         // Update certificate or add exemption page
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewExemption()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
