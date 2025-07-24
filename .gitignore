@@ -53,3 +53,6 @@ notify-template-tests.run.xml
 
 ### Local ###
 .local-uploads
+
+### Copilot ###
+.github/copilot-instructions.md
