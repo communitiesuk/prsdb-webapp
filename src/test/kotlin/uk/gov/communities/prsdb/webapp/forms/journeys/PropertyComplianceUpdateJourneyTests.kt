@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.time.LocalDate
 import kotlin.String
+import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
 class PropertyComplianceUpdateJourneyTests {
@@ -49,6 +50,106 @@ class PropertyComplianceUpdateJourneyTests {
 
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @Nested
+    inner class UpdateGasSafetyStepTests {
+        @Test
+        fun `submit redirects to IssueDate if hasNewCertificate is true`() {
+            // Arrange
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateGasSafety,
+                    pageData = mapOf("hasNewCertificate" to true),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "redirect:${PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment}",
+                redirectModelAndView.viewName,
+            )
+        }
+
+        @Test
+        fun `submit redirects to ExemptionReason if hasNewCertificate is false`() {
+            // Arrange
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateGasSafety,
+                    pageData = mapOf("hasNewCertificate" to false),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "redirect:${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
+                redirectModelAndView.viewName,
+            )
+        }
+
+        @Test
+        fun `can reach the gas safety missing page if certificate was originally missing`() {
+            // Arrange
+            val missingGasSafetyPropertyCompliance =
+                MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(
+                mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId),
+            ).thenReturn(missingGasSafetyPropertyCompliance)
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                JourneyDataBuilder()
+                    .withNewGasSafetyCertStatus(null)
+                    .build(),
+            )
+
+            // Act
+            val redirectModelAndView =
+                getModelAndViewForStep(
+                    stepId = PropertyComplianceStepId.GasSafetyExemptionMissing,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "forms/gasSafetyExemptionMissingForm",
+                redirectModelAndView.viewName,
+            )
+        }
+
+        @Test
+        fun `submitting with a missing update value does not reach the gas safety missing step`() {
+            // Arrange
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                try {
+                    completeStep(
+                        stepId = PropertyComplianceStepId.UpdateGasSafety,
+                        pageData = mapOf("hasNewCertificate" to null),
+                        propertyOwnershipId = propertyOwnershipId,
+                    )
+                } catch (_: Exception) {
+                    null
+                }
+
+            // Assert
+            assertNotEquals(
+                "redirect:${PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment}",
+                redirectModelAndView?.viewName,
+            )
+        }
+    }
 
     @Nested
     inner class UpdateComplianceRecordTests {
@@ -276,5 +377,14 @@ class PropertyComplianceUpdateJourneyTests {
             formData = pageData,
             subPageNumber = null,
             principal = mock(),
+        )
+
+    private fun getModelAndViewForStep(
+        stepId: PropertyComplianceStepId,
+        submittedPageData: PageData? = null,
+        propertyOwnershipId: Long = 1L,
+    ): ModelAndView =
+        createPropertyComplianceUpdateJourney(propertyOwnershipId, stepName = stepId.urlPathSegment).getModelAndViewForStep(
+            submittedPageData = submittedPageData,
         )
 }

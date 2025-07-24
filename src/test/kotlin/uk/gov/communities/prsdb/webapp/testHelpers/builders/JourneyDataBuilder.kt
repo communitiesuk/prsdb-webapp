@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -493,10 +494,19 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withNewGasSafetyCertStatus(hasNewGasSafetyCert: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
-            mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
-        return this
+    fun withNewGasSafetyCertStatus(hasNewGasSafetyCert: Boolean?): JourneyDataBuilder {
+        if (hasNewGasSafetyCert != null) {
+            journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
+                mapOf(UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to hasNewGasSafetyCert)
+            return this
+        } else {
+            journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
+                mapOf(
+                    UpdateGasSafetyCertificateFormModel::hasNewCertificate.name to false,
+                    ORIGINALLY_NOT_INCLUDED_KEY to true,
+                )
+            return this
+        }
     }
 
     fun withGasSafetyIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
