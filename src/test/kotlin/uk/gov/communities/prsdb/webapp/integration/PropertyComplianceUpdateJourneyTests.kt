@@ -290,9 +290,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
     @Test
     fun `User can add an automatched EPC and MEES exemption if the pages are filled in correctly`(page: Page) {
-        val propertyOwnershipId = 33L // EPC should be auto-matched to this property ownership ID
-        val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
-        whenever(epcRegisterClient.getByUprn(100090154792L))
+        whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
                     expiryDate = LocalDate(currentDate.year + 5, 1, 5),
@@ -301,15 +299,10 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
             )
 
         // Update EPC page
-        val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
+        val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
         updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
         updateEpcPage.form.submit()
-        val checkAutoMatchedEpcPage =
-            assertPageIs(
-                page,
-                CheckAutoMatchedEpcPagePropertyComplianceUpdate::class,
-                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-            )
+        val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
 
         // Check Auto Matched EPC page
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
@@ -335,24 +328,18 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // MEES exemption confirmation page
         meesExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(
-            page,
-            UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
+        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // TODO PRSD-1313 - CYA page checks, should return to the Property Record page
     }
 
     @Test
     fun `User can add a new looked up EPC if the pages are filled in correctly`(page: Page) {
-        val propertyOwnershipId = 33L
-        val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
-        whenever(epcRegisterClient.getByUprn(100090154792L))
+        whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
             .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
         // Update EPC page
-        val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
+        val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
         updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
         updateEpcPage.form.submit()
         val epcNotAutomatchedPage = assertPageIs(page, EpcNotAutoMatchedPagePropertyComplianceUpdate::class, urlArguments)
@@ -375,11 +362,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
 
         // Epc Check Your Answers page
-        assertPageIs(
-            page,
-            UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
+        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // TODO PRSD-1313 - CYA page checks, should return to the Property Record page
     }
@@ -412,7 +395,10 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     // TODO PRSD-1392 - add journey test covering adding a MEES exemption from a link on the Property Record page
 
     companion object {
-        private const val PROPERTY_OWNERSHIP_ID = 12L
+        // This property starts with Gas Safety, EICR and EPC exemptions and has a known uprn
+        private const val PROPERTY_OWNERSHIP_ID = 33L
+
+        private const val PROPERTY_33_UPRN = 100090154792L
 
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
 
