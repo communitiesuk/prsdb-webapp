@@ -39,8 +39,7 @@ data class RegistrationNumberDataModel(
             return RegistrationNumberDataModel(regNumType, regNumNumber)
         }
 
-        private fun getBaseRegNumString(regNumString: String): String =
-            regNumString.filter { it.isLetterOrDigit() }.uppercase()
+        private fun getBaseRegNumString(regNumString: String): String = regNumString.filter { it.isLetterOrDigit() }.uppercase()
 
         private fun validateBaseRegNumString(baseRegNumString: String) {
             if (baseRegNumString.length != REG_NUM_LENGTH + 1) {
@@ -62,10 +61,10 @@ data class RegistrationNumberDataModel(
         regNumString = regNumString.padStart(REG_NUM_LENGTH, SAFE_CHARACTERS_CHARSET[0])
 
         return this.type.toInitial() +
-                "-" +
-                regNumString.substring(0, REG_NUM_SEG_LENGTH) +
-                "-" +
-                regNumString.substring(REG_NUM_SEG_LENGTH)
+            "-" +
+            regNumString.substring(0, REG_NUM_SEG_LENGTH) +
+            "-" +
+            regNumString.substring(REG_NUM_SEG_LENGTH)
     }
 
     private fun isType(type: RegistrationNumberType) = this.type == type

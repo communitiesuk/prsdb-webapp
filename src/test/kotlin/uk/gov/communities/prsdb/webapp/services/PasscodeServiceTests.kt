@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
-import java.util.*
+import java.util.Optional
 
 class PasscodeServiceTests {
     private lateinit var mockPasscodeRepository: PasscodeRepository
@@ -56,7 +56,7 @@ class PasscodeServiceTests {
         assertEquals(6, savedPasscode.passcode.length)
         assertTrue(
             savedPasscode.passcode.all { char -> SAFE_CHARACTERS_CHARSET.contains(char) },
-            "Generated passcode '${savedPasscode.passcode}' contains unsafe characters"
+            "Generated passcode '${savedPasscode.passcode}' contains unsafe characters",
         )
         assertNotNull(savedPasscode.passcode)
         assertEquals(mockLocalAuthority, savedPasscode.localAuthority)
@@ -80,9 +80,10 @@ class PasscodeServiceTests {
         val localAuthorityId = 999L
         whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.empty())
 
-        val exception = assertThrows(IllegalArgumentException::class.java) {
-            passcodeService.generatePasscode(localAuthorityId)
-        }
+        val exception =
+            assertThrows(IllegalArgumentException::class.java) {
+                passcodeService.generatePasscode(localAuthorityId)
+            }
 
         assertEquals("LocalAuthority with id $localAuthorityId not found", exception.message)
     }

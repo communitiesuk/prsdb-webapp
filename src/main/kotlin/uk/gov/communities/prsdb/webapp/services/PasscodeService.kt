@@ -18,18 +18,20 @@ class PasscodeService(
 
     @Transactional
     fun generatePasscode(localAuthorityId: Long): Passcode {
-        val localAuthority = localAuthorityRepository.findById(localAuthorityId.toInt())
-            .orElseThrow { IllegalArgumentException("LocalAuthority with id $localAuthorityId not found") }
+        val localAuthority =
+            localAuthorityRepository.findById(localAuthorityId.toInt())
+                .orElseThrow { IllegalArgumentException("LocalAuthority with id $localAuthorityId not found") }
 
         var passcodeString: String
         do {
             passcodeString = generateRandomPasscodeString()
         } while (passcodeRepository.existsById(passcodeString))
 
-        val passcode = Passcode(
-            passcode = passcodeString,
-            localAuthority = localAuthority
-        )
+        val passcode =
+            Passcode(
+                passcode = passcodeString,
+                localAuthority = localAuthority,
+            )
 
         return passcodeRepository.save(passcode)
     }
