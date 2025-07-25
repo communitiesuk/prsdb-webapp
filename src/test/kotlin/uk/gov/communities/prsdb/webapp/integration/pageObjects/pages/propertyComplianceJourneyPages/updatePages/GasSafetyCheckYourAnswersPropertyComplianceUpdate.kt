@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class GasSafetyCheckYourAnswersPropertyComplianceUpdate(
@@ -16,5 +19,23 @@ class GasSafetyCheckYourAnswersPropertyComplianceUpdate(
             PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
         ),
     ) {
-    val continueButton = Button.byText(page, "Continue")
+    val form = CheckGasSafetyComplianceUpdateForm(page)
+
+    fun confirm() = form.submit()
+
+    class CheckGasSafetyComplianceUpdateForm(
+        page: Page,
+    ) : Form(page) {
+        val summaryName = Heading(page.locator("form h2"))
+        val summaryList = CheckGasSafetyComplianceUpdateSummaryList(locator)
+    }
+
+    class CheckGasSafetyComplianceUpdateSummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val gasSafetyRow = getRow("Gas safety certificate")
+        val issueDateRow = getRow("Issue date")
+        val engineerRow = getRow("Gas Safe engineer number")
+        val exemptionRow = getRow("Exemption")
+    }
 }

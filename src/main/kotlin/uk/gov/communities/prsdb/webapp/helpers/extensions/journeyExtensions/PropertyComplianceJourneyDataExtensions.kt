@@ -52,7 +52,16 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
                 UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
-            ) ?: false
+            )
+
+        const val ORIGINALLY_NOT_INCLUDED_KEY = "originallyNotIncluded"
+
+        fun JourneyData.getStillHasNoCertOrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
+                ORIGINALLY_NOT_INCLUDED_KEY,
+            )
 
         fun JourneyData.getGasSafetyCertIssueDate() =
             this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
