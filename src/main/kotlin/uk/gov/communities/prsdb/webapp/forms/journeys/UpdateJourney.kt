@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import org.springframework.validation.Validator
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.ReachableStepDetailsIterator
@@ -63,7 +64,7 @@ abstract class UpdateJourney<T : StepId>(
 
     private fun isOriginalJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 
-    protected fun validateUpdateBeforeSubmission(submittedData: JourneyData): Boolean {
+    protected fun throwIfSubmittedDataIsAnInvalidUpdate(submittedData: JourneyData) {
         val originalJourneyData = createOriginalJourneyData()
         val combinedJourneyData = originalJourneyData + submittedData
 
@@ -80,6 +81,8 @@ abstract class UpdateJourney<T : StepId>(
         val bindingResult = lastStep.step.page.bindDataToFormModel(validator, subPageData)
         val isCombinedJourneyDataValid = subPageData != null && lastStep.step.isSatisfied(bindingResult)
 
-        return isCombinedJourneyDataValid && areAllSubmittedDataInCombinedJourneyData
+        if (!isCombinedJourneyDataValid || !areAllSubmittedDataInCombinedJourneyData) {
+            throw PrsdbWebException("The property details update journey data is not valid for submission")
+        }
     }
 }

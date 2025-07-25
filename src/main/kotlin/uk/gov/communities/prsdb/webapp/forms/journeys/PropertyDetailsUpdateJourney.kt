@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory.Companion.getJourneyDataKey
@@ -316,10 +315,6 @@ class PropertyDetailsUpdateJourney(
     private fun updatePropertyAndRedirect(): String {
         val journeyData = journeyDataService.getJourneyDataFromSession()
 
-        if (!validateUpdateBeforeSubmission(journeyData)) {
-            throw PrsdbWebException("The property details update journey data is not valid for submission")
-        }
-
         val propertyUpdate =
             PropertyOwnershipUpdateModel(
                 ownershipType = journeyData.getOwnershipTypeUpdateIfPresent(),
@@ -329,7 +324,10 @@ class PropertyDetailsUpdateJourney(
                 numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(stepFactory.stepGroupId),
             )
 
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
+        propertyOwnershipService.updatePropertyOwnership(
+            propertyOwnershipId,
+            propertyUpdate,
+        ) { throwIfSubmittedDataIsAnInvalidUpdate(journeyData) }
 
         clearRelatedJourneyContext()
 
