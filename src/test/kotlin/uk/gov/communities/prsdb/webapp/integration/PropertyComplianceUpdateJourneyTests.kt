@@ -4,6 +4,8 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -17,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.CheckAutoMatchedEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrCheckYourAnswersPagePropertyComplianceUpdate
@@ -50,6 +53,17 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
+
+    // Date format like "1 January 2023"
+    private val dateFormat =
+        LocalDate
+            .Format {
+                dayOfMonth()
+                char(' ')
+                monthName(MonthNames.ENGLISH_FULL)
+                char(' ')
+                year()
+            }
 
     @Test
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
@@ -90,10 +104,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Gas Safety Cert. Upload Confirmation page
         assertThat(gasSafetyUploadConfirmationPage.heading).containsText("Your file is being scanned")
         gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("TODO PRSD-976")
+        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
+        assertThat(cyaPage.form.summaryList.engineerRow.value).containsText("1234567")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test
@@ -111,10 +129,13 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Gas Safety Outdated page
         assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
         gasSafetyOutdatedPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Expired")
+        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test
@@ -135,8 +156,13 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         gasSafetyExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("It does not have a gas supply")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test
@@ -162,8 +188,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         gasSafetyExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
+        val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
+
         // Gas Safety Check Your Answers page
-        // TODO PRSD-1245 - check this page, should return to the Property Record page
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("Other")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("valid reason")
+        cyaPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test

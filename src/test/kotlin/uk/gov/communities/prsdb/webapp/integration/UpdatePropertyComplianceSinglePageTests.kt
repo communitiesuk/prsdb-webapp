@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test
 class UpdatePropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
     inner class UpdateGasSafetyStepTests {
-        // TODO PRSD-1245: Re-enable this test when UpdateGasSafetyCertificateFormModel validation is re-enabled
-        @Disabled
         @Test
         fun `Submitting with no option selected returns an error`() {
             val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
