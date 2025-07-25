@@ -5,7 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -40,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyOutdatedPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyUploadConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyUploadPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEicrPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -55,8 +55,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewCertificate()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -101,8 +100,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new outdated certificate)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("true")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewCertificate()
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
@@ -123,8 +121,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can add a new gas safety exemption if the pages are filled in correctly`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewExemption()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
@@ -146,8 +143,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can add a new gas safety exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.form.hasNewCertificateRadios.selectValue("false")
-        updateGasSafetyPage.form.submit()
+        updateGasSafetyPage.submitHasNewExemption()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
@@ -170,13 +166,18 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1245 - check this page, should return to the Property Record page
     }
 
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
+        // Property details before update
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Exempt")
+        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.actions.actionLink
+            .clickAndWait()
+        val updateEicrPage = assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, urlArguments)
+
         // Update certificate or add exemption page
-        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
-        updateEicrPage.continueButton.clickAndWait()
-        // TODO: PRSD-1246 - go to Issue Date only if user has submitted "Add a new eicr certificate"
+        updateEicrPage.submitHasNewCertificate()
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Issue Date page
@@ -209,13 +210,18 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1247 - submit page, should return to the Property Record page
     }
 
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new expired certificate)`(page: Page) {
+        // Property details before update
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Exempt")
+        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.actions.actionLink
+            .clickAndWait()
+        val updateEicrPage = assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, urlArguments)
+
         // Update certificate or add exemption page
-        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
-        updateEicrPage.continueButton.clickAndWait()
-        // TODO: PRSD-1246 - go to Issue Date only if user has submitted "Add a new eicr certificate"
+        updateEicrPage.submitHasNewCertificate()
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Issue Date page
@@ -234,10 +240,16 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly`(page: Page) {
+        // Property details before update
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Exempt")
+        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.actions.actionLink
+            .clickAndWait()
+        val updateEicrPage = assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, urlArguments)
+
         // Update certificate or add exemption page
-        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
-        updateEicrPage.continueButton.clickAndWait()
-        // TODO: PRSD-1246 - go to exemption page if user has submitted "Add a new exemption"
+        updateEicrPage.submitHasNewExemption()
         val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Reason page
@@ -256,10 +268,16 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
+        // Property details before update
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Exempt")
+        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.actions.actionLink
+            .clickAndWait()
+        val updateEicrPage = assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, urlArguments)
+
         // Update certificate or add exemption page
-        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
-        updateEicrPage.continueButton.clickAndWait()
-        // TODO: PRSD-1246 - go to exemption page if user has submitted "Add a new exemption"
+        updateEicrPage.submitHasNewExemption()
         val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Reason page
@@ -292,8 +310,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Update EPC page
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
-        updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
-        updateEpcPage.form.submit()
+        updateEpcPage.submitHasNewCertificate()
         assertPageIs(
             page,
             CheckAutoMatchedEpcPagePropertyComplianceUpdate::class,
@@ -312,8 +329,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Update EPC page
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId)
-        updateEpcPage.form.hasNewCertificateRadios.selectValue("true")
-        updateEpcPage.form.submit()
+        updateEpcPage.submitHasNewCertificate()
         assertPageIs(
             page,
             EpcNotAutoMatchedPagePropertyComplianceUpdate::class,
@@ -328,8 +344,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can add a new EPC exemption if the pages are filled in correctly`(page: Page) {
         // Update EPC page
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
-        updateEpcPage.form.hasNewCertificateRadios.selectValue("false")
-        updateEpcPage.form.submit()
+        updateEpcPage.submitHasNewExemption()
         val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EPC Exemption Reason page
