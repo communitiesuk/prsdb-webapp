@@ -20,7 +20,7 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
     @Test
     fun `Skipped occupancy update sub-journey steps can be accessed via CYA page links, and back links when changing answers`(page: Page) {
         // Household occupancy update page
-        val checkHouseholdsAnswersPage = navigator.goToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId)
+        val checkHouseholdsAnswersPage = navigator.skipToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId)
         checkHouseholdsAnswersPage.form.summaryList.occupancyRow
             .clickActionLinkAndWait()
         val householdOccupancyUpdatePage = assertPageIs(page, HouseholdsOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
@@ -32,7 +32,7 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         assertPageIs(page, HouseholdsOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
 
         // People occupancy update page
-        var checkPeopleAnswersPage = navigator.goToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
+        var checkPeopleAnswersPage = navigator.skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
         checkPeopleAnswersPage.form.summaryList.occupancyRow
             .clickActionLinkAndWait()
         val peopleOccupancyUpdatePage = assertPageIs(page, PeopleOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
@@ -44,7 +44,7 @@ class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
         assertPageIs(page, PeopleOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
 
         // People number of households update page
-        checkPeopleAnswersPage = navigator.goToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
+        checkPeopleAnswersPage = navigator.skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
         checkPeopleAnswersPage.form.summaryList.numberOfHouseholdsRow
             .clickActionLinkAndWait()
         val peopleNumberOfHouseholdsUpdatePage =

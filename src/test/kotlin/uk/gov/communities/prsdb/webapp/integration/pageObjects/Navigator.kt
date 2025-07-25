@@ -1087,7 +1087,17 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId: Long): CheckHouseholdsAnswersPagePropertyDetailsUpdate {
+    fun skipToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId: Long): CheckHouseholdsAnswersPagePropertyDetailsUpdate {
+        setJourneyDataInSession(
+            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
+                propertyOwnershipId,
+                UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment,
+            ),
+            JourneyDataBuilder()
+                .withNumberOfHouseholdsUpdate(1)
+                .withNumberOfHouseholdsPeopleUpdate(3)
+                .build(),
+        )
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
                 "/${UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment}",
@@ -1099,7 +1109,16 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId: Long): CheckPeopleAnswersPagePropertyDetailsUpdate {
+    fun skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId: Long): CheckPeopleAnswersPagePropertyDetailsUpdate {
+        setJourneyDataInSession(
+            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
+                propertyOwnershipId,
+                UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment,
+            ),
+            JourneyDataBuilder()
+                .withNumberOfPeopleUpdate(3)
+                .build(),
+        )
         navigate(
             PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
                 "/${UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment}",
