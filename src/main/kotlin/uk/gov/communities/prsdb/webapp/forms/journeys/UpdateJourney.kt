@@ -73,8 +73,13 @@ abstract class UpdateJourney<T : StepId>(
             }
 
         val lastStep = iterableJourney.last()
+
+        val areAllSubmittedDataInCombinedJourneyData = submittedData.all { it.value == lastStep.filteredJourneyData[it.key] }
+
         val subPageData = JourneyDataHelper.getPageData(combinedJourneyData, lastStep.step.name, lastStep.subPageNumber)
         val bindingResult = lastStep.step.page.bindDataToFormModel(validator, subPageData)
-        return subPageData != null && lastStep.step.isSatisfied(bindingResult)
+        val isCombinedJourneyDataValid = subPageData != null && lastStep.step.isSatisfied(bindingResult)
+
+        return isCombinedJourneyDataValid && areAllSubmittedDataInCombinedJourneyData
     }
 }
