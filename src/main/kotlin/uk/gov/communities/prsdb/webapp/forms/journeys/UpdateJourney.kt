@@ -65,24 +65,49 @@ abstract class UpdateJourney<T : StepId>(
     private fun isOriginalJourneyDataInitialised(journeyData: JourneyData): Boolean = journeyData.containsKey(originalDataKey)
 
     protected fun throwIfSubmittedDataIsAnInvalidUpdate(submittedData: JourneyData) {
-        val originalJourneyData = createOriginalJourneyData()
-        val combinedJourneyData = originalJourneyData + submittedData
+        val journeyDataForUpdatedEntity = createOriginalJourneyData() + submittedData
 
+        val lastStepReachedAfterUpdate = getLastReachableStepForJourneyData(journeyDataForUpdatedEntity)
+
+        if (!lastStepReachedAfterUpdate.isSatisfiedByJourneyData(journeyDataForUpdatedEntity)) {
+            throw PrsdbWebException(
+                "${this::class.simpleName} journeyData would update to an invalid state: " +
+                    "step '${lastStepReachedAfterUpdate.step.name}' is not satisfied by the provided data",
+            )
+        }
+
+        if (!areAllSubmittedDataOnRouteToLastStep(submittedData, lastStepReachedAfterUpdate)) {
+            val erroneouslyIncludedSteps = getStepsSubmittedButNotOnRoute(submittedData, lastStepReachedAfterUpdate).keys
+            throw PrsdbWebException(
+                "${this::class.simpleName} journeyData would update property for an unreached step. " +
+                    "Erroneously included steps: ${erroneouslyIncludedSteps.joinToString("\n* ", "\n* ")}",
+            )
+        }
+    }
+
+    private fun StepDetails<T>.isSatisfiedByJourneyData(journeyDataForUpdatedEntity: Map<String, Any?>): Boolean {
+        val subPageData =
+            JourneyDataHelper.getPageData(journeyDataForUpdatedEntity, this.step.name, this.subPageNumber)
+        val bindingResult = this.step.page.bindDataToFormModel(validator, subPageData)
+        return subPageData != null && this.step.isSatisfied(bindingResult)
+    }
+
+    private fun areAllSubmittedDataOnRouteToLastStep(
+        submittedData: JourneyData,
+        lastStep: StepDetails<T>,
+    ): Boolean = submittedData.filterKeys { it != originalDataKey }.all { it.value == lastStep.filteredJourneyData[it.key] }
+
+    private fun getStepsSubmittedButNotOnRoute(
+        submittedData: JourneyData,
+        lastStep: StepDetails<T>,
+    ): JourneyData = submittedData.filterKeys { it != originalDataKey }.filter { it.value != lastStep.filteredJourneyData[it.key] }
+
+    private fun getLastReachableStepForJourneyData(journeyDataForUpdatedEntity: JourneyData): StepDetails<T> {
         val iterableJourney =
             object : Iterable<StepDetails<T>> {
-                override fun iterator() = ReachableStepDetailsIterator(combinedJourneyData, steps, initialStepId, validator)
+                override fun iterator() = ReachableStepDetailsIterator(journeyDataForUpdatedEntity, steps, initialStepId, validator)
             }
 
-        val lastStep = iterableJourney.last()
-
-        val areAllSubmittedDataInCombinedJourneyData = submittedData.all { it.value == lastStep.filteredJourneyData[it.key] }
-
-        val subPageData = JourneyDataHelper.getPageData(combinedJourneyData, lastStep.step.name, lastStep.subPageNumber)
-        val bindingResult = lastStep.step.page.bindDataToFormModel(validator, subPageData)
-        val isCombinedJourneyDataValid = subPageData != null && lastStep.step.isSatisfied(bindingResult)
-
-        if (!isCombinedJourneyDataValid || !areAllSubmittedDataInCombinedJourneyData) {
-            throw PrsdbWebException("The property details update journey data is not valid for submission")
-        }
+        return iterableJourney.last()
     }
 }
