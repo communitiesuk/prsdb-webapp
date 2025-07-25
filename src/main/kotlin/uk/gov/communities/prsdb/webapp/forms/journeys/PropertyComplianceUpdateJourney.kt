@@ -219,8 +219,8 @@ class PropertyComplianceUpdateJourney(
                 page = CheckUpdateGasSafetyAnswersPage(journeyDataService),
                 saveAfterSubmit = false,
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
-                handleSubmitAndRedirect = { _, _, _ ->
-                    updateComplianceAndRedirect()
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect(filteredJourneyData)
                 },
             )
 
@@ -400,10 +400,11 @@ class PropertyComplianceUpdateJourney(
     }
 
     // TODO 1247, 1313 - add this as the handleSubmitAndRedirect method and test
-    private fun updateComplianceAndRedirect(): String {
-        val journeyData = journeyDataService.getJourneyDataFromSession()
+    private fun updateComplianceAndRedirect(filteredJourneyData: JourneyData): String {
+        val submittedJourneyData = journeyDataService.getJourneyDataFromSession()
+        val relevantJourneyData = submittedJourneyData.filterKeys { it in filteredJourneyData.keys }
 
-        val gasSafetyUpdate = createGasSafetyUpdateOrNull(journeyData, propertyOwnershipId)
+        val gasSafetyUpdate = createGasSafetyUpdateOrNull(relevantJourneyData, propertyOwnershipId)
         // TODO PRSD-1247: Add EICR updates from journeyData to complianceUpdate
         // TODO PRSD-1313: Add EPC updates from journeyData to complianceUpdate
         val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate)
