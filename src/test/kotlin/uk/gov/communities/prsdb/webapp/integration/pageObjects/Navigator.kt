@@ -1042,9 +1042,7 @@ class Navigator(
                 UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
             ),
             JourneyDataBuilder()
-                .withIsOccupiedUpdate(true)
-                .withHouseholds(1)
-                .withTenants(3)
+                .withNewOccupants()
                 .build(),
         )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)

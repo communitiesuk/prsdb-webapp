@@ -35,6 +35,7 @@ abstract class CheckAnswersPage(
             addPageContentToModel(modelAndView, submittableJourneyData)
         } catch (_: NullPointerException) {
             modelAndView.view = RedirectView(missingAnswersRedirect)
+            modelAndView.model.clear()
         }
     }
 
