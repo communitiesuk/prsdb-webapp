@@ -5,11 +5,12 @@ import jakarta.validation.Validation
 import jakarta.validation.Validator
 import jakarta.validation.ValidatorFactory
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -58,7 +59,7 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var journeyFactory: PropertyComplianceUpdateJourneyFactory
 
     @BeforeEach
-    fun setUpBeforeAll() {
+    fun setUp() {
         propertyComplianceRepository = mock()
         propertyOwnershipService = mock()
         session = mock()
@@ -93,17 +94,47 @@ class PropertyComplianceOriginalJourneyDataTest {
 
     @ParameterizedTest
     @MethodSource("getOriginalJourneyDataTestCases")
-    fun getOriginalJourneyData(originalRecord: PropertyCompliance) {
+    fun `A compliance record leads to original journey data that, allows retrieving the final submission step`(
+        originalRecord: PropertyCompliance,
+    ) {
         // Arrange
         val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
-        whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(originalRecord)
+        whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
+
+        // Act
+        val journey =
+            journeyFactory.create(
+                stepName = finalSubmissionStepId.urlPathSegment,
+                propertyOwnershipId = 1L,
+                checkingAnswersFor = null,
+            )
+
+        val finalTemplate = journey.getModelAndViewForStep()
+
+        // Assert
+        assertFalse(finalTemplate.viewName?.contains("redirect")!!)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getOriginalJourneyDataTestCases")
+    fun `A compliance record leads to original journey data that, when submitted, recreates that exact record`(
+        originalRecord: PropertyCompliance,
+    ) {
+        // Arrange
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val journeyDataService = mock<JourneyDataService>()
+
+        whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
+        whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
+        whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
 
         // TODO PRSD-1313 - ensure EPC lookup is mocked correctly for each test case
 
+        // Act
         val journey =
             journeyFactory.create(
                 stepName = finalSubmissionStepId.urlPathSegment,
@@ -116,6 +147,18 @@ class PropertyComplianceOriginalJourneyDataTest {
             principal = mock(),
         )
 
-        verify(propertyComplianceRepository).save(eq(originalRecord))
+        val complianceCaptor = org.mockito.kotlin.argumentCaptor<PropertyCompliance>()
+        verify(propertyComplianceRepository).save(complianceCaptor.capture())
+
+        val savedCompliance = complianceCaptor.firstValue
+
+        // Assert
+        assertEquals(originalRecord.gasSafetyCertS3Key, savedCompliance.gasSafetyCertS3Key)
+        assertEquals(originalRecord.gasSafetyCertIssueDate, savedCompliance.gasSafetyCertIssueDate)
+        assertEquals(originalRecord.gasSafetyCertEngineerNum, savedCompliance.gasSafetyCertEngineerNum)
+        assertEquals(originalRecord.gasSafetyCertExemptionReason, savedCompliance.gasSafetyCertExemptionReason)
+        assertEquals(originalRecord.gasSafetyCertExemptionOtherReason, savedCompliance.gasSafetyCertExemptionOtherReason)
+        // TODO PRSD-1248 - check EICR values match the original record
+        // TODO PRSD-1313 - check EPC values match the orignal record
     }
 }

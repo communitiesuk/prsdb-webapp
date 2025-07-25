@@ -25,7 +25,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withGasSafetyCert(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertS3Key = "gas-key"
+        propertyCompliance.gasSafetyCertS3Key = "property_1_gas_safety_certificate.pdf"
         propertyCompliance.gasSafetyCertIssueDate = issueDate
         propertyCompliance.gasSafetyCertEngineerNum = "1234567"
         return this
@@ -44,7 +44,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withEicr(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.eicrS3Key = "eicr-key"
+        propertyCompliance.eicrS3Key = "property_1_eicr.pdf"
         propertyCompliance.eicrIssueDate = issueDate
         return this
     }
