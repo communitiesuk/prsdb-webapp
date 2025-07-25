@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 class CheckOccupancyAnswersPage(
     private val stepGroupId: UpdatePropertyDetailsGroupIdentifier,
     journeyDataService: JourneyDataService,
+    missingAnswersRedirect: String,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -21,6 +22,7 @@ class CheckOccupancyAnswersPage(
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             ),
         journeyDataService = journeyDataService,
+        missingAnswersRedirect = missingAnswersRedirect,
     ) {
     override fun getSummaryList(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()

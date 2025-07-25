@@ -31,6 +31,31 @@ class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
+    @Test
+    fun `A property update does not affect prior sections updated in parallel`(page: Page) {
+        // Ensure ownership type starts as freehold
+        navigator
+            .goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId)
+            .submitOwnershipType(OwnershipType.FREEHOLD)
+
+        // Start updating ownership type to create isolated session
+        navigator.skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(propertyOwnershipId)
+
+        // Update ownership type to leasehold
+        navigator
+            .goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId)
+            .submitOwnershipType(OwnershipType.LEASEHOLD)
+
+        navigator
+            .skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(propertyOwnershipId)
+            .form
+            .submit()
+
+        val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+
+        assertThat(propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+    }
+
     @Nested
     inner class OwnershipTypeUpdates {
         @Test

@@ -335,7 +335,7 @@ class LandlordDetailsUpdateJourney(
         landlordService.updateLandlordForBaseUserId(
             SecurityContextHolder.getContext().authentication.name,
             landlordUpdate,
-        )
+        ) { throwIfSubmittedDataIsAnInvalidUpdate(journeyData) }
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 

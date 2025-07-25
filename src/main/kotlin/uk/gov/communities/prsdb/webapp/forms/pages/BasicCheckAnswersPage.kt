@@ -9,7 +9,14 @@ abstract class BasicCheckAnswersPage(
     content: Map<String, Any>,
     journeyDataService: JourneyDataService,
     shouldDisplaySectionHeader: Boolean = false,
-) : CheckAnswersPage(content, journeyDataService, templateName = "forms/checkAnswersForm", shouldDisplaySectionHeader) {
+    missingAnswersRedirect: String,
+) : CheckAnswersPage(
+        content,
+        journeyDataService,
+        templateName = "forms/checkAnswersForm",
+        shouldDisplaySectionHeader,
+        missingAnswersRedirect,
+    ) {
     final override fun addPageContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,

@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class CheckLicensingAnswersPage(
     journeyDataService: JourneyDataService,
+    missingAnswersRedirect: String,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -19,6 +20,7 @@ class CheckLicensingAnswersPage(
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             ),
         journeyDataService = journeyDataService,
+        missingAnswersRedirect = missingAnswersRedirect,
     ) {
     override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(

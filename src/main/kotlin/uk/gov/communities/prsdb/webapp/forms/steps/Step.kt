@@ -20,16 +20,16 @@ open class Step<T : StepId>(
 ) {
     val name: String = id.urlPathSegment
 
-    fun updatedJourneyData(
+    fun stepDataPair(
         journeyData: JourneyData,
         formModel: FormModel,
         subPageNumber: Int?,
-    ): JourneyData =
+    ): Pair<String, PageData> =
         if (subPageNumber != null) {
             val newStepData = updatedStepData(journeyData, subPageNumber, formModel.toPageData())
-            journeyData + (name to newStepData)
+            (name to newStepData)
         } else {
-            journeyData + (name to formModel.toPageData())
+            (name to formModel.toPageData())
         }
 
     private fun updatedStepData(

@@ -620,7 +620,7 @@ class PropertyOwnershipServiceTests {
         )
 
         // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
 
         // Assert
         assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
@@ -660,7 +660,7 @@ class PropertyOwnershipServiceTests {
         ).thenReturn(updateLicence)
 
         // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
 
         // Assert
         assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
@@ -668,6 +668,48 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
         assertEquals(updateModel.licensingType, propertyOwnership.license?.licenseType)
         assertEquals(updateModel.licenceNumber, propertyOwnership.license?.licenseNumber)
+    }
+
+    @Test
+    fun `when checkUpdateIsValid throws an exception, no update occurs`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
+                currentNumTenants = 6,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumberSelective"),
+            )
+        val originalOwnershipType = propertyOwnership.ownershipType
+        val originalNumberOfHouseholds = propertyOwnership.currentNumHouseholds
+        val originalNumberOfPeople = propertyOwnership.currentNumTenants
+        val originalLicenceType = propertyOwnership.license?.licenseType
+        val originalLicenceNumber = propertyOwnership.license?.licenseNumber
+
+        val updateLicence = License(LicensingType.HMO_MANDATORY_LICENCE, "licenceNumberMandatory")
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                ownershipType = OwnershipType.LEASEHOLD,
+                numberOfHouseholds = 1,
+                numberOfPeople = 2,
+                licensingType = updateLicence.licenseType,
+                licenceNumber = updateLicence.licenseNumber,
+            )
+
+        // Act
+        try {
+            propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) { throw Exception("Invalid update") }
+        } catch (_: Exception) {
+            // Expected exception, do nothing
+        }
+
+        // Assert
+        assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
+        assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
+        assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
+        assertEquals(originalLicenceType, propertyOwnership.license?.licenseType)
+        assertEquals(originalLicenceNumber, propertyOwnership.license?.licenseNumber)
     }
 
     @Test
@@ -695,7 +737,7 @@ class PropertyOwnershipServiceTests {
         ).thenReturn(null)
 
         // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel)
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
 
         // Assert
         assertNull(propertyOwnership.license)

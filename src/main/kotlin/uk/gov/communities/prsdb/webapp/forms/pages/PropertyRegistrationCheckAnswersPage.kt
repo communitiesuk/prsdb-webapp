@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHe
 class PropertyRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
     private val localAuthorityService: LocalAuthorityService,
+    missingAnswersRedirectUrl: String,
 ) : CheckAnswersPage(
         content =
             mapOf(
@@ -23,6 +24,7 @@ class PropertyRegistrationCheckAnswersPage(
         journeyDataService = journeyDataService,
         templateName = "forms/propertyRegistrationCheckAnswersForm",
         shouldDisplaySectionHeader = true,
+        missingAnswersRedirect = missingAnswersRedirectUrl,
     ) {
     override fun addPageContentToModel(
         modelAndView: ModelAndView,

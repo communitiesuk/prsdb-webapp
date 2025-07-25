@@ -388,7 +388,7 @@ class LandlordServiceTests {
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
         // Act
-        landlordService.updateLandlordForBaseUserId(userId, updateModel)
+        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
 
         // Assert
         assertEquals(originalName, landlordEntity.name)
@@ -423,7 +423,7 @@ class LandlordServiceTests {
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
         // Act
-        landlordService.updateLandlordForBaseUserId(userId, updateModel)
+        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
 
         // Assert
         assertEquals(updateModel.name, landlordEntity.name)
@@ -431,6 +431,40 @@ class LandlordServiceTests {
         assertEquals(updateModel.phoneNumber, landlordEntity.phoneNumber)
         assertEquals(newAddress, landlordEntity.address)
         assertEquals(updateModel.dateOfBirth, landlordEntity.dateOfBirth)
+    }
+
+    @Test
+    fun `when checkUpdateIsValid throws an exception, no update occurs`() {
+        // Arrange
+        val userId = "my id"
+        val originalName = "original name"
+        val originalEmail = "original email"
+        val originalPhoneNumber = "original phone number"
+        val originalDateOfBirth = LocalDate.of(1991, 1, 1)
+        val landlordEntity =
+            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
+        val newAddress = createAddress("new address")
+        val updateModel =
+            LandlordUpdateModel(
+                "newEmail",
+                "newName",
+                "new phone number",
+                AddressDataModel.fromAddress(newAddress),
+                LocalDate.of(1992, 2, 2),
+            )
+
+        // Act
+        try {
+            landlordService.updateLandlordForBaseUserId(userId, updateModel) { throw Exception("Invalid update") }
+        } catch (_: Exception) {
+            // Expected exception, do nothing
+        }
+
+        // Assert
+        assertEquals(originalName, landlordEntity.name)
+        assertEquals(originalEmail, landlordEntity.email)
+        assertEquals(originalPhoneNumber, landlordEntity.phoneNumber)
+        assertEquals(originalDateOfBirth, landlordEntity.dateOfBirth)
     }
 
     @Test

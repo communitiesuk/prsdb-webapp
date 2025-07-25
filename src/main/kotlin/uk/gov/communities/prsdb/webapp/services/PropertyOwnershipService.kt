@@ -184,7 +184,9 @@ class PropertyOwnershipService(
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,
+        checkUpdateIsValid: () -> Unit,
     ) {
+        checkUpdateIsValid()
         val propertyOwnership = getPropertyOwnership(id)
 
         update.ownershipType?.let { propertyOwnership.ownershipType = it }

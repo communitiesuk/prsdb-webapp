@@ -481,7 +481,12 @@ class PropertyComplianceJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.CheckAndSubmit,
-                page = PropertyComplianceCheckAnswersPage(journeyDataService, epcCertificateUrlProvider) { getPropertyAddress() },
+                page =
+                    PropertyComplianceCheckAnswersPage(
+                        journeyDataService,
+                        epcCertificateUrlProvider,
+                        unreachableStepRedirect,
+                    ) { getPropertyAddress() },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
             )
 

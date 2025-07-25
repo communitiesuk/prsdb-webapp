@@ -409,7 +409,9 @@ class PropertyComplianceUpdateJourney(
         // TODO PRSD-1313: Add EPC updates from journeyData to complianceUpdate
         val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate)
 
-        propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate)
+        propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate) {
+            throwIfSubmittedDataIsAnInvalidUpdate(journeyData)
+        }
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 
