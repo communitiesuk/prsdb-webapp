@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.constants
 
 import kotlin.math.pow
 
-val REG_NUM_CHARSET =
+val SAFE_CHARACTERS_CHARSET =
     listOf(
         'C',
         'D',
@@ -32,7 +32,7 @@ val REG_NUM_CHARSET =
         '9',
     )
 
-val REG_NUM_BASE = REG_NUM_CHARSET.size
+val REG_NUM_BASE = SAFE_CHARACTERS_CHARSET.size
 
 const val REG_NUM_LENGTH = 8
 
