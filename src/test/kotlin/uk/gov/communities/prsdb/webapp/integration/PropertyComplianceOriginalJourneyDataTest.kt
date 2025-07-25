@@ -2,19 +2,19 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import jakarta.servlet.http.HttpSession
 import jakarta.validation.Validation
-import jakarta.validation.Validator
 import jakarta.validation.ValidatorFactory
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.context.annotation.Import
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -29,21 +29,63 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
-@Import(Validator::class)
 class PropertyComplianceOriginalJourneyDataTest {
     companion object {
         @JvmStatic
-        fun getOriginalJourneyDataTestCases(): List<PropertyCompliance> =
+        fun getOriginalJourneyDataTestCases(): List<Arguments> =
             listOf(
-                PropertyComplianceBuilder.createWithInDateCerts(),
-                PropertyComplianceBuilder.createWithExpiredCerts(),
-                PropertyComplianceBuilder.createWithNaturallyExpiredCerts(),
-                PropertyComplianceBuilder.createWithCertExemptions(),
-                PropertyComplianceBuilder.createWithMissingCerts(),
+                Arguments.of(
+                    Named.of("with in date certs", PropertyComplianceBuilder.createWithInDateCerts()),
+                    namedExactlyTheSame,
+                ),
+                Arguments.of(
+                    Named.of("with expired certs", PropertyComplianceBuilder.createWithExpiredCerts()),
+                    namedExactlyTheSame,
+                ),
+                Arguments.of(
+                    Named.of("with naturally expired certs", PropertyComplianceBuilder.createWithNaturallyExpiredCerts()),
+                    Named.of("an expired equivalent", ::isUpdatedAnExpiredVersionOfOriginal),
+                ),
+                Arguments.of(
+                    Named.of("with cert exemptions", PropertyComplianceBuilder.createWithCertExemptions()),
+                    namedExactlyTheSame,
+                ),
+                Arguments.of(
+                    Named.of("with missing certs", PropertyComplianceBuilder.createWithMissingCerts()),
+                    namedExactlyTheSame,
+                ),
             )
+
+        val namedExactlyTheSame = Named.of("exactly the same", ::areAllComplianceValuesTheSame)
 
         // TODO PRSD-1313 - Update to use the final submission step ID from the journey factory as prior submissions will be included
         val finalSubmissionStepId = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers
+
+        fun areAllComplianceValuesTheSame(
+            original: PropertyCompliance,
+            updated: PropertyCompliance,
+        ): Boolean {
+            return original.gasSafetyCertS3Key == updated.gasSafetyCertS3Key &&
+                original.gasSafetyCertIssueDate == updated.gasSafetyCertIssueDate &&
+                original.gasSafetyCertEngineerNum == updated.gasSafetyCertEngineerNum &&
+                original.gasSafetyCertExemptionReason == updated.gasSafetyCertExemptionReason &&
+                original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason
+            // TODO PRSD-1248 - check EICR values match the original record
+            // TODO PRSD-1313 - check EPC values match the orignal record
+        }
+
+        fun isUpdatedAnExpiredVersionOfOriginal(
+            original: PropertyCompliance,
+            updated: PropertyCompliance,
+        ): Boolean {
+            return updated.gasSafetyCertS3Key == null &&
+                original.gasSafetyCertIssueDate == updated.gasSafetyCertIssueDate &&
+                updated.gasSafetyCertEngineerNum == null &&
+                original.gasSafetyCertExemptionReason == updated.gasSafetyCertExemptionReason &&
+                original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason
+            // TODO PRSD-1248 - check EICR values match the original record
+            // TODO PRSD-1313 - check EPC values match the orignal record
+        }
     }
 
     private lateinit var propertyComplianceRepository: PropertyComplianceRepository
@@ -119,10 +161,11 @@ class PropertyComplianceOriginalJourneyDataTest {
         assertFalse(finalTemplate.viewName?.contains("redirect")!!)
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "A compliance record {0} leads to original journey data that recreates a record which is {1}")
     @MethodSource("getOriginalJourneyDataTestCases")
-    fun `A compliance record leads to original journey data that, when submitted, recreates that exact record`(
+    fun `Original journey data recreates the original record`(
         originalRecord: PropertyCompliance,
+        complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
     ) {
         // Arrange
         val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
@@ -153,12 +196,6 @@ class PropertyComplianceOriginalJourneyDataTest {
         val savedCompliance = complianceCaptor.firstValue
 
         // Assert
-        assertEquals(originalRecord.gasSafetyCertS3Key, savedCompliance.gasSafetyCertS3Key)
-        assertEquals(originalRecord.gasSafetyCertIssueDate, savedCompliance.gasSafetyCertIssueDate)
-        assertEquals(originalRecord.gasSafetyCertEngineerNum, savedCompliance.gasSafetyCertEngineerNum)
-        assertEquals(originalRecord.gasSafetyCertExemptionReason, savedCompliance.gasSafetyCertExemptionReason)
-        assertEquals(originalRecord.gasSafetyCertExemptionOtherReason, savedCompliance.gasSafetyCertExemptionOtherReason)
-        // TODO PRSD-1248 - check EICR values match the original record
-        // TODO PRSD-1313 - check EPC values match the orignal record
+        assertTrue(complianceRecordsMatch(originalRecord, savedCompliance))
     }
 }
