@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteInc
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -54,13 +55,16 @@ class LandlordController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
-        val numberOfIncompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name)
-        val numberOfIncompleteCompliances =
-            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name)
+        val landlordDashboardNotificationBannerViewModel =
+            LandlordDashboardNotificationBannerViewModel(
+                numberOfIncompleteProperties =
+                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(
+                        principal.name,
+                    ),
+                numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name),
+            )
 
-        model.addAttribute("numberOfIncompleteProperties", numberOfIncompleteProperties)
-        model.addAttribute("numberOfIncompleteCompliances", numberOfIncompleteCompliances)
-
+        model.addAttribute("landlordDashboardNotificationBannerViewModel", landlordDashboardNotificationBannerViewModel)
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
 
