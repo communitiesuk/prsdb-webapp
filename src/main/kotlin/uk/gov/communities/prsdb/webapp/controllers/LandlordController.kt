@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteInc
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -54,17 +55,16 @@ class LandlordController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
-        val numberOfIncompleteProperties = propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name)
-        val numberOfIncompleteCompliances =
-            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name)
+        val landlordDashboardNotificationBannerViewModel =
+            LandlordDashboardNotificationBannerViewModel(
+                numberOfIncompleteProperties =
+                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(
+                        principal.name,
+                    ),
+                numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name),
+            )
 
-        val numberOfOutstandingActionsOfMultipleTypes: Int =
-            getNumberOfOutstandingActionsOfMultipleTypes(numberOfIncompleteProperties, numberOfIncompleteCompliances)
-
-        model.addAttribute("numberOfOutstandingActions", numberOfOutstandingActionsOfMultipleTypes)
-        model.addAttribute("numberOfIncompleteProperties", numberOfIncompleteProperties)
-        model.addAttribute("numberOfIncompleteCompliances", numberOfIncompleteCompliances)
-
+        model.addAttribute("landlordDashboardNotificationBannerViewModel", landlordDashboardNotificationBannerViewModel)
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
 
@@ -208,17 +208,6 @@ class LandlordController(
         )
         model.addAttribute("singleLineAddress", singleLineAddress)
         model.addAttribute(BACK_URL_ATTR_NAME, INCOMPLETE_PROPERTIES_URL)
-    }
-
-    private fun getNumberOfOutstandingActionsOfMultipleTypes(
-        numberOfIncompleteProperties: Int,
-        numberOfIncompleteCompliances: Int,
-    ) = if (numberOfIncompleteProperties == 0 ||
-        numberOfIncompleteCompliances == 0
-    ) {
-        0
-    } else {
-        numberOfIncompleteProperties + numberOfIncompleteCompliances
     }
 
     companion object {

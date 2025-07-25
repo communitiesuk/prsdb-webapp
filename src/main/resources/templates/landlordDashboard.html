@@ -3,9 +3,8 @@
 <main class="govuk-main-wrapper">
     <div id="page-content">
         <th:block
-                th:if="${numberOfOutstandingActions != 0 || numberOfIncompleteProperties != 0 || numberOfIncompleteCompliances != 0}"
-                  th:replace="~{fragments/banners/landlordDashboardNotificationBanner ::  landlordDashboardNotificationBanner(${numberOfOutstandingActions},
-                  ${numberOfIncompleteProperties}, ${numberOfIncompleteCompliances}, ${viewIncompletePropertiesUrl}, ${viewIncompleteCompliancesUrl})}">
+                th:if="${landlordDashboardNotificationBannerViewModel.numberOfOutstandingActions != 0}"
+                  th:replace="~{fragments/banners/landlordDashboardNotificationBanner ::  landlordDashboardNotificationBanner(${landlordDashboardNotificationBannerViewModel}, ${viewIncompletePropertiesUrl}, ${viewIncompleteCompliancesUrl})}">
             </th:block>
         <div id="dashboard-banner"
              th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
