@@ -1,11 +1,11 @@
 CREATE TABLE passcode
 (
-    passcode                 VARCHAR(255),
+    id                 VARCHAR(255),
     created_date       TIMESTAMPTZ(6),
     last_modified_date TIMESTAMPTZ(6),
     local_authority_id INT NOT NULL,
     subject_identifier VARCHAR(255) UNIQUE,
-    PRIMARY KEY (passcode)
+    PRIMARY KEY (id)
 );
 
 ALTER TABLE IF EXISTS passcode
