@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -19,8 +21,11 @@ class EicrViewModelBuilder {
                         // TODO PRSD-976 add link to download certificate and appropriate messages when required
                         value = getEicrMessageKey(propertyCompliance),
                         actionText = "forms.links.change",
-                        // TODO PRSD-1246 add Update EICR Compliance Link
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     if (propertyCompliance.eicrIssueDate != null) {

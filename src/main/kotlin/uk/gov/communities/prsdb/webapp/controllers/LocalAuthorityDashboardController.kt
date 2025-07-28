@@ -23,7 +23,7 @@ class LocalAuthorityDashboardController(
     val userRolesService: UserRolesService,
 ) {
     @GetMapping
-    fun index(model: Model): String = "redirect:$LOCAL_AUTHORITY_DASHBOARD_URL"
+    fun index(): CharSequence = "redirect:$LOCAL_AUTHORITY_DASHBOARD_URL"
 
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
     fun localAuthorityDashboard(
@@ -57,8 +57,6 @@ class LocalAuthorityDashboardController(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_URL,
         )
-        // TODO: link to content
-        model.addAttribute("aboutPilotUrl", "#")
         return "localAuthorityDashboard"
     }
 

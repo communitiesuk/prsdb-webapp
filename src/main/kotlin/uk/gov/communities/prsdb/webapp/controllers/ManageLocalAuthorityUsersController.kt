@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.VOWELS
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.LOCAL_AUTHORITY_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -217,7 +218,11 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        model.addAttribute("councilName", getLocalAuthority(principal, localAuthorityId, request).name)
+        val councilName = getLocalAuthority(principal, localAuthorityId, request).name
+        val councilNameBeginsWithVowel = councilName[0].uppercase() in VOWELS
+
+        model.addAttribute("councilName", councilName)
+        model.addAttribute("councilNameBeginsWithVowel", councilNameBeginsWithVowel)
         model.addAttribute("confirmedEmailRequestModel", ConfirmedEmailRequestModel())
 
         return "inviteLAUser"
@@ -247,7 +252,11 @@ class ManageLocalAuthorityUsersController(
             val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
             invitationEmailSender.sendEmail(
                 emailModel.email,
-                LocalAuthorityInvitationEmail(currentAuthority, invitationLinkAddress),
+                LocalAuthorityInvitationEmail(
+                    currentAuthority,
+                    invitationLinkAddress,
+                    absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+                ),
             )
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)

@@ -1,14 +1,14 @@
 [
   {
-    "id": "66924ee6-40a3-4330-b502-0dbf288f71e5",
-    "name": "LA User Invitation",
-    "subject": "PRD - You've been invited by a local authority to register on the Privately Rented Database",
+    "id": "c99546f8-a2b7-4da4-96dd-fea5ce42fd53",
+    "name": "LA User Invitation V2",
+    "subject": "GOV.UK - You’ve been invited by a local council to register on the PRS Database",
     "bodyLocation": "/emails/LocalAuthorityInvitation.md"
   },
   {
-    "id": "2e6bba9d-22e4-4032-a3bc-b4f7f18662a8",
-    "name": "LA User Invitation Cancellation",
-    "subject": "PRD - Your invite to register on the database is cancelled",
+    "id": "72b0d2ac-3684-48c6-8ece-d27c2d89047d",
+    "name": "LA User Invitation Cancellation V2",
+    "subject": "GOV.UK - Your invite to register on the PRS Database has been cancelled",
     "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   },
   {

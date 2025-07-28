@@ -28,7 +28,7 @@ abstract class UploadCertificateFormModel : FormModel {
 
     companion object {
         private val validExtensions = listOf("pdf", "png", "jpeg", "jpg")
-        private val validMimeTypes = listOf("application/pdf", "image/png", "image/jpeg")
+        val validMimeTypes = listOf("application/pdf", "image/png", "image/jpeg")
         val maxContentLength = 15 * 1024.0.pow(2) // 15MB
 
         fun fromFileItemInput(
