@@ -18,5 +18,11 @@ open class NotificationBanner(
 
     class Content(
         parentLocator: Locator,
-    ) : BaseComponent(parentLocator.locator(".govuk-notification-banner__content"))
+    ) : BaseComponent(parentLocator.locator(".govuk-notification-banner__content")) {
+        val heading = BannerHeading(parentLocator)
+    }
+
+    class BannerHeading(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator(".govuk-notification-banner__heading"))
 }
