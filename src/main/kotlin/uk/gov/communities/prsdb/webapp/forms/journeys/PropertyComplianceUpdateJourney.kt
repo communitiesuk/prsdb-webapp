@@ -364,7 +364,7 @@ class PropertyComplianceUpdateJourney(
                 Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
             }
         } else if (filteredJourneyData.getStillHasNoEpcOrExemption() ?: false) {
-            Pair(PropertyComplianceStepId.EpcMissing, null)
+            Pair(PropertyComplianceStepId.EpcNotFound, null)
         } else {
             Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
