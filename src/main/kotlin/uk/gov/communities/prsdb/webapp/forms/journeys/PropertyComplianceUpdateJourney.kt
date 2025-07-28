@@ -404,7 +404,7 @@ class PropertyComplianceUpdateJourney(
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
-    // TODO 1247, 1313 - add this as the handleSubmitAndRedirect method and test
+    // TODO 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(filteredJourneyData: JourneyData): String {
         val submittedJourneyData = journeyDataService.getJourneyDataFromSession()
         val relevantJourneyData = submittedJourneyData.filterKeys { it in filteredJourneyData.keys }
@@ -452,7 +452,7 @@ class PropertyComplianceUpdateJourney(
                     journeyData.getEicrOriginalName()?.let {
                         PropertyComplianceJourneyHelper.getCertFilename(
                             propertyOwnershipId,
-                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
                             it,
                         )
                     },
