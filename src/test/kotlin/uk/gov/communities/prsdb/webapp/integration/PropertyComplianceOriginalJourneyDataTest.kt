@@ -69,8 +69,11 @@ class PropertyComplianceOriginalJourneyDataTest {
                 original.gasSafetyCertIssueDate == updated.gasSafetyCertIssueDate &&
                 original.gasSafetyCertEngineerNum == updated.gasSafetyCertEngineerNum &&
                 original.gasSafetyCertExemptionReason == updated.gasSafetyCertExemptionReason &&
-                original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason
-            // TODO PRSD-1248 - check EICR values match the original record
+                original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason &&
+                original.eicrS3Key == updated.eicrS3Key &&
+                original.eicrIssueDate == updated.eicrIssueDate &&
+                original.eicrExemptionReason == updated.eicrExemptionReason &&
+                original.eicrExemptionOtherReason == updated.eicrExemptionOtherReason
             // TODO PRSD-1313 - check EPC values match the orignal record
         }
 
@@ -82,8 +85,10 @@ class PropertyComplianceOriginalJourneyDataTest {
                 original.gasSafetyCertIssueDate == updated.gasSafetyCertIssueDate &&
                 updated.gasSafetyCertEngineerNum == null &&
                 original.gasSafetyCertExemptionReason == updated.gasSafetyCertExemptionReason &&
-                original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason
-            // TODO PRSD-1248 - check EICR values match the original record
+                original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason &&
+                updated.eicrS3Key == null &&
+                original.eicrExemptionReason == updated.eicrExemptionReason &&
+                original.eicrExemptionOtherReason == updated.eicrExemptionOtherReason
             // TODO PRSD-1313 - check EPC values match the orignal record
         }
     }

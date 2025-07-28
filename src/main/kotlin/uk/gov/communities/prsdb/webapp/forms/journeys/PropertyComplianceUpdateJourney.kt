@@ -16,6 +16,10 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
@@ -27,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoEicrOrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoGasCertOrExemption
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -407,9 +412,9 @@ class PropertyComplianceUpdateJourney(
         val relevantJourneyData = submittedJourneyData.filterKeys { it in filteredJourneyData.keys }
 
         val gasSafetyUpdate = createGasSafetyUpdateOrNull(relevantJourneyData, propertyOwnershipId)
-        // TODO PRSD-1247: Add EICR updates from journeyData to complianceUpdate
+        val eicrUpdate = createEicrUpdateOrNull(relevantJourneyData, propertyOwnershipId)
         // TODO PRSD-1313: Add EPC updates from journeyData to complianceUpdate
-        val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate)
+        val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate, eicrUpdate)
 
         propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate)
 
@@ -436,6 +441,26 @@ class PropertyComplianceUpdateJourney(
                 engineerNum = journeyData.getGasSafetyCertEngineerNum(),
                 exemptionReason = journeyData.getGasSafetyCertExemptionReason(),
                 exemptionOtherReason = journeyData.getGasSafetyCertExemptionOtherReason(),
+            )
+        }
+
+    fun createEicrUpdateOrNull(
+        journeyData: JourneyData,
+        propertyOwnershipId: Long,
+    ): EicrUpdateModel? =
+        journeyData.getHasNewEICR()?.let { data ->
+            EicrUpdateModel(
+                s3Key =
+                    journeyData.getEicrOriginalName()?.let {
+                        PropertyComplianceJourneyHelper.getCertFilename(
+                            propertyOwnershipId,
+                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            it,
+                        )
+                    },
+                issueDate = journeyData.getEicrIssueDate()?.toJavaLocalDate(),
+                exemptionReason = journeyData.getEicrExemptionReason(),
+                exemptionOtherReason = journeyData.getEicrExemptionOtherReason(),
             )
         }
 
