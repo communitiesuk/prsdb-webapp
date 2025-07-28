@@ -26,8 +26,6 @@ class Passcode() : ModifiableAuditableEntity() {
     constructor(passcode: String, localAuthority: LocalAuthority, baseUser: OneLoginUser? = null) : this() {
         this.passcode = passcode
         this.localAuthority = localAuthority
-        if (baseUser != null) {
-            this.baseUser = baseUser
-        }
+        this.baseUser = baseUser
     }
 }
