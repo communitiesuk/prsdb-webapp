@@ -64,7 +64,7 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (14, '2025-01-15 00:00:00+00', 150242309332, 0),
        (15, '2025-01-15 00:00:00+00', 150242309333, 0),
        (16, '2025-01-15 00:00:00+00', 150242309334, 0),
-       (17, '2025-07-24 00:00:00+00', 150242309335, 0)ON CONFLICT DO NOTHING;
+       (17, '2025-07-24 00:00:00+00', 150242309335, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 

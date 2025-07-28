@@ -191,6 +191,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     fun `User can add a new gas safety exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Update certificate or add exemption page
         val updateGasSafetyPage = startUpdateGasSafetyTask(page)
+        updateGasSafetyPage.submitHasNewExemption()
         val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
