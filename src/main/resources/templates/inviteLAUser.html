@@ -24,6 +24,12 @@
                     addLAUser.paragraph.two.bullet.two
                 </li>
             </ul>
+            <p th:if="${councilNameBeginsWithVowel}" th:text="#{addLAUser.paragraph.three.an(${councilName})}" class="govuk-body">
+                addLAUser.paragraph.three
+            </p>
+            <p th:unless="${councilNameBeginsWithVowel}" th:text="#{addLAUser.paragraph.three.a(${councilName})}" class="govuk-body">
+                addLAUser.paragraph.three
+            </p>
         </section>
         <form th:action="@{''}" class="form" id="email-form" method="post" th:object="${confirmedEmailRequestModel}"
               novalidate>
