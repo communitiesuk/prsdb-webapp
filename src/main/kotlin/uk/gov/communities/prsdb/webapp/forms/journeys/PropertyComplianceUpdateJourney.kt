@@ -25,7 +25,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoCertOrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoEicrOrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoGasCertOrExemption
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -314,16 +315,17 @@ class PropertyComplianceUpdateJourney(
     private fun updateGasSafetyNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
         if (filteredJourneyData.getHasNewGasSafetyCertificate()!!) {
             Pair(PropertyComplianceStepId.GasSafetyIssueDate, null)
-        } else if (filteredJourneyData.getStillHasNoCertOrExemption() ?: false) {
+        } else if (filteredJourneyData.getStillHasNoGasCertOrExemption() ?: false) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionMissing, null)
         } else {
             Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
         }
 
-    // TODO PRSD-1246: Update this to match GasSafety version after PRSD-1245 is implemented
     private fun updateEicrNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getHasNewEICR()) {
+        if (filteredJourneyData.getHasNewEICR()!!) {
             Pair(PropertyComplianceStepId.EicrIssueDate, null)
+        } else if (filteredJourneyData.getStillHasNoEicrOrExemption() ?: false) {
+            Pair(PropertyComplianceStepId.EicrExemptionMissing, null)
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         }
