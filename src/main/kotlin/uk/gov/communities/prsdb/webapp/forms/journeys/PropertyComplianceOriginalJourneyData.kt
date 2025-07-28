@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import kotlin.collections.plus
 
@@ -46,6 +47,17 @@ class PropertyComplianceOriginalJourneyData private constructor(
                 )
         }
 
+    // We need to include a route through the update journey if the user did not previously add an eicr or exemption.
+    private val updateEicrFormModel =
+        object : FormModel {
+            override fun toPageData() =
+                mapOf(
+                    UpdateEicrFormModel::hasNewCertificate.name to (propertyCompliance.eicrIssueDate != null),
+                    ORIGINALLY_NOT_INCLUDED_KEY to
+                        (propertyCompliance.eicrIssueDate == null && propertyCompliance.eicrExemptionReason == null),
+                )
+        }
+
     private val originalGasSafetyJourneyData: JourneyData =
         mapOf(
             PropertyComplianceStepId.UpdateGasSafety toPageData { _ -> updateGasCertificateFormModel },
@@ -66,7 +78,7 @@ class PropertyComplianceOriginalJourneyData private constructor(
 
     private val originalEicrJourneyData =
         mapOf(
-            PropertyComplianceStepId.UpdateEICR toPageData { NoInputFormModel() },
+            PropertyComplianceStepId.UpdateEICR toPageData { _ -> updateEicrFormModel },
             PropertyComplianceStepId.EicrIssueDate toPageData
                 { TodayOrPastDateFormModel.fromDateOrNull(it.eicrIssueDate) },
             PropertyComplianceStepId.EicrUpload toPageData EicrUploadCertificateFormModel::fromComplianceRecordOrNull,
