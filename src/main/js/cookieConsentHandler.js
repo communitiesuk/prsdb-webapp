@@ -1,59 +1,59 @@
 import * as cookieHelper from 'cookie';
 
-const CONSENT_COOKIE_NAME = 'cookie_consent'
-const COOKIES_ROUTE = '/cookies'
+const CONSENT_COOKIE_NAME = 'cookie_consent';
+const COOKIES_ROUTE = '/cookies';
 
 export function addCookieConsentHandler() {
-    const consentCookieValue = cookieHelper.parse(document.cookie)[CONSENT_COOKIE_NAME]
-    const onCookiePage = location.pathname.includes(COOKIES_ROUTE)
+    const consentCookieValue = cookieHelper.parse(document.cookie)[CONSENT_COOKIE_NAME];
+    const onCookiePage = location.pathname.includes(COOKIES_ROUTE);
 
     if (consentCookieValue == null && !onCookiePage) {
-       new CookieBanner().display()
+       new CookieBanner().display();
     }
 }
 
 class CookieBanner {
-    #cookieBanner
-    #cookieMessage
-    #acceptCookiesButton
-    #rejectCookiesButton
-    #cookieConfirmationMessage
-    #cookiesAcceptedText
-    #cookiesRejectedText
-    #hideCookiesConfirmationButton
+    #cookieBanner;
+    #cookieMessage;
+    #acceptCookiesButton;
+    #rejectCookiesButton;
+    #cookieConfirmationMessage;
+    #cookiesAcceptedText;
+    #cookiesRejectedText;
+    #hideCookiesConfirmationButton;
 
     constructor() {
-        this.#cookieBanner = document.querySelector('.govuk-cookie-banner')
-        this.#cookieMessage = document.getElementById('cookie-banner-message')
-        this.#acceptCookiesButton = document.getElementById('accept-cookies-button')
-        this.#rejectCookiesButton = document.getElementById('reject-cookies-button')
-        this.#cookieConfirmationMessage = document.getElementById('cookie-banner-confirmation-message')
-        this.#cookiesAcceptedText = document.getElementById('cookies-accepted-text')
-        this.#cookiesRejectedText = document.getElementById('cookies-rejected-text')
-        this.#hideCookiesConfirmationButton = document.getElementById('hide-cookies-confirmation-button')
+        this.#cookieBanner = document.querySelector('.govuk-cookie-banner');
+        this.#cookieMessage = document.getElementById('cookie-banner-message');
+        this.#acceptCookiesButton = document.getElementById('accept-cookies-button');
+        this.#rejectCookiesButton = document.getElementById('reject-cookies-button');
+        this.#cookieConfirmationMessage = document.getElementById('cookie-banner-confirmation-message');
+        this.#cookiesAcceptedText = document.getElementById('cookies-accepted-text');
+        this.#cookiesRejectedText = document.getElementById('cookies-rejected-text');
+        this.#hideCookiesConfirmationButton = document.getElementById('hide-cookies-confirmation-button');
     }
 
     display() {
-        this.#cookieBanner.hidden = false
+        this.#cookieBanner.hidden = false;
 
-        this.#handleCookiesConsentButton(this.#acceptCookiesButton, true)
-        this.#handleCookiesConsentButton(this.#rejectCookiesButton, false)
+        this.#handleCookiesConsentButton(this.#acceptCookiesButton, true);
+        this.#handleCookiesConsentButton(this.#rejectCookiesButton, false);
 
         this.#hideCookiesConfirmationButton.addEventListener('click', () => {
-            this.#cookieBanner.hidden = true
-        })
+            this.#cookieBanner.hidden = true;
+        });
     }
 
     #handleCookiesConsentButton(button, consentValue) {
         button.addEventListener('click', () => {
-            this.#createConsentCookie(consentValue)
+            this.#createConsentCookie(consentValue);
 
-            this.#cookieMessage.hidden = true
+            this.#cookieMessage.hidden = true;
 
-            const confirmationMessageText = consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText
-            this.#cookieConfirmationMessage.hidden = false
-            confirmationMessageText.hidden = false
-        })
+            const confirmationMessageText = consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText;
+            this.#cookieConfirmationMessage.hidden = false;
+            confirmationMessageText.hidden = false;
+        });
     }
 
     #createConsentCookie(consentValue) {
@@ -62,6 +62,6 @@ class CookieBanner {
                 path: '/',
                 sameSite: true
             }
-        )
+        );
     }
 }
