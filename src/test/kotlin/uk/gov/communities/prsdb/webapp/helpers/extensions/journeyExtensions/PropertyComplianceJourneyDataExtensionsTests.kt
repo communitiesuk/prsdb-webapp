@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -147,12 +148,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getHasNewGasSafetyCertificate returns false if the corresponding page is not in journeyData`() {
+    fun `getHasNewGasSafetyCertificate returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
 
-        assertEquals(false, retrievedHasGasSafetyCert)
+        assertNull(retrievedHasGasSafetyCert)
     }
 
     @Test
@@ -336,6 +337,16 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `getHasNewEICR returns a boolean if the corresponding page is in journeyData`() {
+        val hasNewEICR = true
+        val testJourneyData = journeyDataBuilder.withNewEicrStatus(hasNewEICR).build()
+
+        val retrievedHasEICR = testJourneyData.getHasNewEICR()
+
+        assertEquals(hasNewEICR, retrievedHasEICR)
+    }
+
+    @Test
     fun `getEicrIssueDate returns a LocalDate if the corresponding page is in journeyData`() {
         val eicrIssueDate = LocalDate.now()
         val testJourneyData = journeyDataBuilder.withEicrIssueDate(eicrIssueDate).build()
@@ -343,6 +354,15 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedEicrIssueDate = testJourneyData.getEicrIssueDate()?.toJavaLocalDate()
 
         assertEquals(eicrIssueDate, retrievedEicrIssueDate)
+    }
+
+    @Test
+    fun `getHasNewEICR returns false if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasEICR = testJourneyData.getHasNewEICR()
+
+        assertEquals(false, retrievedHasEICR)
     }
 
     @Test

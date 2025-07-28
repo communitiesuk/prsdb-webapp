@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 
@@ -51,7 +52,16 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
                 UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
-            ) ?: false
+            )
+
+        const val ORIGINALLY_NOT_INCLUDED_KEY = "originallyNotIncluded"
+
+        fun JourneyData.getStillHasNoCertOrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
+                ORIGINALLY_NOT_INCLUDED_KEY,
+            )
 
         fun JourneyData.getGasSafetyCertIssueDate() =
             this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
@@ -106,6 +116,13 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 PropertyComplianceStepId.EICR.urlPathSegment,
                 EicrFormModel::hasCert.name,
             )
+
+        fun JourneyData.getHasNewEICR() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEICR.urlPathSegment,
+                UpdateEicrFormModel::hasNewCertificate.name,
+            ) ?: false
 
         fun JourneyData.getEicrIssueDate() = this.getFieldSetLocalDateValue(PropertyComplianceStepId.EicrIssueDate.urlPathSegment)
 

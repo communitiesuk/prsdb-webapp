@@ -57,8 +57,6 @@ class LocalAuthorityDashboardController(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_URL,
         )
-        // TODO: link to content
-        model.addAttribute("aboutPilotUrl", "#")
         return "localAuthorityDashboard"
     }
 
