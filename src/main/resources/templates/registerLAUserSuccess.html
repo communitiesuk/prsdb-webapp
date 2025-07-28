@@ -6,7 +6,7 @@
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLaUser.success.banner.title(${localAuthority})}, ~{::#confirmation-banner/content()})}">
         </div>
-        <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
+        <h2 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
         <p class="govuk-body" th:text="#{registerLaUser.success.whatHappensNext.paragraph.one}">
             registerLaUser.success.whatHappensNext.paragraph.one
         </p>
