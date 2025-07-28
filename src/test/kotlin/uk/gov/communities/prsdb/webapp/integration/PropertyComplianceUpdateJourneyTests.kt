@@ -7,6 +7,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -24,6 +26,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.CheckAutoMatchedEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.CheckMatchedEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrCheckYourAnswersPagePropertyComplianceUpdate
@@ -36,8 +41,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EicrUploadPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExemptionConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExemptionReasonPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExpiredPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcExpiryCheckPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcLookupPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcNotAutoMatchedPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcNotFoundPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.EpcSupersededPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafeEngineerNumPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyCheckYourAnswersPropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyExemptionConfirmationPagePropertyComplianceUpdate
@@ -47,6 +56,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyOutdatedPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyUploadConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.GasSafetyUploadPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.LowEnergyRatingPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.MeesExemptionCheckPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.MeesExemptionConfirmationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.MeesExemptionReasonPagePropertyComplianceUpdate
@@ -56,6 +66,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.time.format.DateTimeFormatter
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
     @MockitoBean
@@ -369,12 +382,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     @Test
     fun `User can add an automatched EPC and MEES exemption if the pages are filled in correctly`(page: Page) {
         // Property details before update
-        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText("Not required")
-        propertyDetailsPage.propertyComplianceSummaryList.epcRow.actions.actionLink
-            .clickAndWait()
-        val updateEpcPage = assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, urlArguments)
+        val updateEpcPage = startUpdateEpcTask(page)
 
         // Update EPC page
         whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
@@ -419,12 +427,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     @Test
     fun `User can add a new looked up EPC if the pages are filled in correctly`(page: Page) {
         // Property details before update
-        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText("Not required")
-        propertyDetailsPage.propertyComplianceSummaryList.epcRow.actions.actionLink
-            .clickAndWait()
-        val updateEpcPage = assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, urlArguments)
+        val updateEpcPage = startUpdateEpcTask(page)
 
         // Update EPC page
         whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
@@ -458,12 +461,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     @Test
     fun `User can add a new EPC exemption if the pages are filled in correctly`(page: Page) {
         // Property details before update
-        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText("Not required")
-        propertyDetailsPage.propertyComplianceSummaryList.epcRow.actions.actionLink
-            .clickAndWait()
-        val updateEpcPage = assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, urlArguments)
+        val updateEpcPage = startUpdateEpcTask(page)
 
         // Update EPC page
         updateEpcPage.submitHasNewExemption()
@@ -482,6 +480,160 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Check Your Answers page
         // TODO PRSD-1313 - check this page, should return to the Property Record page
+    }
+
+    @Test
+    fun `User can navigate the journey when EPC lookup does not find an EPC`(page: Page) {
+        // Property details before update
+        val updateEpcPage = startUpdateEpcTask(page)
+
+        // Update EPC page
+        whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = LocalDate(currentDate.year + 5, 1, 5),
+                    energyRating = "F",
+                ),
+            )
+        updateEpcPage.submitHasNewCertificate()
+        val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Auto Matched EPC page
+        checkAutoMatchedEpcPage.submitMatchedEpcDetailsIncorrect()
+        var epcLookupPage = assertPageIs(page, EpcLookupPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Lookup page
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        epcLookupPage.submitNonexistentEpcNumber()
+        var epcNotFoundPage = assertPageIs(page, EpcNotFoundPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Not Found page - search again
+        epcNotFoundPage.searchAgainButton.clickAndWait()
+        epcLookupPage = assertPageIs(page, EpcLookupPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Lookup page
+        epcLookupPage.submitNonexistentEpcNumber()
+        epcNotFoundPage = assertPageIs(page, EpcNotFoundPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Not Found page - continue
+        epcNotFoundPage.continueButton.clickAndWait()
+        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Your Answers page
+        // TODO PRSD-1313 - submit this page, should return to the Property Record page (no change to record)
+    }
+
+    @Test
+    fun `User can add an expired EPC after EPC lookup finds a superseded EPC`(page: Page) {
+        // Property details before update
+        val updateEpcPage = startUpdateEpcTask(page)
+
+        // Update EPC page
+        whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
+            .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        updateEpcPage.submitHasNewCertificate()
+        val epcNotAutomatchedPage = assertPageIs(page, EpcNotAutoMatchedPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Not Auto Matched page
+        epcNotAutomatchedPage.continueButton.clickAndWait()
+        val epcLookupPage = assertPageIs(page, EpcLookupPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Epc Lookup page
+        whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                expiryDate = MockEpcData.expiryDateInThePast,
+                latestCertificateNumberForThisProperty = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
+            ),
+        )
+        epcLookupPage.submitSupersededEpcNumber()
+        val epcSupersededPage = assertPageIs(page, EpcSupersededPagePropertyComplianceUpdate::class, urlArguments)
+        assertTrue(epcSupersededPage.page.content().contains(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
+        whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = MockEpcData.expiryDateInThePast,
+                    energyRating = "C",
+                ),
+            )
+        epcSupersededPage.continueButton.clickAndWait()
+        val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Matched EPC page
+        val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
+        val expectedExpiryDate =
+            MockEpcData.expiryDateInThePast
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+        val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyComplianceUpdate::class, urlArguments)
+
+        // EPC Expiry Check page
+        assertTrue(expiryCheckPage.page.content().contains("5 January 2022"))
+        expiryCheckPage.submitTenancyStartedAfterExpiry()
+        val epcExpiredPage = assertPageIs(page, EpcExpiredPagePropertyComplianceUpdate::class, urlArguments)
+
+        // EPC Expired page (good energy rating)
+        assertTrue(epcExpiredPage.page.content().contains("5 January 2022"))
+        assertFalse(epcExpiredPage.page.content().contains("The expired certificate shows an energy rating below E"))
+        epcExpiredPage.continueButton.clickAndWait()
+
+        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Your Answers page
+        // TODO PRSD-1313 - submit this page, should return to the Property Record page
+    }
+
+    @Test
+    fun `User can add an expired EPC with a low energy rating and no MEES exemption`(page: Page) {
+        // Property details before update
+        val updateEpcPage = startUpdateEpcTask(page)
+
+        // Update EPC page
+        whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = LocalDate(currentDate.year - 5, 1, 5),
+                    energyRating = "F",
+                ),
+            )
+        updateEpcPage.submitHasNewCertificate()
+        val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Auto Matched EPC page
+        checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+        val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyComplianceUpdate::class, urlArguments)
+
+        // EPC Expiry check page
+        expiryCheckPage.submitTenancyStartedBeforeExpiry()
+        val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyComplianceUpdate::class, urlArguments)
+
+        // MEES exemption check page
+        meesExemptionCheckPage.submitDoesNotHaveExemption()
+        val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Low energy rating page
+        lowEnergyRatingPage.saveAndContinueButton.clickAndWait()
+        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Your Answers page
+        // TODO PRSD-1313 - submit this page, should return to the Property Record page
+    }
+
+    private fun startUpdateEpcTask(page: Page): UpdateEpcPagePropertyComplianceUpdate {
+        // Property details before update
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText("Not required")
+        propertyDetailsPage.propertyComplianceSummaryList.epcRow.actions.actionLink
+            .clickAndWait()
+        return assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, urlArguments)
     }
 
     // TODO PRSD-1392 - add journey test covering adding a MEES exemption from a link on the Property Record page

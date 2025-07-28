@@ -13,7 +13,7 @@ class EpcNotFoundPagePropertyComplianceUpdate(
         page,
         PropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.EpcLookup,
+            PropertyComplianceStepId.EpcNotFound,
         ),
     ) {
     val searchAgainButton = Button.byText(page, "Search again")
