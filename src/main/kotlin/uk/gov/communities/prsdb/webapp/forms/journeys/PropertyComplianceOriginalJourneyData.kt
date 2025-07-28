@@ -89,8 +89,7 @@ class PropertyComplianceOriginalJourneyData private constructor(
                 EicrExemptionOtherReasonFormModel::fromComplianceRecordOrNull,
             PropertyComplianceStepId.EicrExemptionConfirmation toPageData { NoInputFormModel() },
             PropertyComplianceStepId.EicrExemptionMissing toPageData { NoInputFormModel() },
-            // TODO PRSD-1247: Add EICR check your answers step data
-            PropertyComplianceStepId.UpdateEicrCheckYourAnswers toPageData { NoInputFormModel() },
+            PropertyComplianceStepId.UpdateEicrCheckYourAnswers toPageData { CheckAnswersFormModel() },
         )
 
     // TODO: PRSD-1312: Add original EPC step data

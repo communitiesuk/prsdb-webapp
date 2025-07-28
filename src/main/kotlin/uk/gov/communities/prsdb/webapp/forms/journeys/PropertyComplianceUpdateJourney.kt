@@ -266,7 +266,6 @@ class PropertyComplianceUpdateJourney(
                 saveAfterSubmit = false,
             )
 
-    // TODO: PRSD-1247: Implement EICR check your answers step
     private val eicrCheckYourAnswersStep
         get() =
             Step(
