@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEicrAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -270,15 +271,12 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
-                        content =
-                            mapOf("todoComment" to "TODO PRSD-1247:: Implement EICR Check Your Answers step"),
-                    ),
+                page = CheckUpdateEicrAnswersPage(journeyDataService),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect(filteredJourneyData)
+                },
             )
 
     private val updateEPCStep
