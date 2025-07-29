@@ -25,7 +25,7 @@ abstract class CheckAnswersPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        val submittableJourneyData = journeyDataService.getJourneyDataFromSession()
+        val submittableJourneyData = journeyDataService.getJourneyDataFromSession().filterKeys { it in filteredJourneyData!!.keys }
         modelAndView.addObject(
             "submittedFilteredJourneyData",
             CheckAnswersFormModel.serializeJourneyData(submittableJourneyData),
