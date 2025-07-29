@@ -74,7 +74,9 @@ class LandlordService(
     fun updateLandlordForBaseUserId(
         baseUserId: String,
         landlordUpdate: LandlordUpdateModel,
+        checkUpdateIsValid: () -> Unit,
     ): Landlord {
+        checkUpdateIsValid()
         val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
 
         landlordUpdate.email?.let { landlordEntity.email = it }

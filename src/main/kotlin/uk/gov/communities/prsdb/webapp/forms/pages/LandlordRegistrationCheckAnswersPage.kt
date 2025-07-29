@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class LandlordRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
+    missingAnswersRedirect: String,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -17,6 +18,7 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         journeyDataService = journeyDataService,
         shouldDisplaySectionHeader = true,
+        missingAnswersRedirect = missingAnswersRedirect,
     ) {
     override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
         getIdentityRows(filteredJourneyData) +
