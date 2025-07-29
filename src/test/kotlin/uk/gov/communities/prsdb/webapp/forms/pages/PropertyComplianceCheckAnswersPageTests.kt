@@ -275,6 +275,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withGasSafetyIssueDate(gasCertIssueDate)
                 .withEicrStatus(true)
                 .withEicrIssueDate(eicrIssueDate)
+                .withEicrOutdatedConfirmation()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)

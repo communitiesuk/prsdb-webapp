@@ -357,12 +357,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getHasNewEICR returns false if the corresponding page is not in journeyData`() {
+    fun `getHasNewEICR returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasEICR = testJourneyData.getHasNewEICR()
 
-        assertEquals(false, retrievedHasEICR)
+        assertNull(retrievedHasEICR)
     }
 
     @Test

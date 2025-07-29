@@ -71,11 +71,13 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
         updateGasSafetyPage.submitHasNewCertificate()
-        val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
+        val gasSafetyIssueDatePage =
+            assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
         gasSafetyIssueDatePage.submitDate(currentDate)
-        val gasSafeEngineerNumPage = assertPageIs(page, GasSafeEngineerNumPagePropertyComplianceUpdate::class, urlArguments)
+        val gasSafeEngineerNumPage =
+            assertPageIs(page, GasSafeEngineerNumPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safe Engineer Num. page
         gasSafeEngineerNumPage.submitEngineerNum("1234567")
@@ -120,12 +122,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
         updateGasSafetyPage.submitHasNewCertificate()
-        val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
+        val gasSafetyIssueDatePage =
+            assertPageIs(page, GasSafetyIssueDatePagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Cert. Issue Date page
         val outdatedIssueDate = currentDate.minus(DatePeriod(years = 1))
         gasSafetyIssueDatePage.submitDate(outdatedIssueDate)
-        val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyComplianceUpdate::class, urlArguments)
+        val gasSafetyOutdatedPage =
+            assertPageIs(page, GasSafetyOutdatedPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Outdated page
         assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
@@ -144,7 +148,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
         updateGasSafetyPage.submitHasNewExemption()
-        val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
+        val gasSafetyExemptionReasonPage =
+            assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
         gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.NO_GAS_SUPPLY)
@@ -171,7 +176,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // Update certificate or add exemption page
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
         updateGasSafetyPage.submitHasNewExemption()
-        val gasSafetyExemptionReasonPage = assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
+        val gasSafetyExemptionReasonPage =
+            assertPageIs(page, GasSafetyExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Exemption Reason page
         gasSafetyExemptionReasonPage.submitExemptionReason(GasSafetyExemptionReason.OTHER)
@@ -199,8 +205,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Property details before update
@@ -233,7 +237,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
             ),
         ).thenReturn(true)
         eicrUploadPage.uploadCertificate("validFile.png")
-        val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyComplianceUpdate::class, urlArguments)
+        val eicrUploadConfirmationPage =
+            assertPageIs(page, EicrUploadConfirmationPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Upload Confirmation page
         assertThat(eicrUploadConfirmationPage.heading).containsText("Your file is being scanned")
@@ -242,11 +247,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Check Your Answers page
-        // TODO PRSD-1247 - submit page, should return to the Property Record page
+        val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("TODO PRSD-976")
+        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
+        cyaPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new expired certificate)`(page: Page) {
         // Property details before update
@@ -272,11 +280,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Check Your Answers page
-        // TODO PRSD-1247 - submit page, should return to the Property Record page
+        val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Expired")
+        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
+        cyaPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly`(page: Page) {
         // Property details before update
@@ -289,11 +300,13 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Update certificate or add exemption page
         updateEicrPage.submitHasNewExemption()
-        val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
+        val eicrExemptionReasonPage =
+            assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Reason page
         eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
-        val eicrExemptionConfirmationPage = assertPageIs(page, EicrExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
+        val eicrExemptionConfirmationPage =
+            assertPageIs(page, EicrExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Confirmation page
         assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
@@ -302,11 +315,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Check Your Answers page
-        // TODO: PRSD-1247 - submit page, should return to the Property Record page
+        val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Not required")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("You live in the property with the tenant")
+        cyaPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Property details before update
@@ -319,15 +335,18 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Update certificate or add exemption page
         updateEicrPage.submitHasNewExemption()
-        val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
+        val eicrExemptionReasonPage =
+            assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Reason page
         eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.OTHER)
-        val eicrExemptionOtherReasonPage = assertPageIs(page, EicrExemptionOtherReasonPagePropertyComplianceUpdate::class, urlArguments)
+        val eicrExemptionOtherReasonPage =
+            assertPageIs(page, EicrExemptionOtherReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Other Reason page
         eicrExemptionOtherReasonPage.submitReason("valid reason")
-        val eicrExemptionConfirmationPage = assertPageIs(page, EicrExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
+        val eicrExemptionConfirmationPage =
+            assertPageIs(page, EicrExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Confirmation page
         assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
@@ -336,7 +355,13 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Check Your Answers page
-        // TODO: PRSD-1247 - submit page, should return to the Property Record page
+        val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Not required")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("Other")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("valid reason")
+        cyaPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     // TODO: PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
