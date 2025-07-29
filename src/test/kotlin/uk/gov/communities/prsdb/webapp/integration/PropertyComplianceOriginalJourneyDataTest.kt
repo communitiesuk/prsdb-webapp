@@ -58,7 +58,6 @@ class PropertyComplianceOriginalJourneyDataTest {
 
         val namedExactlyTheSame = Named.of("exactly the same", ::areAllComplianceValuesTheSame)
 
-        // TODO PRSD-1313 - Update to use the final submission step ID from the journey factory as prior submissions will be included
         val finalSubmissionStepId = PropertyComplianceStepId.UpdateEpcCheckYourAnswers
 
         fun areAllComplianceValuesTheSame(

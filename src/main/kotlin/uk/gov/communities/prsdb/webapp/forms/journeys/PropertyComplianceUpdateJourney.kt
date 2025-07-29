@@ -461,7 +461,7 @@ class PropertyComplianceUpdateJourney(
                     journeyData.getEicrOriginalName()?.let {
                         PropertyComplianceJourneyHelper.getCertFilename(
                             propertyOwnershipId,
-                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
                             it,
                         )
                     },
