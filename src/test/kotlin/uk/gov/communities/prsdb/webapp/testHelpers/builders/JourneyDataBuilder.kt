@@ -639,6 +639,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEicrOutdatedConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrOutdated.urlPathSegment] = emptyMap<String, Any>()
+        return this
+    }
+
     fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
             mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
