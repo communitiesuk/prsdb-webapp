@@ -14,7 +14,7 @@ class LandlordIncompletePropertiesPage(
 ) : BasePage(page, INCOMPLETE_PROPERTIES_URL) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))
     val subHeading = Heading(page.locator("p.govuk-body-l"))
-    val text = Heading(page.locator("p.govuk-body"))
+    val text = Heading(page.locator(".govuk-main-wrapper p.govuk-body"))
     val viewRegisteredPropertiesLink = Link.byText(page, "view registered properties")
     val registerANewPropertyLink = Link.byText(page, "register a new property")
 

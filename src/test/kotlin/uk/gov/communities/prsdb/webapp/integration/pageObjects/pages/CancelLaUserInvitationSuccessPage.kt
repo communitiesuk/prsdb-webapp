@@ -11,5 +11,5 @@ class CancelLaUserInvitationSuccessPage(
     page: Page,
 ) : BasePage(page, "/$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT") {
     val confirmationBanner = ConfirmationBanner(page)
-    val returnButton = Button.default(page)
+    val returnButton = Button.byText(page, "Return to manage users")
 }
