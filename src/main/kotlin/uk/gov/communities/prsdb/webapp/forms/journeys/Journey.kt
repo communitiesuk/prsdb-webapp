@@ -85,8 +85,9 @@ abstract class Journey<T : StepId>(
 
         val formModel = currentStep.page.formModel.cast(bindingResult.target)
 
-        val newFilteredJourneyData = currentStep.updatedJourneyData(filteredJourneyData, formModel, subPageNumber)
-        journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
+        val newStepDataPair = currentStep.stepDataPair(filteredJourneyData, formModel, subPageNumber)
+        val newFilteredJourneyData = filteredJourneyData + newStepDataPair
+        journeyDataService.addToJourneyDataIntoSession(mapOf(newStepDataPair))
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()

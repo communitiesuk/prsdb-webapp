@@ -228,9 +228,10 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-                page = CheckUpdateGasSafetyAnswersPage(journeyDataService),
+                page = CheckUpdateGasSafetyAnswersPage(journeyDataService, unreachableStepRedirect),
                 saveAfterSubmit = false,
-                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+                // TODO: PRSD-1247 - restore next action once EICR original journey data is implemented
+                // nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
                     updateComplianceAndRedirect(filteredJourneyData)
                 },
@@ -424,7 +425,9 @@ class PropertyComplianceUpdateJourney(
         val epcUpdate = createEpcUpdateOrNull(relevantJourneyData)
         val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate, eicrUpdate, epcUpdate)
 
-        propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate)
+        propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate) {
+            throwIfSubmittedDataIsAnInvalidUpdate(relevantJourneyData)
+        }
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()
 

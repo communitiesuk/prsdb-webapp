@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class CheckUpdateGasSafetyAnswersPage(
     journeyDataService: JourneyDataService,
+    missingAnswersRedirect: String,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -17,6 +18,7 @@ class CheckUpdateGasSafetyAnswersPage(
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             ),
         journeyDataService = journeyDataService,
+        missingAnswersRedirect = missingAnswersRedirect,
     ) {
     val gasSafetyDataFactory =
         GasSafetySummaryRowsFactory(

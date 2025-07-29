@@ -10,6 +10,6 @@ class ConfirmationPageLaUserRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") {
     val bannerHeading = page.locator(".govuk-panel__title")
-    val bodyHeading = page.locator(".govuk-heading-m")
+    val bodyHeading = page.locator(".govuk-heading-l")
     val returnToDashboardButton = Button.byText(page, "Go to dashboard")
 }
