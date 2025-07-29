@@ -3,15 +3,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.GasSafeEngineerNumBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.MeesExemptionCheckBasePage
 
-class GasSafeEngineerNumPagePropertyComplianceUpdate(
+class MeesExemptionCheckPagePropertyComplianceUpdate(
     page: Page,
     urlArguments: Map<String, String>,
-) : GasSafeEngineerNumBasePage(
+) : MeesExemptionCheckBasePage(
         page,
         PropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.GasSafetyEngineerNum,
+            PropertyComplianceStepId.MeesExemptionCheck,
         ),
     )
