@@ -24,11 +24,13 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 class PropertyComplianceCheckAnswersPage(
     journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    missingAnswersRedirect: String,
     private val propertyAddressProvider: () -> String,
 ) : CheckAnswersPage(
         content = emptyMap(),
         journeyDataService = journeyDataService,
         templateName = "forms/propertyComplianceCheckAnswersForm",
+        missingAnswersRedirect = missingAnswersRedirect,
     ) {
     val gasSafetyDataFactory =
         GasSafetySummaryRowsFactory(

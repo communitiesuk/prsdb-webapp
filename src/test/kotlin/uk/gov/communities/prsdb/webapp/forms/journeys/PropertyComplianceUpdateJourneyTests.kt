@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
@@ -200,6 +201,7 @@ class PropertyComplianceUpdateJourneyTests {
             verify(mockPropertyComplianceService).updatePropertyCompliance(
                 propertyOwnershipId = eq(propertyOwnershipId),
                 update = updateCaptor.capture(),
+                any(),
             )
 
             assertEquals(
@@ -251,6 +253,7 @@ class PropertyComplianceUpdateJourneyTests {
             verify(mockPropertyComplianceService).updatePropertyCompliance(
                 propertyOwnershipId = eq(propertyOwnershipId),
                 update = updateCaptor.capture(),
+                any(),
             )
 
             assertEquals(

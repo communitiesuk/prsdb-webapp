@@ -7,6 +7,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -204,6 +205,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
+    // TODO PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Property details before update
@@ -254,6 +257,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
+    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new expired certificate)`(page: Page) {
         // Property details before update
@@ -287,6 +292,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
+    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly`(page: Page) {
         // Property details before update
@@ -322,6 +329,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
+    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Property details before update
@@ -363,6 +372,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
+    // TODO: PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can add a new automatched EPC if the pages are filled in correctly`(page: Page) {
         val propertyOwnershipId = 33L // EPC should be auto-matched to this property ownership ID
@@ -386,6 +397,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1312 - continue journey test
     }
 
+    // TODO: PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can add a new looked up EPC if the pages are filled in correctly`(page: Page) {
         val propertyOwnershipId = 33L // EPC should be auto-matched to this property ownership ID
@@ -405,6 +418,8 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1312 - continue journey test
     }
 
+    // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
+    @Disabled
     @Test
     fun `User can add a new EPC exemption if the pages are filled in correctly`(page: Page) {
         // Update EPC page

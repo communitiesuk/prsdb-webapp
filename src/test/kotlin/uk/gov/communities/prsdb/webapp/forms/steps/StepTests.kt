@@ -32,7 +32,7 @@ class StepTests {
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
-        val newJourneyData = testStep.updatedJourneyData(journeyData, mockFormModel, null)
+        val newJourneyData = journeyData + testStep.stepDataPair(journeyData, mockFormModel, null)
         val existingPageData = objectToStringKeyedMap(newJourneyData["existingPage"])
         val newPageData = objectToStringKeyedMap(newJourneyData[testStep.name])
 
@@ -53,7 +53,7 @@ class StepTests {
             mapOf(testStep.name to mapOf(("existingProperty" to "existingValue")))
 
         // Act
-        val newJourneyData = testStep.updatedJourneyData(journeyData, mockFormModel, subPageNumber)
+        val newJourneyData = journeyData + testStep.stepDataPair(journeyData, mockFormModel, subPageNumber)
         val existingPageData = objectToStringKeyedMap(newJourneyData[testStep.name])
         val subPageData = objectToStringKeyedMap(existingPageData?.get(subPageNumber.toString()))
 
@@ -74,7 +74,7 @@ class StepTests {
         val testStep = Step<TestStepId>(TestStepId.StepOne, mockPage)
 
         // Act
-        val newJourneyData = testStep.updatedJourneyData(journeyData, mockFormModel, subPageNumber)
+        val newJourneyData = journeyData + testStep.stepDataPair(journeyData, mockFormModel, subPageNumber)
         val existingPageData = objectToStringKeyedMap(newJourneyData["existingPage"])
         val newPageData = objectToStringKeyedMap(newJourneyData[TestStepId.StepOne.urlPathSegment])
         val subPageData = objectToStringKeyedMap(newPageData?.get(subPageNumber.toString()))
