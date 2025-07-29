@@ -1,12 +1,31 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel.PropertyComplianceLinkMessage
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel.PropertyComplianceNotificationMessage
 
-fun MutableList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>.addRow(
+fun MutableList<PropertyComplianceNotificationMessage>.addRow(
     mainText: String,
     linkText: String,
-    withLinkText: Boolean,
+    afterLinkText: String,
+    beforeLinkText: String? = null,
+    withLinkMessage: Boolean,
 ) {
-    val linkTextOrNull = if (withLinkText) linkText else null
-    add(PropertyComplianceViewModel.PropertyComplianceNotificationMessage(mainText, linkTextOrNull))
+    val linkMessageOrNull = getLinkMessageOrNull(withLinkMessage, linkText, afterLinkText, beforeLinkText)
+    add(PropertyComplianceNotificationMessage(mainText, linkMessageOrNull))
 }
+
+fun getLinkMessageOrNull(
+    withLinkMessage: Boolean,
+    linkText: String,
+    afterLinkText: String,
+    beforeLinkText: String?,
+): PropertyComplianceLinkMessage? =
+    if (withLinkMessage) {
+        PropertyComplianceLinkMessage(
+            linkText = linkText,
+            afterLinkText = afterLinkText,
+            beforeLinkText = beforeLinkText,
+        )
+    } else {
+        null
+    }

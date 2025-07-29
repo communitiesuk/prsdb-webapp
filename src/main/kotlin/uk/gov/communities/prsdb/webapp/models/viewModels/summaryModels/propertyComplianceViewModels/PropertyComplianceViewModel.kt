@@ -8,7 +8,6 @@ class PropertyComplianceViewModel(
     private val propertyCompliance: PropertyCompliance,
     private val landlordView: Boolean = true,
 ) {
-    // TODO PRSD-1297 add update links to notification messages
     var notificationMessages: List<PropertyComplianceNotificationMessage> = getNotificationMessageKeys()
 
     val gasSafetySummaryList: List<SummaryListRowViewModel> =
@@ -41,55 +40,69 @@ class PropertyComplianceViewModel(
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        withLinkMessage = landlordView,
                     )
                 }
                 if (propertyCompliance.isGasSafetyCertMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        withLinkMessage = landlordView,
                     )
                 }
                 if (propertyCompliance.isEicrExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        withLinkMessage = landlordView,
                     )
                 }
                 if (propertyCompliance.isEicrMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        withLinkMessage = landlordView,
                     )
                 }
                 if (propertyCompliance.isEpcExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        withLinkMessage = landlordView,
                     )
                 }
                 if (propertyCompliance.isEpcRatingLow == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
+                        "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",
+                        withLinkMessage = landlordView,
                     )
                 }
                 if (propertyCompliance.isEpcMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
-                        landlordView,
+                        "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        withLinkMessage = landlordView,
                     )
                 }
             }.toList()
 
     data class PropertyComplianceNotificationMessage(
         val mainText: String,
-        val linkText: String? = null,
+        val linkMessage: PropertyComplianceLinkMessage? = null,
+    )
+
+    data class PropertyComplianceLinkMessage(
+        val linkText: String,
+        val afterLinkText: String,
+        val beforeLinkText: String? = null,
     )
 }
