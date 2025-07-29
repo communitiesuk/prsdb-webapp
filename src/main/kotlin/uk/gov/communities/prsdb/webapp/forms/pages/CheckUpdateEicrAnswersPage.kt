@@ -13,7 +13,7 @@ class CheckUpdateEicrAnswersPage(
         content =
             mapOf(
                 "title" to "propertyDetails.update.title",
-                "summaryName" to "forms.update.checkOccupancy.summaryName",
+                "summaryName" to "forms.update.eicr.checkYourAnswers.summary",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             ),
