@@ -527,12 +527,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getHasNewEpc returns false if the corresponding page is not in journeyData`() {
+    fun `getHasNewEpc returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasNewEpc = testJourneyData.getHasNewEPC()
 
-        assertEquals(false, retrievedHasNewEpc)
+        assertNull(retrievedHasNewEpc)
     }
 
     @Test

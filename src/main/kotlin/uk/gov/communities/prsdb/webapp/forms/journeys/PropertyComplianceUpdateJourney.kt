@@ -277,8 +277,7 @@ class PropertyComplianceUpdateJourney(
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
                 page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect),
-                // TODO: PRSD-1312 - restore next action once EPC CYA step is implemented
-                // nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
                     updateComplianceAndRedirect(filteredJourneyData)
@@ -356,7 +355,7 @@ class PropertyComplianceUpdateJourney(
             )
 
     private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
-        if (filteredJourneyData.getHasNewEPC()) {
+        if (filteredJourneyData.getHasNewEPC()!!) {
             if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
                 Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
             } else {
@@ -369,7 +368,7 @@ class PropertyComplianceUpdateJourney(
         }
 
     private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        if (filteredJourneyData.getHasNewEPC()) {
+        if (filteredJourneyData.getHasNewEPC()!!) {
             val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
 
             val newFilteredJourneyData =
@@ -413,7 +412,6 @@ class PropertyComplianceUpdateJourney(
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
-    // TODO 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(filteredJourneyData: JourneyData): String {
         val submittedJourneyData = journeyDataService.getJourneyDataFromSession()
         val relevantJourneyData = submittedJourneyData.filterKeys { it in filteredJourneyData.keys }
@@ -474,7 +472,7 @@ class PropertyComplianceUpdateJourney(
         }
 
     fun createEpcUpdateOrNull(journeyData: JourneyData): EpcUpdateModel? =
-        journeyData.getHasNewEPC().let { data ->
+        journeyData.getHasNewEPC()?.let { data ->
             EpcUpdateModel(
                 url = journeyData.getAcceptedEpcDetails()?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
                 expiryDate = journeyData.getAcceptedEpcDetails()?.expiryDate?.toJavaLocalDate(),
