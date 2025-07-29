@@ -205,8 +205,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Property details before update
@@ -257,8 +255,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can navigate the EICR update task if pages are filled in correctly (add new expired certificate)`(page: Page) {
         // Property details before update
@@ -292,8 +288,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly`(page: Page) {
         // Property details before update
@@ -329,8 +323,6 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1247 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add a new EICR exemption if the pages are filled in correctly (with 'other' exemption reason)`(page: Page) {
         // Property details before update

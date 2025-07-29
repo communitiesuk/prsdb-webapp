@@ -225,8 +225,7 @@ class PropertyComplianceUpdateJourney(
                 id = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
                 page = CheckUpdateGasSafetyAnswersPage(journeyDataService, unreachableStepRedirect),
                 saveAfterSubmit = false,
-                // TODO: PRSD-1247 - restore next action once EICR original journey data is implemented
-                // nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
                     updateComplianceAndRedirect(filteredJourneyData)
                 },
@@ -271,8 +270,9 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                page = CheckUpdateEicrAnswersPage(journeyDataService),
-                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+                page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect),
+                // TODO: PRSD-1312 - restore next action once EPC CYA step is implemented
+                // nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
                     updateComplianceAndRedirect(filteredJourneyData)
