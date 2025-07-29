@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEicrAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -41,7 +42,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EpcUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
@@ -231,8 +231,7 @@ class PropertyComplianceUpdateJourney(
                 id = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
                 page = CheckUpdateGasSafetyAnswersPage(journeyDataService, unreachableStepRedirect),
                 saveAfterSubmit = false,
-                // TODO: PRSD-1247 - restore next action once EICR original journey data is implemented
-                // nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
+                nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
                     updateComplianceAndRedirect(filteredJourneyData)
                 },
@@ -273,20 +272,17 @@ class PropertyComplianceUpdateJourney(
                 saveAfterSubmit = false,
             )
 
-    // TODO: PRSD-1247: Implement EICR check your answers step
     private val eicrCheckYourAnswersStep
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
-                        content =
-                            mapOf("todoComment" to "TODO PRSD-1247:: Implement EICR Check Your Answers step"),
-                    ),
-                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+                page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect),
+                // TODO: PRSD-1312 - restore next action once EPC CYA step is implemented
+                // nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect(filteredJourneyData)
+                },
             )
 
     private val updateEPCStep
@@ -417,7 +413,7 @@ class PropertyComplianceUpdateJourney(
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
-    // TODO 1247, 1313 - add this as the handleSubmitAndRedirect method and test
+    // TODO 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(filteredJourneyData: JourneyData): String {
         val submittedJourneyData = journeyDataService.getJourneyDataFromSession()
         val relevantJourneyData = submittedJourneyData.filterKeys { it in filteredJourneyData.keys }
