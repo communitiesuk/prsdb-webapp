@@ -11,5 +11,5 @@ class DeleteLaUserSuccessPage(
     page: Page,
 ) : BasePage(page, "/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT") {
     val confirmationBanner = ConfirmationBanner(page)
-    val returnButton = Button.default(page)
+    val returnButton = Button.byText(page, "Return to manage users")
 }
