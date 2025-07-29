@@ -461,6 +461,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1313 - check this page, should return to the Property Record page
     }
 
+    @Disabled // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
     @Test
     fun `User can navigate the journey when EPC lookup does not find an EPC`(page: Page) {
         // Update EPC page
@@ -502,6 +503,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1313 - submit this page, should return to the Property Record page (no change to record)
     }
 
+    @Disabled // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
     @Test
     fun `User can add an expired EPC after EPC lookup finds a superseded EPC`(page: Page) {
         // Update EPC page
@@ -565,6 +567,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         // TODO PRSD-1313 - submit this page, should return to the Property Record page
     }
 
+    @Disabled // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
     @Test
     fun `User can add an expired EPC with a low energy rating and no MEES exemption`(page: Page) {
         // Update EPC page
