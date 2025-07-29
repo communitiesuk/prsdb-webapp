@@ -23,7 +23,7 @@ class CheckUpdateEicrAnswersPage(
     val eicrDataFactory =
         EicrSummaryRowsFactory(
             doesDataHaveEicr = { data -> data.getHasNewEICR()!! },
-            eicrSafetyStartingStep = PropertyComplianceStepId.UpdateEICR,
+            eicrStartingStep = PropertyComplianceStepId.UpdateEICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemptionReason,
         )
 

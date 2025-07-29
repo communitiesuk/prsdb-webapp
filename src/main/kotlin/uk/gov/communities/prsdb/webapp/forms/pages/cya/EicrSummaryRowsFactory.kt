@@ -4,6 +4,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
@@ -11,12 +12,13 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionMissing
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrUploadConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 class EicrSummaryRowsFactory(
     val doesDataHaveEicr: (JourneyData) -> Boolean,
-    val eicrSafetyStartingStep: PropertyComplianceStepId,
+    val eicrStartingStep: PropertyComplianceStepId,
     val changeExemptionStep: PropertyComplianceStepId,
 ) {
     fun createRows(filteredJourneyData: JourneyData) =
@@ -35,18 +37,20 @@ class EicrSummaryRowsFactory(
             // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
             if (filteredJourneyData.getHasCompletedEicrUploadConfirmation()) {
                 "forms.checkComplianceAnswers.eicr.download"
+            } else if (filteredJourneyData.getHasCompletedEicrOutdated()) {
+                "forms.checkComplianceAnswers.certificate.expired"
             } else if (filteredJourneyData.getHasCompletedEicrExemptionConfirmation()) {
                 "forms.checkComplianceAnswers.certificate.notRequired"
             } else if (filteredJourneyData.getHasCompletedEicrExemptionMissing()) {
                 "forms.checkComplianceAnswers.certificate.notAdded"
             } else {
-                "forms.checkComplianceAnswers.certificate.expired"
+                throw PrsdbWebException("Unexpected EICR status in journey data.")
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.eicr.certificate",
             fieldValue,
-            eicrSafetyStartingStep.urlPathSegment,
+            eicrStartingStep.urlPathSegment,
         )
     }
 

@@ -41,7 +41,7 @@ class PropertyComplianceCheckAnswersPage(
     val eicrDataFactory =
         EicrSummaryRowsFactory(
             doesDataHaveEicr = { data -> data.getHasEICR()!! },
-            eicrSafetyStartingStep = PropertyComplianceStepId.EICR,
+            eicrStartingStep = PropertyComplianceStepId.EICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemption,
         )
 
