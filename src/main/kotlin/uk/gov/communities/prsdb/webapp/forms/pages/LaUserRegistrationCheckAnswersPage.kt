@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 class LaUserRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
     private val invitationService: LocalAuthorityInvitationService,
+    missingAnswersRedirect: String,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -19,6 +20,7 @@ class LaUserRegistrationCheckAnswersPage(
                 "submitButtonText" to "forms.buttons.confirm",
             ),
         journeyDataService = journeyDataService,
+        missingAnswersRedirect = missingAnswersRedirect,
     ) {
     override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
         val sessionToken = invitationService.getTokenFromSession()

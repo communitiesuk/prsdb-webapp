@@ -27,6 +27,7 @@
 <script>
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 </script>
+<div th:replace="~{ fragments/banners/cookieBanner:: cookieBanner }"></div>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 <header th:replace="~{fragments/header/header :: header(${navLinks})}"></header>
 <div class="govuk-width-container">

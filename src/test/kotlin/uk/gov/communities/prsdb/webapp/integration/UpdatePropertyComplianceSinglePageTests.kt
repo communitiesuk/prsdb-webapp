@@ -20,8 +20,6 @@ class UpdatePropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data
 
     @Nested
     inner class UpdateEicrStep {
-        // TODO PRSD-1245 or PRSD-1246: Re-enable this test when UpdateEicrCertificateFormModel validation is re-enabled
-        @Disabled
         @Test
         fun `Submitting with no option selected returns an error`() {
             val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
@@ -33,6 +31,8 @@ class UpdatePropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data
 
     @Nested
     inner class UpdateEpcStep {
+        // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
+        @Disabled
         @Test
         fun `Submitting with no value entered returns an error`() {
             val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
