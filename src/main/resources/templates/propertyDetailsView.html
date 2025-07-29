@@ -10,7 +10,11 @@
                 <ul class="govuk-list govuk-list--bullet" th:each="message: ${complianceDetails.notificationMessages}">
                     <li>
                         <span th:utext="#{${message.mainText}}"></span>
-                        <span th:if="${message.linkMessage != null}" th:text="(${message.linkMessage.beforeLinkText != null} ? #{${message.linkMessage.beforeLinkText}} + ' ' : '') #{${message.linkMessage.linkText}} + ' ' + #{${message.linkMessage.afterLinkText}}"></span>
+                        <th:div th:if="${message.linkMessage != null}">
+                            <span th:if="${message.linkMessage.beforeLinkText != null}" th:text="#{${message.linkMessage.beforeLinkText}}"></span>
+                            <a class="govuk-link" th:href="@{${message.linkMessage.linkUrl}}" th:text="#{${message.linkMessage.linkText}}"></a>
+                            <span th:text="#{${message.linkMessage.afterLinkText}}"></span>
+                        </th:div>
                     </li>
                 </ul>
             </div>

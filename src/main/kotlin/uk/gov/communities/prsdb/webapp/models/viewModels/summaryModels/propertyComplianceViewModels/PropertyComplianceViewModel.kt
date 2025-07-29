@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
@@ -39,6 +41,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isGasSafetyCertExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateGasSafety,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = landlordView,
@@ -47,6 +53,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isGasSafetyCertMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateGasSafety,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = landlordView,
@@ -55,6 +65,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isEicrExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateEICR,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = landlordView,
@@ -63,6 +77,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isEicrMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateEICR,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = landlordView,
@@ -71,6 +89,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isEpcExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateEpc,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = landlordView,
@@ -79,6 +101,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isEpcRatingLow == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateEpc,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",
@@ -88,6 +114,10 @@ class PropertyComplianceViewModel(
                 if (propertyCompliance.isEpcMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            propertyCompliance.propertyOwnership.id,
+                            PropertyComplianceStepId.UpdateEpc,
+                        ),
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = landlordView,
@@ -101,6 +131,7 @@ class PropertyComplianceViewModel(
     )
 
     data class PropertyComplianceLinkMessage(
+        val linkUrl: String,
         val linkText: String,
         val afterLinkText: String,
         val beforeLinkText: String? = null,

@@ -5,23 +5,26 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 
 fun MutableList<PropertyComplianceNotificationMessage>.addRow(
     mainText: String,
+    linkUrl: String,
     linkText: String,
     afterLinkText: String,
     beforeLinkText: String? = null,
     withLinkMessage: Boolean,
 ) {
-    val linkMessageOrNull = getLinkMessageOrNull(withLinkMessage, linkText, afterLinkText, beforeLinkText)
+    val linkMessageOrNull = getLinkMessageOrNull(withLinkMessage, linkUrl, linkText, afterLinkText, beforeLinkText)
     add(PropertyComplianceNotificationMessage(mainText, linkMessageOrNull))
 }
 
 fun getLinkMessageOrNull(
     withLinkMessage: Boolean,
+    linkUrl: String,
     linkText: String,
     afterLinkText: String,
     beforeLinkText: String?,
 ): PropertyComplianceLinkMessage? =
     if (withLinkMessage) {
         PropertyComplianceLinkMessage(
+            linkUrl = linkUrl,
             linkText = linkText,
             afterLinkText = afterLinkText,
             beforeLinkText = beforeLinkText,

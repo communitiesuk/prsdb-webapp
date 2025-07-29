@@ -49,15 +49,27 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -74,11 +86,19 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -95,11 +115,19 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -116,11 +144,19 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -137,7 +173,11 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -154,7 +194,11 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -171,7 +215,11 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -188,15 +236,27 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -213,11 +273,19 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -234,11 +302,19 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -255,11 +331,19 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -276,7 +360,11 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -293,7 +381,11 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -310,7 +402,11 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
+                        ),
                     ),
                 )
 
@@ -327,7 +423,12 @@ class PropertyComplianceViewModelTests {
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
-                        "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
+                            "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",
+                        ),
                     ),
                 )
 
