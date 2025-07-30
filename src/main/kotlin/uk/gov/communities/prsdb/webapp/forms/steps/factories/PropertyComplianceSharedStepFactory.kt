@@ -651,6 +651,11 @@ class PropertyComplianceSharedStepFactory(
                             "getNewEpcUrl" to GET_NEW_EPC_URL,
                             "searchAgainUrl" to PropertyComplianceStepId.EpcLookup.urlPathSegment,
                             "certificateNumber" to getEpcLookupCertificateNumberFromSession(),
+                            "submitButtonText" to
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
+                                    "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                ),
                         ),
                 ),
             nextAction = { _, _ -> Pair(nextActionAfterEpcTask, null) },
@@ -893,7 +898,6 @@ class PropertyComplianceSharedStepFactory(
             Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
-    // TODO PRSD-1313: Find cases where this has been missed, e.g. this property's epc could not be found
     private fun getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
         submitButtonText: String,
         isCheckingOrUpdatingAnswers: Boolean,
