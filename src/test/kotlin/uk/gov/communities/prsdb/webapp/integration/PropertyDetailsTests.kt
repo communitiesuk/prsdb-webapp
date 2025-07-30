@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
@@ -12,6 +13,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEicrPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import kotlin.test.assertEquals
 
@@ -137,10 +141,13 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                 assertThat(detailsPage.notificationBanner.title).containsText("Important")
                 assertThat(
                     detailsPage.notificationBanner.content,
-                ).containsText(
-                    "This property’s energy performance certificate (EPC) is below E. " +
-                        "You must add a new certificate or add a MEES exemption.",
-                )
+                ).containsText("This property’s energy performance certificate (EPC) is below E.")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText("You must")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText("add a new certificate or add a MEES exemption")
             }
 
             @Test
@@ -151,7 +158,77 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
 
-            // TODO PRSD-1297 add tests for update links in notification messages
+            @Nested
+            inner class UpdateLinks {
+                @Test
+                fun `upload a gas safety cert when missing redirects to the update gas safety cert page`(page: Page) {
+                    val propertyOwnershipId = 8
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.updateMissingGasSafetyLink.clickAndWait()
+
+                    assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
+                }
+
+                @Test
+                fun `upload a new gas safety cert when expired redirects to the update gas safety cert page`(page: Page) {
+                    val propertyOwnershipId = 9
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.updateExpiredGasSafetyLink.clickAndWait()
+
+                    assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
+                }
+
+                @Test
+                fun `upload an eicr when missing redirects to the update eicr page`(page: Page) {
+                    val propertyOwnershipId = 8
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.updateMissingEicrLink.clickAndWait()
+
+                    assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
+                }
+
+                @Test
+                fun `upload a new eicr when expired redirects to the update eicr page`(page: Page) {
+                    val propertyOwnershipId = 9
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.updateExpiredEicrLink.clickAndWait()
+
+                    assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
+                }
+
+                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
+                @Disabled
+                @Test
+                fun `add an epc when missing redirects to the update epc page`(page: Page) {
+                    val propertyOwnershipId = 8
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.addEpcLink.clickAndWait()
+
+                    assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
+                }
+
+                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
+                @Disabled
+                @Test
+                fun `add an epc when expired redirects to the update epc page`(page: Page) {
+                    val propertyOwnershipId = 9
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.addEpcLink.clickAndWait()
+
+                    assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
+                }
+
+                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
+                @Disabled
+                @Test
+                fun `add an epc or mees exemption when epc has low rating redirects to the update epc page`(page: Page) {
+                    val propertyOwnershipId = 10
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.addEpcOrMeesExemptionLink.clickAndWait()
+
+                    assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "10"))
+                }
+            }
         }
     }
 
