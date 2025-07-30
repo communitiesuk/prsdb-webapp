@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
@@ -196,8 +195,6 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
                 }
 
-                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
-                @Disabled
                 @Test
                 fun `add an epc when missing redirects to the update epc page`(page: Page) {
                     val propertyOwnershipId = 8
@@ -207,8 +204,6 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
                 }
 
-                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
-                @Disabled
                 @Test
                 fun `add an epc when expired redirects to the update epc page`(page: Page) {
                     val propertyOwnershipId = 9
@@ -218,8 +213,6 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
                 }
 
-                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
-                @Disabled
                 @Test
                 fun `add an epc or mees exemption when epc has low rating redirects to the update epc page`(page: Page) {
                     val propertyOwnershipId = 10
