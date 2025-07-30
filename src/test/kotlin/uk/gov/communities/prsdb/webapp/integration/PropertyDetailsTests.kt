@@ -196,7 +196,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
                 }
 
-                // TODO PRSD-1297 remove @Disabled when the update epc page is implemented/bug is resolved
+                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
                 @Disabled
                 @Test
                 fun `add an epc when missing redirects to the update epc page`(page: Page) {
@@ -207,7 +207,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
                 }
 
-                // TODO PRSD-1297 remove @Disabled when the update epc page is implemented/bug is resolved
+                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
                 @Disabled
                 @Test
                 fun `add an epc when expired redirects to the update epc page`(page: Page) {
@@ -218,7 +218,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
                 }
 
-                // TODO PRSD-1297 remove @Disabled when the update epc page is implemented/bug is resolved
+                // TODO PRSD-1313 remove @Disabled when the update epc page is implemented
                 @Disabled
                 @Test
                 fun `add an epc or mees exemption when epc has low rating redirects to the update epc page`(page: Page) {
