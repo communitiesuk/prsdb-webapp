@@ -428,6 +428,7 @@ class PropertyComplianceViewModelTests {
                             "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
                             "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",
+                            isAfterLinkTextFullStop = true,
                         ),
                     ),
                 )
