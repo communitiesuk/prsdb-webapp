@@ -108,7 +108,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     detailsPage.notificationBanner.content,
                 ).containsText(
                     "This property is missing a gas safety certificate. Upload a certificate as soon as possible.\n" +
-                        "This property is missing a Electrical Installation Condition Report (EICR)." +
+                        "This property is missing an Electrical Installation Condition Report (EICR)." +
                         " Upload an EICR as soon as possible.\n" +
                         "This property is missing an energy performance certificate (EPC). Add a new certificate as soon as possible.",
                 )
@@ -319,7 +319,7 @@ class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
                     detailsPage.notificationBanner.content,
                 ).containsText(
                     "This property is missing a gas safety certificate.\n" +
-                        "This property is missing a Electrical Installation Condition Report (EICR).\n" +
+                        "This property is missing an Electrical Installation Condition Report (EICR).\n" +
                         "This property is missing an energy performance certificate (EPC).",
                 )
             }
