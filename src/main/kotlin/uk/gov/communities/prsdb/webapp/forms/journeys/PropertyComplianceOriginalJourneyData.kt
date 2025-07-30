@@ -1,11 +1,17 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
 
+import kotlinx.datetime.toKotlinLocalDate
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionOtherReasonFormModel
@@ -97,6 +103,26 @@ class PropertyComplianceOriginalJourneyData private constructor(
                 )
         }
 
+    private fun reconstructEpcModelOrNull(): EpcDataModel? {
+        val certificateUrlSegment = propertyCompliance.epcUrl?.split("/")?.lastOrNull()
+        val rating = propertyCompliance.epcEnergyRating
+        val expiryDate = propertyCompliance.epcExpiryDate
+        if (certificateUrlSegment == null || rating == null || expiryDate == null) {
+            return null
+        }
+
+        val certificateNumber =
+            EpcDataModel.parseCertificateNumberOrNull(certificateUrlSegment)
+                ?: throw PrsdbWebException("Invalid EPC URL format: $propertyCompliance.epcUrl")
+
+        return EpcDataModel(
+            certificateNumber = certificateNumber,
+            singleLineAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress,
+            energyRating = rating,
+            expiryDate = expiryDate.toKotlinLocalDate(),
+        )
+    }
+
     private val originalGasSafetyJourneyData: JourneyData =
         mapOf(
             PropertyComplianceStepId.UpdateGasSafety toPageData { _ -> updateGasCertificateFormModel },
@@ -138,6 +164,7 @@ class PropertyComplianceOriginalJourneyData private constructor(
             PropertyComplianceStepId.CheckAutoMatchedEpc toPageData { checkMatchedEpcFormModelAcceptingMatchedEpc },
             PropertyComplianceStepId.CheckMatchedEpc toPageData { checkMatchedEpcFormModelAcceptingMatchedEpc },
             PropertyComplianceStepId.EpcLookup toPageData { epcLookupFormModelWithDummyCertificateNumber },
+            NonStepJourneyDataKey.LookedUpEpc.key to reconstructEpcModelOrNull()?.let { Json.encodeToString(it) },
             PropertyComplianceStepId.EpcNotFound toPageData { NoInputFormModel() },
             PropertyComplianceStepId.EpcSuperseded toPageData { NoInputFormModel() },
             PropertyComplianceStepId.EpcExpiryCheck toPageData EpcExpiryCheckFormModel::fromComplianceRecordOrNull,

@@ -54,6 +54,17 @@ class PropertyComplianceOriginalJourneyDataTest {
                     Named.of("with missing certs", PropertyComplianceBuilder.createWithMissingCerts()),
                     namedExactlyTheSame,
                 ),
+                Arguments.of(
+                    Named.of("with low epc rating", PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()),
+                    namedExactlyTheSame,
+                ),
+                Arguments.of(
+                    Named.of(
+                        "with low epc rating and mees exemption",
+                        PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(),
+                    ),
+                    namedExactlyTheSame,
+                ),
             )
 
         val namedExactlyTheSame = Named.of("exactly the same", ::areAllComplianceValuesTheSame)
@@ -63,8 +74,8 @@ class PropertyComplianceOriginalJourneyDataTest {
         fun areAllComplianceValuesTheSame(
             original: PropertyCompliance,
             updated: PropertyCompliance,
-        ): Boolean {
-            return original.gasSafetyCertS3Key == updated.gasSafetyCertS3Key &&
+        ): Boolean =
+            original.gasSafetyCertS3Key == updated.gasSafetyCertS3Key &&
                 original.gasSafetyCertIssueDate == updated.gasSafetyCertIssueDate &&
                 original.gasSafetyCertEngineerNum == updated.gasSafetyCertEngineerNum &&
                 original.gasSafetyCertExemptionReason == updated.gasSafetyCertExemptionReason &&
@@ -72,24 +83,33 @@ class PropertyComplianceOriginalJourneyDataTest {
                 original.eicrS3Key == updated.eicrS3Key &&
                 original.eicrIssueDate == updated.eicrIssueDate &&
                 original.eicrExemptionReason == updated.eicrExemptionReason &&
-                original.eicrExemptionOtherReason == updated.eicrExemptionOtherReason
-            // TODO PRSD-1313 - check EPC values match the orignal record
-        }
+                original.eicrExemptionOtherReason == updated.eicrExemptionOtherReason &&
+                original.epcUrl == updated.epcUrl &&
+                original.epcExpiryDate == updated.epcExpiryDate &&
+                original.tenancyStartedBeforeEpcExpiry == updated.tenancyStartedBeforeEpcExpiry &&
+                original.epcEnergyRating == updated.epcEnergyRating &&
+                original.epcExemptionReason == updated.epcExemptionReason &&
+                original.epcMeesExemptionReason == updated.epcMeesExemptionReason
 
         fun isUpdatedAnExpiredVersionOfOriginal(
             original: PropertyCompliance,
             updated: PropertyCompliance,
-        ): Boolean {
-            return updated.gasSafetyCertS3Key == null &&
+        ): Boolean =
+            updated.gasSafetyCertS3Key == null &&
                 original.gasSafetyCertIssueDate == updated.gasSafetyCertIssueDate &&
                 updated.gasSafetyCertEngineerNum == null &&
                 original.gasSafetyCertExemptionReason == updated.gasSafetyCertExemptionReason &&
                 original.gasSafetyCertExemptionOtherReason == updated.gasSafetyCertExemptionOtherReason &&
                 updated.eicrS3Key == null &&
+                original.eicrIssueDate == updated.eicrIssueDate &&
                 original.eicrExemptionReason == updated.eicrExemptionReason &&
-                original.eicrExemptionOtherReason == updated.eicrExemptionOtherReason
-            // TODO PRSD-1313 - check EPC values match the orignal record
-        }
+                original.eicrExemptionOtherReason == updated.eicrExemptionOtherReason &&
+                original.epcUrl == updated.epcUrl &&
+                original.epcExpiryDate == updated.epcExpiryDate &&
+                original.tenancyStartedBeforeEpcExpiry == updated.tenancyStartedBeforeEpcExpiry &&
+                original.epcEnergyRating == updated.epcEnergyRating &&
+                original.epcExemptionReason == updated.epcExemptionReason &&
+                original.epcMeesExemptionReason == updated.epcMeesExemptionReason
     }
 
     private lateinit var propertyComplianceRepository: PropertyComplianceRepository
@@ -128,7 +148,7 @@ class PropertyComplianceOriginalJourneyDataTest {
                 journeyDataServiceFactory = journeyDataServiceFactory,
                 propertyComplianceService = propertyComplianceService,
                 propertyOwnershipService = propertyOwnershipService,
-                epcCertificateUrlProvider = EpcCertificateUrlProvider("http://example.com/epc/"),
+                epcCertificateUrlProvider = EpcCertificateUrlProvider(PropertyComplianceBuilder.TEST_EPC_BASE_URL),
                 epcLookupService = epcLookupService,
             )
     }
@@ -179,8 +199,6 @@ class PropertyComplianceOriginalJourneyDataTest {
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
         whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
 
-        // TODO PRSD-1313 - ensure EPC lookup is mocked correctly for each test case
-
         // Act
         val journey =
             journeyFactory.create(
@@ -200,6 +218,31 @@ class PropertyComplianceOriginalJourneyDataTest {
         val savedCompliance = complianceCaptor.firstValue
 
         // Assert
-        assertTrue(complianceRecordsMatch(originalRecord, savedCompliance))
+        assertTrue(
+            complianceRecordsMatch(originalRecord, savedCompliance),
+            complianceRecordUpdateString(originalRecord, savedCompliance),
+        )
     }
+
+    private fun complianceRecordUpdateString(
+        original: PropertyCompliance,
+        new: PropertyCompliance,
+    ) = """
+        Updated PropertyCompliance values:
+        gasSafetyCertS3Key: ${original.gasSafetyCertS3Key} -> ${new.gasSafetyCertS3Key}, 
+        gasSafetyCertIssueDate: ${original.gasSafetyCertIssueDate} -> ${new.gasSafetyCertIssueDate},
+        gasSafetyCertEngineerNum: ${original.gasSafetyCertEngineerNum} -> ${new.gasSafetyCertEngineerNum},
+        gasSafetyCertExemptionReason: ${original.gasSafetyCertExemptionReason} -> ${new.gasSafetyCertExemptionReason},
+        gasSafetyCertExemptionOtherReason: ${original.gasSafetyCertExemptionOtherReason} -> ${new.gasSafetyCertExemptionOtherReason},
+        eicrS3Key: ${original.eicrS3Key} -> ${new.eicrS3Key},
+        eicrIssueDate: ${original.eicrIssueDate} -> ${new.eicrIssueDate},
+        eicrExemptionReason: ${original.eicrExemptionReason} -> ${new.eicrExemptionReason},
+        eicrExemptionOtherReason: ${original.eicrExemptionOtherReason} -> ${new.eicrExemptionOtherReason},
+        epcUrl: ${original.epcUrl} -> ${new.epcUrl},
+        epcExpiryDate: ${original.epcExpiryDate} -> ${new.epcExpiryDate},
+        tenancyStartedBeforeEpcExpiry: ${original.tenancyStartedBeforeEpcExpiry} -> ${new.tenancyStartedBeforeEpcExpiry},
+        epcEnergyRating: ${original.epcEnergyRating} -> ${new.epcEnergyRating},
+        epcExemptionReason: ${original.epcExemptionReason} -> ${new.epcExemptionReason},
+        epcMeesExemptionReason: ${original.epcMeesExemptionReason} -> ${new.epcMeesExemptionReason}
+        """.trimIndent()
 }
