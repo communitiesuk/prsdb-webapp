@@ -15,7 +15,7 @@ fun MutableList<PropertyComplianceNotificationMessage>.addRow(
     add(PropertyComplianceNotificationMessage(mainText, linkMessageOrNull))
 }
 
-fun getLinkMessageOrNull(
+private fun getLinkMessageOrNull(
     withLinkMessage: Boolean,
     linkUrl: String,
     linkText: String,
