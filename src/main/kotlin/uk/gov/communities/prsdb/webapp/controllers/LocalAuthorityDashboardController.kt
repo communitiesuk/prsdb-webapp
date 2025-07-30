@@ -43,6 +43,11 @@ class LocalAuthorityDashboardController(
                         "navLink.manageUsers.title",
                         false,
                     ),
+                    NavigationLinkViewModel(
+                        GeneratePasscodeController.GENERATE_PASSCODE_URL,
+                        "navLink.generatePasscode.title",
+                        false,
+                    ),
                 ),
             )
         }
