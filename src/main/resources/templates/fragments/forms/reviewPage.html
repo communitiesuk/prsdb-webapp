@@ -1,0 +1,8 @@
+<th:block th:fragment="reviewPage(title, backUrl, mainContent)">
+    <html id="page" th:replace="~{fragments/layout :: layout(${title}, ~{::#page/content()}, false)}">
+        <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
+        <main class="govuk-main-wrapper" id="main-content">
+            <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(${mainContent})}"></div>
+        </main>
+    </html>
+</th:block>
