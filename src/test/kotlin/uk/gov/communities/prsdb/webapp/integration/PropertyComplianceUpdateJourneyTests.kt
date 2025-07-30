@@ -5,10 +5,9 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
-import kotlinx.datetime.toJavaLocalDate
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -66,7 +65,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
-import java.time.format.DateTimeFormatter
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -81,7 +79,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
     private val dateFormat =
         LocalDate
             .Format {
-                dayOfMonth()
+                dayOfMonth(Padding.NONE)
                 char(' ')
                 monthName(MonthNames.ENGLISH_FULL)
                 char(' ')
@@ -358,16 +356,15 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add an automatched EPC and MEES exemption if the pages are filled in correctly`(page: Page) {
         // Update EPC page
         val updateEpcPage = startUpdateEpcTask(page)
+        val expiryDate = LocalDate(currentDate.year + 5, 1, 5)
         whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                    expiryDate = LocalDate(currentDate.year + 5, 1, 5),
+                    expiryDate = expiryDate,
                     energyRating = "F",
                 ),
             )
@@ -398,13 +395,17 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // MEES exemption confirmation page
         meesExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+        val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        // TODO PRSD-1313 - CYA page checks, should return to the Property Record page
+        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
+        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("F")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.meesExemptionRow.value).containsText("Listed building exemption")
+
+        checkYourEpcAnswersPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO: PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add a new looked up EPC if the pages are filled in correctly`(page: Page) {
         // Update EPC page
@@ -419,10 +420,12 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val epcLookupPage = assertPageIs(page, EpcLookupPagePropertyComplianceUpdate::class, urlArguments)
 
         // Epc Lookup page
+        val expiryDate = LocalDate(currentDate.year + 5, 1, 5)
         whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                    expiryDate = LocalDate(currentDate.year + 5, 1, 5),
+                    expiryDate = expiryDate,
+                    energyRating = "C",
                 ),
             )
         epcLookupPage.submitCurrentEpcNumber()
@@ -432,13 +435,16 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
 
         // Epc Check Your Answers page
-        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+        val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        // TODO PRSD-1313 - CYA page checks, should return to the Property Record page
+        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
+        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("C")
+
+        checkYourEpcAnswersPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
-    @Disabled
     @Test
     fun `User can add a new EPC exemption if the pages are filled in correctly`(page: Page) {
         // Update EPC page
@@ -455,13 +461,18 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
             epcExemptionConfirmationPage.heading,
         ).containsText("You’ve marked this property as not needing an EPC")
         epcExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
-        assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        // Check Your Answers page
-        // TODO PRSD-1313 - check this page, should return to the Property Record page
+        // Epc Check Your Answers page
+        val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("Not required")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.exemptionReasonRow.value)
+            .containsText("You can demonstrate that the building is due to be demolished")
+
+        checkYourEpcAnswersPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    @Disabled // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
     @Test
     fun `User can navigate the journey when EPC lookup does not find an EPC`(page: Page) {
         // Update EPC page
@@ -499,11 +510,16 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         epcNotFoundPage.continueButton.clickAndWait()
         assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        // Check Your Answers page
-        // TODO PRSD-1313 - submit this page, should return to the Property Record page (no change to record)
+        // Epc Check Your Answers page
+        val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("Not added")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.exemptionReasonRow.value).containsText("None")
+
+        checkYourEpcAnswersPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    @Disabled // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
     @Test
     fun `User can add an expired EPC after EPC lookup finds a superseded EPC`(page: Page) {
         // Update EPC page
@@ -540,10 +556,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // Check Matched EPC page
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
-        val expectedExpiryDate =
-            MockEpcData.expiryDateInThePast
-                .toJavaLocalDate()
-                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        val expectedExpiryDate = dateFormat.format(MockEpcData.expiryDateInThePast)
         BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
@@ -563,19 +576,26 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        // Check Your Answers page
-        // TODO PRSD-1313 - submit this page, should return to the Property Record page
+        // Epc Check Your Answers page
+        val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View expired EPC")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("C")
+
+        checkYourEpcAnswersPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
-    @Disabled // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
     @Test
     fun `User can add an expired EPC with a low energy rating and no MEES exemption`(page: Page) {
         // Update EPC page
         val updateEpcPage = startUpdateEpcTask(page)
+        val expiryDate = LocalDate(currentDate.year - 5, 1, 5)
         whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                    expiryDate = LocalDate(currentDate.year - 5, 1, 5),
+                    expiryDate = expiryDate,
                     energyRating = "F",
                 ),
             )
@@ -598,8 +618,16 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         lowEnergyRatingPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        // Check Your Answers page
-        // TODO PRSD-1313 - submit this page, should return to the Property Record page
+        // Epc Check Your Answers page
+        val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
+
+        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
+        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("F")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.meesExemptionRow.value).containsText("None")
+
+        checkYourEpcAnswersPage.form.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     private fun startUpdateGasSafetyTask(page: Page): UpdateGasSafetyPagePropertyComplianceUpdate {

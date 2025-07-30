@@ -153,12 +153,7 @@ abstract class Journey<T : StepId>(
     protected fun isStepReachable(
         targetStep: Step<T>,
         targetSubPageNumber: Int? = null,
-    ): Boolean {
-        // Initial page is always reachable
-        if (targetStep.id == initialStepId) return true
-        // All other steps are reachable if and only if we can find their previous step by traversal
-        return getPrevStep(targetStep, targetSubPageNumber) != null
-    }
+    ): Boolean = this.any { it.step == targetStep && it.subPageNumber == targetSubPageNumber }
 
     protected fun createSingleSectionWithSingleTaskFromSteps(
         initialStepId: T,

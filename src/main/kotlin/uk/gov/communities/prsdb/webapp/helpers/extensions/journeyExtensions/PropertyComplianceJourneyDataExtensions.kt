@@ -181,7 +181,14 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.UpdateEpc.urlPathSegment,
                 UpdateEpcFormModel::hasNewCertificate.name,
-            ) ?: false
+            )
+
+        fun JourneyData.getStillHasNoEpcOrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEpc.urlPathSegment,
+                ORIGINALLY_NOT_INCLUDED_KEY,
+            )
 
         fun JourneyData.getEpcLookupCertificateNumber(): String? =
             JourneyDataHelper.getFieldStringValue(

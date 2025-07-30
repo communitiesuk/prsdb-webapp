@@ -31,7 +31,7 @@ class PropertyComplianceUpdateJourneyFactory(
             journeyDataServiceFactory.create(
                 getJourneyDataKey(
                     propertyOwnershipId,
-                    PropertyComplianceStepId.entries.find { it.urlPathSegment == stepName }!!.groupIdentifier,
+                    PropertyComplianceStepId.entries.find { it.urlPathSegment == stepName }?.groupIdentifier,
                 ),
             ),
         stepName = stepName,
@@ -46,8 +46,8 @@ class PropertyComplianceUpdateJourneyFactory(
     companion object {
         fun getJourneyDataKey(
             propertyOwnershipId: Long,
-            stepGroupId: PropertyComplianceGroupIdentifier,
+            stepGroupId: PropertyComplianceGroupIdentifier?,
         ) = PropertyComplianceController
-            .getUpdatePropertyComplianceBasePath(propertyOwnershipId) + stepGroupId.name
+            .getUpdatePropertyComplianceBasePath(propertyOwnershipId) + stepGroupId?.name
     }
 }

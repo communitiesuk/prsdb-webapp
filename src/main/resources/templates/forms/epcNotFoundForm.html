@@ -6,6 +6,7 @@
 <!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="certificateNumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
 <header>
@@ -33,6 +34,6 @@
 </section>
 <div class="govuk-button-group">
     <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${searchAgainUrl}},#{forms.buttons.searchAgain})}">forms.buttons.searchAgain</a>
-    <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{forms.buttons.saveAndContinueToLandlordResponsibilities})}"></button>
+    <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{${submitButtonText}})}"></button>
 </div>
 </html>

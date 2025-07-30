@@ -60,7 +60,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withEpc(expiryDate: LocalDate = LocalDate.now().plusYears(1)): PropertyComplianceBuilder {
-        propertyCompliance.epcUrl = "epc-url"
+        propertyCompliance.epcUrl = "$TEST_EPC_BASE_URL/0000-0000-0000-0000-0000"
         propertyCompliance.epcExpiryDate = expiryDate
         if (expiryDate.isBefore(LocalDate.now())) propertyCompliance.tenancyStartedBeforeEpcExpiry = false
         propertyCompliance.epcEnergyRating = "C"
@@ -268,5 +268,7 @@ class PropertyComplianceBuilder {
                 .withGasSafetyCert()
                 .withEicr()
                 .build()
+
+        const val TEST_EPC_BASE_URL = "epc-url"
     }
 }
