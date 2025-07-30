@@ -13,7 +13,6 @@ Once you’ve registered, you can search and view:
 * registered property information
 * registered landlord information
 
-## Before you register
 You must register or sign in using the [GOV.UK One Login](((one login url))) linked to this email address.
 
 ---
