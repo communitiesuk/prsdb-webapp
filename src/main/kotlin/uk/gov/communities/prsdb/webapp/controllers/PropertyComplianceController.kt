@@ -397,7 +397,7 @@ class PropertyComplianceController(
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
 
-        const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
+        private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
 
@@ -414,6 +414,11 @@ class PropertyComplianceController(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
         ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
+
+        fun getReviewPropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            stepId: PropertyComplianceStepId,
+        ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/${stepId.urlPathSegment}"
 
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }
