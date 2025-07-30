@@ -108,6 +108,7 @@ class PropertyComplianceViewModel(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",
+                        isAfterLinkTextFullStop = true,
                         withLinkMessage = landlordView,
                     )
                 }
@@ -135,5 +136,6 @@ class PropertyComplianceViewModel(
         val linkText: String,
         val afterLinkText: String,
         val beforeLinkText: String? = null,
+        val isAfterLinkTextFullStop: Boolean = false,
     )
 }

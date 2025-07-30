@@ -10,8 +10,9 @@ fun MutableList<PropertyComplianceNotificationMessage>.addRow(
     afterLinkText: String,
     beforeLinkText: String? = null,
     withLinkMessage: Boolean,
+    isAfterLinkTextFullStop: Boolean = false,
 ) {
-    val linkMessageOrNull = getLinkMessageOrNull(withLinkMessage, linkUrl, linkText, afterLinkText, beforeLinkText)
+    val linkMessageOrNull = getLinkMessageOrNull(withLinkMessage, linkUrl, linkText, afterLinkText, beforeLinkText, isAfterLinkTextFullStop)
     add(PropertyComplianceNotificationMessage(mainText, linkMessageOrNull))
 }
 
@@ -21,6 +22,7 @@ private fun getLinkMessageOrNull(
     linkText: String,
     afterLinkText: String,
     beforeLinkText: String?,
+    isAfterLinkTextFullStop: Boolean,
 ): PropertyComplianceLinkMessage? =
     if (withLinkMessage) {
         PropertyComplianceLinkMessage(
@@ -28,6 +30,7 @@ private fun getLinkMessageOrNull(
             linkText = linkText,
             afterLinkText = afterLinkText,
             beforeLinkText = beforeLinkText,
+            isAfterLinkTextFullStop = isAfterLinkTextFullStop,
         )
     } else {
         null
