@@ -856,11 +856,12 @@ class PropertyComplianceControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getFireSafetyReview returns 404 for a landlord user that owns the property without compliance`() {
+        fun `getFireSafetyReview redirects to the compliance record for a landlord user that owns the property without compliance`() {
             whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
 
             mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
-                status { isNotFound() }
+                status { is3xxRedirection() }
+                redirectedUrl(PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId))
             }
         }
 

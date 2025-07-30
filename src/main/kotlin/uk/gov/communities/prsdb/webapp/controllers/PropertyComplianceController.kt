@@ -287,14 +287,17 @@ class PropertyComplianceController(
         model: Model,
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        throwErrorIfPropertyComplianceNotFound(propertyOwnershipId)
 
-        val propertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
-        model.addAttribute("reviewMode", true)
-        model.addAttribute("title", "propertyCompliance.title")
-        model.addAttribute("backUrl", propertyComplianceUrl)
-        model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
-        return "forms/fireSafetyDeclarationForm"
+        return if (propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId) == null) {
+            "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}"
+        } else {
+            val propertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+            model.addAttribute("reviewMode", true)
+            model.addAttribute("title", "propertyCompliance.title")
+            model.addAttribute("backUrl", propertyComplianceUrl)
+            model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
+            "forms/fireSafetyDeclarationForm"
+        }
     }
 
     private fun throwErrorIfUserIsNotAuthorized(
@@ -305,15 +308,6 @@ class PropertyComplianceController(
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "User $baseUserId is not authorized to provide compliance for property ownership $propertyOwnershipId",
-            )
-        }
-    }
-
-    private fun throwErrorIfPropertyComplianceNotFound(propertyOwnershipId: Long) {
-        if (propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId) == null) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Property compliance not found for property ownership $propertyOwnershipId",
             )
         }
     }
