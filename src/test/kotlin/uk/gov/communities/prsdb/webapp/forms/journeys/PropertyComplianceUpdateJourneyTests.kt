@@ -112,6 +112,7 @@ class PropertyComplianceUpdateJourneyTests {
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
                 JourneyDataBuilder()
+                    .withExistingCompliance()
                     .withNewGasSafetyCertStatus(null)
                     .build(),
             )
@@ -176,6 +177,7 @@ class PropertyComplianceUpdateJourneyTests {
             expectedUpdateModel.gasSafetyCertUpdate!!
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
                 JourneyDataBuilder()
+                    .withExistingCompliance()
                     .withNewGasSafetyCertStatus(true)
                     .withGasSafetyIssueDate(expectedUpdateModel.gasSafetyCertUpdate.issueDate!!)
                     .withGasSafeEngineerNum(expectedUpdateModel.gasSafetyCertUpdate.engineerNum!!)
@@ -231,6 +233,7 @@ class PropertyComplianceUpdateJourneyTests {
             expectedUpdateModel.gasSafetyCertUpdate!!
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
                 JourneyDataBuilder()
+                    .withExistingCompliance()
                     .withNewGasSafetyCertStatus(false)
                     .withGasSafetyCertExemptionReason(expectedUpdateModel.gasSafetyCertUpdate.exemptionReason!!)
                     .withGasSafetyCertExemptionOtherReason(expectedUpdateModel.gasSafetyCertUpdate.exemptionOtherReason!!)

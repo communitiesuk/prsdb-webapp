@@ -523,6 +523,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withExistingCompliance(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.CheckComplianceExists.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withNewGasSafetyCertStatus(hasNewGasSafetyCert: Boolean?): JourneyDataBuilder {
         if (hasNewGasSafetyCert != null) {
             journeyData[PropertyComplianceStepId.UpdateGasSafety.urlPathSegment] =
