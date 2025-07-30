@@ -1,0 +1,39 @@
+<!--/*@thymesVar id="cookiesUrl" type="java.lang.String"*/-->
+<div  th:fragment="cookieBanner"  class="govuk-cookie-banner" data-nosnippet role="region" th:attrappend="aria-label=#{cookieBanner.heading(#{serviceName})}" hidden>
+
+    <div id="cookie-banner-message" class="govuk-cookie-banner__message govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h2 class="govuk-cookie-banner__heading govuk-heading-m" th:text="#{cookieBanner.heading(#{serviceName})}">cookieBanner.heading(serviceName)</h2>
+                <div class="govuk-cookie-banner__content">
+                    <p class="govuk-body" th:text="#{cookieBanner.body.one}">cookieBanner.body.one</p>
+                    <p class="govuk-body" th:text="#{cookieBanner.body.two}">cookieBanner.body.two</p>
+                </div>
+            </div>
+        </div>
+        <div class="govuk-button-group">
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(buttonText=#{cookieBanner.acceptButton}, id='accept-cookies-button')}">cookieBanner.acceptButton</button>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(buttonText=#{cookieBanner.rejectButton}, id='reject-cookies-button')}">cookieBanner.rejectButton</button>
+            <a class="govuk-link" th:text="#{cookieBanner.viewCookiesLink}" th:href="@{${cookiesUrl}}">cookieBanner.viewCookiesLink</a>
+        </div>
+    </div>
+
+    <div id="cookie-banner-confirmation-message" class="govuk-cookie-banner__message govuk-width-container" role="alert" tabindex="-1" hidden>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-cookie-banner__content">
+                    <p class="govuk-body">
+                        <span id="cookies-accepted-text" th:text="#{cookieBanner.confirmation.accepted.beforeLink}" hidden>cookieBanner.confirmation.accepted.beforeLink</span>
+                        <span id="cookies-rejected-text" th:text="#{cookieBanner.confirmation.rejected.beforeLink}" hidden>cookieBanner.confirmation.rejected.beforeLink</span>
+                        <a class="govuk-link" th:text="#{cookieBanner.confirmation.link}" th:href="@{${cookiesUrl}}">cookieBanner.confirmation.link</a>
+                        <span th:text="#{cookieBanner.confirmation.afterLink}">cookieBanner.confirmation.afterLink</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="govuk-button-group">
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(buttonText=#{cookieBanner.confirmation.hideButton}, id='hide-cookies-confirmation-button')}">cookieBanner.confirmation.hideButton</button>
+        </div>
+    </div>
+
+</div>

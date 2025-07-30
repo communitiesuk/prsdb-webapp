@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -423,15 +423,43 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withNewOccupants(
+        numberOfHouseholds: Int = 2,
+        numberOfPeople: Int = 4,
+    ): JourneyDataBuilder {
+        withIsOccupiedUpdate(true)
+        withIsOccupiedNumberOfHouseholdsUpdate(numberOfHouseholds)
+        withIsOccupiedNumberOfPeopleUpdate(numberOfPeople)
+        return this
+    }
+
     fun withIsOccupiedUpdate(isOccupied: Boolean): JourneyDataBuilder {
         journeyData[UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment] =
             mutableMapOf("occupied" to isOccupied)
         return this
     }
 
+    fun withIsOccupiedNumberOfHouseholdsUpdate(households: Int = 1): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds.urlPathSegment] =
+            mutableMapOf("numberOfHouseholds" to households)
+        return this
+    }
+
+    fun withIsOccupiedNumberOfPeopleUpdate(people: Int = 1): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople.urlPathSegment] =
+            mutableMapOf("numberOfPeople" to people)
+        return this
+    }
+
     fun withNumberOfHouseholdsUpdate(numberOfHouseholds: Int): JourneyDataBuilder {
         journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment] =
             mutableMapOf("numberOfHouseholds" to numberOfHouseholds)
+        return this
+    }
+
+    fun withNumberOfHouseholdsPeopleUpdate(numberOfPeople: Int): JourneyDataBuilder {
+        journeyData[UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople.urlPathSegment] =
+            mutableMapOf("numberOfPeople" to numberOfPeople)
         return this
     }
 
@@ -608,6 +636,11 @@ class JourneyDataBuilder(
 
     fun withEicrUploadConfirmation(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment] = emptyMap<String, Any>()
+        return this
+    }
+
+    fun withEicrOutdatedConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.EicrOutdated.urlPathSegment] = emptyMap<String, Any>()
         return this
     }
 

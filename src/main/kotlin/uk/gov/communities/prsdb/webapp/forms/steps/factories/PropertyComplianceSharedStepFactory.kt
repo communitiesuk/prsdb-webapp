@@ -192,7 +192,7 @@ class PropertyComplianceSharedStepFactory(
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
-    fun createGasSafetyExemptionReasonStep(saveAfterSubmit: Boolean = true) =
+    fun createGasSafetyExemptionReasonStep() =
         Step(
             id = PropertyComplianceStepId.GasSafetyExemptionReason,
             page =
@@ -223,7 +223,7 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { filteredJourneyData, _ -> gasSafetyExemptionReasonStepNextAction(filteredJourneyData) },
-            saveAfterSubmit = saveAfterSubmit,
+            saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
     fun createGasSafetyExemptionOtherReasonStep() =

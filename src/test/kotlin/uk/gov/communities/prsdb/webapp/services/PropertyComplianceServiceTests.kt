@@ -142,7 +142,7 @@ class PropertyComplianceServiceTests {
             .thenReturn(propertyCompliance)
 
         // Act
-        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel)
+        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
 
         // Assert
         assertEquals(updateModel.gasSafetyCertUpdate?.s3Key, propertyCompliance.gasSafetyCertS3Key)
@@ -182,13 +182,58 @@ class PropertyComplianceServiceTests {
             .thenReturn(propertyCompliance)
 
         // Act
-        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel)
+        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
 
         // Assert
         assertEquals(originalEicrS3Key, propertyCompliance.eicrS3Key)
         assertEquals(originalEicrIssueDate, propertyCompliance.eicrIssueDate)
         assertEquals(originalEicrExemptionReason, propertyCompliance.eicrExemptionReason)
         assertEquals(originalEicrExemptionOtherReason, propertyCompliance.eicrExemptionOtherReason)
+    }
+
+    @Test
+    fun `when checkUpdateIsValid throws an exception, no update occurs`() {
+        // Arrange
+        val propertyCompliance =
+            MockPropertyComplianceData.createPropertyCompliance(
+                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertEngineerNum = "1234567",
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+            )
+
+        // Capture original gas safety cert values
+        val originalGasSafetyCertS3Key = propertyCompliance.gasSafetyCertS3Key
+        val originalGasSafetyCertIssueDate = propertyCompliance.gasSafetyCertIssueDate
+        val originalGasSafetyCertEngineerNum = propertyCompliance.gasSafetyCertEngineerNum
+        val originalGasSafetyCertExemptionReason = propertyCompliance.gasSafetyCertExemptionReason
+        val originalGasSafetyCertExemptionOtherReason = propertyCompliance.gasSafetyCertExemptionOtherReason
+
+        val updateModel =
+            PropertyComplianceUpdateModel(
+                gasSafetyCertUpdate =
+                    GasSafetyCertUpdateModel(
+                        exemptionReason = GasSafetyExemptionReason.OTHER,
+                        exemptionOtherReason = "Other reason",
+                    ),
+            )
+
+        // Act
+        try {
+            propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {
+                throw Exception("Validation failed")
+            }
+        } catch (_: Exception) {
+            // Expected exception, do nothing
+        }
+
+        // Assert
+        assertEquals(originalGasSafetyCertS3Key, propertyCompliance.gasSafetyCertS3Key)
+        assertEquals(originalGasSafetyCertIssueDate, propertyCompliance.gasSafetyCertIssueDate)
+        assertEquals(originalGasSafetyCertEngineerNum, propertyCompliance.gasSafetyCertEngineerNum)
+        assertEquals(originalGasSafetyCertExemptionReason, propertyCompliance.gasSafetyCertExemptionReason)
+        assertEquals(originalGasSafetyCertExemptionOtherReason, propertyCompliance.gasSafetyCertExemptionOtherReason)
     }
 
     @Test
