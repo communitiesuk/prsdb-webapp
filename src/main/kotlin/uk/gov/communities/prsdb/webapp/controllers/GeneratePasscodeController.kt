@@ -27,11 +27,12 @@ class GeneratePasscodeController(
         principal: Principal,
     ): String {
         val localAuthorityUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return try {
             val passcode = passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong())
             model.addAttribute("passcode", passcode)
-            model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+
             model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
             "generatePasscode"
         } catch (e: PasscodeLimitExceededException) {
@@ -45,6 +46,7 @@ class GeneratePasscodeController(
         principal: Principal,
     ): String {
         val localAuthorityUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return try {
             val passcode = passcodeService.generateAndStorePasscode(localAuthorityUser.localAuthority.id.toLong())

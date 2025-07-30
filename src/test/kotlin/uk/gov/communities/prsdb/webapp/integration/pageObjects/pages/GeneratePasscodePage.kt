@@ -15,21 +15,24 @@ class GeneratePasscodePage(
     val confirmationBanner = ConfirmationBanner(page)
     val heading = Heading(page.locator("main h1"))
     val confirmationPanelHeading = Heading(page.locator(".govuk-panel--confirmation .govuk-panel__title"))
-    val instructionsText = page.locator("section p.govuk-body")
     val generateAnotherButton = Button.byText(page, "Generate another passcode")
     val returnToDashboardLink = Link.byText(page, "Return to dashboard", selectorOrLocator = "a")
+    val banner = GeneratePasscodeBanner(page)
 
-    fun getPasscodeFromBanner(): String {
-        return page.locator(".govuk-panel--confirmation strong").textContent() ?: ""
-    }
-
-    fun clickGenerateAnother(): GeneratePasscodePage {
+    fun clickGenerateAnother() {
         generateAnotherButton.clickAndWait()
-        return createValidPage(page, GeneratePasscodePage::class)
     }
 
-    fun clickReturnToDashboard(): LocalAuthorityDashboardPage {
+    fun clickReturnToDashboard() {
         returnToDashboardLink.clickAndWait()
-        return createValidPage(page, LocalAuthorityDashboardPage::class)
+    }
+
+    class GeneratePasscodeBanner(
+        page: Page,
+    ) : ConfirmationBanner(page) {
+        val passcode = page.locator(".govuk-panel--confirmation strong")
+        val instructions = page.locator(".govuk-panel--confirmation p.govuk-body")
+
+        fun getPasscode() = passcode.textContent() ?: ""
     }
 }

@@ -22,8 +22,7 @@ class LocalAuthorityDashboardPage(
     val rentersRightsBillLink = Link.byText(page, "Renters' Rights Bill")
     val aboutPilotLink = Link.byText(page, "About this pilot")
 
-    fun clickGeneratePasscode(): GeneratePasscodePage {
+    fun clickGeneratePasscode() {
         generatePasscodeButton.clickAndWait()
-        return createValidPage(page, GeneratePasscodePage::class)
     }
 }
