@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 
+// TODO PRSD-1313: Remove this example controller once the EpcRegisterClient is used in a real controller
 @PrsdbController
 @RequestMapping("example/epc")
 class ExampleEpcController(

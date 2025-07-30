@@ -893,6 +893,7 @@ class PropertyComplianceSharedStepFactory(
             Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null)
         }
 
+    // TODO PRSD-1313: Find cases where this has been missed, e.g. this property's epc could not be found
     private fun getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
         submitButtonText: String,
         isCheckingOrUpdatingAnswers: Boolean,
