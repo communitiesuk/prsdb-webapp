@@ -7,6 +7,7 @@ enum class PropertyComplianceStepId(
     override val groupIdentifier: PropertyComplianceGroupIdentifier,
     override val isCheckYourAnswersStepId: Boolean = false,
 ) : GroupedUpdateStepId<PropertyComplianceGroupIdentifier> {
+    CheckComplianceExists("check-property-exists", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafety("gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
     UpdateGasSafety("update-gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyIssueDate("gas-safety-certificate-issue-date", PropertyComplianceGroupIdentifier.GasSafety),

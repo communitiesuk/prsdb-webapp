@@ -181,5 +181,6 @@ class PropertyComplianceOriginalJourneyData private constructor(
     val asJourneyData: JourneyData =
         originalGasSafetyJourneyData +
             originalEicrJourneyData +
-            originalEpcJourneyData
+            originalEpcJourneyData +
+            (PropertyComplianceStepId.CheckComplianceExists toPageData { NoInputFormModel() })
 }

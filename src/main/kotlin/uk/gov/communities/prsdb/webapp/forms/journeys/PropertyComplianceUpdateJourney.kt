@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEicrAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.UnvisitablePage
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
@@ -99,6 +100,7 @@ class PropertyComplianceUpdateJourney(
         listOf(
             JourneySection(
                 listOf(
+                    JourneyTask.withOneStep(checkComplianceExistsStep),
                     gasSafetyTask,
                     eicrTask,
                     epcTask,
@@ -188,6 +190,15 @@ class PropertyComplianceUpdateJourney(
                     propertyComplianceSharedStepFactory.createLowEnergyRatingStep(),
                     epcCheckYourAnswersStep,
                 ),
+            )
+
+    private val checkComplianceExistsStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.CheckComplianceExists,
+                page = UnvisitablePage(errorMessage = "CheckComplianceExists should never be reached."),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.UpdateGasSafety, null) },
+                saveAfterSubmit = false,
             )
 
     private val updateGasSafetyStep
@@ -484,6 +495,6 @@ class PropertyComplianceUpdateJourney(
         }
 
     companion object {
-        val initialStepId = PropertyComplianceStepId.UpdateGasSafety
+        val initialStepId = PropertyComplianceStepId.CheckComplianceExists
     }
 }
