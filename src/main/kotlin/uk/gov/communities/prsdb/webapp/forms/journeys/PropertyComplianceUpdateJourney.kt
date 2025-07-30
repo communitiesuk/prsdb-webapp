@@ -80,9 +80,9 @@ class PropertyComplianceUpdateJourney(
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
     override fun createOriginalJourneyData(): JourneyData =
-        PropertyComplianceOriginalJourneyData.fromPropertyCompliance(
-            propertyComplianceService.getComplianceForProperty(propertyOwnershipId),
-        )
+        propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)?.let {
+            PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it)
+        } ?: emptyMap()
 
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(

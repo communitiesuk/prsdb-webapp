@@ -58,7 +58,9 @@ class PropertyComplianceUpdateJourneyTests {
         fun `submit redirects to IssueDate if hasNewCertificate is true`() {
             // Arrange
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             // Act
             val redirectModelAndView =
@@ -79,7 +81,9 @@ class PropertyComplianceUpdateJourneyTests {
         fun `submit redirects to ExemptionReason if hasNewCertificate is false`() {
             // Arrange
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             // Act
             val redirectModelAndView =
@@ -103,7 +107,7 @@ class PropertyComplianceUpdateJourneyTests {
                 MockPropertyComplianceData.createPropertyCompliance()
 
             whenever(
-                mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId),
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
             ).thenReturn(missingGasSafetyPropertyCompliance)
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
@@ -130,7 +134,9 @@ class PropertyComplianceUpdateJourneyTests {
         fun `submitting with a missing update value does not reach the gas safety missing step`() {
             // Arrange
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             // Act
             val redirectModelAndView =
@@ -179,7 +185,7 @@ class PropertyComplianceUpdateJourneyTests {
             )
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(
+            whenever(mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)).thenReturn(
                 originalPropertyCompliance,
             )
 
@@ -233,7 +239,9 @@ class PropertyComplianceUpdateJourneyTests {
             )
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             // Act
             val redirectModelAndView =
@@ -279,7 +287,9 @@ class PropertyComplianceUpdateJourneyTests {
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             // Act
             val redirectModelAndView = completeStep(PropertyComplianceStepId.UpdateEpc, mapOf("hasNewCertificate" to true))
@@ -303,7 +313,9 @@ class PropertyComplianceUpdateJourneyTests {
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             val automatchedEpcDetails = MockEpcData.createEpcDataModel()
             whenever(mockEpcLookupService.getEpcByUprn(uprn)).thenReturn(automatchedEpcDetails)
@@ -330,7 +342,9 @@ class PropertyComplianceUpdateJourneyTests {
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             whenever(mockEpcLookupService.getEpcByUprn(uprn)).thenReturn(null)
 
@@ -345,7 +359,9 @@ class PropertyComplianceUpdateJourneyTests {
         fun `submit redirects to EpcExemptionReason if hasNewCertificate is false`() {
             // Arrange
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyOwnershipId)).thenReturn(originalPropertyCompliance)
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
 
             // Act
             val redirectModelAndView = completeStep(PropertyComplianceStepId.UpdateEpc, mapOf("hasNewCertificate" to false))
