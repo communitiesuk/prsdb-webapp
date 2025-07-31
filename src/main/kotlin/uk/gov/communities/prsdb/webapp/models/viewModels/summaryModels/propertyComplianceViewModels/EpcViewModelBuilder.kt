@@ -60,7 +60,7 @@ class EpcViewModelBuilder {
                             actionLink =
                                 PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.MeesExemptionCheck,
+                                    PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
                                 ),
                             withActionLink = withActionLinks,
                         )

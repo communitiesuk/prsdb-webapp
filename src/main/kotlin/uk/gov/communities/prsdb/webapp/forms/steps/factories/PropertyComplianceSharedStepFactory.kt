@@ -85,6 +85,24 @@ class PropertyComplianceSharedStepFactory(
     val lowEnergyRatingStepId = getLowEnergyRatingStepIdFor(stepGroupId)
     val updateEpcCheckYourAnswersStep = getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId)
 
+    val skippedStepIds =
+        when (stepGroupId) {
+            PropertyComplianceGroupIdentifier.Mees ->
+                listOf(
+                    PropertyComplianceStepId.UpdateEpc,
+                    epcNotAutomatchedStepId,
+                    checkAutoMatchedEpcStepId,
+                    checkMatchedEpcStepId,
+                    epcLookupStepId,
+                    epcNotFoundStepId,
+                    epcExpiryCheckStepId,
+                    epcExpiredStepId,
+                    epcExemptionReasonStepId,
+                    epcExemptionConfirmationStepId,
+                )
+            else -> emptyList()
+        }
+
     private val nextActionAfterGasSafetyTask =
         if (isUpdateJourney) {
             PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers
@@ -1077,7 +1095,7 @@ class PropertyComplianceSharedStepFactory(
         val submittedCertificateNumber =
             journeyDataService
                 .getJourneyDataFromSession()
-                .getEpcLookupCertificateNumber()
+                .getEpcLookupCertificateNumber(epcLookupStepId)
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }

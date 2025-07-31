@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
@@ -72,6 +73,7 @@ class PropertyComplianceUpdateJourney(
     ) {
     init {
         initializeOriginalJourneyDataIfNotInitialized()
+        initializeJourneyDataForSkippedStepsIfNotInitialized()
     }
 
     override val stepRouter = GroupedUpdateStepRouter(this)
@@ -80,20 +82,47 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
+    private val propertyComplianceSharedStepFactory
+        get() =
+            PropertyComplianceSharedStepFactory(
+                defaultSaveAfterSubmit = false,
+                isUpdateJourney = true,
+                isCheckingOrUpdatingAnswers = true,
+                journeyDataService = journeyDataService,
+                epcCertificateUrlProvider = epcCertificateUrlProvider,
+                stepName = stepName,
+            )
+
     override fun createOriginalJourneyData(): JourneyData =
         propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)?.let {
-            PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it)
+            PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it, propertyComplianceSharedStepFactory)
         } ?: emptyMap()
 
-    private val propertyComplianceSharedStepFactory =
-        PropertyComplianceSharedStepFactory(
-            defaultSaveAfterSubmit = false,
-            isUpdateJourney = true,
-            isCheckingOrUpdatingAnswers = true,
-            journeyDataService = journeyDataService,
-            epcCertificateUrlProvider = epcCertificateUrlProvider,
-            stepName = stepName,
-        )
+    // TODO PRSD-1392 - commonise this and the equivalent in PropertyDetailsUpdateJourney
+    private fun initializeJourneyDataForSkippedStepsIfNotInitialized() {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey) ?: return
+
+        val journeyDataWithSkippedStepData =
+            journeyData +
+                propertyComplianceSharedStepFactory.skippedStepIds.mapNotNull {
+                    getOriginalDataPairForStepIfNotInitialized(it, originalJourneyData, journeyData)
+                }
+        journeyDataService.setJourneyDataInSession(journeyDataWithSkippedStepData)
+    }
+
+    private fun getOriginalDataPairForStepIfNotInitialized(
+        stepId: PropertyComplianceStepId,
+        originalJourneyData: JourneyData,
+        journeyData: JourneyData,
+    ): Pair<String, Any?>? {
+        val stepUrlPathSegment = stepId.urlPathSegment
+        return if (!journeyData.containsKey(stepUrlPathSegment)) {
+            (stepUrlPathSegment to originalJourneyData[stepUrlPathSegment])
+        } else {
+            null
+        }
+    }
 
     override val sections: List<JourneySection<PropertyComplianceStepId>> =
         listOf(
@@ -367,14 +396,14 @@ class PropertyComplianceUpdateJourney(
     private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
         if (filteredJourneyData.getHasNewEPC()!!) {
             if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
-                Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
+                Pair(propertyComplianceSharedStepFactory.checkAutoMatchedEpcStepId, null)
             } else {
-                Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
+                Pair(propertyComplianceSharedStepFactory.epcNotAutomatchedStepId, null)
             }
         } else if (filteredJourneyData.getStillHasNoEpcOrExemption() ?: false) {
-            Pair(PropertyComplianceStepId.EpcNotFound, null)
+            Pair(propertyComplianceSharedStepFactory.epcNotFoundStepId, null)
         } else {
-            Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+            Pair(propertyComplianceSharedStepFactory.epcExemptionReasonStepId, null)
         }
 
     private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
