@@ -292,6 +292,19 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
+    fun `deletePropertyCompliances deletes all the given PropertyCompliances`() {
+        val propertyCompliances =
+            listOf(
+                MockPropertyComplianceData.createPropertyCompliance(),
+                MockPropertyComplianceData.createPropertyCompliance(),
+            )
+
+        propertyComplianceService.deletePropertyCompliances(propertyCompliances)
+
+        verify(mockPropertyComplianceRepository).deleteAll(propertyCompliances)
+    }
+
+    @Test
     fun `deletePropertyComplianceIfExists deletes the compliance when it exists`() {
         val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
         val propertyOwnershipId = propertyCompliance.propertyOwnership.id

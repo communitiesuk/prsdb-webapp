@@ -18,4 +18,8 @@ class FormContextService(
     fun deleteFormContext(formContext: FormContext) {
         formContextRepository.delete(formContext)
     }
+
+    fun deleteFormContexts(formContexts: List<FormContext>) {
+        formContextRepository.deleteAll(formContexts)
+    }
 }

@@ -12,12 +12,14 @@ class PropertyDeregistrationService(
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
+    private val formContextService: FormContextService,
     private val session: HttpSession,
 ) {
     @Transactional
     fun deregisterProperty(propertyOwnershipId: Long) {
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
             propertyComplianceService.deletePropertyComplianceIfExists(it.id)
+            it.incompleteComplianceForm?.let { incompleteComplianceForm -> formContextService.deleteFormContext(incompleteComplianceForm) }
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
             if (it.license != null) licenseService.deleteLicense(it.license!!)
@@ -28,12 +30,14 @@ class PropertyDeregistrationService(
     fun deregisterProperties(propertyOwnerships: List<PropertyOwnership>) {
         val properties = propertyOwnerships.map { it.property }
         val licenses = propertyOwnerships.mapNotNull { it.license }
-        val compliances = propertyComplianceService.getPropertyCompliancesForPropertyOwnerships(propertyOwnerships)
+        val incompleteComplianceForms = propertyOwnerships.mapNotNull { it.incompleteComplianceForm }
+        val completeCompliances = propertyComplianceService.getPropertyCompliancesForPropertyOwnerships(propertyOwnerships)
 
-        if (compliances.isNotEmpty()) propertyComplianceService.deletePropertyCompliances(compliances)
+        if (completeCompliances.isNotEmpty()) propertyComplianceService.deletePropertyCompliances(completeCompliances)
         propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
         propertyService.deleteProperties(properties)
         licenseService.deleteLicenses(licenses)
+        formContextService.deleteFormContexts(incompleteComplianceForms)
     }
 
     fun addDeregisteredPropertyAndOwnershipIdsToSession(
