@@ -9,8 +9,6 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -19,10 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
@@ -76,7 +71,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBullet
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.time.format.DateTimeFormatter
@@ -86,9 +80,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
-    @MockitoBean
-    private lateinit var fileUploader: FileUploader
-
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
@@ -128,19 +119,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         gasSafeEngineerNumPage.submitEngineerNum("1234567")
         val gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyCompliance::class, urlArguments)
 
-        // Gas Safety Cert. Upload page
-        whenever(
-            fileUploader.uploadFile(
-                eq(
-                    PropertyComplianceJourneyHelper.getCertFilename(
-                        PROPERTY_OWNERSHIP_ID,
-                        PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
-                        "validFile.png",
-                    ),
-                ),
-                any(),
-            ),
-        ).thenReturn(FileUpload())
+        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
@@ -157,19 +136,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         eicrIssueDatePage.submitDate(currentDate)
         val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
 
-        // EICR Upload page
-        whenever(
-            fileUploader.uploadFile(
-                eq(
-                    PropertyComplianceJourneyHelper.getCertFilename(
-                        PROPERTY_OWNERSHIP_ID,
-                        PropertyComplianceStepId.EicrUpload.urlPathSegment,
-                        "validFile.png",
-                    ),
-                ),
-                any(),
-            ),
-        ).thenReturn(FileUpload())
+        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
