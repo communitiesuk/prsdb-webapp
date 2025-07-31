@@ -27,12 +27,16 @@ import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
+import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
+import uk.gov.communities.prsdb.webapp.constants.REVIEW_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
@@ -278,6 +282,26 @@ class PropertyComplianceController(
             .completeStep(formData, principal, checkingAnswersForStep)
     }
 
+    @GetMapping("/$REVIEW_PATH_SEGMENT/$KEEP_PROPERTY_SAFE_PATH_SEGMENT")
+    fun getKeepPropertySafeReview(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        return if (propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId) == null) {
+            "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}"
+        } else {
+            val propertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+            model.addAttribute("backUrl", propertyComplianceUrl)
+            model.addAttribute("housingHealthAndSafetyRatingSystemUrl", HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL)
+            model.addAttribute("homesAct2018Url", HOMES_ACT_2018_URL)
+            model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
+            "forms/keepPropertySafeReview"
+        }
+    }
+
     private fun throwErrorIfUserIsNotAuthorized(
         baseUserId: String,
         propertyOwnershipId: Long,
@@ -386,6 +410,11 @@ class PropertyComplianceController(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
         ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
+
+        fun getReviewPropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            stepId: PropertyComplianceStepId,
+        ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/${stepId.urlPathSegment}"
 
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }
