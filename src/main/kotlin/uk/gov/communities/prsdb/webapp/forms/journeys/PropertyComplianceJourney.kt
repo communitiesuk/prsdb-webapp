@@ -486,6 +486,7 @@ class PropertyComplianceJourney(
                         journeyDataService,
                         epcCertificateUrlProvider,
                         unreachableStepRedirect,
+                        propertyComplianceSharedStepFactory,
                     ) { getPropertyAddress() },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
             )

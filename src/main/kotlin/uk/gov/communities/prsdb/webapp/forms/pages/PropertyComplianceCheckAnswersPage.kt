@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.cya.EicrSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.EpcSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.GasSafetySummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
@@ -17,6 +18,7 @@ class PropertyComplianceCheckAnswersPage(
     journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     missingAnswersRedirect: String,
+    stepFactory: PropertyComplianceSharedStepFactory,
     private val propertyAddressProvider: () -> String,
 ) : CheckAnswersPage(
         content = emptyMap(),
@@ -41,6 +43,7 @@ class PropertyComplianceCheckAnswersPage(
         EpcSummaryRowsFactory(
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             epcStartingStep = PropertyComplianceStepId.EPC,
+            stepFactory = stepFactory,
         )
 
     override fun addPageContentToModel(

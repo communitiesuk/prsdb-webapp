@@ -1016,14 +1016,14 @@ class PropertyComplianceSharedStepFactory(
     }
 
     private fun checkAutoMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getAutoMatchedEpcIsCorrect()!!) {
+        if (filteredJourneyData.getAutoMatchedEpcIsCorrect(checkAutoMatchedEpcStepId)!!) {
             matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = true)
         } else {
             Pair(epcLookupStepId, null)
         }
 
     fun checkMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getMatchedEpcIsCorrect()!!) {
+        if (filteredJourneyData.getMatchedEpcIsCorrect(checkMatchedEpcStepId)!!) {
             matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = false)
         } else {
             // The user will be redirected to the lookup step in handleSubmitAndRedirect
@@ -1035,7 +1035,7 @@ class PropertyComplianceSharedStepFactory(
     private fun getAcceptedEpcDetailsFromSession(): EpcDataModel? =
         journeyDataService
             .getJourneyDataFromSession()
-            .getAcceptedEpcDetails()
+            .getAcceptedEpcDetails(checkAutoMatchedEpcStepId)
 
     private fun matchedEpcIsCorrectNextAction(
         filteredJourneyData: JourneyData,
@@ -1065,8 +1065,8 @@ class PropertyComplianceSharedStepFactory(
     }
 
     private fun epcExpiryCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getDidTenancyStartBeforeEpcExpiry() == true) {
-            if (filteredJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
+        if (filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(epcExpiryCheckStepId) == true) {
+            if (filteredJourneyData.getAcceptedEpcDetails(checkAutoMatchedEpcStepId)?.isEnergyRatingEOrBetter() == true) {
                 Pair(nextActionAfterEpcTask, null)
             } else {
                 Pair(meesExemptionCheckStepId, null)
@@ -1076,7 +1076,7 @@ class PropertyComplianceSharedStepFactory(
         }
 
     private fun meesExemptionCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getPropertyHasMeesExemption()!!) {
+        if (filteredJourneyData.getPropertyHasMeesExemption(meesExemptionCheckStepId)!!) {
             Pair(meesExemptionReasonStepId, null)
         } else {
             Pair(lowEnergyRatingStepId, null)

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages.cya
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
@@ -17,12 +18,13 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 class EpcSummaryRowsFactory(
     val epcStartingStep: PropertyComplianceStepId,
     val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    val stepFactory: PropertyComplianceSharedStepFactory,
 ) {
     fun createRows(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 add(getEpcStatusRow(filteredJourneyData))
-                if (filteredJourneyData.getAcceptedEpcDetails() != null) {
+                if (filteredJourneyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId) != null) {
                     addAll(getEpcDetailRows(filteredJourneyData))
                 } else {
                     add(getEpcExemptionRow(filteredJourneyData))
@@ -41,7 +43,7 @@ class EpcSummaryRowsFactory(
                 "forms.checkComplianceAnswers.epc.view"
             }
 
-        val certificateNumber = filteredJourneyData.getAcceptedEpcDetails()?.certificateNumber
+        val certificateNumber = filteredJourneyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)?.certificateNumber
         val valueUrl =
             if (certificateNumber != null) {
                 epcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)
@@ -60,7 +62,7 @@ class EpcSummaryRowsFactory(
     private fun getEpcDetailRows(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val epcDetails = filteredJourneyData.getAcceptedEpcDetails()!!
+                val epcDetails = filteredJourneyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)!!
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkComplianceAnswers.epc.expiryDate",
@@ -69,13 +71,13 @@ class EpcSummaryRowsFactory(
                     ),
                 )
 
-                val expiryCheckResult = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry()
+                val expiryCheckResult = filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(stepFactory.epcExpiryCheckStepId)
                 if (expiryCheckResult != null) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.epc.expiryCheck",
                             expiryCheckResult,
-                            PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment,
+                            stepFactory.epcExpiryCheckStepId.urlPathSegment,
                         ),
                     )
                 }
@@ -99,7 +101,7 @@ class EpcSummaryRowsFactory(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.epc.meesExemption",
-                            filteredJourneyData.getMeesExemptionReason() ?: "commonText.none",
+                            filteredJourneyData.getMeesExemptionReason(stepFactory.meesExemptionReasonStepId) ?: "commonText.none",
                             changeUrl,
                         ),
                     )
@@ -111,12 +113,12 @@ class EpcSummaryRowsFactory(
             if (filteredJourneyData.getHasCompletedEpcMissing() || filteredJourneyData.getHasCompletedEpcNotFound()) {
                 epcStartingStep.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcExemptionReason.urlPathSegment
+                stepFactory.epcExemptionReasonStepId.urlPathSegment
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.epc.exemption",
-            filteredJourneyData.getEpcExemptionReason() ?: "commonText.none",
+            filteredJourneyData.getEpcExemptionReason(stepFactory.epcExemptionReasonStepId) ?: "commonText.none",
             changeUrl,
         )
     }
