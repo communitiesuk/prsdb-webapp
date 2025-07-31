@@ -11,6 +11,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 
 @ExtendWith(MockitoExtension::class)
 class PropertyDeregistrationServiceTests {
@@ -24,13 +25,16 @@ class PropertyDeregistrationServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
+    private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @Mock
     private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
 
     @Test
-    fun `deregisterProperty deletes the property, license and property ownership`() {
+    fun `deregisterProperty deletes the property, license, compliance and property ownership`() {
         val licence = License()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(license = licence)
         val propertyOwnershipId = propertyOwnership.id
@@ -38,13 +42,14 @@ class PropertyDeregistrationServiceTests {
         // Act
         propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
+        verify(mockPropertyComplianceService).deletePropertyComplianceIfExists(propertyOwnership.id)
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
         verify(mockPropertyService).deleteProperty(propertyOwnership.property)
         verify(mockLicenceService).deleteLicense(licence)
     }
 
     @Test
-    fun `deregisterProperties deletes the property, license and property ownership for all properties`() {
+    fun `deregisterProperties deletes the property, license, compliance and property ownership for all properties`() {
         val license = License()
         val properties =
             listOf(
@@ -56,9 +61,20 @@ class PropertyDeregistrationServiceTests {
                 MockLandlordData.createPropertyOwnership(license = license, property = properties[0]),
                 MockLandlordData.createPropertyOwnership(property = properties[1]),
             )
+        val propertyCompliances =
+            listOf(
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnerships[0]),
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnerships[1]),
+            )
+
+        whenever(
+            mockPropertyComplianceService.getPropertyCompliancesForPropertyOwnerships(propertyOwnerships),
+        ).thenReturn(propertyCompliances)
 
         propertyDeregistrationService.deregisterProperties(propertyOwnerships)
 
+        verify(mockPropertyComplianceService).getPropertyCompliancesForPropertyOwnerships(propertyOwnerships)
+        verify(mockPropertyComplianceService).deletePropertyCompliances(propertyCompliances)
         verify(mockPropertyOwnershipService).deletePropertyOwnerships(propertyOwnerships)
         verify(mockPropertyService).deleteProperties(properties)
         verify(mockLicenceService).deleteLicenses(listOf(license))
