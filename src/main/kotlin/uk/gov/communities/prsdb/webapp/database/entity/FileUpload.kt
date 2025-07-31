@@ -21,10 +21,8 @@ class FileUpload() : ModifiableAuditableEntity() {
         private set
 
     var eTag: String? = null
-        private set
 
     var versionId: String? = null
-        private set
 
     lateinit var extension: String
         private set

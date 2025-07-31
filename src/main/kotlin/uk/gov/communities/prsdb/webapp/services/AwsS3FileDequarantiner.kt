@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 
 @Service
 class AwsS3FileDequarantiner(
@@ -13,17 +16,18 @@ class AwsS3FileDequarantiner(
     val quarantineBucketName: String,
     @Value("\${aws.s3.safeBucket}")
     val safeBucketName: String,
+    private val fileUploadRepository: FileUploadRepository,
 ) : FileDequarantiner {
-    override fun dequarantineFile(objectKey: String): Boolean {
+    override fun dequarantineFile(fileUpload: FileUpload): Boolean {
         val copyResponse =
             transferManager
                 .copy { builder ->
                     builder.copyObjectRequest { requestBuilder ->
                         requestBuilder
                             .sourceBucket(quarantineBucketName)
-                            .sourceKey(objectKey)
+                            .sourceKey(fileUpload.objectKey)
                             .destinationBucket(safeBucketName)
-                            .destinationKey(objectKey)
+                            .destinationKey(fileUpload.objectKey)
                     }
                 }.completionFuture()
                 .join()
@@ -33,10 +37,27 @@ class AwsS3FileDequarantiner(
             return false
         }
 
-        return deleteFile(objectKey)
+        if (!deleteFile(fileUpload.objectKey)) {
+            return false
+        }
+
+        fileUpload.status = FileUploadStatus.SCANNED
+        fileUpload.eTag = copyResponse.copyObjectResult().eTag()
+        fileUpload.versionId = copyResponse.versionId()
+        fileUploadRepository.save(fileUpload)
+
+        return true
     }
 
-    override fun deleteFile(objectKey: String): Boolean {
+    override fun deleteFile(fileUpload: FileUpload): Boolean =
+        if (deleteFile(fileUpload.objectKey)) {
+            fileUploadRepository.delete(fileUpload)
+            true
+        } else {
+            false
+        }
+
+    private fun deleteFile(objectKey: String): Boolean {
         val deleteResponse =
             s3Client
                 .deleteObject { request ->

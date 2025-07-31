@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo.FileCategory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
@@ -16,9 +15,9 @@ class VirusAlertSender(
 ) {
     fun sendAlerts(
         ownership: PropertyOwnership,
-        fileNameInfo: PropertyFileNameInfo,
+        category: FileCategory,
     ) {
-        val email = buildAlertEmail(ownership, fileNameInfo.fileCategory)
+        val email = buildAlertEmail(ownership, category)
         emailNotificationService.sendEmail(ownership.primaryLandlord.email, email)
         emailNotificationService.sendEmail(virusMonitoringEmail, email)
     }

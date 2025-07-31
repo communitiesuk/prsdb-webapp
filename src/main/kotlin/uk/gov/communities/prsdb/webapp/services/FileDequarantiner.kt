@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
-interface FileDequarantiner {
-    fun dequarantineFile(objectKey: String): Boolean
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 
-    fun deleteFile(objectKey: String): Boolean
+interface FileDequarantiner {
+    fun dequarantineFile(fileUpload: FileUpload): Boolean
+
+    fun deleteFile(fileUpload: FileUpload): Boolean
 }
