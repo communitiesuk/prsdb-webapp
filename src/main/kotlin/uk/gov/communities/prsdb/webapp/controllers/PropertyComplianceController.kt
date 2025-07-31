@@ -25,14 +25,17 @@ import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
+import uk.gov.communities.prsdb.webapp.constants.REVIEW_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
@@ -278,6 +281,25 @@ class PropertyComplianceController(
             .completeStep(formData, principal, checkingAnswersForStep)
     }
 
+    @GetMapping("/$REVIEW_PATH_SEGMENT/$FIRE_SAFETY_PATH_SEGMENT")
+    fun getFireSafetyReview(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        return if (propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId) == null) {
+            "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}"
+        } else {
+            val propertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+            model.addAttribute("backUrl", propertyComplianceUrl)
+            model.addAttribute("housesInMultipleOccupationUrl", HOUSES_IN_MULTIPLE_OCCUPATION_URL)
+            model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
+            "forms/fireSafetyReview"
+        }
+    }
+
     private fun throwErrorIfUserIsNotAuthorized(
         baseUserId: String,
         propertyOwnershipId: Long,
@@ -369,7 +391,7 @@ class PropertyComplianceController(
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_COMPLIANCE_PATH_SEGMENT/{propertyOwnershipId}"
 
-        const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
+        private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
 
@@ -386,6 +408,11 @@ class PropertyComplianceController(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
         ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
+
+        fun getReviewPropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            stepId: PropertyComplianceStepId,
+        ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/${stepId.urlPathSegment}"
 
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }

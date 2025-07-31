@@ -1,0 +1,13 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="housesInMultipleOccupationUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="propertyComplianceUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="page" th:replace="~{fragments/layout :: layout(#{propertyCompliance.title}, ~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="main" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#main/content()})}">
+            <th:block th:replace="~{fragments/content/fireSafetyContent :: fireSafetyContent(${housesInMultipleOccupationUrl})}"></th:block>
+            <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${propertyComplianceUrl}, #{forms.buttons.returnToPropertyRecord})}"></button>
+        </div>
+    </main>
+</html>

@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -17,8 +19,11 @@ class LandlordResponsibilitiesViewModelBuilder {
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
                         value = MessageKeyConverter.convert(propertyCompliance.hasFireSafetyDeclaration),
                         actionText = "forms.links.view",
-                        // TODO PRSD-1314 add Review Fire Safety Info url
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.FireSafetyDeclaration,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     addRow(
