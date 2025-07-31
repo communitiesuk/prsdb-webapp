@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
@@ -99,6 +100,16 @@ class PropertyComplianceSharedStepFactory(
                     epcExpiredStepId,
                     epcExemptionReasonStepId,
                     epcExemptionConfirmationStepId,
+                )
+            else -> emptyList()
+        }
+
+    val skippedNonStepJourneyDataKeys =
+        when (stepGroupId) {
+            PropertyComplianceGroupIdentifier.Mees ->
+                listOf(
+                    NonStepJourneyDataKey.LookedUpEpc.key,
+                    NonStepJourneyDataKey.AutoMatchedEpc.key,
                 )
             else -> emptyList()
         }

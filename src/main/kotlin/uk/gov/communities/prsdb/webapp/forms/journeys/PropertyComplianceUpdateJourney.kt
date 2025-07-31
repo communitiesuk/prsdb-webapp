@@ -107,7 +107,11 @@ class PropertyComplianceUpdateJourney(
             journeyData +
                 stepFactory.skippedStepIds.mapNotNull {
                     getOriginalDataPairForStepIfNotInitialized(it, originalJourneyData, journeyData)
+                } +
+                stepFactory.skippedNonStepJourneyDataKeys.mapNotNull { key ->
+                    originalJourneyData[key]?.let { value -> key to value }
                 }
+
         journeyDataService.setJourneyDataInSession(journeyDataWithSkippedStepData)
     }
 
@@ -217,6 +221,7 @@ class PropertyComplianceUpdateJourney(
                     stepFactory.createMeesExemptionConfirmationStep(),
                     stepFactory.createLowEnergyRatingStep(),
                     epcCheckYourAnswersStep,
+                    meesCheckYourAnswersStep,
                 ),
             )
 
@@ -381,6 +386,24 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
+                page =
+                    CheckUpdateEpcAnswersPage(
+                        journeyDataService,
+                        epcCertificateUrlProvider,
+                        unreachableStepRedirect,
+                        stepFactory,
+                    ),
+                saveAfterSubmit = false,
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect(filteredJourneyData)
+                },
+            )
+
+    // TODO PRSD-1392 - maybe commonise this with epcCheckYourAnswersStep in the stepFactory
+    private val meesCheckYourAnswersStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateMeesCheckYourAnswers,
                 page =
                     CheckUpdateEpcAnswersPage(
                         journeyDataService,
