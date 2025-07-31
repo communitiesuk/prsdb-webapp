@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
@@ -303,7 +302,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> gasSafetyStepNextAction(filteredJourneyData) },
             )
@@ -334,7 +333,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> eicrStepNextAction(filteredJourneyData) },
             )
@@ -370,7 +369,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.epc.radios.option.notRequired.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcStepHandleSubmitAndRedirect(filteredJourneyData) },
                 nextAction = { filteredJourneyData, _ -> epcStepNextAction(filteredJourneyData) },
@@ -401,7 +400,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ),
                 nextAction = { filteredJourneyData, _ -> fireSafetyDeclarationStepNextAction(filteredJourneyData) },
             )
