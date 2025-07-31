@@ -92,7 +92,7 @@ class EpcSummaryRowsFactory(
                     val exemptionReason = filteredJourneyData.getMeesExemptionReason()
                     val changeUrl =
                         if (filteredJourneyData.getHasCompletedEpcExpired()) {
-                            PropertyComplianceStepId.EPC.urlPathSegment
+                            epcStartingStep.urlPathSegment
                         } else if (exemptionReason == null) {
                             PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment
                         } else {
