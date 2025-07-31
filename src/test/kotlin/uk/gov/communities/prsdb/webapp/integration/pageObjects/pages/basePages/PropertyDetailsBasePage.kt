@@ -55,5 +55,6 @@ abstract class PropertyDetailsBasePage(
         val meesExemptionRow = getRow("MEES exemption")
         val fireSafetyRow = getRow("Followed fire safety responsibilities")
         val propertySafetyRow = getRow("Understood your responsibility to keep your property safe")
+        val responsibilityToTenantsRow = getRow("Understood your responsibilities to tenants")
     }
 }

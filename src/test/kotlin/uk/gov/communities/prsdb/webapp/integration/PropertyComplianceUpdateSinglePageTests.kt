@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.FireSafetyDeclarationPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.KeepPropertySafePagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.ResponsibilityToTenantsPagePropertyComplianceUpdate
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
@@ -41,6 +42,26 @@ class PropertyComplianceUpdateSinglePageTests : SinglePageTestWithSeedData("data
 
         // Go back to property record
         reviewPropertySafetyPage.returnToRecordButton.clickAndWait()
+        propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
+    }
+
+    @Test
+    fun `User can review their responsibility to tenants declaration`(page: Page) {
+        // Go to property compliance tab of property record
+        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+
+        // Review responsibility to tenants declaration
+        propertyDetailsPage.propertyComplianceSummaryList.responsibilityToTenantsRow.clickActionLinkAndWait()
+        val reviewResponsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyComplianceUpdate::class, urlArguments)
+        assertContains(
+            reviewResponsibilityToTenantsPage.heading.getText(),
+            "Make sure you follow your legal responsibilities to your tenants",
+        )
+
+        // Go back to property record
+        reviewResponsibilityToTenantsPage.returnToRecordButton.clickAndWait()
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
     }

@@ -68,8 +68,13 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
                             "commonText.yes",
-                            // TODO PRSD-1316 add Review Legal Responsibilities to Tenants Info url
-                            SummaryListRowActionViewModel("forms.links.view", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.view",
+                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                    propertyComplianceWithFireSafety.propertyOwnership.id,
+                                    PropertyComplianceStepId.ResponsibilityToTenants,
+                                ),
+                            ),
                         ),
                     ),
                 ),
