@@ -40,7 +40,7 @@ class EicrUploadCertificateFormModel : UploadCertificateFormModel() {
                 EicrUploadCertificateFormModel().apply {
                     this.name = it
                     // The following are not stored in the database, and are only required for validation
-                    this.isMetadataOnly = false
+                    this.isUserSubmittedMetadataOnly = false
                     this.contentType = validMimeTypes.first()
                 }
             }

@@ -79,11 +79,11 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 GasSafeEngineerNumFormModel::engineerNumber.name,
             )
 
-        fun JourneyData.getGasSafetyCertOriginalName() =
+        fun JourneyData.getGasSafetyCertUploadId() =
             JourneyDataHelper.getFieldStringValue(
                 this,
                 PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
-                GasSafetyUploadCertificateFormModel::name.name,
+                GasSafetyUploadCertificateFormModel::fileUploadId.name,
             )
 
         fun JourneyData.getHasGasSafetyCertExemption() =
@@ -139,11 +139,11 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             return issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
         }
 
-        fun JourneyData.getEicrOriginalName() =
+        fun JourneyData.getEicrUploadId() =
             JourneyDataHelper.getFieldStringValue(
                 this,
                 PropertyComplianceStepId.EicrUpload.urlPathSegment,
-                EicrUploadCertificateFormModel::name.name,
+                EicrUploadCertificateFormModel::fileUploadId.name,
             )
 
         fun JourneyData.getHasEicrExemption() =

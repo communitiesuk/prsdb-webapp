@@ -20,7 +20,7 @@ class FileUploadPage(
         val isMetadataSatisfied = super.isSatisfied(bindingResult)
         val uploadFormModel = bindingResult.target as UploadCertificateFormModel
 
-        if (isMetadataSatisfied && uploadFormModel.isMetadataOnly) {
+        if (isMetadataSatisfied && uploadFormModel.isUserSubmittedMetadataOnly) {
             throw IllegalStateException("Metadata only file submissions are only allowed for invalid files to elicit validation errors")
         }
 
