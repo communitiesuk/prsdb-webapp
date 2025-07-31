@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -25,8 +27,11 @@ class LandlordResponsibilitiesViewModelBuilder {
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
                         value = MessageKeyConverter.convert(propertyCompliance.hasKeepPropertySafeDeclaration),
                         actionText = "forms.links.view",
-                        // TODO PRSD-1315 add Review Keep Property Safe Info url
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.KeepPropertySafe,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     addRow(
