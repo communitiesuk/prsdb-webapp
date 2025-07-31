@@ -57,8 +57,13 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
                             "commonText.yes",
-                            // TODO PRSD-1315 add Review Keep Property Safe Info url
-                            SummaryListRowActionViewModel("forms.links.view", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.view",
+                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                    propertyComplianceWithFireSafety.propertyOwnership.id,
+                                    PropertyComplianceStepId.KeepPropertySafe,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",

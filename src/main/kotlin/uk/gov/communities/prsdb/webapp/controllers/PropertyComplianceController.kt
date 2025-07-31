@@ -28,7 +28,10 @@ import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
+import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.NRLA_UK_REGULATIONS_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_PATH_SEGMENT
@@ -297,6 +300,26 @@ class PropertyComplianceController(
             model.addAttribute("housesInMultipleOccupationUrl", HOUSES_IN_MULTIPLE_OCCUPATION_URL)
             model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
             "forms/fireSafetyReview"
+        }
+    }
+
+    @GetMapping("/$REVIEW_PATH_SEGMENT/$KEEP_PROPERTY_SAFE_PATH_SEGMENT")
+    fun getKeepPropertySafeReview(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        return if (propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId) == null) {
+            "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}"
+        } else {
+            val propertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+            model.addAttribute("backUrl", propertyComplianceUrl)
+            model.addAttribute("housingHealthAndSafetyRatingSystemUrl", HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL)
+            model.addAttribute("homesAct2018Url", HOMES_ACT_2018_URL)
+            model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
+            "forms/keepPropertySafeReview"
         }
     }
 

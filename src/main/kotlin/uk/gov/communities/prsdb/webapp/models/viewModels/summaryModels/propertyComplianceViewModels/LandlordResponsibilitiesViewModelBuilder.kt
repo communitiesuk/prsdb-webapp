@@ -30,8 +30,11 @@ class LandlordResponsibilitiesViewModelBuilder {
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
                         value = MessageKeyConverter.convert(propertyCompliance.hasKeepPropertySafeDeclaration),
                         actionText = "forms.links.view",
-                        // TODO PRSD-1315 add Review Keep Property Safe Info url
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.KeepPropertySafe,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     addRow(

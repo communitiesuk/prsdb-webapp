@@ -54,5 +54,6 @@ abstract class PropertyDetailsBasePage(
         val epcRow = getRow("Energy Performance Certificate (EPC)")
         val meesExemptionRow = getRow("MEES exemption")
         val fireSafetyRow = getRow("Followed fire safety responsibilities")
+        val propertySafetyRow = getRow("Understood your responsibility to keep your property safe")
     }
 }
