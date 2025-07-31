@@ -41,8 +41,11 @@ class LandlordResponsibilitiesViewModelBuilder {
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
                         value = MessageKeyConverter.convert(propertyCompliance.hasResponsibilityToTenantsDeclaration),
                         actionText = "forms.links.view",
-                        // TODO PRSD-1316 add Review Legal Responsibilities to Tenants Info url
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.ResponsibilityToTenants,
+                            ),
                         withActionLink = withActionLinks,
                     )
                 }.toList()
