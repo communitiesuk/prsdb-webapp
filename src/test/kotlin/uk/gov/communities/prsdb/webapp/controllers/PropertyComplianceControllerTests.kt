@@ -28,6 +28,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -874,11 +875,10 @@ class PropertyComplianceControllerTests(
 
             mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
                 status { isOk() }
-                view { name("forms/fireSafetyDeclarationForm") }
+                view { name("forms/fireSafetyReview") }
                 model {
-                    attribute("reviewMode", true)
-                    attribute("title", "propertyCompliance.title")
                     attribute("backUrl", expectedPropertyComplianceUrl)
+                    attribute("housesInMultipleOccupationUrl", HOUSES_IN_MULTIPLE_OCCUPATION_URL)
                     attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
                 }
             }
