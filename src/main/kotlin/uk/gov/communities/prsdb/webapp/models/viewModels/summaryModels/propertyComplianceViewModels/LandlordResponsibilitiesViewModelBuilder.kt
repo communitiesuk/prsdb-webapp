@@ -19,8 +19,11 @@ class LandlordResponsibilitiesViewModelBuilder {
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
                         value = MessageKeyConverter.convert(propertyCompliance.hasFireSafetyDeclaration),
                         actionText = "forms.links.view",
-                        // TODO PRSD-1314 add Review Fire Safety Info url
-                        actionLink = "#",
+                        actionLink =
+                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.FireSafetyDeclaration,
+                            ),
                         withActionLink = withActionLinks,
                     )
                     addRow(

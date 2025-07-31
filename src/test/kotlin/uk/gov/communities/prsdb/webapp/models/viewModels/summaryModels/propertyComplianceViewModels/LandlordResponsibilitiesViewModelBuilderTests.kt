@@ -39,15 +39,20 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                 arguments(
                     named(
                         "with fire safety declaration",
-                        PropertyComplianceBuilder.createWithInDateCertsAndSetFireSafetyDeclaration(true),
+                        propertyComplianceWithFireSafety,
                     ),
                     named("with action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
                             "commonText.yes",
-                            // TODO PRSD-1314 add Review Fire Safety Info url
-                            SummaryListRowActionViewModel("forms.links.view", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.view",
+                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                    propertyComplianceWithFireSafety.propertyOwnership.id,
+                                    PropertyComplianceStepId.FireSafetyDeclaration,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",

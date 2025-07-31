@@ -29,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
@@ -817,6 +818,72 @@ class PropertyComplianceControllerTests(
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
             verify(fileUploader).uploadFile(any(), any())
             verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
+        }
+    }
+
+    @Nested
+    inner class GetFireSafetyReview {
+        private val validPropertyComplianceFireSafetyReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                validPropertyOwnershipId,
+                PropertyComplianceStepId.FireSafetyDeclaration,
+            )
+        private val invalidPropertyComplianceFireSafetyReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                invalidPropertyOwnershipId,
+                PropertyComplianceStepId.FireSafetyDeclaration,
+            )
+
+        @Test
+        fun `getFireSafetyReview returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getFireSafetyReview returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFireSafetyReview returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFireSafetyReview redirects to the compliance record for a landlord user that owns the property without compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
+
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId))
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFireSafetyReview returns 200 for a landlord user that owns the property with compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(PropertyCompliance())
+
+            val expectedPropertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId)
+
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { isOk() }
+                view { name("forms/fireSafetyReview") }
+                model {
+                    attribute("backUrl", expectedPropertyComplianceUrl)
+                    attribute("housesInMultipleOccupationUrl", HOUSES_IN_MULTIPLE_OCCUPATION_URL)
+                    attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
+                }
+            }
         }
     }
 
