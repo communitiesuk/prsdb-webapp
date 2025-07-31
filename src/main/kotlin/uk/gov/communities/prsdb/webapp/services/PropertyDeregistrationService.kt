@@ -11,11 +11,13 @@ class PropertyDeregistrationService(
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyComplianceService: PropertyComplianceService,
     private val session: HttpSession,
 ) {
     @Transactional
     fun deregisterProperty(propertyOwnershipId: Long) {
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
+            propertyComplianceService.deletePropertyComplianceIfExists(it.id)
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
             if (it.license != null) licenseService.deleteLicense(it.license!!)
