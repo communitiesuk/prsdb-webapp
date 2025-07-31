@@ -28,8 +28,11 @@ import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -814,6 +817,75 @@ class PropertyComplianceControllerTests(
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
             verify(fileUploader).uploadFile(any(), any())
             verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
+        }
+    }
+
+    @Nested
+    inner class GetKeepPropertySafeReview {
+        private val validPropertyComplianceKeepPropertySafeReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                validPropertyOwnershipId,
+                PropertyComplianceStepId.KeepPropertySafe,
+            )
+        private val invalidPropertyComplianceKeepPropertySafeReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                invalidPropertyOwnershipId,
+                PropertyComplianceStepId.KeepPropertySafe,
+            )
+
+        @Test
+        fun `getKeepPropertySafeReview returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getKeepPropertySafeReview returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getKeepPropertySafeReview returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getKeepPropertySafeReview redirects to the compliance record for a landlord user that owns the property without compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
+
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId))
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getKeepPropertySafeReview returns 200 for a landlord user that owns the property with compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(
+                PropertyCompliance(),
+            )
+
+            val expectedPropertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId)
+
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { isOk() }
+                view { name("forms/keepPropertySafeReview") }
+                model {
+                    attribute("backUrl", expectedPropertyComplianceUrl)
+                    attribute("housingHealthAndSafetyRatingSystemUrl", HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL)
+                    attribute("homesAct2018Url", HOMES_ACT_2018_URL)
+                    attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
+                }
+            }
         }
     }
 }
