@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_U
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
@@ -439,7 +440,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(false)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(null)
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -462,7 +463,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(true)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(FileUpload())
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -779,7 +780,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadUpdateJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(false)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(null)
 
             mvc
                 .post(validPropertyComplianceUpdateFileUploadUrl) {
@@ -802,7 +803,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadUpdateJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(true)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(FileUpload())
 
             mvc
                 .post(validPropertyComplianceUpdateFileUploadUrl) {

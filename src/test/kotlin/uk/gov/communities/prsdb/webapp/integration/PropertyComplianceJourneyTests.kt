@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
@@ -139,7 +140,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
                 ),
                 any(),
             ),
-        ).thenReturn(true)
+        ).thenReturn(FileUpload())
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
@@ -168,7 +169,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
                 ),
                 any(),
             ),
-        ).thenReturn(true)
+        ).thenReturn(FileUpload())
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)
 

@@ -185,7 +185,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                     ),
                     any(),
                 ),
-            ).thenReturn(false)
+            ).thenReturn(null)
 
             val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.uploadCertificate("validFile.png")
@@ -321,7 +321,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                     ),
                     any(),
                 ),
-            ).thenReturn(false)
+            ).thenReturn(null)
 
             val eicrUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.uploadCertificate("validFile.png")

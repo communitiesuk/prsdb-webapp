@@ -5,8 +5,10 @@ import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -25,7 +27,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withGasSafetyCert(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertS3Key = "property_1_gas_safety_certificate.pdf"
+        propertyCompliance.gasSafetyFileUpload = FileUpload(FileUploadStatus.QUARANTINED, "property_1_gas_safety_certificate.pdf")
         propertyCompliance.gasSafetyCertIssueDate = issueDate
         propertyCompliance.gasSafetyCertEngineerNum = "1234567"
         return this
@@ -44,7 +46,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withEicr(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.eicrS3Key = "property_1_eicr.pdf"
+        propertyCompliance.eicrFileUpload = FileUpload(FileUploadStatus.QUARANTINED, "property_1_eicr.pdf")
         propertyCompliance.eicrIssueDate = issueDate
         return this
     }

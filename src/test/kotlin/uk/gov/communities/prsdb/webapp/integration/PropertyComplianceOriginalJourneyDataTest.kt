@@ -134,6 +134,7 @@ class PropertyComplianceOriginalJourneyDataTest {
                 propertyComplianceRepository = propertyComplianceRepository,
                 propertyOwnershipService = propertyOwnershipService,
                 session = session,
+                fileUploadRepository = mock(),
             )
 
         journeyDataServiceFactory = mock()
