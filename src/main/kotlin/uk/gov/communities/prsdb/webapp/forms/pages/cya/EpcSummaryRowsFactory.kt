@@ -89,9 +89,12 @@ class EpcSummaryRowsFactory(
                 )
 
                 if (epcDetails.energyRating.uppercase() !in EPC_ACCEPTABLE_RATING_RANGE) {
+                    val exemptionReason = filteredJourneyData.getMeesExemptionReason()
                     val changeUrl =
                         if (filteredJourneyData.getHasCompletedEpcExpired()) {
-                            PropertyComplianceStepId.EPC.urlPathSegment
+                            epcStartingStep.urlPathSegment
+                        } else if (exemptionReason == null) {
+                            PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment
                         } else {
                             PropertyComplianceStepId.MeesExemptionReason.urlPathSegment
                         }
@@ -99,7 +102,7 @@ class EpcSummaryRowsFactory(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.epc.meesExemption",
-                            filteredJourneyData.getMeesExemptionReason() ?: "commonText.none",
+                            exemptionReason ?: "commonText.none",
                             changeUrl,
                         ),
                     )

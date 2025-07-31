@@ -525,6 +525,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withMissingEicrExemption()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
+                .withMeesExemptionCheckStep(true)
                 .withMeesExemptionReasonStep(meesExemption)
                 .withFireSafetyDeclaration(true)
                 .build()
@@ -563,6 +564,114 @@ class PropertyComplianceCheckAnswersPageTests {
     }
 
     @Test
+    fun `the correct summary rows appear when the provided (in-date) EPC has a low rating and no MEES exemption`() {
+        // Arrange
+        val epcDetails = MockEpcData.createEpcDataModel(energyRating = "F")
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(false)
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(false)
+                .withMissingEicrExemption()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .withMeesExemptionCheckStep(false)
+                .withFireSafetyDeclaration(true)
+                .build()
+
+        val expectedEpcData =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.certificate",
+                    "forms.checkComplianceAnswers.epc.view",
+                    PropertyComplianceStepId.EPC.urlPathSegment,
+                    certificateUrl,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.expiryDate",
+                    epcDetails.expiryDate,
+                    null,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.energyRating",
+                    epcDetails.energyRating.uppercase(),
+                    null,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.meesExemption",
+                    "commonText.none",
+                    PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment,
+                ),
+            )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
+        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedEpcData, returnedEpcData)
+    }
+
+    @Test
+    fun `the correct summary rows appear when the provided (expired) EPC has a low rating and a MEES exemption`() {
+        // Arrange
+        val epcDetails = MockEpcData.createEpcDataModel(energyRating = "F", expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val meesExemption = MeesExemptionReason.HIGH_COST
+        val tenancyStartedBeforeExpiry = false
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(false)
+                .withMissingGasSafetyExemption()
+                .withEicrStatus(false)
+                .withMissingEicrExemption()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .withMeesExemptionCheckStep(true)
+                .withMeesExemptionReasonStep(meesExemption)
+                .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
+                .withEpcExpiredStep()
+                .withFireSafetyDeclaration(true)
+                .build()
+
+        val expectedEpcData =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.certificate",
+                    "forms.checkComplianceAnswers.epc.viewExpired",
+                    PropertyComplianceStepId.EPC.urlPathSegment,
+                    certificateUrl,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.expiryDate",
+                    epcDetails.expiryDate,
+                    null,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.expiryCheck",
+                    tenancyStartedBeforeExpiry,
+                    PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.energyRating",
+                    epcDetails.energyRating.uppercase(),
+                    null,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.meesExemption",
+                    meesExemption,
+                    PropertyComplianceStepId.EPC.urlPathSegment,
+                ),
+            )
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
+        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedEpcData, returnedEpcData)
+    }
+
+    @Test
     fun `the correct summary rows appear when the provided (expired) EPC has a low rating and no MEES exemption`() {
         // Arrange
         val epcDetails = MockEpcData.createEpcDataModel(energyRating = "F", expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
@@ -575,6 +684,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withMissingEicrExemption()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
+                .withMeesExemptionCheckStep(false)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
                 .withFireSafetyDeclaration(true)
