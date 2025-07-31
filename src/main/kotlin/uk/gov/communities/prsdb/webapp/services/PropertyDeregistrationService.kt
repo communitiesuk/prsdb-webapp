@@ -28,7 +28,9 @@ class PropertyDeregistrationService(
     fun deregisterProperties(propertyOwnerships: List<PropertyOwnership>) {
         val properties = propertyOwnerships.map { it.property }
         val licenses = propertyOwnerships.mapNotNull { it.license }
+        val compliances = propertyComplianceService.getPropertyCompliancesForPropertyOwnerships(propertyOwnerships)
 
+        if (compliances.isNotEmpty()) propertyComplianceService.deletePropertyCompliances(compliances)
         propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
         propertyService.deleteProperties(properties)
         licenseService.deleteLicenses(licenses)

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import java.time.LocalDate
@@ -70,6 +71,9 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
+    fun getPropertyCompliancesForPropertyOwnerships(propertyOwnerships: List<PropertyOwnership>): List<PropertyCompliance> =
+        propertyOwnerships.mapNotNull { propertyOwnership -> getComplianceForPropertyOrNull(propertyOwnership.id) }
+
     @Transactional
     fun updatePropertyCompliance(
         propertyOwnershipId: Long,
@@ -121,6 +125,10 @@ class PropertyComplianceService(
 
     fun deletePropertyCompliance(propertyCompliance: PropertyCompliance) {
         propertyComplianceRepository.delete(propertyCompliance)
+    }
+
+    fun deletePropertyCompliances(propertyCompliances: List<PropertyCompliance>) {
+        propertyComplianceRepository.deleteAll(propertyCompliances)
     }
 
     fun deletePropertyComplianceIfExists(propertyOwnershipId: Long) =
