@@ -36,12 +36,13 @@ class EicrUploadCertificateFormModel : UploadCertificateFormModel() {
 
     companion object {
         fun fromComplianceRecordOrNull(record: PropertyCompliance) =
-            record.eicrS3Key?.let {
+            record.eicrFileUpload?.let {
                 EicrUploadCertificateFormModel().apply {
-                    this.name = it
+                    this.name = it.objectKey ?: ""
                     // The following are not stored in the database, and are only required for validation
                     this.isUserSubmittedMetadataOnly = false
                     this.contentType = validMimeTypes.first()
+                    this.fileUploadId = it.id
                 }
             }
     }

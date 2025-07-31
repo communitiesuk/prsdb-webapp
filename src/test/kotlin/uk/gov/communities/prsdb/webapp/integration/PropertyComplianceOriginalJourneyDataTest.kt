@@ -132,6 +132,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         propertyComplianceRepository = mock()
         propertyOwnershipService = mock()
         session = mock()
+        fileUploadRepository = mock()
         propertyComplianceService =
             PropertyComplianceService(
                 propertyComplianceRepository = propertyComplianceRepository,
@@ -174,7 +175,6 @@ class PropertyComplianceOriginalJourneyDataTest {
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
         whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
-        whenever(fileUploadRepository.getReferenceById(any())).thenReturn(originalRecord.gasSafetyFileUpload, originalRecord.eicrFileUpload)
 
         // Act
         val journey =
@@ -203,6 +203,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
         whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
+        whenever(fileUploadRepository.getReferenceById(any())).thenReturn(originalRecord.gasSafetyFileUpload, originalRecord.eicrFileUpload)
 
         // Act
         val journey =
