@@ -98,7 +98,7 @@ class PropertyComplianceJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(emptyMap())
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            createPropertyComplianceJourney(propertyOwnership.id)
+            createPropertyComplianceJourney(propertyOwnershipId = propertyOwnership.id)
 
             verify(mockJourneyDataService)
                 .loadJourneyDataIntoSession(propertyOwnership.incompleteComplianceForm!!)
@@ -110,7 +110,10 @@ class PropertyComplianceJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(emptyMap())
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val errorThrown = assertThrows<ResponseStatusException> { createPropertyComplianceJourney(propertyOwnership.id) }
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    createPropertyComplianceJourney(propertyOwnershipId = propertyOwnership.id)
+                }
             assertContains(errorThrown.message, "Property ownership ${propertyOwnership.id} does not have an incomplete compliance form")
         }
     }
@@ -891,21 +894,24 @@ class PropertyComplianceJourneyTests {
         }
     }
 
-    private fun createPropertyComplianceJourney(propertyOwnershipId: Long = 1L) =
-        PropertyComplianceJourney(
-            validator = AlwaysTrueValidator(),
-            journeyDataService = mockJourneyDataService,
-            propertyOwnershipService = mockPropertyOwnershipService,
-            epcLookupService = mockEpcLookupService,
-            propertyComplianceService = mockPropertyComplianceService,
-            propertyOwnershipId = propertyOwnershipId,
-            epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
-            messageSource = mockMessageSource,
-            fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
-            partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
-            urlProvider = mockUrlProvider,
-            checkingAnswersForStep = null,
-        )
+    private fun createPropertyComplianceJourney(
+        stepName: String = PropertyComplianceStepId.GasSafety.urlPathSegment,
+        propertyOwnershipId: Long = 1L,
+    ) = PropertyComplianceJourney(
+        validator = AlwaysTrueValidator(),
+        journeyDataService = mockJourneyDataService,
+        propertyOwnershipService = mockPropertyOwnershipService,
+        epcLookupService = mockEpcLookupService,
+        propertyComplianceService = mockPropertyComplianceService,
+        propertyOwnershipId = propertyOwnershipId,
+        epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
+        messageSource = mockMessageSource,
+        fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
+        partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
+        urlProvider = mockUrlProvider,
+        checkingAnswersForStep = null,
+        stepName = stepName,
+    )
 
     private fun completeStep(
         stepId: PropertyComplianceStepId,
@@ -918,7 +924,7 @@ class PropertyComplianceJourneyTests {
                 .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
         }
 
-        return createPropertyComplianceJourney(propertyOwnershipId).completeStep(
+        return createPropertyComplianceJourney(stepId.urlPathSegment, propertyOwnershipId).completeStep(
             stepPathSegment = stepId.urlPathSegment,
             formData = pageData,
             subPageNumber = null,
@@ -937,7 +943,7 @@ class PropertyComplianceJourneyTests {
                 .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
         }
 
-        return createPropertyComplianceJourney(propertyOwnershipId)
+        return createPropertyComplianceJourney(currentStepId.urlPathSegment, propertyOwnershipId)
             .sections
             .flatMap { section -> section.tasks }
             .flatMap { task -> task.steps }

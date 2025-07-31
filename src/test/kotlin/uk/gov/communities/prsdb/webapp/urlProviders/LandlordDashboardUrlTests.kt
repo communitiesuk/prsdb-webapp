@@ -290,6 +290,7 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 absoluteUrlProvider,
                 checkingAnswersForStep = null,
+                stepName = PropertyComplianceStepId.CheckAndSubmit.urlPathSegment,
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
 

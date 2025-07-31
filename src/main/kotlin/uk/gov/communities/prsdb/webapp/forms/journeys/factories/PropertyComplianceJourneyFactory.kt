@@ -29,6 +29,7 @@ class PropertyComplianceJourneyFactory(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     fun create(
+        stepName: String,
         propertyOwnershipId: Long,
         checkingAnswersFor: String? = null,
     ) = PropertyComplianceJourney(
@@ -44,6 +45,7 @@ class PropertyComplianceJourneyFactory(
         partialPropertyComplianceConfirmationEmailService,
         absoluteUrlProvider,
         checkingAnswersFor,
+        stepName,
     )
 
     companion object {

@@ -88,12 +88,11 @@ class PropertyComplianceUpdateJourney(
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = false,
-            nextActionAfterGasSafetyTask = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-            nextActionAfterEicrTask = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-            nextActionAfterEpcTask = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
+            isUpdateJourney = true,
             isCheckingOrUpdatingAnswers = true,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
+            stepName = stepName,
         )
 
     override val sections: List<JourneySection<PropertyComplianceStepId>> =

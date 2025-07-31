@@ -87,6 +87,7 @@ class PropertyComplianceJourney(
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
     checkingAnswersForStep: String?,
+    stepName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -119,12 +120,11 @@ class PropertyComplianceJourney(
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = true,
-            nextActionAfterGasSafetyTask = PropertyComplianceStepId.EICR,
-            nextActionAfterEicrTask = PropertyComplianceStepId.EPC,
-            nextActionAfterEpcTask = landlordResponsibilities.first().startingStepId,
+            isUpdateJourney = false,
             isCheckingOrUpdatingAnswers = isCheckingAnswers,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
+            stepName = stepName,
         )
 
     override val sections =
