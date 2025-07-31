@@ -13,10 +13,16 @@ class LocalAuthorityDashboardPage(
     val bannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
     val bannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
     val manageUsersButton = Link.byText(page, "Manage users", selectorOrLocator = "li.govuk-service-navigation__item")
+    val generatePasscodeButton =
+        Link.byText(page, "Generate passcode", selectorOrLocator = "li.govuk-service-navigation__item")
 
     val searchPropertyButton = Button.byText(page, "Search for a property")
     val searchLandlordButton = Button.byText(page, "Search for a landlord")
     val privacyNoticeLink = Link.byText(page, "Privacy notice")
     val rentersRightsBillLink = Link.byText(page, "Renters' Rights Bill")
     val aboutPilotLink = Link.byText(page, "About this pilot")
+
+    fun clickGeneratePasscode() {
+        generatePasscodeButton.clickAndWait()
+    }
 }

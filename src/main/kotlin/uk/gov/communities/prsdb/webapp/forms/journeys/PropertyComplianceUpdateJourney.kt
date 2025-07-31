@@ -8,20 +8,25 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEicrAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.pages.UnvisitablePage
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
@@ -30,12 +35,14 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoEicrOrExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoEpcOrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getStillHasNoGasCertOrExemption
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EpcUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
@@ -54,7 +61,7 @@ class PropertyComplianceUpdateJourney(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val epcLookupService: EpcLookupService,
-    epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val checkingAnswersForStep: String?,
 ) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
@@ -74,9 +81,9 @@ class PropertyComplianceUpdateJourney(
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
     override fun createOriginalJourneyData(): JourneyData =
-        PropertyComplianceOriginalJourneyData.fromPropertyCompliance(
-            propertyComplianceService.getComplianceForProperty(propertyOwnershipId),
-        )
+        propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)?.let {
+            PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it)
+        } ?: emptyMap()
 
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(
@@ -93,6 +100,7 @@ class PropertyComplianceUpdateJourney(
         listOf(
             JourneySection(
                 listOf(
+                    JourneyTask.withOneStep(checkComplianceExistsStep),
                     gasSafetyTask,
                     eicrTask,
                     epcTask,
@@ -184,6 +192,15 @@ class PropertyComplianceUpdateJourney(
                 ),
             )
 
+    private val checkComplianceExistsStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.CheckComplianceExists,
+                page = UnvisitablePage(errorMessage = "CheckComplianceExists should never be reached."),
+                nextAction = { _, _ -> Pair(PropertyComplianceStepId.UpdateGasSafety, null) },
+                saveAfterSubmit = false,
+            )
+
     private val updateGasSafetyStep
         get() =
             Step(
@@ -271,8 +288,7 @@ class PropertyComplianceUpdateJourney(
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
                 page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect),
-                // TODO: PRSD-1312 - restore next action once EPC CYA step is implemented
-                // nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
+                nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
                     updateComplianceAndRedirect(filteredJourneyData)
@@ -333,34 +349,37 @@ class PropertyComplianceUpdateJourney(
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         }
 
-    // TODO PRSD-1313: Implement EPC check your answers step
     private val epcCheckYourAnswersStep
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
                 page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/todo",
-                        content =
-                            mapOf("todoComment" to "TODO PRSD-1313: Implement EPC Check Your Answers step"),
+                    CheckUpdateEpcAnswersPage(
+                        journeyDataService,
+                        epcCertificateUrlProvider,
+                        unreachableStepRedirect,
                     ),
                 saveAfterSubmit = false,
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect(filteredJourneyData)
+                },
             )
 
     private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
-        if (filteredJourneyData.getHasNewEPC()) {
+        if (filteredJourneyData.getHasNewEPC()!!) {
             if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
                 Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
             } else {
                 Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
             }
+        } else if (filteredJourneyData.getStillHasNoEpcOrExemption() ?: false) {
+            Pair(PropertyComplianceStepId.EpcNotFound, null)
         } else {
             Pair(PropertyComplianceStepId.EpcExemptionReason, null)
         }
 
     private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        if (filteredJourneyData.getHasNewEPC()) {
+        if (filteredJourneyData.getHasNewEPC()!!) {
             val epcDetails = getAutomatchedEpc(propertyOwnershipId, epcLookupService, propertyOwnershipService)
 
             val newFilteredJourneyData =
@@ -404,15 +423,14 @@ class PropertyComplianceUpdateJourney(
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
-    // TODO 1313 - add this as the handleSubmitAndRedirect method and test
     private fun updateComplianceAndRedirect(filteredJourneyData: JourneyData): String {
         val submittedJourneyData = journeyDataService.getJourneyDataFromSession()
         val relevantJourneyData = submittedJourneyData.filterKeys { it in filteredJourneyData.keys }
 
         val gasSafetyUpdate = createGasSafetyUpdateOrNull(relevantJourneyData, propertyOwnershipId)
         val eicrUpdate = createEicrUpdateOrNull(relevantJourneyData, propertyOwnershipId)
-        // TODO PRSD-1313: Add EPC updates from journeyData to complianceUpdate
-        val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate, eicrUpdate)
+        val epcUpdate = createEpcUpdateOrNull(relevantJourneyData)
+        val complianceUpdate = PropertyComplianceUpdateModel(gasSafetyUpdate, eicrUpdate, epcUpdate)
 
         propertyComplianceService.updatePropertyCompliance(propertyOwnershipId, complianceUpdate) {
             throwIfSubmittedDataIsAnInvalidUpdate(relevantJourneyData)
@@ -464,7 +482,19 @@ class PropertyComplianceUpdateJourney(
             )
         }
 
+    fun createEpcUpdateOrNull(journeyData: JourneyData): EpcUpdateModel? =
+        journeyData.getHasNewEPC()?.let { data ->
+            EpcUpdateModel(
+                url = journeyData.getAcceptedEpcDetails()?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
+                expiryDate = journeyData.getAcceptedEpcDetails()?.expiryDate?.toJavaLocalDate(),
+                tenancyStartedBeforeExpiry = journeyData.getDidTenancyStartBeforeEpcExpiry(),
+                energyRating = journeyData.getAcceptedEpcDetails()?.energyRating,
+                exemptionReason = journeyData.getEpcExemptionReason(),
+                meesExemptionReason = journeyData.getMeesExemptionReason(),
+            )
+        }
+
     companion object {
-        val initialStepId = PropertyComplianceStepId.UpdateGasSafety
+        val initialStepId = PropertyComplianceStepId.CheckComplianceExists
     }
 }

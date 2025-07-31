@@ -651,6 +651,11 @@ class PropertyComplianceSharedStepFactory(
                             "getNewEpcUrl" to GET_NEW_EPC_URL,
                             "searchAgainUrl" to PropertyComplianceStepId.EpcLookup.urlPathSegment,
                             "certificateNumber" to getEpcLookupCertificateNumberFromSession(),
+                            "submitButtonText" to
+                                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
+                                    "forms.buttons.saveAndContinueToLandlordResponsibilities",
+                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                ),
                         ),
                 ),
             nextAction = { _, _ -> Pair(nextActionAfterEpcTask, null) },

@@ -23,7 +23,7 @@ class MockPropertyComplianceData {
             eicrIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,
-            epcUrl: String? = "epc.url",
+            epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
             epcExpiryDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
             tenancyStartedBeforeEpcExpiry: Boolean? = null,
             epcEnergyRating: String? = "C",

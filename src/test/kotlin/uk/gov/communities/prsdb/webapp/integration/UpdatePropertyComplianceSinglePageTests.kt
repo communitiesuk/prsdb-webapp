@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -31,8 +30,6 @@ class UpdatePropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data
 
     @Nested
     inner class UpdateEpcStep {
-        // TODO PRSD-1312 - remove @Disabled when Gas Safety completion links to the rest of the journey
-        @Disabled
         @Test
         fun `Submitting with no value entered returns an error`() {
             val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)

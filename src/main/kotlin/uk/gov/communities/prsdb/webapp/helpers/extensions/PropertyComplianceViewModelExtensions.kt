@@ -1,12 +1,37 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel.PropertyComplianceLinkMessage
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel.PropertyComplianceNotificationMessage
 
-fun MutableList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>.addRow(
+fun MutableList<PropertyComplianceNotificationMessage>.addRow(
     mainText: String,
+    linkUrl: String,
     linkText: String,
-    withLinkText: Boolean,
+    afterLinkText: String,
+    beforeLinkText: String? = null,
+    withLinkMessage: Boolean,
+    isAfterLinkTextFullStop: Boolean = false,
 ) {
-    val linkTextOrNull = if (withLinkText) linkText else null
-    add(PropertyComplianceViewModel.PropertyComplianceNotificationMessage(mainText, linkTextOrNull))
+    val linkMessageOrNull = getLinkMessageOrNull(withLinkMessage, linkUrl, linkText, afterLinkText, beforeLinkText, isAfterLinkTextFullStop)
+    add(PropertyComplianceNotificationMessage(mainText, linkMessageOrNull))
 }
+
+private fun getLinkMessageOrNull(
+    withLinkMessage: Boolean,
+    linkUrl: String,
+    linkText: String,
+    afterLinkText: String,
+    beforeLinkText: String?,
+    isAfterLinkTextFullStop: Boolean,
+): PropertyComplianceLinkMessage? =
+    if (withLinkMessage) {
+        PropertyComplianceLinkMessage(
+            linkUrl = linkUrl,
+            linkText = linkText,
+            afterLinkText = afterLinkText,
+            beforeLinkText = beforeLinkText,
+            isAfterLinkTextFullStop = isAfterLinkTextFullStop,
+        )
+    } else {
+        null
+    }
