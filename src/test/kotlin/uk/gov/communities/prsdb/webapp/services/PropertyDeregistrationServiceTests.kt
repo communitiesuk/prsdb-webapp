@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
@@ -29,6 +30,7 @@ class PropertyDeregistrationServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
+    @InjectMocks
     @Mock
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
 
