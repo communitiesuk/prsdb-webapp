@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
@@ -107,7 +108,10 @@ class PropertyComplianceUpdateJourney(
             journeyData +
                 stepFactory.skippedStepIds.mapNotNull {
                     getOriginalDataPairForStepIfNotInitialized(it, originalJourneyData, journeyData)
-                }
+                } +
+                (NonStepJourneyDataKey.LookedUpEpc.key to originalJourneyData[NonStepJourneyDataKey.LookedUpEpc.key]) +
+                (NonStepJourneyDataKey.AutoMatchedEpc.key to originalJourneyData[NonStepJourneyDataKey.AutoMatchedEpc.key])
+
         journeyDataService.setJourneyDataInSession(journeyDataWithSkippedStepData)
     }
 
@@ -217,6 +221,7 @@ class PropertyComplianceUpdateJourney(
                     stepFactory.createMeesExemptionConfirmationStep(),
                     stepFactory.createLowEnergyRatingStep(),
                     epcCheckYourAnswersStep,
+                    meesCheckYourAnswersStep,
                 ),
             )
 
@@ -381,6 +386,24 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
+                page =
+                    CheckUpdateEpcAnswersPage(
+                        journeyDataService,
+                        epcCertificateUrlProvider,
+                        unreachableStepRedirect,
+                        stepFactory,
+                    ),
+                saveAfterSubmit = false,
+                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                    updateComplianceAndRedirect(filteredJourneyData)
+                },
+            )
+
+    // TODO PRSD-1392 - maybe commonise this with epcCheckYourAnswersStep in the stepFactory
+    private val meesCheckYourAnswersStep
+        get() =
+            Step(
+                id = PropertyComplianceStepId.UpdateMeesCheckYourAnswers,
                 page =
                     CheckUpdateEpcAnswersPage(
                         journeyDataService,
