@@ -1,0 +1,17 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="privateRentingGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="rightToRentChecksUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="governmentApprovedDepositProtectionSchemeUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="howToRentGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="propertyComplianceUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="page" th:replace="~{fragments/layout :: layout(#{propertyCompliance.title}, ~{::#page/content()}, false)}">
+  <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
+  <main class="govuk-main-wrapper" id="main-content">
+    <div id="main" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#main/content()})}">
+      <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.heading}">forms.landlordResponsibilities.responsibilityToTenants.heading</h1>
+      <th:block th:replace="~{fragments/content/responsibilityToTenantsContent :: responsibilityToTenantsContent(${privateRentingGuideUrl}, ${rightToRentChecksUrl}, ${governmentApprovedDepositProtectionSchemeUrl}, ${howToRentGuideUrl})}"></th:block>
+      <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${propertyComplianceUrl}, #{forms.buttons.returnToPropertyRecord})}">forms.buttons.returnToPropertyRecord</button>
+    </div>
+  </main>
+</html>
