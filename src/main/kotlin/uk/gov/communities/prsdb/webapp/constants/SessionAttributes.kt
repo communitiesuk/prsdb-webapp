@@ -19,3 +19,5 @@ const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
 const val PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION = "propertiesWithComplianceAddedThisSession"
 
 const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
+
+const val SUBMITTED_PASSCODE = "submittedPasscode"

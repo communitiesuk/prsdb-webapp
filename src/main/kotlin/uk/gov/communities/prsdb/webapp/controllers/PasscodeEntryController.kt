@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpSession
 import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.ui.Model
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
 import uk.gov.communities.prsdb.webapp.models.requestModels.PasscodeRequestModel
 
 @PrsdbController
@@ -33,13 +36,16 @@ class PasscodeEntryController {
         @ModelAttribute
         passcodeRequestModel: PasscodeRequestModel,
         bindingResult: BindingResult,
+        session: HttpSession,
     ): String {
         if (bindingResult.hasErrors()) {
             return "passcodeEntry"
         }
 
-        // TODO: Validate passcode and handle authentication
-        // For now, just redirect or show success
-        return "redirect:/" // Redirect to appropriate page after successful passcode entry
+        // Store the passcode in session
+        session.setAttribute(SUBMITTED_PASSCODE, passcodeRequestModel.passcode)
+
+        // Redirect to landlord registration index page
+        return "redirect:/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
     }
 }
