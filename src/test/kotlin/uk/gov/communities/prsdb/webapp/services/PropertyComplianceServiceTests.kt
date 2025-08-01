@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Spy
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -38,7 +37,6 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockSession: HttpSession
 
-    @Spy
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
 
@@ -292,40 +290,24 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `deletePropertyCompliances deletes all the given PropertyCompliances`() {
-        val propertyCompliances =
+    fun `deletePropertyCompliancesByOwnershipIds deletes PropertyCompliances with the given PropertyOwnershipIds`() {
+        val propertyOwnershipIds =
             listOf(
-                MockPropertyComplianceData.createPropertyCompliance(),
-                MockPropertyComplianceData.createPropertyCompliance(),
+                1L,
+                2L,
             )
 
-        propertyComplianceService.deletePropertyCompliances(propertyCompliances)
+        propertyComplianceService.deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
 
-        verify(mockPropertyComplianceRepository).deleteAll(propertyCompliances)
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
     }
 
     @Test
-    fun `deletePropertyComplianceIfExists deletes the compliance when it exists`() {
-        val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-        val propertyOwnershipId = propertyCompliance.propertyOwnership.id
+    fun `deletePropertyComplianceByOwnershipId deletes the PropertyCompliance with the given PropertyOwnershipId`() {
+        val propertyOwnershipId = 1L
 
-        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
-            .thenReturn(propertyCompliance)
+        propertyComplianceService.deletePropertyComplianceByOwnershipId(propertyOwnershipId)
 
-        propertyComplianceService.deletePropertyComplianceIfExists(propertyOwnershipId)
-
-        verify(propertyComplianceService).deletePropertyCompliance(propertyCompliance)
-    }
-
-    @Test
-    fun `deletePropertyComplianceIfExists does nothing when compliance does not exist`() {
-        val propertyOwnershipId = 123L
-
-        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
-            .thenReturn(null)
-
-        propertyComplianceService.deletePropertyComplianceIfExists(propertyOwnershipId)
-
-        verify(propertyComplianceService, org.mockito.Mockito.never()).deletePropertyCompliance(any())
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_Id(propertyOwnershipId)
     }
 }

@@ -11,7 +11,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 
 @ExtendWith(MockitoExtension::class)
 class PropertyDeregistrationServiceTests {
@@ -45,7 +44,7 @@ class PropertyDeregistrationServiceTests {
         // Act
         propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
-        verify(mockPropertyComplianceService).deletePropertyComplianceIfExists(propertyOwnership.id)
+        verify(mockPropertyComplianceService).deletePropertyComplianceByOwnershipId(propertyOwnership.id)
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
         verify(mockPropertyService).deleteProperty(propertyOwnership.property)
         verify(mockLicenceService).deleteLicense(licence)
@@ -64,20 +63,12 @@ class PropertyDeregistrationServiceTests {
                 MockLandlordData.createPropertyOwnership(license = license, property = properties[0]),
                 MockLandlordData.createPropertyOwnership(property = properties[1]),
             )
-        val propertyCompliances =
-            listOf(
-                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnerships[0]),
-                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnerships[1]),
-            )
 
-        whenever(
-            mockPropertyComplianceService.getPropertyCompliancesForPropertyOwnerships(propertyOwnerships),
-        ).thenReturn(propertyCompliances)
+        val propertyOwnershipIds = propertyOwnerships.map { it.id }
 
         propertyDeregistrationService.deregisterProperties(propertyOwnerships)
 
-        verify(mockPropertyComplianceService).getPropertyCompliancesForPropertyOwnerships(propertyOwnerships)
-        verify(mockPropertyComplianceService).deletePropertyCompliances(propertyCompliances)
+        verify(mockPropertyComplianceService).deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
         verify(mockPropertyOwnershipService).deletePropertyOwnerships(propertyOwnerships)
         verify(mockPropertyService).deleteProperties(properties)
         verify(mockLicenceService).deleteLicenses(listOf(license))
