@@ -35,3 +35,6 @@ COLUMN eicr_s3_key;
 ALTER TABLE property_compliance
 DROP
 COLUMN gas_safety_cert_s3_key;
+
+ALTER TABLE file_upload
+    ADD CONSTRAINT uniqueS3ObjectConstraint UNIQUE (object_key, e_tag, version_id);

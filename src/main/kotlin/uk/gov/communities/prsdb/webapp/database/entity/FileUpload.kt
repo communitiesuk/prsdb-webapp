@@ -4,9 +4,12 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 
 @Entity
+@Table(uniqueConstraints = [UniqueConstraint(name = "uniqueS3ObjectConstraint", columnNames = ["objectKey", "eTag", "versionId"])])
 class FileUpload() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
