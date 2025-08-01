@@ -39,7 +39,7 @@ class AwsS3FileUploader(
                 uploadRepository.save(
                     FileUpload(
                         status = FileUploadStatus.QUARANTINED,
-                        s3Key = objectKey,
+                        objectKey = objectKey,
                         eTag = response.eTag(),
                         versionId = response.versionId(),
                         extension = extension,

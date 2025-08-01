@@ -39,7 +39,7 @@ class LocalFileUploader(
         return uploadRepository.save(
             FileUpload(
                 status = FileUploadStatus.SCANNED,
-                s3Key = objectKey,
+                objectKey = objectKey,
                 extension = extension,
             ),
         )
