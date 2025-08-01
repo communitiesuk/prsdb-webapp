@@ -417,7 +417,11 @@ class PropertyComplianceController(
         file: FileItemInput,
         fileLength: Long,
     ): FileUpload? =
-        fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength), FilenameUtils.getExtension(file.name))
+        fileUploader.uploadFile(
+            uploadFileName,
+            file.inputStream.withMaxLength(fileLength),
+            FilenameUtils.getExtension(file.name),
+        )
 
     private fun addCookieIfStepIsFileUploadStep(
         stepName: String,

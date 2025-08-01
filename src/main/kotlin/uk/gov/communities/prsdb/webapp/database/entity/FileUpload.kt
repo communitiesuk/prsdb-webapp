@@ -32,6 +32,7 @@ class FileUpload() : ModifiableAuditableEntity() {
     constructor(status: FileUploadStatus, s3Key: String, extension: String) : this() {
         this.status = status
         this.objectKey = s3Key
+        this.extension = extension
     }
 
     constructor(status: FileUploadStatus, s3Key: String, extension: String, eTag: String, versionId: String?) : this() {
@@ -39,5 +40,6 @@ class FileUpload() : ModifiableAuditableEntity() {
         this.objectKey = s3Key
         this.eTag = eTag
         this.versionId = versionId
+        this.extension = extension
     }
 }
