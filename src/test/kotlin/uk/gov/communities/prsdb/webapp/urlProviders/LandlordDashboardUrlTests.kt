@@ -266,7 +266,6 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
-                anyOrNull(),
             ),
         ).thenReturn(compliantPropertyCompliance)
 

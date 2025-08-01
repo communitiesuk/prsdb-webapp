@@ -568,7 +568,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
-                .containsText("Select whether you have followed fire safety responsibilities")
+                .containsText("You must agree to your responsibilities to continue")
         }
     }
 

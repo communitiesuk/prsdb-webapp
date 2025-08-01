@@ -75,7 +75,6 @@ class PropertyComplianceServiceTests {
                 epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
                 epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
                 epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,
-                hasFireSafetyDeclaration = expectedPropertyCompliance.hasFireSafetyDeclaration,
             )
 
         val propertyComplianceCaptor = captor<PropertyCompliance>()

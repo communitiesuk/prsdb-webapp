@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
 class LandlordResponsibilitiesViewModelBuilderTests {
-    @ParameterizedTest(name = "{0} and {1}")
+    @ParameterizedTest(name = "{1}")
     @MethodSource("provideLandlordResponsibilityRows")
     fun `fromEntity returns the correct summary rows`(
         propertyCompliance: PropertyCompliance,
@@ -30,17 +30,13 @@ class LandlordResponsibilitiesViewModelBuilderTests {
     }
 
     companion object {
-        private val propertyComplianceWithFireSafety =
-            PropertyComplianceBuilder.createWithInDateCertsAndSetFireSafetyDeclaration(true)
+        private val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
         @JvmStatic
         private fun provideLandlordResponsibilityRows() =
             arrayOf(
                 arguments(
-                    named(
-                        "with fire safety declaration",
-                        propertyComplianceWithFireSafety,
-                    ),
+                    propertyCompliance,
                     named("with action links", true),
                     listOf(
                         SummaryListRowViewModel(
@@ -49,7 +45,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
-                                    propertyComplianceWithFireSafety.propertyOwnership.id,
+                                    propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.FireSafetyDeclaration,
                                 ),
                             ),
@@ -60,7 +56,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
-                                    propertyComplianceWithFireSafety.propertyOwnership.id,
+                                    propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.KeepPropertySafe,
                                 ),
                             ),
@@ -71,7 +67,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
-                                    propertyComplianceWithFireSafety.propertyOwnership.id,
+                                    propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.ResponsibilityToTenants,
                                 ),
                             ),
@@ -79,15 +75,12 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                     ),
                 ),
                 arguments(
-                    named(
-                        "without fire safety declaration",
-                        PropertyComplianceBuilder.createWithInDateCertsAndSetFireSafetyDeclaration(false),
-                    ),
+                    propertyCompliance,
                     named("without action links", false),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
-                            "commonText.no",
+                            "commonText.yes",
                             null,
                         ),
                         SummaryListRowViewModel(

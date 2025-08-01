@@ -50,7 +50,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyRiskPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -96,7 +95,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (in-date certs, declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (in-date certs)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -166,23 +165,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
-        assertThat(
-            fireSafetyDeclarationPage.form.fieldHeading,
-        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
-        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(
-                responsibilityToTenantsPage.heading,
-            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -218,7 +213,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (outdated certs, declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (outdated certs)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -330,23 +325,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
-        assertThat(
-            fireSafetyDeclarationPage.form.fieldHeading,
-        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
-        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(
-                responsibilityToTenantsPage.heading,
-            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -392,7 +383,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions, declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -455,23 +446,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
-        assertThat(
-            fireSafetyDeclarationPage.form.fieldHeading,
-        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
-        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(
-                responsibilityToTenantsPage.heading,
-            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -507,7 +494,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions, no declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -553,19 +540,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        fireSafetyDeclarationPage.submitHasNotDeclaredFireSafety()
-        val fireSafetyRiskPage = assertPageIs(page, FireSafetyRiskPagePropertyCompliance::class, urlArguments)
-
-        // Fire Safety Risk page
-        BaseComponent.assertThat(fireSafetyRiskPage.heading).containsText("Your property is at risk of fire")
-        fireSafetyRiskPage.form.submit()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
+        BaseComponent
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
