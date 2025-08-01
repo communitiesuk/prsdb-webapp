@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
@@ -32,8 +31,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
-    @Column(name = "gas_safety_cert_s3_key")
-    var gasSafetyCertS3Key: String? = null
+    @OneToOne
+    @JoinColumn(
+        name = "gas_safety_upload_id",
+        nullable = true,
+        foreignKey = ForeignKey(name = "FK_PROPERTY_COMPLIANCE_GAS_SAFETY_UPLOAD"),
+    )
+    var gasSafetyFileUpload: FileUpload? = null
 
     var gasSafetyCertIssueDate: LocalDate? = null
 
@@ -43,8 +47,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var gasSafetyCertExemptionOtherReason: String? = null
 
-    @Column(name = "eicr_s3_key")
-    var eicrS3Key: String? = null
+    @OneToOne
+    @JoinColumn(
+        name = "eicr_id",
+        nullable = true,
+        foreignKey = ForeignKey(name = "FK_PROPERTY_COMPLIANCE_EICR_UPLOAD"),
+    )
+    var eicrFileUpload: FileUpload? = null
 
     var eicrIssueDate: LocalDate? = null
 
@@ -69,6 +78,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val hasKeepPropertySafeDeclaration: Boolean = true
 
     val hasResponsibilityToTenantsDeclaration: Boolean = true
+
+    val gasSafetyCertS3Key: String?
+        get() = gasSafetyFileUpload?.objectKey
+
+    val eicrS3Key: String?
+        get() = eicrFileUpload?.objectKey
 
     val hasGasSafetyExemption: Boolean
         get() = gasSafetyCertExemptionReason != null
@@ -123,12 +138,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     constructor(
         propertyOwnership: PropertyOwnership,
         hasFireSafetyDeclaration: Boolean,
-        gasSafetyCertS3Key: String? = null,
+        gasSafetyCertUpload: FileUpload? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyCertEngineerNum: String? = null,
         gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
         gasSafetyCertExemptionOtherReason: String? = null,
-        eicrS3Key: String? = null,
+        eicrUpload: FileUpload? = null,
         eicrIssueDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
@@ -140,12 +155,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         epcMeesExemptionReason: MeesExemptionReason? = null,
     ) : this() {
         this.propertyOwnership = propertyOwnership
-        this.gasSafetyCertS3Key = gasSafetyCertS3Key
+        this.gasSafetyFileUpload = gasSafetyCertUpload
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         this.gasSafetyCertEngineerNum = gasSafetyCertEngineerNum
         this.gasSafetyCertExemptionReason = gasSafetyCertExemptionReason
         this.gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason
-        this.eicrS3Key = eicrS3Key
+        this.eicrFileUpload = eicrUpload
         this.eicrIssueDate = eicrIssueDate
         this.eicrExemptionReason = eicrExemptionReason
         this.eicrExemptionOtherReason = eicrExemptionOtherReason

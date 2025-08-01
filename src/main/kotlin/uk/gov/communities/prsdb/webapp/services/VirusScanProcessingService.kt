@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -53,9 +55,11 @@ class VirusScanProcessingService(
     ) {
         val complianceRecord = complianceRepository.findByPropertyOwnership_Id(ownership.id)
         if (complianceRecord != null) {
+            val fileUpload = FileUpload(FileUploadStatus.SCANNED, fileNameInfo.toString())
             when (fileNameInfo.fileCategory) {
-                FileCategory.Eirc -> complianceRecord.eicrS3Key = fileNameInfo.toString()
-                FileCategory.GasSafetyCert -> complianceRecord.gasSafetyCertS3Key = fileNameInfo.toString()
+                // TODO 1352 - Replace with file upload status updates over new uploads
+                FileCategory.Eirc -> complianceRecord.eicrFileUpload = fileUpload
+                FileCategory.GasSafetyCert -> complianceRecord.gasSafetyFileUpload = fileUpload
             }
             complianceRepository.save(complianceRecord)
         }

@@ -49,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
@@ -382,27 +383,27 @@ class PropertyComplianceController(
 
         val formModelClass = PropertyComplianceJourneyHelper.getUploadCertificateFormModelClass(stepName)
 
-        val isUploadSuccessfulOrNull =
+        val fileUploadId =
             if (isFileValid(formModelClass, file, request.contentLengthLong)) {
                 val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName, file.name)
-                uploadFile(uploadFileName, file, request.contentLengthLong)
+                uploadFile(uploadFileName, file, request.contentLengthLong)?.id
             } else {
                 null
             }
 
         fileInputIterator.discardRemainingFields()
 
-        if (isUploadSuccessfulOrNull != true) {
+        if (fileUploadId == null) {
             val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
             response.addCookie(cookie)
         }
 
         return UploadCertificateFormModel
-            .fromFileItemInput(
+            .fromUploadedFile(
                 formModelClass,
                 file,
                 request.contentLengthLong,
-                isUploadSuccessfulOrNull,
+                fileUploadId,
             ).toPageData()
     }
 
@@ -411,7 +412,7 @@ class PropertyComplianceController(
         file: FileItemInput,
         fileLength: Long,
     ): Boolean {
-        val fileFormModel = UploadCertificateFormModel.fromFileItemInput(formModelClass, file, fileLength)
+        val fileFormModel = UploadCertificateFormModel.fromUploadedFileMetadata(formModelClass, file, fileLength)
         return !validator.validateObject(fileFormModel).hasErrors()
     }
 
@@ -419,7 +420,7 @@ class PropertyComplianceController(
         uploadFileName: String,
         file: FileItemInput,
         fileLength: Long,
-    ): Boolean = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
+    ): FileUpload? = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
 
     private fun addCookieIfStepIsFileUploadStep(
         stepName: String,
@@ -435,7 +436,7 @@ class PropertyComplianceController(
     private fun annotateFormDataForMetadataOnlyFileUpload(formData: PageData): PageData {
         // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
         // postJourneyData() is used for a file upload endpoint.
-        return formData + (UploadCertificateFormModel::isMetadataOnly.name to true)
+        return formData + (UploadCertificateFormModel::isUserSubmittedMetadataOnly.name to true)
     }
 
     companion object {
