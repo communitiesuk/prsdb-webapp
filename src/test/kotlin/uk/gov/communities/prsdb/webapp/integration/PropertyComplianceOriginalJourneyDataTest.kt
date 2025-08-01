@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
@@ -155,6 +156,8 @@ class PropertyComplianceOriginalJourneyDataTest {
                 propertyOwnershipService = propertyOwnershipService,
                 epcCertificateUrlProvider = EpcCertificateUrlProvider(PropertyComplianceBuilder.TEST_EPC_BASE_URL),
                 epcLookupService = epcLookupService,
+                // TODO PRSD-1352
+                certificateUploadService = Mockito.mock(),
             )
     }
 

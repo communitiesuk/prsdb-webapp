@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEic
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -62,6 +63,7 @@ class PropertyComplianceUpdateJourney(
     private val epcLookupService: EpcLookupService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val checkingAnswersForStep: String?,
+    private val certificateUploadService: CertificateUploadService,
 ) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
         initialStepId = initialStepId,
@@ -93,6 +95,8 @@ class PropertyComplianceUpdateJourney(
             isCheckingOrUpdatingAnswers = true,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
+            certificateUploadService = certificateUploadService,
+            propertyOwnershipId = propertyOwnershipId,
         )
 
     override val sections: List<JourneySection<PropertyComplianceStepId>> =

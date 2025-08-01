@@ -902,6 +902,8 @@ class PropertyComplianceJourneyTests {
             fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
             partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
             urlProvider = mockUrlProvider,
+            // TODO PRSD-1352
+            certificateUploadService = mock(),
             checkingAnswersForStep = null,
         )
 

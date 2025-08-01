@@ -386,6 +386,8 @@ class PropertyComplianceUpdateJourneyTests {
         propertyComplianceService = mockPropertyComplianceService,
         epcLookupService = mockEpcLookupService,
         epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
+        // TODO PRSD-1352
+        certificateUploadService = mock(),
         checkingAnswersForStep = null,
     )
 
