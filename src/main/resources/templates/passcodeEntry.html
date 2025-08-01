@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html id="main-content"
-      th:replace="~{fragments/layout :: layout('Passcode Entry', ~{::#main-content/content()}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
+      th:replace="~{fragments/layout :: layout(#{passcodeEntry.title}, ~{::#main-content/content()}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
 <main class="govuk-main-wrapper">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <h1 class="govuk-heading-l">Enter passcode</h1>
+        <h1 class="govuk-heading-l" th:text="#{passcodeEntry.heading}">passcodeEntry.heading</h1>
 
         <!--/*/ <th:block th:object="${passcodeRequestModel}" th:if="passcodeRequestModel != null"> /*/-->
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary }"></div>
         <!--/*/ </th:block> /*/-->
 
-        <p class="govuk-body">Enter the passcode provided by your local authority to access the landlord registration
-            service.</p>
+        <p class="govuk-body" th:text="#{passcodeEntry.description}">passcodeEntry.description</p>
 
         <form th:action="@{''}" class="form" id="passcode-form" method="post" th:object="${passcodeRequestModel}"
               novalidate>
             <input th:replace="~{fragments/forms/basicTextInput :: textInput('Passcode', 'passcode', null)}">
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton('Submit')}"></button>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
         </form>
     </div>
 </main>
 </html>
-
