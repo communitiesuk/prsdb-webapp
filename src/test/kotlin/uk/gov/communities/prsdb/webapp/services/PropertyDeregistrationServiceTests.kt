@@ -31,7 +31,6 @@ class PropertyDeregistrationServiceTests {
     private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
-    @Mock
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
 
     @Mock
