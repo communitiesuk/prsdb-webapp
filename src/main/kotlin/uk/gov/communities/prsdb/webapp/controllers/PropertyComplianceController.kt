@@ -65,7 +65,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import java.security.Principal
-import kotlin.reflect.KClass
 
 @PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
@@ -381,10 +380,8 @@ class PropertyComplianceController(
             fileInputIterator.getFirstFileField()
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
-        val formModelClass = PropertyComplianceJourneyHelper.getUploadCertificateFormModelClass(stepName)
-
         val fileUploadId =
-            if (isFileValid(formModelClass, file, request.contentLengthLong)) {
+            if (isFileValid(file, request.contentLengthLong)) {
                 val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName, file.name)
                 uploadFile(uploadFileName, file, request.contentLengthLong)?.id
             } else {
@@ -400,7 +397,6 @@ class PropertyComplianceController(
 
         return UploadCertificateFormModel
             .fromUploadedFile(
-                formModelClass,
                 file,
                 request.contentLengthLong,
                 fileUploadId,
@@ -408,11 +404,10 @@ class PropertyComplianceController(
     }
 
     private fun isFileValid(
-        formModelClass: KClass<out UploadCertificateFormModel>,
         file: FileItemInput,
         fileLength: Long,
     ): Boolean {
-        val fileFormModel = UploadCertificateFormModel.fromUploadedFileMetadata(formModelClass, file, fileLength)
+        val fileFormModel = UploadCertificateFormModel.fromUploadedFileMetadata(file, fileLength)
         return !validator.validateObject(fileFormModel).hasErrors()
     }
 
