@@ -66,7 +66,8 @@ class PasscodeService(
     }
 
     fun isValidPasscode(passcode: String): Boolean {
-        return passcodeRepository.existsByPasscode(passcode)
+        val normalizedPasscode = passcode.trim().uppercase()
+        return passcodeRepository.existsByPasscode(normalizedPasscode)
     }
 
     private fun generateRandomPasscodeString(): String {
