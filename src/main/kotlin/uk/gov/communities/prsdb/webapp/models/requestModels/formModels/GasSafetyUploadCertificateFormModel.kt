@@ -38,7 +38,7 @@ class GasSafetyUploadCertificateFormModel : UploadCertificateFormModel() {
         fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyUploadCertificateFormModel? =
             record.gasSafetyFileUpload?.let {
                 GasSafetyUploadCertificateFormModel().apply {
-                    this.name = it.objectKey ?: ""
+                    this.name = "${it.objectKey}.${it.extension}"
                     // The following are not stored in the database, and are only required for validation
                     this.isUserSubmittedMetadataOnly = false
                     this.contentType = validMimeTypes.first()

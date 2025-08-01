@@ -14,7 +14,8 @@ import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.system.exitProcess
 
 @Component
-@Profile("web-server-deactivated & scan-processor")
+// TODO PRSD-1352: remove the never run profile to re-enable virus scan processing
+@Profile("web-server-deactivated & scan-processor & never-run")
 class ProcessScanResultApplicationRunner(
     private val context: ApplicationContext,
     private val service: VirusScanProcessingService,

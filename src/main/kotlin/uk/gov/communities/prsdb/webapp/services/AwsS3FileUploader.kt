@@ -19,6 +19,7 @@ class AwsS3FileUploader(
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
+        extension: String,
     ): FileUpload? {
         inputStream.use { input ->
             val requestBody = AsyncRequestBody.forBlockingInputStream(null)
@@ -38,9 +39,10 @@ class AwsS3FileUploader(
                 uploadRepository.save(
                     FileUpload(
                         status = FileUploadStatus.QUARANTINED,
-                        s3Key = objectKey,
+                        objectKey = objectKey,
                         eTag = response.eTag(),
                         versionId = response.versionId(),
+                        extension = extension,
                     ),
                 )
             } else {

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
+import org.apache.commons.io.FilenameUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -65,7 +66,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import java.security.Principal
-import kotlin.reflect.KClass
 
 @PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
@@ -381,11 +381,9 @@ class PropertyComplianceController(
             fileInputIterator.getFirstFileField()
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
 
-        val formModelClass = PropertyComplianceJourneyHelper.getUploadCertificateFormModelClass(stepName)
-
         val fileUploadId =
-            if (isFileValid(formModelClass, file, request.contentLengthLong)) {
-                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName, file.name)
+            if (isFileValid(file, request.contentLengthLong)) {
+                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName)
                 uploadFile(uploadFileName, file, request.contentLengthLong)?.id
             } else {
                 null
@@ -400,7 +398,6 @@ class PropertyComplianceController(
 
         return UploadCertificateFormModel
             .fromUploadedFile(
-                formModelClass,
                 file,
                 request.contentLengthLong,
                 fileUploadId,
@@ -408,11 +405,10 @@ class PropertyComplianceController(
     }
 
     private fun isFileValid(
-        formModelClass: KClass<out UploadCertificateFormModel>,
         file: FileItemInput,
         fileLength: Long,
     ): Boolean {
-        val fileFormModel = UploadCertificateFormModel.fromUploadedFileMetadata(formModelClass, file, fileLength)
+        val fileFormModel = UploadCertificateFormModel.fromUploadedFileMetadata(file, fileLength)
         return !validator.validateObject(fileFormModel).hasErrors()
     }
 
@@ -420,7 +416,12 @@ class PropertyComplianceController(
         uploadFileName: String,
         file: FileItemInput,
         fileLength: Long,
-    ): FileUpload? = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
+    ): FileUpload? =
+        fileUploader.uploadFile(
+            uploadFileName,
+            file.inputStream.withMaxLength(fileLength),
+            FilenameUtils.getExtension(file.name),
+        )
 
     private fun addCookieIfStepIsFileUploadStep(
         stepName: String,

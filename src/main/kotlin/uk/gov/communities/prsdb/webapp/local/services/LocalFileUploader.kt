@@ -21,6 +21,7 @@ class LocalFileUploader(
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
+        extension: String,
     ): FileUpload? {
         val cleanObjectKey =
             objectKey
@@ -38,7 +39,8 @@ class LocalFileUploader(
         return uploadRepository.save(
             FileUpload(
                 status = FileUploadStatus.SCANNED,
-                s3Key = objectKey,
+                objectKey = objectKey,
+                extension = extension,
             ),
         )
     }

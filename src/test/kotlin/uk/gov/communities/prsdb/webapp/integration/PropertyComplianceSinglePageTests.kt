@@ -180,9 +180,9 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                         PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
                             PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
-                            "validFile.png",
                         ),
                     ),
+                    any(),
                     any(),
                 ),
             ).thenReturn(null)
@@ -316,9 +316,9 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                         PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
                             PropertyComplianceStepId.EicrUpload.urlPathSegment,
-                            "validFile.png",
                         ),
                     ),
+                    any(),
                     any(),
                 ),
             ).thenReturn(null)
