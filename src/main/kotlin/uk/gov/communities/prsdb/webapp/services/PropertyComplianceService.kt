@@ -121,4 +121,15 @@ class PropertyComplianceService(
     @Suppress("UNCHECKED_CAST")
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
+
+    fun deletePropertyCompliance(propertyCompliance: PropertyCompliance) {
+        propertyComplianceRepository.delete(propertyCompliance)
+    }
+
+    fun deletePropertyComplianceByOwnershipId(propertyOwnershipId: Long) =
+        propertyComplianceRepository.deleteByPropertyOwnership_Id(propertyOwnershipId)
+
+    fun deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds: List<Long>) {
+        propertyComplianceRepository.deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
+    }
 }

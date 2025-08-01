@@ -53,4 +53,17 @@ class FormContextServiceTests {
 
         verify(mockFormContextRepository).delete(formContext)
     }
+
+    @Test
+    fun `deleteFormContexts deletes all the given FormContexts`() {
+        val formContexts =
+            listOf(
+                MockLandlordData.createPropertyRegistrationFormContext(),
+                MockLandlordData.createPropertyComplianceFormContext(),
+            )
+
+        formContextService.deleteFormContexts(formContexts)
+
+        verify(mockFormContextRepository).deleteAll(formContexts)
+    }
 }
