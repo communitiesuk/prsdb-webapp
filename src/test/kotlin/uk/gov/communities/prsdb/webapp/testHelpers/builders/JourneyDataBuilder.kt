@@ -800,9 +800,9 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withFireSafetyDeclaration(hasDeclared: Boolean): JourneyDataBuilder {
+    fun withFireSafetyDeclaration(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
-            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to hasDeclared)
+            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to true)
         return this
     }
 

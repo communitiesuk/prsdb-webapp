@@ -39,7 +39,6 @@ class PropertyComplianceService(
         epcEnergyRating: String? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
-        hasFireSafetyDeclaration: Boolean = false,
     ): PropertyCompliance {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
         val gasSafetyUpload = gasSafetyCertUploadId?.let { fileUploadRepository.getReferenceById(it) }
@@ -47,7 +46,6 @@ class PropertyComplianceService(
         return propertyComplianceRepository.save(
             PropertyCompliance(
                 propertyOwnership = propertyOwnership,
-                hasFireSafetyDeclaration = hasFireSafetyDeclaration,
                 gasSafetyCertUpload = gasSafetyUpload,
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                 gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
