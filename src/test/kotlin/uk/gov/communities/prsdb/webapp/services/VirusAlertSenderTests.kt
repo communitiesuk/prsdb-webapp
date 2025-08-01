@@ -11,7 +11,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo.FileCategory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
@@ -51,7 +50,6 @@ class VirusAlertSenderTests {
         expectedBody: String,
     ) {
         // Arrange
-        val fileNameInfo = PropertyFileNameInfo(1L, testCategory, "file.txt")
         val landlordEmail = "landlord@example.com"
         val registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 37L)
 
@@ -79,7 +77,7 @@ class VirusAlertSenderTests {
             )
 
         // Act
-        virusAlertSender.sendAlerts(ownership, fileNameInfo)
+        virusAlertSender.sendAlerts(ownership, testCategory)
 
         // Assert
         val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()
