@@ -15,9 +15,9 @@ class FileUpload() : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
-    var status: FileUploadStatus? = null
+    lateinit var status: FileUploadStatus
 
-    var objectKey: String? = null
+    lateinit var objectKey: String
         private set
 
     var eTag: String? = null
@@ -31,7 +31,7 @@ class FileUpload() : ModifiableAuditableEntity() {
         this.objectKey = s3Key
     }
 
-    constructor(status: FileUploadStatus, s3Key: String, eTag: String?, versionId: String?) : this() {
+    constructor(status: FileUploadStatus, s3Key: String, eTag: String, versionId: String?) : this() {
         this.status = status
         this.objectKey = s3Key
         this.eTag = eTag
