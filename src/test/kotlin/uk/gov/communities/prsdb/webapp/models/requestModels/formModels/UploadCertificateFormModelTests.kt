@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
 class UploadCertificateFormModelTests {
     @ParameterizedTest
     @MethodSource("provideUploadCertificateFormModelClasses")
-    fun `fromFileItemInput returns a corresponding UploadCertificateFormModel`(desiredClass: KClass<out UploadCertificateFormModel>) {
+    fun `fromUploadedFile returns a corresponding UploadCertificateFormModel`(desiredClass: KClass<out UploadCertificateFormModel>) {
         val fileName = "fileName"
         val contentType = "fileType"
         val contentLength = 20L
@@ -29,13 +29,13 @@ class UploadCertificateFormModelTests {
                 this.name = fileName
                 this.contentType = contentType
                 this.contentLength = contentLength
-                this.isUploadSuccessfulOrNull = true
+                this.hasUploadFailed = false
                 this.isUserSubmittedMetadataOnly = false
                 this.fileUploadId = fileUpload.id
             }
 
         val returnedModel =
-            UploadCertificateFormModel.fromFileItemUpload(
+            UploadCertificateFormModel.fromUploadedFile(
                 desiredClass,
                 fileItemInput,
                 contentLength,
@@ -46,7 +46,7 @@ class UploadCertificateFormModelTests {
     }
 
     @Test
-    fun `fromFileInput throws an IllegalStateException when the desired class is not supported`() {
+    fun `fromUploadedFile throws an IllegalStateException when the desired class is not supported`() {
         val fileName = "fileName"
         val contentType = "fileType"
         val contentLength = 20L
@@ -54,7 +54,7 @@ class UploadCertificateFormModelTests {
         val fileItemInput = MockFileItemInput(name = fileName, contentType = contentType)
 
         assertThrows<IllegalStateException> {
-            UploadCertificateFormModel.fromFileItemUpload(
+            UploadCertificateFormModel.fromUploadedFile(
                 UnsupportedUploadCertificateFormModel::class,
                 fileItemInput,
                 contentLength,

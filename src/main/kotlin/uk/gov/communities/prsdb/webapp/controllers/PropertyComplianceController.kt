@@ -372,7 +372,7 @@ class PropertyComplianceController(
         }
 
         return UploadCertificateFormModel
-            .fromFileItemUpload(
+            .fromUploadedFile(
                 formModelClass,
                 file,
                 request.contentLengthLong,

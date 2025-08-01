@@ -16,7 +16,7 @@ abstract class UploadCertificateFormModel : FormModel {
 
     var contentLength: Long = 0
 
-    var isUploadSuccessfulOrNull: Boolean? = null
+    var hasUploadFailed: Boolean = false
 
     var isUserSubmittedMetadataOnly: Boolean = true
 
@@ -26,7 +26,7 @@ abstract class UploadCertificateFormModel : FormModel {
 
     fun isContentLengthValid() = !isNameNotBlank() || !isFileTypeValid() || contentLength <= maxContentLength
 
-    fun isUploadSuccessfulOrInvalid() = isUploadSuccessfulOrNull != false
+    fun isUploadSuccessfulOrInvalid() = !hasUploadFailed
 
     companion object {
         private val validExtensions = listOf("pdf", "png", "jpeg", "jpg")
@@ -49,12 +49,12 @@ abstract class UploadCertificateFormModel : FormModel {
                 this.name = fileItemInput.name
                 this.contentType = fileItemInput.contentType
                 this.contentLength = fileLength
-                this.isUploadSuccessfulOrNull = null
+                this.hasUploadFailed = false
                 this.isUserSubmittedMetadataOnly = false
             }
         }
 
-        fun fromFileItemUpload(
+        fun fromUploadedFile(
             desiredClass: KClass<out UploadCertificateFormModel>,
             fileItemInput: FileItemInput,
             fileLength: Long,
@@ -71,7 +71,7 @@ abstract class UploadCertificateFormModel : FormModel {
                 this.name = fileItemInput.name
                 this.contentType = fileItemInput.contentType
                 this.contentLength = fileLength
-                this.isUploadSuccessfulOrNull = fileUploadId != null
+                this.hasUploadFailed = fileUploadId == null
                 this.isUserSubmittedMetadataOnly = false
                 this.fileUploadId = fileUploadId
             }
