@@ -386,17 +386,11 @@ class PropertyComplianceJourney(
                             mapOf(
                                 "title" to "propertyCompliance.title",
                                 "housesInMultipleOccupationUrl" to HOUSES_IN_MULTIPLE_OCCUPATION_URL,
-                                "radioOptions" to
+                                "options" to
                                     listOf(
-                                        RadiosButtonViewModel(
+                                        CheckboxViewModel(
                                             value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
+                                            labelMsgKey = "forms.landlordResponsibilities.fireSafety.checkbox.label",
                                         ),
                                     ),
                             ),
