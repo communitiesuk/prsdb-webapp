@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
+import org.apache.commons.io.FilenameUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -382,7 +383,7 @@ class PropertyComplianceController(
 
         val fileUploadId =
             if (isFileValid(file, request.contentLengthLong)) {
-                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName, file.name)
+                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName)
                 uploadFile(uploadFileName, file, request.contentLengthLong)?.id
             } else {
                 null
@@ -415,7 +416,8 @@ class PropertyComplianceController(
         uploadFileName: String,
         file: FileItemInput,
         fileLength: Long,
-    ): FileUpload? = fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength))
+    ): FileUpload? =
+        fileUploader.uploadFile(uploadFileName, file.inputStream.withMaxLength(fileLength), FilenameUtils.getExtension(file.name))
 
     private fun addCookieIfStepIsFileUploadStep(
         stepName: String,

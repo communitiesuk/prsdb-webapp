@@ -436,7 +436,7 @@ class PropertyComplianceControllerTests(
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader, never()).uploadFile(any(), any())
+            verify(fileUploader, never()).uploadFile(any(), any(), any())
             verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
         }
 
@@ -444,7 +444,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(null)
+            whenever(fileUploader.uploadFile(any(), any(), any())).thenReturn(null)
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -459,7 +459,7 @@ class PropertyComplianceControllerTests(
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader).uploadFile(any(), any())
+            verify(fileUploader).uploadFile(any(), any(), any())
             verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
         }
 
@@ -467,7 +467,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(FileUpload())
+            whenever(fileUploader.uploadFile(any(), any(), any())).thenReturn(FileUpload())
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -481,7 +481,7 @@ class PropertyComplianceControllerTests(
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader).uploadFile(any(), any())
+            verify(fileUploader).uploadFile(any(), any(), any())
             verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
         }
     }
@@ -776,7 +776,7 @@ class PropertyComplianceControllerTests(
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader, never()).uploadFile(any(), any())
+            verify(fileUploader, never()).uploadFile(any(), any(), any())
             verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceUpdateFileUploadUrl)
         }
 
@@ -784,7 +784,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadUpdateJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(null)
+            whenever(fileUploader.uploadFile(any(), any(), any())).thenReturn(null)
 
             mvc
                 .post(validPropertyComplianceUpdateFileUploadUrl) {
@@ -799,7 +799,7 @@ class PropertyComplianceControllerTests(
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader).uploadFile(any(), any())
+            verify(fileUploader).uploadFile(any(), any(), any())
             verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceUpdateFileUploadUrl)
         }
 
@@ -807,7 +807,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadUpdateJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(FileUpload())
+            whenever(fileUploader.uploadFile(any(), any(), any())).thenReturn(FileUpload())
 
             mvc
                 .post(validPropertyComplianceUpdateFileUploadUrl) {
@@ -821,7 +821,7 @@ class PropertyComplianceControllerTests(
                 }
 
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader).uploadFile(any(), any())
+            verify(fileUploader).uploadFile(any(), any(), any())
             verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
         }
     }

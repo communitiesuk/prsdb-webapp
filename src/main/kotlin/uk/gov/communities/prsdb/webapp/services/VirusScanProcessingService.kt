@@ -55,7 +55,7 @@ class VirusScanProcessingService(
     ) {
         val complianceRecord = complianceRepository.findByPropertyOwnership_Id(ownership.id)
         if (complianceRecord != null) {
-            val fileUpload = FileUpload(FileUploadStatus.SCANNED, fileNameInfo.toString())
+            val fileUpload = FileUpload(FileUploadStatus.SCANNED, fileNameInfo.toString(), "TODO PRSD-1352")
             when (fileNameInfo.fileCategory) {
                 // TODO 1352 - Replace with file upload status updates over new uploads
                 FileCategory.Eirc -> complianceRecord.eicrFileUpload = fileUpload

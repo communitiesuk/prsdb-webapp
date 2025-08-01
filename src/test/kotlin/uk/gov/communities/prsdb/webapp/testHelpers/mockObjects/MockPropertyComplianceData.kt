@@ -35,12 +35,14 @@ class MockPropertyComplianceData {
         ) = PropertyCompliance(
             propertyOwnership = propertyOwnership,
             hasFireSafetyDeclaration = hasFireSafetyDeclaration,
-            gasSafetyCertUpload = gasSafetyCertS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it) },
+            // TODO PRSD-1352 fix extensions
+            gasSafetyCertUpload = gasSafetyCertS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it, "pdf") },
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
             gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
-            eicrUpload = eicrS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it) },
+            // TODO PRSD-1352 fix extensions
+            eicrUpload = eicrS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it, "pdf") },
             eicrIssueDate = eicrIssueDate,
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,

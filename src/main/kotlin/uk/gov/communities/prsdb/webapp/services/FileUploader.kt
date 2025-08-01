@@ -7,5 +7,6 @@ interface FileUploader {
     fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
+        extension: String,
     ): FileUpload?
 }
