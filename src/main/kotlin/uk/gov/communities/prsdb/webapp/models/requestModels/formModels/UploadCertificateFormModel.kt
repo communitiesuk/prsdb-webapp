@@ -38,12 +38,7 @@ abstract class UploadCertificateFormModel : FormModel {
             fileItemInput: FileItemInput,
             fileLength: Long,
         ): UploadCertificateFormModel {
-            val uploadCertificateFormModel =
-                when (desiredClass) {
-                    GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
-                    EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
-                    else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
-                }
+            val uploadCertificateFormModel = createUninitialisedUploadCertificateFormModel(desiredClass)
 
             return uploadCertificateFormModel.apply {
                 this.name = fileItemInput.name
@@ -60,12 +55,7 @@ abstract class UploadCertificateFormModel : FormModel {
             fileLength: Long,
             fileUploadId: Long?,
         ): UploadCertificateFormModel {
-            val uploadCertificateFormModel =
-                when (desiredClass) {
-                    GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
-                    EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
-                    else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
-                }
+            val uploadCertificateFormModel = createUninitialisedUploadCertificateFormModel(desiredClass)
 
             return uploadCertificateFormModel.apply {
                 this.name = fileItemInput.name
@@ -76,5 +66,14 @@ abstract class UploadCertificateFormModel : FormModel {
                 this.fileUploadId = fileUploadId
             }
         }
+
+        private fun createUninitialisedUploadCertificateFormModel(
+            desiredClass: KClass<out UploadCertificateFormModel>,
+        ): UploadCertificateFormModel =
+            when (desiredClass) {
+                GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
+                EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
+                else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
+            }
     }
 }
