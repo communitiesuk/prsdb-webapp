@@ -36,10 +36,13 @@ class GasSafetyUploadCertificateFormModel : UploadCertificateFormModel() {
 
     companion object {
         fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyUploadCertificateFormModel? =
-            record.gasSafetyCertS3Key?.let {
+            record.gasSafetyFileUpload?.let {
                 GasSafetyUploadCertificateFormModel().apply {
-                    this.name = it
-                    this.isMetadataOnly = false
+                    this.name = it.objectKey ?: ""
+                    // The following are not stored in the database, and are only required for validation
+                    this.isUserSubmittedMetadataOnly = false
+                    this.contentType = validMimeTypes.first()
+                    this.fileUploadId = it.id
                 }
             }
     }

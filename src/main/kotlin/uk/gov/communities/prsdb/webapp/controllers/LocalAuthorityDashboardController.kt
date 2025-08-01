@@ -43,6 +43,11 @@ class LocalAuthorityDashboardController(
                         "navLink.manageUsers.title",
                         false,
                     ),
+                    NavigationLinkViewModel(
+                        GeneratePasscodeController.GENERATE_PASSCODE_URL,
+                        "navLink.generatePasscode.title",
+                        false,
+                    ),
                 ),
             )
         }
@@ -57,8 +62,6 @@ class LocalAuthorityDashboardController(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_URL,
         )
-        // TODO: link to content
-        model.addAttribute("aboutPilotUrl", "#")
         return "localAuthorityDashboard"
     }
 

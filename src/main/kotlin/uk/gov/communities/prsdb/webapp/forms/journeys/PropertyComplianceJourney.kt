@@ -26,15 +26,13 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
-import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
@@ -42,7 +40,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
@@ -303,7 +301,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> gasSafetyStepNextAction(filteredJourneyData) },
             )
@@ -334,7 +332,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 nextAction = { filteredJourneyData, _ -> eicrStepNextAction(filteredJourneyData) },
             )
@@ -370,7 +368,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.epc.radios.option.notRequired.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ) { mapOf("address" to getPropertyAddress()) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> epcStepHandleSubmitAndRedirect(filteredJourneyData) },
                 nextAction = { filteredJourneyData, _ -> epcStepNextAction(filteredJourneyData) },
@@ -401,7 +399,7 @@ class PropertyComplianceJourney(
                                             labelMsgKey = "forms.radios.option.no.label",
                                         ),
                                     ),
-                            ).withBackUrlIfNotNullAndNotCheckingAnswers(taskListUrlSegment, isCheckingAnswers),
+                            ),
                     ),
                 nextAction = { filteredJourneyData, _ -> fireSafetyDeclarationStepNextAction(filteredJourneyData) },
             )
@@ -481,7 +479,12 @@ class PropertyComplianceJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.CheckAndSubmit,
-                page = PropertyComplianceCheckAnswersPage(journeyDataService, epcCertificateUrlProvider) { getPropertyAddress() },
+                page =
+                    PropertyComplianceCheckAnswersPage(
+                        journeyDataService,
+                        epcCertificateUrlProvider,
+                        unreachableStepRedirect,
+                    ) { getPropertyAddress() },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
             )
 
@@ -566,35 +569,17 @@ class PropertyComplianceJourney(
         }
 
     private fun checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val gasSafetyCertFilename =
-            filteredJourneyData.getGasSafetyCertOriginalName()?.let {
-                PropertyComplianceJourneyHelper.getCertFilename(
-                    propertyOwnershipId,
-                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
-                    it,
-                )
-            }
-
-        val eicrFilename =
-            filteredJourneyData.getEicrOriginalName()?.let {
-                PropertyComplianceJourneyHelper.getCertFilename(
-                    propertyOwnershipId,
-                    PropertyComplianceStepId.EicrUpload.urlPathSegment,
-                    it,
-                )
-            }
-
         val epcDetails = filteredJourneyData.getAcceptedEpcDetails()
 
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(
                 propertyOwnershipId = propertyOwnershipId,
-                gasSafetyCertS3Key = gasSafetyCertFilename,
+                gasSafetyCertUploadId = filteredJourneyData.getGasSafetyCertUploadId()?.toLong(),
                 gasSafetyCertIssueDate = filteredJourneyData.getGasSafetyCertIssueDate()?.toJavaLocalDate(),
                 gasSafetyCertEngineerNum = filteredJourneyData.getGasSafetyCertEngineerNum(),
                 gasSafetyCertExemptionReason = filteredJourneyData.getGasSafetyCertExemptionReason(),
                 gasSafetyCertExemptionOtherReason = filteredJourneyData.getGasSafetyCertExemptionOtherReason(),
-                eicrS3Key = eicrFilename,
+                eicrUploadId = filteredJourneyData.getEicrUploadId()?.toLong(),
                 eicrIssueDate = filteredJourneyData.getEicrIssueDate()?.toJavaLocalDate(),
                 eicrExemptionReason = filteredJourneyData.getEicrExemptionReason(),
                 eicrExemptionOtherReason = filteredJourneyData.getEicrExemptionOtherReason(),

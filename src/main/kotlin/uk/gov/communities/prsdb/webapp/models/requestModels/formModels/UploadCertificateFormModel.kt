@@ -10,13 +10,15 @@ abstract class UploadCertificateFormModel : FormModel {
 
     var name: String = ""
 
+    var fileUploadId: Long? = null
+
     var contentType: String = ""
 
     var contentLength: Long = 0
 
-    var isUploadSuccessfulOrNull: Boolean? = null
+    var hasUploadFailed: Boolean = false
 
-    var isMetadataOnly: Boolean = true
+    var isUserSubmittedMetadataOnly: Boolean = true
 
     fun isNameNotBlank() = name.isNotBlank()
 
@@ -24,33 +26,54 @@ abstract class UploadCertificateFormModel : FormModel {
 
     fun isContentLengthValid() = !isNameNotBlank() || !isFileTypeValid() || contentLength <= maxContentLength
 
-    fun isUploadSuccessfulOrInvalid() = isUploadSuccessfulOrNull != false
+    fun isUploadSuccessfulOrInvalid() = !hasUploadFailed
 
     companion object {
         private val validExtensions = listOf("pdf", "png", "jpeg", "jpg")
-        private val validMimeTypes = listOf("application/pdf", "image/png", "image/jpeg")
+        val validMimeTypes = listOf("application/pdf", "image/png", "image/jpeg")
         val maxContentLength = 15 * 1024.0.pow(2) // 15MB
 
-        fun fromFileItemInput(
+        fun fromUploadedFileMetadata(
             desiredClass: KClass<out UploadCertificateFormModel>,
             fileItemInput: FileItemInput,
             fileLength: Long,
-            isUploadSuccessfulOrNull: Boolean? = null,
         ): UploadCertificateFormModel {
-            val uploadCertificateFormModel =
-                when (desiredClass) {
-                    GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
-                    EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
-                    else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
-                }
+            val uploadCertificateFormModel = createUninitialisedUploadCertificateFormModel(desiredClass)
 
             return uploadCertificateFormModel.apply {
                 this.name = fileItemInput.name
                 this.contentType = fileItemInput.contentType
                 this.contentLength = fileLength
-                this.isUploadSuccessfulOrNull = isUploadSuccessfulOrNull
-                this.isMetadataOnly = false
+                this.hasUploadFailed = false
+                this.isUserSubmittedMetadataOnly = false
             }
         }
+
+        fun fromUploadedFile(
+            desiredClass: KClass<out UploadCertificateFormModel>,
+            fileItemInput: FileItemInput,
+            fileLength: Long,
+            fileUploadId: Long?,
+        ): UploadCertificateFormModel {
+            val uploadCertificateFormModel = createUninitialisedUploadCertificateFormModel(desiredClass)
+
+            return uploadCertificateFormModel.apply {
+                this.name = fileItemInput.name
+                this.contentType = fileItemInput.contentType
+                this.contentLength = fileLength
+                this.hasUploadFailed = fileUploadId == null
+                this.isUserSubmittedMetadataOnly = false
+                this.fileUploadId = fileUploadId
+            }
+        }
+
+        private fun createUninitialisedUploadCertificateFormModel(
+            desiredClass: KClass<out UploadCertificateFormModel>,
+        ): UploadCertificateFormModel =
+            when (desiredClass) {
+                GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
+                EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
+                else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
+            }
     }
 }

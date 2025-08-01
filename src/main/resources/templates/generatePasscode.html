@@ -1,0 +1,35 @@
+<!--/*@thymesVar id="passcode" type=""*/-->
+<!DOCTYPE html>
+<html id="main-content"
+      th:replace="~{fragments/layout :: layout(#{generatePasscode.title}, ~{::#main-content/content()}, false)}">
+<a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+<main class="govuk-main-wrapper">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{generatePasscode.banner.heading}, ~{::#confirmation-banner/content()})}">
+            <span th:text="#{generatePasscode.banner.body}" th:remove="tag">
+                generatePasscode.banner.body
+            </span>
+            <br>
+            <strong th:text="${passcode}"></strong>
+        </div>
+        <section>
+            <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+            <p class="govuk-body" th:text="#{generatePasscode.instructions}">
+                generatePasscode.instructions
+            </p>
+        </section>
+        <form method="POST" th:action="@{''}">
+            <div class="govuk-button-group">
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePasscode.generateAnother})}">
+                    generatePasscode.generateAnother
+                </button>
+                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${dashboardUrl}, #{generatePasscode.returnToDashboard})}">
+                    generatePasscode.returnToDashboard
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+</html>

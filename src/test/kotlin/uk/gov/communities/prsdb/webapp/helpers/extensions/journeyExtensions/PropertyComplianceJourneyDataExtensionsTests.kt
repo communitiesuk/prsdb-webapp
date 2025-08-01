@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
@@ -38,7 +38,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -57,8 +58,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcLookupPagePropertyCompliance.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
@@ -147,12 +148,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getHasNewGasSafetyCertificate returns false if the corresponding page is not in journeyData`() {
+    fun `getHasNewGasSafetyCertificate returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
 
-        assertEquals(false, retrievedHasGasSafetyCert)
+        assertNull(retrievedHasGasSafetyCert)
     }
 
     @Test
@@ -219,20 +220,20 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getGasSafetyCertOriginalName returns a string if the corresponding page is in journeyData`() {
-        val gasSafetyCertOriginalName = "file.png"
-        val testJourneyData = journeyDataBuilder.withOriginalGasSafetyCertName(gasSafetyCertOriginalName).build()
+    fun `getGasSafetyCertUploadId returns a string if the corresponding page is in journeyData`() {
+        val gasSafetyFileUploadId = 33L
+        val testJourneyData = journeyDataBuilder.withGasCertFileUploadId(gasSafetyFileUploadId).build()
 
-        val retrievedGasSafetyCertOriginalName = testJourneyData.getGasSafetyCertOriginalName()
+        val retrievedGasSafetyCertUploadId = testJourneyData.getGasSafetyCertUploadId()?.toLong()
 
-        assertEquals(gasSafetyCertOriginalName, retrievedGasSafetyCertOriginalName)
+        assertEquals(gasSafetyFileUploadId, retrievedGasSafetyCertUploadId)
     }
 
     @Test
-    fun `getGasSafetyCertOriginalName returns null if the corresponding page is not in journeyData`() {
+    fun `getGasSafetyCertUploadId returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertOriginalName()
+        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertUploadId()
 
         assertNull(retrievedGasSafeEngineerNum)
     }
@@ -336,6 +337,16 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
+    fun `getHasNewEICR returns a boolean if the corresponding page is in journeyData`() {
+        val hasNewEICR = true
+        val testJourneyData = journeyDataBuilder.withNewEicrStatus(hasNewEICR).build()
+
+        val retrievedHasEICR = testJourneyData.getHasNewEICR()
+
+        assertEquals(hasNewEICR, retrievedHasEICR)
+    }
+
+    @Test
     fun `getEicrIssueDate returns a LocalDate if the corresponding page is in journeyData`() {
         val eicrIssueDate = LocalDate.now()
         val testJourneyData = journeyDataBuilder.withEicrIssueDate(eicrIssueDate).build()
@@ -343,6 +354,15 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedEicrIssueDate = testJourneyData.getEicrIssueDate()?.toJavaLocalDate()
 
         assertEquals(eicrIssueDate, retrievedEicrIssueDate)
+    }
+
+    @Test
+    fun `getHasNewEICR returns null if the corresponding page is not in journeyData`() {
+        val testJourneyData = journeyDataBuilder.build()
+
+        val retrievedHasEICR = testJourneyData.getHasNewEICR()
+
+        assertNull(retrievedHasEICR)
     }
 
     @Test
@@ -380,22 +400,22 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getEicrOriginalName returns a string if the corresponding page is in journeyData`() {
-        val eicrOriginalName = "eicr.pdf"
-        val testJourneyData = journeyDataBuilder.withOriginalEicrName(eicrOriginalName).build()
+    fun `getEicrUploadId returns a string if the corresponding page is in journeyData`() {
+        val eicrUploadId = 933L
+        val testJourneyData = journeyDataBuilder.withEicrUploadId(eicrUploadId).build()
 
-        val retrievedEicrOriginalName = testJourneyData.getEicrOriginalName()
+        val retrievedEicrUploadId = testJourneyData.getEicrUploadId()?.toLong()
 
-        assertEquals(eicrOriginalName, retrievedEicrOriginalName)
+        assertEquals(eicrUploadId, retrievedEicrUploadId)
     }
 
     @Test
-    fun `getEicrOriginalName returns null if the corresponding page is not in journeyData`() {
+    fun `getEicrUploadId returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val retrievedEicrOriginalName = testJourneyData.getEicrOriginalName()
+        val retrievedEicrUploadId = testJourneyData.getEicrUploadId()
 
-        assertNull(retrievedEicrOriginalName)
+        assertNull(retrievedEicrUploadId)
     }
 
     @Test
@@ -507,12 +527,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getHasNewEpc returns false if the corresponding page is not in journeyData`() {
+    fun `getHasNewEpc returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
         val retrievedHasNewEpc = testJourneyData.getHasNewEPC()
 
-        assertEquals(false, retrievedHasNewEpc)
+        assertNull(retrievedHasNewEpc)
     }
 
     @Test

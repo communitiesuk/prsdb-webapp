@@ -1,12 +1,16 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 
 enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: PropertyComplianceGroupIdentifier,
     override val isCheckYourAnswersStepId: Boolean = false,
 ) : GroupedUpdateStepId<PropertyComplianceGroupIdentifier> {
+    CheckComplianceExists("check-property-exists", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafety("gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
     UpdateGasSafety("update-gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
     GasSafetyIssueDate("gas-safety-certificate-issue-date", PropertyComplianceGroupIdentifier.GasSafety),
@@ -50,10 +54,10 @@ enum class PropertyComplianceStepId(
     MeesExemptionConfirmation("mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Epc),
     LowEnergyRating("low-energy-rating", PropertyComplianceGroupIdentifier.Epc),
     UpdateEpcCheckYourAnswers("epc-check-your-answers", PropertyComplianceGroupIdentifier.Epc, true),
-    FireSafetyDeclaration("fire-safety-declaration", PropertyComplianceGroupIdentifier.FireSafety),
+    FireSafetyDeclaration(FIRE_SAFETY_PATH_SEGMENT, PropertyComplianceGroupIdentifier.FireSafety),
     FireSafetyRisk("fire-safety-risk", PropertyComplianceGroupIdentifier.FireSafety),
-    KeepPropertySafe("keep-property-safe", PropertyComplianceGroupIdentifier.KeepPropertySafe),
-    ResponsibilityToTenants("responsibility-to-tenants", PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
+    KeepPropertySafe(KEEP_PROPERTY_SAFE_PATH_SEGMENT, PropertyComplianceGroupIdentifier.KeepPropertySafe),
+    ResponsibilityToTenants(RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT, PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
     CheckAndSubmit("check-and-submit", PropertyComplianceGroupIdentifier.CheckAndSubmit),
 }
 

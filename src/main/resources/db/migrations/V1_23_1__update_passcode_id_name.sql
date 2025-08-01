@@ -1,0 +1,5 @@
+ALTER TABLE IF EXISTS passcode
+    DROP CONSTRAINT IF EXISTS passcode_pkey CASCADE;
+ALTER TABLE IF EXISTS passcode
+    RENAME COLUMN id TO passcode;
+ALTER TABLE IF EXISTS passcode ADD PRIMARY KEY (passcode);

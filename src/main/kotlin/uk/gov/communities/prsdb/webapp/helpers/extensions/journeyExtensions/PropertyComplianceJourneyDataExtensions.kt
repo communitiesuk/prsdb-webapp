@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 
@@ -51,7 +52,16 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
                 UpdateGasSafetyCertificateFormModel::hasNewCertificate.name,
-            ) ?: false
+            )
+
+        const val ORIGINALLY_NOT_INCLUDED_KEY = "originallyNotIncluded"
+
+        fun JourneyData.getStillHasNoGasCertOrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
+                ORIGINALLY_NOT_INCLUDED_KEY,
+            )
 
         fun JourneyData.getGasSafetyCertIssueDate() =
             this.getFieldSetLocalDateValue(PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment)
@@ -69,11 +79,11 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 GasSafeEngineerNumFormModel::engineerNumber.name,
             )
 
-        fun JourneyData.getGasSafetyCertOriginalName() =
+        fun JourneyData.getGasSafetyCertUploadId() =
             JourneyDataHelper.getFieldStringValue(
                 this,
                 PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
-                GasSafetyUploadCertificateFormModel::name.name,
+                GasSafetyUploadCertificateFormModel::fileUploadId.name,
             )
 
         fun JourneyData.getHasGasSafetyCertExemption() =
@@ -107,6 +117,20 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 EicrFormModel::hasCert.name,
             )
 
+        fun JourneyData.getHasNewEICR() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEICR.urlPathSegment,
+                UpdateEicrFormModel::hasNewCertificate.name,
+            )
+
+        fun JourneyData.getStillHasNoEicrOrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEICR.urlPathSegment,
+                ORIGINALLY_NOT_INCLUDED_KEY,
+            )
+
         fun JourneyData.getEicrIssueDate() = this.getFieldSetLocalDateValue(PropertyComplianceStepId.EicrIssueDate.urlPathSegment)
 
         fun JourneyData.getIsEicrOutdated(): Boolean? {
@@ -115,11 +139,11 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             return issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
         }
 
-        fun JourneyData.getEicrOriginalName() =
+        fun JourneyData.getEicrUploadId() =
             JourneyDataHelper.getFieldStringValue(
                 this,
                 PropertyComplianceStepId.EicrUpload.urlPathSegment,
-                EicrUploadCertificateFormModel::name.name,
+                EicrUploadCertificateFormModel::fileUploadId.name,
             )
 
         fun JourneyData.getHasEicrExemption() =
@@ -157,7 +181,14 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.UpdateEpc.urlPathSegment,
                 UpdateEpcFormModel::hasNewCertificate.name,
-            ) ?: false
+            )
+
+        fun JourneyData.getStillHasNoEpcOrExemption() =
+            JourneyDataHelper.getFieldBooleanValue(
+                this,
+                PropertyComplianceStepId.UpdateEpc.urlPathSegment,
+                ORIGINALLY_NOT_INCLUDED_KEY,
+            )
 
         fun JourneyData.getEpcLookupCertificateNumber(): String? =
             JourneyDataHelper.getFieldStringValue(
@@ -313,7 +344,7 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
         fun JourneyData.getHasCompletedEicrExemptionMissing() =
             this.containsKey(PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment)
 
-        private fun JourneyData.getHasCompletedEicrOutdated() = this.containsKey(PropertyComplianceStepId.EicrOutdated.urlPathSegment)
+        fun JourneyData.getHasCompletedEicrOutdated() = this.containsKey(PropertyComplianceStepId.EicrOutdated.urlPathSegment)
 
         fun JourneyData.getHasCompletedEpcExemptionConfirmation() =
             this.containsKey(PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment)

@@ -12,6 +12,7 @@ abstract class PropertyDetailsBasePage(
 ) : BasePage(page, urlSegment) {
     val tabs = PropertyDetailsTabs(page)
     val propertyDetailsSummaryList = PropertyDetailsSummaryList(page)
+    val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
 
     fun getLandlordNameLinkFromKeyDetails(landlordName: String) = Link.byText(page, landlordName, 0)
 
@@ -43,5 +44,17 @@ abstract class PropertyDetailsBasePage(
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfPeopleRow = getRow("Number of people")
         val licensingRow = getRow("Licensing type")
+    }
+
+    class PropertyComplianceSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val gasSafetyRow = getRow("Gas safety certificate")
+        val eicrRow = getRow("Electrical Installation Condition Report (EICR)")
+        val epcRow = getRow("Energy Performance Certificate (EPC)")
+        val meesExemptionRow = getRow("MEES exemption")
+        val fireSafetyRow = getRow("Followed fire safety responsibilities")
+        val propertySafetyRow = getRow("Understood your responsibility to keep your property safe")
+        val responsibilityToTenantsRow = getRow("Understood your responsibilities to tenants")
     }
 }

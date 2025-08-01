@@ -1,24 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.context.bean.override.mockito.MockitoBean
-import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.services.FileUploader
 
 class UpdatePropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
-    @MockitoBean
-    private lateinit var fileUploader: FileUploader
-
-    @MockitoBean
-    private lateinit var epcRegisterClient: EpcRegisterClient
-
     @Nested
     inner class UpdateGasSafetyStepTests {
-        // TODO PRSD-1245: Re-enable this test when UpdateGasSafetyCertificateFormModel validation is re-enabled
-        @Disabled
         @Test
         fun `Submitting with no option selected returns an error`() {
             val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
@@ -26,6 +14,17 @@ class UpdatePropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data
             assertThat(
                 updateGasSafetyPage.form.getErrorMessage(),
             ).containsText("Select whether you want to add a new certificate or exemption")
+        }
+    }
+
+    @Nested
+    inner class UpdateEicrStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
+            updateEicrPage.form.submit()
+            assertThat(updateEicrPage.form.getErrorMessage())
+                .containsText("Select whether you want to add a new EICR or exemption")
         }
     }
 

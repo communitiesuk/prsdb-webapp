@@ -8,20 +8,20 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFileItemInput
 import java.io.File
-import kotlin.div
 import kotlin.reflect.KClass
 import kotlin.test.assertTrue
 
 class UploadCertificateFormModelTests {
     @ParameterizedTest
     @MethodSource("provideUploadCertificateFormModelClasses")
-    fun `fromFileItemInput returns a corresponding UploadCertificateFormModel`(desiredClass: KClass<out UploadCertificateFormModel>) {
+    fun `fromUploadedFile returns a corresponding UploadCertificateFormModel`(desiredClass: KClass<out UploadCertificateFormModel>) {
         val fileName = "fileName"
         val contentType = "fileType"
         val contentLength = 20L
-        val isUploadSuccessful = true
+        val fileUpload = FileUpload()
         val fileItemInput = MockFileItemInput(name = fileName, contentType = contentType)
 
         val expectedModel =
@@ -29,35 +29,36 @@ class UploadCertificateFormModelTests {
                 this.name = fileName
                 this.contentType = contentType
                 this.contentLength = contentLength
-                this.isUploadSuccessfulOrNull = isUploadSuccessful
-                this.isMetadataOnly = false
+                this.hasUploadFailed = false
+                this.isUserSubmittedMetadataOnly = false
+                this.fileUploadId = fileUpload.id
             }
 
         val returnedModel =
-            UploadCertificateFormModel.fromFileItemInput(
+            UploadCertificateFormModel.fromUploadedFile(
                 desiredClass,
                 fileItemInput,
                 contentLength,
-                isUploadSuccessful,
+                fileUpload.id,
             )
 
         assertTrue(ReflectionEquals(returnedModel).matches(expectedModel))
     }
 
     @Test
-    fun `fromFileInput throws an IllegalStateException when the desired class is not supported`() {
+    fun `fromUploadedFile throws an IllegalStateException when the desired class is not supported`() {
         val fileName = "fileName"
         val contentType = "fileType"
         val contentLength = 20L
-        val isUploadSuccessful = true
+        val fileUpload = FileUpload()
         val fileItemInput = MockFileItemInput(name = fileName, contentType = contentType)
 
         assertThrows<IllegalStateException> {
-            UploadCertificateFormModel.fromFileItemInput(
+            UploadCertificateFormModel.fromUploadedFile(
                 UnsupportedUploadCertificateFormModel::class,
                 fileItemInput,
                 contentLength,
-                isUploadSuccessful,
+                fileUpload.id,
             )
         }
     }

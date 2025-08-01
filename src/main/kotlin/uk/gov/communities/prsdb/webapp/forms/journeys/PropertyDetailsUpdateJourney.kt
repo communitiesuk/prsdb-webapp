@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyDetailsUpdateJourneyStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberStepIdAndFormModel
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyDetailsUpdateJourneyExtensions.Companion.getLicenceNumberUpdateIfPresent
@@ -266,7 +266,7 @@ class PropertyDetailsUpdateJourney(
     private val checkLicensingAnswers =
         Step(
             id = UpdatePropertyDetailsStepId.CheckYourLicensingAnswers,
-            page = CheckLicensingAnswersPage(journeyDataService),
+            page = CheckLicensingAnswersPage(journeyDataService, unreachableStepRedirect),
             nextAction = { _, _ -> Pair(stepFactory.occupancyStepId, null) },
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
         )
@@ -280,7 +280,7 @@ class PropertyDetailsUpdateJourney(
     private val checkOccupancyAnswers =
         Step(
             id = stepFactory.checkOccupancyAnswersStepId,
-            page = CheckOccupancyAnswersPage(stepFactory.stepGroupId, journeyDataService),
+            page = CheckOccupancyAnswersPage(stepFactory.stepGroupId, journeyDataService, unreachableStepRedirect),
             handleSubmitAndRedirect = { _, _, _ -> updatePropertyAndRedirect() },
             saveAfterSubmit = false,
         )
@@ -324,7 +324,10 @@ class PropertyDetailsUpdateJourney(
                 numberOfPeople = journeyData.getNumberOfPeopleUpdateIfPresent(stepFactory.stepGroupId),
             )
 
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnershipId, propertyUpdate)
+        propertyOwnershipService.updatePropertyOwnership(
+            propertyOwnershipId,
+            propertyUpdate,
+        ) { throwIfSubmittedDataIsAnInvalidUpdate(journeyData) }
 
         clearRelatedJourneyContext()
 

@@ -63,7 +63,8 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (13, '2025-01-15 00:00:00+00', 150242309331, 0),
        (14, '2025-01-15 00:00:00+00', 150242309332, 0),
        (15, '2025-01-15 00:00:00+00', 150242309333, 0),
-       (16, '2025-01-15 00:00:00+00', 150242309334, 0) ON CONFLICT DO NOTHING;
+       (16, '2025-01-15 00:00:00+00', 150242309334, 0),
+       (17, '2025-07-24 00:00:00+00', 150242309335, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -75,7 +76,8 @@ VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2),
        (5, '2025-01-15 00:00:00+00', null, null, '5a, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
        (6, '2025-01-15 00:00:00+00', null, null, '6, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
        (7, '2025-01-15 00:00:00+00', null, null, '7, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (8, '2025-01-15 00:00:00+00', null, null, '8, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21) ON CONFLICT DO NOTHING;
+       (8, '2025-01-15 00:00:00+00', null, null, '8, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
+       (9, '2025-07-24 00:00:00+00', null, 100090154806, '19, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -99,7 +101,8 @@ VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null),
        (5, 1, true, 1, 5, '2024-10-15 00:00:00+00', null),
        (6, 1, true, 1, 6, '2024-10-15 00:00:00+00', null),
        (7, 1, true, 1, 7, '2024-10-15 00:00:00+00', null),
-       (8, 1, true, 1, 8, '2024-10-15 00:00:00+00', null) ON CONFLICT DO NOTHING;
+       (8, 1, true, 1, 8, '2024-10-15 00:00:00+00', null),
+       (9, 1, true, 1, 9, '2025-07-24 00:00:00+00', null) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
 
@@ -111,7 +114,8 @@ VALUES (1, true, 0, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2),
        (5, true, 0, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null),
        (6, true, 0, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null),
        (7, true, 0, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null),
-       (8, true, 0, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null) ON CONFLICT DO NOTHING;
+       (8, true, 0, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null),
+       (9, true, 0, 1, 1, 2, 17, 1, 9, '2025-07-24 00:00:00+00', null, null) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -127,8 +131,8 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,
-                                 gas_safety_cert_s3_key, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason,
-                                 eicr_s3_key, eicr_issue_date, eicr_exemption_reason, eicr_exemption_other_reason,
+                                 gas_safety_upload_id, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason,
+                                 eicr_id, eicr_issue_date, eicr_exemption_reason, eicr_exemption_other_reason,
                                  epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES (1, 5, '01/01/25', '01/01/25',
@@ -147,6 +151,11 @@ VALUES (1, 5, '01/01/25', '01/01/25',
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-02-28', null, 'g', null, null,
         true, true, true),
        (4, 8, '01/01/25', '01/01/25',
+        null, null, null, 0, null,
+        null, null, 1, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2030-12-03', null, 'c', null, null,
+        true, true, true),
+       (5, 9, '01/01/25', '01/01/25',
         null, null, null, 0, null,
         null, null, 1, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2030-12-03', null, 'c', null, null,
