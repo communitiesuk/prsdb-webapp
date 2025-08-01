@@ -55,7 +55,6 @@ enum class PropertyComplianceStepId(
     LowEnergyRating("low-energy-rating", PropertyComplianceGroupIdentifier.Epc),
     UpdateEpcCheckYourAnswers("epc-check-your-answers", PropertyComplianceGroupIdentifier.Epc, true),
     FireSafetyDeclaration(FIRE_SAFETY_PATH_SEGMENT, PropertyComplianceGroupIdentifier.FireSafety),
-    FireSafetyRisk("fire-safety-risk", PropertyComplianceGroupIdentifier.FireSafety),
     KeepPropertySafe(KEEP_PROPERTY_SAFE_PATH_SEGMENT, PropertyComplianceGroupIdentifier.KeepPropertySafe),
     ResponsibilityToTenants(RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT, PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
     CheckAndSubmit("check-and-submit", PropertyComplianceGroupIdentifier.CheckAndSubmit),
