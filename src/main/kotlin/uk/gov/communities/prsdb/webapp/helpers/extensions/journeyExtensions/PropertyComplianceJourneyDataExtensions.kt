@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
@@ -282,13 +281,6 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 this,
                 PropertyComplianceStepId.MeesExemptionReason.urlPathSegment,
                 MeesExemptionReasonFormModel::exemptionReason.name,
-            )
-
-        fun JourneyData.getHasFireSafetyDeclaration() =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
-                FireSafetyDeclarationFormModel::hasDeclared.name,
             )
 
         fun JourneyData.getResponsibilityToTenantsAgreement() =
