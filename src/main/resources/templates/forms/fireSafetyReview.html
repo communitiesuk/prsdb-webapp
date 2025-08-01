@@ -6,6 +6,9 @@
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
     <main class="govuk-main-wrapper" id="main-content">
         <div id="main" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#main/content()})}">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.fireSafety.heading}">forms.landlordResponsibilities.fireSafety.heading</h1>
+            </header>
             <th:block th:replace="~{fragments/content/fireSafetyContent :: fireSafetyContent(${housesInMultipleOccupationUrl})}"></th:block>
             <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${propertyComplianceUrl}, #{forms.buttons.returnToPropertyRecord})}"></button>
         </div>

@@ -5,9 +5,8 @@
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, null)}">
-    <th:block th:replace="~{fragments/content/fireSafetyContent :: fireSafetyContent(${housesInMultipleOccupationUrl})}"></th:block>
-    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'hasDeclared', null, null)}">
-        <p class="govuk-body-l govuk-!-font-weight-bold" th:text="#{forms.landlordResponsibilities.fireSafety.fieldHeading}">forms.landlordResponsibilities.fireSafety.fieldHeading</p>
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'hasDeclared', #{forms.landlordResponsibilities.fireSafety.heading}, null)}">
+        <th:block th:replace="~{fragments/content/fireSafetyContent :: fireSafetyContent(${housesInMultipleOccupationUrl})}"></th:block>
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'hasDeclared',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
