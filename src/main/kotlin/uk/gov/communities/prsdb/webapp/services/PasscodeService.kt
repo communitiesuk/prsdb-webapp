@@ -65,6 +65,10 @@ class PasscodeService(
         return getLastGeneratedPasscode() ?: generateAndStorePasscode(localAuthorityId)
     }
 
+    fun isValidPasscode(passcode: String): Boolean {
+        return passcodeRepository.existsByPasscode(passcode)
+    }
+
     private fun generateRandomPasscodeString(): String {
         return (1..PASSCODE_LENGTH)
             .map { SAFE_CHARACTERS_CHARSET.random() }

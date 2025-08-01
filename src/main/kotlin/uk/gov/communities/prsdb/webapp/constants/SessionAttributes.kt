@@ -21,3 +21,5 @@ const val PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION = "propertiesWithComplia
 const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
 
 const val SUBMITTED_PASSCODE = "submittedPasscode"
+
+const val PASSCODE_REDIRECT_URL = "passcodeRedirectUrl"
