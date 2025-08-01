@@ -37,7 +37,7 @@ class AwsS3FileUploader(
             return if (response.sdkHttpResponse().isSuccessful) {
                 uploadRepository.save(
                     FileUpload(
-                        status = FileUploadStatus.SCANNED,
+                        status = FileUploadStatus.QUARANTINED,
                         s3Key = objectKey,
                         eTag = response.eTag(),
                         versionId = response.versionId(),
