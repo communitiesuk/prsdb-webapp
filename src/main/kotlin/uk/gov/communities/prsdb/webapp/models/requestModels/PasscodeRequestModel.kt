@@ -1,19 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels
 
-import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
-import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
-import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
+import jakarta.validation.constraints.NotBlank
 
-@IsValidPrioritised
 data class PasscodeRequestModel(
-    @ValidatedBy(
-        constraints = [
-            ConstraintDescriptor(
-                messageKey = "passcodeEntry.error.missingPasscode",
-                validatorType = NotBlankConstraintValidator::class,
-            ),
-        ],
+    @NotBlank(
+        message = "passcodeEntry.error.missingPasscode",
     )
     var passcode: String = "",
 )
