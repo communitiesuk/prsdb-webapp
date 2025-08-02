@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
@@ -53,6 +54,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
@@ -168,6 +170,11 @@ class Navigator(
     fun goToPropertySearchPage(): SearchPropertyRegisterPage {
         navigate(SearchRegisterController.SEARCH_PROPERTY_URL)
         return createValidPage(page, SearchPropertyRegisterPage::class)
+    }
+
+    fun goToPasscodeEntryPage(): PasscodeEntryPage {
+        navigate(PasscodeEntryController.PASSCODE_ENTRY_ROUTE)
+        return createValidPage(page, PasscodeEntryPage::class)
     }
 
     fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
@@ -523,7 +530,11 @@ class Navigator(
 
     fun goToPropertyComplianceStartPage(propertyOwnershipId: Long): StartPagePropertyCompliance {
         navigate(PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId))
-        return createValidPage(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+        return createValidPage(
+            page,
+            StartPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun goToPropertyComplianceGasSafetyPage(propertyOwnershipId: Long): GasSafetyPagePropertyCompliance {
@@ -531,7 +542,11 @@ class Navigator(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafety.urlPathSegment}",
         )
-        return createValidPage(page, GasSafetyPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+        return createValidPage(
+            page,
+            GasSafetyPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun skipToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
@@ -641,7 +656,11 @@ class Navigator(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EICR.urlPathSegment}",
         )
-        return createValidPage(page, EicrPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+        return createValidPage(
+            page,
+            EicrPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun skipToPropertyComplianceEicrIssueDatePage(propertyOwnershipId: Long): EicrIssueDatePagePropertyCompliance {
@@ -733,7 +752,11 @@ class Navigator(
             PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EPC.urlPathSegment}",
         )
-        return createValidPage(page, EpcPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+        return createValidPage(
+            page,
+            EpcPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     fun skipToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
@@ -942,7 +965,10 @@ class Navigator(
 
     fun goToPropertyComplianceUpdateUpdateGasSafetyPage(propertyOwnershipId: Long): UpdateGasSafetyPagePropertyComplianceUpdate {
         navigate(
-            PropertyComplianceController.getUpdatePropertyComplianceStepPath(propertyOwnershipId, PropertyComplianceStepId.UpdateGasSafety),
+            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                propertyOwnershipId,
+                PropertyComplianceStepId.UpdateGasSafety,
+            ),
         )
         return createValidPage(
             page,
@@ -953,7 +979,10 @@ class Navigator(
 
     fun goToPropertyComplianceUpdateUpdateEicrPage(propertyOwnershipId: Long): UpdateEicrPagePropertyComplianceUpdate {
         navigate(
-            PropertyComplianceController.getUpdatePropertyComplianceStepPath(propertyOwnershipId, PropertyComplianceStepId.UpdateEICR),
+            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                propertyOwnershipId,
+                PropertyComplianceStepId.UpdateEICR,
+            ),
         )
         return createValidPage(
             page,
@@ -964,7 +993,10 @@ class Navigator(
 
     fun goToPropertyComplianceUpdateUpdateEpcPage(propertyOwnershipId: Long): UpdateEpcPagePropertyComplianceUpdate {
         navigate(
-            PropertyComplianceController.getUpdatePropertyComplianceStepPath(propertyOwnershipId, PropertyComplianceStepId.UpdateEpc),
+            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                propertyOwnershipId,
+                PropertyComplianceStepId.UpdateEpc,
+            ),
         )
         return createValidPage(
             page,
@@ -1199,7 +1231,11 @@ class Navigator(
             "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER=$contextId",
         )
-        return createValidPage(page, DeleteIncompletePropertyRegistrationAreYouSurePage::class, mapOf("contextId" to contextId))
+        return createValidPage(
+            page,
+            DeleteIncompletePropertyRegistrationAreYouSurePage::class,
+            mapOf("contextId" to contextId),
+        )
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
