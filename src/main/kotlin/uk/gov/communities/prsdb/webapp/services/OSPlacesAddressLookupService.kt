@@ -13,9 +13,16 @@ class OSPlacesAddressLookupService(
     override fun search(
         houseNameOrNumber: String,
         postcode: String,
-    ): List<AddressDataModel> = responseToAddressList(osPlacesClient.search(houseNameOrNumber, postcode))
+        restrictToEngland: Boolean,
+    ): List<AddressDataModel> {
+        val response = osPlacesClient.search(houseNameOrNumber, postcode)
+        return responseToAddressList(response, restrictToEngland)
+    }
 
-    private fun responseToAddressList(response: String): List<AddressDataModel> {
+    private fun responseToAddressList(
+        response: String,
+        restrictToEngland: Boolean,
+    ): List<AddressDataModel> {
         val jsonResponse = JSONObject(response)
 
         if (!jsonResponse.has("results")) {
@@ -25,38 +32,49 @@ class OSPlacesAddressLookupService(
         val results = jsonResponse.getJSONArray("results")
         val addresses = mutableListOf<AddressDataModel>()
         for (i in 0 until results.length()) {
-            val dataset = results.getJSONObject(i).getJSONObject("DPA")
-            addresses.add(
-                AddressDataModel(
-                    singleLineAddress = dataset.getString("ADDRESS"),
-                    localAuthorityId = getLocalAuthorityId(dataset),
-                    uprn = if (dataset.getString("UPRN").isEmpty()) null else dataset.getString("UPRN").toLong(),
-                    organisation = dataset.optString("ORGANISATION_NAME", null),
-                    subBuilding = dataset.optString("SUB_BUILDING_NAME", null),
-                    buildingName = dataset.optString("BUILDING_NAME", null),
-                    buildingNumber =
-                        if (dataset.has("BUILDING_NUMBER")) {
-                            dataset.getInt("BUILDING_NUMBER").toString()
-                        } else {
-                            null
-                        },
-                    streetName = dataset.optString("THOROUGHFARE_NAME", null),
-                    locality = dataset.optString("DEPENDENT_LOCALITY", null),
-                    townName = dataset.optString("POST_TOWN", null),
-                    postcode = dataset.optString("POSTCODE", null),
-                ),
-            )
+            val addressJSON = results.getJSONObject(i).getJSONObject("DPA")
+            if (!restrictToEngland || addressJSON.isEnglandAddress()) {
+                addresses.add(addressJSON.toAddressDataModel())
+            }
         }
         return addresses
     }
 
-    private fun getLocalAuthorityId(dataset: JSONObject): Int? {
-        val custodianCode = dataset.getInt("LOCAL_CUSTODIAN_CODE").toString()
-        try {
-            return localAuthorityService.retrieveLocalAuthorityByCustodianCode(custodianCode)!!.id
-        } catch (exception: NullPointerException) {
-            println("No local authority found for $custodianCode retrieved from OSPlaces")
+    private fun JSONObject.toAddressDataModel(): AddressDataModel =
+        AddressDataModel(
+            singleLineAddress = this.getString("ADDRESS"),
+            localAuthorityId = this.getLocalAuthorityId(),
+            uprn = if (this.getString("UPRN").isEmpty()) null else this.getString("UPRN").toLong(),
+            organisation = this.optString("ORGANISATION_NAME", null),
+            subBuilding = this.optString("SUB_BUILDING_NAME", null),
+            buildingName = this.optString("BUILDING_NAME", null),
+            buildingNumber =
+                if (this.has("BUILDING_NUMBER")) {
+                    this.getInt("BUILDING_NUMBER").toString()
+                } else {
+                    null
+                },
+            streetName = this.optString("THOROUGHFARE_NAME", null),
+            locality = this.optString("DEPENDENT_LOCALITY", null),
+            townName = this.optString("POST_TOWN", null),
+            postcode = this.optString("POSTCODE", null),
+        )
+
+    private fun JSONObject.getLocalAuthorityId(): Int? {
+        // We only store English local authorities in the database
+        if (!this.isEnglandAddress()) {
             return null
         }
+
+        val custodianCode = this.getInt("LOCAL_CUSTODIAN_CODE").toString()
+        val localAuthorityId = localAuthorityService.retrieveLocalAuthorityByCustodianCode(custodianCode)?.id
+
+        if (localAuthorityId == null) {
+            println("No local authority found for $custodianCode retrieved from OSPlaces")
+        }
+
+        return localAuthorityId
     }
+
+    private fun JSONObject.isEnglandAddress(): Boolean = this.getString("COUNTRY_CODE") == "E"
 }
