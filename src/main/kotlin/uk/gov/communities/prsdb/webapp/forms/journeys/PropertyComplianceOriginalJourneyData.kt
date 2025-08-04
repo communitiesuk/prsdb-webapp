@@ -180,7 +180,7 @@ class PropertyComplianceOriginalJourneyData private constructor(
             stepFactory.meesExemptionReasonStepId toPageData MeesExemptionReasonFormModel::fromComplianceRecordOrNull,
             stepFactory.meesExemptionConfirmationStepId toPageData { NoInputFormModel() },
             stepFactory.lowEnergyRatingStepId toPageData { NoInputFormModel() },
-            stepFactory.updateEpcCheckYourAnswersStep toPageData { CheckAnswersFormModel() },
+            stepFactory.updateEpcCheckYourAnswersStepId toPageData { CheckAnswersFormModel() },
         )
 
     val asJourneyData: JourneyData =
