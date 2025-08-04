@@ -10,7 +10,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 
 class PasscodeEntrySinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
@@ -27,8 +27,8 @@ class PasscodeEntrySinglePageTests : SinglePageTestWithSeedData("data-mockuser-n
             val passcodeEntryPage = navigator.goToPasscodeEntryPage()
             passcodeEntryPage.submitPasscode(validPasscode)
 
-            // Should redirect to landlord registration name page
-            assertPageIs(page, NameFormPageLandlordRegistration::class)
+            // Should redirect to landlord registration start page
+            assertPageIs(page, StartPageLandlordRegistration::class)
         }
 
         @Test

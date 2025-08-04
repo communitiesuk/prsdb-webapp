@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -22,7 +22,7 @@ class PasscodeEntryPage(
 
     class PasscodeForm(
         page: Page,
-    ) : FormWithSectionHeader(page) {
+    ) : Form(page) {
         val passcodeInput = TextInput.textByFieldName(locator, "passcode")
     }
 }

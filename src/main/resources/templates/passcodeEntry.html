@@ -12,7 +12,7 @@
 
         <p class="govuk-body" th:text="#{passcodeEntry.description}">passcodeEntry.description</p>
 
-        <form th:action="@{''}" class="form" id="passcode-form" method="post" th:object="${passcodeRequestModel}"
+        <form class="form" id="passcode-form" method="post" th:object="${passcodeRequestModel}"
               novalidate>
             <input th:replace="~{fragments/forms/basicTextInput :: textInput('Passcode', 'passcode', null)}">
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
