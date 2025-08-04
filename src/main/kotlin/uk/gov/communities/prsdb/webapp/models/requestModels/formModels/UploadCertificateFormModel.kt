@@ -4,12 +4,20 @@ import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.io.FilenameUtils
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 import kotlin.math.pow
 
+@IsValidPrioritised
 open class UploadCertificateFormModel : FormModel {
     @ValidatedBy(
         constraints = [
+            ConstraintDescriptor(
+                // This message is never shown to users, as when this form model fails validation a subclass will be re-validated and used instead
+                messageKey = "forms.uploadCertificate.error.missing.placeholder",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isNameNotBlank",
+            ),
             ConstraintDescriptor(
                 messageKey = "forms.uploadCertificate.error.wrongType",
                 validatorType = DelegatedPropertyConstraintValidator::class,
