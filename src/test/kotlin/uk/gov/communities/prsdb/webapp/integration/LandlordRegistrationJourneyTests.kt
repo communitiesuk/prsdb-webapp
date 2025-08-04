@@ -28,6 +28,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -48,11 +50,8 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
 
     @BeforeEach
     fun setup() {
-        whenever(
-            osPlacesClient.search(any(), any()),
-        ).thenReturn(
-            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':28,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
+        whenever(osPlacesClient.search(any(), any())).thenReturn(
+            MockOSPlacesAPIResponses.createResponse(AddressDataModel("1, Example Road, EG1 2AB")),
         )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))

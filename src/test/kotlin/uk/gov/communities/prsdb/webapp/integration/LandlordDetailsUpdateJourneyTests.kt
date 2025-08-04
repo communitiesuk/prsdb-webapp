@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
@@ -30,19 +31,13 @@ class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
 
     @BeforeEach
     fun setup() {
-        val addressJson2 =
-            "{'DPA':{'ADDRESS':'2, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':114,'UPRN':'22','BUILDING_NUMBER':2,'POSTCODE':'EG1 2AB'}}"
-        val addressJson3 =
-            "{'DPA':{'ADDRESS':'3, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':116,'UPRN':'973','BUILDING_NUMBER':3,'POSTCODE':'EG1 2AB'}}"
-        whenever(
-            osPlacesClient.search(any(), any()),
-        ).thenReturn(
-            "{'results':[" +
-                "{'DPA':{'ADDRESS':'$addressFound','LOCAL_CUSTODIAN_CODE':28,'UPRN':'7923','BUILDING_NUMBER':9,'POSTCODE':'EG1 2AB'}}," +
-                "$addressJson2,$addressJson3,]}",
-        )
+        val addresses =
+            listOf(
+                AddressDataModel(addressFound),
+                AddressDataModel("2, Example Road, EG1 2AB"),
+                AddressDataModel("3, Example Road, EG1 2AB"),
+            )
+        whenever(osPlacesClient.search(any(), any())).thenReturn(MockOSPlacesAPIResponses.createResponse(addresses))
     }
 
     @Nested
