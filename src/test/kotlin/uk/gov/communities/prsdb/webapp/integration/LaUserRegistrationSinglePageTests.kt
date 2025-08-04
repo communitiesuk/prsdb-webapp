@@ -37,6 +37,31 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
     }
 
     @Nested
+    inner class LaUserRegistrationAcceptInvitationRoute : NestedSinglePageTestWithSeedData("data-mockuser-with-expired-invitation.sql") {
+        @Test
+        fun `Navigating here with an expired token redirects to the invalid link page`(page: Page) {
+            val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
+            navigator.navigateToLaUserRegistrationAcceptInvitationRoute(expiredToken)
+            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
+            BaseComponent.assertThat(errorPage.heading).containsText("This invite link is not valid")
+            assertThat(
+                errorPage.description,
+            ).containsText("Contact the PRS Database admin user at your local council to ask for another invite.")
+        }
+
+        @Test
+        fun `Navigating here with an invalid token redirects to the invalid link page`(page: Page) {
+            val invalidToken = "1234abcd-5678-abcd-1234-567abcd1111d"
+            navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invalidToken)
+            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
+            BaseComponent.assertThat(errorPage.heading).containsText("This invite link is not valid")
+            assertThat(
+                errorPage.description,
+            ).containsText("Contact the PRS Database admin user at your local council to ask for another invite.")
+        }
+    }
+
+    @Nested
     inner class LaUserRegistrationStepLandingPage : NestedSinglePageTestWithSeedData("data-local.sql") {
         @Test
         fun `Navigating here as a registered local authority user redirects to the LA dashboard page`(page: Page) {

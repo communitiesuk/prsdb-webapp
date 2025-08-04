@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.ConfirmationPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -51,8 +52,10 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
 
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
+        // Accept invitation route
+        navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invitation.token.toString())
+        val landingPage = assertPageIs(page, LandingPageLaUserRegistration::class)
         // Landing page - render
-        val landingPage = navigator.skipToLaUserRegistrationLandingPage(invitation.token)
         assertThat(landingPage.headingCaption).containsText("Before you register")
         assertThat(landingPage.heading).containsText("Registering as a local authority user")
         // Submit and go to next page
