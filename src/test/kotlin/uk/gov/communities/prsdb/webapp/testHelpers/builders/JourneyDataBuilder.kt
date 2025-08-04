@@ -497,14 +497,6 @@ class JourneyDataBuilder(
             .withLicensingTypeUpdate(licensingType)
             .withLicenceNumberUpdate(licenceNumber, licensingType)
 
-    fun withOriginalData(
-        originalDataKey: String,
-        originalData: JourneyData,
-    ): JourneyDataBuilder {
-        journeyData[originalDataKey] = originalData
-        return this
-    }
-
     fun withOriginalNumberOfHouseholdsData(
         originalDataKey: String,
         originalNumberOfHouseholds: Int,
@@ -607,11 +599,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withGasSafetyUpdateCheckAnswers(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
@@ -680,11 +667,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEicrUpdateCheckAnswers(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.UpdateEicrCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
@@ -702,14 +684,34 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withCheckAutoMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment] =
+    fun withCheckAutoMatchedEpcResult(
+        matchedEpcIsCorrect: Boolean,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc
+            } else {
+                PropertyComplianceStepId.CheckAutoMatchedEpc
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
         return this
     }
 
-    fun withCheckMatchedEpcResult(matchedEpcIsCorrect: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment] =
+    fun withCheckMatchedEpcResult(
+        matchedEpcIsCorrect: Boolean,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc
+            } else {
+                PropertyComplianceStepId.CheckMatchedEpc
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
         return this
     }
@@ -719,8 +721,18 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEpcLookupCertificateNumber(certificateNumber: String = CURRENT_EPC_CERTIFICATE_NUMBER): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcLookup.urlPathSegment] =
+    fun withEpcLookupCertificateNumber(
+        certificateNumber: String = CURRENT_EPC_CERTIFICATE_NUMBER,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcLookup
+            } else {
+                PropertyComplianceStepId.EpcLookup
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
         return this
     }
@@ -740,14 +752,31 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEpcExemptionReason(epcExemptionReason: EpcExemptionReason): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcExemptionReason.urlPathSegment] =
+    fun withEpcExemptionReason(
+        epcExemptionReason: EpcExemptionReason,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExemptionReason
+            } else {
+                PropertyComplianceStepId.EpcExemptionReason
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(EpcExemptionReasonFormModel::exemptionReason.name to epcExemptionReason)
         return this
     }
 
-    fun withEpcExemptionConfirmationStep(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
+    fun withEpcExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation
+            } else {
+                PropertyComplianceStepId.EpcExemptionConfirmation
+            }
+
+        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -756,41 +785,99 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEpcExpiryCheckStep(tenancyStartedBeforeExpiry: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment] =
+    fun withEpcExpiryCheckStep(
+        tenancyStartedBeforeExpiry: Boolean,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck
+            } else {
+                PropertyComplianceStepId.EpcExpiryCheck
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name to tenancyStartedBeforeExpiry)
         return this
     }
 
-    fun withEpcExpiredStep(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcExpired.urlPathSegment] = emptyMap<String, Any?>()
+    fun withEpcExpiredStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExpired
+            } else {
+                PropertyComplianceStepId.EpcExpired
+            }
+
+        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
-    fun withEpcNotFoundStep(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcNotFound.urlPathSegment] = emptyMap<String, Any?>()
+    fun withEpcNotFoundStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcNotFound
+            } else {
+                PropertyComplianceStepId.EpcNotFound
+            }
+
+        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
-    fun withLowEnergyRatingStep(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.LowEnergyRating.urlPathSegment] = emptyMap<String, Any?>()
+    fun withLowEnergyRatingStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesLowEnergyRating
+            } else {
+                PropertyComplianceStepId.LowEnergyRating
+            }
+
+        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
-    fun withMeesExemptionCheckStep(hasExemption: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment] =
+    fun withMeesExemptionCheckStep(
+        hasExemption: Boolean,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionCheck
+            } else {
+                PropertyComplianceStepId.MeesExemptionCheck
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(MeesExemptionCheckFormModel::propertyHasExemption.name to hasExemption)
         return this
     }
 
-    fun withMeesExemptionReasonStep(exemptionReason: MeesExemptionReason): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.MeesExemptionReason.urlPathSegment] =
+    fun withMeesExemptionReasonStep(
+        exemptionReason: MeesExemptionReason,
+        meesOnlyUpdate: Boolean = false,
+    ): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionReason
+            } else {
+                PropertyComplianceStepId.MeesExemptionReason
+            }
+
+        journeyData[stepId.urlPathSegment] =
             mapOf(MeesExemptionReasonFormModel::exemptionReason.name to exemptionReason)
         return this
     }
 
-    fun withMeesExemptionConfirmationStep(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.MeesExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
+    fun withMeesExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
+        val stepId =
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation
+            } else {
+                PropertyComplianceStepId.MeesExemptionConfirmation
+            }
+
+        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
