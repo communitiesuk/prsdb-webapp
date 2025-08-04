@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
@@ -38,12 +38,11 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertOriginalName
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
@@ -220,20 +219,20 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getGasSafetyCertOriginalName returns a string if the corresponding page is in journeyData`() {
-        val gasSafetyCertOriginalName = "file.png"
-        val testJourneyData = journeyDataBuilder.withOriginalGasSafetyCertName(gasSafetyCertOriginalName).build()
+    fun `getGasSafetyCertUploadId returns a string if the corresponding page is in journeyData`() {
+        val gasSafetyFileUploadId = 33L
+        val testJourneyData = journeyDataBuilder.withGasCertFileUploadId(gasSafetyFileUploadId).build()
 
-        val retrievedGasSafetyCertOriginalName = testJourneyData.getGasSafetyCertOriginalName()
+        val retrievedGasSafetyCertUploadId = testJourneyData.getGasSafetyCertUploadId()?.toLong()
 
-        assertEquals(gasSafetyCertOriginalName, retrievedGasSafetyCertOriginalName)
+        assertEquals(gasSafetyFileUploadId, retrievedGasSafetyCertUploadId)
     }
 
     @Test
-    fun `getGasSafetyCertOriginalName returns null if the corresponding page is not in journeyData`() {
+    fun `getGasSafetyCertUploadId returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertOriginalName()
+        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertUploadId()
 
         assertNull(retrievedGasSafeEngineerNum)
     }
@@ -400,22 +399,22 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getEicrOriginalName returns a string if the corresponding page is in journeyData`() {
-        val eicrOriginalName = "eicr.pdf"
-        val testJourneyData = journeyDataBuilder.withOriginalEicrName(eicrOriginalName).build()
+    fun `getEicrUploadId returns a string if the corresponding page is in journeyData`() {
+        val eicrUploadId = 933L
+        val testJourneyData = journeyDataBuilder.withEicrUploadId(eicrUploadId).build()
 
-        val retrievedEicrOriginalName = testJourneyData.getEicrOriginalName()
+        val retrievedEicrUploadId = testJourneyData.getEicrUploadId()?.toLong()
 
-        assertEquals(eicrOriginalName, retrievedEicrOriginalName)
+        assertEquals(eicrUploadId, retrievedEicrUploadId)
     }
 
     @Test
-    fun `getEicrOriginalName returns null if the corresponding page is not in journeyData`() {
+    fun `getEicrUploadId returns null if the corresponding page is not in journeyData`() {
         val testJourneyData = journeyDataBuilder.build()
 
-        val retrievedEicrOriginalName = testJourneyData.getEicrOriginalName()
+        val retrievedEicrUploadId = testJourneyData.getEicrUploadId()
 
-        assertNull(retrievedEicrOriginalName)
+        assertNull(retrievedEicrUploadId)
     }
 
     @Test
@@ -778,25 +777,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
         // Act, Assert
         assertNull(testJourneyData.getMeesExemptionReason())
-    }
-
-    @Test
-    fun `getHasFireSafetyDeclaration returns a boolean if the corresponding page is in journeyData`() {
-        val hasFireSafetyDeclaration = true
-        val testJourneyData = journeyDataBuilder.withFireSafetyDeclaration(hasFireSafetyDeclaration).build()
-
-        val retrievedHasFireSafetyDeclaration = testJourneyData.getHasFireSafetyDeclaration()
-
-        assertEquals(hasFireSafetyDeclaration, retrievedHasFireSafetyDeclaration)
-    }
-
-    @Test
-    fun `getHasFireSafetyDeclaration returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasFireSafetyDeclaration = testJourneyData.getHasFireSafetyDeclaration()
-
-        assertNull(retrievedHasFireSafetyDeclaration)
     }
 
     @Nested

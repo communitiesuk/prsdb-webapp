@@ -13,7 +13,7 @@ data class PropertyComplianceUpdateModel(
 )
 
 data class GasSafetyCertUpdateModel(
-    val s3Key: String? = null,
+    val fileUploadId: Long? = null,
     val issueDate: LocalDate? = null,
     val engineerNum: String? = null,
     val exemptionReason: GasSafetyExemptionReason? = null,
@@ -21,7 +21,7 @@ data class GasSafetyCertUpdateModel(
 )
 
 data class EicrUpdateModel(
-    val s3Key: String? = null,
+    val fileUploadId: Long? = null,
     val issueDate: LocalDate? = null,
     val exemptionReason: EicrExemptionReason? = null,
     val exemptionOtherReason: String? = null,

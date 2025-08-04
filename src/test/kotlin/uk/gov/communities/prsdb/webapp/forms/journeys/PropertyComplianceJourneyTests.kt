@@ -795,7 +795,6 @@ class PropertyComplianceJourneyTests {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
-                    anyOrNull(),
                 )
             verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
@@ -866,7 +865,6 @@ class PropertyComplianceJourneyTests {
             whenever(
                 mockPropertyComplianceService.createPropertyCompliance(
                     eq(propertyCompliance.propertyOwnership.id),
-                    anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),

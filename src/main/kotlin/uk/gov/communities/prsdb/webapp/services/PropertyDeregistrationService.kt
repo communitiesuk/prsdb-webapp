@@ -11,11 +11,15 @@ class PropertyDeregistrationService(
     private val propertyService: PropertyService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyComplianceService: PropertyComplianceService,
+    private val formContextService: FormContextService,
     private val session: HttpSession,
 ) {
     @Transactional
     fun deregisterProperty(propertyOwnershipId: Long) {
         propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)?.let {
+            propertyComplianceService.deletePropertyComplianceByOwnershipId(it.id)
+            it.incompleteComplianceForm?.let { incompleteComplianceForm -> formContextService.deleteFormContext(incompleteComplianceForm) }
             propertyOwnershipService.deletePropertyOwnership(it)
             propertyService.deleteProperty(it.property)
             if (it.license != null) licenseService.deleteLicense(it.license!!)
@@ -24,12 +28,16 @@ class PropertyDeregistrationService(
 
     @Transactional
     fun deregisterProperties(propertyOwnerships: List<PropertyOwnership>) {
+        val propertyOwnershipIds = propertyOwnerships.map { it.id }
         val properties = propertyOwnerships.map { it.property }
         val licenses = propertyOwnerships.mapNotNull { it.license }
+        val incompleteComplianceForms = propertyOwnerships.mapNotNull { it.incompleteComplianceForm }
 
+        propertyComplianceService.deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
         propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
         propertyService.deleteProperties(properties)
         licenseService.deleteLicenses(licenses)
+        formContextService.deleteFormContexts(incompleteComplianceForms)
     }
 
     fun addDeregisteredPropertyAndOwnershipIdsToSession(

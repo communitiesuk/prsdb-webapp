@@ -109,7 +109,6 @@ class PropertyComplianceInfoUrlTests(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
-                anyOrNull(),
             ),
         ).thenReturn(nonCompliantPropertyCompliance)
 

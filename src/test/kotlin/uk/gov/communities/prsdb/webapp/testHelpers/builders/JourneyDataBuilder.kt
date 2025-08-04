@@ -559,14 +559,14 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOriginalGasSafetyCertName(
-        originalName: String,
+    fun withGasCertFileUploadId(
+        uploadId: Long,
         metadataOnly: Boolean = false,
     ): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyUpload.urlPathSegment] =
             mapOf(
-                GasSafetyUploadCertificateFormModel::name.name to originalName,
-                GasSafetyUploadCertificateFormModel::isMetadataOnly.name to metadataOnly,
+                GasSafetyUploadCertificateFormModel::fileUploadId.name to uploadId,
+                GasSafetyUploadCertificateFormModel::isUserSubmittedMetadataOnly.name to metadataOnly,
             )
         return this
     }
@@ -633,9 +633,9 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOriginalEicrName(originalName: String): JourneyDataBuilder {
+    fun withEicrUploadId(uploadId: Long): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrUpload.urlPathSegment] =
-            mapOf(EicrUploadCertificateFormModel::name.name to originalName)
+            mapOf(EicrUploadCertificateFormModel::fileUploadId.name to uploadId)
         return this
     }
 
@@ -800,9 +800,9 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withFireSafetyDeclaration(hasDeclared: Boolean): JourneyDataBuilder {
+    fun withFireSafetyDeclaration(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
-            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to hasDeclared)
+            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to true)
         return this
     }
 

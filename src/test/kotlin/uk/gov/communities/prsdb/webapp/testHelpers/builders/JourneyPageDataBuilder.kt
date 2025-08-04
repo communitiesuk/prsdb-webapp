@@ -145,7 +145,7 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 
-        fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration(true)
+        fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration()
 
         fun beforePropertyComplianceResponsibilityToTenants() = beforePropertyComplianceKeepPropertySafe().withKeepPropertySafeDeclaration()
 

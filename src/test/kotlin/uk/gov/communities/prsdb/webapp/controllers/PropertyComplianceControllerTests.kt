@@ -28,8 +28,17 @@ import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
+import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
+import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
+import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -436,7 +445,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(false)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(null)
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -459,7 +468,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(true)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(FileUpload())
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -776,7 +785,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadUpdateJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(false)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(null)
 
             mvc
                 .post(validPropertyComplianceUpdateFileUploadUrl) {
@@ -799,7 +808,7 @@ class PropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postFileUploadUpdateJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
             whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any())).thenReturn(true)
+            whenever(fileUploader.uploadFile(any(), any())).thenReturn(FileUpload())
 
             mvc
                 .post(validPropertyComplianceUpdateFileUploadUrl) {
@@ -815,6 +824,212 @@ class PropertyComplianceControllerTests(
             verify(tokenCookieService).useToken(validFileUploadCookie.value)
             verify(fileUploader).uploadFile(any(), any())
             verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
+        }
+    }
+
+    @Nested
+    inner class GetFireSafetyReview {
+        private val validPropertyComplianceFireSafetyReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                validPropertyOwnershipId,
+                PropertyComplianceStepId.FireSafetyDeclaration,
+            )
+        private val invalidPropertyComplianceFireSafetyReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                invalidPropertyOwnershipId,
+                PropertyComplianceStepId.FireSafetyDeclaration,
+            )
+
+        @Test
+        fun `getFireSafetyReview returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getFireSafetyReview returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFireSafetyReview returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFireSafetyReview redirects to the compliance record for a landlord user that owns the property without compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
+
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId))
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFireSafetyReview returns 200 for a landlord user that owns the property with compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(PropertyCompliance())
+
+            val expectedPropertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId)
+
+            mvc.get(validPropertyComplianceFireSafetyReviewUrl).andExpect {
+                status { isOk() }
+                view { name("forms/fireSafetyReview") }
+                model {
+                    attribute("backUrl", expectedPropertyComplianceUrl)
+                    attribute("housesInMultipleOccupationUrl", HOUSES_IN_MULTIPLE_OCCUPATION_URL)
+                    attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
+                }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetKeepPropertySafeReview {
+        private val validPropertyComplianceKeepPropertySafeReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                validPropertyOwnershipId,
+                PropertyComplianceStepId.KeepPropertySafe,
+            )
+        private val invalidPropertyComplianceKeepPropertySafeReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                invalidPropertyOwnershipId,
+                PropertyComplianceStepId.KeepPropertySafe,
+            )
+
+        @Test
+        fun `getKeepPropertySafeReview returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getKeepPropertySafeReview returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getKeepPropertySafeReview returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getKeepPropertySafeReview redirects to the compliance record for a landlord user that owns the property without compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
+
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId))
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getKeepPropertySafeReview returns 200 for a landlord user that owns the property with compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(
+                PropertyCompliance(),
+            )
+
+            val expectedPropertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId)
+
+            mvc.get(validPropertyComplianceKeepPropertySafeReviewUrl).andExpect {
+                status { isOk() }
+                view { name("forms/keepPropertySafeReview") }
+                model {
+                    attribute("backUrl", expectedPropertyComplianceUrl)
+                    attribute("housingHealthAndSafetyRatingSystemUrl", HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL)
+                    attribute("homesAct2018Url", HOMES_ACT_2018_URL)
+                    attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
+                }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetResponsibilityToTenantsReview {
+        private val validPropertyComplianceResponsibilityToTenantsReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                validPropertyOwnershipId,
+                PropertyComplianceStepId.ResponsibilityToTenants,
+            )
+        private val invalidPropertyComplianceResponsibilityToTenantsReviewUrl =
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                invalidPropertyOwnershipId,
+                PropertyComplianceStepId.ResponsibilityToTenants,
+            )
+
+        @Test
+        fun `getResponsibilityToTenantsReview returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceResponsibilityToTenantsReviewUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getResponsibilityToTenantsReview returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceResponsibilityToTenantsReviewUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getResponsibilityToTenantsReview returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceResponsibilityToTenantsReviewUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getResponsibilityToTenantsReview redirects to compliance record for landlord that owns the property without compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
+
+            mvc.get(validPropertyComplianceResponsibilityToTenantsReviewUrl).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId))
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getResponsibilityToTenantsReview returns 200 for a landlord user that owns the property with compliance`() {
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(
+                PropertyCompliance(),
+            )
+
+            val expectedPropertyComplianceUrl = PropertyDetailsController.getPropertyCompliancePath(validPropertyOwnershipId)
+
+            mvc.get(validPropertyComplianceResponsibilityToTenantsReviewUrl).andExpect {
+                status { isOk() }
+                view { name("forms/responsibilityToTenantsReview") }
+                model {
+                    attribute("backUrl", expectedPropertyComplianceUrl)
+                    attribute("privateRentingGuideUrl", PRIVATE_RENTING_GUIDE_URL)
+                    attribute("rightToRentChecksUrl", RIGHT_TO_RENT_CHECKS_URL)
+                    attribute("governmentApprovedDepositProtectionSchemeUrl", GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL)
+                    attribute("howToRentGuideUrl", HOW_TO_RENT_GUIDE_URL)
+                    attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
+                }
+            }
         }
     }
 }

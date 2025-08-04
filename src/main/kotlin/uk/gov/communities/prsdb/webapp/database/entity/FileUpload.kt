@@ -1,0 +1,40 @@
+package uk.gov.communities.prsdb.webapp.database.entity
+
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+
+@Entity
+@Table(uniqueConstraints = [UniqueConstraint(name = "uniqueS3ObjectConstraint", columnNames = ["objectKey", "eTag", "versionId"])])
+class FileUpload() : ModifiableAuditableEntity() {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0
+
+    lateinit var status: FileUploadStatus
+
+    lateinit var objectKey: String
+        private set
+
+    var eTag: String? = null
+        private set
+
+    var versionId: String? = null
+        private set
+
+    constructor(status: FileUploadStatus, s3Key: String) : this() {
+        this.status = status
+        this.objectKey = s3Key
+    }
+
+    constructor(status: FileUploadStatus, s3Key: String, eTag: String, versionId: String?) : this() {
+        this.status = status
+        this.objectKey = s3Key
+        this.eTag = eTag
+        this.versionId = versionId
+    }
+}

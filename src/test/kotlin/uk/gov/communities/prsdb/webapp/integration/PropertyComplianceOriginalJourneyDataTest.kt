@@ -12,11 +12,13 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginalJourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
@@ -116,6 +118,7 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var propertyComplianceRepository: PropertyComplianceRepository
     private lateinit var propertyOwnershipService: PropertyOwnershipService
     private lateinit var session: HttpSession
+    private lateinit var fileUploadRepository: FileUploadRepository
 
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
     private lateinit var epcLookupService: EpcLookupService
@@ -132,11 +135,13 @@ class PropertyComplianceOriginalJourneyDataTest {
         propertyComplianceRepository = mock()
         propertyOwnershipService = mock()
         session = mock()
+        fileUploadRepository = mock()
         propertyComplianceService =
             PropertyComplianceService(
                 propertyComplianceRepository = propertyComplianceRepository,
                 propertyOwnershipService = propertyOwnershipService,
                 session = session,
+                fileUploadRepository = fileUploadRepository,
             )
 
         journeyDataServiceFactory = mock()
@@ -218,6 +223,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
         whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
+        whenever(fileUploadRepository.getReferenceById(any())).thenReturn(originalRecord.gasSafetyFileUpload, originalRecord.eicrFileUpload)
 
         // Act
         val journey =
@@ -232,7 +238,7 @@ class PropertyComplianceOriginalJourneyDataTest {
             principal = mock(),
         )
 
-        val complianceCaptor = org.mockito.kotlin.argumentCaptor<PropertyCompliance>()
+        val complianceCaptor = argumentCaptor<PropertyCompliance>()
         verify(propertyComplianceRepository).save(complianceCaptor.capture())
 
         val savedCompliance = complianceCaptor.firstValue

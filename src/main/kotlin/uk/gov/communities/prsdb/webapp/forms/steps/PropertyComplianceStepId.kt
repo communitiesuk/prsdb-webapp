@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 
 enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
@@ -66,10 +69,9 @@ enum class PropertyComplianceStepId(
     UpdateMeesMeesExemptionConfirmation("update-mees-mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesLowEnergyRating("update-mees-low-energy-rating", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesCheckYourAnswers("mees-check-your-answers", PropertyComplianceGroupIdentifier.Mees, true),
-    FireSafetyDeclaration("fire-safety-declaration", PropertyComplianceGroupIdentifier.FireSafety),
-    FireSafetyRisk("fire-safety-risk", PropertyComplianceGroupIdentifier.FireSafety),
-    KeepPropertySafe("keep-property-safe", PropertyComplianceGroupIdentifier.KeepPropertySafe),
-    ResponsibilityToTenants("responsibility-to-tenants", PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
+    FireSafetyDeclaration(FIRE_SAFETY_PATH_SEGMENT, PropertyComplianceGroupIdentifier.FireSafety),
+    KeepPropertySafe(KEEP_PROPERTY_SAFE_PATH_SEGMENT, PropertyComplianceGroupIdentifier.KeepPropertySafe),
+    ResponsibilityToTenants(RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT, PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
     CheckAndSubmit("check-and-submit", PropertyComplianceGroupIdentifier.CheckAndSubmit),
     ;
 

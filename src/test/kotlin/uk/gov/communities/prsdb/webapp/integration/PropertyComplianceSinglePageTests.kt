@@ -185,7 +185,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                     ),
                     any(),
                 ),
-            ).thenReturn(false)
+            ).thenReturn(null)
 
             val gasSafetyUploadPage = navigator.skipToPropertyComplianceGasSafetyUploadPage(PROPERTY_OWNERSHIP_ID)
             gasSafetyUploadPage.uploadCertificate("validFile.png")
@@ -321,7 +321,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
                     ),
                     any(),
                 ),
-            ).thenReturn(false)
+            ).thenReturn(null)
 
             val eicrUploadPage = navigator.skipToPropertyComplianceEicrUploadPage(PROPERTY_OWNERSHIP_ID)
             eicrUploadPage.uploadCertificate("validFile.png")
@@ -568,7 +568,7 @@ class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local
             val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
-                .containsText("Select whether you have followed fire safety responsibilities")
+                .containsText("You must agree to your responsibilities to continue")
         }
     }
 

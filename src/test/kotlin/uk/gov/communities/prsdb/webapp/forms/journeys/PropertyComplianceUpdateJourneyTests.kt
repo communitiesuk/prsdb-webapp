@@ -169,7 +169,7 @@ class PropertyComplianceUpdateJourneyTests {
                 PropertyComplianceUpdateModel(
                     gasSafetyCertUpdate =
                         GasSafetyCertUpdateModel(
-                            s3Key = "property_${propertyOwnershipId}_gas_safety_certificate.png",
+                            fileUploadId = 1L,
                             issueDate = LocalDate.now(),
                             engineerNum = "1234321",
                         ),
@@ -181,7 +181,7 @@ class PropertyComplianceUpdateJourneyTests {
                     .withNewGasSafetyCertStatus(true)
                     .withGasSafetyIssueDate(expectedUpdateModel.gasSafetyCertUpdate.issueDate!!)
                     .withGasSafeEngineerNum(expectedUpdateModel.gasSafetyCertUpdate.engineerNum!!)
-                    .withOriginalGasSafetyCertName("file.png")
+                    .withGasCertFileUploadId(expectedUpdateModel.gasSafetyCertUpdate.fileUploadId!!)
                     .withGasSafetyCertUploadConfirmation()
                     .build(),
             )

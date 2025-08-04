@@ -18,6 +18,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
@@ -37,6 +38,9 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockSession: HttpSession
 
+    @Mock
+    private lateinit var mockFileUploadRepository: FileUploadRepository
+
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
 
@@ -48,15 +52,20 @@ class PropertyComplianceServiceTests {
             .thenReturn(expectedPropertyCompliance.propertyOwnership)
         whenever(mockPropertyComplianceRepository.save(any())).thenReturn(expectedPropertyCompliance)
 
+        whenever(mockFileUploadRepository.getReferenceById(any())).thenReturn(
+            expectedPropertyCompliance.gasSafetyFileUpload,
+            expectedPropertyCompliance.eicrFileUpload,
+        )
+
         val returnedPropertyCompliance =
             propertyComplianceService.createPropertyCompliance(
                 propertyOwnershipId = expectedPropertyCompliance.propertyOwnership.id,
-                gasSafetyCertS3Key = expectedPropertyCompliance.gasSafetyCertS3Key,
+                gasSafetyCertUploadId = expectedPropertyCompliance.gasSafetyFileUpload?.id,
                 gasSafetyCertIssueDate = expectedPropertyCompliance.gasSafetyCertIssueDate,
                 gasSafetyCertEngineerNum = expectedPropertyCompliance.gasSafetyCertEngineerNum,
                 gasSafetyCertExemptionReason = expectedPropertyCompliance.gasSafetyCertExemptionReason,
                 gasSafetyCertExemptionOtherReason = expectedPropertyCompliance.gasSafetyCertExemptionOtherReason,
-                eicrS3Key = expectedPropertyCompliance.eicrS3Key,
+                eicrUploadId = expectedPropertyCompliance.eicrFileUpload?.id,
                 eicrIssueDate = expectedPropertyCompliance.eicrIssueDate,
                 eicrExemptionReason = expectedPropertyCompliance.eicrExemptionReason,
                 eicrExemptionOtherReason = expectedPropertyCompliance.eicrExemptionOtherReason,
@@ -66,12 +75,12 @@ class PropertyComplianceServiceTests {
                 epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
                 epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
                 epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,
-                hasFireSafetyDeclaration = expectedPropertyCompliance.hasFireSafetyDeclaration,
             )
 
         val propertyComplianceCaptor = captor<PropertyCompliance>()
         verify(mockPropertyComplianceRepository).save(propertyComplianceCaptor.capture())
-        assertTrue(ReflectionEquals(expectedPropertyCompliance, "id").matches(propertyComplianceCaptor.value))
+        val capturedPropertyCompliance = propertyComplianceCaptor.value
+        assertTrue(ReflectionEquals(expectedPropertyCompliance, "id").matches(capturedPropertyCompliance))
         assertEquals(expectedPropertyCompliance, returnedPropertyCompliance)
     }
 
@@ -145,11 +154,14 @@ class PropertyComplianceServiceTests {
         propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
 
         // Assert
-        assertEquals(updateModel.gasSafetyCertUpdate?.s3Key, propertyCompliance.gasSafetyCertS3Key)
+        assertEquals(updateModel.gasSafetyCertUpdate?.fileUploadId, propertyCompliance.gasSafetyFileUpload?.id)
         assertEquals(updateModel.gasSafetyCertUpdate?.issueDate, propertyCompliance.gasSafetyCertIssueDate)
         assertEquals(updateModel.gasSafetyCertUpdate?.engineerNum, propertyCompliance.gasSafetyCertEngineerNum)
         assertEquals(updateModel.gasSafetyCertUpdate?.exemptionReason, propertyCompliance.gasSafetyCertExemptionReason)
-        assertEquals(updateModel.gasSafetyCertUpdate?.exemptionOtherReason, propertyCompliance.gasSafetyCertExemptionOtherReason)
+        assertEquals(
+            updateModel.gasSafetyCertUpdate?.exemptionOtherReason,
+            propertyCompliance.gasSafetyCertExemptionOtherReason,
+        )
     }
 
     @Test
@@ -275,5 +287,36 @@ class PropertyComplianceServiceTests {
         whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionSet)
 
         assertFalse(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
+    }
+
+    @Test
+    fun `deletePropertyCompliance deletes the given PropertyCompliance`() {
+        val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+        propertyComplianceService.deletePropertyCompliance(propertyCompliance)
+
+        verify(mockPropertyComplianceRepository).delete(propertyCompliance)
+    }
+
+    @Test
+    fun `deletePropertyCompliancesByOwnershipIds deletes PropertyCompliances with the given PropertyOwnershipIds`() {
+        val propertyOwnershipIds =
+            listOf(
+                1L,
+                2L,
+            )
+
+        propertyComplianceService.deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
+
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
+    }
+
+    @Test
+    fun `deletePropertyComplianceByOwnershipId deletes the PropertyCompliance with the given PropertyOwnershipId`() {
+        val propertyOwnershipId = 1L
+
+        propertyComplianceService.deletePropertyComplianceByOwnershipId(propertyOwnershipId)
+
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_Id(propertyOwnershipId)
     }
 }

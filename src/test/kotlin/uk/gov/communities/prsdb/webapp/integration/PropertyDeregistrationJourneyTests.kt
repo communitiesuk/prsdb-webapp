@@ -37,6 +37,32 @@ class PropertyDeregistrationJourneyTests : JourneyTestWithSeedData("data-local.s
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
+    @Test
+    fun `User can delete a property record that has compliance information`(page: Page) {
+        val propertyOwnershipId = 8
+        val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
+        deregisterPropertyAreYouSurePage.submitWantsToProceed()
+
+        val reasonPage =
+            assertPageIs(
+                page,
+                ReasonPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        reasonPage.submitReason("No longer own this property")
+
+        val confirmationPage =
+            assertPageIs(
+                page,
+                ConfirmationPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+
+        confirmationPage.goToDashboardButton.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
     @Nested
     inner class ReasonStep {
         @Test

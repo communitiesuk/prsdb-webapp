@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -29,16 +31,14 @@ class MockPropertyComplianceData {
             epcEnergyRating: String? = "C",
             epcExemptionReason: EpcExemptionReason? = null,
             epcMeesExemptionReason: MeesExemptionReason? = null,
-            hasFireSafetyDeclaration: Boolean = true,
         ) = PropertyCompliance(
             propertyOwnership = propertyOwnership,
-            hasFireSafetyDeclaration = hasFireSafetyDeclaration,
-            gasSafetyCertS3Key = gasSafetyCertS3Key,
+            gasSafetyCertUpload = gasSafetyCertS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it) },
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
             gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
-            eicrS3Key = eicrS3Key,
+            eicrUpload = eicrS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it) },
             eicrIssueDate = eicrIssueDate,
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
