@@ -44,50 +44,58 @@ class RegisterLAUserControllerTests(
 
     private val expiredToken = "expired-token"
 
+    private val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
+
     @BeforeEach
     fun setupMocks() {
         whenever(invitationService.tokenIsValid(validToken)).thenReturn(true)
         whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
-        whenever(invitationService.tokenIsValid(invalidToken)).thenReturn(false)
     }
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint stores valid token in session`() {
+    fun `acceptInvitation endpoint stores valid token in session and redirects to the registration landing page`() {
+        whenever(invitationService.getInvitationOrNull(validToken)).thenReturn(invitation)
+        whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(false)
+
         mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken").andExpect {
             status { is3xxRedirection() }
+            redirectedUrl("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
         }
 
-        verify(invitationService).tokenIsValid(validToken)
+        verify(invitationService).getInvitationOrNull(validToken)
+        verify(invitationService).getInvitationHasExpired(invitation)
         verify(invitationService).storeTokenInSession(validToken)
     }
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint rejects invalid token`() {
+    fun `acceptInvitation endpoint rejects invalid token and redirects to the invalid link page`() {
+        whenever(invitationService.getInvitationOrNull(invalidToken)).thenReturn(null)
+
         mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$invalidToken").andExpect {
             status { is3xxRedirection() }
             redirectedUrl(RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
         }
 
-        verify(invitationService).tokenIsValid(invalidToken)
+        verify(invitationService).getInvitationOrNull(invalidToken)
         verify(invitationService, never()).storeTokenInSession(invalidToken)
     }
 
     @Test
     @WithMockUser
     fun `acceptInvitation endpoints deletes an expired token from the database and redirects to the invalid link page`() {
-        val returnedInvitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
-        whenever(invitationService.tokenIsValid(expiredToken)).thenReturn(false)
-        whenever(invitationService.getInvitationFromToken(expiredToken)).thenReturn(returnedInvitation)
-        whenever(invitationService.getInvitationHasExpired(returnedInvitation)).thenReturn(true)
+        whenever(invitationService.getInvitationOrNull(expiredToken)).thenReturn(invitation)
+        whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(true)
 
         mvc.get("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$expiredToken").andExpect {
             status { is3xxRedirection() }
             redirectedUrl(RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
         }
 
-        verify(invitationService).deleteInvitation(returnedInvitation)
+        verify(invitationService).getInvitationOrNull(expiredToken)
+        verify(invitationService).getInvitationHasExpired(invitation)
+        verify(invitationService).deleteInvitation(invitation)
         verify(invitationService, never()).storeTokenInSession(expiredToken)
     }
 

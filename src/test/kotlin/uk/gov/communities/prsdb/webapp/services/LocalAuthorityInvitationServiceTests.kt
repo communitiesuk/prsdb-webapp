@@ -5,6 +5,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -94,6 +95,27 @@ class LocalAuthorityInvitationServiceTests {
 
         val thrown = assertThrows(TokenNotFoundException::class.java) { inviteService.getInvitationFromToken(testUuid.toString()) }
         assertEquals("Invitation token not found in database", thrown.message)
+    }
+
+    @Test
+    fun `getInvitationOrNull returns an invitation if the token is in the database`() {
+        val testUuid = UUID.randomUUID()
+        val testInvitation = MockLocalAuthorityData.createLocalAuthorityInvitation(token = testUuid)
+        whenever(mockLaInviteRepository.findByToken(testUuid))
+            .thenReturn(testInvitation)
+
+        val invitation = inviteService.getInvitationOrNull(testUuid.toString())
+
+        assertEquals(invitation, testInvitation)
+    }
+
+    @Test
+    fun `getInvitationOrNull returns null if hee token is not in the database`() {
+        val testUuid = UUID.randomUUID()
+        whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(null)
+
+        val invitation = inviteService.getInvitationOrNull(testUuid.toString())
+        assertNull(invitation)
     }
 
     @Test
