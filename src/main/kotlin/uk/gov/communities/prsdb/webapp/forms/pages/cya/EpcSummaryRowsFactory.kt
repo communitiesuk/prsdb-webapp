@@ -43,7 +43,10 @@ class EpcSummaryRowsFactory(
                 "forms.checkComplianceAnswers.epc.view"
             }
 
-        val certificateNumber = filteredJourneyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)?.certificateNumber
+        val certificateNumber =
+            filteredJourneyData
+                .getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
+                ?.certificateNumber
         val valueUrl =
             if (certificateNumber != null) {
                 epcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)
@@ -95,7 +98,7 @@ class EpcSummaryRowsFactory(
                         if (filteredJourneyData.getHasCompletedEpcExpired()) {
                             PropertyComplianceStepId.EPC.urlPathSegment
                         } else {
-                            PropertyComplianceStepId.MeesExemptionReason.urlPathSegment
+                            stepFactory.meesExemptionReasonStepId.urlPathSegment
                         }
 
                     add(

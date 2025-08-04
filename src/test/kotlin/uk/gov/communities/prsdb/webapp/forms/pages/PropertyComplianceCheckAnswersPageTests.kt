@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -31,6 +32,9 @@ import java.time.LocalDate
 class PropertyComplianceCheckAnswersPageTests {
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @Mock
+    private lateinit var mockStepFactory: PropertyComplianceSharedStepFactory
 
     private val certificateUrl: String = "https://example.com/certificate"
 
@@ -49,6 +53,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 journeyDataService = mockJourneyDataService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 missingAnswersRedirect = "/property-compliance/missing-answers",
+                stepFactory = mockStepFactory,
             ) { "any address" }
         val modelAndView = ModelAndView()
 
@@ -160,6 +165,9 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
@@ -247,6 +255,9 @@ class PropertyComplianceCheckAnswersPageTests {
                     actionValue = "forms.links.view",
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
@@ -344,6 +355,9 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
@@ -416,6 +430,9 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
@@ -453,6 +470,9 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
@@ -504,6 +524,9 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
@@ -553,6 +576,10 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.MeesExemptionReason.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
@@ -609,6 +636,10 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)

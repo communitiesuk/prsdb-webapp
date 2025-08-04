@@ -164,7 +164,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         originalRecord: PropertyCompliance,
     ) {
         // Arrange
-        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, mock())
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
@@ -192,7 +192,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
     ) {
         // Arrange
-        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, mock())
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
