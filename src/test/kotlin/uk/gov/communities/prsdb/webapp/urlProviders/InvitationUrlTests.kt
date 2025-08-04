@@ -114,7 +114,7 @@ class InvitationUrlTests(
             .andExpect { status { is3xxRedirection() } }
 
         // Assert
-        verify(localAuthorityInvitationService).tokenIsValid(testToken)
+        verify(localAuthorityInvitationService).getInvitationOrNull(testToken)
     }
 
     @Suppress("SameParameterValue")
