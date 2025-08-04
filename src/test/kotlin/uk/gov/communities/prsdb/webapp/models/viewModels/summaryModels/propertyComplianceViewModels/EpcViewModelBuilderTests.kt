@@ -174,8 +174,13 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
-                            // TODO PRSD-1392 add Update MEES exemption Link
-                            SummaryListRowActionViewModel("forms.links.change", "#"),
+                            SummaryListRowActionViewModel(
+                                "forms.links.change",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    meesCompliant.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
+                                ),
+                            ),
                         ),
                     ),
                 ),
