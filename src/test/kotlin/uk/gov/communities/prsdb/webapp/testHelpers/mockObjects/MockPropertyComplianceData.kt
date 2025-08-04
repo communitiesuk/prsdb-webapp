@@ -31,11 +31,8 @@ class MockPropertyComplianceData {
             epcEnergyRating: String? = "C",
             epcExemptionReason: EpcExemptionReason? = null,
             epcMeesExemptionReason: MeesExemptionReason? = null,
-            hasFireSafetyDeclaration: Boolean = true,
         ) = PropertyCompliance(
             propertyOwnership = propertyOwnership,
-            hasFireSafetyDeclaration = hasFireSafetyDeclaration,
-            // TODO PRSD-1352 fix extensions
             gasSafetyCertUpload = gasSafetyCertS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it, "pdf") },
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,

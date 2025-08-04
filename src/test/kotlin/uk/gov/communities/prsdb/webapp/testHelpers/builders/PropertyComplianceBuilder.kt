@@ -91,11 +91,6 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withoutFireSafetyDeclaration(hasDeclared: Boolean = true): PropertyComplianceBuilder {
-        propertyCompliance.hasFireSafetyDeclaration = hasDeclared
-        return this
-    }
-
     companion object {
         fun createWithInDateCerts() =
             PropertyComplianceBuilder()
@@ -124,15 +119,6 @@ class PropertyComplianceBuilder {
             .withMeesExemption(exemption)
             .withLowEpcRating()
             .build()
-
-        fun createWithInDateCertsAndSetFireSafetyDeclaration(hasDeclared: Boolean) =
-            PropertyComplianceBuilder()
-                .withPropertyOwnership()
-                .withGasSafetyCert()
-                .withEicr()
-                .withEpc()
-                .withoutFireSafetyDeclaration(hasDeclared)
-                .build()
 
         fun createWithExpiredCerts() =
             PropertyComplianceBuilder()

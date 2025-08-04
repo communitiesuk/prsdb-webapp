@@ -64,7 +64,6 @@ class PropertyComplianceCheckAnswersPageTests {
         val gasCertEngineerNum = "123456"
         val eicrIssueDate = LocalDate.now().minusDays(1)
         val epcDetails = MockEpcData.createEpcDataModel()
-        val hasFireSafetyDeclaration = true
         val filteredJourneyData =
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(true)
@@ -76,7 +75,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrUploadConfirmation()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
-                .withFireSafetyDeclaration(hasFireSafetyDeclaration)
                 .build()
 
         val expectedGasSafetyData =
@@ -143,8 +141,9 @@ class PropertyComplianceCheckAnswersPageTests {
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                    hasFireSafetyDeclaration,
+                    true,
                     PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                    actionValue = "forms.links.view",
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
@@ -177,7 +176,6 @@ class PropertyComplianceCheckAnswersPageTests {
     @Test
     fun `the correct summary rows appear when certificates are missing`() {
         // Arrange
-        val hasFireSafetyDeclaration = false
         val filteredJourneyData =
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(false)
@@ -185,7 +183,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrStatus(false)
                 .withMissingEicrExemption()
                 .withEpcMissingStep()
-                .withFireSafetyDeclaration(hasFireSafetyDeclaration)
                 .build()
 
         val expectedGasSafetyData =
@@ -227,39 +224,17 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
-        val expectedResponsibilityData =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                    hasFireSafetyDeclaration,
-                    PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
-                    true,
-                    PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.responsibilityToTenants",
-                    true,
-                    PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-            )
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
         val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
-        val returnedResponsibilityData = summaryData["responsibilityData"] as List<SummaryListRowViewModel>
 
         // Assert
         assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
         assertIterableEquals(expectedEicrData, returnedEicrData)
         assertIterableEquals(expectedEpcData, returnedEpcData)
-        assertIterableEquals(expectedResponsibilityData, returnedResponsibilityData)
     }
 
     @Test
@@ -280,7 +255,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withCheckAutoMatchedEpcResult(true)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedGasSafetyData =
@@ -373,7 +347,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrExemptionConfirmation()
                 .withEpcExemptionReason(epcExemption)
                 .withEpcExemptionConfirmationStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedGasSafetyData =
@@ -438,7 +411,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrStatus(false)
                 .withMissingEicrExemption()
                 .withEpcNotFoundStep()
-                .withFireSafetyDeclaration(true)
                 .build()
         val expectedEpcData =
             listOf(
@@ -476,7 +448,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -527,7 +498,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withCheckAutoMatchedEpcResult(true)
                 .withMeesExemptionCheckStep(true)
                 .withMeesExemptionReasonStep(meesExemption)
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -576,7 +546,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .withMeesExemptionCheckStep(false)
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -630,7 +599,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withMeesExemptionReasonStep(meesExemption)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -687,7 +655,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withMeesExemptionCheckStep(false)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =

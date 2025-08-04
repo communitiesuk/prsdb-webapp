@@ -43,7 +43,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
@@ -55,7 +54,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormMo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
@@ -168,15 +166,9 @@ class PropertyComplianceJourney(
     private val landlordResponsibilities
         get() =
             listOf(
-                fireSafetyTask,
-                JourneyTask.withOneStep(
-                    keepPropertySafeStep,
-                    "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
-                ),
-                JourneyTask.withOneStep(
-                    responsibilityToTenantsStep,
-                    "propertyCompliance.taskList.landlordResponsibilities.tenants",
-                ),
+                JourneyTask.withOneStep(fireSafetyDeclarationStep, "propertyCompliance.taskList.landlordResponsibilities.fireSafety"),
+                JourneyTask.withOneStep(keepPropertySafeStep, "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe"),
+                JourneyTask.withOneStep(responsibilityToTenantsStep, "propertyCompliance.taskList.landlordResponsibilities.tenants"),
             )
 
     private val gasSafetyTask
@@ -262,17 +254,6 @@ class PropertyComplianceJourney(
                 ),
                 "propertyCompliance.taskList.upload.epc",
                 "propertyCompliance.taskList.upload.epc.hint",
-            )
-
-    private val fireSafetyTask
-        get() =
-            JourneyTask(
-                PropertyComplianceStepId.FireSafetyDeclaration,
-                setOf(
-                    fireSafetyDeclarationStep,
-                    fireSafetyRiskStep,
-                ),
-                "propertyCompliance.taskList.landlordResponsibilities.fireSafety",
             )
 
     private val gasSafetyStep
@@ -386,35 +367,13 @@ class PropertyComplianceJourney(
                             mapOf(
                                 "title" to "propertyCompliance.title",
                                 "housesInMultipleOccupationUrl" to HOUSES_IN_MULTIPLE_OCCUPATION_URL,
-                                "radioOptions" to
+                                "options" to
                                     listOf(
-                                        RadiosButtonViewModel(
+                                        CheckboxViewModel(
                                             value = true,
-                                            valueStr = "yes",
-                                            labelMsgKey = "forms.radios.option.yes.label",
-                                        ),
-                                        RadiosButtonViewModel(
-                                            value = false,
-                                            valueStr = "no",
-                                            labelMsgKey = "forms.radios.option.no.label",
+                                            labelMsgKey = "forms.landlordResponsibilities.fireSafety.checkbox.label",
                                         ),
                                     ),
-                            ),
-                    ),
-                nextAction = { filteredJourneyData, _ -> fireSafetyDeclarationStepNextAction(filteredJourneyData) },
-            )
-
-    private val fireSafetyRiskStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.FireSafetyRisk,
-                page =
-                    Page(
-                        formModel = NoInputFormModel::class,
-                        templateName = "forms/fireSafetyRiskForm",
-                        content =
-                            mapOf(
-                                "title" to "propertyCompliance.title",
                             ),
                     ),
                 nextAction = { _, _ -> Pair(PropertyComplianceStepId.KeepPropertySafe, null) },
@@ -561,13 +520,6 @@ class PropertyComplianceJourney(
         return getRedirectForNextStep(epcLookupStep, newFilteredJourneyData, null, checkingAnswersFor)
     }
 
-    private fun fireSafetyDeclarationStepNextAction(filteredJourneyData: JourneyData) =
-        if (filteredJourneyData.getHasFireSafetyDeclaration()!!) {
-            Pair(PropertyComplianceStepId.KeepPropertySafe, null)
-        } else {
-            Pair(PropertyComplianceStepId.FireSafetyRisk, null)
-        }
-
     private fun checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val epcDetails = filteredJourneyData.getAcceptedEpcDetails()
 
@@ -589,7 +541,6 @@ class PropertyComplianceJourney(
                 epcEnergyRating = epcDetails?.energyRating,
                 epcExemptionReason = filteredJourneyData.getEpcExemptionReason(),
                 epcMeesExemptionReason = filteredJourneyData.getMeesExemptionReason(),
-                hasFireSafetyDeclaration = filteredJourneyData.getHasFireSafetyDeclaration()!!,
             )
 
         sendConfirmationEmail(propertyCompliance)
@@ -658,7 +609,7 @@ class PropertyComplianceJourney(
                 null
             }
 
-        fun resetCheckMatchedEpcInSessionIfChangedEpcDetails(
+        private fun resetCheckMatchedEpcInSessionIfChangedEpcDetails(
             newEpcDetails: EpcDataModel?,
             journeyDataService: JourneyDataService,
         ) {

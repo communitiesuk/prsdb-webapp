@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.cya.EpcSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.GasSafetySummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasFireSafetyDeclaration
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -15,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyComplianceCheckAnswersPage(
     journeyDataService: JourneyDataService,
-    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    epcCertificateUrlProvider: EpcCertificateUrlProvider,
     missingAnswersRedirect: String,
     private val propertyAddressProvider: () -> String,
 ) : CheckAnswersPage(
@@ -24,42 +23,33 @@ class PropertyComplianceCheckAnswersPage(
         templateName = "forms/propertyComplianceCheckAnswersForm",
         missingAnswersRedirect = missingAnswersRedirect,
     ) {
-    val gasSafetyDataFactory =
+    private val gasSafetyDataFactory =
         GasSafetySummaryRowsFactory(
             doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },
             gasSafetyStartingStep = PropertyComplianceStepId.GasSafety,
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
         )
-    val eicrDataFactory =
+
+    private val eicrDataFactory =
         EicrSummaryRowsFactory(
             doesDataHaveEicr = { data -> data.getHasEICR()!! },
             eicrStartingStep = PropertyComplianceStepId.EICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemption,
         )
 
-    val epcDataFactory =
+    private val epcDataFactory =
         EpcSummaryRowsFactory(
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             epcStartingStep = PropertyComplianceStepId.EPC,
         )
 
-    override fun addPageContentToModel(
-        modelAndView: ModelAndView,
-        filteredJourneyData: JourneyData,
-    ) {
-        modelAndView.addObject("propertyAddress", propertyAddressProvider())
-        modelAndView.addObject("gasSafetyData", gasSafetyDataFactory.createRows(filteredJourneyData))
-        modelAndView.addObject("eicrData", eicrDataFactory.createRows(filteredJourneyData))
-        modelAndView.addObject("epcData", epcDataFactory.createRows(filteredJourneyData))
-        modelAndView.addObject("responsibilityData", getResponsibilityData(filteredJourneyData))
-    }
-
-    private fun getResponsibilityData(filteredJourneyData: JourneyData) =
+    private val responsibilityData =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                filteredJourneyData.getHasFireSafetyDeclaration()!!,
+                true,
                 PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                actionValue = "forms.links.view",
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
@@ -74,4 +64,15 @@ class PropertyComplianceCheckAnswersPage(
                 actionValue = "forms.links.view",
             ),
         )
+
+    override fun addPageContentToModel(
+        modelAndView: ModelAndView,
+        filteredJourneyData: JourneyData,
+    ) {
+        modelAndView.addObject("propertyAddress", propertyAddressProvider())
+        modelAndView.addObject("gasSafetyData", gasSafetyDataFactory.createRows(filteredJourneyData))
+        modelAndView.addObject("eicrData", eicrDataFactory.createRows(filteredJourneyData))
+        modelAndView.addObject("epcData", epcDataFactory.createRows(filteredJourneyData))
+        modelAndView.addObject("responsibilityData", responsibilityData)
+    }
 }

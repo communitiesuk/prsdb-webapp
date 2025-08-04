@@ -75,7 +75,6 @@ class PropertyComplianceServiceTests {
                 epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
                 epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
                 epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,
-                hasFireSafetyDeclaration = expectedPropertyCompliance.hasFireSafetyDeclaration,
             )
 
         val propertyComplianceCaptor = captor<PropertyCompliance>()
@@ -159,7 +158,10 @@ class PropertyComplianceServiceTests {
         assertEquals(updateModel.gasSafetyCertUpdate?.issueDate, propertyCompliance.gasSafetyCertIssueDate)
         assertEquals(updateModel.gasSafetyCertUpdate?.engineerNum, propertyCompliance.gasSafetyCertEngineerNum)
         assertEquals(updateModel.gasSafetyCertUpdate?.exemptionReason, propertyCompliance.gasSafetyCertExemptionReason)
-        assertEquals(updateModel.gasSafetyCertUpdate?.exemptionOtherReason, propertyCompliance.gasSafetyCertExemptionOtherReason)
+        assertEquals(
+            updateModel.gasSafetyCertUpdate?.exemptionOtherReason,
+            propertyCompliance.gasSafetyCertExemptionOtherReason,
+        )
     }
 
     @Test
@@ -285,5 +287,36 @@ class PropertyComplianceServiceTests {
         whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionSet)
 
         assertFalse(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
+    }
+
+    @Test
+    fun `deletePropertyCompliance deletes the given PropertyCompliance`() {
+        val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+        propertyComplianceService.deletePropertyCompliance(propertyCompliance)
+
+        verify(mockPropertyComplianceRepository).delete(propertyCompliance)
+    }
+
+    @Test
+    fun `deletePropertyCompliancesByOwnershipIds deletes PropertyCompliances with the given PropertyOwnershipIds`() {
+        val propertyOwnershipIds =
+            listOf(
+                1L,
+                2L,
+            )
+
+        propertyComplianceService.deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
+
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
+    }
+
+    @Test
+    fun `deletePropertyComplianceByOwnershipId deletes the PropertyCompliance with the given PropertyOwnershipId`() {
+        val propertyOwnershipId = 1L
+
+        propertyComplianceService.deletePropertyComplianceByOwnershipId(propertyOwnershipId)
+
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_Id(propertyOwnershipId)
     }
 }
