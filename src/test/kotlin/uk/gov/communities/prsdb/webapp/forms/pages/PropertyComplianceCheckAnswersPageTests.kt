@@ -600,6 +600,11 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
+        whenever(mockStepFactory.meesExemptionCheckStepId).thenReturn(PropertyComplianceStepId.MeesExemptionCheck)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
@@ -657,6 +662,10 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
