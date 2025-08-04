@@ -40,26 +40,32 @@ class PropertyComplianceOriginalJourneyDataTest {
                 Arguments.of(
                     Named.of("with in date certs", PropertyComplianceBuilder.createWithInDateCerts()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with expired certs", PropertyComplianceBuilder.createWithExpiredCerts()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with naturally expired certs", PropertyComplianceBuilder.createWithNaturallyExpiredCerts()),
                     Named.of("an expired equivalent", ::isUpdatedAnExpiredVersionOfOriginal),
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with cert exemptions", PropertyComplianceBuilder.createWithCertExemptions()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with missing certs", PropertyComplianceBuilder.createWithMissingCerts()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with low epc rating", PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of(
@@ -67,12 +73,27 @@ class PropertyComplianceOriginalJourneyDataTest {
                         PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(),
                     ),
                     namedExactlyTheSame,
+                    false,
+                ),
+                Arguments.of(
+                    Named.of(
+                        "with low epc rating for updating mees only",
+                        PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(),
+                    ),
+                    namedExactlyTheSame,
+                    true,
+                ),
+                Arguments.of(
+                    Named.of(
+                        "with low epc rating and mees exemption for updating mees only",
+                        PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(),
+                    ),
+                    namedExactlyTheSame,
+                    true,
                 ),
             )
 
         val namedExactlyTheSame = Named.of("exactly the same", ::areAllComplianceValuesTheSame)
-
-        val finalSubmissionStepId = PropertyComplianceStepId.UpdateEpcCheckYourAnswers
 
         fun areAllComplianceValuesTheSame(
             original: PropertyCompliance,
@@ -152,21 +173,6 @@ class PropertyComplianceOriginalJourneyDataTest {
 
         stepFactory = mock()
 
-        whenever(stepFactory.epcNotAutomatchedStepId).thenReturn(PropertyComplianceStepId.EpcNotAutoMatched)
-        whenever(stepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
-        whenever(stepFactory.checkMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckMatchedEpc)
-        whenever(stepFactory.epcLookupStepId).thenReturn(PropertyComplianceStepId.EpcLookup)
-        whenever(stepFactory.epcNotFoundStepId).thenReturn(PropertyComplianceStepId.EpcNotFound)
-        whenever(stepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
-        whenever(stepFactory.epcExpiredStepId).thenReturn(PropertyComplianceStepId.EpcExpired)
-        whenever(stepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
-        whenever(stepFactory.epcExemptionConfirmationStepId).thenReturn(PropertyComplianceStepId.EpcExemptionConfirmation)
-        whenever(stepFactory.meesExemptionCheckStepId).thenReturn(PropertyComplianceStepId.MeesExemptionCheck)
-        whenever(stepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
-        whenever(stepFactory.meesExemptionConfirmationStepId).thenReturn(PropertyComplianceStepId.MeesExemptionConfirmation)
-        whenever(stepFactory.lowEnergyRatingStepId).thenReturn(PropertyComplianceStepId.LowEnergyRating)
-        whenever(stepFactory.checkYourAnswersStepId).thenReturn(PropertyComplianceStepId.UpdateEpcCheckYourAnswers)
-
         this.journeyFactory =
             PropertyComplianceUpdateJourneyFactory(
                 validator = validator,
@@ -187,8 +193,13 @@ class PropertyComplianceOriginalJourneyDataTest {
     @MethodSource("getOriginalJourneyDataTestCases")
     fun `A compliance record leads to original journey data that, allows retrieving the final submission step`(
         originalRecord: PropertyCompliance,
+        complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
+        meesOnlyUpdate: Boolean,
     ) {
         // Arrange
+        val finalSubmissionStepId = getFinalSubmissionStepId(meesOnlyUpdate)
+        setupStepFactory(meesOnlyUpdate)
+
         val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, stepFactory)
         val journeyDataService = mock<JourneyDataService>()
 
@@ -215,9 +226,13 @@ class PropertyComplianceOriginalJourneyDataTest {
     fun `Original journey data recreates the original record`(
         originalRecord: PropertyCompliance,
         complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
+        meesOnlyUpdate: Boolean = false,
     ) {
         // Arrange
+        val finalSubmissionStepId = getFinalSubmissionStepId(meesOnlyUpdate)
+        setupStepFactory(meesOnlyUpdate)
         val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, stepFactory)
+
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
@@ -271,4 +286,112 @@ class PropertyComplianceOriginalJourneyDataTest {
         epcExemptionReason: ${original.epcExemptionReason} -> ${new.epcExemptionReason},
         epcMeesExemptionReason: ${original.epcMeesExemptionReason} -> ${new.epcMeesExemptionReason}
         """.trimIndent()
+
+    private fun setupStepFactory(meesOnlyUpdate: Boolean) {
+        whenever(stepFactory.epcNotAutomatchedStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcNotAutomatched
+            } else {
+                PropertyComplianceStepId.EpcNotAutoMatched
+            },
+        )
+        whenever(stepFactory.checkAutoMatchedEpcStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc
+            } else {
+                PropertyComplianceStepId.CheckAutoMatchedEpc
+            },
+        )
+        whenever(stepFactory.checkMatchedEpcStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc
+            } else {
+                PropertyComplianceStepId.CheckMatchedEpc
+            },
+        )
+        whenever(stepFactory.epcLookupStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcLookup
+            } else {
+                PropertyComplianceStepId.EpcLookup
+            },
+        )
+        whenever(stepFactory.epcNotFoundStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcNotFound
+            } else {
+                PropertyComplianceStepId.EpcNotFound
+            },
+        )
+        whenever(stepFactory.epcExpiryCheckStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck
+            } else {
+                PropertyComplianceStepId.EpcExpiryCheck
+            },
+        )
+        whenever(stepFactory.epcExpiredStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExpired
+            } else {
+                PropertyComplianceStepId.EpcExpired
+            },
+        )
+        whenever(stepFactory.epcExemptionReasonStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExemptionReason
+            } else {
+                PropertyComplianceStepId.EpcExemptionReason
+            },
+        )
+        whenever(stepFactory.epcExemptionConfirmationStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation
+            } else {
+                PropertyComplianceStepId.EpcExemptionConfirmation
+            },
+        )
+        whenever(stepFactory.meesExemptionCheckStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionCheck
+            } else {
+                PropertyComplianceStepId.MeesExemptionCheck
+            },
+        )
+        whenever(stepFactory.meesExemptionReasonStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionReason
+            } else {
+                PropertyComplianceStepId.MeesExemptionReason
+            },
+        )
+        whenever(stepFactory.meesExemptionConfirmationStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation
+            } else {
+                PropertyComplianceStepId.MeesExemptionConfirmation
+            },
+        )
+        whenever(stepFactory.lowEnergyRatingStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesLowEnergyRating
+            } else {
+                PropertyComplianceStepId.LowEnergyRating
+            },
+        )
+        whenever(stepFactory.checkYourAnswersStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckYourAnswers
+            } else {
+                PropertyComplianceStepId.UpdateEpcCheckYourAnswers
+            },
+        )
+    }
+
+    private fun getFinalSubmissionStepId(meesOnlyUpdate: Boolean) =
+        if (meesOnlyUpdate) {
+            PropertyComplianceStepId.UpdateMeesCheckYourAnswers
+        } else {
+            PropertyComplianceStepId.UpdateEpcCheckYourAnswers
+        }
 }
