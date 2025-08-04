@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEicrAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.UnvisitablePage
@@ -99,7 +98,6 @@ class PropertyComplianceUpdateJourney(
             PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it, stepFactory)
         } ?: emptyMap()
 
-    // TODO PRSD-1392 - commonise this and the equivalent in PropertyDetailsUpdateJourney
     private fun initializeJourneyDataForSkippedStepsIfNotInitialized() {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey) ?: return
@@ -221,8 +219,10 @@ class PropertyComplianceUpdateJourney(
                     stepFactory.createMeesExemptionReasonStep(),
                     stepFactory.createMeesExemptionConfirmationStep(),
                     stepFactory.createLowEnergyRatingStep(),
-                    epcCheckYourAnswersStep,
-                    meesCheckYourAnswersStep,
+                    stepFactory.createCheckAnswersStep(
+                        unreachableStepRedirect,
+                        handleSubmitAndRedirect = { filteredJourneyData -> updateComplianceAndRedirect(filteredJourneyData) },
+                    ),
                 ),
             )
 
@@ -382,41 +382,6 @@ class PropertyComplianceUpdateJourney(
         } else {
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         }
-
-    private val epcCheckYourAnswersStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-                page =
-                    CheckUpdateEpcAnswersPage(
-                        journeyDataService,
-                        epcCertificateUrlProvider,
-                        unreachableStepRedirect,
-                        stepFactory,
-                    ),
-                saveAfterSubmit = false,
-                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
-                    updateComplianceAndRedirect(filteredJourneyData)
-                },
-            )
-
-    // TODO PRSD-1392 - maybe commonise this with epcCheckYourAnswersStep in the stepFactory
-    private val meesCheckYourAnswersStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.UpdateMeesCheckYourAnswers,
-                page =
-                    CheckUpdateEpcAnswersPage(
-                        journeyDataService,
-                        epcCertificateUrlProvider,
-                        unreachableStepRedirect,
-                        stepFactory,
-                    ),
-                saveAfterSubmit = false,
-                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
-                    updateComplianceAndRedirect(filteredJourneyData)
-                },
-            )
 
     private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
         if (filteredJourneyData.getHasNewEPC()!!) {

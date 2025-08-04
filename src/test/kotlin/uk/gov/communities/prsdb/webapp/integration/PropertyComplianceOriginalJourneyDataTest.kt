@@ -165,7 +165,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         whenever(stepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
         whenever(stepFactory.meesExemptionConfirmationStepId).thenReturn(PropertyComplianceStepId.MeesExemptionConfirmation)
         whenever(stepFactory.lowEnergyRatingStepId).thenReturn(PropertyComplianceStepId.LowEnergyRating)
-        whenever(stepFactory.updateEpcCheckYourAnswersStepId).thenReturn(PropertyComplianceStepId.UpdateEpcCheckYourAnswers)
+        whenever(stepFactory.checkYourAnswersStepId).thenReturn(PropertyComplianceStepId.UpdateEpcCheckYourAnswers)
 
         this.journeyFactory =
             PropertyComplianceUpdateJourneyFactory(

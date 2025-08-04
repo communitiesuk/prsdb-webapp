@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceGroupIdentifier
@@ -84,7 +85,7 @@ class PropertyComplianceSharedStepFactory(
     val meesExemptionReasonStepId = getMeesExemptionReasonStepIdFor(stepGroupId)
     val meesExemptionConfirmationStepId = getMeesExemptionConfirmationStepIdFor(stepGroupId)
     val lowEnergyRatingStepId = getLowEnergyRatingStepIdFor(stepGroupId)
-    val updateEpcCheckYourAnswersStepId = getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId)
+    val checkYourAnswersStepId = getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId)
 
     val skippedStepIds =
         when (stepGroupId) {
@@ -130,7 +131,7 @@ class PropertyComplianceSharedStepFactory(
 
     private val nextActionAfterEpcTask =
         if (isUpdateJourney) {
-            updateEpcCheckYourAnswersStepId
+            checkYourAnswersStepId
         } else {
             PropertyComplianceStepId.FireSafetyDeclaration
         }
@@ -953,6 +954,22 @@ class PropertyComplianceSharedStepFactory(
             nextAction = { _, _ -> Pair(nextActionAfterEpcTask, null) },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
+
+    fun createCheckAnswersStep(
+        unreachableStepRedirect: String,
+        handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String),
+    ) = Step(
+        id = checkYourAnswersStepId,
+        page =
+            CheckUpdateEpcAnswersPage(
+                journeyDataService,
+                epcCertificateUrlProvider,
+                unreachableStepRedirect,
+                stepFactory = this,
+            ),
+        saveAfterSubmit = false,
+        handleSubmitAndRedirect = { filteredJourneyData, _, _ -> handleSubmitAndRedirect(filteredJourneyData) },
+    )
 
     private fun gasSafetyIssueDateStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getIsGasSafetyCertOutdated()!!) {
