@@ -5,6 +5,7 @@ import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -38,6 +39,7 @@ class LandlordSecurityConfig(
     fun landlordSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/landlord/**")
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
@@ -54,7 +56,7 @@ class LandlordSecurityConfig(
                     redirection.baseUri("/landlord/login/oauth2/code/one-login")
                 }
             }.csrf { requests ->
-                requests.ignoringRequestMatchers("/local/**", "${PasscodeEntryController.PASSCODE_ENTRY_ROUTE}/**")
+                requests.ignoringRequestMatchers("/local/**")
                     .csrfTokenRepository(csrfTokenRepository())
             }.addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
 
