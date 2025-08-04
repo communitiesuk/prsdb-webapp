@@ -41,17 +41,17 @@ class PropertyComplianceService(
         epcMeesExemptionReason: MeesExemptionReason? = null,
     ): PropertyCompliance {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        val gasSafetyUpload = gasSafetyCertUploadId?.let { fileUploadRepository.getReferenceById(it) }
-        val eicrUpload = eicrUploadId?.let { fileUploadRepository.getReferenceById(it) }
+        val gasSafetyUploadReference = gasSafetyCertUploadId?.let { fileUploadRepository.getReferenceById(it) }
+        val eicrUploadReference = eicrUploadId?.let { fileUploadRepository.getReferenceById(it) }
         return propertyComplianceRepository.save(
             PropertyCompliance(
                 propertyOwnership = propertyOwnership,
-                gasSafetyCertUpload = gasSafetyUpload,
+                gasSafetyCertUpload = gasSafetyUploadReference,
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                 gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
                 gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
                 gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
-                eicrUpload = eicrUpload,
+                eicrUpload = eicrUploadReference,
                 eicrIssueDate = eicrIssueDate,
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,

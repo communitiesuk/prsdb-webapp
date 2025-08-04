@@ -9,6 +9,7 @@ data class PropertyFileNameInfo(
 ) {
     override fun toString() = "property_${propertyOwnershipId}_${fileCategory.categoryName}.$extension"
 
+    // TODO PRSD-1352: Gut this class and extract the enum so it can be appropriately used by the entities
     enum class FileCategory(
         val categoryName: String,
     ) {

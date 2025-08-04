@@ -288,8 +288,7 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 absoluteUrlProvider,
-                // TODO PRSD-1352
-                certificateUploadService = Mockito.mock(),
+                certificateUploadService = mock(),
                 checkingAnswersForStep = null,
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)

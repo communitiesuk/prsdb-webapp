@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -51,6 +52,9 @@ class PropertyComplianceUpdateJourneyTests {
 
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @Mock
+    private lateinit var mockCertificateUploadService: CertificateUploadService
 
     @Nested
     inner class UpdateGasSafetyStepTests {
@@ -386,8 +390,7 @@ class PropertyComplianceUpdateJourneyTests {
         propertyComplianceService = mockPropertyComplianceService,
         epcLookupService = mockEpcLookupService,
         epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
-        // TODO PRSD-1352
-        certificateUploadService = mock(),
+        certificateUploadService = mockCertificateUploadService,
         checkingAnswersForStep = null,
     )
 

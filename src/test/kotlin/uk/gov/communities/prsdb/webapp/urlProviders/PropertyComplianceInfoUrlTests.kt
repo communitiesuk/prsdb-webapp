@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.urlProviders
 import jakarta.validation.Validator
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
@@ -142,8 +141,7 @@ class PropertyComplianceInfoUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 absoluteUrlProvider,
-                // TODO PRSD-1352
-                certificateUploadService = Mockito.mock(),
+                certificateUploadService = mock(),
                 checkingAnswersForStep = null,
             )
         whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
