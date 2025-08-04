@@ -371,3 +371,11 @@ VALUES (1, 8, '01/01/25', '01/01/25',
         true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+
+-- TODO PRSD-1352 Add appropriate default values for the file_upload table and certificate_upload table corresponding to the forms already in progress
+INSERT INTO file_upload (id, created_date, last_modified_date, status, object_key, e_tag, version_id, extension)
+VALUES (1, '04/08/25', '04/08/25', 0, 'certificateUpload.1.eicr-file-upload.250804000000', 'etag12345', 'version12345', 'pdf');
+
+INSERT INTO certificate_upload (id, created_date, last_modified_date, file_upload_id, property_ownership_id, category)
+VALUES (1, '04/08/25', '04/08/25', 1, 1, 0)
