@@ -94,12 +94,12 @@ class EpcSummaryRowsFactory(
                 )
 
                 if (epcDetails.energyRating.uppercase() !in EPC_ACCEPTABLE_RATING_RANGE) {
-                    val exemptionReason = filteredJourneyData.getMeesExemptionReason()
+                    val exemptionReason = filteredJourneyData.getMeesExemptionReason(stepFactory.meesExemptionReasonStepId)
                     val changeUrl =
                         if (filteredJourneyData.getHasCompletedEpcExpired()) {
                             epcStartingStep.urlPathSegment
                         } else if (exemptionReason == null) {
-                            PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment
+                            stepFactory.meesExemptionCheckStepId.urlPathSegment
                         } else {
                             stepFactory.meesExemptionReasonStepId.urlPathSegment
                         }
