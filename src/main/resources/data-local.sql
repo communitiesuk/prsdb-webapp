@@ -378,4 +378,7 @@ INSERT INTO file_upload (id, created_date, last_modified_date, status, object_ke
 VALUES (1, '04/08/25', '04/08/25', 0, 'certificateUpload.1.eicr-file-upload.250804000000', 'etag12345', 'version12345', 'pdf');
 
 INSERT INTO certificate_upload (id, created_date, last_modified_date, file_upload_id, property_ownership_id, category)
-VALUES (1, '04/08/25', '04/08/25', 1, 1, 0)
+VALUES (1, '04/08/25', '04/08/25', 1, 1, 0);
+
+SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
+SELECT setval(pg_get_serial_sequence('certificate_upload', 'id'), (SELECT MAX(id) FROM certificate_upload));
