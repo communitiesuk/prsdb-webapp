@@ -68,9 +68,7 @@ class PropertyComplianceSharedStepFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     stepName: String,
 ) {
-    val stepGroupId =
-        PropertyComplianceStepId.fromPathSegment(stepName)?.groupIdentifier
-            ?: throw IllegalArgumentException("Step: $stepName does not correspond to a PropertyComplianceStepId group identifier")
+    private val stepGroupId = PropertyComplianceStepId.fromPathSegment(stepName)?.groupIdentifier
 
     val epcNotAutomatchedStepId = getEpcNotAutomatchedStepIdFor(stepGroupId)
     val checkAutoMatchedEpcStepId = getCheckAutoMatchedEpcStepIdFor(stepGroupId)
