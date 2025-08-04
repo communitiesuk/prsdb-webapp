@@ -82,12 +82,14 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
+    private val isCheckingAnswers = checkingAnswersForStep != null
+
     private val stepFactory
         get() =
             PropertyComplianceSharedStepFactory(
                 defaultSaveAfterSubmit = false,
                 isUpdateJourney = true,
-                isCheckingOrUpdatingAnswers = true,
+                isCheckingAnswers = isCheckingAnswers,
                 journeyDataService = journeyDataService,
                 epcCertificateUrlProvider = epcCertificateUrlProvider,
                 stepName = stepName,
@@ -216,7 +218,7 @@ class PropertyComplianceUpdateJourney(
                     stepFactory.createEpcMissingStep(),
                     stepFactory.createEpcExemptionReasonStep(),
                     stepFactory.createEpcExemptionConfirmationStep(),
-                    stepFactory.createMeesExemptionCheckStep(),
+                    stepFactory.createMeesExemptionCheckStep(propertyOwnershipId),
                     stepFactory.createMeesExemptionReasonStep(),
                     stepFactory.createMeesExemptionConfirmationStep(),
                     stepFactory.createLowEnergyRatingStep(),

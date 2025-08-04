@@ -16,12 +16,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.GroupedJourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
@@ -60,8 +62,8 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyComplianceSharedStepFactory(
     private val defaultSaveAfterSubmit: Boolean,
-    private val isCheckingOrUpdatingAnswers: Boolean,
-    isUpdateJourney: Boolean,
+    private val isCheckingAnswers: Boolean,
+    private val isUpdateJourney: Boolean,
     private val journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     stepName: String,
@@ -203,7 +205,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -224,7 +226,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -328,7 +330,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -349,7 +351,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -406,7 +408,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -429,7 +431,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -537,7 +539,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -560,7 +562,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -678,7 +680,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -724,7 +726,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -747,7 +749,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -804,7 +806,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -812,7 +814,7 @@ class PropertyComplianceSharedStepFactory(
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
-    fun createMeesExemptionCheckStep() =
+    fun createMeesExemptionCheckStep(propertyOwnershipId: Long) =
         Step(
             id = meesExemptionCheckStepId,
             page =
@@ -837,6 +839,13 @@ class PropertyComplianceSharedStepFactory(
                                 ),
                             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
                             "singleLineAddress" to (getAcceptedEpcDetailsFromSession()?.singleLineAddress ?: ""),
+                        ).withBackUrlIfNotNullAndNotCheckingAnswers(
+                            if (meesExemptionCheckStepId == PropertyComplianceStepId.UpdateMeesMeesExemptionCheck) {
+                                PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+                            } else {
+                                null
+                            },
+                            isCheckingAnswers,
                         ),
                 ),
             nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
@@ -916,7 +925,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -939,7 +948,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),

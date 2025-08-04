@@ -121,7 +121,7 @@ class PropertyComplianceJourney(
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = true,
             isUpdateJourney = false,
-            isCheckingOrUpdatingAnswers = isCheckingAnswers,
+            isCheckingAnswers = isCheckingAnswers,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             stepName = stepName,
@@ -257,7 +257,7 @@ class PropertyComplianceJourney(
                     propertyComplianceSharedStepFactory.createEpcMissingStep(),
                     propertyComplianceSharedStepFactory.createEpcExemptionReasonStep(),
                     propertyComplianceSharedStepFactory.createEpcExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(),
+                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(propertyOwnershipId),
                     propertyComplianceSharedStepFactory.createMeesExemptionReasonStep(),
                     propertyComplianceSharedStepFactory.createMeesExemptionConfirmationStep(),
                     propertyComplianceSharedStepFactory.createLowEnergyRatingStep(),
