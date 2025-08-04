@@ -16,7 +16,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -131,7 +133,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -169,7 +171,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -208,7 +210,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,

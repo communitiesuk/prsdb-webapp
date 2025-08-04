@@ -16,12 +16,12 @@ class MockPropertyComplianceData {
     companion object {
         fun createPropertyCompliance(
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
-            gasSafetyCertS3Key: String? = "property-gas-safety-cert.pdf",
+            gasSafetyCertUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf"),
             gasSafetyCertIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
             gasSafetyCertEngineerNum: String? = "1234567",
             gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
             gasSafetyCertExemptionOtherReason: String? = null,
-            eicrS3Key: String? = "eicr.pdf",
+            eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf"),
             eicrIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,
@@ -33,13 +33,12 @@ class MockPropertyComplianceData {
             epcMeesExemptionReason: MeesExemptionReason? = null,
         ) = PropertyCompliance(
             propertyOwnership = propertyOwnership,
-            gasSafetyCertUpload = gasSafetyCertS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it, "pdf") },
+            gasSafetyCertUpload = gasSafetyCertUpload,
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
             gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
-            // TODO PRSD-1352 fix extensions
-            eicrUpload = eicrS3Key?.let { FileUpload(FileUploadStatus.QUARANTINED, it, "pdf") },
+            eicrUpload = eicrFileUpload,
             eicrIssueDate = eicrIssueDate,
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
