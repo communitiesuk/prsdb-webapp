@@ -292,7 +292,7 @@ class LandlordDashboardUrlTests(
                 checkingAnswersForStep = null,
                 stepName = PropertyComplianceStepId.CheckAndSubmit.urlPathSegment,
             )
-        whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
+        whenever(mockPropertyComplianceJourneyFactory.create(any(), any(), anyOrNull())).thenReturn(propertyComplianceJourney)
 
         // Act, Assert
         mvc
