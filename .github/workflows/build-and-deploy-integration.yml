@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - fix/prsd-1435-use-https
 
 jobs:
   build-and-deploy-integration:
