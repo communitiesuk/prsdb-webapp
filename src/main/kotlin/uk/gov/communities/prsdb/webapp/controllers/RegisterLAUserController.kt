@@ -43,16 +43,15 @@ class RegisterLAUserController(
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         val invitation = invitationService.getInvitationOrNull(token)
 
-        invitation?.let {
-            if (!invitationService.getInvitationHasExpired(it)) {
-                invitationService.storeTokenInSession(token)
-                return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
-            } else {
-                invitationService.deleteInvitation(it)
-            }
+        return if (invitation == null) {
+            "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
+        } else if (invitationService.getInvitationHasExpired(invitation)) {
+            invitationService.deleteInvitation(invitation)
+            "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
+        } else {
+            invitationService.storeTokenInSession(token)
+            return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
         }
-
-        return "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
     }
 
     @GetMapping("/$LANDING_PAGE_PATH_SEGMENT")
