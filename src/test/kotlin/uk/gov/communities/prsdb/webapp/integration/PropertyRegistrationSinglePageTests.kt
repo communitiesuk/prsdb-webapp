@@ -70,8 +70,9 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
 
             // redirect to noAddressFoundPage
             val noAddressFoundPage = BasePage.assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(houseNumber)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(postcode)
+            BaseComponent
+                .assertThat(noAddressFoundPage.heading)
+                .containsText("No matching address in England found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
