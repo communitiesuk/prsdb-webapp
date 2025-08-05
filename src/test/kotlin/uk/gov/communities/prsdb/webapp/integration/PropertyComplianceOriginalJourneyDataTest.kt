@@ -379,7 +379,7 @@ class PropertyComplianceOriginalJourneyDataTest {
                 PropertyComplianceStepId.LowEnergyRating
             },
         )
-        whenever(stepFactory.checkYourAnswersStepId).thenReturn(
+        whenever(stepFactory.epcCheckYourAnswersStepId).thenReturn(
             if (meesOnlyUpdate) {
                 PropertyComplianceStepId.UpdateMeesCheckYourAnswers
             } else {

@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
@@ -64,7 +65,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             // Lookup address finds no results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 

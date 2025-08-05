@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
 import java.time.LocalDate
@@ -286,7 +287,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             // Lookup address finds no results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.skipToLandlordRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
@@ -369,7 +370,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             // Lookup address finds no results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.skipToLandlordRegistrationLookupContactAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
