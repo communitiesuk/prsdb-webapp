@@ -110,7 +110,7 @@ class LocalAuthorityInvitationServiceTests {
     }
 
     @Test
-    fun `getInvitationOrNull returns null if hee token is not in the database`() {
+    fun `getInvitationOrNull returns null if the token is not in the database`() {
         val testUuid = UUID.randomUUID()
         whenever(mockLaInviteRepository.findByToken(testUuid)).thenReturn(null)
 
