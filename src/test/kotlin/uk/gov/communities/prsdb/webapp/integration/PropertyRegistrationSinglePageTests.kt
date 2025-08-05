@@ -65,8 +65,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             // Lookup address finds no English results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode))
-                .thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(5, useEnglishAddresses = false))
+            whenever(osPlacesClient.search(houseNumber, postcode, true)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 

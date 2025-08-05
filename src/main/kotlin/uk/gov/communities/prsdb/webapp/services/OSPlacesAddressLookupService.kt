@@ -14,15 +14,9 @@ class OSPlacesAddressLookupService(
         houseNameOrNumber: String,
         postcode: String,
         restrictToEngland: Boolean,
-    ): List<AddressDataModel> {
-        val response = osPlacesClient.search(houseNameOrNumber, postcode)
-        return responseToAddressList(response, restrictToEngland)
-    }
+    ) = responseToAddressList(osPlacesClient.search(houseNameOrNumber, postcode, restrictToEngland))
 
-    private fun responseToAddressList(
-        response: String,
-        restrictToEngland: Boolean,
-    ): List<AddressDataModel> {
+    private fun responseToAddressList(response: String): List<AddressDataModel> {
         val jsonResponse = JSONObject(response)
 
         if (!jsonResponse.has("results")) {
@@ -33,9 +27,7 @@ class OSPlacesAddressLookupService(
         val addresses = mutableListOf<AddressDataModel>()
         for (i in 0 until results.length()) {
             val addressJSON = results.getJSONObject(i).getJSONObject("DPA")
-            if (!restrictToEngland || addressJSON.isEnglandAddress()) {
-                addresses.add(addressJSON.toAddressDataModel())
-            }
+            addresses.add(addressJSON.toAddressDataModel())
         }
         return addresses
     }

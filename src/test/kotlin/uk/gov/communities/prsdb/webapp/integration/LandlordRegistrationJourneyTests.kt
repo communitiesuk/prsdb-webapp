@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -50,7 +51,7 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
 
     @BeforeEach
     fun setup() {
-        whenever(osPlacesClient.search(any(), any())).thenReturn(
+        whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(
             MockOSPlacesAPIResponses.createResponse(AddressDataModel("1, Example Road, EG1 2AB")),
         )
 
