@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.InvalidLinkPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -42,10 +43,10 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
         fun `Navigating here with an invalid token redirects to the invalid link page`(page: Page) {
             val invalidToken = "1234abcd-5678-abcd-1234-567abcd1111d"
             navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invalidToken)
-            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
-            BaseComponent.assertThat(errorPage.heading).containsText("This invite link is not valid")
+            val invalidLinkPage = BasePage.assertPageIs(page, InvalidLinkPageLaUserRegistration::class)
+            BaseComponent.assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
             assertThat(
-                errorPage.description,
+                invalidLinkPage.description,
             ).containsText("Contact the PRS Database admin user at your local council to ask for another invite.")
         }
     }

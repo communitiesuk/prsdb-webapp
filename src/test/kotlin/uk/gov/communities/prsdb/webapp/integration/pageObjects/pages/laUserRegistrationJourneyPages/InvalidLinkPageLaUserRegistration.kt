@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegi
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ErrorBasePage
 
 class InvalidLinkPageLaUserRegistration(
     page: Page,
-) : ErrorPage(page, RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+) : ErrorBasePage(page, RegisterLAUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
