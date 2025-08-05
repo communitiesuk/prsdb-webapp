@@ -599,15 +599,29 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withGasSafetyUpdateCheckYourAnswers(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
     }
 
-    fun withNewEicrStatus(hasNewEICR: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.UpdateEICR.urlPathSegment] =
-            mapOf(UpdateEicrFormModel::hasNewCertificate.name to hasNewEICR)
-        return this
+    fun withNewEicrStatus(hasNewEICR: Boolean?): JourneyDataBuilder {
+        if (hasNewEICR != null) {
+            journeyData[PropertyComplianceStepId.UpdateEICR.urlPathSegment] =
+                mapOf(UpdateEicrFormModel::hasNewCertificate.name to hasNewEICR)
+            return this
+        } else {
+            journeyData[PropertyComplianceStepId.UpdateEICR.urlPathSegment] =
+                mapOf(
+                    UpdateEicrFormModel::hasNewCertificate.name to false,
+                    ORIGINALLY_NOT_INCLUDED_KEY to true,
+                )
+            return this
+        }
     }
 
     fun withEicrIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
@@ -620,9 +634,15 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEicrUploadId(uploadId: Long): JourneyDataBuilder {
+    fun withEicrUploadId(
+        uploadId: Long,
+        metadataOnly: Boolean = false,
+    ): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EicrUpload.urlPathSegment] =
-            mapOf(EicrUploadCertificateFormModel::fileUploadId.name to uploadId)
+            mapOf(
+                EicrUploadCertificateFormModel::fileUploadId.name to uploadId,
+                EicrUploadCertificateFormModel::isUserSubmittedMetadataOnly.name to metadataOnly,
+            )
         return this
     }
 

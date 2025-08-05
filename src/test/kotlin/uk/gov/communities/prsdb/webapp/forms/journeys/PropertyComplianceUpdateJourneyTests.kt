@@ -13,10 +13,12 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -160,7 +162,7 @@ class PropertyComplianceUpdateJourneyTests {
     }
 
     @Nested
-    inner class UpdateComplianceRecordTests {
+    inner class UpdateGasSafetyComplianceRecordTests {
         @Test
         fun `complete check your gas safety answers submits a new certificate to the database`() {
             // Arrange
@@ -250,6 +252,256 @@ class PropertyComplianceUpdateJourneyTests {
             val redirectModelAndView =
                 completeStep(
                     stepId = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
+                    pageData = mapOf(),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
+                redirectModelAndView.viewName,
+            )
+
+            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
+            verify(mockPropertyComplianceService).updatePropertyCompliance(
+                propertyOwnershipId = eq(propertyOwnershipId),
+                update = updateCaptor.capture(),
+                any(),
+            )
+
+            assertEquals(
+                expectedUpdateModel,
+                updateCaptor.firstValue,
+            )
+        }
+    }
+
+    @Nested
+    inner class UpdateEICRStepTests {
+        @Test
+        fun `submit redirects to IssueDate if hasNewCertificate is true`() {
+            // Arrange
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateEICR,
+                    pageData = mapOf("hasNewCertificate" to true),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "redirect:${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
+                redirectModelAndView.viewName,
+            )
+        }
+
+        @Test
+        fun `submit redirects to ExemptionReason if hasNewCertificate is false`() {
+            // Arrange
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateEICR,
+                    pageData = mapOf("hasNewCertificate" to false),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "redirect:${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
+                redirectModelAndView.viewName,
+            )
+        }
+
+        @Test
+        fun `can reach the EICR missing page if certificate was originally missing`() {
+            // Arrange
+            val missingEicrPropertyCompliance =
+                MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(missingEicrPropertyCompliance)
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                JourneyDataBuilder()
+                    .withExistingCompliance()
+                    .withNewGasSafetyCertStatus(true)
+                    .withGasSafetyIssueDate(LocalDate.now())
+                    .withGasSafeEngineerNum(1234567.toString())
+                    .withGasCertFileUploadId(2L)
+                    .withGasSafetyCertUploadConfirmation()
+                    .withGasSafetyUpdateCheckYourAnswers()
+                    .withNewEicrStatus(null)
+                    .build(),
+            )
+
+            // Act
+            val redirectModelAndView =
+                getModelAndViewForStep(
+                    stepId = PropertyComplianceStepId.EicrExemptionMissing,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "forms/eicrExemptionMissingForm",
+                redirectModelAndView.viewName,
+            )
+        }
+
+        @Test
+        fun `submitting with a missing update value does not reach the EICR missing step`() {
+            // Arrange
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                try {
+                    completeStep(
+                        stepId = PropertyComplianceStepId.UpdateEICR,
+                        pageData = mapOf("hasNewCertificate" to null),
+                        propertyOwnershipId = propertyOwnershipId,
+                    )
+                } catch (_: Exception) {
+                    null
+                }
+
+            // Assert
+            assertNotEquals(
+                "redirect:${PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment}",
+                redirectModelAndView?.viewName,
+            )
+        }
+    }
+
+    @Nested
+    inner class UpdateEICRComplianceRecordTests {
+        @Test
+        fun `complete check your EICR answers submits a new certificate to the database`() {
+            // Arrange
+            val propertyOwnershipId = 123L
+            val expectedUpdateModel =
+                PropertyComplianceUpdateModel(
+                    gasSafetyCertUpdate =
+                        GasSafetyCertUpdateModel(
+                            fileUploadId = 2L,
+                            issueDate = LocalDate.now(),
+                            engineerNum = "1234567",
+                        ),
+                    eicrUpdate =
+                        EicrUpdateModel(
+                            fileUploadId = 1L,
+                            issueDate = LocalDate.now(),
+                        ),
+                )
+            expectedUpdateModel.eicrUpdate!!
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                JourneyDataBuilder()
+                    .withExistingCompliance()
+                    .withNewGasSafetyCertStatus(true)
+                    .withGasSafetyIssueDate(LocalDate.now())
+                    .withGasSafeEngineerNum(1234567.toString())
+                    .withGasCertFileUploadId(2L)
+                    .withGasSafetyCertUploadConfirmation()
+                    .withGasSafetyUpdateCheckYourAnswers()
+                    .withNewEicrStatus(true)
+                    .withEicrIssueDate(expectedUpdateModel.eicrUpdate.issueDate!!)
+                    .withEicrUploadId(expectedUpdateModel.eicrUpdate.fileUploadId!!)
+                    .withEicrUploadConfirmation()
+                    .build(),
+            )
+
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)).thenReturn(
+                originalPropertyCompliance,
+            )
+
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
+                    pageData = mapOf(),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            // Assert
+            assertEquals(
+                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
+                redirectModelAndView.viewName,
+            )
+
+            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
+            verify(mockPropertyComplianceService).updatePropertyCompliance(
+                propertyOwnershipId = eq(propertyOwnershipId),
+                update = updateCaptor.capture(),
+                any(),
+            )
+
+            assertEquals(
+                expectedUpdateModel,
+                updateCaptor.firstValue,
+            )
+        }
+
+        @Test
+        fun `complete check your EICR answers submits a new exemption to the database`() {
+            // Arrange
+            val propertyOwnershipId = 123L
+            val expectedUpdateModel =
+                PropertyComplianceUpdateModel(
+                    gasSafetyCertUpdate =
+                        GasSafetyCertUpdateModel(
+                            fileUploadId = 2L,
+                            issueDate = LocalDate.now(),
+                            engineerNum = "1234567",
+                        ),
+                    eicrUpdate =
+                        EicrUpdateModel(
+                            exemptionReason = EicrExemptionReason.OTHER,
+                            exemptionOtherReason = "Other reason for exemption",
+                        ),
+                )
+            expectedUpdateModel.eicrUpdate!!
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                JourneyDataBuilder()
+                    .withExistingCompliance()
+                    .withNewGasSafetyCertStatus(true)
+                    .withGasSafetyIssueDate(LocalDate.now())
+                    .withGasSafeEngineerNum(1234567.toString())
+                    .withGasCertFileUploadId(2L)
+                    .withGasSafetyCertUploadConfirmation()
+                    .withGasSafetyUpdateCheckYourAnswers()
+                    .withNewEicrStatus(false)
+                    .withEicrExemptionReason(expectedUpdateModel.eicrUpdate.exemptionReason!!)
+                    .withEicrExemptionOtherReason(expectedUpdateModel.eicrUpdate.exemptionOtherReason!!)
+                    .withEicrExemptionConfirmation()
+                    .build(),
+            )
+
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(
+                mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
+            ).thenReturn(originalPropertyCompliance)
+
+            // Act
+            val redirectModelAndView =
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
                     pageData = mapOf(),
                     propertyOwnershipId = propertyOwnershipId,
                 )
