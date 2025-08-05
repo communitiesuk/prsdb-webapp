@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginalJourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -127,6 +128,8 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var propertyComplianceService: PropertyComplianceService
     private lateinit var journeyFactory: PropertyComplianceUpdateJourneyFactory
 
+    private lateinit var stepFactory: PropertyComplianceSharedStepFactory
+
     @BeforeEach
     fun setUp() {
         propertyComplianceRepository = mock()
@@ -146,6 +149,23 @@ class PropertyComplianceOriginalJourneyDataTest {
 
         validatorFactory = Validation.buildDefaultValidatorFactory()
         validator = SpringValidatorAdapter(validatorFactory.validator)
+
+        stepFactory = mock()
+
+        whenever(stepFactory.epcNotAutomatchedStepId).thenReturn(PropertyComplianceStepId.EpcNotAutoMatched)
+        whenever(stepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(stepFactory.checkMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckMatchedEpc)
+        whenever(stepFactory.epcLookupStepId).thenReturn(PropertyComplianceStepId.EpcLookup)
+        whenever(stepFactory.epcNotFoundStepId).thenReturn(PropertyComplianceStepId.EpcNotFound)
+        whenever(stepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(stepFactory.epcExpiredStepId).thenReturn(PropertyComplianceStepId.EpcExpired)
+        whenever(stepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
+        whenever(stepFactory.epcExemptionConfirmationStepId).thenReturn(PropertyComplianceStepId.EpcExemptionConfirmation)
+        whenever(stepFactory.meesExemptionCheckStepId).thenReturn(PropertyComplianceStepId.MeesExemptionCheck)
+        whenever(stepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
+        whenever(stepFactory.meesExemptionConfirmationStepId).thenReturn(PropertyComplianceStepId.MeesExemptionConfirmation)
+        whenever(stepFactory.lowEnergyRatingStepId).thenReturn(PropertyComplianceStepId.LowEnergyRating)
+        whenever(stepFactory.epcCheckYourAnswersStepId).thenReturn(PropertyComplianceStepId.UpdateEpcCheckYourAnswers)
 
         this.journeyFactory =
             PropertyComplianceUpdateJourneyFactory(
@@ -169,7 +189,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         originalRecord: PropertyCompliance,
     ) {
         // Arrange
-        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, stepFactory)
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
@@ -197,7 +217,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
     ) {
         // Arrange
-        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, stepFactory)
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)

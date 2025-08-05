@@ -103,7 +103,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId)
+            .create(TASK_LIST_PATH_SEGMENT, propertyOwnershipId)
             .getModelAndViewForTaskList()
     }
 
@@ -121,7 +121,7 @@ class PropertyComplianceController(
 
         val stepModelAndView =
             propertyComplianceJourneyFactory
-                .create(propertyOwnershipId, checkingAnswersForStep)
+                .create(stepName, propertyOwnershipId, checkingAnswersForStep)
                 .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
 
         addCookieIfStepIsFileUploadStep(stepName, request, response)
@@ -143,7 +143,7 @@ class PropertyComplianceController(
         val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, checkingAnswersForStep)
+            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
             .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
     }
 
@@ -172,7 +172,7 @@ class PropertyComplianceController(
             )
 
         return propertyComplianceJourneyFactory
-            .create(propertyOwnershipId, checkingAnswersForStep)
+            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
             .completeStep(
                 stepName,
                 formData,

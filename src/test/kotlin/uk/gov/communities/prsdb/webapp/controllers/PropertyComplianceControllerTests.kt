@@ -131,7 +131,8 @@ class PropertyComplianceControllerTests(
             tokenCookieService.createCookieForValue(validFileUploadCookie.name, validPropertyComplianceUpdateFileUploadUrl),
         ).thenReturn(validFileUploadCookie)
 
-        whenever(propertyComplianceJourneyFactory.create(eq(validPropertyOwnershipId), anyOrNull())).thenReturn(propertyComplianceJourney)
+        whenever(propertyComplianceJourneyFactory.create(any(), eq(validPropertyOwnershipId), anyOrNull()))
+            .thenReturn(propertyComplianceJourney)
 
         whenever(propertyComplianceUpdateJourneyFactory.create(any(), eq(validPropertyOwnershipId), anyOrNull()))
             .thenReturn(propertyComplianceUpdateJourney)
