@@ -656,6 +656,48 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
+    @Test
+    fun `Mees exemption check back link url returns to CheckMatchedEpc if part of a full EPC update`(page: Page) {
+        // Update EPC page
+        val updateEpcPage = startUpdateEpcTask(page)
+        val expiryDate = LocalDate(currentDate.year + 5, 1, 5)
+        whenever(epcRegisterClient.getByUprn(PROPERTY_33_UPRN))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = expiryDate,
+                    energyRating = "F",
+                ),
+            )
+        updateEpcPage.submitHasNewCertificate()
+        var checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Check Auto Matched EPC page
+        checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
+        val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyComplianceUpdate::class, urlArguments)
+
+        // Back link returns to Check Auto Matched EPC page
+        meesExemptionCheckPage.backLink.clickAndWait()
+        assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+    }
+
+    @Test
+    fun `Mees exemption check back link url returns to PropertyDetails if part of a MEES-only update`(page: Page) {
+        val propertyOwnershipIdWithMeesExemption = 11L
+        val urlArguments = getUrlArguments(propertyOwnershipIdWithMeesExemption)
+
+        // MEES exemption check page
+        val meesExemptionCheckPage =
+            startUpdateMeesTask(
+                page,
+                propertyOwnershipIdWithMeesExemption,
+                "New landlord exemption",
+            )
+
+        // Back link returns to propertyDetailsPage
+        meesExemptionCheckPage.backLink.clickAndWait()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+    }
+
     private fun startUpdateGasSafetyTask(page: Page): UpdateGasSafetyPagePropertyComplianceUpdate {
         // Property details before update
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
