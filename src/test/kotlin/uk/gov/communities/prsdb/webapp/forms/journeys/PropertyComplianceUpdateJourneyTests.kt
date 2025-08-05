@@ -172,7 +172,6 @@ class PropertyComplianceUpdateJourneyTests {
         @Test
         fun `complete check your gas safety answers submits a new certificate to the database`() {
             // Arrange
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 PropertyComplianceUpdateModel(
                     gasSafetyCertUpdate =
@@ -199,37 +198,13 @@ class PropertyComplianceUpdateJourneyTests {
                 originalPropertyCompliance,
             )
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers, expectedUpdateModel)
         }
 
         @Test
         fun `complete check your gas safety answers submits a new exemption to the database`() {
             // Arrange
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 PropertyComplianceUpdateModel(
                     gasSafetyCertUpdate =
@@ -254,31 +229,8 @@ class PropertyComplianceUpdateJourneyTests {
                 mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
             ).thenReturn(originalPropertyCompliance)
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers, expectedUpdateModel)
         }
     }
 
@@ -397,7 +349,6 @@ class PropertyComplianceUpdateJourneyTests {
         @Test
         fun `complete check your EICR answers submits a new certificate to the database`() {
             // Arrange
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 PropertyComplianceUpdateModel(
                     gasSafetyCertUpdate =
@@ -432,37 +383,13 @@ class PropertyComplianceUpdateJourneyTests {
                 originalPropertyCompliance,
             )
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.UpdateEicrCheckYourAnswers, expectedUpdateModel)
         }
 
         @Test
         fun `complete check your EICR answers submits a new exemption to the database`() {
             // Arrange
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 PropertyComplianceUpdateModel(
                     gasSafetyCertUpdate =
@@ -497,31 +424,8 @@ class PropertyComplianceUpdateJourneyTests {
                 mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
             ).thenReturn(originalPropertyCompliance)
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.UpdateEicrCheckYourAnswers, expectedUpdateModel)
         }
     }
 
@@ -633,7 +537,6 @@ class PropertyComplianceUpdateJourneyTests {
             val epcUrl = "www.example-epc-url.com"
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(any())).thenReturn(epcUrl)
 
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 createExpectedEpcUpdateModel(
                     url = epcUrl,
@@ -653,31 +556,8 @@ class PropertyComplianceUpdateJourneyTests {
                 originalPropertyCompliance,
             )
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.UpdateEpcCheckYourAnswers, expectedUpdateModel)
         }
 
         @Test
@@ -686,7 +566,6 @@ class PropertyComplianceUpdateJourneyTests {
             val epcUrl = "www.example-epc-url.com"
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(any())).thenReturn(epcUrl)
 
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 createExpectedEpcUpdateModel(
                     url = epcUrl,
@@ -706,37 +585,13 @@ class PropertyComplianceUpdateJourneyTests {
                 originalPropertyCompliance,
             )
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.UpdateEpcCheckYourAnswers, expectedUpdateModel)
         }
 
         @Test
         fun `complete check your EPC answers submits a new EPC exemption to the database`() {
             // Arrange
-            val propertyOwnershipId = 123L
             val expectedUpdateModel =
                 createExpectedEpcUpdateModel(
                     url = null,
@@ -756,31 +611,8 @@ class PropertyComplianceUpdateJourneyTests {
                 originalPropertyCompliance,
             )
 
-            // Act
-            val redirectModelAndView =
-                completeStep(
-                    stepId = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-                    pageData = mapOf(),
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            // Assert
-            assertEquals(
-                "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
-                redirectModelAndView.viewName,
-            )
-
-            val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
-            verify(mockPropertyComplianceService).updatePropertyCompliance(
-                propertyOwnershipId = eq(propertyOwnershipId),
-                update = updateCaptor.capture(),
-                any(),
-            )
-
-            assertEquals(
-                expectedUpdateModel,
-                updateCaptor.firstValue,
-            )
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.UpdateEpcCheckYourAnswers, expectedUpdateModel)
         }
     }
 
@@ -909,5 +741,36 @@ class PropertyComplianceUpdateJourneyTests {
                 .withEpcExemptionConfirmationStep()
                 .build()
         }
+    }
+
+    private fun complianceUpdateRecordTestsActAndAssert(
+        checkAnswersStepId: PropertyComplianceStepId,
+        expectedUpdateModel: PropertyComplianceUpdateModel,
+    ) {
+        // Act
+        val redirectModelAndView =
+            completeStep(
+                stepId = checkAnswersStepId,
+                pageData = mapOf(),
+                propertyOwnershipId = propertyOwnershipId,
+            )
+
+        // Assert
+        assertEquals(
+            "redirect:${PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)}",
+            redirectModelAndView.viewName,
+        )
+
+        val updateCaptor = argumentCaptor<PropertyComplianceUpdateModel>()
+        verify(mockPropertyComplianceService).updatePropertyCompliance(
+            propertyOwnershipId = eq(propertyOwnershipId),
+            update = updateCaptor.capture(),
+            any(),
+        )
+
+        assertEquals(
+            expectedUpdateModel,
+            updateCaptor.firstValue,
+        )
     }
 }
