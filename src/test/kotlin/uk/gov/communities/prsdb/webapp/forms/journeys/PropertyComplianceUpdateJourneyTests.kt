@@ -616,6 +616,38 @@ class PropertyComplianceUpdateJourneyTests {
         }
     }
 
+    @Nested
+    inner class MeesOnlyUpdateOfEpcComplianceRecordTests {
+        @Test
+        fun `complete check your answers updates the MEES exemption in the database`() {
+            // Arrange
+            val epcUrl = "www.example-epc-url.com"
+            whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(any())).thenReturn(epcUrl)
+
+            val expectedUpdateModel =
+                createExpectedEpcUpdateModel(
+                    url = epcUrl,
+                    expiryDate = LocalDate.now().plusYears(1),
+                    tenancyStartedBeforeExpiry = null,
+                    energyRating = "G",
+                    exemptionReason = null,
+                    meesExemptionReason = MeesExemptionReason.WALL_INSULATION,
+                )
+
+            whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
+                createJourneyDataForEpcUpdate(true, expectedUpdateModel.epcUpdate!!, meesOnlyUpdate = true),
+            )
+
+            val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            whenever(mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)).thenReturn(
+                originalPropertyCompliance,
+            )
+
+            // Act, Assert
+            complianceUpdateRecordTestsActAndAssert(PropertyComplianceStepId.UpdateMeesCheckYourAnswers, expectedUpdateModel)
+        }
+    }
+
     private fun createPropertyComplianceUpdateJourney(
         propertyOwnershipId: Long = 1L,
         stepName: String,
@@ -685,6 +717,7 @@ class PropertyComplianceUpdateJourneyTests {
     private fun createJourneyDataForEpcUpdate(
         newEpcStatus: Boolean,
         epcUpdateModel: EpcUpdateModel,
+        meesOnlyUpdate: Boolean = false,
     ): JourneyData {
         return if (newEpcStatus && epcUpdateModel.meesExemptionReason != null) {
             JourneyPageDataBuilder
@@ -703,10 +736,10 @@ class PropertyComplianceUpdateJourneyTests {
                             energyRating = epcUpdateModel.energyRating!!,
                         ),
                 )
-                .withCheckAutoMatchedEpcResult(true)
-                .withMeesExemptionCheckStep(true)
-                .withMeesExemptionReasonStep(epcUpdateModel.meesExemptionReason!!)
-                .withMeesExemptionConfirmationStep()
+                .withCheckAutoMatchedEpcResult(true, meesOnlyUpdate)
+                .withMeesExemptionCheckStep(true, meesOnlyUpdate)
+                .withMeesExemptionReasonStep(epcUpdateModel.meesExemptionReason!!, meesOnlyUpdate)
+                .withMeesExemptionConfirmationStep(meesOnlyUpdate)
                 .build()
         } else if (newEpcStatus) {
             JourneyPageDataBuilder
