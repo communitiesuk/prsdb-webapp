@@ -6,7 +6,10 @@ import kotlin.math.min
 
 class MockOSPlacesAPIResponses {
     companion object {
-        fun createResponseOfSize(size: Int): String {
+        fun createResponseOfSize(
+            size: Int,
+            useEnglishAddresses: Boolean = true,
+        ): String {
             val addresses =
                 (1..min(size, MAX_ADDRESSES)).map {
                     AddressDataModel(
@@ -15,17 +18,19 @@ class MockOSPlacesAPIResponses {
                         buildingNumber = it.toString(),
                     )
                 }
-            return createResponse(addresses)
+            return createResponse(addresses, useEnglishAddresses)
         }
 
         fun createResponse(address: AddressDataModel) = createResponse(listOf(address))
 
-        fun createResponse(addresses: List<AddressDataModel>) =
-            if (addresses.isEmpty()) {
-                "{}"
-            } else {
-                addresses.joinToString(",", "{'results':[", "]}") {
-                    """
+        fun createResponse(
+            addresses: List<AddressDataModel>,
+            useEnglishAddresses: Boolean = true,
+        ) = if (addresses.isEmpty()) {
+            "{}"
+        } else {
+            addresses.joinToString(",", "{'results':[", "]}") {
+                """
                     {'DPA':
                         {
                             'ADDRESS':'${it.singleLineAddress}',
@@ -33,11 +38,11 @@ class MockOSPlacesAPIResponses {
                             'UPRN':'${it.uprn ?: 123456}',
                             'BUILDING_NUMBER':'${it.buildingNumber ?: "1"}',
                             'POSTCODE':'${it.postcode ?: "EG"}',
-                            'COUNTRY_CODE':'E'
+                            'COUNTRY_CODE':'${if (useEnglishAddresses) "E" else "W"}',
                         }
                     }
-                    """
-                }
+                """
             }
+        }
     }
 }

@@ -28,6 +28,8 @@ class LookupAddressStepTests {
 
     private lateinit var lookupAddressStep: LookupAddressStep<LookupStepTestIds>
 
+    private val restrictToEngland = true
+
     enum class LookupStepTestIds(
         override val urlPathSegment: String,
     ) : StepId {
@@ -42,6 +44,7 @@ class LookupAddressStepTests {
             LookupAddressStep(
                 id = LookupStepTestIds.LookupAddress,
                 page = mockPage,
+                restrictToEngland = restrictToEngland,
                 nextStepIfAddressesFound = LookupStepTestIds.SelectAddress,
                 nextStepIfNoAddressesFound = LookupStepTestIds.NoAddressFound,
                 addressLookupService = mockAddressLookupService,
@@ -95,7 +98,7 @@ class LookupAddressStepTests {
         val redirectedUrl = lookupAddressStep.handleSubmitAndRedirect?.let { it(originalJourneyData, null, null) }
 
         // Assert
-        verify(mockAddressLookupService).search(houseNumber, postcode)
+        verify(mockAddressLookupService).search(houseNumber, postcode, restrictToEngland)
         verify(mockJourneyDataService).addToJourneyDataIntoSession(expectedUpdatedJourneyData)
         assertEquals(LookupStepTestIds.NoAddressFound.urlPathSegment, redirectedUrl)
     }
