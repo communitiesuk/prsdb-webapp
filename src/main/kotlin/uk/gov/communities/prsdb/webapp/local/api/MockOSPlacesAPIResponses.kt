@@ -24,19 +24,19 @@ class MockOSPlacesAPIResponses {
             if (addresses.isEmpty()) {
                 "{}"
             } else {
-                addresses.joinToString(",", "{'results':[", "]}") { address ->
+                addresses.joinToString(",", "{'results':[", "]}") {
                     """
                     {'DPA':
                         {
-                            'ADDRESS':'${address.singleLineAddress}',
+                            'ADDRESS':'${it.singleLineAddress}',
                             'LOCAL_CUSTODIAN_CODE':'114',
-                            'UPRN':'${address.uprn ?: 123456}',
-                            'BUILDING_NUMBER':'${address.buildingNumber ?: "1"}',
-                            'POSTCODE':'${address.postcode ?: "EG"}',
+                            'UPRN':'${it.uprn ?: 123456}',
+                            'BUILDING_NUMBER':'${it.buildingNumber ?: "1"}',
+                            'POSTCODE':'${it.postcode ?: "EG"}',
                             'COUNTRY_CODE':'E'
                         }
                     }
-                """
+                    """
                 }
             }
     }
