@@ -39,6 +39,7 @@ class LandlordSecurityConfig(
     fun landlordSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/landlord/**")
+            // Required to allow csrf token to be stored in the session on public pages
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests

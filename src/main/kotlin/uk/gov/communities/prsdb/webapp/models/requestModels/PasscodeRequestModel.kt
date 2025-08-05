@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
+// TODO: PRSD-1094: Use built-in validation annotations instead of custom ones
 @IsValidPrioritised
 data class PasscodeRequestModel(
     @ValidatedBy(
