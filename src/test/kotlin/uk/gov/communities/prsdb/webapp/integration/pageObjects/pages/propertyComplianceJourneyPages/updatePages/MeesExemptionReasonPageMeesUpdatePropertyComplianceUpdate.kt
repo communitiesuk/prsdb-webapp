@@ -3,15 +3,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UpdateEpcCheckYourAnswersBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.MeesExemptionReasonBasePage
 
-class UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate(
+class MeesExemptionReasonPageMeesUpdatePropertyComplianceUpdate(
     page: Page,
     urlArguments: Map<String, String>,
-) : UpdateEpcCheckYourAnswersBasePage(
+) : MeesExemptionReasonBasePage(
         page,
         PropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
+            PropertyComplianceStepId.UpdateMeesMeesExemptionReason,
         ),
     )

@@ -5,13 +5,13 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UpdateEpcCheckYourAnswersBasePage
 
-class UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate(
+class UpdateMeesCheckYourAnswersPagePropertyComplianceUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : UpdateEpcCheckYourAnswersBasePage(
         page,
         PropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
+            PropertyComplianceStepId.UpdateMeesCheckYourAnswers,
         ),
     )
