@@ -687,6 +687,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withEicrUpdateCheckYourAnswers(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.UpdateEicrCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
