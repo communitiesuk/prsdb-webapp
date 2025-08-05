@@ -321,15 +321,13 @@ class LandlordRegistrationJourney(
             page =
                 Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "noAddressFoundPage",
+                    templateName = "forms/noAddressFoundForm",
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).first,
-                            "searchAgainUrl" to
-                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
-                                "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+                            "searchAgainUrl" to LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -446,7 +444,7 @@ class LandlordRegistrationJourney(
             page =
                 Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "noAddressFoundPage",
+                    templateName = "forms/noAddressFoundForm",
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
