@@ -85,7 +85,7 @@ class PropertyComplianceSharedStepFactory(
     val meesExemptionReasonStepId = getMeesExemptionReasonStepIdFor(stepGroupId)
     val meesExemptionConfirmationStepId = getMeesExemptionConfirmationStepIdFor(stepGroupId)
     val lowEnergyRatingStepId = getLowEnergyRatingStepIdFor(stepGroupId)
-    val checkYourAnswersStepId = getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId)
+    val epcCheckYourAnswersStepId = getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId)
 
     val skippedStepIds =
         when (stepGroupId) {
@@ -131,7 +131,7 @@ class PropertyComplianceSharedStepFactory(
 
     private val nextActionAfterEpcTask =
         if (isUpdateJourney) {
-            checkYourAnswersStepId
+            epcCheckYourAnswersStepId
         } else {
             PropertyComplianceStepId.FireSafetyDeclaration
         }
@@ -959,7 +959,7 @@ class PropertyComplianceSharedStepFactory(
         unreachableStepRedirect: String,
         handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String),
     ) = Step(
-        id = checkYourAnswersStepId,
+        id = epcCheckYourAnswersStepId,
         page =
             CheckUpdateEpcAnswersPage(
                 journeyDataService,
