@@ -38,6 +38,70 @@
                 <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordInitialStep}, #{forms.buttons.startNow})}"></a>
             </section>
             <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.about.heading}">
+                    registerAsALandlord.about.heading
+                </h2>
+                <p class="govuk-body-s">
+                    <span th:text="#{registerAsALandlord.about.paragraph.one.beforeLink}">
+                        registerAsALandlord.about.paragraph.one.beforeLink
+                    </span>
+                    <a class="govuk-link" th:text="#{registerAsALandlord.about.paragraph.one.link}" href=#>
+                        registerAsALandlord.about.paragraph.one.link
+                    </a>
+                    <span th:text="#{registerAsALandlord.about.paragraph.one.afterLink}">
+                        registerAsALandlord.about.paragraph.one.afterLink
+                    </span>
+                </p>
+                <p class="govuk-body-s" th:text="#{registerAsALandlord.about.paragraph.two}">
+                    registerAsALandlord.about.paragraph.two
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.about.paragraph.two.bullet.one}">
+                        registerAsALandlord.about.paragraph.two.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.about.paragraph.two.bullet.two}">
+                        registerAsALandlord.about.paragraph.two.bullet.two
+                    </li>
+                </ul>
+                <h3 class="govuk-heading-s" th:text="#{registerAsALandlord.about.heading.two}">registerAsALandlord.about.heading.two</h3>
+                <p class="govuk-body-s" th:text="#{registerAsALandlord.about.paragraph.three}">
+                    registerAsALandlord.about.paragraph.three
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.about.paragraph.three.bullet.one}">
+                        registerAsALandlord.about.paragraph.three.bullet.one
+                    </li>
+                    <li>
+                        <span th:text="#{registerAsALandlord.about.paragraph.three.bullet.two.beforeLink}">
+                            registerAsALandlord.about.paragraph.three.bullet.two.beforeLink
+                        </span>
+                        <a class="govuk-link" th:text="#{registerAsALandlord.about.paragraph.three.bullet.two.link}" href=#>
+                            registerAsALandlord.about.paragraph.three.bullet.two.link
+                        </a>
+                    </li>
+                    <li th:text="#{registerAsALandlord.about.paragraph.three.bullet.three}">
+                        registerAsALandlord.about.paragraph.three.bullet.three
+                    </li>
+                </ul>
+                <p class="govuk-body-s" th:text="#{registerAsALandlord.about.paragraph.four}">
+                    registerAsALandlord.about.paragraph.four
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.about.paragraph.four.bullet.one}">
+                        registerAsALandlord.about.paragraph.four.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.about.paragraph.four.bullet.two}">
+                        registerAsALandlord.about.paragraph.four.bullet.two
+                    </li>
+                    <li th:text="#{registerAsALandlord.about.paragraph.four.bullet.three}">
+                        registerAsALandlord.about.paragraph.four.bullet.three
+                    </li>
+                    <li th:text="#{registerAsALandlord.about.paragraph.four.bullet.four}">
+                        registerAsALandlord.about.paragraph.four.bullet.four
+                    </li>
+                </ul>
+            </section>
+
                 <span class="govuk-body"><b th:text="#{registerAsALandlord.whoCanAccess.landlord.heading}">
                     registerAsALandlord.whoCanAccess.landlord.heading
                 </b></span>
