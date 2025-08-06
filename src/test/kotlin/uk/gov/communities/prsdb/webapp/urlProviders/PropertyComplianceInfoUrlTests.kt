@@ -33,11 +33,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -61,9 +61,6 @@ class PropertyComplianceInfoUrlTests(
     private lateinit var mockTokenCookieService: TokenCookieService
 
     @MockitoBean
-    private lateinit var mockFileUploader: FileUploader
-
-    @MockitoBean
     private lateinit var mockPropertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
 
     @MockitoBean
@@ -83,6 +80,9 @@ class PropertyComplianceInfoUrlTests(
 
     @Mock
     private lateinit var mockEmailNotificationService: EmailNotificationService<EmailTemplateModel>
+
+    @MockitoBean
+    private lateinit var uploadService: UploadService
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 

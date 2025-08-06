@@ -51,7 +51,8 @@ class AwsS3FileDequarantiner(
 
     override fun deleteFile(fileUpload: FileUpload): Boolean =
         if (deleteFile(fileUpload.objectKey)) {
-            fileUploadRepository.delete(fileUpload)
+            fileUpload.status = FileUploadStatus.DELETED
+            fileUploadRepository.save(fileUpload)
             true
         } else {
             false

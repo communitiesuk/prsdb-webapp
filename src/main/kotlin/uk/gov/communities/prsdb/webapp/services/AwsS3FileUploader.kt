@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.models.dataModels.FileUploadResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import java.io.InputStream
 
 @PrsdbWebService
@@ -16,7 +16,7 @@ class AwsS3FileUploader(
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-    ): FileUploadResult? {
+    ): UploadedFileLocator? {
         inputStream.use { input ->
             val requestBody = AsyncRequestBody.forBlockingInputStream(null)
             val upload =
@@ -32,7 +32,7 @@ class AwsS3FileUploader(
             val response = upload.completionFuture().join().response()
 
             return if (response.sdkHttpResponse().isSuccessful) {
-                FileUploadResult(
+                UploadedFileLocator(
                     objectKey = objectKey,
                     eTag = response.eTag(),
                     versionId = response.versionId(),

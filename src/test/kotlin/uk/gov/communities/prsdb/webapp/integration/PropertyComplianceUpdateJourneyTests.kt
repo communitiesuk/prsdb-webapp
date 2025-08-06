@@ -60,7 +60,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
-import uk.gov.communities.prsdb.webapp.models.dataModels.FileUploadResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertFalse
@@ -107,7 +107,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
                 any(),
                 any(),
             ),
-        ).thenReturn(FileUploadResult("validGasSafety", "mockETag", "mockVersionId"))
+        ).thenReturn(UploadedFileLocator("validGasSafety", "mockETag", "mockVersionId"))
 
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage =
@@ -235,7 +235,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
                 any(),
                 any(),
             ),
-        ).thenReturn(FileUploadResult("validEicr", "mockETag", "mockVersionId"))
+        ).thenReturn(UploadedFileLocator("validEicr", "mockETag", "mockVersionId"))
 
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage =

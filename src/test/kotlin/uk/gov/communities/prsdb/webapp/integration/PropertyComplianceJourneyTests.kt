@@ -67,7 +67,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.models.dataModels.FileUploadResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
@@ -130,7 +130,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
                 any(),
                 any(),
             ),
-        ).thenReturn(FileUploadResult("validGasSafety", "mockETag", "mockVersionId"))
+        ).thenReturn(UploadedFileLocator("validGasSafety", "mockETag", "mockVersionId"))
 
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
@@ -154,7 +154,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
                 any(),
                 any(),
             ),
-        ).thenReturn(FileUploadResult("validEicr", "mockETag", "mockVersionId"))
+        ).thenReturn(UploadedFileLocator("validEicr", "mockETag", "mockVersionId"))
 
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)

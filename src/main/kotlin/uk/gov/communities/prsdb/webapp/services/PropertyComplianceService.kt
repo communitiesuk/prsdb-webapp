@@ -9,19 +9,22 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
+import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import java.time.LocalDate
 
 @PrsdbWebService
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
-    private val fileUploadRepository: FileUploadRepository,
+    private val certificateUploadRepository: CertificateUploadRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
 ) {
+    @Transactional
     fun createPropertyCompliance(
         propertyOwnershipId: Long,
         gasSafetyCertUploadId: Long? = null,
@@ -41,17 +44,17 @@ class PropertyComplianceService(
         epcMeesExemptionReason: MeesExemptionReason? = null,
     ): PropertyCompliance {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        val gasSafetyUploadReference = gasSafetyCertUploadId?.let { fileUploadRepository.getReferenceById(it) }
-        val eicrUploadReference = eicrUploadId?.let { fileUploadRepository.getReferenceById(it) }
+        val gasSafetyUpload = gasSafetyCertUploadId?.let { getCertificateFileUpload(it) }
+        val eicrUpload = eicrUploadId?.let { getCertificateFileUpload(it) }
         return propertyComplianceRepository.save(
             PropertyCompliance(
                 propertyOwnership = propertyOwnership,
-                gasSafetyCertUpload = gasSafetyUploadReference,
+                gasSafetyCertUpload = gasSafetyUpload,
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                 gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
                 gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
                 gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
-                eicrUpload = eicrUploadReference,
+                eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
@@ -83,7 +86,7 @@ class PropertyComplianceService(
 
         if (update.gasSafetyCertUpdate != null) {
             propertyCompliance.gasSafetyFileUpload =
-                update.gasSafetyCertUpdate.fileUploadId?.let { fileUploadRepository.getReferenceById(it) }
+                update.gasSafetyCertUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.gasSafetyCertIssueDate = update.gasSafetyCertUpdate.issueDate
             propertyCompliance.gasSafetyCertEngineerNum = update.gasSafetyCertUpdate.engineerNum
             propertyCompliance.gasSafetyCertExemptionReason = update.gasSafetyCertUpdate.exemptionReason
@@ -91,7 +94,7 @@ class PropertyComplianceService(
         }
 
         if (update.eicrUpdate != null) {
-            propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { fileUploadRepository.getReferenceById(it) }
+            propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
             propertyCompliance.eicrExemptionOtherReason = update.eicrUpdate.exemptionOtherReason
@@ -131,5 +134,16 @@ class PropertyComplianceService(
 
     fun deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds: List<Long>) {
         propertyComplianceRepository.deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
+    }
+
+    // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
+    private fun getCertificateFileUpload(id: Long): FileUpload {
+        val certificate = certificateUploadRepository.findByFileUpload_Id(id)
+
+        if (certificate == null) {
+            throw PrsdbWebException("No certificate upload found for ID: $id")
+        }
+
+        return certificate.fileUpload
     }
 }

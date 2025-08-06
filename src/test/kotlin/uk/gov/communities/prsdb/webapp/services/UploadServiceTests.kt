@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.FileUploadResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import java.io.InputStream
 
 @ExtendWith(MockitoExtension::class)
@@ -33,7 +33,7 @@ class UploadServiceTests {
     fun `uploadFile uploads the input stream to a file and saves the result as quarantined`() {
         // Arrange
         val proposedObjectKey = "testObjectKey"
-        val mockUploadResult = FileUploadResult(proposedObjectKey, "mockETag", "mockVersionId")
+        val mockUploadResult = UploadedFileLocator(proposedObjectKey, "mockETag", "mockVersionId")
 
         whenever(mockUploader.uploadFile(any(), any()))
             .thenReturn(mockUploadResult)

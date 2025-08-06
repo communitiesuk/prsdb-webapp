@@ -20,18 +20,12 @@ class FileUpload() : ModifiableAuditableEntity() {
     lateinit var objectKey: String
         private set
 
-    var eTag: String? = null
+    lateinit var eTag: String
 
     var versionId: String? = null
 
     lateinit var extension: String
         private set
-
-    constructor(status: FileUploadStatus, objectKey: String, extension: String) : this() {
-        this.status = status
-        this.objectKey = objectKey
-        this.extension = extension
-    }
 
     constructor(status: FileUploadStatus, objectKey: String, extension: String, eTag: String, versionId: String?) : this() {
         this.status = status

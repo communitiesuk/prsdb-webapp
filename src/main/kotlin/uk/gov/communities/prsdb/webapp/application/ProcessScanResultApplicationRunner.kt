@@ -7,10 +7,9 @@ import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
-import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.system.exitProcess
 
@@ -19,7 +18,6 @@ import kotlin.system.exitProcess
 class ProcessScanResultApplicationRunner(
     private val context: ApplicationContext,
     private val service: VirusScanProcessingService,
-    private val certificateUploadRepository: CertificateUploadRepository,
 ) : ApplicationRunner {
     @Value("\${SCAN_RESULT_STATUS:DEFAULT}")
     private lateinit var scanResultStatus: String
@@ -45,13 +43,18 @@ class ProcessScanResultApplicationRunner(
                 throw PrsdbWebException("Invocation from scan on unexpected bucket: $eventBucketName")
             }
 
-            val upload = getCertificateUpload()
+            val objectLocator =
+                UploadedFileLocator(
+                    objectKey = objectKey,
+                    eTag = etag,
+                    versionId = versionId,
+                )
 
             val scanStatus =
                 ScanResult.fromStringValueOrNull(scanResultStatus)
                     ?: throw PrsdbWebException("Unknown guard duty status: $scanResultStatus")
 
-            service.processScan(upload, scanStatus)
+            service.processScan(objectLocator, scanStatus)
 
             val code =
                 SpringApplication.exit(context, { 0 }).also {
@@ -62,18 +65,5 @@ class ProcessScanResultApplicationRunner(
             println("Error processing scan result: ${prsdbWebException.message}")
             throw prsdbWebException
         }
-    }
-
-    private fun getCertificateUpload(): CertificateUpload {
-        val certificateUpload =
-            certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(
-                objectKey = objectKey,
-                versionId = versionId,
-            ) ?: throw PrsdbWebException("File upload not found for object key: $objectKey with version ID: $versionId")
-        val fileETag = certificateUpload.fileUpload.eTag
-        if (fileETag != etag) {
-            throw PrsdbWebException("ETag mismatch for object key: $objectKey. Expected: $fileETag, Received: $etag")
-        }
-        return certificateUpload
     }
 }

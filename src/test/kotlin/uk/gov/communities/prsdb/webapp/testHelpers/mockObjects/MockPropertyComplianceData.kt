@@ -16,12 +16,12 @@ class MockPropertyComplianceData {
     companion object {
         fun createPropertyCompliance(
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
-            gasSafetyCertUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf"),
+            gasSafetyCertUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf", "etag", "versionId"),
             gasSafetyCertIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
             gasSafetyCertEngineerNum: String? = "1234567",
             gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
             gasSafetyCertExemptionOtherReason: String? = null,
-            eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf"),
+            eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"),
             eicrIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,

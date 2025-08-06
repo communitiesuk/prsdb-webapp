@@ -7,6 +7,9 @@ interface CertificateUploadRepository : JpaRepository<CertificateUpload, Long> {
     @Suppress("ktlint:standard:function-naming")
     fun findByFileUpload_ObjectKeyAndFileUpload_VersionId(
         objectKey: String,
-        versionId: String,
+        versionId: String?,
     ): CertificateUpload?
+
+    @Suppress("ktlint:standard:function-naming")
+    fun findByFileUpload_Id(fileUploadId: Long): CertificateUpload?
 }
