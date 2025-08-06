@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 @ExtendWith(MockitoExtension::class)
 class VirusScanProcessingServiceTests {
     @Mock
-    private lateinit var dequarantiner: FileDequarantiner
+    private lateinit var dequarantiner: UploadDequarantiner
 
     @Mock
     private lateinit var certificateUploadRepository: CertificateUploadRepository
@@ -105,13 +105,13 @@ class VirusScanProcessingServiceTests {
         whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
             .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
 
-        whenever(dequarantiner.deleteFile(any())).thenReturn(true)
+        whenever(dequarantiner.deleteQuarantinedFile(any())).thenReturn(true)
 
         // Act
         virusScanProcessingService.processScan(locator, scanResultStatus)
 
         // Assert
-        verify(dequarantiner).deleteFile(fileUpload)
+        verify(dequarantiner).deleteQuarantinedFile(fileUpload)
     }
 
     @Test

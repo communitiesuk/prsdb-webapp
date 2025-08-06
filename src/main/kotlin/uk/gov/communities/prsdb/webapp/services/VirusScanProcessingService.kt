@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
 @Service
 class VirusScanProcessingService(
-    private val dequarantiner: FileDequarantiner,
+    private val dequarantiner: UploadDequarantiner,
     private val virusAlertSender: VirusAlertSender,
     private val certificateUploadRepository: CertificateUploadRepository,
     private val fileUploadRepository: FileUploadRepository,
@@ -46,7 +46,7 @@ class VirusScanProcessingService(
             ScanResult.Failed,
             -> {
                 virusAlertSender.sendAlerts(certificateUpload.propertyOwnership, certificateUpload.category)
-                if (!dequarantiner.deleteFile(certificateUpload.fileUpload)) {
+                if (!dequarantiner.deleteQuarantinedFile(certificateUpload.fileUpload)) {
                     throw PrsdbWebException("Failed to delete unsafe file: ${certificateUpload.fileUpload.objectKey}")
                 }
             }
@@ -61,7 +61,7 @@ class VirusScanProcessingService(
             fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
 
         fileUpload?.let {
-            if (dequarantiner.deleteFile(fileUpload)) {
+            if (dequarantiner.deleteQuarantinedFile(fileUpload)) {
                 throw PrsdbWebException("Deleted orphaned file: ${fileUpload.objectKey}")
             } else {
                 throw PrsdbWebException("Failed to delete orphaned file: ${fileUpload.objectKey}")
