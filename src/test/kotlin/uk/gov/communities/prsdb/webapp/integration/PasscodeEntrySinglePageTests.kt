@@ -57,15 +57,5 @@ class PasscodeEntrySinglePageTests : SinglePageTestWithSeedData("data-mockuser-n
             assertPageIs(page, PasscodeEntryPage::class)
             assertThat(passcodeEntryPage.form.getErrorMessage()).containsText("Enter a passcode")
         }
-
-        @Test
-        fun `submitting form without passcode shows validation error`(page: Page) {
-            val passcodeEntryPage = navigator.goToPasscodeEntryPage()
-            passcodeEntryPage.form.submit()
-
-            // Should stay on same page with validation error
-            assertPageIs(page, PasscodeEntryPage::class)
-            assertThat(passcodeEntryPage.form.getErrorMessage()).containsText("Enter a passcode")
-        }
     }
 }

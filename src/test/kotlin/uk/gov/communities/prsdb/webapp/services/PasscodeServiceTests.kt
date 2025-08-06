@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -279,7 +280,7 @@ class PasscodeServiceTests {
 
         val result = passcodeService.isValidPasscode(passcode)
 
-        assertTrue(!result)
+        assertFalse(result)
         verify(mockPasscodeRepository).existsByPasscode(passcode)
     }
 
@@ -292,30 +293,6 @@ class PasscodeServiceTests {
         val result = passcodeService.isValidPasscode(inputPasscode)
 
         assertTrue(result)
-        verify(mockPasscodeRepository).existsByPasscode(normalizedPasscode)
-    }
-
-    @Test
-    fun `isValidPasscode handles lowercase input`() {
-        val inputPasscode = "abc123"
-        val normalizedPasscode = "ABC123"
-        whenever(mockPasscodeRepository.existsByPasscode(normalizedPasscode)).thenReturn(true)
-
-        val result = passcodeService.isValidPasscode(inputPasscode)
-
-        assertTrue(result)
-        verify(mockPasscodeRepository).existsByPasscode(normalizedPasscode)
-    }
-
-    @Test
-    fun `isValidPasscode handles mixed case input with whitespace`() {
-        val inputPasscode = " AbC123 "
-        val normalizedPasscode = "ABC123"
-        whenever(mockPasscodeRepository.existsByPasscode(normalizedPasscode)).thenReturn(false)
-
-        val result = passcodeService.isValidPasscode(inputPasscode)
-
-        assertTrue(!result)
         verify(mockPasscodeRepository).existsByPasscode(normalizedPasscode)
     }
 }

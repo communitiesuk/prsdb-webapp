@@ -57,8 +57,7 @@ class LandlordSecurityConfig(
                     redirection.baseUri("/landlord/login/oauth2/code/one-login")
                 }
             }.csrf { requests ->
-                requests.ignoringRequestMatchers("/local/**")
-                    .csrfTokenRepository(csrfTokenRepository())
+                requests.ignoringRequestMatchers("/local/**").csrfTokenRepository(csrfTokenRepository())
             }.addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
 
         return http.build()
