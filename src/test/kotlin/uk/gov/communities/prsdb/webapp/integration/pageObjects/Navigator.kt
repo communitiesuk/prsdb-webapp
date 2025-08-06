@@ -72,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
@@ -193,6 +194,17 @@ class Navigator(
 
     fun navigateToLandlordRegistrationVerifyIdentityPage() {
         navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
+    }
+
+    fun skipToLandlordRegistrationIdentityNotVerifiedPage(): IdentityNotVerifiedFormPageLandlordRegistration {
+        setJourneyDataInSession(
+            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyPageDataBuilder.beforeLandlordRegistrationIdentityNotVerified().build(),
+        )
+        navigate(
+            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment}",
+        )
+        return createValidPage(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
     }
 
     fun skipToLandlordRegistrationNamePage(): NameFormPageLandlordRegistration {
