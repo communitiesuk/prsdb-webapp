@@ -176,14 +176,7 @@ class JourneyPageDataBuilder {
             gasCertificatefileUploadId: Long = 2L,
             eicrIssueDate: LocalDate = LocalDate.now(),
             eicrFileUploadId: Long = 1L,
-        ) = JourneyDataBuilder()
-            .withExistingCompliance()
-            .withNewGasSafetyCertStatus(true)
-            .withGasSafetyIssueDate(gasSafetyIssueDate)
-            .withGasSafeEngineerNum(gasSafeEngineerNumber)
-            .withGasCertFileUploadId(gasCertificatefileUploadId)
-            .withGasSafetyCertUploadConfirmation()
-            .withGasSafetyUpdateCheckYourAnswers()
+        ) = beforePropertyComplianceEicrUpdate(gasSafetyIssueDate, gasSafeEngineerNumber, gasCertificatefileUploadId)
             .withNewEicrStatus(true)
             .withEicrIssueDate(eicrIssueDate)
             .withEicrUploadId(eicrFileUploadId)

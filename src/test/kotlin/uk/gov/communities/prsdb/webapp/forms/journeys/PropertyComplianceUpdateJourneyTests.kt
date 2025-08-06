@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
@@ -19,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
@@ -39,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.time.LocalDate
 import kotlin.String
-import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
 class PropertyComplianceUpdateJourneyTests {
@@ -140,30 +139,21 @@ class PropertyComplianceUpdateJourneyTests {
         }
 
         @Test
-        fun `submitting with a missing update value does not reach the gas safety missing step`() {
+        fun `submitting with a missing update value throws an exception`() {
             // Arrange
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
             whenever(
                 mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
             ).thenReturn(originalPropertyCompliance)
 
-            // Act
-            val redirectModelAndView =
-                try {
-                    completeStep(
-                        stepId = PropertyComplianceStepId.UpdateGasSafety,
-                        pageData = mapOf("hasNewCertificate" to null),
-                        propertyOwnershipId = propertyOwnershipId,
-                    )
-                } catch (_: Exception) {
-                    null
-                }
-
-            // Assert
-            assertNotEquals(
-                "redirect:${PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment}",
-                redirectModelAndView?.viewName,
-            )
+            // Act, Assert
+            assertThrows<NullPointerException> {
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateGasSafety,
+                    pageData = mapOf("hasNewCertificate" to null),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+            }
         }
     }
 
@@ -317,30 +307,21 @@ class PropertyComplianceUpdateJourneyTests {
         }
 
         @Test
-        fun `submitting with a missing update value does not reach the EICR missing step`() {
+        fun `submitting with a missing update value throws an exception`() {
             // Arrange
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
             whenever(
                 mockPropertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId),
             ).thenReturn(originalPropertyCompliance)
 
-            // Act
-            val redirectModelAndView =
-                try {
-                    completeStep(
-                        stepId = PropertyComplianceStepId.UpdateEICR,
-                        pageData = mapOf("hasNewCertificate" to null),
-                        propertyOwnershipId = propertyOwnershipId,
-                    )
-                } catch (_: Exception) {
-                    null
-                }
-
-            // Assert
-            assertNotEquals(
-                "redirect:${PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment}",
-                redirectModelAndView?.viewName,
-            )
+            // Act, Assert
+            assertThrows<NullPointerException> {
+                completeStep(
+                    stepId = PropertyComplianceStepId.UpdateEICR,
+                    pageData = mapOf("hasNewCertificate" to null),
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+            }
         }
     }
 
@@ -548,7 +529,7 @@ class PropertyComplianceUpdateJourneyTests {
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-                createJourneyDataForEpcUpdate(true, expectedUpdateModel.epcUpdate!!),
+                createJourneyDataForEpcUpdateWithNewEpc(expectedUpdateModel.epcUpdate!!),
             )
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
@@ -577,7 +558,7 @@ class PropertyComplianceUpdateJourneyTests {
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-                createJourneyDataForEpcUpdate(true, expectedUpdateModel.epcUpdate!!),
+                createJourneyDataForEpcUpdateWithMeesExemption(expectedUpdateModel.epcUpdate!!, meesOnlyUpdate = false),
             )
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
@@ -603,7 +584,7 @@ class PropertyComplianceUpdateJourneyTests {
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-                createJourneyDataForEpcUpdate(false, expectedUpdateModel.epcUpdate!!),
+                createJourneyDataForEpcUpdateWithEpcExemption(expectedUpdateModel.epcUpdate!!),
             )
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
@@ -635,7 +616,7 @@ class PropertyComplianceUpdateJourneyTests {
                 )
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-                createJourneyDataForEpcUpdate(true, expectedUpdateModel.epcUpdate!!, meesOnlyUpdate = true),
+                createJourneyDataForEpcUpdateWithMeesExemption(expectedUpdateModel.epcUpdate!!, meesOnlyUpdate = true),
             )
 
             val originalPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
@@ -714,67 +695,64 @@ class PropertyComplianceUpdateJourneyTests {
             ),
     )
 
-    private fun createJourneyDataForEpcUpdate(
-        newEpcStatus: Boolean,
+    private fun createJourneyDataForEpcUpdateWithEpcExemption(epcUpdateModel: EpcUpdateModel) =
+        JourneyPageDataBuilder
+            .beforePropertyComplianceEpcUpdate(
+                gasSafetyIssueDate = LocalDate.now(),
+                gasSafeEngineerNumber = "1234567",
+                gasCertificatefileUploadId = 2L,
+                eicrIssueDate = LocalDate.now(),
+                eicrFileUploadId = 1L,
+            )
+            .withNewEpcStatus(false)
+            .withEpcExemptionReason(epcUpdateModel.exemptionReason!!)
+            .withEpcExemptionConfirmationStep()
+            .build()
+
+    private fun createJourneyDataForEpcUpdateWithNewEpc(epcUpdateModel: EpcUpdateModel) =
+        JourneyPageDataBuilder
+            .beforePropertyComplianceEpcUpdate(
+                gasSafetyIssueDate = LocalDate.now(),
+                gasSafeEngineerNumber = "1234567",
+                gasCertificatefileUploadId = 2L,
+                eicrIssueDate = LocalDate.now(),
+                eicrFileUploadId = 1L,
+            )
+            .withNewEpcStatus(true)
+            .withAutoMatchedEpcDetails(
+                epcDetails =
+                    MockEpcData.createEpcDataModel(
+                        expiryDate = epcUpdateModel.expiryDate!!.toKotlinLocalDate(),
+                        energyRating = epcUpdateModel.energyRating!!,
+                    ),
+            )
+            .withCheckAutoMatchedEpcResult(true)
+            .build()
+
+    private fun createJourneyDataForEpcUpdateWithMeesExemption(
         epcUpdateModel: EpcUpdateModel,
         meesOnlyUpdate: Boolean = false,
-    ): JourneyData {
-        return if (newEpcStatus && epcUpdateModel.meesExemptionReason != null) {
-            JourneyPageDataBuilder
-                .beforePropertyComplianceEpcUpdate(
-                    gasSafetyIssueDate = LocalDate.now(),
-                    gasSafeEngineerNumber = "1234567",
-                    gasCertificatefileUploadId = 2L,
-                    eicrIssueDate = LocalDate.now(),
-                    eicrFileUploadId = 1L,
-                )
-                .withNewEpcStatus(newEpcStatus)
-                .withAutoMatchedEpcDetails(
-                    epcDetails =
-                        MockEpcData.createEpcDataModel(
-                            expiryDate = epcUpdateModel.expiryDate!!.toKotlinLocalDate(),
-                            energyRating = epcUpdateModel.energyRating!!,
-                        ),
-                )
-                .withCheckAutoMatchedEpcResult(true, meesOnlyUpdate)
-                .withMeesExemptionCheckStep(true, meesOnlyUpdate)
-                .withMeesExemptionReasonStep(epcUpdateModel.meesExemptionReason!!, meesOnlyUpdate)
-                .withMeesExemptionConfirmationStep(meesOnlyUpdate)
-                .build()
-        } else if (newEpcStatus) {
-            JourneyPageDataBuilder
-                .beforePropertyComplianceEpcUpdate(
-                    gasSafetyIssueDate = LocalDate.now(),
-                    gasSafeEngineerNumber = "1234567",
-                    gasCertificatefileUploadId = 2L,
-                    eicrIssueDate = LocalDate.now(),
-                    eicrFileUploadId = 1L,
-                )
-                .withNewEpcStatus(newEpcStatus)
-                .withAutoMatchedEpcDetails(
-                    epcDetails =
-                        MockEpcData.createEpcDataModel(
-                            expiryDate = epcUpdateModel.expiryDate!!.toKotlinLocalDate(),
-                            energyRating = epcUpdateModel.energyRating!!,
-                        ),
-                )
-                .withCheckAutoMatchedEpcResult(true)
-                .build()
-        } else {
-            JourneyPageDataBuilder
-                .beforePropertyComplianceEpcUpdate(
-                    gasSafetyIssueDate = LocalDate.now(),
-                    gasSafeEngineerNumber = "1234567",
-                    gasCertificatefileUploadId = 2L,
-                    eicrIssueDate = LocalDate.now(),
-                    eicrFileUploadId = 1L,
-                )
-                .withNewEpcStatus(newEpcStatus)
-                .withEpcExemptionReason(epcUpdateModel.exemptionReason!!)
-                .withEpcExemptionConfirmationStep()
-                .build()
-        }
-    }
+    ) = JourneyPageDataBuilder
+        .beforePropertyComplianceEpcUpdate(
+            gasSafetyIssueDate = LocalDate.now(),
+            gasSafeEngineerNumber = "1234567",
+            gasCertificatefileUploadId = 2L,
+            eicrIssueDate = LocalDate.now(),
+            eicrFileUploadId = 1L,
+        )
+        .withNewEpcStatus(true)
+        .withAutoMatchedEpcDetails(
+            epcDetails =
+                MockEpcData.createEpcDataModel(
+                    expiryDate = epcUpdateModel.expiryDate!!.toKotlinLocalDate(),
+                    energyRating = epcUpdateModel.energyRating!!,
+                ),
+        )
+        .withCheckAutoMatchedEpcResult(true, meesOnlyUpdate)
+        .withMeesExemptionCheckStep(true, meesOnlyUpdate)
+        .withMeesExemptionReasonStep(epcUpdateModel.meesExemptionReason!!, meesOnlyUpdate)
+        .withMeesExemptionConfirmationStep(meesOnlyUpdate)
+        .build()
 
     private fun complianceUpdateRecordTestsActAndAssert(
         checkAnswersStepId: PropertyComplianceStepId,
