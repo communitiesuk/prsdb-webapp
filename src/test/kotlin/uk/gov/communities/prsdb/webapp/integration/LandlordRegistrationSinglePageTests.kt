@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
@@ -85,7 +84,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`(page: Page) {
             navigator.navigateToLandlordRegistrationVerifyIdentityPage()
-            val dashboardPage = BasePage.assertPageIs(page, LandlordDashboardPage::class)
+            val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
         }
     }
@@ -166,7 +165,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
                 val date = currentDate.minus(DatePeriod(years = 18))
                 val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
                 dateOfBirthPage.submitDate(date)
-                BasePage.assertPageIs(page, EmailFormPageLandlordRegistration::class)
+                assertPageIs(page, EmailFormPageLandlordRegistration::class)
             }
 
             @Test
@@ -174,7 +173,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
                 val date = currentDate.minus(DatePeriod(years = 121)).plus(DatePeriod(days = 1))
                 val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
                 dateOfBirthPage.submitDate(date)
-                BasePage.assertPageIs(page, EmailFormPageLandlordRegistration::class)
+                assertPageIs(page, EmailFormPageLandlordRegistration::class)
             }
 
             @Test
@@ -226,7 +225,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         ) {
             val phoneNumPage = navigator.skipToLandlordRegistrationPhoneNumberPage()
             phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedInternationalPhoneNumber(regionCode))
-            BasePage.assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+            assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         }
 
         @Test
@@ -292,19 +291,20 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // redirect to noAddressFoundPage
-            val noAddressFoundPage = BasePage.assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(houseNumber)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(postcode)
+            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
+            BaseComponent
+                .assertThat(noAddressFoundPage.heading)
+                .containsText("No matching address found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
-            val lookupAddressPageAgain = BasePage.assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+            val lookupAddressPageAgain = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
             lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // Submit no address found page
-            val noAddressFoundPageAgain = BasePage.assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
+            val noAddressFoundPageAgain = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
             noAddressFoundPageAgain.form.submit()
-            BasePage.assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
         }
     }
 
@@ -321,7 +321,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectAddressPage = navigator.skipToLandlordRegistrationSelectAddressPage()
             selectAddressPage.searchAgain.clickAndWait()
-            BasePage.assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
         }
     }
 
@@ -376,21 +376,22 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
 
             // redirect to noAddressFoundPage
             val noAddressFoundPage =
-                BasePage.assertPageIs(page, NoContactAddressFoundFormPageLandlordRegistration::class)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(houseNumber)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(postcode)
+                assertPageIs(page, NoContactAddressFoundFormPageLandlordRegistration::class)
+            BaseComponent
+                .assertThat(noAddressFoundPage.heading)
+                .containsText("No matching address found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
             val lookupAddressPageAgain =
-                BasePage.assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
+                assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
             lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // Submit no address found page
             val noAddressFoundPageAgain =
-                BasePage.assertPageIs(page, NoContactAddressFoundFormPageLandlordRegistration::class)
+                assertPageIs(page, NoContactAddressFoundFormPageLandlordRegistration::class)
             noAddressFoundPageAgain.form.submit()
-            BasePage.assertPageIs(page, ManualContactAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, ManualContactAddressFormPageLandlordRegistration::class)
         }
     }
 
@@ -407,7 +408,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectContactAddressPage = navigator.skipToLandlordRegistrationSelectContactAddressPage()
             selectContactAddressPage.searchAgain.clickAndWait()
-            BasePage.assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
         }
     }
 
@@ -439,7 +440,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         @Test
         fun `Navigating here with an incomplete form returns a 500 error page`(page: Page) {
             navigator.navigateToLandlordRegistrationConfirmationPage()
-            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
+            val errorPage = assertPageIs(page, ErrorPage::class)
             BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
@@ -451,17 +452,17 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             var checkAnswersPage = navigator.skipToLandlordRegistrationCheckAnswersPage()
             checkAnswersPage.form.summaryList.emailRow.actions.actionLink
                 .clickAndWait()
-            var emailPage = BasePage.assertPageIs(page, EmailFormPageLandlordRegistration::class)
+            var emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
 
             emailPage.submitEmail("New@email.com")
-            checkAnswersPage = BasePage.assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+            checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
 
             checkAnswersPage.form.summaryList.emailRow.actions.actionLink
                 .clickAndWait()
-            emailPage = BasePage.assertPageIs(page, EmailFormPageLandlordRegistration::class)
+            emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
 
             emailPage.backLink.clickAndWait()
-            BasePage.assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+            assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         }
     }
 }
