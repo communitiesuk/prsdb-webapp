@@ -61,10 +61,10 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorE
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
-import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import java.security.Principal
 
 @PrsdbController
@@ -73,7 +73,7 @@ import java.security.Principal
 class PropertyComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
-    private val fileUploader: FileUploader,
+    private val uploadService: UploadService,
     private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
     private val propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory,
     private val validator: Validator,
@@ -417,7 +417,7 @@ class PropertyComplianceController(
         file: FileItemInput,
         fileLength: Long,
     ): FileUpload? =
-        fileUploader.uploadFile(
+        uploadService.uploadFile(
             uploadFileName,
             file.inputStream.withMaxLength(fileLength),
             FilenameUtils.getExtension(file.name),
