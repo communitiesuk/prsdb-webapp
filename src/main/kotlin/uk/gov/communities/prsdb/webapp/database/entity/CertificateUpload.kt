@@ -8,7 +8,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
+import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 
 @Entity
 open class CertificateUpload() : ModifiableAuditableEntity() {
@@ -16,7 +16,7 @@ open class CertificateUpload() : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
-    lateinit var category: PropertyFileNameInfo.FileCategory
+    lateinit var category: FileCategory
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_ownership_id")
@@ -28,7 +28,7 @@ open class CertificateUpload() : ModifiableAuditableEntity() {
     lateinit var fileUpload: FileUpload
         private set
 
-    constructor(upload: FileUpload, category: PropertyFileNameInfo.FileCategory, propertyOwnership: PropertyOwnership) : this() {
+    constructor(upload: FileUpload, category: FileCategory, propertyOwnership: PropertyOwnership) : this() {
         this.category = category
         this.fileUpload = upload
         this.propertyOwnership = propertyOwnership

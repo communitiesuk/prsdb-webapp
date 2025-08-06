@@ -20,6 +20,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -29,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -150,7 +150,7 @@ class PropertyComplianceJourneyTests {
             verify(mockCertificateUploadService).saveCertificateUpload(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
-                eq(PropertyFileNameInfo.FileCategory.GasSafetyCert),
+                eq(FileCategory.GasSafetyCert),
             )
         }
 
@@ -182,7 +182,7 @@ class PropertyComplianceJourneyTests {
             verify(mockCertificateUploadService).saveCertificateUpload(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
-                eq(PropertyFileNameInfo.FileCategory.Eirc),
+                eq(FileCategory.Eirc),
             )
         }
     }
