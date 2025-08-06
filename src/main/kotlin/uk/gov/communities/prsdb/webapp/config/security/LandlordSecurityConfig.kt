@@ -5,6 +5,7 @@ import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -37,9 +39,13 @@ class LandlordSecurityConfig(
     fun landlordSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/landlord/**")
+            // Required to allow csrf token to be stored in the session on public pages
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
+                    .permitAll()
+                    .requestMatchers(PasscodeEntryController.PASSCODE_ENTRY_ROUTE)
                     .permitAll()
                     .anyRequest()
                     .authenticated()
@@ -82,7 +88,10 @@ class LandlordSecurityConfig(
                     ::doesTokenContainAnyIdVerificationClaims,
                 ),
                 SecurityContextHolderFilter::class.java,
-            ).addFilterAfter(InvalidCoreIdentityFilter(securityContextRepository), OauthTokenSecondaryValidatingFilter::class.java)
+            ).addFilterAfter(
+                InvalidCoreIdentityFilter(securityContextRepository),
+                OauthTokenSecondaryValidatingFilter::class.java,
+            )
 
         return http.build()
     }

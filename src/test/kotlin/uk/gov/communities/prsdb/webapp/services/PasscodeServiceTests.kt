@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -222,5 +223,60 @@ class PasscodeServiceTests {
         verify(mockPasscodeRepository, never()).count()
         verify(mockLocalAuthorityRepository, never()).findById(anyInt())
         verify(mockPasscodeRepository, never()).save(any(Passcode::class.java))
+    }
+
+    @Test
+    fun `getOrGeneratePasscode generates new passcode when no cached passcode exists`() {
+        val localAuthorityId = 123L
+        val mockPasscodeValue = "XYZ789"
+        val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalAuthority)
+        whenever(mockSession.getAttribute(LAST_GENERATED_PASSCODE)).thenReturn(null)
+        whenever(mockPasscodeRepository.count()).thenReturn(500L)
+        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
+        whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
+        whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscodeWithValue)
+
+        val result = passcodeService.getOrGeneratePasscode(localAuthorityId)
+
+        assertEquals(mockPasscodeValue, result)
+        verify(mockSession).getAttribute(LAST_GENERATED_PASSCODE)
+        verify(mockSession).setAttribute(LAST_GENERATED_PASSCODE, mockPasscodeValue)
+        verify(mockPasscodeRepository).count()
+        verify(mockLocalAuthorityRepository).findById(localAuthorityId.toInt())
+        verify(mockPasscodeRepository).save(any(Passcode::class.java))
+    }
+
+    @Test
+    fun `isValidPasscode returns true for existing passcode`() {
+        val passcode = "ABC123"
+        whenever(mockPasscodeRepository.existsByPasscode(passcode)).thenReturn(true)
+
+        val result = passcodeService.isValidPasscode(passcode)
+
+        assertTrue(result)
+        verify(mockPasscodeRepository).existsByPasscode(passcode)
+    }
+
+    @Test
+    fun `isValidPasscode returns false for non-existing passcode`() {
+        val passcode = "INVALID"
+        whenever(mockPasscodeRepository.existsByPasscode(passcode)).thenReturn(false)
+
+        val result = passcodeService.isValidPasscode(passcode)
+
+        assertFalse(result)
+        verify(mockPasscodeRepository).existsByPasscode(passcode)
+    }
+
+    @Test
+    fun `isValidPasscode normalizes passcode by trimming whitespace and converting to uppercase`() {
+        val inputPasscode = "  abc123  "
+        val normalizedPasscode = "ABC123"
+        whenever(mockPasscodeRepository.existsByPasscode(normalizedPasscode)).thenReturn(true)
+
+        val result = passcodeService.isValidPasscode(inputPasscode)
+
+        assertTrue(result)
+        verify(mockPasscodeRepository).existsByPasscode(normalizedPasscode)
     }
 }
