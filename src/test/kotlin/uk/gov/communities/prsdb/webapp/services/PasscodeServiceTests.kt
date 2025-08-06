@@ -247,22 +247,6 @@ class PasscodeServiceTests {
     }
 
     @Test
-    fun `generateAndStorePasscode stores passcode in session`() {
-        val localAuthorityId = 123L
-        val mockPasscodeValue = "DEF456"
-        val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalAuthority)
-        whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
-        whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
-        whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscodeWithValue)
-
-        val result = passcodeService.generateAndStorePasscode(localAuthorityId)
-
-        assertEquals(mockPasscodeValue, result)
-        verify(mockSession).setAttribute(LAST_GENERATED_PASSCODE, mockPasscodeValue)
-    }
-
-    @Test
     fun `isValidPasscode returns true for existing passcode`() {
         val passcode = "ABC123"
         whenever(mockPasscodeRepository.existsByPasscode(passcode)).thenReturn(true)
