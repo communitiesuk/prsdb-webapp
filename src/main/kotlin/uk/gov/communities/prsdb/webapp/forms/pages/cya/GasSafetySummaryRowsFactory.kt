@@ -4,6 +4,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionMissing
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyUploadConfirmation
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 class GasSafetySummaryRowsFactory(
@@ -33,18 +35,20 @@ class GasSafetySummaryRowsFactory(
 
     private fun getGasSafetyCertStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
         val fieldValue =
-            // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-            if (filteredJourneyData.getHasCompletedGasSafetyUploadConfirmation()) {
-                "forms.checkComplianceAnswers.gasSafety.download"
+            if (filteredJourneyData.getHasCompletedGasSafetyExemptionMissing()) {
+                "forms.checkComplianceAnswers.certificate.notAdded"
             } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionConfirmation()) {
                 "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
-            } else {
+            } else if (filteredJourneyData.getIsGasSafetyCertOutdated() == true) {
                 "forms.checkComplianceAnswers.certificate.expired"
+            } else if (filteredJourneyData.getHasCompletedGasSafetyUploadConfirmation()) {
+                // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
+                "forms.checkComplianceAnswers.gasSafety.download"
+            } else {
+                throw PrsdbWebException("Unexpected gas safety cert. status in journey data.")
             }
 
-        return SummaryListRowViewModel.Companion.forCheckYourAnswersPage(
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.gasSafety.certificate",
             fieldValue,
             gasSafetyStartingStep.urlPathSegment,
@@ -57,12 +61,12 @@ class GasSafetySummaryRowsFactory(
                 val issueDate = filteredJourneyData.getGasSafetyCertIssueDate()!!
                 addAll(
                     listOf(
-                        SummaryListRowViewModel.Companion.forCheckYourAnswersPage(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.issueDate",
                             issueDate,
                             PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment,
                         ),
-                        SummaryListRowViewModel.Companion.forCheckYourAnswersPage(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.validUntil",
                             issueDate.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS)),
                             null,
@@ -71,9 +75,9 @@ class GasSafetySummaryRowsFactory(
                 )
 
                 val engineerNum = filteredJourneyData.getGasSafetyCertEngineerNum()
-                if (engineerNum != null) {
+                if (engineerNum != null && !filteredJourneyData.getIsGasSafetyCertOutdated()!!) {
                     add(
-                        SummaryListRowViewModel.Companion.forCheckYourAnswersPage(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.gasSafety.engineerNumber",
                             engineerNum,
                             PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment,
@@ -90,7 +94,7 @@ class GasSafetySummaryRowsFactory(
                 else -> exemptionReason
             }
 
-        return SummaryListRowViewModel.Companion.forCheckYourAnswersPage(
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.certificate.exemption",
             fieldValue,
             changeExemptionStep.urlPathSegment,
