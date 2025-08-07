@@ -12,12 +12,14 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class PropertyComplianceCheckAnswersPage(
     journeyDataService: JourneyDataService,
     epcCertificateUrlProvider: EpcCertificateUrlProvider,
     missingAnswersRedirect: String,
     stepFactory: PropertyComplianceSharedStepFactory,
+    uploadService: UploadService,
     private val propertyAddressProvider: () -> String,
 ) : CheckAnswersPage(
         content = emptyMap(),
@@ -30,6 +32,7 @@ class PropertyComplianceCheckAnswersPage(
             doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },
             gasSafetyStartingStep = PropertyComplianceStepId.GasSafety,
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
+            uploadService = uploadService,
         )
 
     private val eicrDataFactory =

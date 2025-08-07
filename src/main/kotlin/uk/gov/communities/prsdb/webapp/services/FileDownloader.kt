@@ -8,7 +8,7 @@ interface FileDownloader {
     fun getDownloadUrl(
         fileUpload: FileUpload,
         fileName: String? = null,
-    ): String?
+    ): String
 
     fun isFileDownloadable(fileUpload: FileUpload): Boolean = fileUpload.status == FileUploadStatus.SCANNED
 }

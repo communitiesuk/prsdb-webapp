@@ -70,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class PropertyComplianceJourney(
     validator: Validator,
@@ -84,6 +85,7 @@ class PropertyComplianceJourney(
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
     private val certificateUploadService: CertificateUploadService,
+    private val uploadService: UploadService,
     checkingAnswersForStep: String?,
     stepName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
@@ -448,6 +450,7 @@ class PropertyComplianceJourney(
                         epcCertificateUrlProvider,
                         unreachableStepRedirect,
                         propertyComplianceSharedStepFactory,
+                        uploadService,
                     ) { getPropertyAddress() },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
             )

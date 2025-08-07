@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceS
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
@@ -37,6 +38,9 @@ class PropertyComplianceCheckAnswersPageTests {
 
     @Mock
     private lateinit var mockStepFactory: PropertyComplianceSharedStepFactory
+
+    @Mock
+    private lateinit var mockUploadService: UploadService
 
     private val certificateUrl: String = "https://example.com/certificate"
 
@@ -56,6 +60,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 missingAnswersRedirect = "/property-compliance/missing-answers",
                 stepFactory = mockStepFactory,
+                uploadService = mockUploadService,
             ) { "any address" }
         val modelAndView = ModelAndView()
 

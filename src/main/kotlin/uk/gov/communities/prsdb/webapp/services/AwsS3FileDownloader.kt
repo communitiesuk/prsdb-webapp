@@ -17,7 +17,7 @@ class AwsS3FileDownloader(
     override fun getDownloadUrl(
         fileUpload: FileUpload,
         fileName: String?,
-    ): String? {
+    ): String {
         if (!isFileDownloadable(fileUpload)) {
             throw PrsdbWebException(
                 "File with object key ${fileUpload.objectKey} is not downloadable. " +

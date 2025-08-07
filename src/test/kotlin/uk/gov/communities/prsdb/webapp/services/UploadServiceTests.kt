@@ -58,7 +58,8 @@ class UploadServiceTests {
         // Given
         val mockUploader = mock<FileUploader>()
         val mockRepository = mock<FileUploadRepository>()
-        val uploadService = UploadService(mockUploader, mockRepository)
+        val mockDownloader = mock<FileDownloader>()
+        val uploadService = UploadService(mockUploader, mockDownloader, mockRepository)
 
         val proposedObjectKey = "testObjectKey"
         whenever(mockUploader.uploadFile(any(), any()))
