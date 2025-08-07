@@ -327,7 +327,7 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect),
+                page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect, uploadService),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->

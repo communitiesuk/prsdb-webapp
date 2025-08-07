@@ -5,10 +5,12 @@ import uk.gov.communities.prsdb.webapp.forms.pages.cya.EicrSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class CheckUpdateEicrAnswersPage(
     journeyDataService: JourneyDataService,
     missingAnswersRedirect: String,
+    uploadService: UploadService,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -25,6 +27,7 @@ class CheckUpdateEicrAnswersPage(
             doesDataHaveEicr = { data -> data.getHasNewEICR()!! },
             eicrStartingStep = PropertyComplianceStepId.UpdateEICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemptionReason,
+            uploadService = uploadService,
         )
 
     override fun getSummaryList(filteredJourneyData: JourneyData) = eicrDataFactory.createRows(filteredJourneyData)

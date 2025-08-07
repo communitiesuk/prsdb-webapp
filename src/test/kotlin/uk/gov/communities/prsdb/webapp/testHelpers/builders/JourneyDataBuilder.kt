@@ -573,6 +573,11 @@ class JourneyDataBuilder(
         return this
     }
 
+    fun withGasSafetyOutdatedConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment] = emptyMap<String, Any>()
+        return this
+    }
+
     fun withGasSafetyCertExemptionStatus(hasGasSafetyCertExemption: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyExemption.urlPathSegment] =
             mapOf(GasSafetyExemptionFormModel::hasExemption.name to hasGasSafetyCertExemption)

@@ -27,6 +27,9 @@ class UploadServiceTests {
     @Mock
     private lateinit var mockRepository: FileUploadRepository
 
+    @Mock
+    private lateinit var mockDownloader: FileDownloader
+
     @InjectMocks
     private lateinit var uploadService: UploadService
 
