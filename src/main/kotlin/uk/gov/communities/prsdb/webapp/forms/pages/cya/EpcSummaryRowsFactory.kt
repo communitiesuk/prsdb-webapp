@@ -59,6 +59,7 @@ class EpcSummaryRowsFactory(
             fieldValue,
             epcStartingStep.urlPathSegment,
             valueUrl,
+            valueUrlOpensNewTab = true,
         )
     }
 
