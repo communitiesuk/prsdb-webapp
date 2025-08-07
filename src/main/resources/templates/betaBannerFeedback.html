@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{betaBannerFeedback.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{betaBannerFeedback.heading}">betaBannerFeedback.heading</h1>
+                <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
+            </header>
+            <section>
+                <div class="govuk-form-group">
+                    <h2 class="govuk-label-wrapper">
+                        <label class="govuk-label govuk-label--m" for="feedback-textarea" th:text="#{betaBannerFeedback.label}">betaBannerFeedback.label</label>
+                    </h2>
+                    <div class="govuk-hint" id="feedback-textarea-hint" th:text="#{betaBannerFeedback.hint}">betaBannerFeedback.hint</div>
+                    <textarea class="govuk-textarea" id="feedback-textarea" name="feedback" rows="5" aria-describedby="feedback-textarea-hint"></textarea>
+                    <div class="govuk-hint" th:text="#{betaBannerFeedback.additionalInfo}">betaBannerFeedback.additionalInfo</div>
+                    <label class="govuk-label" for="email-input" th:text="#{betaBannerFeedback.emailLabel}">betaBannerFeedback.emailLabel</label>
+                    <input class="govuk-input" id="email-input" name="email" type="email"/>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+</html>
