@@ -130,6 +130,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -259,6 +260,7 @@ class PropertyComplianceCheckAnswersPageTests {
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(true)
                 .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafetyOutdatedConfirmation()
                 .withEicrStatus(true)
                 .withEicrIssueDate(eicrIssueDate)
                 .withEicrOutdatedConfirmation()
@@ -311,6 +313,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -321,6 +324,97 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.expiryCheck",
                     tenancyStartedBeforeExpiry,
                     PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.energyRating",
+                    epcDetails.energyRating.uppercase(),
+                    null,
+                ),
+            )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+
+        // Act
+        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
+        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
+        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
+        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
+        assertIterableEquals(expectedEicrData, returnedEicrData)
+        assertIterableEquals(expectedEpcData, returnedEpcData)
+    }
+
+    @Test
+    fun `the correct summary rows appear when certificate expiry dates have passed since being provided`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafeEngineerNum()
+                .withGasSafetyCertUploadConfirmation()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadConfirmation()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        val expectedGasSafetyData =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.gasSafety.certificate",
+                    "forms.checkComplianceAnswers.certificate.expired",
+                    PropertyComplianceStepId.GasSafety.urlPathSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.certificate.issueDate",
+                    gasCertIssueDate.toKotlinLocalDate(),
+                    PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.certificate.validUntil",
+                    gasCertIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate(),
+                    null,
+                ),
+            )
+        val expectedEicrData =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.eicr.certificate",
+                    "forms.checkComplianceAnswers.certificate.expired",
+                    PropertyComplianceStepId.EICR.urlPathSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.certificate.issueDate",
+                    eicrIssueDate.toKotlinLocalDate(),
+                    PropertyComplianceStepId.EicrIssueDate.urlPathSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.certificate.validUntil",
+                    eicrIssueDate.plusYears(EICR_VALIDITY_YEARS.toLong()).toKotlinLocalDate(),
+                    null,
+                ),
+            )
+        val expectedEpcData =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.certificate",
+                    "forms.checkComplianceAnswers.epc.view",
+                    PropertyComplianceStepId.EPC.urlPathSegment,
+                    certificateUrl,
+                    valueUrlOpensNewTab = true,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkComplianceAnswers.epc.expiryDate",
+                    epcDetails.expiryDate,
+                    null,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.energyRating",
@@ -477,6 +571,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -530,6 +625,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -582,6 +678,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -640,6 +737,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -700,6 +798,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
