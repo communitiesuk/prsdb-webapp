@@ -65,6 +65,11 @@ class PasscodeService(
         return getLastGeneratedPasscode() ?: generateAndStorePasscode(localAuthorityId)
     }
 
+    fun isValidPasscode(passcode: String): Boolean {
+        val normalizedPasscode = passcode.trim().uppercase()
+        return passcodeRepository.existsByPasscode(normalizedPasscode)
+    }
+
     private fun generateRandomPasscodeString(): String {
         return (1..PASSCODE_LENGTH)
             .map { SAFE_CHARACTERS_CHARSET.random() }

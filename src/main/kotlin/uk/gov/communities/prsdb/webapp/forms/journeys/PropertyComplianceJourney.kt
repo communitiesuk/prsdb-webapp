@@ -85,6 +85,7 @@ class PropertyComplianceJourney(
     private val urlProvider: AbsoluteUrlProvider,
     private val certificateUploadService: CertificateUploadService,
     checkingAnswersForStep: String?,
+    stepName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -117,14 +118,13 @@ class PropertyComplianceJourney(
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = true,
-            nextActionAfterGasSafetyTask = PropertyComplianceStepId.EICR,
-            nextActionAfterEicrTask = PropertyComplianceStepId.EPC,
-            nextActionAfterEpcTask = landlordResponsibilities.first().startingStepId,
-            isCheckingOrUpdatingAnswers = isCheckingAnswers,
+            isUpdateJourney = false,
+            isCheckingAnswers = isCheckingAnswers,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             certificateUploadService = certificateUploadService,
             propertyOwnershipId = propertyOwnershipId,
+            stepName = stepName,
         )
 
     override val sections =
@@ -251,7 +251,7 @@ class PropertyComplianceJourney(
                     propertyComplianceSharedStepFactory.createEpcMissingStep(),
                     propertyComplianceSharedStepFactory.createEpcExemptionReasonStep(),
                     propertyComplianceSharedStepFactory.createEpcExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(),
+                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(propertyOwnershipId),
                     propertyComplianceSharedStepFactory.createMeesExemptionReasonStep(),
                     propertyComplianceSharedStepFactory.createMeesExemptionConfirmationStep(),
                     propertyComplianceSharedStepFactory.createLowEnergyRatingStep(),
@@ -447,6 +447,7 @@ class PropertyComplianceJourney(
                         journeyDataService,
                         epcCertificateUrlProvider,
                         unreachableStepRedirect,
+                        propertyComplianceSharedStepFactory,
                     ) { getPropertyAddress() },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
             )

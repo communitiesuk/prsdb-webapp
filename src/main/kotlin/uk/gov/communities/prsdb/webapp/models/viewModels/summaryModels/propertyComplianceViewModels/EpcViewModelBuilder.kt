@@ -57,8 +57,11 @@ class EpcViewModelBuilder {
                             key = "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
                             actionText = "forms.links.change",
-                            // TODO PRSD-1392 add Update EPC Compliance Link to MEES exemption reason step
-                            actionLink = "#",
+                            actionLink =
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    propertyCompliance.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
+                                ),
                             withActionLink = withActionLinks,
                         )
                     }

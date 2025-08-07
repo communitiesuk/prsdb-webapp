@@ -10,7 +10,7 @@ abstract class NoAddressFoundFormPage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val form = NoAddressFoundForm(page)
-    val searchAgain = Link.byText(page, "Search Again")
+    val searchAgain = Link.byText(page, "search again")
     val heading: Heading = Heading(page.locator(".govuk-heading-l"))
 
     class NoAddressFoundForm(

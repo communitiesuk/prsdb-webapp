@@ -1,6 +1,6 @@
 import * as cookieHelper from 'cookie';
 
-const CONSENT_COOKIE_NAME = 'cookie_consent';
+export const CONSENT_COOKIE_NAME = 'cookie_consent';
 const COOKIES_ROUTE = '/cookies';
 
 export function addCookieConsentHandler() {
@@ -53,6 +53,8 @@ class CookieBanner {
             const confirmationMessageText = consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText;
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
+
+            window['ga-disable-GA_MEASUREMENT_ID'] = !consentValue;
         });
     }
 

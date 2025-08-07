@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.getAutomatchedEpc
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney.Companion.updateEpcDetailsInSessionAndReturnUpdatedJourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEicrAnswersPage
-import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateGasSafetyAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.UnvisitablePage
@@ -17,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
+import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
@@ -73,6 +73,7 @@ class PropertyComplianceUpdateJourney(
     ) {
     init {
         initializeOriginalJourneyDataIfNotInitialized()
+        initializeJourneyDataForSkippedStepsIfNotInitialized()
     }
 
     override val stepRouter = GroupedUpdateStepRouter(this)
@@ -81,23 +82,54 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
+    private val isCheckingAnswers = checkingAnswersForStep != null
+
+    private val stepFactory
+        get() =
+            PropertyComplianceSharedStepFactory(
+                defaultSaveAfterSubmit = false,
+                isUpdateJourney = true,
+                isCheckingAnswers = isCheckingAnswers,
+                journeyDataService = journeyDataService,
+                epcCertificateUrlProvider = epcCertificateUrlProvider,
+                certificateUploadService = certificateUploadService,
+                propertyOwnershipId = propertyOwnershipId,
+                stepName = stepName,
+            )
+
     override fun createOriginalJourneyData(): JourneyData =
         propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)?.let {
-            PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it)
+            PropertyComplianceOriginalJourneyData.fromPropertyCompliance(it, stepFactory)
         } ?: emptyMap()
 
-    private val propertyComplianceSharedStepFactory =
-        PropertyComplianceSharedStepFactory(
-            defaultSaveAfterSubmit = false,
-            nextActionAfterGasSafetyTask = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-            nextActionAfterEicrTask = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-            nextActionAfterEpcTask = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-            isCheckingOrUpdatingAnswers = true,
-            journeyDataService = journeyDataService,
-            epcCertificateUrlProvider = epcCertificateUrlProvider,
-            certificateUploadService = certificateUploadService,
-            propertyOwnershipId = propertyOwnershipId,
-        )
+    private fun initializeJourneyDataForSkippedStepsIfNotInitialized() {
+        val journeyData = journeyDataService.getJourneyDataFromSession()
+        val originalJourneyData = JourneyDataHelper.getPageData(journeyData, originalDataKey) ?: return
+
+        val journeyDataWithSkippedStepData =
+            journeyData +
+                stepFactory.skippedStepIds.mapNotNull {
+                    getOriginalDataPairForStepIfNotInitialized(it, originalJourneyData, journeyData)
+                } +
+                stepFactory.skippedNonStepJourneyDataKeys.mapNotNull { key ->
+                    originalJourneyData[key]?.let { value -> key to value }
+                }
+
+        journeyDataService.setJourneyDataInSession(journeyDataWithSkippedStepData)
+    }
+
+    private fun getOriginalDataPairForStepIfNotInitialized(
+        stepId: PropertyComplianceStepId,
+        originalJourneyData: JourneyData,
+        journeyData: JourneyData,
+    ): Pair<String, Any?>? {
+        val stepUrlPathSegment = stepId.urlPathSegment
+        return if (!journeyData.containsKey(stepUrlPathSegment)) {
+            (stepUrlPathSegment to originalJourneyData[stepUrlPathSegment])
+        } else {
+            null
+        }
+    }
 
     override val sections: List<JourneySection<PropertyComplianceStepId>> =
         listOf(
@@ -117,16 +149,16 @@ class PropertyComplianceUpdateJourney(
                 PropertyComplianceStepId.UpdateGasSafety,
                 setOf(
                     updateGasSafetyStep,
-                    propertyComplianceSharedStepFactory.createGasSafetyIssueDateStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyEngineerNumStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyUploadStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyUploadConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyOutdatedStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyExemptionStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyExemptionReasonStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyExemptionOtherReasonStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createGasSafetyExemptionMissingStep(),
+                    stepFactory.createGasSafetyIssueDateStep(),
+                    stepFactory.createGasSafetyEngineerNumStep(),
+                    stepFactory.createGasSafetyUploadStep(),
+                    stepFactory.createGasSafetyUploadConfirmationStep(),
+                    stepFactory.createGasSafetyOutdatedStep(),
+                    stepFactory.createGasSafetyExemptionStep(),
+                    stepFactory.createGasSafetyExemptionReasonStep(),
+                    stepFactory.createGasSafetyExemptionOtherReasonStep(),
+                    stepFactory.createGasSafetyExemptionConfirmationStep(),
+                    stepFactory.createGasSafetyExemptionMissingStep(),
                     gasSafetyCheckYourAnswersStep,
                 ),
             )
@@ -137,22 +169,22 @@ class PropertyComplianceUpdateJourney(
                 PropertyComplianceStepId.UpdateEICR,
                 setOf(
                     updateEICRStep,
-                    propertyComplianceSharedStepFactory.createEicrIssueDateStep(),
-                    propertyComplianceSharedStepFactory.createEicrUploadStep(),
-                    propertyComplianceSharedStepFactory.createEicrUploadConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createEicrOutdatedStep(),
-                    propertyComplianceSharedStepFactory.createEicrExemptionStep(),
-                    propertyComplianceSharedStepFactory.createEicrExemptionReasonStep(),
-                    propertyComplianceSharedStepFactory.createEicrExemptionOtherReasonStep(),
-                    propertyComplianceSharedStepFactory.createEicrExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createEicrExemptionMissingStep(),
+                    stepFactory.createEicrIssueDateStep(),
+                    stepFactory.createEicrUploadStep(),
+                    stepFactory.createEicrUploadConfirmationStep(),
+                    stepFactory.createEicrOutdatedStep(),
+                    stepFactory.createEicrExemptionStep(),
+                    stepFactory.createEicrExemptionReasonStep(),
+                    stepFactory.createEicrExemptionOtherReasonStep(),
+                    stepFactory.createEicrExemptionConfirmationStep(),
+                    stepFactory.createEicrExemptionMissingStep(),
                     eicrCheckYourAnswersStep,
                 ),
             )
 
     private val epcLookupStep
         get() =
-            propertyComplianceSharedStepFactory.createEpcLookupStep(
+            stepFactory.createEpcLookupStep(
                 handleSubmitAndRedirect = { filteredJourneyData ->
                     epcLookupStepHandleSubmitAndRedirect(filteredJourneyData)
                 },
@@ -160,7 +192,7 @@ class PropertyComplianceUpdateJourney(
 
     private val checkMatchedEpcStep
         get() =
-            propertyComplianceSharedStepFactory.createCheckMatchedEpcStep(
+            stepFactory.createCheckMatchedEpcStep(
                 handleSubmitAndRedirect = { filteredJourneyData ->
                     checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData)
                 },
@@ -172,26 +204,29 @@ class PropertyComplianceUpdateJourney(
                 PropertyComplianceStepId.UpdateEpc,
                 setOf(
                     updateEPCStep,
-                    propertyComplianceSharedStepFactory.createEpcNotAutoMatchedStep(),
-                    propertyComplianceSharedStepFactory.createCheckAutoMatchedEpcStep(),
+                    stepFactory.createEpcNotAutoMatchedStep(),
+                    stepFactory.createCheckAutoMatchedEpcStep(),
                     epcLookupStep,
                     checkMatchedEpcStep,
-                    propertyComplianceSharedStepFactory.createEpcNotFoundStep(),
-                    propertyComplianceSharedStepFactory.createEpcSupersededStep(
+                    stepFactory.createEpcNotFoundStep(),
+                    stepFactory.createEpcSupersededStep(
                         handleSubmitAndRedirect = { filteredJourneyData ->
                             epcSupersededHandleSubmitAndRedirect(filteredJourneyData)
                         },
                     ),
-                    propertyComplianceSharedStepFactory.createEpcExpiryCheckStep(),
-                    propertyComplianceSharedStepFactory.createEpcExpiredStep(),
-                    propertyComplianceSharedStepFactory.createEpcMissingStep(),
-                    propertyComplianceSharedStepFactory.createEpcExemptionReasonStep(),
-                    propertyComplianceSharedStepFactory.createEpcExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(),
-                    propertyComplianceSharedStepFactory.createMeesExemptionReasonStep(),
-                    propertyComplianceSharedStepFactory.createMeesExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createLowEnergyRatingStep(),
-                    epcCheckYourAnswersStep,
+                    stepFactory.createEpcExpiryCheckStep(),
+                    stepFactory.createEpcExpiredStep(),
+                    stepFactory.createEpcMissingStep(),
+                    stepFactory.createEpcExemptionReasonStep(),
+                    stepFactory.createEpcExemptionConfirmationStep(),
+                    stepFactory.createMeesExemptionCheckStep(propertyOwnershipId),
+                    stepFactory.createMeesExemptionReasonStep(),
+                    stepFactory.createMeesExemptionConfirmationStep(),
+                    stepFactory.createLowEnergyRatingStep(),
+                    stepFactory.createCheckAnswersStep(
+                        unreachableStepRedirect,
+                        handleSubmitAndRedirect = { filteredJourneyData -> updateComplianceAndRedirect(filteredJourneyData) },
+                    ),
                 ),
             )
 
@@ -352,33 +387,17 @@ class PropertyComplianceUpdateJourney(
             Pair(PropertyComplianceStepId.EicrExemptionReason, null)
         }
 
-    private val epcCheckYourAnswersStep
-        get() =
-            Step(
-                id = PropertyComplianceStepId.UpdateEpcCheckYourAnswers,
-                page =
-                    CheckUpdateEpcAnswersPage(
-                        journeyDataService,
-                        epcCertificateUrlProvider,
-                        unreachableStepRedirect,
-                    ),
-                saveAfterSubmit = false,
-                handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
-                    updateComplianceAndRedirect(filteredJourneyData)
-                },
-            )
-
     private fun updateEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId, Int?> =
         if (filteredJourneyData.getHasNewEPC()!!) {
             if (filteredJourneyData.getEpcDetails(autoMatched = true) != null) {
-                Pair(PropertyComplianceStepId.CheckAutoMatchedEpc, null)
+                Pair(stepFactory.checkAutoMatchedEpcStepId, null)
             } else {
-                Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
+                Pair(stepFactory.epcNotAutomatchedStepId, null)
             }
         } else if (filteredJourneyData.getStillHasNoEpcOrExemption() ?: false) {
-            Pair(PropertyComplianceStepId.EpcNotFound, null)
+            Pair(stepFactory.epcNotFoundStepId, null)
         } else {
-            Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+            Pair(stepFactory.epcExemptionReasonStepId, null)
         }
 
     private fun updateEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
@@ -398,7 +417,7 @@ class PropertyComplianceUpdateJourney(
     }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val nextAction = propertyComplianceSharedStepFactory.checkMatchedEpcStepNextAction(filteredJourneyData)
+        val nextAction = stepFactory.checkMatchedEpcStepNextAction(filteredJourneyData)
         val overriddenRedirectStepId =
             PropertyComplianceJourney.getRedirectStepOverrideForCheckMatchedEpcStepHandleSubmitAndRedirect(nextAction)
 
@@ -468,12 +487,21 @@ class PropertyComplianceUpdateJourney(
     fun createEpcUpdateOrNull(journeyData: JourneyData): EpcUpdateModel? =
         journeyData.getHasNewEPC()?.let { data ->
             EpcUpdateModel(
-                url = journeyData.getAcceptedEpcDetails()?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
-                expiryDate = journeyData.getAcceptedEpcDetails()?.expiryDate?.toJavaLocalDate(),
-                tenancyStartedBeforeExpiry = journeyData.getDidTenancyStartBeforeEpcExpiry(),
-                energyRating = journeyData.getAcceptedEpcDetails()?.energyRating,
-                exemptionReason = journeyData.getEpcExemptionReason(),
-                meesExemptionReason = journeyData.getMeesExemptionReason(),
+                url =
+                    journeyData
+                        .getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
+                        ?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
+                expiryDate =
+                    journeyData
+                        .getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
+                        ?.expiryDate
+                        ?.toJavaLocalDate(),
+                tenancyStartedBeforeExpiry =
+                    journeyData.getDidTenancyStartBeforeEpcExpiry(stepFactory.epcExpiryCheckStepId),
+                energyRating =
+                    journeyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)?.energyRating,
+                exemptionReason = journeyData.getEpcExemptionReason(stepFactory.epcExemptionReasonStepId),
+                meesExemptionReason = journeyData.getMeesExemptionReason(stepFactory.meesExemptionReasonStepId),
             )
         }
 

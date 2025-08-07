@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -36,10 +37,13 @@ import kotlin.collections.plus
 
 class PropertyComplianceOriginalJourneyData private constructor(
     private val propertyCompliance: PropertyCompliance,
+    stepFactory: PropertyComplianceSharedStepFactory,
 ) {
     companion object {
-        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): JourneyData =
-            PropertyComplianceOriginalJourneyData(propertyCompliance).asJourneyData
+        fun fromPropertyCompliance(
+            propertyCompliance: PropertyCompliance,
+            stepFactory: PropertyComplianceSharedStepFactory,
+        ): JourneyData = PropertyComplianceOriginalJourneyData(propertyCompliance, stepFactory).asJourneyData
     }
 
     private infix fun <T : FormModel?> StepId.toPageData(fromRecordFunc: (PropertyCompliance) -> T): Pair<String, PageData> =
@@ -160,22 +164,23 @@ class PropertyComplianceOriginalJourneyData private constructor(
     private val originalEpcJourneyData: JourneyData =
         mapOf(
             PropertyComplianceStepId.UpdateEpc toPageData { _ -> updateEpcFormModel },
-            PropertyComplianceStepId.EpcNotAutoMatched toPageData { NoInputFormModel() },
-            PropertyComplianceStepId.CheckAutoMatchedEpc toPageData { checkMatchedEpcFormModelAcceptingMatchedEpc },
-            PropertyComplianceStepId.CheckMatchedEpc toPageData { checkMatchedEpcFormModelAcceptingMatchedEpc },
-            PropertyComplianceStepId.EpcLookup toPageData { epcLookupFormModelWithDummyCertificateNumber },
+            stepFactory.epcNotAutomatchedStepId toPageData { NoInputFormModel() },
+            stepFactory.checkAutoMatchedEpcStepId toPageData { checkMatchedEpcFormModelAcceptingMatchedEpc },
+            stepFactory.checkMatchedEpcStepId toPageData { checkMatchedEpcFormModelAcceptingMatchedEpc },
+            stepFactory.epcLookupStepId toPageData { epcLookupFormModelWithDummyCertificateNumber },
             NonStepJourneyDataKey.LookedUpEpc.key to reconstructEpcModelOrNull()?.let { Json.encodeToString(it) },
-            PropertyComplianceStepId.EpcNotFound toPageData { NoInputFormModel() },
+            NonStepJourneyDataKey.AutoMatchedEpc.key to reconstructEpcModelOrNull()?.let { Json.encodeToString(it) },
+            stepFactory.epcNotFoundStepId toPageData { NoInputFormModel() },
             PropertyComplianceStepId.EpcSuperseded toPageData { NoInputFormModel() },
-            PropertyComplianceStepId.EpcExpiryCheck toPageData EpcExpiryCheckFormModel::fromComplianceRecordOrNull,
-            PropertyComplianceStepId.EpcExpired toPageData { NoInputFormModel() },
-            PropertyComplianceStepId.EpcExemptionReason toPageData EpcExemptionReasonFormModel::fromComplianceRecordOrNull,
-            PropertyComplianceStepId.EpcExemptionConfirmation toPageData { NoInputFormModel() },
-            PropertyComplianceStepId.MeesExemptionCheck toPageData MeesExemptionCheckFormModel::fromComplianceRecordOrNull,
-            PropertyComplianceStepId.MeesExemptionReason toPageData MeesExemptionReasonFormModel::fromComplianceRecordOrNull,
-            PropertyComplianceStepId.MeesExemptionConfirmation toPageData { NoInputFormModel() },
-            PropertyComplianceStepId.LowEnergyRating toPageData { NoInputFormModel() },
-            PropertyComplianceStepId.UpdateEpcCheckYourAnswers toPageData { CheckAnswersFormModel() },
+            stepFactory.epcExpiryCheckStepId toPageData EpcExpiryCheckFormModel::fromComplianceRecordOrNull,
+            stepFactory.epcExpiredStepId toPageData { NoInputFormModel() },
+            stepFactory.epcExemptionReasonStepId toPageData EpcExemptionReasonFormModel::fromComplianceRecordOrNull,
+            stepFactory.epcExemptionConfirmationStepId toPageData { NoInputFormModel() },
+            stepFactory.meesExemptionCheckStepId toPageData MeesExemptionCheckFormModel::fromComplianceRecordOrNull,
+            stepFactory.meesExemptionReasonStepId toPageData MeesExemptionReasonFormModel::fromComplianceRecordOrNull,
+            stepFactory.meesExemptionConfirmationStepId toPageData { NoInputFormModel() },
+            stepFactory.lowEnergyRatingStepId toPageData { NoInputFormModel() },
+            stepFactory.epcCheckYourAnswersStepId toPageData { CheckAnswersFormModel() },
         )
 
     val asJourneyData: JourneyData =

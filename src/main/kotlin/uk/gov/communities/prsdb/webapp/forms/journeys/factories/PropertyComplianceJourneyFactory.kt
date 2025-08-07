@@ -31,6 +31,7 @@ class PropertyComplianceJourneyFactory(
     private val certificateUploadService: CertificateUploadService,
 ) {
     fun create(
+        stepName: String,
         propertyOwnershipId: Long,
         checkingAnswersFor: String? = null,
     ) = PropertyComplianceJourney(
@@ -47,6 +48,7 @@ class PropertyComplianceJourneyFactory(
         absoluteUrlProvider,
         certificateUploadService,
         checkingAnswersFor,
+        stepName,
     )
 
     companion object {
