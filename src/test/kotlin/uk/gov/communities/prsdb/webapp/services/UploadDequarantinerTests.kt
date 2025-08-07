@@ -124,7 +124,6 @@ class UploadDequarantinerTests {
         assertEquals(originalETag, fileUpload.eTag)
     }
 
-    @Suppress("ktlint:standard:max-line-length")
     @Test
     fun `when a file is deleted, deleteQuarantinedFile returns true and the new details are saved`() {
         // Arrange
