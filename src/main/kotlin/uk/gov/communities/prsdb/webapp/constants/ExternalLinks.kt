@@ -56,3 +56,9 @@ const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/ho
 const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"
 
 const val ONE_LOGIN_INFO_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
+
+const val RENTERS_RIGHTS_BILL_GUIDE_URL =
+    "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
+        "/guide-to-the-renters-rights-bill"
+
+const val TENANCY_TYPES_GUIDE_URL = "https://www.gov.uk/private-renting-tenancy-agreements/tenancy-types"

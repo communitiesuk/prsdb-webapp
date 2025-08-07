@@ -13,8 +13,11 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.TENANCY_TYPES_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -40,6 +43,9 @@ class RegisterLandlordController(
             "registerAsALandlordInitialStep",
             "$LANDLORD_REGISTRATION_ROUTE/${START_PAGE_PATH_SEGMENT}",
         )
+        model.addAttribute("oneLoginInfoUrl", ONE_LOGIN_INFO_URL)
+        model.addAttribute("rentersRightsBillGuideUrl", RENTERS_RIGHTS_BILL_GUIDE_URL)
+        model.addAttribute("tenancyTypesGuideUrl", TENANCY_TYPES_GUIDE_URL)
         return "registerAsALandlord"
     }
 
