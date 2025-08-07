@@ -4,22 +4,26 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionMissing
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrUploadConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class EicrSummaryRowsFactory(
     val doesDataHaveEicr: (JourneyData) -> Boolean,
     val eicrStartingStep: PropertyComplianceStepId,
     val changeExemptionStep: PropertyComplianceStepId,
+    val uploadService: UploadService,
 ) {
     fun createRows(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
@@ -33,19 +37,38 @@ class EicrSummaryRowsFactory(
             }.toList()
 
     private fun getEicrStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
-        val fieldValue =
+        data class EicrValue(
+            val fieldValue: String,
+            val downloadUrl: String? = null,
+        )
+
+        fun createEicrValueForFileUpload(fileId: Long): EicrValue {
+            val fileUpload = uploadService.getFileUploadById(fileId)
+
+            return when (fileUpload.status) {
+                FileUploadStatus.QUARANTINED -> EicrValue("forms.checkComplianceAnswers.eicr.notYetAvailable")
+                FileUploadStatus.DELETED -> EicrValue("forms.checkComplianceAnswers.eicr.virusScanFailed")
+                FileUploadStatus.SCANNED ->
+                    EicrValue(
+                        "forms.checkComplianceAnswers.eicr.download",
+                        uploadService.getDownloadUrl(fileUpload, "eicr.${fileUpload.extension}"),
+                    )
+            }
+        }
+
+        val eicrValue =
             when (EicrStatus.fromJourneyData(filteredJourneyData)) {
-                // TODO PRSD-976: Add link to EICR (or appropriate message if virus scan failed)
-                EicrStatus.UPLOADED -> "forms.checkComplianceAnswers.eicr.download"
-                EicrStatus.EXEMPTION -> "forms.checkComplianceAnswers.certificate.notRequired"
-                EicrStatus.MISSING -> "forms.checkComplianceAnswers.certificate.notAdded"
-                EicrStatus.OUTDATED -> "forms.checkComplianceAnswers.certificate.expired"
+                EicrStatus.UPLOADED -> createEicrValueForFileUpload(filteredJourneyData.getEicrUploadId()!!.toLong())
+                EicrStatus.EXEMPTION -> EicrValue("forms.checkComplianceAnswers.certificate.notRequired")
+                EicrStatus.MISSING -> EicrValue("forms.checkComplianceAnswers.certificate.notAdded")
+                EicrStatus.OUTDATED -> EicrValue("forms.checkComplianceAnswers.certificate.expired")
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.eicr.certificate",
-            fieldValue,
+            eicrValue.fieldValue,
             eicrStartingStep.urlPathSegment,
+            eicrValue.downloadUrl,
         )
     }
 

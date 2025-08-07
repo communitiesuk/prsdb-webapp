@@ -16,8 +16,10 @@ import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -76,18 +78,49 @@ class PropertyComplianceCheckAnswersPageTests {
         val gasCertEngineerNum = "123456"
         val eicrIssueDate = LocalDate.now().minusDays(1)
         val epcDetails = MockEpcData.createEpcDataModel()
+        val gasCertFileUploadId = 12345L
+        val eicrFileUploadId = 67890L
         val filteredJourneyData =
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(true)
                 .withGasSafetyIssueDate(gasCertIssueDate)
                 .withGasSafeEngineerNum(gasCertEngineerNum)
+                .withGasCertFileUploadId(gasCertFileUploadId)
                 .withGasSafetyCertUploadConfirmation()
                 .withEicrStatus(true)
                 .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadId(eicrFileUploadId)
                 .withEicrUploadConfirmation()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .build()
+
+        val gasCertFileUpload =
+            FileUpload(
+                FileUploadStatus.SCANNED,
+                "gas-safety",
+                "pdf",
+                "1",
+                "1",
+            )
+        val eicrFileUpload =
+            FileUpload(
+                FileUploadStatus.SCANNED,
+                "eicr",
+                "pdf",
+                "1",
+                "1",
+            )
+        whenever(mockUploadService.getFileUploadById(gasCertFileUploadId))
+            .thenReturn(gasCertFileUpload)
+        whenever(mockUploadService.getFileUploadById(eicrFileUploadId))
+            .thenReturn(eicrFileUpload)
+
+        val gasDownloadUrl = "https://example.com/gas_safety_certificate.pdf"
+        whenever(mockUploadService.getDownloadUrl(gasCertFileUpload, "gas_safety_certificate.pdf")).thenReturn(gasDownloadUrl)
+
+        val eicrDownloadUrl = "https://example.com/eicr.pdf"
+        whenever(mockUploadService.getDownloadUrl(eicrFileUpload, "eicr.pdf")).thenReturn(eicrDownloadUrl)
 
         val expectedGasSafetyData =
             listOf(
@@ -95,6 +128,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.gasSafety.certificate",
                     "forms.checkComplianceAnswers.gasSafety.download",
                     PropertyComplianceStepId.GasSafety.urlPathSegment,
+                    gasDownloadUrl,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.certificate.issueDate",
@@ -118,6 +152,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.eicr.certificate",
                     "forms.checkComplianceAnswers.eicr.download",
                     PropertyComplianceStepId.EICR.urlPathSegment,
+                    eicrDownloadUrl,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.certificate.issueDate",

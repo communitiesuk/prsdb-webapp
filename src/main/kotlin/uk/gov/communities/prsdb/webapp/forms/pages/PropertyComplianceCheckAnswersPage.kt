@@ -40,6 +40,7 @@ class PropertyComplianceCheckAnswersPage(
             doesDataHaveEicr = { data -> data.getHasEICR()!! },
             eicrStartingStep = PropertyComplianceStepId.EICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemption,
+            uploadService = uploadService,
         )
 
     private val epcDataFactory =
