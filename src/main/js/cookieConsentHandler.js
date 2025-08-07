@@ -16,9 +16,9 @@ export function addCookieConsentHandler() {
 
 function signalGtmConsent(isGranted = false) {
     gtag('consent', 'default', {
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-        ad_storage: 'denied',
+        ad_user_data: isGranted ? 'granted' : 'denied',
+        ad_personalization: isGranted ? 'granted' : 'denied',
+        ad_storage: isGranted ? 'granted' : 'denied',
         analytics_storage: isGranted ? 'granted' : 'denied'
     })
 
