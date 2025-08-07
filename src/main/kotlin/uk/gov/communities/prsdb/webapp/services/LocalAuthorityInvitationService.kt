@@ -57,6 +57,13 @@ class LocalAuthorityInvitationService(
         }
     }
 
+    fun getInvitationOrNull(token: String): LocalAuthorityInvitation? =
+        try {
+            getInvitationFromToken(token)
+        } catch (e: TokenNotFoundException) {
+            null
+        }
+
     fun storeTokenInSession(token: String) {
         session.setAttribute(LA_USER_INVITATION_TOKEN, token)
     }

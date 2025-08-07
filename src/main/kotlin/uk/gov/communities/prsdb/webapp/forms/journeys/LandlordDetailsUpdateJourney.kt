@@ -245,15 +245,13 @@ class LandlordDetailsUpdateJourney(
             page =
                 Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "noAddressFoundPage",
+                    templateName = "forms/noAddressFoundForm",
                     content =
                         mapOf(
                             "title" to "landlordDetails.update.title",
                             "postcode" to getHouseNameOrNumberAndPostcode().second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
-                            "searchAgainUrl" to
-                                "${LandlordDetailsController.UPDATE_ROUTE}/" +
-                                LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment,
+                            "searchAgainUrl" to LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment,
                         ),
                 ),
             nextAction = { _, _ -> Pair(LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress, null) },

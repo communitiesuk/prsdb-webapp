@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.EpcSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -10,6 +11,7 @@ class CheckUpdateEpcAnswersPage(
     journeyDataService: JourneyDataService,
     epcCertificateUrlProvider: EpcCertificateUrlProvider,
     missingAnswersRedirect: String,
+    stepFactory: PropertyComplianceSharedStepFactory,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -25,6 +27,7 @@ class CheckUpdateEpcAnswersPage(
         EpcSummaryRowsFactory(
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             epcStartingStep = PropertyComplianceStepId.UpdateEpc,
+            stepFactory = stepFactory,
         )
 
     override fun getSummaryList(filteredJourneyData: JourneyData) = epcDataFactory.createRows(filteredJourneyData)

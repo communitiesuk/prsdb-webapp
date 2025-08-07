@@ -41,17 +41,17 @@ class RegisterLAUserController(
         // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
         // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
-        if (invitationService.tokenIsValid(token)) {
+        val invitation = invitationService.getInvitationOrNull(token)
+
+        return if (invitation == null) {
+            "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
+        } else if (invitationService.getInvitationHasExpired(invitation)) {
+            invitationService.deleteInvitation(invitation)
+            "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
+        } else {
             invitationService.storeTokenInSession(token)
             return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
         }
-
-        val invitation = invitationService.getInvitationFromToken(token)
-        if (invitationService.getInvitationHasExpired(invitation)) {
-            invitationService.deleteInvitation(invitation)
-        }
-
-        return "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
     }
 
     @GetMapping("/$LANDING_PAGE_PATH_SEGMENT")

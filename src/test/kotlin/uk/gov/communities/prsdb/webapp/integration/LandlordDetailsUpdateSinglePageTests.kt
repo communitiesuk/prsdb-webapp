@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 
 class LandlordDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
@@ -57,7 +58,7 @@ class LandlordDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
             // Arrange for no addresses to be found
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
 
             // Lookup Address page
             val lookupAddressPage = navigator.goToUpdateLandlordDetailsUpdateLookupAddressPage()
