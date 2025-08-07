@@ -9,6 +9,7 @@ import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -64,6 +65,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateMeesCheckYourAnswersPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
+import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -83,6 +86,9 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
                 year()
             }
 
+    @MockitoBean
+    private lateinit var fileUploader: FileUploader
+
     @Test
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {
         // Update certificate or add exemption page
@@ -100,7 +106,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         gasSafeEngineerNumPage.submitEngineerNum("1234567")
         val gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyComplianceUpdate::class, urlArguments)
 
-        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
+        // Gas Safety Cert. Upload page
+        whenever(
+            fileUploader.uploadFile(
+                any(),
+                any(),
+            ),
+        ).thenReturn(UploadedFileLocator("validGasSafety", "mockETag", "mockVersionId"))
+
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage =
             assertPageIs(
@@ -221,7 +234,14 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         eicrIssueDatePage.submitDate(currentDate)
         val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyComplianceUpdate::class, urlArguments)
 
-        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
+        // EICR Upload page
+        whenever(
+            fileUploader.uploadFile(
+                any(),
+                any(),
+            ),
+        ).thenReturn(UploadedFileLocator("validEicr", "mockETag", "mockVersionId"))
+
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage =
             assertPageIs(page, EicrUploadConfirmationPagePropertyComplianceUpdate::class, urlArguments)

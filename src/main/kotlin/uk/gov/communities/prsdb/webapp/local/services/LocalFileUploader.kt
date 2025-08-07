@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.local.services
 
+import kotlinx.datetime.Clock
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import java.io.File
 import java.io.InputStream
@@ -21,7 +21,7 @@ class LocalFileUploader(
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
-    ): FileUpload? {
+    ): UploadedFileLocator? {
         val cleanObjectKey =
             objectKey
                 .map { char -> if (char in forbiddenFilenameCharacters) "" else char }
@@ -35,11 +35,10 @@ class LocalFileUploader(
             }
         }
 
-        return uploadRepository.save(
-            FileUpload(
-                status = FileUploadStatus.SCANNED,
-                s3Key = objectKey,
-            ),
+        return UploadedFileLocator(
+            objectKey = objectKey,
+            eTag = objectKey,
+            versionId = Clock.System.now().toString(),
         )
     }
 }

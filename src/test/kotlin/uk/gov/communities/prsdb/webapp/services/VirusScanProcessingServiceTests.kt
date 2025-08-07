@@ -1,127 +1,134 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.argumentCaptor
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
-import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyFileNameInfo.FileCategory
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
+@ExtendWith(MockitoExtension::class)
 class VirusScanProcessingServiceTests {
-    private lateinit var virusScanProcessingService: VirusScanProcessingService
-    private lateinit var dequarantiner: FileDequarantiner
+    @Mock
+    private lateinit var dequarantiner: UploadDequarantiner
 
-    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
-    private lateinit var complianceRepository: PropertyComplianceRepository
+    @Mock
+    private lateinit var certificateUploadRepository: CertificateUploadRepository
+
+    @Mock
+    private lateinit var fileUploadRepository: FileUploadRepository
+
+    @Mock
     private lateinit var virusAlertSender: VirusAlertSender
 
-    @BeforeEach
-    fun setup() {
-        dequarantiner = mock()
-        propertyOwnershipRepository = mock()
-        complianceRepository = mock()
-        virusAlertSender = mock()
-        virusScanProcessingService =
-            VirusScanProcessingService(propertyOwnershipRepository, complianceRepository, dequarantiner, virusAlertSender)
-
-        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(anyLong())).thenAnswer { invocation ->
-            val ownership = mock<PropertyOwnership>()
-            whenever(ownership.id).thenReturn(invocation.getArgument(0))
-            ownership
-        }
-    }
+    @InjectMocks
+    private lateinit var virusScanProcessingService: VirusScanProcessingService
 
     @Test
     fun `when no threats are found, processScan calls the dequarantiner`() {
         // Arrange
-        val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
+        val fileUpload =
+            FileUpload(
+                FileUploadStatus.QUARANTINED,
+                "s3Key",
+                "txt",
+                "eTag",
+                "versionId",
+            )
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(true)
+        whenever(dequarantiner.dequarantineFile(any())).thenReturn(true)
+        whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
 
         // Act
-        virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
+        virusScanProcessingService.processScan(locator, scanResultStatus)
 
         // Assert
-        verify(dequarantiner).dequarantineFile(fileNameInfo.toString())
+        verify(dequarantiner).dequarantineFile(fileUpload)
     }
-
-    @EnumSource(FileCategory::class)
-    @ParameterizedTest
-    fun `when the dequarantiner succeeds, processScan adds the certificate to the compliance record if present`(category: FileCategory) {
-        // Arrange
-        val fileNameInfo = PropertyFileNameInfo(5L, category, "jpg")
-        val scanResultStatus = ScanResult.NoThreats
-
-        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(true)
-        whenever(complianceRepository.findByPropertyOwnership_Id(fileNameInfo.propertyOwnershipId)).thenReturn(PropertyCompliance())
-
-        // Act
-        virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
-
-        // Assert
-        val captor = argumentCaptor<PropertyCompliance>()
-        verify(complianceRepository).save(captor.capture())
-        assert(getKeyFromRecordForCategory(captor.firstValue, category) == fileNameInfo.toString())
-    }
-
-    private fun getKeyFromRecordForCategory(
-        complianceRecord: PropertyCompliance,
-        category: FileCategory,
-    ): String? =
-        when (category) {
-            FileCategory.Eirc -> complianceRecord.eicrS3Key
-            FileCategory.GasSafetyCert -> complianceRecord.gasSafetyCertS3Key
-        }
 
     @Test
     fun `if the dequarantiner fails the processScan throws an exception`() {
         // Arrange
-        val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
+        val fileUpload =
+            FileUpload(
+                FileUploadStatus.QUARANTINED,
+                "s3Key",
+                "txt",
+                "eTag",
+                "versionId",
+            )
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
         val scanResultStatus = ScanResult.NoThreats
 
-        whenever(dequarantiner.dequarantineFile(fileNameInfo.toString())).thenReturn(false)
+        whenever(dequarantiner.dequarantineFile(any())).thenReturn(false)
+        whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
 
         // Act & Assert
-        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
+        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, scanResultStatus) }
     }
 
     @EnumSource(ScanResult::class)
     @ParameterizedTest
-    fun `processScan throws an error for each scan result other than NoThreats`(scanResultStatus: ScanResult) {
+    fun `processScan deletes the file for each scan result other than NoThreats`(scanResultStatus: ScanResult) {
         // Ignore NoThreats and AccessDenied cases since they are tested separately
         if (scanResultStatus == ScanResult.NoThreats || scanResultStatus == ScanResult.AccessDenied) {
             return
         }
-
         // Arrange
-        val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
-        whenever(dequarantiner.deleteFile(fileNameInfo.toString())).thenReturn(true)
+        val fileUpload =
+            FileUpload(
+                FileUploadStatus.QUARANTINED,
+                "s3Key",
+                "txt",
+                "eTag",
+                "versionId",
+            )
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+        whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
+
+        whenever(dequarantiner.deleteQuarantinedFile(any())).thenReturn(true)
 
         // Act
-        virusScanProcessingService.processScan(fileNameInfo, scanResultStatus)
+        virusScanProcessingService.processScan(locator, scanResultStatus)
 
         // Assert
-        verify(dequarantiner).deleteFile(fileNameInfo.toString())
+        verify(dequarantiner).deleteQuarantinedFile(fileUpload)
     }
 
     @Test
     fun `processScan throws an exception for AccessDenied scan result`() {
-        val fileNameInfo = PropertyFileNameInfo(5L, FileCategory.GasSafetyCert, "txt")
+        // Arrange
+        val fileUpload =
+            FileUpload(
+                FileUploadStatus.QUARANTINED,
+                "s3Key",
+                "txt",
+                "eTag",
+                "versionId",
+            )
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+
         val scanResultStatus = ScanResult.AccessDenied
 
-        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(fileNameInfo, scanResultStatus) }
+        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, scanResultStatus) }
     }
 }
