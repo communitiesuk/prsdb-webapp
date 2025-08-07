@@ -1,13 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.junit.jupiter.api.Nested
+import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PropertyComplianceViewModelFactoryTests {
-    val gasSafetyViewModelFactory = GasSafetyViewModelFactory()
-    val eicrViewModelFactory = EicrViewModelFactory()
+    val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock())
+    val eicrViewModelFactory = EicrViewModelFactory(mock())
     val propertyComplianceViewModelFactory = PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, eicrViewModelFactory)
 
     @Test
