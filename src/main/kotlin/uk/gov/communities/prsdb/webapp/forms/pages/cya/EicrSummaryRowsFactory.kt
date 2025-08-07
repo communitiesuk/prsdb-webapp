@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionMissing
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrUploadConfirmation
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 class EicrSummaryRowsFactory(
@@ -34,15 +34,15 @@ class EicrSummaryRowsFactory(
 
     private fun getEicrStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
         val fieldValue =
-            // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-            if (filteredJourneyData.getHasCompletedEicrUploadConfirmation()) {
-                "forms.checkComplianceAnswers.eicr.download"
-            } else if (filteredJourneyData.getHasCompletedEicrOutdated()) {
-                "forms.checkComplianceAnswers.certificate.expired"
+            if (filteredJourneyData.getHasCompletedEicrExemptionMissing()) {
+                "forms.checkComplianceAnswers.certificate.notAdded"
             } else if (filteredJourneyData.getHasCompletedEicrExemptionConfirmation()) {
                 "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getHasCompletedEicrExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
+            } else if (filteredJourneyData.getIsEicrOutdated() == true) {
+                "forms.checkComplianceAnswers.certificate.expired"
+            } else if (filteredJourneyData.getHasCompletedEicrUploadConfirmation()) {
+                // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
+                "forms.checkComplianceAnswers.eicr.download"
             } else {
                 throw PrsdbWebException("Unexpected EICR status in journey data.")
             }
