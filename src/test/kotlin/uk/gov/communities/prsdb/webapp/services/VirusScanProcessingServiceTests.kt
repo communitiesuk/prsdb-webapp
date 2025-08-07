@@ -87,7 +87,7 @@ class VirusScanProcessingServiceTests {
 
     @EnumSource(ScanResult::class)
     @ParameterizedTest
-    fun `processScan throws an error for each scan result other than NoThreats`(scanResultStatus: ScanResult) {
+    fun `processScan deletes the file for each scan result other than NoThreats`(scanResultStatus: ScanResult) {
         // Ignore NoThreats and AccessDenied cases since they are tested separately
         if (scanResultStatus == ScanResult.NoThreats || scanResultStatus == ScanResult.AccessDenied) {
             return
