@@ -142,6 +142,7 @@ class PropertyComplianceInfoUrlTests(
                 mockEmailNotificationService,
                 absoluteUrlProvider,
                 certificateUploadService = mock(),
+                uploadService = mock(),
                 checkingAnswersForStep = null,
                 stepName = PropertyComplianceStepId.CheckAndSubmit.name,
             )

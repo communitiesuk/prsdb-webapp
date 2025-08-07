@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages.cya
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -11,16 +12,20 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionMissing
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyUploadConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class GasSafetySummaryRowsFactory(
     val doesDataHaveGasSafetyCert: (JourneyData) -> Boolean,
     val gasSafetyStartingStep: PropertyComplianceStepId,
     val changeExemptionStep: PropertyComplianceStepId,
+    val uploadService: UploadService,
 ) {
     fun createRows(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
@@ -34,24 +39,45 @@ class GasSafetySummaryRowsFactory(
             }.toList()
 
     private fun getGasSafetyCertStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
-        val fieldValue =
-            if (filteredJourneyData.getHasCompletedGasSafetyExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
+        data class GasSafetyCertificateValue(
+            val fieldValue: String,
+            val downloadUrl: String? = null,
+        )
+
+        fun createGasSafetyCertificateValueForFileUpload(fileId: Long): GasSafetyCertificateValue {
+            val fileUpload = uploadService.getFileUploadById(fileId)
+
+            return when (fileUpload.status) {
+                FileUploadStatus.QUARANTINED -> GasSafetyCertificateValue("forms.checkComplianceAnswers.gasSafety.notYetAvailable")
+                FileUploadStatus.DELETED -> GasSafetyCertificateValue("forms.checkComplianceAnswers.gasSafety.virusScanFailed")
+                FileUploadStatus.SCANNED ->
+                    GasSafetyCertificateValue(
+                        "forms.checkComplianceAnswers.gasSafety.download",
+                        uploadService.getDownloadUrl(fileUpload, "gas_safety_certificate.${fileUpload.extension}"),
+                    )
+            }
+        }
+
+        val gasSafetyCertificateValue =
+            if (filteredJourneyData.getHasCompletedGasSafetyUploadConfirmation()) {
+                createGasSafetyCertificateValueForFileUpload(
+                    filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
+                )
             } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionConfirmation()) {
-                "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getIsGasSafetyCertOutdated() == true) {
-                "forms.checkComplianceAnswers.certificate.expired"
-            } else if (filteredJourneyData.getHasCompletedGasSafetyUploadConfirmation()) {
-                // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-                "forms.checkComplianceAnswers.gasSafety.download"
+                GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.notRequired")
+            } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionMissing()) {
+                GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.notAdded")
+            } else if (filteredJourneyData.getHasCompletedGasSafetyOutdated()) {
+                GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.expired")
             } else {
-                throw PrsdbWebException("Unexpected gas safety cert. status in journey data.")
+                throw PrsdbWebException("Unexpected gas safety status in journey data.")
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.gasSafety.certificate",
-            fieldValue,
+            gasSafetyCertificateValue.fieldValue,
             gasSafetyStartingStep.urlPathSegment,
+            gasSafetyCertificateValue.downloadUrl,
         )
     }
 

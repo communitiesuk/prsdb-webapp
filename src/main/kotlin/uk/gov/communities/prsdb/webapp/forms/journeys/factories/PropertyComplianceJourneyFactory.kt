@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebComponent
@@ -29,6 +30,7 @@ class PropertyComplianceJourneyFactory(
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val certificateUploadService: CertificateUploadService,
+    private val uploadService: UploadService,
 ) {
     fun create(
         stepName: String,
@@ -47,6 +49,7 @@ class PropertyComplianceJourneyFactory(
         partialPropertyComplianceConfirmationEmailService,
         absoluteUrlProvider,
         certificateUploadService,
+        uploadService,
         checkingAnswersFor,
         stepName,
     )
