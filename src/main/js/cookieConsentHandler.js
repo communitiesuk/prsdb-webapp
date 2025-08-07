@@ -12,6 +12,10 @@ export function addCookieConsentHandler() {
     }
 
     signalGtmConsent(consentCookieValue === 'true');
+    if (consentCookieValue === 'false') {
+        deleteCookie("_ga")
+        deleteCookie("_ga_PDPW9SQ94W")
+    }
 }
 
 function signalGtmConsent(isGranted = false) {
@@ -26,7 +30,16 @@ function signalGtmConsent(isGranted = false) {
 }
 
 function updateGtmConsent(isGranted = false) {
-    gtag('consent', 'update', { analytics_storage: isGranted ? 'granted' : 'denied' })
+    gtag('consent', 'update', {
+        ad_user_data: isGranted ? 'granted' : 'denied',
+        ad_personalization: isGranted ? 'granted' : 'denied',
+        ad_storage: isGranted ? 'granted' : 'denied',
+        analytics_storage: isGranted ? 'granted' : 'denied'
+    })
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
 
 class CookieBanner {
@@ -72,6 +85,10 @@ class CookieBanner {
             confirmationMessageText.hidden = false;
 
             updateGtmConsent(consentValue);
+            if (consentValue === false) {
+                deleteCookie("_ga")
+                deleteCookie("_ga_PDPW9SQ94W")
+            }
         });
     }
 
