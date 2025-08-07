@@ -2,11 +2,40 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.io.FilenameUtils
+import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
+import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
+import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 import kotlin.math.pow
-import kotlin.reflect.KClass
 
-abstract class UploadCertificateFormModel : FormModel {
-    abstract val certificate: Nothing?
+@IsValidPrioritised
+open class UploadCertificateFormModel : FormModel {
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                // This message is never shown to users, as when this form model fails validation a subclass will be re-validated and used instead
+                messageKey = "forms.uploadCertificate.error.missing.placeholder",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isNameNotBlank",
+            ),
+            ConstraintDescriptor(
+                messageKey = "forms.uploadCertificate.error.wrongType",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isFileTypeValid",
+            ),
+            ConstraintDescriptor(
+                messageKey = "forms.uploadCertificate.error.tooBig",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isContentLengthValid",
+            ),
+            ConstraintDescriptor(
+                messageKey = "forms.uploadCertificate.error.unsuccessfulUpload",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isUploadSuccessfulOrInvalid",
+            ),
+        ],
+    )
+    open val certificate: Nothing? = null
 
     var name: String = ""
 
@@ -34,11 +63,10 @@ abstract class UploadCertificateFormModel : FormModel {
         val maxContentLength = 15 * 1024.0.pow(2) // 15MB
 
         fun fromUploadedFileMetadata(
-            desiredClass: KClass<out UploadCertificateFormModel>,
             fileItemInput: FileItemInput,
             fileLength: Long,
         ): UploadCertificateFormModel {
-            val uploadCertificateFormModel = createUninitialisedUploadCertificateFormModel(desiredClass)
+            val uploadCertificateFormModel = UploadCertificateFormModel()
 
             return uploadCertificateFormModel.apply {
                 this.name = fileItemInput.name
@@ -50,12 +78,11 @@ abstract class UploadCertificateFormModel : FormModel {
         }
 
         fun fromUploadedFile(
-            desiredClass: KClass<out UploadCertificateFormModel>,
             fileItemInput: FileItemInput,
             fileLength: Long,
             fileUploadId: Long?,
         ): UploadCertificateFormModel {
-            val uploadCertificateFormModel = createUninitialisedUploadCertificateFormModel(desiredClass)
+            val uploadCertificateFormModel = UploadCertificateFormModel()
 
             return uploadCertificateFormModel.apply {
                 this.name = fileItemInput.name
@@ -66,14 +93,5 @@ abstract class UploadCertificateFormModel : FormModel {
                 this.fileUploadId = fileUploadId
             }
         }
-
-        private fun createUninitialisedUploadCertificateFormModel(
-            desiredClass: KClass<out UploadCertificateFormModel>,
-        ): UploadCertificateFormModel =
-            when (desiredClass) {
-                GasSafetyUploadCertificateFormModel::class -> GasSafetyUploadCertificateFormModel()
-                EicrUploadCertificateFormModel::class -> EicrUploadCertificateFormModel()
-                else -> throw IllegalStateException("Unsupported desired class: ${desiredClass.simpleName}")
-            }
     }
 }

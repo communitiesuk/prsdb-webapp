@@ -20,6 +20,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBullet
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -80,6 +82,9 @@ class PropertyComplianceJourneyTests {
     @Mock
     private lateinit var mockUrlProvider: AbsoluteUrlProvider
 
+    @Mock
+    private lateinit var mockCertificateUploadService: CertificateUploadService
+
     @Nested
     inner class LoadJourneyDataIfNotLoadedTests {
         @Test
@@ -115,6 +120,73 @@ class PropertyComplianceJourneyTests {
                     createPropertyComplianceJourney(propertyOwnershipId = propertyOwnership.id)
                 }
             assertContains(errorThrown.message, "Property ownership ${propertyOwnership.id} does not have an incomplete compliance form")
+        }
+    }
+
+    @Nested
+    inner class CertificateUploadTests {
+        @Test
+        fun `uploading a gas safety certificate creates a certificate upload record in the database`() {
+            // Arrange
+            val fileUploadId = 1234L
+
+            val originalJourneyData = JourneyPageDataBuilder.beforePropertyComplianceGasSafetyUpload().build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession())
+                .thenReturn(originalJourneyData)
+
+            // Act
+            completeStep(
+                PropertyComplianceStepId.GasSafetyUpload,
+                mapOf(
+                    "certificate" to null,
+                    "name" to "Gas Safety Certificate",
+                    "fileUploadId" to fileUploadId,
+                    "contentType" to "application/pdf",
+                    "contentLength" to 1024L,
+                    "hasUploadFailed" to false,
+                    "isUserSubmittedMetadataOnly" to false,
+                ),
+                stubPropertyOwnership = false,
+            )
+
+            // Assert
+            verify(mockCertificateUploadService).saveCertificateUpload(
+                eq(propertyOwnershipId),
+                eq(fileUploadId),
+                eq(FileCategory.GasSafetyCert),
+            )
+        }
+
+        @Test
+        fun `uploading an EICR creates a certificate upload record in the database`() {
+            // Arrange
+            val fileUploadId = 1234L
+
+            val originalJourneyData = JourneyPageDataBuilder.beforePropertyComplianceEicrUpload().build()
+            whenever(mockJourneyDataService.getJourneyDataFromSession())
+                .thenReturn(originalJourneyData)
+
+            // Act
+            completeStep(
+                PropertyComplianceStepId.EicrUpload,
+                mapOf(
+                    "certificate" to null,
+                    "name" to "EICR file",
+                    "fileUploadId" to fileUploadId,
+                    "contentType" to "application/pdf",
+                    "contentLength" to 1024L,
+                    "hasUploadFailed" to false,
+                    "isUserSubmittedMetadataOnly" to false,
+                ),
+                stubPropertyOwnership = false,
+            )
+
+            // Assert
+            verify(mockCertificateUploadService).saveCertificateUpload(
+                eq(propertyOwnershipId),
+                eq(fileUploadId),
+                eq(FileCategory.Eirc),
+            )
         }
     }
 
@@ -907,6 +979,7 @@ class PropertyComplianceJourneyTests {
         fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
         partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
         urlProvider = mockUrlProvider,
+        certificateUploadService = mockCertificateUploadService,
         checkingAnswersForStep = null,
         stepName = stepName,
     )

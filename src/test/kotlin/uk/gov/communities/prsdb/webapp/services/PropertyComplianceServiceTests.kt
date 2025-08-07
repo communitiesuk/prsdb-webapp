@@ -13,12 +13,16 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
+import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
@@ -39,7 +43,7 @@ class PropertyComplianceServiceTests {
     private lateinit var mockSession: HttpSession
 
     @Mock
-    private lateinit var mockFileUploadRepository: FileUploadRepository
+    private lateinit var mockCertificateUploadRepository: CertificateUploadRepository
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -52,9 +56,9 @@ class PropertyComplianceServiceTests {
             .thenReturn(expectedPropertyCompliance.propertyOwnership)
         whenever(mockPropertyComplianceRepository.save(any())).thenReturn(expectedPropertyCompliance)
 
-        whenever(mockFileUploadRepository.getReferenceById(any())).thenReturn(
-            expectedPropertyCompliance.gasSafetyFileUpload,
-            expectedPropertyCompliance.eicrFileUpload,
+        whenever(mockCertificateUploadRepository.findByFileUpload_Id(any())).thenReturn(
+            expectedPropertyCompliance.gasSafetyFileUpload?.let { CertificateUpload(it, mock(), mock()) },
+            expectedPropertyCompliance.eicrFileUpload?.let { CertificateUpload(it, mock(), mock()) },
         )
 
         val returnedPropertyCompliance =
@@ -131,7 +135,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -169,7 +173,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -208,7 +212,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,

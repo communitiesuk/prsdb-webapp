@@ -9,6 +9,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -66,10 +67,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.time.format.DateTimeFormatter
@@ -87,6 +90,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
 
     @MockitoBean
     private lateinit var partialComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var fileUploader: FileUploader
 
     @BeforeEach
     fun setUp() {
@@ -118,7 +124,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         gasSafeEngineerNumPage.submitEngineerNum("1234567")
         val gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
+        // Gas Safety Cert. Upload page
+        whenever(
+            fileUploader.uploadFile(
+                any(),
+                any(),
+            ),
+        ).thenReturn(UploadedFileLocator("validGasSafety", "mockETag", "mockVersionId"))
+
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
@@ -135,7 +148,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         eicrIssueDatePage.submitDate(currentDate)
         val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
+        // EICR Upload page
+        whenever(
+            fileUploader.uploadFile(
+                any(),
+                any(),
+            ),
+        ).thenReturn(UploadedFileLocator("validEicr", "mockETag", "mockVersionId"))
+
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)
 

@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -20,6 +21,7 @@ class PropertyComplianceUpdateJourneyFactory(
     val propertyComplianceService: PropertyComplianceService,
     val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     val epcLookupService: EpcLookupService,
+    val certificateUploadService: CertificateUploadService,
 ) {
     fun create(
         stepName: String,
@@ -41,6 +43,7 @@ class PropertyComplianceUpdateJourneyFactory(
         epcCertificateUrlProvider = epcCertificateUrlProvider,
         epcLookupService = epcLookupService,
         checkingAnswersForStep = checkingAnswersFor,
+        certificateUploadService = certificateUploadService,
     )
 
     companion object {
