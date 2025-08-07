@@ -130,6 +130,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -311,6 +312,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -477,6 +479,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -530,6 +533,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -582,6 +586,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -640,6 +645,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -700,6 +706,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
