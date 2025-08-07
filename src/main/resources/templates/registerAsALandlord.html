@@ -28,7 +28,7 @@
                     <span th:remove="tag" th:text="#{registerAsALandlord.access.paragraph.three.beforeLink}">
                         registerAsALandlord.access.paragraph.three.beforeLink
                     </span>
-                    <a class="govuk-link" th:text="#{registerAsALandlord.access.paragraph.three.link}" th:href="${oneLoginInfoUrl}">
+                    <a class="govuk-link" th:text="#{registerAsALandlord.access.paragraph.three.link}" th:href="${provingYourIdentity}">
                         registerAsALandlord.access.paragraph.three.link
                     </a>
                     <span th:remove="tag" th:text="#{registerAsALandlord.access.paragraph.three.afterLink}">
@@ -158,12 +158,10 @@
                 <p class="govuk-body-m"><span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.beforeLink}">
                     registerAsALandlord.futureRequirements.paragraph.two.beforeLink
                 </span>
-                    <a class="govuk-link" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.link}" href="https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill/guide-to-the-renters-rights-bill#private-rented-sector-database">
+                    <a class="govuk-link" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.link}" th:href="${rentersRightsBillPRSD}">
                         registerAsALandlord.futureRequirements.paragraph.two.link
-                    </a>
-                    <span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.afterLink}">
-                        registerAsALandlord.futureRequirements.paragraph.two.afterLink
-                    </span>
+                    </a><span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.afterLink}">
+                        registerAsALandlord.futureRequirements.paragraph.two.afterLink</span>
                 </p>
                 <p class="govuk-body-m" th:text="#{registerAsALandlord.futureRequirements.paragraph.three}">
                     registerAsALandlord.futureRequirements.paragraph.three
