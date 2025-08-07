@@ -164,7 +164,7 @@ class LandlordRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                             BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
                         ),
-                    shouldDisplaySectionHeader = true,
+                    shouldDisplaySectionHeader = false,
                 ),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Name, null) },
             saveAfterSubmit = false,
