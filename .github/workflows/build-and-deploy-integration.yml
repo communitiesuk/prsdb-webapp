@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - feat/PRSD-1183-update-GA
 
 jobs:
   build-and-deploy-integration:
