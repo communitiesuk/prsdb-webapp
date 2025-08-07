@@ -194,13 +194,17 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
-            handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
                     FileCategory.GasSafetyCert,
                 )
-                PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment
+                Step.generateUrl(
+                    PropertyComplianceStepId.GasSafetyUploadConfirmation,
+                    null,
+                    checking,
+                )
             },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
@@ -405,13 +409,17 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
-            handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
                     FileCategory.Eirc,
                 )
-                PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment
+                Step.generateUrl(
+                    PropertyComplianceStepId.EicrUploadConfirmation,
+                    null,
+                    checking,
+                )
             },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
