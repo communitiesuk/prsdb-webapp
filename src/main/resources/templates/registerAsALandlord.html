@@ -38,9 +38,9 @@
                 <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordInitialStep}, #{forms.buttons.startNow})}"></a>
             </section>
             <section>
-                <h3 class="govuk-heading-m" th:text="#{registerAsALandlord.about.heading}">
+                <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.about.heading}">
                     registerAsALandlord.about.heading
-                </h3>
+                </h2>
                 <p class="govuk-body-m">
                     <span th:remove="tag" th:text="#{registerAsALandlord.about.paragraph.one.beforeLink}">
                         registerAsALandlord.about.paragraph.one.beforeLink
@@ -160,7 +160,8 @@
                 </span>
                     <a class="govuk-link" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.link}" th:href="${rentersRightsBillPRSD}">
                         registerAsALandlord.futureRequirements.paragraph.two.link
-                    </a><span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.afterLink}">
+                    </a>
+                    <span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.afterLink}">
                         registerAsALandlord.futureRequirements.paragraph.two.afterLink</span>
                 </p>
                 <p class="govuk-body-m" th:text="#{registerAsALandlord.futureRequirements.paragraph.three}">
