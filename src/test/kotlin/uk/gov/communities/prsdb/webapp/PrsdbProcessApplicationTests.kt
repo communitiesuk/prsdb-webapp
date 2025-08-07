@@ -17,10 +17,13 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
+import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
+import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AwsS3FileDequarantiner
-import uk.gov.communities.prsdb.webapp.services.LocalFileDequarantiner
+import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
+import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.jvm.java
@@ -51,8 +54,11 @@ class PrsdbProcessApplicationTests {
                 NotifyEmailNotificationService::class.java.simpleName,
                 NotifyConfig::class.java.simpleName,
                 S3Config::class.java.simpleName,
-                AwsS3FileDequarantiner::class.java.simpleName,
-                LocalFileDequarantiner::class.java.simpleName,
+                AwsS3QuarantinedFileDeleter::class.java.simpleName,
+                LocalQuarantinedFileDeleter::class.java.simpleName,
+                AwsS3DequarantiningFileCopier::class.java.simpleName,
+                LocalDequarantiningFileCopier::class.java.simpleName,
+                UploadDequarantiner::class.java.simpleName,
                 VirusScanProcessingService::class.java.simpleName,
                 AbsoluteUrlProvider::class.java.simpleName,
                 VirusAlertSender::class.java.simpleName,
