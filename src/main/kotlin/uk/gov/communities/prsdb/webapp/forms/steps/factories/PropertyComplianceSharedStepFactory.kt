@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
@@ -28,8 +29,10 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Jour
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -58,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -67,6 +71,8 @@ class PropertyComplianceSharedStepFactory(
     private val isUpdateJourney: Boolean,
     private val journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val certificateUploadService: CertificateUploadService,
+    private val propertyOwnershipId: Long,
     stepName: String,
 ) {
     private val stepGroupId = PropertyComplianceStepId.fromPathSegment(stepName)?.groupIdentifier
@@ -188,6 +194,14 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                certificateUploadService.saveCertificateUpload(
+                    propertyOwnershipId,
+                    filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
+                    FileCategory.GasSafetyCert,
+                )
+                PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment
+            },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
@@ -391,6 +405,14 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
+                certificateUploadService.saveCertificateUpload(
+                    propertyOwnershipId,
+                    filteredJourneyData.getEicrUploadId()!!.toLong(),
+                    FileCategory.Eirc,
+                )
+                PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment
+            },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 

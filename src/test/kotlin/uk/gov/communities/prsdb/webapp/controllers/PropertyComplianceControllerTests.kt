@@ -46,10 +46,10 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplian
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
-import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import kotlin.reflect.full.memberProperties
 
@@ -64,7 +64,7 @@ class PropertyComplianceControllerTests(
     private lateinit var tokenCookieService: TokenCookieService
 
     @MockitoBean
-    private lateinit var fileUploader: FileUploader
+    private lateinit var fileUploader: UploadService
 
     @MockitoBean
     private lateinit var propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory

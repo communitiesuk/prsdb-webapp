@@ -275,4 +275,6 @@ class PropertyOwnershipService(
         val createdDateInUk = DateTimeHelper.getDateInUK(createdDate.toKotlinInstant())
         return DateTimeHelper.get28DaysFromDate(createdDateInUk)
     }
+
+    fun getReferenceById(propertyOwnershipId: Long) = propertyOwnershipRepository.getReferenceById(propertyOwnershipId)
 }

@@ -1,10 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -22,20 +18,6 @@ class PropertyComplianceJourneyHelperTests {
         val keyTypePart = fileNameParts[0]
         val propertyOwnershipIdPart = fileNameParts[1]
         val stepNamePart = fileNameParts[2]
-        val timestampPart = fileNameParts[3]
-        val timeStampInstant =
-            LocalDateTime
-                .parse(
-                    timestampPart,
-                    LocalDateTime.Format {
-                        yearTwoDigits(2000)
-                        monthNumber()
-                        dayOfMonth()
-                        hour()
-                        minute()
-                        second()
-                    },
-                ).toInstant(TimeZone.of("Europe/London"))
 
         assertEquals(
             keyTypePart,
@@ -48,10 +30,6 @@ class PropertyComplianceJourneyHelperTests {
         assertEquals(
             stepNamePart,
             stepName,
-        )
-        assertTrue(
-            timeStampInstant.minus(timeBefore).absoluteValue.inWholeSeconds <= 1,
-            "Timestamp [$timestampPart] is not within 1 seconds of the measured time - $timeBefore",
         )
     }
 
