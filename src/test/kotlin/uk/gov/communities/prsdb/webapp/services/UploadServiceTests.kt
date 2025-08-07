@@ -10,6 +10,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -45,10 +46,11 @@ class UploadServiceTests {
         val result = uploadService.uploadFile(proposedObjectKey, InputStream.nullInputStream(), "txt")
 
         // Assert
-        assertEquals(proposedObjectKey, result?.objectKey)
-        assertEquals(mockUploadResult.eTag, result?.eTag)
-        assertEquals(mockUploadResult.versionId, result?.versionId)
-        assertEquals(FileUploadStatus.QUARANTINED, result?.status)
+        verify(mockRepository).save(eq(result!!))
+        assertEquals(proposedObjectKey, result.objectKey)
+        assertEquals(mockUploadResult.eTag, result.eTag)
+        assertEquals(mockUploadResult.versionId, result.versionId)
+        assertEquals(FileUploadStatus.QUARANTINED, result.status)
     }
 
     @Test
