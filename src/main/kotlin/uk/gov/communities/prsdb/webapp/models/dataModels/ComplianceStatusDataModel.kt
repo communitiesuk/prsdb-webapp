@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
@@ -50,6 +51,21 @@ data class ComplianceStatusDataModel(
             )
         }
 
+        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                singleLineAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                registrationNumber =
+                    RegistrationNumberDataModel
+                        .fromRegistrationNumber(
+                            propertyCompliance.propertyOwnership.registrationNumber,
+                        ).toString(),
+                gasSafetyStatus = propertyCompliance.gasSafetyStatus,
+                eicrStatus = propertyCompliance.eicrStatus,
+                epcStatus = propertyCompliance.epcStatus,
+                isComplete = true,
+            )
+
         private fun JourneyData.getGasSafetyStatus(): ComplianceCertStatus =
             if (this.getHasCompletedGasSafetyExemptionMissing()) {
                 ComplianceCertStatus.NOT_ADDED
@@ -82,5 +98,29 @@ data class ComplianceStatusDataModel(
             } else {
                 ComplianceCertStatus.NOT_STARTED
             }
+
+        private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
+            get() =
+                when {
+                    this.isGasSafetyCertMissing -> ComplianceCertStatus.NOT_ADDED
+                    this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
+                    else -> ComplianceCertStatus.ADDED
+                }
+
+        private val PropertyCompliance.eicrStatus: ComplianceCertStatus
+            get() =
+                when {
+                    this.isEicrMissing -> ComplianceCertStatus.NOT_ADDED
+                    this.isEicrExpired == true -> ComplianceCertStatus.EXPIRED
+                    else -> ComplianceCertStatus.ADDED
+                }
+
+        private val PropertyCompliance.epcStatus: ComplianceCertStatus
+            get() =
+                when {
+                    this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    this.isEpcExpired == true -> ComplianceCertStatus.EXPIRED
+                    else -> ComplianceCertStatus.ADDED
+                }
     }
 }

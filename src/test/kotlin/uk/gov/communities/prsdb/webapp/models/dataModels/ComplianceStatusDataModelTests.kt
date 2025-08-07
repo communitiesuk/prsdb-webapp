@@ -10,12 +10,15 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ComplianceStatusDataModelTests {
     private val objectMapper = ObjectMapper()
@@ -72,6 +75,40 @@ class ComplianceStatusDataModelTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(incompleteComplianceForm = null)
 
         assertThrows<IllegalArgumentException> { ComplianceStatusDataModel.fromIncompleteComplianceForm(propertyOwnership) }
+    }
+
+    @Test
+    fun `fromPropertyCompliance returns a ComplianceStatusDataModel with correct non-status values`() {
+        // Arrange
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val propertyOwnershipRegNum =
+            RegistrationNumberDataModel
+                .fromRegistrationNumber(propertyCompliance.propertyOwnership.registrationNumber)
+                .toString()
+
+        // Act
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+
+        // Assert
+        assertEquals(propertyCompliance.propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
+        assertEquals(propertyCompliance.propertyOwnership.property.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
+        assertEquals(propertyOwnershipRegNum, complianceStatusDataModel.registrationNumber)
+        assertTrue(complianceStatusDataModel.isComplete)
+    }
+
+    @ParameterizedTest(name = "when {0}")
+    @MethodSource("providePropertyCompliancesAndStatuses")
+    fun `fromPropertyCompliance returns a ComplianceStatusDataModel with correct status values`(
+        propertyCompliance: PropertyCompliance,
+        expectedCertStatus: ComplianceCertStatus,
+    ) {
+        // Act
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+
+        // Assert
+        assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
+        assertEquals(expectedCertStatus, complianceStatusDataModel.eicrStatus)
+        assertEquals(expectedCertStatus, complianceStatusDataModel.epcStatus)
     }
 
     companion object {
@@ -167,6 +204,23 @@ class ComplianceStatusDataModelTests {
                             .withEpcExpiredStep()
                             .build(),
                     ),
+                    ComplianceCertStatus.EXPIRED,
+                ),
+            )
+
+        @JvmStatic
+        private fun providePropertyCompliancesAndStatuses() =
+            listOf(
+                arguments(
+                    named("when in-date certs or exemptions have been added", PropertyComplianceBuilder.createWithInDateCerts()),
+                    ComplianceCertStatus.ADDED,
+                ),
+                arguments(
+                    named("when certs are missing", PropertyComplianceBuilder.createWithMissingCerts()),
+                    ComplianceCertStatus.NOT_ADDED,
+                ),
+                arguments(
+                    named("when certs are expired", PropertyComplianceBuilder.createWithExpiredCerts()),
                     ComplianceCertStatus.EXPIRED,
                 ),
             )
