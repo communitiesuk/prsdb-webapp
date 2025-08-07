@@ -10,6 +10,23 @@ export function addCookieConsentHandler() {
     if (consentCookieValue == null && !onCookiePage) {
        new CookieBanner().display();
     }
+
+    signalGtmConsent(consentCookieValue === 'true');
+}
+
+function signalGtmConsent(isGranted = false) {
+    gtag('consent', 'default', {
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        ad_storage: 'denied',
+        analytics_storage: isGranted ? 'granted' : 'denied'
+    })
+
+    window.dataLayer.push({ event: 'default_consent' })
+}
+
+function updateGtmConsent(isGranted = false) {
+    gtag('consent', 'update', { analytics_storage: isGranted ? 'granted' : 'denied' })
 }
 
 class CookieBanner {
@@ -54,7 +71,7 @@ class CookieBanner {
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
 
-            window['ga-disable-GA_MEASUREMENT_ID'] = !consentValue;
+            updateGtmConsent(consentValue);
         });
     }
 
