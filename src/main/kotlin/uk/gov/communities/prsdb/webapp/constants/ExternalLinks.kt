@@ -1,9 +1,5 @@
 package uk.gov.communities.prsdb.webapp.constants
 
-const val RENTERS_RIGHTS_BILL_URL =
-    "https://www.gov.uk/government/publications/" +
-        "guide-to-the-renters-rights-bill/guide-to-the-renters-rights-bill#private-rented-sector-database"
-
 const val GAS_SAFE_REGISTER = "https://www.gassaferegister.co.uk/find-an-engineer-or-check-the-register"
 
 const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.uk/safety-guidance/competent-registered-electrician.aspx"
@@ -56,3 +52,16 @@ const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/ho
 const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"
 
 const val ONE_LOGIN_INFO_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
+
+const val ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY =
+    "https://www.gov.uk/using-your-gov-uk-one-login/proving-your-identity"
+
+const val RENTERS_RIGHTS_BILL_GUIDE_URL =
+    "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
+        "/guide-to-the-renters-rights-bill"
+
+const val RENTERS_RIGHTS_BILL_PRSD =
+    "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
+        "/guide-to-the-renters-rights-bill#private-rented-sector-database"
+
+const val TENANCY_TYPES_GUIDE_URL = "https://www.gov.uk/private-renting-tenancy-agreements/tenancy-types"

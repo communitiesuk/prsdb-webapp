@@ -42,7 +42,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         @Test
         fun `registerAsALandlord page renders`(page: Page) {
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
-            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Private Rented Sector Database")
+            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Private Rented Sector (PRS) Database")
         }
 
         @Test
