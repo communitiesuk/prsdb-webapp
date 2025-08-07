@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.local.services
 
+import kotlinx.datetime.Clock
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
@@ -37,7 +38,7 @@ class LocalFileUploader(
         return UploadedFileLocator(
             objectKey = objectKey,
             eTag = objectKey,
-            versionId = objectKey,
+            versionId = Clock.System.now().toString(),
         )
     }
 }
