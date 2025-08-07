@@ -41,5 +41,15 @@ class UploadService(
     fun getDownloadUrl(
         fileUpload: FileUpload,
         fileName: String? = null,
-    ): String? = downloader.getDownloadUrl(fileUpload, fileName)
+    ): String = downloader.getDownloadUrl(fileUpload, fileName)
+
+    fun getDownloadUrlOrNull(
+        fileUpload: FileUpload,
+        fileName: String? = null,
+    ): String? =
+        if (downloader.isFileDownloadable(fileUpload)) {
+            downloader.getDownloadUrl(fileUpload, fileName)
+        } else {
+            null
+        }
 }
