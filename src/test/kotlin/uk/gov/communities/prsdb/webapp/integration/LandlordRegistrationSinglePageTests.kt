@@ -22,11 +22,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
@@ -46,11 +46,11 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
         }
 
         @Test
-        fun `the 'Start Now' button directs an unverified user to the landlord registration name page`(page: Page) {
+        fun `the 'Start Now' button directs an unverified user to the landlord registration identity not verified page`(page: Page) {
             whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
             landlordRegistrationStartPage.startButton.clickAndWait()
-            assertPageIs(page, NameFormPageLandlordRegistration::class)
+            assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
         }
 
         @Test

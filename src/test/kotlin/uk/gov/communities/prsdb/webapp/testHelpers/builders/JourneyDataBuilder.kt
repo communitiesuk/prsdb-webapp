@@ -125,6 +125,7 @@ class JourneyDataBuilder(
         private val defaultLandlordJourneyData: JourneyData =
             mapOf(
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment to mapOf(),
+                LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment to mapOf(),
                 LandlordRegistrationStepId.Name.urlPathSegment to mapOf("name" to "Arthur Dent"),
                 LandlordRegistrationStepId.DateOfBirth.urlPathSegment to
                     mapOf(
@@ -343,15 +344,36 @@ class JourneyDataBuilder(
     }
 
     fun withUnverifiedUser(
-        name: String? = "Arthur Dent",
-        dob: LocalDate? = LocalDate.of(2000, 6, 8),
+        name: String? = null,
+        dob: LocalDate? = null,
     ): JourneyDataBuilder {
+        this
+            .withVerifyIdentityUnverified()
+            .withIdentityNotVerified()
+            .withNameUnverifiedLandlordData(
+                name ?: "Arthur Dent",
+            ).withDateOfBirthUnverifiedLandlordData(dob ?: LocalDate.of(2000, 6, 8))
+        return this
+    }
+
+    fun withVerifyIdentityUnverified(): JourneyDataBuilder {
         journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] = emptyMap<String, Any?>()
-        name?.let { journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name) }
-        dob?.let {
-            journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
-                mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
-        }
+        return this
+    }
+
+    fun withIdentityNotVerified(): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withNameUnverifiedLandlordData(name: String = "Arthur Dent"): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name)
+        return this
+    }
+
+    fun withDateOfBirthUnverifiedLandlordData(dob: LocalDate = LocalDate.of(2000, 6, 8)): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+            mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
         return this
     }
 

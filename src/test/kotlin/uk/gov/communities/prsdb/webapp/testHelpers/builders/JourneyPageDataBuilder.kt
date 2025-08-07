@@ -13,11 +13,11 @@ class JourneyPageDataBuilder {
     companion object {
         fun beforeLandlordRegistrationConfirmIdentity() = JourneyDataBuilder().withVerifiedUser()
 
-        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withUnverifiedUser(name = null, dob = null)
+        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withVerifyIdentityUnverified()
 
-        fun beforeLandlordRegistrationName() = JourneyDataBuilder().withUnverifiedUser(name = null)
+        fun beforeLandlordRegistrationName() = beforeLandlordRegistrationIdentityNotVerified().withIdentityNotVerified()
 
-        fun beforeLandlordRegistrationDob() = JourneyDataBuilder().withUnverifiedUser(dob = null)
+        fun beforeLandlordRegistrationDob() = beforeLandlordRegistrationName().withNameUnverifiedLandlordData()
 
         fun beforeLandlordRegistrationEmail() = beforeLandlordRegistrationConfirmIdentity()
 
