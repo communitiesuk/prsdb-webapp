@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -18,12 +17,12 @@ open class CertificateUpload() : ModifiableAuditableEntity() {
 
     lateinit var category: FileCategory
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "property_ownership_id")
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "file_upload_id")
     lateinit var fileUpload: FileUpload
         private set
