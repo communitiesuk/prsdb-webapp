@@ -15,7 +15,7 @@ class LocalFileDownloader : FileDownloader {
     override fun getDownloadUrl(
         fileUpload: FileUpload,
         fileName: String?,
-    ): String? {
+    ): String {
         if (!isFileDownloadable(fileUpload)) {
             throw PrsdbWebException(
                 "File with object key ${fileUpload.objectKey} is not downloadable. " +
@@ -30,11 +30,18 @@ class LocalFileDownloader : FileDownloader {
                 "File with object key ${fileUpload.objectKey} does not exist in the local storage.",
             )
         }
+        val contentType =
+            when (fileUpload.extension) {
+                "pdf" -> "application/pdf"
+                "jpg", "jpeg" -> "image/jpeg"
+                "png" -> "image/png"
+                else -> "application/octet-stream"
+            }
 
         return if (fileName != null) {
-            "file:///${destinationFile.absolutePath}?filename=$fileName"
+            "/local-file/safe/${fileUpload.objectKey}?fileName=$fileName&contentType=$contentType"
         } else {
-            "file:///${destinationFile.absolutePath}"
+            "/local-file/safe/${fileUpload.objectKey}?fileName=${fileUpload.objectKey}&contentType=$contentType"
         }
     }
 }
