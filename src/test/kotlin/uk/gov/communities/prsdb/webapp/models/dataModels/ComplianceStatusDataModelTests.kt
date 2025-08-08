@@ -24,13 +24,49 @@ class ComplianceStatusDataModelTests {
     private val objectMapper = ObjectMapper()
 
     @ParameterizedTest(name = "{1} when {0}")
-    @MethodSource("provideComplianceStatusDataModelsAndStates")
+    @MethodSource("provideComplianceStatusDataModelsInProgressStates")
     fun `isInProgress returns`(
         complianceStatusDataModel: ComplianceStatusDataModel,
         expectedIsInProgress: Boolean,
     ) {
         val returnedIsComplianceInProgress = complianceStatusDataModel.isInProgress
         assertEquals(expectedIsInProgress, returnedIsComplianceInProgress)
+    }
+
+    @Test
+    fun `isNonCompliant returns true if any cert's status isn't ADDED`() {
+        // Arrange
+        val complianceStatusDataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = false,
+            )
+
+        // Act & Assert
+        assertTrue(complianceStatusDataModel.isNonCompliant)
+    }
+
+    @Test
+    fun `isNonCompliant returns false if all cert statuses are ADDED`() {
+        // Arrange
+        val complianceStatusDataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = false,
+            )
+
+        // Act & Assert
+        assertFalse(complianceStatusDataModel.isNonCompliant)
     }
 
     @Test
@@ -113,7 +149,7 @@ class ComplianceStatusDataModelTests {
 
     companion object {
         @JvmStatic
-        private fun provideComplianceStatusDataModelsAndStates() =
+        private fun provideComplianceStatusDataModelsInProgressStates() =
             listOf(
                 arguments(
                     named(

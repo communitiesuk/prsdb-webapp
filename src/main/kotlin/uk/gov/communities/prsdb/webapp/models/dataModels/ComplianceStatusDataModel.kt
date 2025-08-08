@@ -30,6 +30,9 @@ data class ComplianceStatusDataModel(
     val isInProgress: Boolean
         get() = !isComplete && certStatuses.any { it != ComplianceCertStatus.NOT_STARTED }
 
+    val isNonCompliant: Boolean
+        get() = certStatuses.any { it != ComplianceCertStatus.ADDED }
+
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
     companion object {
