@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
@@ -20,7 +21,7 @@ class LocalAuthoritySecurityConfig(
     @Order(3)
     fun localAuthoritySecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .securityMatcher("/local-authority/**")
+            .securityMatcher("/$LOCAL_AUTHORITY_PATH_SEGMENT/**")
             .authorizeHttpRequests { requests ->
                 requests
                     .anyRequest()
@@ -30,7 +31,7 @@ class LocalAuthoritySecurityConfig(
                     userInfo.oidcUserService(localAuthorityOidcUserService())
                 }
                 oauth.redirectionEndpoint { redirection ->
-                    redirection.baseUri("/local-authority/login/oauth2/code/one-login")
+                    redirection.baseUri("/$LOCAL_AUTHORITY_PATH_SEGMENT/login/oauth2/code/one-login")
                 }
             }.csrf { }
 

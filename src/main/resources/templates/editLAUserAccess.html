@@ -20,7 +20,7 @@
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{editLAUserAccess.saveButton})}"></button>
                 <button th:replace="~{fragments/buttons/warningButton :: warningButton(
                                 buttonText=#{editLAUserAccess.deleteAccountButton},
-                                href=@{/local-authority/{laId}/delete-user/{uid}(laId=${localAuthorityId}, uid=${localAuthorityUserId})}
+                                href=@{/local-council/{laId}/delete-user/{uid}(laId=${localAuthorityId}, uid=${localAuthorityUserId})}
                             )}"
                 ></button>
             </div>

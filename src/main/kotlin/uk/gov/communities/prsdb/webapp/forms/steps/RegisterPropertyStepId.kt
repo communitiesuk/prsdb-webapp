@@ -10,7 +10,7 @@ enum class RegisterPropertyStepId(
     NoAddressFound("no-address-found", RegisterPropertyGroupIdentifier.Address),
     ManualAddress("manual-address", RegisterPropertyGroupIdentifier.Address),
     AlreadyRegistered("already-registered", RegisterPropertyGroupIdentifier.Address),
-    LocalAuthority("local-authority", RegisterPropertyGroupIdentifier.Address),
+    LocalAuthority("local-council", RegisterPropertyGroupIdentifier.Address),
     PropertyType("property-type", RegisterPropertyGroupIdentifier.PropertyType),
     OwnershipType("ownership-type", RegisterPropertyGroupIdentifier.Ownership),
     Occupancy("occupancy", RegisterPropertyGroupIdentifier.Occupancy),
