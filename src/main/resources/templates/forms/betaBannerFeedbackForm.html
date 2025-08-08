@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title th:text="betaBannerFeedback.form.title">betaBannerFeedback.form.title</title>
+</head>
+
+<body>
+    <th:block th:fragment="betaBannerFeedbackForm">
+        <form method="post" th:action="@{/beta-banner-feedback}" novalidate>
+            <div class="govuk-form-group">
+                <!-- Textarea component for feedback -->
+                <div th:replace="~{fragments/forms/textArea :: textArea(
+                    #{betaBannerFeedback.label},
+                    'feedback',
+                    #{betaBannerFeedback.hint},
+                    1200
+                )}"></div>
+                <div class="govuk-hint" th:text="#{betaBannerFeedback.additionalInfo}"></div>
+            </div>
+            <div class="govuk-form-group">
+                <div th:replace="~{fragments/forms/emailInput :: emailInput(
+                    #{betaBannerFeedback.emailLabel},
+                    'email',
+                    null
+                )}"></div>
+            </div>
+            <div class="govuk-form-group">
+                <button type="submit" class="govuk-button" data-module="govuk-button"
+                    th:text="#{betaBannerFeedback.buttonText}">
+                    betaBannerFeedback.buttonText
+                </button>
+            </div>
+        </form>
+    </th:block>
+</body>
+
+</html>

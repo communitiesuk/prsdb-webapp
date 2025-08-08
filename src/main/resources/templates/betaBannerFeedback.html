@@ -8,16 +8,15 @@
                 <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
             </header>
             <section>
-                <div class="govuk-form-group">
-                    <h2 class="govuk-label-wrapper">
-                        <label class="govuk-label govuk-label--m" for="feedback-textarea" th:text="#{betaBannerFeedback.label}">betaBannerFeedback.label</label>
-                    </h2>
-                    <div class="govuk-hint" id="feedback-textarea-hint" th:text="#{betaBannerFeedback.hint}">betaBannerFeedback.hint</div>
-                    <textarea class="govuk-textarea" id="feedback-textarea" name="feedback" rows="5" aria-describedby="feedback-textarea-hint"></textarea>
-                    <div class="govuk-hint" th:text="#{betaBannerFeedback.additionalInfo}">betaBannerFeedback.additionalInfo</div>
-                    <label class="govuk-label" for="email-input" th:text="#{betaBannerFeedback.emailLabel}">betaBannerFeedback.emailLabel</label>
-                    <input class="govuk-input" id="email-input" name="email" type="email"/>
-                </div>
+                <div th:replace="~{forms/betaBannerFeedbackForm :: betaBannerFeedbackForm}"></div>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="betaBannerFeedback.heading.two">betaBannerFeedback.heading.two</h2>
+                <h3 class="govuk-heading-s" th:text="betaBannerFeedback.heading.three">betaBannerFeedback.heading.three</h3>
+                <p class="govuk-body" th:text="betaBannerFeedback.paragraph.one">betaBannerFeedback.paragraph.one</p>
+                <h3 class="govuk-heading-s" th:text="betaBannerFeedback.heading.four">betaBannerFeedback.heading.four</h3>
+                <p class="govuk-body" th:text="betaBannerFeedback.paragraph.two">betaBannerFeedback.paragraph.two</p>
+                <p class="govuk-body" th:text="betaBannerFeedback.paragraph.three">betaBannerFeedback.paragraph.three</p>
             </section>
         </div>
     </div>
