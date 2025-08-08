@@ -63,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxView
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -82,7 +83,9 @@ class PropertyComplianceJourney(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
+    private val certificateUploadService: CertificateUploadService,
     checkingAnswersForStep: String?,
+    stepName: String,
 ) : JourneyWithTaskList<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE,
         initialStepId = initialStepId,
@@ -115,12 +118,13 @@ class PropertyComplianceJourney(
     private val propertyComplianceSharedStepFactory =
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = true,
-            nextActionAfterGasSafetyTask = PropertyComplianceStepId.EICR,
-            nextActionAfterEicrTask = PropertyComplianceStepId.EPC,
-            nextActionAfterEpcTask = landlordResponsibilities.first().startingStepId,
-            isCheckingOrUpdatingAnswers = isCheckingAnswers,
+            isUpdateJourney = false,
+            isCheckingAnswers = isCheckingAnswers,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
+            certificateUploadService = certificateUploadService,
+            propertyOwnershipId = propertyOwnershipId,
+            stepName = stepName,
         )
 
     override val sections =
@@ -247,7 +251,7 @@ class PropertyComplianceJourney(
                     propertyComplianceSharedStepFactory.createEpcMissingStep(),
                     propertyComplianceSharedStepFactory.createEpcExemptionReasonStep(),
                     propertyComplianceSharedStepFactory.createEpcExemptionConfirmationStep(),
-                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(),
+                    propertyComplianceSharedStepFactory.createMeesExemptionCheckStep(propertyOwnershipId),
                     propertyComplianceSharedStepFactory.createMeesExemptionReasonStep(),
                     propertyComplianceSharedStepFactory.createMeesExemptionConfirmationStep(),
                     propertyComplianceSharedStepFactory.createLowEnergyRatingStep(),
@@ -443,6 +447,7 @@ class PropertyComplianceJourney(
                         journeyDataService,
                         epcCertificateUrlProvider,
                         unreachableStepRedirect,
+                        propertyComplianceSharedStepFactory,
                     ) { getPropertyAddress() },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAndSubmitHandleSubmitAndRedirect(filteredJourneyData) },
             )

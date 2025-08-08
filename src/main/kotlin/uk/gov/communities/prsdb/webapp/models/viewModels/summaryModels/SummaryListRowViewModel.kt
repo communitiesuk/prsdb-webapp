@@ -36,6 +36,7 @@ data class SummaryListRowViewModel(
             actionUrl: String?,
             valueUrl: String? = null,
             actionValue: String = "forms.links.change",
+            valueUrlOpensNewTab: Boolean = false,
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
@@ -48,6 +49,7 @@ data class SummaryListRowViewModel(
                         )
                     },
                 valueUrl = valueUrl,
+                valueUrlOpensNewTab = valueUrlOpensNewTab,
             )
     }
 }

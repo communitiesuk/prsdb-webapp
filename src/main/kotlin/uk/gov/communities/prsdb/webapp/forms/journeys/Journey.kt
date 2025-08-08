@@ -71,8 +71,6 @@ abstract class Journey<T : StepId>(
         checkingAnswersForStep: String? = null,
     ): ModelAndView {
         val currentStep = getStep(stepPathSegment)
-
-        val filteredJourneyData = getPrevStep(currentStep, subPageNumber)?.filteredJourneyData ?: emptyMap()
         val bindingResult = currentStep.page.bindDataToFormModel(validator, formData)
 
         if (!currentStep.isSatisfied(bindingResult)) {
@@ -83,16 +81,16 @@ abstract class Journey<T : StepId>(
             )
         }
 
+        val filteredJourneyData = getPrevStep(currentStep, subPageNumber)?.filteredJourneyData ?: emptyMap()
         val formModel = currentStep.page.formModel.cast(bindingResult.target)
-
         val newStepDataPair = currentStep.stepDataPair(filteredJourneyData, formModel, subPageNumber)
-        val newFilteredJourneyData = filteredJourneyData + newStepDataPair
         journeyDataService.addToJourneyDataIntoSession(mapOf(newStepDataPair))
+
+        val newFilteredJourneyData = filteredJourneyData + newStepDataPair
 
         if (currentStep.saveAfterSubmit) {
             val journeyDataContextId = journeyDataService.getContextId()
-            val journeyData = journeyDataService.getJourneyDataFromSession()
-            journeyDataService.saveJourneyData(journeyDataContextId, journeyData, journeyType, principal)
+            journeyDataService.saveJourneyData(journeyDataContextId, newFilteredJourneyData, journeyType, principal)
         }
 
         val checkingAnswersForId = checkingAnswersForStep?.let { getStep(it).id }

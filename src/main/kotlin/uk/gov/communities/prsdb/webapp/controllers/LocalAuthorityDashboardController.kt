@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
@@ -60,7 +60,7 @@ class LocalAuthorityDashboardController(
         model.addAttribute("privacyNoticeUrl", "#")
         model.addAttribute(
             "rentersRightsBillUrl",
-            RENTERS_RIGHTS_BILL_URL,
+            RENTERS_RIGHTS_BILL_PRSD,
         )
         return "localAuthorityDashboard"
     }

@@ -225,15 +225,14 @@ class PropertyRegistrationJourney(
             page =
                 Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "noAddressFoundPage",
+                    templateName = "forms/noAddressFoundForm",
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
+                            "restrictToEngland" to true,
                             "postcode" to getHouseNameOrNumberAndPostcode().second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
-                            "searchAgainUrl" to
-                                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
-                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            "searchAgainUrl" to RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),

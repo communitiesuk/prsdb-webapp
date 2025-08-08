@@ -43,7 +43,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordReg
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -51,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
@@ -109,7 +109,7 @@ class LandlordDashboardUrlTests(
     private lateinit var mockTokenCookieService: TokenCookieService
 
     @MockitoBean
-    private lateinit var mockFileUploader: FileUploader
+    private lateinit var mockFileUploadService: UploadService
 
     @MockitoBean
     private lateinit var mockPropertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
@@ -288,9 +288,11 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 absoluteUrlProvider,
+                certificateUploadService = mock(),
                 checkingAnswersForStep = null,
+                stepName = PropertyComplianceStepId.CheckAndSubmit.urlPathSegment,
             )
-        whenever(mockPropertyComplianceJourneyFactory.create(any(), anyOrNull())).thenReturn(propertyComplianceJourney)
+        whenever(mockPropertyComplianceJourneyFactory.create(any(), any(), anyOrNull())).thenReturn(propertyComplianceJourney)
 
         // Act, Assert
         mvc

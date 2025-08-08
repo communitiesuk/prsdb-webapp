@@ -13,18 +13,26 @@ import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.CheckUpdateEpcAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.FileUploadPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyExtensions.Companion.withBackUrlIfNotNullAndNotCheckingAnswers
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
@@ -53,18 +61,87 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyComplianceSharedStepFactory(
     private val defaultSaveAfterSubmit: Boolean,
-    private val isCheckingOrUpdatingAnswers: Boolean,
-    private val nextActionAfterGasSafetyTask: PropertyComplianceStepId,
-    private val nextActionAfterEicrTask: PropertyComplianceStepId,
-    private val nextActionAfterEpcTask: PropertyComplianceStepId?,
+    private val isCheckingAnswers: Boolean,
+    private val isUpdateJourney: Boolean,
     private val journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val certificateUploadService: CertificateUploadService,
+    private val propertyOwnershipId: Long,
+    stepName: String,
 ) {
+    private val stepGroupId = PropertyComplianceStepId.fromPathSegment(stepName)?.groupIdentifier
+
+    val epcNotAutomatchedStepId = getEpcNotAutomatchedStepIdFor(stepGroupId)
+    val checkAutoMatchedEpcStepId = getCheckAutoMatchedEpcStepIdFor(stepGroupId)
+    val checkMatchedEpcStepId = getCheckMatchedEpcStepIdFor(stepGroupId)
+    val epcLookupStepId = getEpcLookupStepIdFor(stepGroupId)
+    val epcNotFoundStepId = getEpcNotFoundStepIdFor(stepGroupId)
+    val epcExpiryCheckStepId = getEpcExpiryCheckStepIdFor(stepGroupId)
+    val epcExpiredStepId = getEpcExpiredStepIdFor(stepGroupId)
+    val epcMissingStepId = getEpcMissingStepIdFor(stepGroupId)
+    val epcExemptionReasonStepId = getEpcExemptionReasonStepIdFor(stepGroupId)
+    val epcExemptionConfirmationStepId = getEpcExemptionConfirmationStepIdFor(stepGroupId)
+    val meesExemptionCheckStepId = getMeesExemptionCheckStepIdFor(stepGroupId)
+    val meesExemptionReasonStepId = getMeesExemptionReasonStepIdFor(stepGroupId)
+    val meesExemptionConfirmationStepId = getMeesExemptionConfirmationStepIdFor(stepGroupId)
+    val lowEnergyRatingStepId = getLowEnergyRatingStepIdFor(stepGroupId)
+    val epcCheckYourAnswersStepId = getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId)
+
+    val skippedStepIds =
+        when (stepGroupId) {
+            PropertyComplianceGroupIdentifier.Mees ->
+                listOf(
+                    PropertyComplianceStepId.UpdateEpc,
+                    epcNotAutomatchedStepId,
+                    checkAutoMatchedEpcStepId,
+                    checkMatchedEpcStepId,
+                    epcLookupStepId,
+                    epcNotFoundStepId,
+                    epcExpiryCheckStepId,
+                    epcExpiredStepId,
+                    epcExemptionReasonStepId,
+                    epcExemptionConfirmationStepId,
+                )
+            else -> emptyList()
+        }
+
+    val skippedNonStepJourneyDataKeys =
+        when (stepGroupId) {
+            PropertyComplianceGroupIdentifier.Mees ->
+                listOf(
+                    NonStepJourneyDataKey.LookedUpEpc.key,
+                    NonStepJourneyDataKey.AutoMatchedEpc.key,
+                )
+            else -> emptyList()
+        }
+
+    private val nextActionAfterGasSafetyTask =
+        if (isUpdateJourney) {
+            PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers
+        } else {
+            PropertyComplianceStepId.EICR
+        }
+
+    private val nextActionAfterEicrTask =
+        if (isUpdateJourney) {
+            PropertyComplianceStepId.UpdateEicrCheckYourAnswers
+        } else {
+            PropertyComplianceStepId.EPC
+        }
+
+    private val nextActionAfterEpcTask =
+        if (isUpdateJourney) {
+            epcCheckYourAnswersStepId
+        } else {
+            PropertyComplianceStepId.FireSafetyDeclaration
+        }
+
     fun createGasSafetyIssueDateStep() =
         Step(
             id = PropertyComplianceStepId.GasSafetyIssueDate,
@@ -117,6 +194,18 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
+            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
+                certificateUploadService.saveCertificateUpload(
+                    propertyOwnershipId,
+                    filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
+                    FileCategory.GasSafetyCert,
+                )
+                Step.generateUrl(
+                    PropertyComplianceStepId.GasSafetyUploadConfirmation,
+                    null,
+                    checking,
+                )
+            },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
@@ -133,7 +222,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -154,7 +243,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -258,7 +347,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -279,7 +368,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -320,6 +409,18 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
+            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
+                certificateUploadService.saveCertificateUpload(
+                    propertyOwnershipId,
+                    filteredJourneyData.getEicrUploadId()!!.toLong(),
+                    FileCategory.Eirc,
+                )
+                Step.generateUrl(
+                    PropertyComplianceStepId.EicrUploadConfirmation,
+                    null,
+                    checking,
+                )
+            },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
@@ -336,7 +437,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -359,7 +460,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -467,7 +568,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -490,7 +591,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
-                                    isCheckingOrUpdatingAnswers,
+                                    isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -500,7 +601,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createEpcNotAutoMatchedStep() =
         Step(
-            id = PropertyComplianceStepId.EpcNotAutoMatched,
+            id = epcNotAutomatchedStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -510,13 +611,13 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                         ),
                 ),
-            nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcLookup, null) },
+            nextAction = { _, _ -> Pair(epcLookupStepId, null) },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
     fun createCheckAutoMatchedEpcStep() =
         Step(
-            id = PropertyComplianceStepId.CheckAutoMatchedEpc,
+            id = checkAutoMatchedEpcStepId,
             page = getCheckMatchedEpcPage(autoMatchedEpc = true),
             nextAction = { filteredJourneyData, _ -> checkAutoMatchedEpcStepNextAction(filteredJourneyData) },
             saveAfterSubmit = defaultSaveAfterSubmit,
@@ -524,7 +625,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createCheckMatchedEpcStep(handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String)) =
         Step(
-            id = PropertyComplianceStepId.CheckMatchedEpc,
+            id = checkMatchedEpcStepId,
             page = getCheckMatchedEpcPage(autoMatchedEpc = false),
             nextAction = { filteredJourneyData, _ -> checkMatchedEpcStepNextAction(filteredJourneyData) },
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> handleSubmitAndRedirect(filteredJourneyData) },
@@ -544,14 +645,14 @@ class PropertyComplianceSharedStepFactory(
                             "certificateNumber" to getLatestEpcCertificateNumberFromSession(),
                         ),
                 ),
-            nextAction = { _, _ -> Pair(PropertyComplianceStepId.CheckMatchedEpc, null) },
+            nextAction = { _, _ -> Pair(checkMatchedEpcStepId, null) },
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> handleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
     fun createEpcExemptionReasonStep() =
         Step(
-            id = PropertyComplianceStepId.EpcExemptionReason,
+            id = epcExemptionReasonStepId,
             page =
                 Page(
                     formModel = EpcExemptionReasonFormModel::class,
@@ -591,13 +692,13 @@ class PropertyComplianceSharedStepFactory(
                                 ),
                         ),
                 ),
-            nextAction = { _, _ -> Pair(PropertyComplianceStepId.EpcExemptionConfirmation, null) },
+            nextAction = { _, _ -> Pair(epcExemptionConfirmationStepId, null) },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
     fun createEpcExemptionConfirmationStep() =
         Step(
-            id = PropertyComplianceStepId.EpcExemptionConfirmation,
+            id = epcExemptionConfirmationStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -608,7 +709,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -618,7 +719,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createEpcLookupStep(handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String)) =
         Step(
-            id = PropertyComplianceStepId.EpcLookup,
+            id = epcLookupStepId,
             page =
                 Page(
                     formModel = EpcLookupFormModel::class,
@@ -639,7 +740,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createEpcNotFoundStep() =
         Step(
-            id = PropertyComplianceStepId.EpcNotFound,
+            id = epcNotFoundStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -654,7 +755,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -664,7 +765,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createEpcMissingStep() =
         Step(
-            id = PropertyComplianceStepId.EpcMissing,
+            id = epcMissingStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -677,7 +778,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -687,7 +788,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createEpcExpiryCheckStep() =
         Step(
-            id = PropertyComplianceStepId.EpcExpiryCheck,
+            id = epcExpiryCheckStepId,
             page =
                 Page(
                     formModel = EpcExpiryCheckFormModel::class,
@@ -718,7 +819,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createEpcExpiredStep() =
         Step(
-            id = PropertyComplianceStepId.EpcExpired,
+            id = epcExpiredStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -734,7 +835,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -742,9 +843,9 @@ class PropertyComplianceSharedStepFactory(
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
-    fun createMeesExemptionCheckStep() =
+    fun createMeesExemptionCheckStep(propertyOwnershipId: Long) =
         Step(
-            id = PropertyComplianceStepId.MeesExemptionCheck,
+            id = meesExemptionCheckStepId,
             page =
                 Page(
                     formModel = MeesExemptionCheckFormModel::class,
@@ -767,6 +868,13 @@ class PropertyComplianceSharedStepFactory(
                                 ),
                             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
                             "singleLineAddress" to (getAcceptedEpcDetailsFromSession()?.singleLineAddress ?: ""),
+                        ).withBackUrlIfNotNullAndNotCheckingAnswers(
+                            if (meesExemptionCheckStepId == PropertyComplianceStepId.UpdateMeesMeesExemptionCheck) {
+                                PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+                            } else {
+                                null
+                            },
+                            isCheckingAnswers,
                         ),
                 ),
             nextAction = { filteredJourneyData, _ -> meesExemptionCheckStepNextAction(filteredJourneyData) },
@@ -775,7 +883,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createMeesExemptionReasonStep() =
         Step(
-            id = PropertyComplianceStepId.MeesExemptionReason,
+            id = meesExemptionReasonStepId,
             page =
                 Page(
                     formModel = MeesExemptionReasonFormModel::class,
@@ -829,13 +937,13 @@ class PropertyComplianceSharedStepFactory(
                                 ),
                         ),
                 ),
-            nextAction = { _, _ -> Pair(PropertyComplianceStepId.MeesExemptionConfirmation, null) },
+            nextAction = { _, _ -> Pair(meesExemptionConfirmationStepId, null) },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
 
     fun createMeesExemptionConfirmationStep() =
         Step(
-            id = PropertyComplianceStepId.MeesExemptionConfirmation,
+            id = meesExemptionConfirmationStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -846,7 +954,7 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
@@ -856,7 +964,7 @@ class PropertyComplianceSharedStepFactory(
 
     fun createLowEnergyRatingStep() =
         Step(
-            id = PropertyComplianceStepId.LowEnergyRating,
+            id = lowEnergyRatingStepId,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -869,13 +977,29 @@ class PropertyComplianceSharedStepFactory(
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
-                                    isCheckingOrUpdatingAnswers = isCheckingOrUpdatingAnswers,
+                                    isCheckingOrUpdatingAnswers = isCheckingAnswers || isUpdateJourney,
                                 ),
                         ),
                 ),
             nextAction = { _, _ -> Pair(nextActionAfterEpcTask, null) },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
+
+    fun createCheckAnswersStep(
+        unreachableStepRedirect: String,
+        handleSubmitAndRedirect: ((filteredJourneyData: JourneyData) -> String),
+    ) = Step(
+        id = epcCheckYourAnswersStepId,
+        page =
+            CheckUpdateEpcAnswersPage(
+                journeyDataService,
+                epcCertificateUrlProvider,
+                unreachableStepRedirect,
+                stepFactory = this,
+            ),
+        saveAfterSubmit = false,
+        handleSubmitAndRedirect = { filteredJourneyData, _, _ -> handleSubmitAndRedirect(filteredJourneyData) },
+    )
 
     private fun gasSafetyIssueDateStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getIsGasSafetyCertOutdated()!!) {
@@ -957,14 +1081,14 @@ class PropertyComplianceSharedStepFactory(
     }
 
     private fun checkAutoMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getAutoMatchedEpcIsCorrect()!!) {
+        if (filteredJourneyData.getAutoMatchedEpcIsCorrect(checkAutoMatchedEpcStepId)!!) {
             matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = true)
         } else {
-            Pair(PropertyComplianceStepId.EpcLookup, null)
+            Pair(epcLookupStepId, null)
         }
 
     fun checkMatchedEpcStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getMatchedEpcIsCorrect()!!) {
+        if (filteredJourneyData.getMatchedEpcIsCorrect(checkMatchedEpcStepId)!!) {
             matchedEpcIsCorrectNextAction(filteredJourneyData, autoMatched = false)
         } else {
             // The user will be redirected to the lookup step in handleSubmitAndRedirect
@@ -976,7 +1100,7 @@ class PropertyComplianceSharedStepFactory(
     private fun getAcceptedEpcDetailsFromSession(): EpcDataModel? =
         journeyDataService
             .getJourneyDataFromSession()
-            .getAcceptedEpcDetails()
+            .getAcceptedEpcDetails(checkAutoMatchedEpcStepId)
 
     private fun matchedEpcIsCorrectNextAction(
         filteredJourneyData: JourneyData,
@@ -984,10 +1108,10 @@ class PropertyComplianceSharedStepFactory(
     ): Pair<PropertyComplianceStepId?, Int?> {
         val epcDetails = filteredJourneyData.getEpcDetails(autoMatched)!!
         if (epcDetails.isPastExpiryDate()) {
-            return Pair(PropertyComplianceStepId.EpcExpiryCheck, null)
+            return Pair(epcExpiryCheckStepId, null)
         }
         if (!epcDetails.isEnergyRatingEOrBetter()) {
-            return Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+            return Pair(meesExemptionCheckStepId, null)
         }
         return Pair(nextActionAfterEpcTask, null)
     }
@@ -995,30 +1119,32 @@ class PropertyComplianceSharedStepFactory(
     private fun epcLookupStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> {
         val lookedUpEpcDetails =
             filteredJourneyData.getEpcDetails(autoMatched = false)
-                ?: return Pair(PropertyComplianceStepId.EpcNotFound, null)
+                ?: return Pair(epcNotFoundStepId, null)
         return if (lookedUpEpcDetails.isLatestCertificateForThisProperty()) {
-            Pair(PropertyComplianceStepId.CheckMatchedEpc, null)
+            Pair(checkMatchedEpcStepId, null)
         } else {
+            // We don't need to duplicate this step for the MEES update journey as this page is not visited and the
+            // superseded results would be overwritten so this result not part of the final EPC update.
             Pair(PropertyComplianceStepId.EpcSuperseded, null)
         }
     }
 
     private fun epcExpiryCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getDidTenancyStartBeforeEpcExpiry() == true) {
-            if (filteredJourneyData.getAcceptedEpcDetails()?.isEnergyRatingEOrBetter() == true) {
+        if (filteredJourneyData.getDidTenancyStartBeforeEpcExpiry(epcExpiryCheckStepId) == true) {
+            if (filteredJourneyData.getAcceptedEpcDetails(checkAutoMatchedEpcStepId)?.isEnergyRatingEOrBetter() == true) {
                 Pair(nextActionAfterEpcTask, null)
             } else {
-                Pair(PropertyComplianceStepId.MeesExemptionCheck, null)
+                Pair(meesExemptionCheckStepId, null)
             }
         } else {
-            Pair(PropertyComplianceStepId.EpcExpired, null)
+            Pair(epcExpiredStepId, null)
         }
 
     private fun meesExemptionCheckStepNextAction(filteredJourneyData: JourneyData): Pair<PropertyComplianceStepId?, Int?> =
-        if (filteredJourneyData.getPropertyHasMeesExemption()!!) {
-            Pair(PropertyComplianceStepId.MeesExemptionReason, null)
+        if (filteredJourneyData.getPropertyHasMeesExemption(meesExemptionCheckStepId)!!) {
+            Pair(meesExemptionReasonStepId, null)
         } else {
-            Pair(PropertyComplianceStepId.LowEnergyRating, null)
+            Pair(lowEnergyRatingStepId, null)
         }
 
     private fun getEpcExpiredTemplate(): String {
@@ -1034,7 +1160,7 @@ class PropertyComplianceSharedStepFactory(
         val submittedCertificateNumber =
             journeyDataService
                 .getJourneyDataFromSession()
-                .getEpcLookupCertificateNumber()
+                .getEpcLookupCertificateNumber(epcLookupStepId)
                 ?: return ""
         return EpcDataModel.parseCertificateNumberOrNull(submittedCertificateNumber)!! // Only valid EPC numbers will be in journeyData
     }
@@ -1047,5 +1173,112 @@ class PropertyComplianceSharedStepFactory(
     private fun getLatestEpcCertificateNumberFromSession(): String {
         return journeyDataService.getJourneyDataFromSession().getLatestEpcCertificateNumber()
             ?: return ""
+    }
+
+    companion object {
+        fun getEpcNotAutomatchedStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcNotAutoMatched
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcNotAutomatched
+                else -> PropertyComplianceStepId.EpcNotAutoMatched
+            }
+
+        fun getCheckAutoMatchedEpcStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.CheckAutoMatchedEpc
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc
+                else -> PropertyComplianceStepId.CheckAutoMatchedEpc
+            }
+
+        fun getCheckMatchedEpcStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.CheckMatchedEpc
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesCheckMatchedEpc
+                else -> PropertyComplianceStepId.CheckMatchedEpc
+            }
+
+        fun getEpcLookupStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcLookup
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcLookup
+                else -> PropertyComplianceStepId.EpcLookup
+            }
+
+        fun getEpcNotFoundStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcNotFound
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcNotFound
+                else -> PropertyComplianceStepId.EpcNotFound
+            }
+
+        fun getEpcExpiryCheckStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcExpiryCheck
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcExpiryCheck
+                else -> PropertyComplianceStepId.EpcExpiryCheck
+            }
+
+        fun getEpcExpiredStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcExpired
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcExpired
+                else -> PropertyComplianceStepId.EpcExpired
+            }
+
+        fun getEpcMissingStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcMissing
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcMissing
+                else -> PropertyComplianceStepId.EpcMissing
+            }
+
+        fun getEpcExemptionReasonStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcExemptionReason
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcExemptionReason
+                else -> PropertyComplianceStepId.EpcExemptionReason
+            }
+
+        fun getEpcExemptionConfirmationStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.EpcExemptionConfirmation
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation
+                else -> PropertyComplianceStepId.EpcExemptionConfirmation
+            }
+
+        fun getMeesExemptionCheckStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.MeesExemptionCheck
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesMeesExemptionCheck
+                else -> PropertyComplianceStepId.MeesExemptionCheck
+            }
+
+        fun getMeesExemptionReasonStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.MeesExemptionReason
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesMeesExemptionReason
+                else -> PropertyComplianceStepId.MeesExemptionReason
+            }
+
+        fun getMeesExemptionConfirmationStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.MeesExemptionConfirmation
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation
+                else -> PropertyComplianceStepId.MeesExemptionConfirmation
+            }
+
+        fun getLowEnergyRatingStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.LowEnergyRating
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesLowEnergyRating
+                else -> PropertyComplianceStepId.LowEnergyRating
+            }
+
+        fun getUpdateEpcCheckYourAnswersStepIdFor(stepGroupId: PropertyComplianceGroupIdentifier?) =
+            when (stepGroupId) {
+                PropertyComplianceGroupIdentifier.Epc -> PropertyComplianceStepId.UpdateEpcCheckYourAnswers
+                PropertyComplianceGroupIdentifier.Mees -> PropertyComplianceStepId.UpdateMeesCheckYourAnswers
+                else -> PropertyComplianceStepId.UpdateEpcCheckYourAnswers
+            }
     }
 }

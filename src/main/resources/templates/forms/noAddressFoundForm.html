@@ -1,0 +1,24 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="restrictToEngland" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
+<!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <h1 class="govuk-heading-l" th:with="headingMsg=${restrictToEngland} ? 'forms.noAddressFound.english.heading' : 'forms.noAddressFound.heading'" th:text="${#messages.msg(headingMsg, postcode, houseNameOrNumber)}">
+        forms.noAddressFound.(english.)heading
+    </h1>
+    <p class="govuk-body">
+        <span th:text="#{${#bools.isTrue(restrictToEngland) ? 'forms.noAddressFound.english.paragraph.one.beforeLink' : 'forms.noAddressFound.paragraph.one.beforeLink'}}" th:remove="tag">
+            forms.noAddressFound.(english.)paragraph.one.beforeLink
+        </span>
+        <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{forms.noAddressFound.paragraph.one.linkText}">
+            forms.noAddressFound.paragraph.one.linkText
+        </a>
+    </p>
+    <p class="govuk-body" th:text="#{forms.noAddressFound.paragraph.two}">forms.noAddressFound.paragraph.two</p>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.noAddressFound.button.text})}"></button>
+</html>

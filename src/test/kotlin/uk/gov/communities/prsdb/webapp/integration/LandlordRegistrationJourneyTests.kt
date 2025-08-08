@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -162,7 +163,10 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, selected address)`(
         page: Page,
     ) {
-        val namePage = navigator.skipToLandlordRegistrationNamePage()
+        val identityNotVerifiedPage = navigator.skipToLandlordRegistrationIdentityNotVerifiedPage()
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
         namePage.submitName("landlord name")
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
@@ -215,7 +219,10 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, manual address)`(
         page: Page,
     ) {
-        val namePage = navigator.skipToLandlordRegistrationNamePage()
+        val identityNotVerifiedPage = navigator.skipToLandlordRegistrationIdentityNotVerifiedPage()
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
         namePage.submitName("landlord name")
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)

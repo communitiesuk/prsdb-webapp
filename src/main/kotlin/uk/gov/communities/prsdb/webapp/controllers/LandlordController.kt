@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -83,7 +83,7 @@ class LandlordController(
         model.addAttribute("howToLetUrl", "#")
         model.addAttribute(
             "rentersRightsBillUrl",
-            RENTERS_RIGHTS_BILL_URL,
+            RENTERS_RIGHTS_BILL_PRSD,
         )
         model.addAttribute("keepingPropertyCompliantUrl", "#")
 

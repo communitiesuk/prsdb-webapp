@@ -1,0 +1,8 @@
+package uk.gov.communities.prsdb.webapp.models.requestModels
+
+import jakarta.validation.constraints.NotBlank
+
+class PasscodeRequestModel() {
+    @NotBlank(message = "passcodeEntry.error.missingPasscode")
+    var passcode: String = ""
+}
