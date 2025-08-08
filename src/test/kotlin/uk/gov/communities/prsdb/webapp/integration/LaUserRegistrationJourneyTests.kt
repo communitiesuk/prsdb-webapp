@@ -59,7 +59,7 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
         val landingPage = assertPageIs(page, LandingPageLaUserRegistration::class)
         // Landing page - render
         assertThat(landingPage.headingCaption).containsText("Before you register")
-        assertThat(landingPage.heading).containsText("Registering as a local authority user")
+        assertThat(landingPage.heading).containsText("Registering as a local council user")
         // Submit and go to next page
         landingPage.clickBeginButton()
         val namePage = assertPageIs(page, NameFormPageLaUserRegistration::class)

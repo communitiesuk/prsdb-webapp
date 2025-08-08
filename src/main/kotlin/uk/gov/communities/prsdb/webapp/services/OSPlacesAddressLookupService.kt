@@ -62,7 +62,7 @@ class OSPlacesAddressLookupService(
         val localAuthorityId = localAuthorityService.retrieveLocalAuthorityByCustodianCode(custodianCode)?.id
 
         if (localAuthorityId == null) {
-            println("No local authority found for $custodianCode retrieved from OSPlaces")
+            println("No local council found for $custodianCode retrieved from OSPlaces")
         }
 
         return localAuthorityId

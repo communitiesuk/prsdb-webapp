@@ -132,7 +132,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
             selectLocalAuthorityPage.form.submit()
             assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
-                .containsText("Select a local authority to continue")
+                .containsText("Select a local council to continue")
         }
     }
 

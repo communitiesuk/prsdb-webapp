@@ -17,7 +17,7 @@ class InviteLaAdminSinglePageTests : SinglePageTestWithSeedData("data-local.sql"
     fun `inviting a new LA admin shows validation errors if any of the fields are empty`(page: Page) {
         val invitePage = navigator.goToInviteLaAdmin()
         invitePage.form.submit()
-        assertThat(invitePage.form.getErrorMessage("localAuthorityId")).containsText("Select a local authority to continue")
+        assertThat(invitePage.form.getErrorMessage("localAuthorityId")).containsText("Select a local council to continue")
         assertThat(invitePage.form.getErrorMessage("email")).containsText("You must enter an email address")
         assertThat(invitePage.form.getErrorMessage("confirmEmail")).containsText("You must enter and confirm their email address")
     }

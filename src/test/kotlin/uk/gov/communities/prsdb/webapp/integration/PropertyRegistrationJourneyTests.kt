@@ -215,7 +215,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
         val selectLocalAuthorityPage = assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
 
         // Select local authority - render page
-        assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local authority area is your property in?")
+        assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local council area is your property in?")
         assertThat(selectLocalAuthorityPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         selectLocalAuthorityPage.submitLocalAuthority("BATH AND NORTH EAST SOMERSET COUNCIL", "BATH AND NORTH EAST SOMERSET COUNCIL")
