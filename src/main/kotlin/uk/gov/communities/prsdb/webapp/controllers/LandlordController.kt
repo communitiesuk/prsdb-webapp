@@ -13,6 +13,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.BETA_BANNER_FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
@@ -175,6 +176,9 @@ class LandlordController(
 
         return "complianceActions"
     }
+
+    @GetMapping("/${BETA_BANNER_FEEDBACK_PATH_SEGMENT}")
+    fun betaBannerFeedback(): String = "betaBannerFeedback"
 
     fun populateDeleteIncompletePropertyRegistrationModel(
         model: Model,
