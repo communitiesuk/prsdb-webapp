@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html id="page" th:replace="~{fragments/layout :: layout(#{complianceActions.title},~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{complianceActions.heading}">complianceActions.heading</h1>
+            <th:block th:unless="${#lists.isEmpty(complianceActions)}">
+                <p class="govuk-body-l govuk-hint" th:text="#{complianceActions.hintText}">complianceActions.hintText</p>
+            </th:block>
+        </header>
+
+        <th:block th:unless="${#lists.isEmpty(complianceActions)}" th:each="complianceAction: ${complianceActions}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceAction.title}, null, ${complianceAction.actions}, ${complianceAction.summaryList})}"></div>
+        </th:block>
+
+        <th:block th:if="${#lists.isEmpty(complianceActions)}">
+            <p class="govuk-body-l govuk-hint" th:text="#{complianceActions.none.hintText}">complianceActions.none.hintText</p>
+            <p class="govuk-body" th:text="#{complianceActions.none.paragraph.one}">complianceActions.none.paragraph.one</p>
+            <section>
+                <h2 class="govuk-heading-s" th:text="#{complianceActions.updatePropertyOccupancy.heading}">complianceActions.updatePropertyOccupancy.heading</h2>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>
+                            <span th:text="#{complianceActions.updatePropertyOccupancy.bullet.one.beforeLink}">
+                                complianceActions.updatePropertyOccupancy.bullet.one.beforeLink
+                            </span><a class="govuk-link" th:text="#{complianceActions.updatePropertyOccupancy.bullet.one.linkText}" th:href="${viewRegisteredPropertiesUrl}">
+                        complianceActions.updatePropertyOccupancy.bullet.one.linkText
+                    </a><span th:text="#{complianceActions.updatePropertyOccupancy.bullet.one.afterLink}">
+                            complianceActions.updatePropertyOccupancy.bullet.one.afterLink
+                            </span>
+                    </li>
+                    <li th:text="#{complianceActions.updatePropertyOccupancy.bullet.two}">
+                        complianceActions.updatePropertyOccupancy.bullet.two
+                    </li>
+                    <li th:text="#{complianceActions.updatePropertyOccupancy.bullet.three}">
+                        complianceActions.updatePropertyOccupancy.bullet.three
+                    </li>
+                    <li th:text="#{complianceActions.updatePropertyOccupancy.bullet.four}">
+                        complianceActions.updatePropertyOccupancy.bullet.four
+                    </li>
+                    <li th:text="#{complianceActions.updatePropertyOccupancy.bullet.five}">
+                        complianceActions.updatePropertyOccupancy.bullet.five
+                    </li>
+                </ul>
+                <p class="govuk-body" th:text="#{complianceActions.updatePropertyOccupancy.paragraph.one}">complianceActions.updatePropertyOccupancy.paragraph.one</p>
+            </section>
+        </th:block>
+
+    </main>
+</html>
