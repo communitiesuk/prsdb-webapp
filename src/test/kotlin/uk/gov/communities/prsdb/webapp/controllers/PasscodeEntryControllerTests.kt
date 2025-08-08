@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
@@ -158,6 +159,19 @@ class PasscodeEntryControllerTests(
             }
             .andExpect {
                 status { isUnsupportedMediaType() }
+            }
+    }
+
+    @Test
+    fun `passcodeAlreadyUsed GET returns 200 and displays passcode-already-used page for unauthenticated users`() {
+        mvc
+            .get("/$PASSCODE_ALREADY_USED_ROUTE")
+            .andExpect {
+                status { isOk() }
+                view { name("passcodeAlreadyUsed") }
+                model {
+                    attribute("passcodeEntryUrl", PASSCODE_ENTRY_ROUTE)
+                }
             }
     }
 }

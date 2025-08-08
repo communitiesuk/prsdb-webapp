@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PASSCODE_ALREADY_USED_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_ENTRY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
@@ -26,6 +27,7 @@ class PasscodeEntryController(
 ) {
     companion object {
         const val PASSCODE_ENTRY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PASSCODE_ENTRY_PATH_SEGMENT"
+        const val PASSCODE_ALREADY_USED_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PASSCODE_ALREADY_USED_PATH_SEGMENT"
     }
 
     @GetMapping("/$PASSCODE_ENTRY_PATH_SEGMENT")
@@ -71,5 +73,11 @@ class PasscodeEntryController(
         } else {
             "redirect:$LANDLORD_REGISTRATION_ROUTE"
         }
+    }
+
+    @GetMapping("/$PASSCODE_ALREADY_USED_PATH_SEGMENT")
+    fun passcodeAlreadyUsed(model: Model): String {
+        model.addAttribute("passcodeEntryUrl", PASSCODE_ENTRY_ROUTE)
+        return "passcodeAlreadyUsed"
     }
 }
