@@ -10,6 +10,36 @@ export function addCookieConsentHandler() {
     if (consentCookieValue == null && !onCookiePage) {
        new CookieBanner().display();
     }
+
+    signalGtmConsent(consentCookieValue === 'true');
+    if (consentCookieValue === 'false') {
+        deleteCookie("_ga")
+        deleteCookie("_ga_PDPW9SQ94W")
+    }
+}
+
+function signalGtmConsent(isGranted = false) {
+    gtag('consent', 'default', {
+        ad_user_data: isGranted ? 'granted' : 'denied',
+        ad_personalization: isGranted ? 'granted' : 'denied',
+        ad_storage: isGranted ? 'granted' : 'denied',
+        analytics_storage: isGranted ? 'granted' : 'denied'
+    })
+
+    window.dataLayer.push({ event: 'default_consent' })
+}
+
+function updateGtmConsent(isGranted = false) {
+    gtag('consent', 'update', {
+        ad_user_data: isGranted ? 'granted' : 'denied',
+        ad_personalization: isGranted ? 'granted' : 'denied',
+        ad_storage: isGranted ? 'granted' : 'denied',
+        analytics_storage: isGranted ? 'granted' : 'denied'
+    })
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
 
 class CookieBanner {
@@ -54,7 +84,11 @@ class CookieBanner {
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
 
-            window['ga-disable-GA_MEASUREMENT_ID'] = !consentValue;
+            updateGtmConsent(consentValue);
+            if (consentValue === false) {
+                deleteCookie("_ga")
+                deleteCookie("_ga_PDPW9SQ94W")
+            }
         });
     }
 
