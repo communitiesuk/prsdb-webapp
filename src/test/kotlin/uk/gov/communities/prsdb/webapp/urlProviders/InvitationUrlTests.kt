@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
@@ -39,7 +40,7 @@ import kotlin.test.Test
 
 @WebMvcTest(
     controllers = [ManageLocalAuthorityUsersController::class, RegisterLAUserController::class],
-    properties = ["base-url.local-authority=http://localhost:8080/local-authority"],
+    properties = ["base-url.local-authority=http://localhost:8080/$LOCAL_AUTHORITY_PATH_SEGMENT"],
 )
 @Import(AbsoluteUrlProvider::class)
 class InvitationUrlTests(
