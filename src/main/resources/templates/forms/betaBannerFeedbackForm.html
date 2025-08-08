@@ -2,14 +2,13 @@
 <html lang="en">
 
 <head>
-    <title th:text="betaBannerFeedback.form.title">betaBannerFeedback.form.title</title>
+    <title th:text="#{betaBannerFeedback.form.title}">betaBannerFeedback.form.title</title>
 </head>
 
 <body>
     <th:block th:fragment="betaBannerFeedbackForm">
         <form method="post" th:action="@{/beta-banner-feedback}" novalidate>
             <div class="govuk-form-group">
-                <!-- Textarea component for feedback -->
                 <div th:replace="~{fragments/forms/textArea :: textArea(
                     #{betaBannerFeedback.label},
                     'feedback',
