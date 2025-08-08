@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsU
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -41,6 +41,7 @@ class PropertyDetailsController(
     private val propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory,
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
+    private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -72,7 +73,7 @@ class PropertyDetailsController(
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
-                PropertyComplianceViewModel(
+                propertyComplianceViewModelFactory.create(
                     propertyCompliance = propertyCompliance,
                     landlordView = true,
                 )
@@ -164,7 +165,7 @@ class PropertyDetailsController(
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
-                PropertyComplianceViewModel(
+                propertyComplianceViewModelFactory.create(
                     propertyCompliance = propertyCompliance,
                     landlordView = false,
                 )

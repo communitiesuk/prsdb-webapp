@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsU
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -83,6 +84,9 @@ class PropertyComplianceInfoUrlTests(
 
     @MockitoBean
     private lateinit var uploadService: UploadService
+
+    @MockitoBean
+    private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 

@@ -20,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -40,6 +41,9 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var viewModelFactory: PropertyComplianceViewModelFactory
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
