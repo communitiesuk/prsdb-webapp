@@ -5,8 +5,10 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
+import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 
@@ -14,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
     private val localAuthorityRepository: LocalAuthorityRepository,
+    private val oneLoginUserRepository: OneLoginUserRepository,
     private val session: HttpSession,
 ) {
     companion object {
@@ -66,8 +69,50 @@ class PasscodeService(
     }
 
     fun isValidPasscode(passcode: String): Boolean {
-        val normalizedPasscode = passcode.trim().uppercase()
+        val normalizedPasscode = normalizePasscode(passcode)
         return passcodeRepository.existsByPasscode(normalizedPasscode)
+    }
+
+    private fun normalizePasscode(passcode: String): String {
+        return passcode.trim().uppercase()
+    }
+
+    fun hasUserClaimedPasscode(userId: String): Boolean {
+        return passcodeRepository.findByBaseUser_Id(userId) != null
+    }
+
+    fun findPasscode(passcodeString: String): Passcode? {
+        return passcodeRepository.findByPasscode(normalizePasscode(passcodeString))
+    }
+
+    @Transactional
+    fun claimPasscodeForUser(
+        passcodeString: String,
+        userId: String,
+    ): Boolean {
+        val passcode = findPasscode(passcodeString) ?: return false
+
+        if (passcode.baseUser != null) {
+            // Already claimed
+            return false
+        }
+
+        // Find or create the OneLoginUser
+        val user =
+            oneLoginUserRepository.findById(userId).orElse(null)
+                ?: OneLoginUser(userId).also { oneLoginUserRepository.save(it) }
+
+        passcode.claimByUser(user)
+        passcodeRepository.save(passcode)
+        return true
+    }
+
+    fun isPasscodeClaimedByUser(
+        passcodeString: String,
+        userId: String,
+    ): Boolean {
+        val passcode = findPasscode(passcodeString) ?: return false
+        return passcode.baseUser?.id == userId
     }
 
     private fun generateRandomPasscodeString(): String {

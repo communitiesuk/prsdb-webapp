@@ -5,4 +5,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 
 interface PasscodeRepository : JpaRepository<Passcode, String> {
     fun existsByPasscode(passcode: String): Boolean
+
+    fun findByPasscode(passcode: String): Passcode?
+
+    @Suppress("ktlint:standard:function-naming")
+    fun findByBaseUser_Id(userId: String): Passcode?
 }
