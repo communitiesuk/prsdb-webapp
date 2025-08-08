@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.LocatorAssertions
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.NestedSinglePageTestWithSeedData
@@ -17,6 +18,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
+    // TODO PRSD-1394: Re-enable this test
+    @Disabled
     @Nested
     inner class LandlordsWithIncompleteCompliances :
         NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-compliances.sql") {

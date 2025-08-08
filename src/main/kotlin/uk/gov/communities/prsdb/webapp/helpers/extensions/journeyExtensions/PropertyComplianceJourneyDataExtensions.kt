@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
@@ -296,38 +295,6 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
                 MeesExemptionReasonFormModel::exemptionReason.name,
             )
 
-        fun JourneyData.getResponsibilityToTenantsAgreement() =
-            JourneyDataHelper.getFieldBooleanValue(
-                this,
-                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
-                ResponsibilityToTenantsFormModel::agreesToResponsibility.name,
-            )
-
-        fun JourneyData.getHasCompletedGasSafetyTask() =
-            this.getHasCompletedGasSafetyUploadConfirmation() ||
-                this.getHasCompletedGasSafetyExemptionConfirmation() ||
-                this.getHasCompletedGasSafetyExemptionMissing() ||
-                this.getHasCompletedGasSafetyOutdated()
-
-        fun JourneyData.getHasCompletedEicrTask() =
-            this.getHasCompletedEicrUploadConfirmation() ||
-                this.getHasCompletedEicrExemptionConfirmation() ||
-                this.getHasCompletedEicrExemptionMissing() ||
-                this.getHasCompletedEicrOutdated()
-
-        fun JourneyData.getHasCompletedEpcTask() =
-            this.getHasCompletedEpcExemptionConfirmation() ||
-                this.getHasCompletedEpcMissing() ||
-                this.getHasCompletedEpcNotFound() ||
-                this.getHasCompletedEpcTaskWithCheckAutoMatchedEpc() ||
-                this.getHasCompletedEpcTaskWithCheckMatchedEpc() ||
-                this.getHasCompletedEpcTaskWithEpcExpiryCheck() ||
-                this.getHasCompletedEpcExpired() ||
-                this.getHasCompletedMeesExemptionConfirmation() ||
-                this.getHasCompletedEpcLowEnergyRating()
-
-        fun JourneyData.getHasCompletedLandlordsResponsibilitiesTask() = this.getResponsibilityToTenantsAgreement() ?: false
-
         fun JourneyData.getHasCompletedGasSafetyUploadConfirmation() =
             this.containsKey(PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment)
 
@@ -336,9 +303,6 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         fun JourneyData.getHasCompletedGasSafetyExemptionMissing() =
             this.containsKey(PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment)
-
-        private fun JourneyData.getHasCompletedGasSafetyOutdated() =
-            this.containsKey(PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment)
 
         fun JourneyData.getHasCompletedEicrUploadConfirmation() =
             this.containsKey(PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment)
@@ -349,8 +313,6 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
         fun JourneyData.getHasCompletedEicrExemptionMissing() =
             this.containsKey(PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment)
 
-        fun JourneyData.getHasCompletedEicrOutdated() = this.containsKey(PropertyComplianceStepId.EicrOutdated.urlPathSegment)
-
         fun JourneyData.getHasCompletedEpcExemptionConfirmation() =
             this.containsKey(PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment)
 
@@ -358,28 +320,18 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         fun JourneyData.getHasCompletedEpcNotFound() = this.containsKey(PropertyComplianceStepId.EpcNotFound.urlPathSegment)
 
-        private fun JourneyData.getHasCompletedEpcTaskWithCheckAutoMatchedEpc(
-            automatchedStepId: PropertyComplianceStepId = PropertyComplianceStepId.CheckAutoMatchedEpc,
-        ) = this.containsKey(automatchedStepId.urlPathSegment) &&
-            this.getAutoMatchedEpcIsCorrect(automatchedStepId)!! &&
-            !this.getEpcDetails(autoMatched = true)!!.isPastExpiryDate() &&
-            this.getEpcDetails(autoMatched = true)!!.isEnergyRatingEOrBetter()
-
-        private fun JourneyData.getHasCompletedEpcTaskWithCheckMatchedEpc(
-            matchedStepId: PropertyComplianceStepId = PropertyComplianceStepId.CheckMatchedEpc,
-        ) = this.containsKey(matchedStepId.urlPathSegment) &&
-            this.getMatchedEpcIsCorrect(matchedStepId)!! &&
-            !this.getEpcDetails(autoMatched = false)!!.isPastExpiryDate() &&
-            this.getEpcDetails(autoMatched = false)!!.isEnergyRatingEOrBetter()
-
-        private fun JourneyData.getHasCompletedEpcTaskWithEpcExpiryCheck(
-            automatchedStepId: PropertyComplianceStepId = PropertyComplianceStepId.CheckAutoMatchedEpc,
-            epcExpiryCheckStepId: PropertyComplianceStepId = PropertyComplianceStepId.EpcExpiryCheck,
-        ) = this.containsKey(epcExpiryCheckStepId.urlPathSegment) &&
-            this.getDidTenancyStartBeforeEpcExpiry() == true &&
-            this.getAcceptedEpcDetails(automatchedStepId)!!.isEnergyRatingEOrBetter()
-
         fun JourneyData.getHasCompletedEpcExpired() = this.containsKey(PropertyComplianceStepId.EpcExpired.urlPathSegment)
+
+        fun JourneyData.getHasCompletedEpcAdded() =
+            this.getHasAddedInDateAndHighRatedEpc() ||
+                this.getHasCompletedMeesExemptionConfirmation() ||
+                this.getHasCompletedEpcLowEnergyRating()
+
+        private fun JourneyData.getHasAddedInDateAndHighRatedEpc(): Boolean {
+            val acceptedEpcDetails = this.getAcceptedEpcDetails() ?: return false
+            val isEpcInDate = !acceptedEpcDetails.isPastExpiryDate() || this.getDidTenancyStartBeforeEpcExpiry() == true
+            return isEpcInDate && acceptedEpcDetails.isEnergyRatingEOrBetter()
+        }
 
         private fun JourneyData.getHasCompletedMeesExemptionConfirmation() =
             this.containsKey(PropertyComplianceStepId.MeesExemptionConfirmation.urlPathSegment)
