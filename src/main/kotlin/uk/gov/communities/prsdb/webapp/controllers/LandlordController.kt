@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
@@ -181,7 +182,10 @@ class LandlordController(
     }
 
     @GetMapping("/${BETA_BANNER_FEEDBACK_PATH_SEGMENT}")
-    fun betaBannerFeedback(): String = "betaBannerFeedback"
+    fun betaBannerFeedback(model: Model): String {
+        model.addAttribute("betaFeedbackModel", BetaFeedbackModel())
+        return "betaBannerFeedback"
+    }
 
     fun populateDeleteIncompletePropertyRegistrationModel(
         model: Model,

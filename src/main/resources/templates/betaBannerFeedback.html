@@ -1,24 +1,24 @@
-<!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{betaBannerFeedback.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
-    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
-        <div id="page-content">
-            <header>
-                <h1 class="govuk-heading-l" th:text="#{betaBannerFeedback.heading}">betaBannerFeedback.heading</h1>
-                <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
-            </header>
-            <section>
-                <div th:replace="~{forms/betaBannerFeedbackForm :: betaBannerFeedbackForm}"></div>
-            </section>
-            <section>
-                <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
-                <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
-                <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.one}">betaBannerFeedback.paragraph.one</p>
-                <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.four}">betaBannerFeedback.heading.four</h3>
-                <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.two}">betaBannerFeedback.paragraph.two</p>
-                <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.three}">betaBannerFeedback.paragraph.three</p>
-            </section>
+<th:block th:replace="~{fragments/layout :: layout(#{betaBannerFeedback.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+            <div id="page-content">
+                <header>
+                    <h1 class="govuk-heading-l" th:text="#{betaBannerFeedback.heading}">betaBannerFeedback.heading</h1>
+                    <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
+                </header>
+                <section>
+                    <div th:replace="~{forms/betaBannerFeedbackForm :: betaBannerFeedbackForm}"></div>
+                </section>
+                <section>
+                    <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
+                    <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
+                    <p class="govuk-body beta-feedback-red" th:text="#{betaBannerFeedback.paragraph.one}">betaBannerFeedback.paragraph.one</p>
+                    <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.four}">betaBannerFeedback.heading.four</h3>
+                    <p class="govuk-body beta-feedback-red" th:text="#{betaBannerFeedback.paragraph.two}">betaBannerFeedback.paragraph.two</p>
+                    <p class="govuk-body beta-feedback-red" th:text="#{betaBannerFeedback.paragraph.three}">betaBannerFeedback.paragraph.three</p>
+                </section>
+            </div>
         </div>
-    </div>
-</main>
-</html>
+    </main>
+</th:block>
+
