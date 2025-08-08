@@ -286,7 +286,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             // Lookup address finds no results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
+            whenever(osPlacesClient.search(houseNumber, postcode, false)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.skipToLandlordRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
@@ -370,7 +370,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
             // Lookup address finds no results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
+            whenever(osPlacesClient.search(houseNumber, postcode, false)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.skipToLandlordRegistrationLookupContactAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 

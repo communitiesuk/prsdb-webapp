@@ -6,5 +6,6 @@ interface AddressLookupService {
     fun search(
         houseNameOrNumber: String,
         postcode: String,
+        restrictToEngland: Boolean = false,
     ): List<AddressDataModel>
 }

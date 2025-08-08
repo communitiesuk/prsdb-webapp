@@ -58,7 +58,7 @@ class LandlordDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-lo
             // Arrange for no addresses to be found
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
+            whenever(osPlacesClient.search(houseNumber, postcode, false)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
 
             // Lookup Address page
             val lookupAddressPage = navigator.goToUpdateLandlordDetailsUpdateLookupAddressPage()

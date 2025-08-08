@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -37,7 +38,7 @@ class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
                 AddressDataModel("2, Example Road, EG1 2AB"),
                 AddressDataModel("3, Example Road, EG1 2AB"),
             )
-        whenever(osPlacesClient.search(any(), any())).thenReturn(MockOSPlacesAPIResponses.createResponse(addresses))
+        whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(MockOSPlacesAPIResponses.createResponse(addresses))
     }
 
     @Nested

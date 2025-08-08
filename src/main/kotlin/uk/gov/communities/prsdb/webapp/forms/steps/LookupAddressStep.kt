@@ -12,6 +12,7 @@ class LookupAddressStep<T : StepId>(
     id: T,
     page: AbstractPage,
     saveAfterSubmit: Boolean = true,
+    restrictToEngland: Boolean = false,
     private val nextStepIfAddressesFound: T,
     private val nextStepIfNoAddressesFound: T,
     private val addressLookupService: AddressLookupService,
@@ -33,6 +34,7 @@ class LookupAddressStep<T : StepId>(
                 nextStepIfNoAddressesFound,
                 journeyDataService,
                 addressLookupService,
+                restrictToEngland,
             )
         },
     ) {
@@ -57,13 +59,14 @@ class LookupAddressStep<T : StepId>(
             nextStepIfNoAddressesFound: T,
             journeyDataService: JourneyDataService,
             addressLookupService: AddressLookupService,
+            restrictToEngland: Boolean,
         ): String {
             val (houseNameOrNumber, postcode) =
                 JourneyDataHelper.getLookupAddressHouseNameOrNumberAndPostcode(
                     filteredJourneyData,
                     id.urlPathSegment,
                 )!!
-            val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode)
+            val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode, restrictToEngland)
 
             val updatedFilteredJourneyData = filteredJourneyData.withUpdatedLookedUpAddresses(addressLookupResults)
             journeyDataService.addToJourneyDataIntoSession(updatedFilteredJourneyData)
