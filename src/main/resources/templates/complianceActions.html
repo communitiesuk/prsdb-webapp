@@ -4,9 +4,7 @@
     <main class="govuk-main-wrapper" id="main-content">
         <header>
             <h1 class="govuk-heading-l" th:text="#{complianceActions.heading}">complianceActions.heading</h1>
-            <th:block th:unless="${#lists.isEmpty(complianceActions)}">
-                <p class="govuk-body-l govuk-hint" th:text="#{complianceActions.hintText}">complianceActions.hintText</p>
-            </th:block>
+            <p class="govuk-body-l govuk-hint" th:text="#{${#lists.isEmpty(complianceActions) ? 'complianceActions.none.hintText' : 'complianceActions.hintText'}}">complianceActions.(none.)hintText</p>
         </header>
 
         <th:block th:unless="${#lists.isEmpty(complianceActions)}" th:each="complianceAction: ${complianceActions}">
@@ -14,7 +12,6 @@
         </th:block>
 
         <th:block th:if="${#lists.isEmpty(complianceActions)}">
-            <p class="govuk-body-l govuk-hint" th:text="#{complianceActions.none.hintText}">complianceActions.none.hintText</p>
             <p class="govuk-body" th:text="#{complianceActions.none.paragraph.one}">complianceActions.none.paragraph.one</p>
             <section>
                 <h2 class="govuk-heading-s" th:text="#{complianceActions.updatePropertyOccupancy.heading}">complianceActions.updatePropertyOccupancy.heading</h2>
