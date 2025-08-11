@@ -30,7 +30,7 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Local authority")
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Local council")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Property licence")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Tenanted")
         }
@@ -73,7 +73,7 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
             assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Registration number")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Local authority")
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Local council")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Licensing type")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(4)).containsText("Tenanted")
         }
