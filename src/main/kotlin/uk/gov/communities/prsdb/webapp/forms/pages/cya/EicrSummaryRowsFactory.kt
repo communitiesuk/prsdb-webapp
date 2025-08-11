@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionMissing
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrUploadConfirmation
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 class EicrSummaryRowsFactory(
@@ -34,17 +34,12 @@ class EicrSummaryRowsFactory(
 
     private fun getEicrStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
         val fieldValue =
-            if (filteredJourneyData.getHasCompletedEicrExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
-            } else if (filteredJourneyData.getHasCompletedEicrExemptionConfirmation()) {
-                "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getIsEicrOutdated() == true) {
-                "forms.checkComplianceAnswers.certificate.expired"
-            } else if (filteredJourneyData.getHasCompletedEicrUploadConfirmation()) {
-                // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-                "forms.checkComplianceAnswers.eicr.download"
-            } else {
-                throw PrsdbWebException("Unexpected EICR status in journey data.")
+            when (EicrStatus.fromJourneyData(filteredJourneyData)) {
+                // TODO PRSD-976: Add link to EICR (or appropriate message if virus scan failed)
+                EicrStatus.UPLOADED -> "forms.checkComplianceAnswers.eicr.download"
+                EicrStatus.EXEMPTION -> "forms.checkComplianceAnswers.certificate.notRequired"
+                EicrStatus.MISSING -> "forms.checkComplianceAnswers.certificate.notAdded"
+                EicrStatus.OUTDATED -> "forms.checkComplianceAnswers.certificate.expired"
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -83,5 +78,27 @@ class EicrSummaryRowsFactory(
             fieldValue,
             changeExemptionStep.urlPathSegment,
         )
+    }
+}
+
+private enum class EicrStatus {
+    UPLOADED,
+    EXEMPTION,
+    MISSING,
+    OUTDATED,
+    ;
+
+    companion object {
+        fun fromJourneyData(data: JourneyData): EicrStatus {
+            val statusList =
+                listOfNotNull(
+                    if (data.getHasCompletedEicrUploadConfirmation()) UPLOADED else null,
+                    if (data.getHasCompletedEicrExemptionConfirmation()) EXEMPTION else null,
+                    if (data.getHasCompletedEicrExemptionMissing()) MISSING else null,
+                    if (data.getHasCompletedEicrOutdated()) OUTDATED else null,
+                )
+            return statusList.singleOrNull()
+                ?: throw PrsdbWebException("Filtered journey data does not have a single EICR status: $statusList")
+        }
     }
 }

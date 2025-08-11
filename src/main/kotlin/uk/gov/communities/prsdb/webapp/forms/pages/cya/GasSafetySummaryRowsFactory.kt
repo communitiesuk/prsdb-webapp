@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyExemptionMissing
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyUploadConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -35,17 +36,12 @@ class GasSafetySummaryRowsFactory(
 
     private fun getGasSafetyCertStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
         val fieldValue =
-            if (filteredJourneyData.getHasCompletedGasSafetyExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
-            } else if (filteredJourneyData.getHasCompletedGasSafetyExemptionConfirmation()) {
-                "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getIsGasSafetyCertOutdated() == true) {
-                "forms.checkComplianceAnswers.certificate.expired"
-            } else if (filteredJourneyData.getHasCompletedGasSafetyUploadConfirmation()) {
+            when (GasSafetyStatus.fromJourneyData(filteredJourneyData)) {
                 // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-                "forms.checkComplianceAnswers.gasSafety.download"
-            } else {
-                throw PrsdbWebException("Unexpected gas safety cert. status in journey data.")
+                GasSafetyStatus.UPLOADED -> "forms.checkComplianceAnswers.gasSafety.download"
+                GasSafetyStatus.EXEMPTION -> "forms.checkComplianceAnswers.certificate.notRequired"
+                GasSafetyStatus.MISSING -> "forms.checkComplianceAnswers.certificate.notAdded"
+                GasSafetyStatus.OUTDATED -> "forms.checkComplianceAnswers.certificate.expired"
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -99,5 +95,27 @@ class GasSafetySummaryRowsFactory(
             fieldValue,
             changeExemptionStep.urlPathSegment,
         )
+    }
+}
+
+private enum class GasSafetyStatus {
+    UPLOADED,
+    EXEMPTION,
+    MISSING,
+    OUTDATED,
+    ;
+
+    companion object {
+        fun fromJourneyData(data: JourneyData): GasSafetyStatus {
+            val statusList =
+                listOfNotNull(
+                    if (data.getHasCompletedGasSafetyUploadConfirmation()) UPLOADED else null,
+                    if (data.getHasCompletedGasSafetyExemptionConfirmation()) EXEMPTION else null,
+                    if (data.getHasCompletedGasSafetyExemptionMissing()) MISSING else null,
+                    if (data.getHasCompletedGasSafetyOutdated()) OUTDATED else null,
+                )
+            return statusList.singleOrNull()
+                ?: throw PrsdbWebException("Filtered journey data does not have a single gas safety status: $statusList")
+        }
     }
 }

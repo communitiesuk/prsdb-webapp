@@ -35,7 +35,7 @@ class LandlordIncompletePropertiesPage(
             locator: Locator,
         ) : SummaryList(locator) {
             val propertyAddressRow = getRow("Property address")
-            val localAuthorityRow = getRow("Local authority")
+            val localAuthorityRow = getRow("Local council")
             val completeByRow = getRow("Complete by")
         }
     }

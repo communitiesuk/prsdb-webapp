@@ -5,7 +5,6 @@ import {addCookieConsentHandler} from "./cookieConsentHandler.js";
 import $ from 'jquery'
 import {initAll as initMoJDS} from '@ministryofjustice/frontend'
 import '../resources/css/custom.scss'
-import {googleAnalyticsEnabler} from "#main-javascript/googleAnalyticsEnabler.js";
 
 initGDS()
 
@@ -14,8 +13,6 @@ initSelectAutocomplete()
 addFileUploadListener()
 
 addCookieConsentHandler()
-
-googleAnalyticsEnabler()
 
 window.$ = $
 initMoJDS()
