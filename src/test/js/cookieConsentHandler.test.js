@@ -113,12 +113,20 @@ describe('Cookie Consent Handler', () => {
         })
 
         test('to denied and expires existing GA cookies if the cookie_consent cookie is already set to false', () => {
-            //TODO: check for deleting cookies
-            document.cookie = 'cookie_consent=false';
+            // Arrange
+            document.cookie = 'cookie_consent=false;';
+            document.cookie = '_ga=123; _ga_PDPW9SQ94W=456;';
+            document.cookie = '_ga_PDPW9SQ94W=456;'
+            assert.strictEqual(document.cookie.includes('_ga='), true);
+            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), true);
 
+            // Act
             addCookieConsentHandler();
 
+            // Assert
             assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+            assert.strictEqual(document.cookie.includes('_ga='), false);
+            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), false);
         });
 
         test('to denied if the cookie_consent cookie is not set', () => {
@@ -137,7 +145,19 @@ describe('Cookie Consent Handler', () => {
             assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(true)[0]);
         });
         test('to denied and expires existing GA cookies when cookies are rejected on the cookie banner', () => {
-            //TODO
+            document.cookie = '_ga=123; _ga_PDPW9SQ94W=456;';
+            document.cookie = '_ga_PDPW9SQ94W=456;'
+            assert.strictEqual(document.cookie.includes('_ga='), true);
+            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), true);
+            const rejectButton = document.getElementById('reject-cookies-button');
+
+            addCookieConsentHandler();
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+            rejectButton.click();
+
+            assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(false)[0]);
+            assert.strictEqual(document.cookie.includes('_ga='), false);
+            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), false);
         });
     });
 });
