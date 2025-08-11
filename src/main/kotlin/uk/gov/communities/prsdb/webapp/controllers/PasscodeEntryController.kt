@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpSession
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.PasscodeService
 
 @PrsdbController
 @RequestMapping("/$LANDLORD_PATH_SEGMENT")
+@Profile("require-passcode")
 class PasscodeEntryController(
     private val passcodeService: PasscodeService,
 ) {

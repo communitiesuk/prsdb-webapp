@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import kotlin.test.Test
 
 @WebMvcTest(PasscodeEntryController::class)
+@ActiveProfiles("require-passcode")
 class PasscodeEntryControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -165,7 +167,7 @@ class PasscodeEntryControllerTests(
     @Test
     fun `passcodeAlreadyUsed GET returns 200 and displays passcode-already-used page for unauthenticated users`() {
         mvc
-            .get("/$PASSCODE_ALREADY_USED_ROUTE")
+            .get(PASSCODE_ALREADY_USED_ROUTE)
             .andExpect {
                 status { isOk() }
                 view { name("passcodeAlreadyUsed") }

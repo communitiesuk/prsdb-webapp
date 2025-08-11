@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 
 @PrsdbWebService
+@Profile("require-passcode")
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
     private val localAuthorityRepository: LocalAuthorityRepository,

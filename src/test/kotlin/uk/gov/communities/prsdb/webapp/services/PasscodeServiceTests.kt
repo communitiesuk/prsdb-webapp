@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 import java.util.Optional
@@ -29,6 +30,7 @@ import java.util.Optional
 class PasscodeServiceTests {
     private lateinit var mockPasscodeRepository: PasscodeRepository
     private lateinit var mockLocalAuthorityRepository: LocalAuthorityRepository
+    private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
     private lateinit var mockSession: HttpSession
     private lateinit var passcodeService: PasscodeService
 
@@ -39,8 +41,15 @@ class PasscodeServiceTests {
     fun setup() {
         mockPasscodeRepository = mock()
         mockLocalAuthorityRepository = mock()
+        mockOneLoginUserRepository = mock()
         mockSession = mock()
-        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalAuthorityRepository, mockSession)
+        passcodeService =
+            PasscodeService(
+                mockPasscodeRepository,
+                mockLocalAuthorityRepository,
+                mockOneLoginUserRepository,
+                mockSession,
+            )
     }
 
     @Test
