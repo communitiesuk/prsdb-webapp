@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 
-class LandlordDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class NameUpdates {
         @Test

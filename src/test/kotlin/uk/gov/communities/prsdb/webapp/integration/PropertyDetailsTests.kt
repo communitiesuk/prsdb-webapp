@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import kotlin.test.assertEquals
 
-class PropertyDetailsTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class PropertyDetailsLandlordView {
         @Test

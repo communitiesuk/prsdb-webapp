@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import uk.gov.communities.prsdb.webapp.testHelpers.IntegrationTestHelper
 
-abstract class SinglePageTestWithSeedData(
-    private val scripts: List<String>,
+abstract class IntegrationTestWithImmutableData(
+    private val seedDataScripts: List<String>,
 ) : IntegrationTest() {
     constructor(script: String) : this(listOf(script))
 
@@ -16,11 +16,11 @@ abstract class SinglePageTestWithSeedData(
         @Autowired flyway: Flyway,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
-        IntegrationTestHelper.resetAndSeedDatabase(flyway, scripts, jdbcTemplate)
+        IntegrationTestHelper.resetAndSeedDatabase(flyway, seedDataScripts, jdbcTemplate)
     }
 
-    abstract class NestedSinglePageTestWithSeedData(
-        private val scripts: List<String>,
+    abstract class NestedIntegrationTestWithImmutableData(
+        private val seedDataScripts: List<String>,
     ) : NestedIntegrationTest() {
         constructor(script: String) : this(listOf(script))
 
@@ -29,7 +29,7 @@ abstract class SinglePageTestWithSeedData(
             @Autowired flyway: Flyway,
             @Autowired jdbcTemplate: JdbcTemplate,
         ) {
-            IntegrationTestHelper.resetAndSeedDatabase(flyway, scripts, jdbcTemplate)
+            IntegrationTestHelper.resetAndSeedDatabase(flyway, seedDataScripts, jdbcTemplate)
         }
     }
 }
