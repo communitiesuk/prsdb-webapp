@@ -15,8 +15,8 @@ abstract class ModifiableAuditableEntity :
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false)
-    var lastModifiedDate: Instant? = null
-        private set
+    open var lastModifiedDate: Instant? = null
+        protected set
 
     fun getMostRecentlyUpdated(): Instant = lastModifiedDate ?: createdDate
 }

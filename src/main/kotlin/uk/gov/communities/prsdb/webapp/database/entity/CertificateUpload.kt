@@ -13,19 +13,19 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 open class CertificateUpload() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0
+    open val id: Long = 0
 
-    lateinit var category: FileCategory
+    open lateinit var category: FileCategory
 
     @ManyToOne
     @JoinColumn(name = "property_ownership_id")
-    lateinit var propertyOwnership: PropertyOwnership
-        private set
+    open lateinit var propertyOwnership: PropertyOwnership
+        protected set
 
     @OneToOne
     @JoinColumn(name = "file_upload_id")
-    lateinit var fileUpload: FileUpload
-        private set
+    open lateinit var fileUpload: FileUpload
+        protected set
 
     constructor(upload: FileUpload, category: FileCategory, propertyOwnership: PropertyOwnership) : this() {
         this.category = category
