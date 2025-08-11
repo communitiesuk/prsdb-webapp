@@ -57,14 +57,15 @@ class LandlordController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
+        val numberOfComplianceActions =
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
+                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
                 numberOfIncompleteProperties =
-                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(
-                        principal.name,
-                    ),
-                // TODO PRSD-1394: Update number to include complete compliances with actions
-                numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name),
+                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name),
+                numberOfComplianceActions = numberOfComplianceActions,
             )
 
         model.addAttribute("landlordDashboardNotificationBannerViewModel", landlordDashboardNotificationBannerViewModel)
