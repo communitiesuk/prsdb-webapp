@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertTrue
 
-class PropertyComplianceSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @MockitoBean
     private lateinit var fileUploader: UploadService
 

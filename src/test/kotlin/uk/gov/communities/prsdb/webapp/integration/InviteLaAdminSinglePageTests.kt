@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 
-class InviteLaAdminSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class InviteLaAdminSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `inviting a new LA admin shows validation errors if the email is invalid or the email addresses don't match`(page: Page) {
         val invitePage = navigator.goToInviteLaAdmin()

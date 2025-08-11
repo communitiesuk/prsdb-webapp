@@ -45,7 +45,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.net.URI
 import kotlin.test.assertTrue
 
-class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @MockitoSpyBean

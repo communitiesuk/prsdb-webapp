@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PeopleOccupancyFormPagePropertyDetailsUpdate
 import kotlin.test.assertEquals
 
-class PropertyDetailsUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 

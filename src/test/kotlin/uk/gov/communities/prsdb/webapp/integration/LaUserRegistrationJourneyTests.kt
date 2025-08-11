@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
-class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-not-lauser.sql") {
+class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-lauser.sql") {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
 
@@ -102,7 +102,7 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
     }
 
     @Nested
-    inner class WithExpiredToken : NestedJourneyTestWithSeedData("data-mockuser-with-expired-invitation.sql") {
+    inner class WithExpiredToken : NestedIntegrationTestWithMutableData("data-mockuser-with-expired-invitation.sql") {
         @Test
         fun `User with an expired token is redirected to the invalid link page`(page: Page) {
             val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
