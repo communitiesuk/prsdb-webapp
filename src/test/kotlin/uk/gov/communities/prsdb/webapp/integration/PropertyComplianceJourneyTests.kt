@@ -20,8 +20,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
@@ -227,9 +227,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
             ),
         )
 
-        // Go to Incomplete Compliances page
+        // Go to Compliance Actions page
         confirmationPage.addForAnotherPropertyButton.clickAndWait()
-        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Test
@@ -397,9 +397,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
             ),
         )
 
-        // Go to Incomplete Compliances page
+        // Go to Compliance Actions page
         confirmationPage.addForAnotherPropertyButton.clickAndWait()
-        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Test

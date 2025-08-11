@@ -16,7 +16,7 @@ class IncompletePropertyViewModelBuilder {
         ): SummaryCardViewModel =
             SummaryCardViewModel(
                 cardNumber = (index + 1).toString(),
-                title = "landlord.incompleteProperties.summaryCardTitlePrefix",
+                title = "landlord.incompleteProperties.summaryCardTitle",
                 summaryList = getSummaryList(dataModel),
                 actions = getActions(dataModel.contextId, currentUrlKey),
             )
