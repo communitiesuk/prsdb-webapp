@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<th:block th:replace="~{fragments/layout :: layout(#{betaBannerFeedbackSuccess.title}, ~{::main}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+            <div id="page-content">
+                <section>
+                    <h1 class="govuk-heading-l" th:text="#{betaBannerFeedbackSuccess.heading}">betaBannerFeedbackSuccess.heading</h1>
+                    <p class="govuk-body" th:text="#{betaBannerFeedbackSuccess.paragraph}">betaBannerFeedbackSuccess.paragraph</p>
+                    <p class="govuk-body" th:text="#{betaBannerFeedbackSuccess.paragraph.two}">betaBannerFeedbackSuccess.paragraph.two</p>
+                    <p class="govuk-body" th:text="#{betaBannerFeedbackSuccess.paragraph.three}">betaBannerFeedbackSuccess.paragraph.three</p>
+                </section>
+            </div>
+        </div>
+    </main>
+</th:block>
+</html>
