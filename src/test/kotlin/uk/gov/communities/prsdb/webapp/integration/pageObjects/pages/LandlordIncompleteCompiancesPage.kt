@@ -35,7 +35,7 @@ class LandlordIncompleteCompiancesPage(
             locator: Locator,
         ) : SummaryList(locator) {
             val propertyAddressRow = getRow("Property address")
-            val localAuthorityRow = getRow("Local authority")
+            val localAuthorityRow = getRow("Local council")
             val certificatesDueRow = getRow("Certificates due")
             val gasSafetyRow = getRow("Gas safety")
             val electricalSafetyRow = getRow("Electrical safety")

@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserRoute
@@ -255,7 +256,7 @@ class ManageLocalAuthorityUsersControllerTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `getEditUserAccessLevelPage returns 404 for admin user specifying a non-number for the user id`() {
         mvc
-            .get("/local-authority/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/not-a-number")
+            .get("/$LOCAL_AUTHORITY_PATH_SEGMENT/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/not-a-number")
             .andExpect {
                 status { isNotFound() }
             }

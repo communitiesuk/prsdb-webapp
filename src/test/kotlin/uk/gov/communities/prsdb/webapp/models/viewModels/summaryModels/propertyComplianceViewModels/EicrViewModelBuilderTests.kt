@@ -23,7 +23,7 @@ class EicrViewModelBuilderTests {
         expectedRows: List<SummaryListRowViewModel>,
     ) {
         val eicrRows =
-            EicrViewModelBuilder.fromEntity(
+            EicrViewModelFactory().fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
             )

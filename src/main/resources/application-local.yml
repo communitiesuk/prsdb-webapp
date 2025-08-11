@@ -65,7 +65,7 @@ local:
 
 base-url:
   landlord: http://localhost:8080/landlord
-  local-authority: http://localhost:8080/local-authority
+  local-authority: http://localhost:8080/local-council
 
 aws:
   s3:

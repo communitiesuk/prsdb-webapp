@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -55,7 +56,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
 
     @BeforeEach
     fun setup() {
-        whenever(osPlacesClient.search(any(), any())).thenReturn(
+        whenever(osPlacesClient.search(any(), any(), eq(true))).thenReturn(
             MockOSPlacesAPIResponses.createResponse(AddressDataModel(singleLineAddress = "1, Example Road, EG1 2AB")),
         )
 
@@ -214,7 +215,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
         val selectLocalAuthorityPage = assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
 
         // Select local authority - render page
-        assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local authority area is your property in?")
+        assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local council area is your property in?")
         assertThat(selectLocalAuthorityPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         selectLocalAuthorityPage.submitLocalAuthority("BATH AND NORTH EAST SOMERSET COUNCIL", "BATH AND NORTH EAST SOMERSET COUNCIL")

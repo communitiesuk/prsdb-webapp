@@ -173,6 +173,7 @@ class PropertyRegistrationJourney(
             addressLookupService = addressLookupService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
+            restrictToEngland = true,
         )
 
     private fun selectAddressStep() =

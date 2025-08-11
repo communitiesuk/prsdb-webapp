@@ -61,11 +61,11 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         }
 
         @Test
-        fun `If no addresses are returned, user can search again or enter address manually via the No Address Found step`(page: Page) {
-            // Lookup address finds no results
+        fun `If no English addresses are found, user can search again or enter address manually via the No Address Found step`(page: Page) {
+            // Lookup address finds no English results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
+            whenever(osPlacesClient.search(houseNumber, postcode, true)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
@@ -132,7 +132,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
             selectLocalAuthorityPage.form.submit()
             assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
-                .containsText("Select a local authority to continue")
+                .containsText("Select a local council to continue")
         }
     }
 
