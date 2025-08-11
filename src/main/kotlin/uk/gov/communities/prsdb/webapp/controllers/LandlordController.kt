@@ -187,6 +187,7 @@ class LandlordController(
         val formModel = BetaFeedbackModel()
         model.addAttribute("betaFeedbackModel", formModel)
         model.addAttribute("referrerHeader", request.getHeader("referer"))
+        model.addAttribute("backUrl", request.getHeader("referer"))
 
         return "betaBannerFeedback"
     }
