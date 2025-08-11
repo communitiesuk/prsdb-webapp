@@ -47,7 +47,7 @@ import uk.gov.communities.prsdb.webapp.constants.REVIEW_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.ADD_COMPLIANCE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -214,7 +214,7 @@ class PropertyComplianceController(
         model.addAttribute("electricalSafetyStandardsUrl", ELECTRICAL_SAFETY_STANDARDS_URL)
         model.addAttribute("getNewEpcUrl", GET_NEW_EPC_URL)
         model.addAttribute("registerMeesExemptionUrl", REGISTER_PRS_EXEMPTION_URL)
-        model.addAttribute("propertiesWithoutComplianceUrl", INCOMPLETE_COMPLIANCES_URL)
+        model.addAttribute("addComplianceUrl", ADD_COMPLIANCE_URL)
         model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return if (confirmationMessageKeys.nonCompliantMsgKeys.isEmpty()) {

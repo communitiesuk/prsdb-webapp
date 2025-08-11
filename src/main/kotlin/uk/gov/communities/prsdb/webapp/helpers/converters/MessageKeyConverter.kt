@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.converters
 
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -25,6 +26,7 @@ class MessageKeyConverter {
                 is EicrExemptionReason -> convertEicrExemptionReason(enum)
                 is EpcExemptionReason -> convertEpcExemptionReason(enum)
                 is MeesExemptionReason -> convertMeesExemptionReason(enum)
+                is ComplianceCertStatus -> convertComplianceCertStatus(enum)
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
@@ -89,6 +91,14 @@ class MessageKeyConverter {
                 MeesExemptionReason.THIRD_PARTY_CONSENT -> "forms.meesExemptionReason.radios.thirdPartyConsent.label"
                 MeesExemptionReason.PROPERTY_DEVALUATION -> "forms.meesExemptionReason.radios.propertyDevaluation.label"
                 MeesExemptionReason.NEW_LANDLORD -> "forms.meesExemptionReason.radios.newLandlord.label"
+            }
+
+        private fun convertComplianceCertStatus(complianceCertStatus: ComplianceCertStatus): String =
+            when (complianceCertStatus) {
+                ComplianceCertStatus.NOT_STARTED -> "complianceActions.status.notStarted"
+                ComplianceCertStatus.ADDED -> "complianceActions.status.added"
+                ComplianceCertStatus.NOT_ADDED -> "complianceActions.status.notAdded"
+                ComplianceCertStatus.EXPIRED -> "complianceActions.status.expired"
             }
     }
 }
