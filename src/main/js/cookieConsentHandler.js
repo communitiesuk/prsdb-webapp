@@ -11,10 +11,10 @@ export function addCookieConsentHandler() {
        new CookieBanner().display();
     }
 
-    updateGtmConsent(consentCookieValue === 'true');
+    updateGaConsent(consentCookieValue === 'true');
 }
 
-function updateGtmConsent(isGranted = false) {
+function updateGaConsent(isGranted = false) {
     const gtag = window.gtag || function (...args) {
         window.dataLayer = window.dataLayer || []
         window.dataLayer.push(args)
@@ -79,7 +79,7 @@ class CookieBanner {
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
 
-            updateGtmConsent(consentValue);
+            updateGaConsent(consentValue);
         });
     }
 
