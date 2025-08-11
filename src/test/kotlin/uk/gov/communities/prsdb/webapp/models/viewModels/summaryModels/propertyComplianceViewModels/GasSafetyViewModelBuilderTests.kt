@@ -21,7 +21,7 @@ class GasSafetyViewModelBuilderTests {
         expectedRows: List<SummaryListRowViewModel>,
     ) {
         val gasSafetyRows =
-            GasSafetyViewModelBuilder.fromEntity(
+            GasSafetyViewModelFactory().fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
             )
