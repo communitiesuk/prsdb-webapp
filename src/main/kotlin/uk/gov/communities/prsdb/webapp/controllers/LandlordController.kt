@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Incomplet
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
@@ -41,6 +42,7 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
@@ -55,13 +57,15 @@ class LandlordController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
+        val numberOfComplianceActions =
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
+                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
                 numberOfIncompleteProperties =
-                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(
-                        principal.name,
-                    ),
-                numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name),
+                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name),
+                numberOfComplianceActions = numberOfComplianceActions,
             )
 
         model.addAttribute("landlordDashboardNotificationBannerViewModel", landlordDashboardNotificationBannerViewModel)
