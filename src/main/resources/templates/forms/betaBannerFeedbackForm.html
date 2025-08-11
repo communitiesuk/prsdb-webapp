@@ -1,6 +1,6 @@
 <th:block th:fragment="betaBannerFeedbackForm">
-    <form method="post" th:action="@{/beta-banner-feedback}" th:object="${betaFeedbackModel}" novalidate>
-        <div class="govuk-form-group">
+    <form id="feedback-form" method="post" th:action="@{/beta-banner-feedback}" th:object="${betaFeedbackModel}" novalidate>
+        <div id="feedback-form-textarea" class="govuk-form-group">
             <div th:replace="~{fragments/forms/textArea :: textArea(
                 #{betaBannerFeedback.label},
                 'feedback',
