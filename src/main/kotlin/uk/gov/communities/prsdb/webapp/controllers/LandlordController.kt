@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
@@ -179,8 +180,14 @@ class LandlordController(
     }
 
     @GetMapping("/${BETA_BANNER_FEEDBACK_PATH_SEGMENT}")
-    fun betaBannerFeedback(model: Model): String {
-        model.addAttribute("betaFeedbackModel", BetaFeedbackModel())
+    fun betaBannerFeedback(
+        model: Model,
+        request: HttpServletRequest,
+    ): String {
+        val formModel = BetaFeedbackModel()
+        model.addAttribute("betaFeedbackModel", formModel)
+        model.addAttribute("referrerHeader", request.getHeader("referer"))
+
         return "betaBannerFeedback"
     }
 

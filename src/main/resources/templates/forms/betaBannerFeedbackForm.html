@@ -1,6 +1,13 @@
 <th:block th:fragment="betaBannerFeedbackForm">
     <form id="feedback-form" method="post" th:action="@{/beta-banner-feedback}" th:object="${betaFeedbackModel}" novalidate>
-        <div id="feedback-form-textarea" class="govuk-form-group">
+        <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
+        <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
+
+        <div id="feedback-form-textarea" class="govuk-form-group" th:classappend="${#fields.hasErrors('feedback')} ? 'govuk-form-group--error'">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{betaBannerFeedback.heading}">betaBannerFeedback.heading</h1>
+                <p class="govuk-body" th:text="#{betaBannerFeedback.intro}" style="margin-bottom: 30px;">betaBannerFeedback.intro</p>
+            </header>
             <div th:replace="~{fragments/forms/textArea :: textArea(
                 #{betaBannerFeedback.label},
                 'feedback',
