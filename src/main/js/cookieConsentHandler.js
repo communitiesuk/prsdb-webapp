@@ -1,24 +1,28 @@
 import * as cookieHelper from 'cookie';
 
-export const CONSENT_COOKIE_NAME = 'cookie_consent';
+const CONSENT_COOKIE_NAME = 'cookie_consent';
 const COOKIES_ROUTE = '/cookies';
 
 export function addCookieConsentHandler() {
     const consentCookieValue = cookieHelper.parse(document.cookie)[CONSENT_COOKIE_NAME];
     const onCookiePage = location.pathname.includes(COOKIES_ROUTE);
-
-    if (consentCookieValue == null && !onCookiePage) {
-       new CookieBanner().display();
+    const gtag = window.gtag || function (...args) {
+        window.dataLayer = window.dataLayer || []
+        window.dataLayer.push(args)
     }
 
-    signalGtmConsent(consentCookieValue === 'true');
+    if (consentCookieValue == null && !onCookiePage) {
+       new CookieBanner(gtag).display();
+    }
+
+    signalGtmConsent(consentCookieValue === 'true', gtag);
     if (consentCookieValue === 'false') {
         deleteCookie("_ga")
         deleteCookie("_ga_PDPW9SQ94W")
     }
 }
 
-function signalGtmConsent(isGranted = false) {
+function signalGtmConsent(isGranted = false, gtag) {
     gtag('consent', 'default', {
         ad_user_data: isGranted ? 'granted' : 'denied',
         ad_personalization: isGranted ? 'granted' : 'denied',
@@ -29,7 +33,7 @@ function signalGtmConsent(isGranted = false) {
     window.dataLayer.push({ event: 'default_consent' })
 }
 
-function updateGtmConsent(isGranted = false) {
+function updateGtmConsent(isGranted = false, gtag) {
     gtag('consent', 'update', {
         ad_user_data: isGranted ? 'granted' : 'denied',
         ad_personalization: isGranted ? 'granted' : 'denied',
@@ -51,8 +55,9 @@ class CookieBanner {
     #cookiesAcceptedText;
     #cookiesRejectedText;
     #hideCookiesConfirmationButton;
+    #gtag;
 
-    constructor() {
+    constructor(gtag) {
         this.#cookieBanner = document.querySelector('.govuk-cookie-banner');
         this.#cookieMessage = document.getElementById('cookie-banner-message');
         this.#acceptCookiesButton = document.getElementById('accept-cookies-button');
@@ -61,6 +66,7 @@ class CookieBanner {
         this.#cookiesAcceptedText = document.getElementById('cookies-accepted-text');
         this.#cookiesRejectedText = document.getElementById('cookies-rejected-text');
         this.#hideCookiesConfirmationButton = document.getElementById('hide-cookies-confirmation-button');
+        this.#gtag = gtag;
     }
 
     display() {
@@ -84,7 +90,7 @@ class CookieBanner {
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
 
-            updateGtmConsent(consentValue);
+            updateGtmConsent(consentValue, this.#gtag);
             if (consentValue === false) {
                 deleteCookie("_ga")
                 deleteCookie("_ga_PDPW9SQ94W")
