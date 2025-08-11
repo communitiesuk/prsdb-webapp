@@ -304,6 +304,8 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
         fun JourneyData.getHasCompletedGasSafetyExemptionMissing() =
             this.containsKey(PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment)
 
+        fun JourneyData.getHasCompletedGasSafetyOutdated() = this.containsKey(PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment)
+
         fun JourneyData.getHasCompletedEicrUploadConfirmation() =
             this.containsKey(PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment)
 
@@ -312,6 +314,8 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
 
         fun JourneyData.getHasCompletedEicrExemptionMissing() =
             this.containsKey(PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment)
+
+        fun JourneyData.getHasCompletedEicrOutdated() = this.containsKey(PropertyComplianceStepId.EicrOutdated.urlPathSegment)
 
         fun JourneyData.getHasCompletedEpcExemptionConfirmation() =
             this.containsKey(PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment)

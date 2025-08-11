@@ -11,14 +11,10 @@ export function addCookieConsentHandler() {
        new CookieBanner().display();
     }
 
-    updateGtmConsent(consentCookieValue === 'true');
-    if (consentCookieValue === 'false') {
-        deleteCookie("_ga")
-        deleteCookie("_ga_PDPW9SQ94W")
-    }
+    updateGaConsent(consentCookieValue === 'true');
 }
 
-function updateGtmConsent(isGranted = false) {
+function updateGaConsent(isGranted = false) {
     const gtag = window.gtag || function (...args) {
         window.dataLayer = window.dataLayer || []
         window.dataLayer.push(args)
@@ -30,6 +26,11 @@ function updateGtmConsent(isGranted = false) {
         ad_storage: isGranted ? 'granted' : 'denied',
         analytics_storage: isGranted ? 'granted' : 'denied'
     })
+
+    if (!isGranted) {
+        deleteCookie("_ga")
+        deleteCookie("_ga_PDPW9SQ94W")
+    }
 }
 
 function deleteCookie(name) {
@@ -78,11 +79,7 @@ class CookieBanner {
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
 
-            updateGtmConsent(consentValue);
-            if (consentValue === false) {
-                deleteCookie("_ga")
-                deleteCookie("_ga_PDPW9SQ94W")
-            }
+            updateGaConsent(consentValue);
         });
     }
 
