@@ -7,11 +7,9 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 import org.springframework.ui.ModelMap
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
@@ -352,8 +350,6 @@ class PropertyComplianceCheckAnswersPageTests {
     }
 
     @Test
-    // Commonised set up code mocks functions that are not called in this test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     fun `getSummaryRows throws an exception if there are multiple confirmations in the gas safety data`() {
         // Arrange
         val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
@@ -374,12 +370,10 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
     }
 
     @Test
-    // Commonised set up code mocks functions that are not called in this test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     fun `getSummaryRows throws an exception if there are no confirmations in the gas safety data`() {
         // Arrange
         val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
@@ -398,12 +392,10 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
     }
 
     @Test
-    // Commonised set up code mocks functions that are not called in this test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     fun `getSummaryRows throws an exception if there are multiple confirmations in the eicr data`() {
         // Arrange
         val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
@@ -424,12 +416,10 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
     }
 
     @Test
-    // Commonised set up code mocks functions that are not called in this test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     fun `getSummaryRows throws an exception if there are no confirmations in the eicr data`() {
         // Arrange
         val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
@@ -448,7 +438,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
     }
 
     @Test
