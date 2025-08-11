@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
+class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `the dashboard loads displaying the user's name and lrn`() {
         val dashboard = navigator.goToLandlordDashboard()
@@ -68,7 +68,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
     inner class NotificationBanner {
         @Nested
         inner class LandlordWithoutIncompletePropertiesOrIncompleteCompliance :
-            NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-properties.sql") {
+            NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
             @Test
             fun `the dashboard loads without a notification banner`() {
                 val dashboard = navigator.goToLandlordDashboard()
@@ -80,7 +80,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
         inner class WithOnlyIncompleteProperties {
             @Nested
             inner class WithOne :
-                NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-property.sql") {
+                NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-one-incomplete-property.sql") {
                 @Test
                 fun `the notification banner loads with only correct message for one incomplete property`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
@@ -91,7 +91,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             }
 
             @Nested
-            inner class WithMultiple : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties.sql") {
+            inner class WithMultiple : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-incomplete-properties.sql") {
                 @Test
                 fun `the notification banner loads with correct message for multiple incomplete properties`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
@@ -114,7 +114,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
         inner class WithOnlyIncompleteCompliances {
             @Nested
             inner class WithOne :
-                NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-compliance.sql") {
+                NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-one-incomplete-compliance.sql") {
                 @Test
                 fun `the notification banner loads with correct message for one incomplete compliance`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
@@ -124,7 +124,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             }
 
             @Nested
-            inner class WithMultiple : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-compliance-actions.sql") {
+            inner class WithMultiple : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
                 @Test
                 fun `the notification banner loads with correct message for multiple incomplete compliances`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
@@ -143,7 +143,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
 
         @Nested
         inner class WithIncompletePropertiesAndIncompleteCompliances :
-            NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties-and-incomplete-compliances.sql") {
+            NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-incomplete-properties-and-incomplete-compliances.sql") {
             @Test
             fun `the notification banner loads with correct heading and messages`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()

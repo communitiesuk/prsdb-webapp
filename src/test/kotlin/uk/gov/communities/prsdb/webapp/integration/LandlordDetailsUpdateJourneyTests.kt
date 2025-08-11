@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
-class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     val addressFound = "Entirely new test address"
 
@@ -42,7 +42,7 @@ class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
     }
 
     @Nested
-    inner class NameUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
+    inner class NameUpdates : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their name`(page: Page) {
             // Details page
@@ -62,7 +62,7 @@ class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
     }
 
     @Nested
-    inner class DateOfBirthUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
+    inner class DateOfBirthUpdates : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their date of birth`(page: Page) {
             // Details page

@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordInc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class DeleteIncompletePropertyRegistrationAreYouSurePageTests :
-    SinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-property.sql") {
+    IntegrationTestWithImmutableData("data-mockuser-landlord-with-one-incomplete-property.sql") {
     val contextId = "1"
     val singleLineAddress = "1, SAVOY COURT, LONDON, WC2R 0EX"
 

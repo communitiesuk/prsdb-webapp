@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class TaskListStep {
         @Test

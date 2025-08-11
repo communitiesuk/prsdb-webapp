@@ -25,7 +25,7 @@ import kotlin.collections.mapOf
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
-class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
+class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") {
     @Nested
     inner class LandlordSearchTests {
         @Test

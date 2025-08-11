@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.NestedSinglePageTestWithSeedData
+import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -15,7 +15,8 @@ import kotlin.test.assertEquals
 
 class ComplianceActionsPageTests : IntegrationTest() {
     @Nested
-    inner class LandlordsWithComplianceActions : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-compliance-actions.sql") {
+    inner class LandlordsWithComplianceActions :
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @Test
         fun `the page loads with heading and subheading`() {
             val complianceActionsPage = navigator.goToComplianceActions()
@@ -62,7 +63,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LandlordsWithoutComplianceActions : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-properties.sql") {
+    inner class LandlordsWithoutComplianceActions : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
         @Test
         fun `the page loads with heading and page text`() {
             val complianceActionsPage = navigator.goToComplianceActions()
