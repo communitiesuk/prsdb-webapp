@@ -24,8 +24,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.time.LocalDate
 import kotlin.test.assertFalse
@@ -128,6 +130,25 @@ class PropertyComplianceServiceTests {
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
 
         assertThrows<EntityNotFoundException> { propertyComplianceService.getComplianceForProperty(propertyOwnershipId) }
+    }
+
+    @Test
+    fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant properties`() {
+        // Arrange
+        val landlordBaseUserId = "baseUserId"
+        val nonCompliantProperty = PropertyComplianceBuilder.createWithMissingCerts()
+        val compliances = listOf(PropertyComplianceBuilder.createWithInDateCerts(), nonCompliantProperty)
+
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+        ).thenReturn(compliances)
+
+        // Act
+        val returnedNonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+
+        // Assert
+        val expectedNonCompliantProperties = listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperty))
+        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
     }
 
     @Test

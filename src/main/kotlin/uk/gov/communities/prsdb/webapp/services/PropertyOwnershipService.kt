@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -21,17 +19,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrTask
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcTask
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedGasSafetyTask
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedLandlordsResponsibilitiesTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
-import java.time.Instant
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -245,36 +237,11 @@ class PropertyOwnershipService(
                 0,
             ).toInt()
 
-    fun getIncompleteCompliancesForLandlord(principalName: String): List<IncompleteComplianceDataModel> {
+    fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
         val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
 
         return propertyOwnerships
             .filter { it.isOccupied && it.isComplianceIncomplete }
-            .map { getIncompleteComplianceDataModel(it) }
+            .map { ComplianceStatusDataModel.fromIncompleteComplianceForm(it) }
     }
-
-    private fun getIncompleteComplianceDataModel(propertyOwnership: PropertyOwnership): IncompleteComplianceDataModel {
-        val certificatesDueDate = getIncompleteComplianceCertificatesDueDate(propertyOwnership.createdDate)
-        val incompleteComplianceJourneyData = propertyOwnership.incompleteComplianceForm!!.toJourneyData()
-
-        return IncompleteComplianceDataModel(
-            propertyOwnershipId = propertyOwnership.id,
-            singleLineAddress = propertyOwnership.property.address.singleLineAddress,
-            localAuthorityName =
-                propertyOwnership.property.address.localAuthority!!
-                    .name,
-            certificatesDueDate = certificatesDueDate,
-            gasSafety = incompleteComplianceJourneyData.getHasCompletedGasSafetyTask(),
-            electricalSafety = incompleteComplianceJourneyData.getHasCompletedEicrTask(),
-            energyPerformance = incompleteComplianceJourneyData.getHasCompletedEpcTask(),
-            landlordsResponsibilities = incompleteComplianceJourneyData.getHasCompletedLandlordsResponsibilitiesTask(),
-        )
-    }
-
-    private fun getIncompleteComplianceCertificatesDueDate(createdDate: Instant): LocalDate {
-        val createdDateInUk = DateTimeHelper.getDateInUK(createdDate.toKotlinInstant())
-        return DateTimeHelper.get28DaysFromDate(createdDateInUk)
-    }
-
-    fun getReferenceById(propertyOwnershipId: Long) = propertyOwnershipRepository.getReferenceById(propertyOwnershipId)
 }

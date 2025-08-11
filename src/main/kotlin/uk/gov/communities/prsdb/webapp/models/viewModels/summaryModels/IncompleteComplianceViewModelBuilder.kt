@@ -4,62 +4,63 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addAction
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
-import uk.gov.communities.prsdb.webapp.models.dataModels.IncompleteComplianceDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 
+// TODO PRSD-1394: Update view model to match design
 class IncompleteComplianceViewModelBuilder {
     companion object {
         fun fromDataModel(
             index: Int,
-            dataModel: IncompleteComplianceDataModel,
+            dataModel: ComplianceStatusDataModel,
             currentUrlKey: Int? = null,
         ): SummaryCardViewModel =
             SummaryCardViewModel(
-                cardNumber = (index + 1).toString(),
-                title = "landlord.incompleteCompliances.summaryCardTitlePrefix",
+                cardNumber = null,
+                title = "landlord.incompleteCompliances.summaryCardTitle",
                 summaryList = getSummaryList(dataModel),
                 actions = getActions(dataModel, currentUrlKey),
             )
 
-        private fun getSummaryList(dataModel: IncompleteComplianceDataModel): List<SummaryListRowViewModel> =
+        private fun getSummaryList(dataModel: ComplianceStatusDataModel): List<SummaryListRowViewModel> =
             mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
                         "landlord.incompleteCompliances.summaryRow.propertyAddress",
                         dataModel.singleLineAddress,
                     )
-                    addRow(
-                        "landlord.incompleteCompliances.summaryRow.localAuthority",
-                        dataModel.localAuthorityName,
-                    )
-                    addRow(
-                        "landlord.incompleteCompliances.summaryRow.certificatesDue",
-                        dataModel.certificatesDueDate,
-                    )
-                    addRow(
-                        "landlord.incompleteCompliances.summaryRow.gasSafety",
-                        getComplianceTaskStatus(dataModel.gasSafety),
-                    )
-                    addRow(
-                        "landlord.incompleteCompliances.summaryRow.electricalSafety",
-                        getComplianceTaskStatus(dataModel.electricalSafety),
-                    )
-                    addRow(
-                        "landlord.incompleteCompliances.summaryRow.energyPerformance",
-                        getComplianceTaskStatus(dataModel.energyPerformance),
-                    )
-                    addRow(
-                        "landlord.incompleteCompliances.SummaryRow.landlordResponsibilities",
-                        getComplianceTaskStatus(dataModel.landlordsResponsibilities),
-                    )
+//                    addRow(
+//                        "landlord.incompleteCompliances.summaryRow.localAuthority",
+//                        dataModel.localAuthorityName,
+//                    )
+//                    addRow(
+//                        "landlord.incompleteCompliances.summaryRow.certificatesDue",
+//                        dataModel.certificatesDueDate,
+//                    )
+//                    addRow(
+//                        "landlord.incompleteCompliances.summaryRow.gasSafety",
+//                        getComplianceTaskStatus(dataModel.gasSafety),
+//                    )
+//                    addRow(
+//                        "landlord.incompleteCompliances.summaryRow.electricalSafety",
+//                        getComplianceTaskStatus(dataModel.electricalSafety),
+//                    )
+//                    addRow(
+//                        "landlord.incompleteCompliances.summaryRow.energyPerformance",
+//                        getComplianceTaskStatus(dataModel.energyPerformance),
+//                    )
+//                    addRow(
+//                        "landlord.incompleteCompliances.SummaryRow.landlordResponsibilities",
+//                        getComplianceTaskStatus(dataModel.landlordsResponsibilities),
+//                    )
                 }.toList()
 
         private fun getActions(
-            dataModel: IncompleteComplianceDataModel,
+            dataModel: ComplianceStatusDataModel,
             currentUrlKey: Int?,
         ): List<SummaryCardActionViewModel> =
             mutableListOf<SummaryCardActionViewModel>()
                 .apply {
-                    if (dataModel.isComplianceInProgress()) {
+                    if (dataModel.isInProgress) {
                         addAction(
                             "landlord.incompleteCompliances.action.continue",
                             PropertyComplianceController

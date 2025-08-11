@@ -7,6 +7,7 @@ enum class LandlordRegistrationStepId(
     override val groupIdentifier: LandlordRegistrationGroupIdentifier,
 ) : GroupedStepId<LandlordRegistrationGroupIdentifier> {
     VerifyIdentity(RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT, LandlordRegistrationGroupIdentifier.IdentityVerification),
+    IdentityNotVerified("identity-not-verified", LandlordRegistrationGroupIdentifier.IdentityVerification),
     Name("name", LandlordRegistrationGroupIdentifier.Name),
     DateOfBirth("date-of-birth", LandlordRegistrationGroupIdentifier.DateOfBirth),
     ConfirmIdentity("confirm-identity", LandlordRegistrationGroupIdentifier.IdentityVerification),

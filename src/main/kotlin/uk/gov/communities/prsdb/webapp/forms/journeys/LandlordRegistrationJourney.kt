@@ -119,6 +119,7 @@ class LandlordRegistrationJourney(
             LandlordRegistrationStepId.VerifyIdentity,
             setOf(
                 verifyIdentityStep(),
+                identityNotVerifiedStep(),
                 nameStep(),
                 dateOfBirthStep(),
                 confirmIdentityStep(),
@@ -149,6 +150,26 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
+    private fun identityNotVerifiedStep() =
+        Step(
+            id = LandlordRegistrationStepId.IdentityNotVerified,
+            page =
+                Page(
+                    formModel = NoInputFormModel::class,
+                    templateName = "forms/identityNotVerifiedForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "fieldSetHeading" to "forms.identityNotVerified.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.continue",
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                        ),
+                    shouldDisplaySectionHeader = false,
+                ),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Name, null) },
+            saveAfterSubmit = false,
+        )
+
     private fun nameStep() =
         Step(
             id = LandlordRegistrationStepId.Name,
@@ -163,7 +184,6 @@ class LandlordRegistrationJourney(
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -546,7 +566,7 @@ class LandlordRegistrationJourney(
         if (LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData)) {
             Pair(LandlordRegistrationStepId.ConfirmIdentity, null)
         } else {
-            Pair(LandlordRegistrationStepId.Name, null)
+            Pair(LandlordRegistrationStepId.IdentityNotVerified, null)
         }
 
     private fun countryOfResidenceNextAction(filteredJourneyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =

@@ -19,9 +19,11 @@ class OSPlacesClient(
     fun search(
         houseNameOrNumber: String,
         postcode: String,
+        restrictToEngland: Boolean,
     ): String {
         val query = URLEncoder.encode("$houseNameOrNumber, $postcode", "UTF-8")
-        return getResponse("/find?minmatch=0.4&maxresults=$MAX_ADDRESSES&query=$query")
+        val countryFilter = if (restrictToEngland) "fq=COUNTRY_CODE:E" else ""
+        return getResponse("/find?minmatch=0.4&maxresults=$MAX_ADDRESSES&query=$query&$countryFilter")
     }
 
     private fun getResponse(endpoint: String): String {

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions
 
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
@@ -40,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcTask
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcAdded
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
@@ -70,8 +71,9 @@ import kotlin.test.assertTrue
 
 class PropertyComplianceJourneyDataExtensionsTests {
     companion object {
-        // currentDate is an arbitrary date
-        private val currentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
+        private val arbitraryCurrentDate = LocalDate.of(2020, 1, 5).toKotlinLocalDate()
+        private val pastDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 1))
+        private val futureDate = DateTimeHelper().getCurrentDateInUK().plus(DatePeriod(years = 1))
 
         @JvmStatic
         private fun provideGasSafetyCertIssueDates() =
@@ -248,7 +250,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         issueDate: LocalDate,
         expectedResult: Boolean,
     ) {
-        mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(currentDate) }
+        mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(arbitraryCurrentDate) }
             .use {
                 val testJourneyData = journeyDataBuilder.withGasSafetyIssueDate(issueDate).build()
 
@@ -447,7 +449,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         issueDate: LocalDate,
         expectedResult: Boolean,
     ) {
-        mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(currentDate) }
+        mockConstruction(DateTimeHelper::class.java) { mock, _ -> whenever(mock.getCurrentDateInUK()).thenReturn(arbitraryCurrentDate) }
             .use {
                 val testJourneyData = journeyDataBuilder.withEicrIssueDate(issueDate).build()
 
@@ -911,227 +913,100 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Nested
-    inner class GetHasCompletedEpcTask {
+    inner class GetHasCompletedEpcAdded {
         @Test
-        fun `getHasCompletedEpcTask returns true if the EpcExemptionConfirmation step has been completed`() {
-            val testJourneyData = journeyDataBuilder.withEpcExemptionConfirmationStep().build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertTrue(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `getHasCompletedEpcTask returns true if the EpcMissing step has been completed`() {
-            val testJourneyData = journeyDataBuilder.withEpcMissingStep().build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertTrue(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `getHasCompletedEpcTask returns true if the EpcExpired step has been completed`() {
-            val testJourneyData = journeyDataBuilder.withEpcExpiredStep().build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertTrue(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `getHasCompletedEpcTask returns true if the EpcNotFound step has been completed`() {
-            val testJourneyData = journeyDataBuilder.withEpcNotFoundStep().build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertTrue(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `getHasCompletedEpcTask returns true if the LowEnergyRating step has been completed`() {
+        fun `getHasCompletedEpcAdded returns true if the LowEnergyRating step has been completed`() {
             val testJourneyData = journeyDataBuilder.withLowEnergyRatingStep().build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertTrue(hasCompletedEpcTask)
         }
 
         @Test
-        fun `getHasCompletedEpcTask returns true if the MeesExemption step has been completed`() {
+        fun `getHasCompletedEpcAdded returns true if the MeesExemptionConfirmation step has been completed`() {
             val testJourneyData = journeyDataBuilder.withMeesExemptionConfirmationStep().build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertTrue(hasCompletedEpcTask)
         }
 
         @Test
-        fun `getHasCompletedEpcTask returns true if EpcExpiryCheck was answered Yes and the energy rating is E or better`() {
+        fun `getHasCompletedEpcAdded returns true if EpcExpiryCheck was answered Yes and the energy rating is E or better`() {
             val testJourneyData =
                 journeyDataBuilder
-                    .withAutoMatchedEpcDetails(
-                        MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "A"),
-                    ).withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(expiryDate = pastDate, energyRating = "A"))
+                    .withCheckAutoMatchedEpcResult(true)
                     .withEpcExpiryCheckStep(true)
                     .build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertTrue(hasCompletedEpcTask)
         }
 
+        @Suppress("ktlint:standard:max-line-length")
         @Test
-        fun `EpcExpiryCheck does not complete the EPC task if the energy rating is worse than E and MEES steps are not completed`() {
+        fun `getHasCompletedEpcAdded returns false if EpcExpiryCheck was answered Yes but the energy rating is low and MEES steps are not completed`() {
             val testJourneyData =
                 journeyDataBuilder
-                    .withAutoMatchedEpcDetails(
-                        MockEpcData.createEpcDataModel(expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5), energyRating = "F"),
-                    ).withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(expiryDate = pastDate, energyRating = "F"))
+                    .withCheckAutoMatchedEpcResult(true)
                     .withEpcExpiryCheckStep(true)
                     .build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertFalse(hasCompletedEpcTask)
         }
 
         @Test
-        fun `EpcExpiryCheck does not complete the EPC task if it is answered No`() {
+        fun `getHasCompletedEpcAdded returns false if EpcExpiryCheck was answered No`() {
             val testJourneyData =
                 journeyDataBuilder
                     .withEpcExpiryCheckStep(false)
                     .build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertFalse(hasCompletedEpcTask)
         }
 
         @Test
-        fun `getHasCompletedEpcTask returns true if CheckAutoMatchedEpc is answered Yes for an in date EPC with a good energy rating`() {
+        fun `getHasCompletedEpcAdded returns true for an in date EPC with a good energy rating`() {
             val testJourneyData =
                 journeyDataBuilder
-                    .withAutoMatchedEpcDetails(
-                        MockEpcData.createEpcDataModel(
-                            expiryDate =
-                                DateTimeHelper().getCurrentDateInUK().plus(
-                                    DatePeriod(years = 5),
-                                ),
-                            energyRating = "A",
-                        ),
-                    ).withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(expiryDate = futureDate, energyRating = "A"))
+                    .withCheckAutoMatchedEpcResult(true)
                     .build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertTrue(hasCompletedEpcTask)
         }
 
         @Test
-        fun `CheckAutoMatchedEpc does not complete the EPC task if it is answered No`() {
+        fun `getHasCompletedEpcAdded returns false if no EPC has been accepted`() {
             val testJourneyData =
                 journeyDataBuilder
                     .withCheckAutoMatchedEpcResult(false)
                     .build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertFalse(hasCompletedEpcTask)
         }
 
         @Test
-        fun `CheckAutoMatchedEpc does not complete the EPC task if the accepted EPC has expired`() {
+        fun `getHasCompletedEpcAdded returns false if the accepted in-date EPC has a low energy rating`() {
             val testJourneyData =
                 journeyDataBuilder
-                    .withAutoMatchedEpcDetails(
-                        MockEpcData.createEpcDataModel(
-                            expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5),
-                        ),
-                    ).withCheckAutoMatchedEpcResult(true)
+                    .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel(energyRating = "F"))
+                    .withCheckAutoMatchedEpcResult(true)
                     .build()
 
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertFalse(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `CheckAutoMatchedEpc does not complete the EPC task if the accepted EPC has a low energy rating`() {
-            val testJourneyData =
-                journeyDataBuilder
-                    .withAutoMatchedEpcDetails(
-                        MockEpcData.createEpcDataModel(
-                            energyRating = "F",
-                        ),
-                    ).withCheckAutoMatchedEpcResult(true)
-                    .build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertFalse(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `getHasCompletedEpcTask returns true if CheckMatchedEpc is answered Yes for an in date EPC with a good energy rating`() {
-            val testJourneyData =
-                journeyDataBuilder
-                    .withLookedUpEpcDetails(
-                        MockEpcData.createEpcDataModel(
-                            expiryDate =
-                                DateTimeHelper().getCurrentDateInUK().plus(
-                                    DatePeriod(years = 5),
-                                ),
-                            energyRating = "A",
-                        ),
-                    ).withCheckMatchedEpcResult(true)
-                    .build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertTrue(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `CheckMatchedEpc does not complete the EPC task if it is answered No`() {
-            val testJourneyData =
-                journeyDataBuilder
-                    .withCheckMatchedEpcResult(false)
-                    .build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertFalse(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `CheckMatchedEpc does not complete the EPC task if the accepted EPC has expired`() {
-            val testJourneyData =
-                journeyDataBuilder
-                    .withLookedUpEpcDetails(
-                        MockEpcData.createEpcDataModel(
-                            expiryDate = kotlinx.datetime.LocalDate(2022, 1, 5),
-                        ),
-                    ).withCheckMatchedEpcResult(true)
-                    .build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
-
-            assertFalse(hasCompletedEpcTask)
-        }
-
-        @Test
-        fun `CheckMatchedEpc does not complete the EPC task if the accepted EPC has a low energy rating`() {
-            val testJourneyData =
-                journeyDataBuilder
-                    .withLookedUpEpcDetails(
-                        MockEpcData.createEpcDataModel(
-                            energyRating = "F",
-                        ),
-                    ).withCheckMatchedEpcResult(true)
-                    .build()
-
-            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcTask()
+            val hasCompletedEpcTask = testJourneyData.getHasCompletedEpcAdded()
 
             assertFalse(hasCompletedEpcTask)
         }
