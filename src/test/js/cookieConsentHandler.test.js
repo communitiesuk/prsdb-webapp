@@ -27,6 +27,9 @@ function setup(onCookiesPage = false) {
     teardown = jsdom(html, {
         url: onCookiesPage ? 'https://example.com/cookies' : 'https://example.com'
     });
+
+    window.GOOGLE_PROPERTY = 'GTM-XXXXXXX'
+    window.dataLayer = []
 }
 
 describe('Cookie Consent Handler', () => {
@@ -100,4 +103,52 @@ describe('Cookie Consent Handler', () => {
 
         assert.strictEqual(cookieBanner.hidden, true);
     });
+    describe('updates Google Analytics (GA) consent', () => {
+        test('to granted if the cookie_consent cookie is already set to true', () => {
+            document.cookie = 'cookie_consent=true';
+
+            addCookieConsentHandler();
+
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(true));
+        })
+
+        test('to denied and expires existing GA cookies if the cookie_consent cookie is already set to false', () => {
+            //TODO: check for deleting cookies
+            document.cookie = 'cookie_consent=false';
+
+            addCookieConsentHandler();
+
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+        });
+
+        test('to denied if the cookie_consent cookie is not set', () => {
+            addCookieConsentHandler();
+
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+        });
+
+        test('to granted when cookies are accepted on the cookie banner', () => {
+            const acceptButton = document.getElementById('accept-cookies-button');
+
+            addCookieConsentHandler();
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+            acceptButton.click();
+
+            assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(true)[0]);
+        });
+        test('to denied and expires existing GA cookies when cookies are rejected on the cookie banner', () => {
+            //TODO
+        });
+    });
 });
+
+function expectedDataLayer(granted) {
+    return [
+        ['consent', 'update', {
+            ad_user_data: granted ? 'granted' : 'denied',
+            ad_personalization: granted ? 'granted' : 'denied',
+            ad_storage: granted ? 'granted' : 'denied',
+            analytics_storage: granted ? 'granted' : 'denied'
+        }]
+    ];
+}
