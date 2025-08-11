@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 
-class InviteLaUsersSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class InviteLaUsersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `inviting a new LA user shows validation errors if the email addresses don't match`() {
         val invitePage = navigator.goToInviteNewLaUser(2)

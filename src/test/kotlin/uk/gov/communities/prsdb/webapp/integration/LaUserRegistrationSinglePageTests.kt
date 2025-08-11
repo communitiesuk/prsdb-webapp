@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
-class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-lauser.sql") {
+class LaUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-lauser.sql") {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
 
@@ -52,7 +52,7 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
     }
 
     @Nested
-    inner class LaUserRegistrationStepLandingPage : NestedSinglePageTestWithSeedData("data-local.sql") {
+    inner class LaUserRegistrationStepLandingPage : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `Navigating here as a registered local authority user redirects to the LA dashboard page`(page: Page) {
             navigator.navigateToLaUserRegistrationLandingPage(invitation.token)

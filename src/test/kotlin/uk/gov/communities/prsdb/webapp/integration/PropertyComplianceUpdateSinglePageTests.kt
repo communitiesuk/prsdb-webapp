@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class PropertyComplianceUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `Submitting UpdateGasSafetyStep with no option selected returns an error`() {
         val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)

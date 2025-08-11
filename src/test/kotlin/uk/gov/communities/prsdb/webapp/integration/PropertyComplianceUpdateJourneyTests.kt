@@ -71,7 +71,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
@@ -689,7 +689,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
                 ),
             )
         updateEpcPage.submitHasNewCertificate()
-        var checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+        val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
 
         // Check Auto Matched EPC page
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()

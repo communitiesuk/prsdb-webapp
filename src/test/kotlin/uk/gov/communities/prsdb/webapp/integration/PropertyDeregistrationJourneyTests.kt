@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
-class PropertyDeregistrationJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1

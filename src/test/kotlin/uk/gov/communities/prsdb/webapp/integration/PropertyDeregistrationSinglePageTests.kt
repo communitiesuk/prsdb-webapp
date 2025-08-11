@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class PropertyDeregistrationSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class AreYouSureStep {
         @Test

@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import kotlin.test.assertContains
 
-class PropertyDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 

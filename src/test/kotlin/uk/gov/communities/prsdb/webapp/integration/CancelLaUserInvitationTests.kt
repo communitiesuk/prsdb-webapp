@@ -1,10 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.integration.JourneyTestWithSeedData.NestedJourneyTestWithSeedData
+import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaUserInvitationSuccessPage
@@ -16,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class CancelLaUserInvitationTests : IntegrationTest() {
     @Nested
-    inner class LaUserInvitation : NestedJourneyTestWithSeedData("data-la-users-and-invitations.sql") {
+    inner class LaUserInvitation : NestedIntegrationTestWithMutableData("data-la-users-and-invitations.sql") {
         @Test
         fun `an la user invitation can be cancelled`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
@@ -49,7 +48,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LaAdminInvitation : NestedJourneyTestWithSeedData("data-la-invitations-user-is-system-operator.sql") {
+    inner class LaAdminInvitation : NestedIntegrationTestWithMutableData("data-la-invitations-user-is-system-operator.sql") {
         @Test
         fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page

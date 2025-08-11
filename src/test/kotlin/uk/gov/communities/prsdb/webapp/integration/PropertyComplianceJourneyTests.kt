@@ -81,7 +81,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
