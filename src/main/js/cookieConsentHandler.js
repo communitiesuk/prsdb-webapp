@@ -21,9 +21,6 @@ function updateGaConsent(isGranted = false) {
     }
 
     gtag('consent', 'update', {
-        ad_user_data: isGranted ? 'granted' : 'denied',
-        ad_personalization: isGranted ? 'granted' : 'denied',
-        ad_storage: isGranted ? 'granted' : 'denied',
         analytics_storage: isGranted ? 'granted' : 'denied'
     })
 
