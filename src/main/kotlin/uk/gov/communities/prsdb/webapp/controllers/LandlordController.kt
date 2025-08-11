@@ -194,6 +194,15 @@ class LandlordController(
         return "betaBannerFeedback"
     }
 
+    @GetMapping("/${BETA_BANNER_FEEDBACK_PATH_SEGMENT}/success")
+    fun betaBannerFeedbackSuccess(
+        model: Model,
+        request: HttpServletRequest,
+    ): String {
+        model.addAttribute("backUrl", request.getHeader("referer"))
+        return "betaBannerFeedbackSuccess"
+    }
+
     fun populateDeleteIncompletePropertyRegistrationModel(
         model: Model,
         contextId: Long,
