@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - feat/PRSD-1183-update-ga-cookie-domain
 
 jobs:
   build-and-deploy-integration:
