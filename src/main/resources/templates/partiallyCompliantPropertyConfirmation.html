@@ -6,7 +6,7 @@
 <!--/*@thymesVar id="electricalSafetyStandardsUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="registerMeesExemptionUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="propertiesWithoutComplianceUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addComplianceUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="dashboardUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{propertyCompliance.confirmation.title}, ~{::main}, false)}">
@@ -80,7 +80,7 @@
             </p>
         </section>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${propertiesWithoutComplianceUrl}}, #{propertyCompliance.confirmation.addForAnotherProperty})}"></a>
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${addComplianceUrl}}, #{propertyCompliance.confirmation.addForAnotherProperty})}"></a>
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}"></a>
         </div>
     </div>

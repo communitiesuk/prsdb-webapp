@@ -4,8 +4,8 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
@@ -51,10 +51,10 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
     }
 
     @Test
-    fun `the add compliance information button links to the add compliance information page`(page: Page) {
+    fun `the add compliance information button links to the compliance actions page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.addComplianceInformationButton.clickAndWait()
-        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Test
@@ -133,7 +133,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
                 fun `the add compliance information link redirects to the compliance actions page`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     dashboard.notificationBanner.addComplianceInformationLink.clickAndWait()
-                    assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+                    assertPageIs(page, ComplianceActionsPage::class)
                 }
             }
         }
@@ -158,7 +158,7 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             fun `the add compliance information link redirects to the compliance actions page`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()
                 dashboard.notificationBanner.addComplianceInformationLink.clickAndWait()
-                assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+                assertPageIs(page, ComplianceActionsPage::class)
             }
         }
     }

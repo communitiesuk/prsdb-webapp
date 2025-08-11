@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
@@ -13,11 +12,11 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_COMPLIANCES_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.ADD_COMPLIANCE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -143,9 +142,9 @@ class LandlordControllerTests(
     }
 
     @Test
-    fun `landlordIncompleteCompliances returns a redirect for unauthenticated user`() {
+    fun `addComplianceInformation returns a redirect for unauthenticated user`() {
         mvc
-            .get(INCOMPLETE_COMPLIANCES_URL)
+            .get(ADD_COMPLIANCE_URL)
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -153,47 +152,55 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `landlordIncompleteCompliances returns 403 for unauthorized user`() {
+    fun `addComplianceInformation returns 403 for unauthorized user`() {
         mvc
-            .get(INCOMPLETE_COMPLIANCES_URL)
+            .get(ADD_COMPLIANCE_URL)
             .andExpect {
                 status { isForbidden() }
             }
     }
 
-    // TODO PRSD-1394: Re-enable this test
-    @Disabled
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `landlordIncompleteCompliances returns 200 for authorised landlord user`() {
+    fun `addComplianceInformation returns 200 for authorised landlord user`() {
+        // Arrange
         val incompleteComplianceDataModel =
             ComplianceStatusDataModel(
                 1,
                 "123 Example Street, EX",
-                "Example Local Authority",
+                "P-XXXX-XXXX",
                 ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.ADDED,
+                ComplianceCertStatus.NOT_STARTED,
+                ComplianceCertStatus.NOT_STARTED,
                 false,
             )
-        val incompleteCompliancesViewModel =
+        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(listOf(incompleteComplianceDataModel))
+
+        val nonCompliantDataModel =
+            ComplianceStatusDataModel(
+                2,
+                "456 Example Avenue, EX",
+                "P-YYYY-YYYY",
+                ComplianceCertStatus.EXPIRED,
+                ComplianceCertStatus.ADDED,
+                ComplianceCertStatus.NOT_ADDED,
+                false,
+            )
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
+
+        // Act and Assert
+        val expectedComplianceActions =
             listOf(
-                IncompleteComplianceViewModelBuilder.fromDataModel(
-                    0,
-                    incompleteComplianceDataModel,
-                    0,
-                ),
+                ComplianceActionViewModelBuilder.fromDataModel(incompleteComplianceDataModel, 0),
+                ComplianceActionViewModelBuilder.fromDataModel(nonCompliantDataModel, 0),
             )
 
-        whenever(
-            propertyOwnershipService.getIncompleteCompliancesForLandlord("user"),
-        ).thenReturn(listOf(incompleteComplianceDataModel))
         mvc
-            .get(INCOMPLETE_COMPLIANCES_URL)
+            .get(ADD_COMPLIANCE_URL)
             .andExpect {
                 status { isOk() }
                 model {
-                    attribute("incompleteCompliances", incompleteCompliancesViewModel)
+                    attribute("complianceActions", expectedComplianceActions)
                     attribute(
                         "viewRegisteredPropertiesUrl",
                         "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",

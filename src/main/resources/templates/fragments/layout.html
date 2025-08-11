@@ -25,12 +25,23 @@
     <script defer data-domain="register-home-to-rent.communities.gov.uk" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
     <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 </head>
-<script> window['ga-disable-GA_MEASUREMENT_ID'] = !window.googleAnalyticsEnabled; </script>
-<!-- Google tag (gtag.js) -->
+<script>
+    <!-- Set consent for google tag to denied by default -->
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'ad_storage': 'denied',
+        'analytics_storage': 'denied',
+        'wait_for_update': 500,
+    });
+</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PDPW9SQ94W"></script>
 <script>
+    <!-- Google tag (gtag.js) -->
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-PDPW9SQ94W');
 </script>
