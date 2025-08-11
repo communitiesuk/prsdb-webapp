@@ -22,7 +22,7 @@ class LandlordIncompleteCompliancesPageTests : IntegrationTest() {
     @Disabled
     @Nested
     inner class LandlordsWithIncompleteCompliances :
-        NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-compliances.sql") {
+        NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-compliance-actions.sql") {
         @Test
         fun `the page loads with heading and subheading`() {
             val incompleteCompliancesPage = navigator.goToLandlordIncompleteCompliances()
