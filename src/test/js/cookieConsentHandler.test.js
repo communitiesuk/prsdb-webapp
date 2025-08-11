@@ -115,7 +115,7 @@ describe('Cookie Consent Handler', () => {
         test('to denied and expires existing GA cookies if the cookie_consent cookie is already set to false', () => {
             // Arrange
             document.cookie = 'cookie_consent=false;';
-            document.cookie = '_ga=123; _ga_PDPW9SQ94W=456;';
+            document.cookie = '_ga=123;';
             document.cookie = '_ga_PDPW9SQ94W=456;'
             assert.strictEqual(document.cookie.includes('_ga='), true);
             assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), true);
@@ -165,9 +165,6 @@ describe('Cookie Consent Handler', () => {
 function expectedDataLayer(granted) {
     return [
         ['consent', 'update', {
-            ad_user_data: granted ? 'granted' : 'denied',
-            ad_personalization: granted ? 'granted' : 'denied',
-            ad_storage: granted ? 'granted' : 'denied',
             analytics_storage: granted ? 'granted' : 'denied'
         }]
     ];
