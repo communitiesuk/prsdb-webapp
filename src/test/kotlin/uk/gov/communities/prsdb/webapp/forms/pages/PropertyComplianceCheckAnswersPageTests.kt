@@ -3,12 +3,15 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 import org.springframework.ui.ModelMap
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
@@ -348,7 +351,59 @@ class PropertyComplianceCheckAnswersPageTests {
     }
 
     @Test
-    fun `the correct summary rows appear when certificate expiry dates have passed since being provided`() {
+    // Commonised set up code mocks functions that are not called in this test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `getSummaryRows throws an exception if there are multiple confirmations in the gas safety data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafeEngineerNum()
+                .withGasSafetyCertUploadConfirmation()
+                .withGasSafetyOutdatedConfirmation()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadConfirmation()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        // Act
+        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+    }
+
+    @Test
+    // Commonised set up code mocks functions that are not called in this test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `getSummaryRows throws an exception if there are no confirmations in the gas safety data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafeEngineerNum()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadConfirmation()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        // Act
+        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+    }
+
+    @Test
+    // Commonised set up code mocks functions that are not called in this test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `getSummaryRows throws an exception if there are multiple confirmations in the eicr data`() {
         // Arrange
         val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
         val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
@@ -362,80 +417,37 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrStatus(true)
                 .withEicrIssueDate(eicrIssueDate)
                 .withEicrUploadConfirmation()
+                .withEicrExemptionConfirmation()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .build()
 
-        val expectedGasSafetyData =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.gasSafety.certificate",
-                    "forms.checkComplianceAnswers.certificate.expired",
-                    PropertyComplianceStepId.GasSafety.urlPathSegment,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.certificate.issueDate",
-                    gasCertIssueDate.toKotlinLocalDate(),
-                    PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.certificate.validUntil",
-                    gasCertIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate(),
-                    null,
-                ),
-            )
-        val expectedEicrData =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.eicr.certificate",
-                    "forms.checkComplianceAnswers.certificate.expired",
-                    PropertyComplianceStepId.EICR.urlPathSegment,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.certificate.issueDate",
-                    eicrIssueDate.toKotlinLocalDate(),
-                    PropertyComplianceStepId.EicrIssueDate.urlPathSegment,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.certificate.validUntil",
-                    eicrIssueDate.plusYears(EICR_VALIDITY_YEARS.toLong()).toKotlinLocalDate(),
-                    null,
-                ),
-            )
-        val expectedEpcData =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.epc.certificate",
-                    "forms.checkComplianceAnswers.epc.view",
-                    PropertyComplianceStepId.EPC.urlPathSegment,
-                    certificateUrl,
-                    valueUrlOpensNewTab = true,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.epc.expiryDate",
-                    epcDetails.expiryDate,
-                    null,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.epc.energyRating",
-                    epcDetails.energyRating.uppercase(),
-                    null,
-                ),
-            )
+        // Act
+        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+    }
 
-        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
-        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+    @Test
+    // Commonised set up code mocks functions that are not called in this test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `getSummaryRows throws an exception if there are no confirmations in the eicr data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafeEngineerNum()
+                .withGasSafetyCertUploadConfirmation()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
 
         // Act
-        val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
-        val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
-        val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
-        val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
-
-        // Assert
-        assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
-        assertIterableEquals(expectedEicrData, returnedEicrData)
-        assertIterableEquals(expectedEpcData, returnedEpcData)
+        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
     }
 
     @Test
