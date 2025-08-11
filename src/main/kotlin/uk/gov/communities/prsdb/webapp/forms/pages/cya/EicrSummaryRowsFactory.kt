@@ -4,6 +4,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
@@ -88,12 +89,16 @@ private enum class EicrStatus {
     ;
 
     companion object {
-        fun fromJourneyData(data: JourneyData): EicrStatus =
-            listOfNotNull(
-                if (data.getHasCompletedEicrUploadConfirmation()) UPLOADED else null,
-                if (data.getHasCompletedEicrExemptionConfirmation()) EXEMPTION else null,
-                if (data.getHasCompletedEicrExemptionMissing()) MISSING else null,
-                if (data.getHasCompletedEicrOutdated()) OUTDATED else null,
-            ).single()
+        fun fromJourneyData(data: JourneyData): EicrStatus {
+            val statusList =
+                listOfNotNull(
+                    if (data.getHasCompletedEicrUploadConfirmation()) UPLOADED else null,
+                    if (data.getHasCompletedEicrExemptionConfirmation()) EXEMPTION else null,
+                    if (data.getHasCompletedEicrExemptionMissing()) MISSING else null,
+                    if (data.getHasCompletedEicrOutdated()) OUTDATED else null,
+                )
+            return statusList.singleOrNull()
+                ?: throw PrsdbWebException("Filtered journey data does not have a single EICR status: $statusList")
+        }
     }
 }

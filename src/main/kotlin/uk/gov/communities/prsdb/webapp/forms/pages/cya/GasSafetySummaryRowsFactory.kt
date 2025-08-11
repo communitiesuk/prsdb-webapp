@@ -4,6 +4,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
@@ -105,12 +106,16 @@ private enum class GasSafetyStatus {
     ;
 
     companion object {
-        fun fromJourneyData(data: JourneyData): GasSafetyStatus =
-            listOfNotNull(
-                if (data.getHasCompletedGasSafetyUploadConfirmation()) UPLOADED else null,
-                if (data.getHasCompletedGasSafetyExemptionConfirmation()) EXEMPTION else null,
-                if (data.getHasCompletedGasSafetyExemptionMissing()) MISSING else null,
-                if (data.getHasCompletedGasSafetyOutdated()) OUTDATED else null,
-            ).single()
+        fun fromJourneyData(data: JourneyData): GasSafetyStatus {
+            val statusList =
+                listOfNotNull(
+                    if (data.getHasCompletedGasSafetyUploadConfirmation()) UPLOADED else null,
+                    if (data.getHasCompletedGasSafetyExemptionConfirmation()) EXEMPTION else null,
+                    if (data.getHasCompletedGasSafetyExemptionMissing()) MISSING else null,
+                    if (data.getHasCompletedGasSafetyOutdated()) OUTDATED else null,
+                )
+            return statusList.singleOrNull()
+                ?: throw PrsdbWebException("Filtered journey data does not have a single gas safety status: $statusList")
+        }
     }
 }

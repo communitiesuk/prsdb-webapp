@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
@@ -373,7 +374,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
     }
 
     @Test
@@ -397,7 +398,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
     }
 
     @Test
@@ -423,7 +424,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
     }
 
     @Test
@@ -447,7 +448,7 @@ class PropertyComplianceCheckAnswersPageTests {
                 .build()
 
         // Act
-        assertThrows<Exception> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = true) }
     }
 
     @Test
