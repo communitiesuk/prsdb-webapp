@@ -12,9 +12,9 @@
     "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
   },
   {
-    "id": "de70ee4b-8dda-4374-b528-d9975369790f",
-    "name": "LA Admin Invitation",
-    "subject": "PRD – You’ve been invited to register as a local authority admin on the Privately Rented Database",
+    "id": "767e3b8e-8977-4107-8a3a-11cb40300113",
+    "name": "LA Admin Invitation V2",
+    "subject": "PRD – You’ve been invited to register as a local council admin on the Privately Rented Database",
     "bodyLocation": "/emails/LocalAuthorityAdminInvitation.md"
   },
   {
