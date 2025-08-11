@@ -3,3 +3,7 @@
 .beta-feedback-red {
   color: govuk-colour("red");
 }
+
+#feedback-form-textarea .govuk-label {
+  font-weight: bold;
+}
