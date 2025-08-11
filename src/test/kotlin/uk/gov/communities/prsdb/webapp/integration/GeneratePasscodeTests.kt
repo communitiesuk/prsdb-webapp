@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeLimitExceededPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-@ActiveProfiles("local", "local-no-auth", "require-passcode")
+@ActiveProfiles("require-passcode")
 class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoSpyBean
     lateinit var passcodeRepository: PasscodeRepository
