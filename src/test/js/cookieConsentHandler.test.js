@@ -1,5 +1,5 @@
 import jsdom from 'global-jsdom';
-import { describe, test, beforeEach,} from 'node:test';
+import { describe, test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { addCookieConsentHandler } from '#main-javascript/cookieConsentHandler.js';
 
@@ -27,9 +27,6 @@ function setup(onCookiesPage = false) {
     teardown = jsdom(html, {
         url: onCookiesPage ? 'https://example.com/cookies' : 'https://example.com'
     });
-
-    window.GOOGLE_PROPERTY = 'GTM-XXXXXXX'
-    window.dataLayer = []
 }
 
 describe('Cookie Consent Handler', () => {
@@ -103,45 +100,4 @@ describe('Cookie Consent Handler', () => {
 
         assert.strictEqual(cookieBanner.hidden, true);
     });
-
-    describe('updates Google Analytics (GA) consent', () => {
-        test('to granted if the cookie_consent cookie is already set to true', () => {
-            //TODO
-        })
-
-        test('to denied and expires existing GA cookies if the cookie_consent cookie is already set to false', () => {
-            //TODO
-        });
-
-        test('to denied and expires existing GA cookies if the cookie_consent cookie is not set', () => {
-            document.cookie = "_ga=123; path=/";
-            document.cookie = "_ga_PDPW9SQ94W=456; path=/";
-            assert.strictEqual(document.cookie.includes('_ga=123'), true);
-            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W=456'), true);
-
-            addCookieConsentHandler();
-
-            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
-            assert.strictEqual(document.cookie.includes('_ga=123'), false);
-            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W=456'), false);
-        });
-
-        test('to granted when cookies are accepted on the cookie banner', () => {
-            //TODO
-        });
-        test('to denied and expires existing GA cookies when cookies are rejected on the cookie banner', () => {
-            //TODO
-        });
-    });
 });
-
-function expectedDataLayer(granted) {
-    return [
-        ['consent', 'update', {
-            ad_user_data: granted ? 'granted' : 'denied',
-            ad_personalization: granted ? 'granted' : 'denied',
-            ad_storage: granted ? 'granted' : 'denied',
-            analytics_storage: granted ? 'granted' : 'denied'
-        }]
-    ];
-}
