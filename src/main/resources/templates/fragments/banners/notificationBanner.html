@@ -1,13 +1,10 @@
-<div th:fragment="notificationBanner(title, content)" class="govuk-notification-banner" role="region"
-     aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+<div th:fragment="notificationBanner(title, content)" th:with="isSuccess=${isSuccess ?: false}"
+     class="govuk-notification-banner" th:classappend="${isSuccess ? 'govuk-notification-banner--success' : ''}"
+     th:attr="role=${isSuccess ? 'alert' : 'region'}"
+     aria-labelledby="govuk-notification-banner-title"
+     data-module="govuk-notification-banner">
     <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title" th:text="${title}">
-            Title
-        </h2>
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title" th:text="${title}">title</h2>
     </div>
-    <div class="govuk-notification-banner__content">
-        <div th:replace="${content}">
-            content
-        </div>
-    </div>
+    <div class="govuk-notification-banner__content" th:insert="${content}"></div>
 </div>
