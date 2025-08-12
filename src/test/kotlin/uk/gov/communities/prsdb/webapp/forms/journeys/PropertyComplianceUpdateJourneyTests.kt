@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -62,6 +63,9 @@ class PropertyComplianceUpdateJourneyTests {
 
     @Mock
     private lateinit var mockCertificateUploadService: CertificateUploadService
+
+    @Mock
+    private lateinit var mockUploadService: UploadService
 
     @Nested
     inner class UpdateGasSafetyStepTests {
@@ -646,6 +650,7 @@ class PropertyComplianceUpdateJourneyTests {
         epcLookupService = mockEpcLookupService,
         epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
         certificateUploadService = mockCertificateUploadService,
+        uploadService = mockUploadService,
         checkingAnswersForStep = null,
     )
 
