@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
@@ -78,6 +79,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_INCOMPLETE_COMPLIANCE_FORM"),
     )
     var incompleteComplianceForm: FormContext? = null
+
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
+    var certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
+        private set
 
     constructor(
         occupancyType: OccupancyType,
