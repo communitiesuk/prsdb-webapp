@@ -71,6 +71,7 @@ server:
 
 aws:
   s3:
+    signatureDuration: ${AWS_S3_SIGNATURE_DURATION:1h}
     quarantineBucket: ${AWS_QUARANTINE_BUCKET}
     safeBucket: ${S3_SAFE_BUCKET_KEY}
 
