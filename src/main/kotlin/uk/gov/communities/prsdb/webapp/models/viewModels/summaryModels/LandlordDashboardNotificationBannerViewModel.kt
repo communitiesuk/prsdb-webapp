@@ -2,13 +2,13 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 class LandlordDashboardNotificationBannerViewModel(
     val numberOfIncompleteProperties: Int,
-    val numberOfIncompleteCompliances: Int,
+    val numberOfComplianceActions: Int,
 ) {
-    val numberOfOutstandingActions: Int = numberOfIncompleteCompliances + numberOfIncompleteProperties
+    val numberOfOutstandingActions: Int = numberOfComplianceActions + numberOfIncompleteProperties
 
-    val showOutstandingActionsHeading: Boolean = numberOfIncompleteProperties != 0 && numberOfIncompleteCompliances != 0
+    val showOutstandingActionsHeading: Boolean = numberOfIncompleteProperties != 0 && numberOfComplianceActions != 0
 
-    val onlyIncompleteProperties: Boolean = numberOfIncompleteProperties != 0 && numberOfIncompleteCompliances == 0
+    val onlyIncompleteProperties: Boolean = numberOfIncompleteProperties != 0 && numberOfComplianceActions == 0
 
-    val onlyIncompleteCompliances: Boolean = numberOfIncompleteProperties == 0 && numberOfIncompleteCompliances != 0
+    val onlyComplianceActions: Boolean = numberOfIncompleteProperties == 0 && numberOfComplianceActions != 0
 }

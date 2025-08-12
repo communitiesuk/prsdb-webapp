@@ -9,6 +9,7 @@ import java.io.InputStream
 @PrsdbWebService
 class UploadService(
     private val uploader: FileUploader,
+    private val downloader: FileDownloader,
     private val uploadRepository: FileUploadRepository,
 ) {
     fun uploadFile(
@@ -31,4 +32,24 @@ class UploadService(
 
         return uploadRepository.save(fileUpload)
     }
+
+    fun getFileUploadById(fileUploadId: Long): FileUpload =
+        uploadRepository.findById(fileUploadId).orElseThrow {
+            IllegalArgumentException("File upload with ID $fileUploadId not found")
+        }
+
+    fun getDownloadUrl(
+        fileUpload: FileUpload,
+        fileName: String? = null,
+    ): String = downloader.getDownloadUrl(fileUpload, fileName)
+
+    fun getDownloadUrlOrNull(
+        fileUpload: FileUpload,
+        fileName: String? = null,
+    ): String? =
+        if (downloader.isFileDownloadable(fileUpload)) {
+            downloader.getDownloadUrl(fileUpload, fileName)
+        } else {
+            null
+        }
 }

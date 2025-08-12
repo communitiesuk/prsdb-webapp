@@ -5,11 +5,16 @@ import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
 class GasSafetyViewModelBuilderTests {
@@ -20,8 +25,11 @@ class GasSafetyViewModelBuilderTests {
         withActionLinks: Boolean,
         expectedRows: List<SummaryListRowViewModel>,
     ) {
+        val uploadService = mock<UploadService>()
+        whenever(uploadService.getDownloadUrlOrNull(any(), anyOrNull())).thenReturn(DOWNLOAD_URL)
+
         val gasSafetyRows =
-            GasSafetyViewModelFactory().fromEntity(
+            GasSafetyViewModelFactory(uploadService).fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
             )
@@ -35,6 +43,8 @@ class GasSafetyViewModelBuilderTests {
         private val expiredBeforeUpload = PropertyComplianceBuilder.createWithGasCertExpiredBeforeUpload()
         private val exempt = PropertyComplianceBuilder.createWithCertExemptions(gasExemption = GasSafetyExemptionReason.NO_GAS_SUPPLY)
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
+
+        private const val DOWNLOAD_URL = "example.com/download"
 
         @JvmStatic
         private fun provideGasSafetyRows() =
@@ -54,6 +64,7 @@ class GasSafetyViewModelBuilderTests {
                                 "/landlord/provide-compliance-certificates/" +
                                     "${compliant.propertyOwnership.id}/update/update-gas-safety-certificate",
                             ),
+                            DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -80,6 +91,7 @@ class GasSafetyViewModelBuilderTests {
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
                             null,
+                            DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",

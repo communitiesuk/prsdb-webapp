@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -12,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
 class EicrViewModelBuilderTests {
@@ -22,8 +27,11 @@ class EicrViewModelBuilderTests {
         withActionLinks: Boolean,
         expectedRows: List<SummaryListRowViewModel>,
     ) {
+        val uploadService = mock<UploadService>()
+        whenever(uploadService.getDownloadUrlOrNull(any(), anyOrNull())).thenReturn(DOWNLOAD_URL)
+
         val eicrRows =
-            EicrViewModelFactory().fromEntity(
+            EicrViewModelFactory(uploadService).fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
             )
@@ -37,6 +45,8 @@ class EicrViewModelBuilderTests {
         private val expiredBeforeUpload = PropertyComplianceBuilder.createWithEicrExpiredBeforeUpload()
         private val exempt = PropertyComplianceBuilder.createWithCertExemptions(eicrExemption = EicrExemptionReason.LIVE_IN_LANDLORD)
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
+
+        private const val DOWNLOAD_URL = "example.com/eicr-download-url"
 
         @JvmStatic
         private fun providesEicrRows() =
@@ -58,6 +68,7 @@ class EicrViewModelBuilderTests {
                                     PropertyComplianceStepId.UpdateEICR,
                                 ),
                             ),
+                            DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -80,6 +91,7 @@ class EicrViewModelBuilderTests {
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
                             null,
+                            DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",

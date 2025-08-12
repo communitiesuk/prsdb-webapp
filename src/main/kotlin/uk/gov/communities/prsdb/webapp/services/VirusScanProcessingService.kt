@@ -36,7 +36,6 @@ class VirusScanProcessingService(
     ) {
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
-                // TODO PRSD-976 - We might need to dequarantine to a more contextual object key if that is visible to users
                 if (!dequarantiner.dequarantineFile(certificateUpload.fileUpload)) {
                     throw PrsdbWebException("Failed to dequarantine file: ${certificateUpload.fileUpload.objectKey}")
                 }

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -26,18 +27,24 @@ class ComplianceActionViewModelBuilder {
                         "complianceActions.summaryRow.registrationNumber",
                         dataModel.registrationNumber,
                     )
-                    addRow(
-                        "complianceActions.summaryRow.gasSafety",
-                        MessageKeyConverter.convert(dataModel.gasSafetyStatus),
-                    )
-                    addRow(
-                        "complianceActions.summaryRow.electricalSafety",
-                        MessageKeyConverter.convert(dataModel.eicrStatus),
-                    )
-                    addRow(
-                        "complianceActions.summaryRow.energyPerformance",
-                        MessageKeyConverter.convert(dataModel.epcStatus),
-                    )
+                    if (!dataModel.isComplete || dataModel.gasSafetyStatus != ComplianceCertStatus.ADDED) {
+                        addRow(
+                            "complianceActions.summaryRow.gasSafety",
+                            MessageKeyConverter.convert(dataModel.gasSafetyStatus),
+                        )
+                    }
+                    if (!dataModel.isComplete || dataModel.eicrStatus != ComplianceCertStatus.ADDED) {
+                        addRow(
+                            "complianceActions.summaryRow.electricalSafety",
+                            MessageKeyConverter.convert(dataModel.eicrStatus),
+                        )
+                    }
+                    if (!dataModel.isComplete || dataModel.epcStatus != ComplianceCertStatus.ADDED) {
+                        addRow(
+                            "complianceActions.summaryRow.energyPerformance",
+                            MessageKeyConverter.convert(dataModel.epcStatus),
+                        )
+                    }
                 }.toList()
 
         private fun getActions(
