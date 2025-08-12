@@ -6,12 +6,12 @@ We use Playwright to drive our web integration tests. This is configured in our 
 
 We set seed data by passing SQL script names into integration test class constructors. There are three base classes:
 
-* `JourneyTestWithSeedData` - resets and seeds the database before each test (use when tests affect the database)
-* `SinglePageTestWithSeedData` - resets and seeds the database before each test class (use when tests don't affect the database)
+* `IntegrationTestWithMutableData` - resets and seeds the database before each test (use when tests affect the database)
+* `IntegrationTestWithImmutableData` - resets and seeds the database before each test class (use when tests don't affect the database)
 * `IntegrationTest` - doesn't reset or seed the database (use when **all** tests get their seed data from nested classes)
 
 Tests that require different seed data to the rest of the class must be put in nested classes that inherit from 
-`NestedJourneyTestWithSeedData` or `NestedSinglePageTestWithSeedData` depending on the outer class.
+`NestedIntegrationTestWithMutableData` or `NestedIntegrationTestWithImmutableData` depending on the outer class.
 
 ## Page Objects (and Components)
 

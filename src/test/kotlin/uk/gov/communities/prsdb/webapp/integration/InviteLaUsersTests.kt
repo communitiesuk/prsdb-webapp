@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
 
-class InviteLaUsersTests : JourneyTestWithSeedData("data-local.sql") {
+class InviteLaUsersTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))

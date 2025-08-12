@@ -34,7 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedI
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
 import java.time.LocalDate
 
-class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
+class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Nested
@@ -69,7 +69,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     }
 
     @Nested
-    inner class AlreadyRegistered : NestedSinglePageTestWithSeedData("data-local.sql") {
+    inner class AlreadyRegistered : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
             val startPage = navigator.goToLandlordRegistrationStartPage()
@@ -80,7 +80,7 @@ class LandlordRegistrationSinglePageTests : SinglePageTestWithSeedData("data-moc
     }
 
     @Nested
-    inner class LandlordRegistrationStepVerifyIdentity : NestedSinglePageTestWithSeedData("data-local.sql") {
+    inner class LandlordRegistrationStepVerifyIdentity : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `Navigating here as a registered landlord redirects to the landlord dashboard page`(page: Page) {
             navigator.navigateToLandlordRegistrationVerifyIdentityPage()

@@ -52,6 +52,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,
@@ -64,6 +65,7 @@ class PropertyComplianceUpdateJourney(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val checkingAnswersForStep: String?,
     private val certificateUploadService: CertificateUploadService,
+    private val uploadService: UploadService,
 ) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
         initialStepId = initialStepId,
@@ -278,7 +280,7 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers,
-                page = CheckUpdateGasSafetyAnswersPage(journeyDataService, unreachableStepRedirect),
+                page = CheckUpdateGasSafetyAnswersPage(journeyDataService, unreachableStepRedirect, uploadService),
                 saveAfterSubmit = false,
                 nextAction = { _, _ -> Pair(eicrTask.startingStepId, null) },
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->
@@ -325,7 +327,7 @@ class PropertyComplianceUpdateJourney(
         get() =
             Step(
                 id = PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
-                page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect),
+                page = CheckUpdateEicrAnswersPage(journeyDataService, unreachableStepRedirect, uploadService),
                 nextAction = { _, _ -> Pair(epcTask.startingStepId, null) },
                 saveAfterSubmit = false,
                 handleSubmitAndRedirect = { filteredJourneyData, _, _ ->

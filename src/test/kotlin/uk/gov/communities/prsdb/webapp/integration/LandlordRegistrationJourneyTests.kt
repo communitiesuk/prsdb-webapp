@@ -40,7 +40,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhon
 import java.net.URI
 import kotlin.test.assertNotNull
 
-class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-not-landlord.sql") {
+class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 

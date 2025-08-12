@@ -25,11 +25,12 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import java.security.Principal
@@ -41,6 +42,7 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
@@ -55,13 +57,15 @@ class LandlordController(
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
 
+        val numberOfComplianceActions =
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
+                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
                 numberOfIncompleteProperties =
-                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(
-                        principal.name,
-                    ),
-                numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name),
+                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name),
+                numberOfComplianceActions = numberOfComplianceActions,
             )
 
         model.addAttribute("landlordDashboardNotificationBannerViewModel", landlordDashboardNotificationBannerViewModel)
@@ -75,16 +79,13 @@ class LandlordController(
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
         )
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-        model.addAttribute("viewIncompleteCompliancesUrl", INCOMPLETE_COMPLIANCES_URL)
+        model.addAttribute("addComplianceUrl", ADD_COMPLIANCE_URL)
 
         model.addAttribute("updatesToPilotUrl", "#")
         model.addAttribute("policyUpdatesUrl", "#")
         model.addAttribute("privacyNoticeUrl", "#")
         model.addAttribute("howToLetUrl", "#")
-        model.addAttribute(
-            "rentersRightsBillUrl",
-            RENTERS_RIGHTS_BILL_PRSD,
-        )
+        model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_PRSD)
         model.addAttribute("keepingPropertyCompliantUrl", "#")
 
         return "landlordDashboard"
@@ -157,26 +158,22 @@ class LandlordController(
         model: Model,
         principal: Principal,
     ): String {
-        val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
+        val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
+        val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
 
-        val incompleteComplianceViewModels =
-            incompleteCompliances.mapIndexed { index, dataModel ->
-                IncompleteComplianceViewModelBuilder.fromDataModel(
-                    index,
-                    dataModel,
-                    backUrlStorageService.storeCurrentUrlReturningKey(),
-                )
+        val complianceActions =
+            (incompleteComplianceProperties + nonCompliantProperties).map {
+                ComplianceActionViewModelBuilder.fromDataModel(it, backUrlStorageService.storeCurrentUrlReturningKey())
             }
 
-        model.addAttribute("incompleteCompliances", incompleteComplianceViewModels)
+        model.addAttribute("complianceActions", complianceActions)
         model.addAttribute(
             "viewRegisteredPropertiesUrl",
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
         )
-
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
-        return "incompleteCompliancesView"
+        return "complianceActions"
     }
 
     fun populateDeleteIncompletePropertyRegistrationModel(
@@ -214,12 +211,10 @@ class LandlordController(
         const val LANDLORD_DASHBOARD_URL = "/$LANDLORD_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
         const val LANDLORD_BASE_URL = "/$LANDLORD_PATH_SEGMENT"
         const val INCOMPLETE_PROPERTIES_URL = "/$LANDLORD_PATH_SEGMENT/$INCOMPLETE_PROPERTIES_PATH_SEGMENT"
-        const val INCOMPLETE_COMPLIANCES_URL =
-            "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT"
+        const val ADD_COMPLIANCE_URL = "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT"
 
-        const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT" +
-                "?$CONTEXT_ID_URL_PARAMETER={contextId}"
+        private const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
         fun deleteIncompletePropertyPath(contextId: Long): String =
             UriTemplate(DELETE_INCOMPLETE_PROPERTY_ROUTE).expand(contextId).toASCIIString()

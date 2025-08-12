@@ -5,10 +5,12 @@ import uk.gov.communities.prsdb.webapp.forms.pages.cya.GasSafetySummaryRowsFacto
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class CheckUpdateGasSafetyAnswersPage(
     journeyDataService: JourneyDataService,
     missingAnswersRedirect: String,
+    uploadService: UploadService,
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
@@ -25,6 +27,7 @@ class CheckUpdateGasSafetyAnswersPage(
             doesDataHaveGasSafetyCert = { data -> data.getHasNewGasSafetyCertificate()!! },
             gasSafetyStartingStep = PropertyComplianceStepId.UpdateGasSafety,
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemptionReason,
+            uploadService = uploadService,
         )
 
     override fun getSummaryList(filteredJourneyData: JourneyData) = gasSafetyDataFactory.createRows(filteredJourneyData)

@@ -71,7 +71,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
@@ -128,7 +128,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
         val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("TODO PRSD-976")
+        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Pending virus scan")
         assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
         assertThat(cyaPage.form.summaryList.engineerRow.value).containsText("1234567")
         cyaPage.form.submit()
@@ -254,7 +254,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
 
         // EICR Check Your Answers page
         val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
-        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("TODO PRSD-976")
+        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Pending virus scan")
         assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
         cyaPage.form.submit()
 
@@ -689,7 +689,7 @@ class PropertyComplianceUpdateJourneyTests : JourneyTestWithSeedData("data-local
                 ),
             )
         updateEpcPage.submitHasNewCertificate()
-        var checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
+        val checkAutoMatchedEpcPage = assertPageIs(page, CheckAutoMatchedEpcPagePropertyComplianceUpdate::class, urlArguments)
 
         // Check Auto Matched EPC page
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -8,9 +9,12 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @PrsdbWebService
-class GasSafetyViewModelFactory {
+class GasSafetyViewModelFactory(
+    private val uploadService: UploadService,
+) {
     fun fromEntity(
         propertyCompliance: PropertyCompliance,
         withActionLinks: Boolean,
@@ -19,8 +23,11 @@ class GasSafetyViewModelFactory {
             .apply {
                 addRow(
                     key = "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
-                    // TODO PRSD-976 add link to download certificate and appropriate messages when required
                     value = getGasCertificateMessageKey(propertyCompliance),
+                    valueUrl =
+                        propertyCompliance.gasSafetyFileUpload?.let {
+                            uploadService.getDownloadUrlOrNull(it, "gas_safety_certificate.${it.extension}")
+                        },
                     actionText = "forms.links.change",
                     actionLink =
                         PropertyComplianceController.getUpdatePropertyComplianceStepPath(
@@ -54,20 +61,32 @@ class GasSafetyViewModelFactory {
                 }
             }.toList()
 
-    private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String =
-        if (propertyCompliance.gasSafetyCertS3Key != null) {
-            if (propertyCompliance.isGasSafetyCertExpired!!) {
-                "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
-            } else {
+    private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String {
+        val uploadedFileStatus = propertyCompliance.gasSafetyFileUpload?.status
+        val expired = propertyCompliance.isGasSafetyCertExpired
+        return when {
+            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! ->
                 "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
-            }
-        } else if (propertyCompliance.gasSafetyCertIssueDate != null) {
-            "propertyDetails.complianceInformation.expired"
-        } else if (propertyCompliance.hasGasSafetyExemption) {
-            "propertyDetails.complianceInformation.exempt"
-        } else {
-            "propertyDetails.complianceInformation.notAdded"
+
+            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! ->
+                "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
+
+            uploadedFileStatus == FileUploadStatus.QUARANTINED ->
+                "propertyDetails.complianceInformation.gasSafety.virusScanPending"
+
+            uploadedFileStatus == FileUploadStatus.DELETED ->
+                "propertyDetails.complianceInformation.gasSafety.virusScanFailed"
+
+            expired == true ->
+                "propertyDetails.complianceInformation.expired"
+
+            propertyCompliance.hasGasSafetyExemption ->
+                "propertyDetails.complianceInformation.exempt"
+
+            else ->
+                "propertyDetails.complianceInformation.notAdded"
         }
+    }
 
     private fun getExemptionReasonValue(
         exemptionReason: GasSafetyExemptionReason?,

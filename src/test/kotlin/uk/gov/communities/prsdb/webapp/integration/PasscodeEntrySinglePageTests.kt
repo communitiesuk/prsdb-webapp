@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 
-class PasscodeEntrySinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-landlord.sql") {
+class PasscodeEntrySinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @MockitoBean
     lateinit var passcodeService: PasscodeService
 

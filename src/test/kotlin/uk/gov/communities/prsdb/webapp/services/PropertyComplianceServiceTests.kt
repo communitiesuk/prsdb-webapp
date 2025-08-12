@@ -133,6 +133,25 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
+    fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant properties`() {
+        // Arrange
+        val landlordBaseUserId = "baseUserId"
+        val nonCompliantProperties =
+            listOf(PropertyComplianceBuilder.createWithMissingCerts(), PropertyComplianceBuilder.createWithExpiredCerts())
+        val compliances = nonCompliantProperties + PropertyComplianceBuilder.createWithInDateCerts()
+
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+        ).thenReturn(compliances)
+
+        // Act
+        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+
+        // Assert
+        assertEquals(nonCompliantProperties.size, returnedCount)
+    }
+
+    @Test
     fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"

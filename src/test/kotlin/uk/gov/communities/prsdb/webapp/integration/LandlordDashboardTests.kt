@@ -4,15 +4,15 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
+class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `the dashboard loads displaying the user's name and lrn`() {
         val dashboard = navigator.goToLandlordDashboard()
@@ -51,10 +51,10 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
     }
 
     @Test
-    fun `the add compliance information button links to the add compliance information page`(page: Page) {
+    fun `the add compliance information button links to the compliance actions page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.addComplianceInformationButton.clickAndWait()
-        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Test
@@ -67,8 +67,8 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
     @Nested
     inner class NotificationBanner {
         @Nested
-        inner class LandlordWithoutIncompletePropertiesOrIncompleteCompliance :
-            NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-properties.sql") {
+        inner class LandlordWithoutIncompletePropertiesOrComplianceActions :
+            NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
             @Test
             fun `the dashboard loads without a notification banner`() {
                 val dashboard = navigator.goToLandlordDashboard()
@@ -79,10 +79,9 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
         @Nested
         inner class WithOnlyIncompleteProperties {
             @Nested
-            inner class WithOne :
-                NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-property.sql") {
+            inner class WithOne : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-one-incomplete-property.sql") {
                 @Test
-                fun `the notification banner loads with only correct message for one incomplete property`(page: Page) {
+                fun `the notification banner loads with correct message for one incomplete property`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.title).containsText("Important")
                     assertThat(dashboard.notificationBanner.content.heading)
@@ -91,14 +90,13 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             }
 
             @Nested
-            inner class WithMultiple : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties.sql") {
+            inner class WithMultiple : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-incomplete-properties.sql") {
                 @Test
                 fun `the notification banner loads with correct message for multiple incomplete properties`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.title).containsText("Important")
-                    assertThat(
-                        dashboard.notificationBanner.content.heading,
-                    ).containsText("You have 2 incomplete properties: View incomplete properties")
+                    assertThat(dashboard.notificationBanner.content.heading)
+                        .containsText("You have 2 incomplete properties: View incomplete properties")
                 }
 
                 @Test
@@ -111,12 +109,11 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
         }
 
         @Nested
-        inner class WithOnlyIncompleteCompliances {
+        inner class WithOnlyComplianceActions {
             @Nested
-            inner class WithOne :
-                NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-one-incomplete-compliance.sql") {
+            inner class WithOne : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-one-compliance-action.sql") {
                 @Test
-                fun `the notification banner loads with correct message for one incomplete compliance`(page: Page) {
+                fun `the notification banner loads with correct message for one compliance action`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
                         .containsText("You have 1 property awaiting compliance information: Add compliance information")
@@ -124,31 +121,30 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             }
 
             @Nested
-            inner class WithMultiple : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-compliances.sql") {
+            inner class WithMultiple : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
                 @Test
-                fun `the notification banner loads with correct message for multiple incomplete compliances`(page: Page) {
+                fun `the notification banner loads with correct message for multiple compliance actions`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 2 properties awaiting compliance information: Add compliance information")
+                        .containsText("You have 3 properties awaiting compliance information: Add compliance information")
                 }
 
                 @Test
-                fun `the add compliance information link redirects to the incomplete compliances page`(page: Page) {
+                fun `the add compliance information link redirects to the compliance actions page`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     dashboard.notificationBanner.addComplianceInformationLink.clickAndWait()
-                    assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+                    assertPageIs(page, ComplianceActionsPage::class)
                 }
             }
         }
 
         @Nested
-        inner class WithIncompletePropertiesAndIncompleteCompliances :
-            NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties-and-incomplete-compliances.sql") {
+        inner class WithIncompletePropertiesAndComplianceActions :
+            NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-incomplete-properties-and-compliance-actions.sql") {
             @Test
             fun `the notification banner loads with correct heading and messages`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()
-                assertThat(dashboard.notificationBanner.content.heading)
-                    .containsText("You have 4 outstanding property actions")
+                assertThat(dashboard.notificationBanner.content.heading).containsText("You have 4 outstanding property actions")
             }
 
             @Test
@@ -159,10 +155,10 @@ class LandlordDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
             }
 
             @Test
-            fun `the add compliance information link redirects to the incomplete compliances page`(page: Page) {
+            fun `the add compliance information link redirects to the compliance actions page`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()
                 dashboard.notificationBanner.addComplianceInformationLink.clickAndWait()
-                assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+                assertPageIs(page, ComplianceActionsPage::class)
             }
         }
     }

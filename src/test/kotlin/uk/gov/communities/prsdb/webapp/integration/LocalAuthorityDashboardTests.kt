@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.Test
 
-class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql") {
+class LocalAuthorityDashboardTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `the dashboard loads displaying the user's name and local authority`(page: Page) {
         val dashboard = navigator.goToLocalAuthorityDashboard()
@@ -40,7 +40,7 @@ class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql"
     }
 
     @Nested
-    inner class LaUserNotAdmin : NestedSinglePageTestWithSeedData("data-mockuser-la-user-not-admin.sql") {
+    inner class LaUserNotAdmin : NestedIntegrationTestWithImmutableData("data-mockuser-la-user-not-admin.sql") {
         @Test
         fun `the manage users button is not visible`(page: Page) {
             val dashboard = navigator.goToLocalAuthorityDashboard()
@@ -49,7 +49,7 @@ class LocalAuthorityDashboardTests : SinglePageTestWithSeedData("data-local.sql"
     }
 
     @Nested
-    inner class LaAdminUser : NestedSinglePageTestWithSeedData("data-mockuser-la-admin-user.sql") {
+    inner class LaAdminUser : NestedIntegrationTestWithImmutableData("data-mockuser-la-admin-user.sql") {
         @Test
         fun `the manage users button is visible and when clicked redirects to the manage users page`(page: Page) {
             val dashboard = navigator.goToLocalAuthorityDashboard()

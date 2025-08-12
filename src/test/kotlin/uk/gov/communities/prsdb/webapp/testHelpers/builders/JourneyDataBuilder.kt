@@ -567,11 +567,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withGasSafetyOutdatedConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment] = emptyMap<String, Any>()
-        return this
-    }
-
     fun withGasSafeEngineerNum(engineerNum: String = "1234567"): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment] =
             mapOf(GasSafeEngineerNumFormModel::engineerNumber.name to engineerNum)
@@ -592,6 +587,11 @@ class JourneyDataBuilder(
 
     fun withGasSafetyCertUploadConfirmation(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment] = emptyMap<String, Any>()
+        return this
+    }
+
+    fun withGasSafetyOutdatedConfirmation(): JourneyDataBuilder {
+        journeyData[PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment] = emptyMap<String, Any>()
         return this
     }
 

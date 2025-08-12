@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ConfirmDeleteLaUserPage
@@ -14,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class EditLAUserTests : JourneyTestWithSeedData("data-local.sql") {
+class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent
