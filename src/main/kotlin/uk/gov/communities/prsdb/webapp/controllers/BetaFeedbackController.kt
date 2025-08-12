@@ -91,4 +91,11 @@ class BetaFeedbackController {
         }
         return "redirect:/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
     }
+
+    @RequestMapping("/${LANDLORD_PATH_SEGMENT}/beta-banner")
+    fun routeLandlordFeedback(): String = "redirect:/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
+
+    @RequestMapping("/${LOCAL_AUTHORITY_PATH_SEGMENT}/beta-banner")
+    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+    fun routeLocalAuthorityFeedback(): String = "redirect:/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
 }
