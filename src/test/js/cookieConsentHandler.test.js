@@ -27,6 +27,10 @@ function setup(onCookiesPage = false) {
     teardown = jsdom(html, {
         url: onCookiesPage ? 'https://example.com/cookies' : 'https://example.com'
     });
+
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = 'G-PDPW9SQ94W'
+    window.GOOGLE_COOKIE_DOMAIN = 'communities.gov.uk'
+    window.dataLayer = []
 }
 
 describe('Cookie Consent Handler', () => {
