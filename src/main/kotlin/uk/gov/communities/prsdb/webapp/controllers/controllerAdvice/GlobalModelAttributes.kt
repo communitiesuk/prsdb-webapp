@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.gov.communities.prsdb.webapp.PrsdbControllerAdvice
@@ -20,7 +21,10 @@ class GlobalModelAttributes {
         auth: org.springframework.security.core.Authentication?,
     ) {
         val url =
-            if (auth != null && auth.isAuthenticated &&
+            if (
+                auth != null &&
+                auth.isAuthenticated &&
+                auth !is AnonymousAuthenticationToken &&
                 auth.authorities.any { it.authority == ROLE_LA_USER || it.authority == ROLE_LA_ADMIN }
             ) {
                 "/local-authority/feedback"
