@@ -34,7 +34,7 @@ class AwsS3FileUploader(
             return if (response.sdkHttpResponse().isSuccessful) {
                 UploadedFileLocator(
                     objectKey = objectKey,
-                    eTag = response.eTag(),
+                    eTag = response.eTag().removeSurrounding(""),
                     versionId = response.versionId(),
                 )
             } else {
