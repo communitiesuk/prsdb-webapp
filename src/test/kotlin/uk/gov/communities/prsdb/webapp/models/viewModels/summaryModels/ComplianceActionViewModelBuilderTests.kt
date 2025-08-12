@@ -1,18 +1,19 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Named.named
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import kotlin.test.assertEquals
 
 class ComplianceActionViewModelBuilderTests {
-    @Test
-    fun `fromDataModel returns a SummaryCardViewModel with the correct title and summary list`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `fromDataModel returns a SummaryCardViewModel with the correct title and summary list when`(isComplete: Boolean) {
         // Arrange
         val dataModel =
             ComplianceStatusDataModel(
@@ -22,20 +23,24 @@ class ComplianceActionViewModelBuilderTests {
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
                 eicrStatus = ComplianceCertStatus.NOT_ADDED,
                 epcStatus = ComplianceCertStatus.EXPIRED,
-                isComplete = true,
+                isComplete = isComplete,
             )
         val anyCurrentUrlKey = 1
 
         val expectedSummaryList =
-            listOf(
+            listOfNotNull(
                 SummaryListRowViewModel(
                     "complianceActions.summaryRow.registrationNumber",
                     dataModel.registrationNumber,
                 ),
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.gasSafety",
-                    MessageKeyConverter.convert(dataModel.gasSafetyStatus),
-                ),
+                if (!isComplete) {
+                    SummaryListRowViewModel(
+                        "complianceActions.summaryRow.gasSafety",
+                        MessageKeyConverter.convert(dataModel.gasSafetyStatus),
+                    )
+                } else {
+                    null
+                },
                 SummaryListRowViewModel(
                     "complianceActions.summaryRow.electricalSafety",
                     MessageKeyConverter.convert(dataModel.eicrStatus),
