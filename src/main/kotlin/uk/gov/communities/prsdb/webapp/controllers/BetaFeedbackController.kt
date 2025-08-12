@@ -27,8 +27,9 @@ class BetaFeedbackController {
     ): String {
         val formModel = BetaFeedbackModel()
         model.addAttribute("betaFeedbackModel", formModel)
-        model.addAttribute("referrerHeader", request.getHeader("referer"))
-        model.addAttribute("backUrl", request.getHeader("referer"))
+        val referrer = request.getHeader("referer")
+        model.addAttribute("referrerHeader", referrer)
+        model.addAttribute("backUrl", referrer)
         return "betaBannerFeedback"
     }
 
@@ -49,8 +50,9 @@ class BetaFeedbackController {
     ): String {
         val formModel = BetaFeedbackModel()
         model.addAttribute("betaFeedbackModel", formModel)
-        model.addAttribute("referrerHeader", request.getHeader("referer"))
-        model.addAttribute("backUrl", request.getHeader("referer"))
+        val referrer = request.getHeader("referer")
+        model.addAttribute("referrerHeader", referrer)
+        model.addAttribute("backUrl", referrer)
         return "betaBannerFeedback"
     }
 
@@ -72,7 +74,9 @@ class BetaFeedbackController {
         request: HttpServletRequest,
     ): String {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("referrerHeader", request.getHeader("referer"))
+            val referrer = request.getHeader("referer")
+            model.addAttribute("referrerHeader", referrer)
+            model.addAttribute("backUrl", referrer)
             return "betaBannerFeedback"
         }
         return "redirect:/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
@@ -87,7 +91,9 @@ class BetaFeedbackController {
         request: HttpServletRequest,
     ): String {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("referrerHeader", request.getHeader("referer"))
+            val referrer = request.getHeader("referer")
+            model.addAttribute("referrerHeader", referrer)
+            model.addAttribute("backUrl", referrer)
             return "betaBannerFeedback"
         }
         return "redirect:/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
