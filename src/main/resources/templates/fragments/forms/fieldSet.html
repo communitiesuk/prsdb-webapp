@@ -1,16 +1,10 @@
-<div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" class="govuk-form-group"
-     th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
-    <fieldset class="govuk-fieldset" role="group"
-              th:attrappend="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint ' : ''}${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
-        <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h1 class="govuk-fieldset__heading" th:text="${fieldSetHeading}">
-                Heading for set of form fields
-            </h1>
+<div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" th:with="headingSize=${headingSize ?: 'l'}" class="govuk-form-group" th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
+    <fieldset class="govuk-fieldset" th:attr="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint ' : ''}${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
+        <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend" th:classappend="|govuk-fieldset__legend--${headingSize}|">
+            <h1 th:if="${headingSize == 'l'}" class="govuk-fieldset__heading" th:text="${fieldSetHeading}">fieldSetHeading</h1>
+            <h2 th:unless="${headingSize == 'l'}" class="govuk-fieldset__heading" th:text="${fieldSetHeading}">fieldSetHeading</h2>
         </legend>
-        <div id="field-hint" th:if="${fieldSetHint != null}" th:id="${fieldName}+'-hint'" class="govuk-hint"
-             th:text="${fieldSetHint}">
-            Hint for the set of form fields
-        </div>
+        <div id="field-hint" th:if="${fieldSetHint != null}" th:id="${fieldName}+'-hint'" class="govuk-hint" th:text="${fieldSetHint}">fieldSetHint</div>
         <div th:replace="${content}"></div>
     </fieldset>
 </div>
