@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
@@ -14,7 +13,6 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
-import uk.gov.communities.prsdb.webapp.constants.BETA_BANNER_FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
@@ -26,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompleteComplianceViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
@@ -180,28 +177,6 @@ class LandlordController(
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "incompleteCompliancesView"
-    }
-
-    @GetMapping("/${BETA_BANNER_FEEDBACK_PATH_SEGMENT}")
-    fun betaBannerFeedback(
-        model: Model,
-        request: HttpServletRequest,
-    ): String {
-        val formModel = BetaFeedbackModel()
-        model.addAttribute("betaFeedbackModel", formModel)
-        model.addAttribute("referrerHeader", request.getHeader("referer"))
-        model.addAttribute("backUrl", request.getHeader("referer"))
-
-        return "betaBannerFeedback"
-    }
-
-    @GetMapping("/${BETA_BANNER_FEEDBACK_PATH_SEGMENT}/success")
-    fun betaBannerFeedbackSuccess(
-        model: Model,
-        request: HttpServletRequest,
-    ): String {
-        model.addAttribute("backUrl", request.getHeader("referer"))
-        return "betaBannerFeedbackSuccess"
     }
 
     fun populateDeleteIncompletePropertyRegistrationModel(
