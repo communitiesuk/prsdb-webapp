@@ -26,7 +26,7 @@ function updateGaConsent(isGranted = false) {
 
     if (!isGranted) {
         deleteCookie("_ga")
-        deleteCookie("_ga_PDPW9SQ94W")
+        deleteCookie("_ga_" + window.GOOGLE_ANALYTICS_MEASUREMENT_ID.slice(2))
     }
 }
 

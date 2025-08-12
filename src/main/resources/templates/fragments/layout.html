@@ -37,9 +37,10 @@
         'wait_for_update': 500,
     });
 </script>
-<!--/*@thymesVar id="googleAnalyticsMeasurementId" type=""*/-->
+<!--/*@thymesVar id="googleAnalyticsMeasurementId" type="String"*/-->
 <script async th:src="'https://www.googletagmanager.com/gtag/js?id='+${googleAnalyticsMeasurementId}"></script>
 <script th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = [[${measurementIdAsString}]];
     <!-- Google tag (gtag.js) -->
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
