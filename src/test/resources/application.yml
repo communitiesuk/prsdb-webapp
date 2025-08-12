@@ -23,3 +23,10 @@ aws:
   s3:
     quarantineBucket: 'quarantine-bucket'
     safeBucket: 'safe-bucket'
+
+plausible:
+  domain-id: register-home-to-rent.communities.gov.uk
+
+google-analytics:
+  measurement-id: G-XXXXXXXXXX
+  cookie-domain: example.gov.uk
