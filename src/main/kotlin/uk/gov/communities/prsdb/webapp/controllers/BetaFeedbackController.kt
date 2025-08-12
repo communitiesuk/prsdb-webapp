@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.BETA_BANNER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
@@ -92,10 +93,10 @@ class BetaFeedbackController {
         return "redirect:/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
     }
 
-    @RequestMapping("/${LANDLORD_PATH_SEGMENT}/beta-banner")
+    @RequestMapping("/${LANDLORD_PATH_SEGMENT}/$BETA_BANNER_PATH_SEGMENT")
     fun routeLandlordFeedback(): String = "redirect:/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
 
-    @RequestMapping("/${LOCAL_AUTHORITY_PATH_SEGMENT}/beta-banner")
+    @RequestMapping("/${LOCAL_AUTHORITY_PATH_SEGMENT}/$BETA_BANNER_PATH_SEGMENT")
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     fun routeLocalAuthorityFeedback(): String = "redirect:/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
 }
