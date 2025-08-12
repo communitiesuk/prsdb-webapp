@@ -68,10 +68,10 @@ class EicrViewModelFactory(
                 "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr"
 
             uploadedFileStatus == FileUploadStatus.QUARANTINED ->
-                "propertyDetails.complianceInformation.electricalSafety.virusScanPending"
+                "propertyCompliance.uploadedFile.virusScanPending"
 
             uploadedFileStatus == FileUploadStatus.DELETED ->
-                "propertyDetails.complianceInformation.electricalSafety.virusScanFailed"
+                "propertyCompliance.uploadedFile.virusScanFailed"
 
             expired == true ->
                 "propertyDetails.complianceInformation.expired"
