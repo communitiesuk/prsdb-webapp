@@ -53,7 +53,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             val completedComplianceCard = complianceActionsPage.getSummaryCard("4 Pretend Crescent")
             assertThat(completedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKC")
             assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("Not added")
-            assertThat(completedComplianceCard.summaryList.electricalSafetyRow).containsText("Added")
+            assertThat(completedComplianceCard.summaryList.electricalSafetyRow).isHidden()
             assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
 
             completedComplianceCard.getAction("Update expired or missing certificates").link.clickAndWait()
