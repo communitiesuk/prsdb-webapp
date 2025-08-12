@@ -77,7 +77,7 @@ plausible:
 
 google-analytics:
   measurement-id: G-PDPW9SQ94W
-  cookie-domain: communities.gov.uk
+  cookie-domain: localhost
 ---
 
 spring:
