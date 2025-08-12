@@ -37,13 +37,14 @@
         'wait_for_update': 500,
     });
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PDPW9SQ94W"></script>
-<script>
+<!--/*@thymesVar id="googleAnalyticsMeasurementId" type=""*/-->
+<script async th:src="'https://www.googletagmanager.com/gtag/js?id='+${googleAnalyticsMeasurementId}"></script>
+<script th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
     <!-- Google tag (gtag.js) -->
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-PDPW9SQ94W');
+    gtag('config', [[${measurementIdAsString}]])
 </script>
 <body class="govuk-template__body">
 <script>
