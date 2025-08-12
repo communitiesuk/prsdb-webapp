@@ -10,7 +10,7 @@ import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 
 @Entity
-open class CertificateUpload() : ModifiableAuditableEntity() {
+class CertificateUpload() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
