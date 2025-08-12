@@ -1,0 +1,58 @@
+# Analytics
+
+We are using both [Plausible](https://plausible.io/docs) and [Google Analytics](https://developers.google.com/analytics/devguides/collection/ga4) to track user interactions with the service.
+
+We have not yet implemented any custom events in either, but both should be tracking page views and some basic user interactions.
+
+Both sets of analytics are added via code snippets on the "layout.html" page.
+
+## Plausible
+
+Plausible has been set up to track optional events including outbound links, file downloads, 404 error pages and hashed page paths.
+All of those except for hashed page paths add to our billable pageviews.
+Modifying these requires a code change.
+
+### Plausible Team
+
+To view the analytics on Plausible, you will need to be added to the Team on the Plausible account or be added as a guest on the sites.
+One of the dev team should be able to invite you (at time of writing, Rowan, Travis, Jasmin, Isobel and Kiran are on the team and can add more members).
+
+(To edit the team, click on your name in the top right of the screen and select "Team settings" from the drop-down menu.
+Team members can be added in the "General" section)
+
+Note there may be a team limit of 10 members, so we may need to remove people if we reach that limit and instead add them as guests on the sites (see below).
+
+#### Restricting access to Plausible Analytics
+
+We may need to only include people on the team who are authorized to view the production analytics (team members can see all "sites")
+We should be able to add people to view the test analytics only by going to the site settings and adding people as guests.
+
+From the [dashboard](https://plausible.io/sites), click on the three dots on the site you want to edit and select "Settings".
+Then go to the "People" section and invite guests from there (note I haven't actually tried this yet...)
+
+### Viewing Plausible Analytics
+
+To view the analytics, from the [dashboard](https://plausible.io/sites) click on the site you want to view.
+At the moment, there is only register-home-to-rent.communities.gov.uk, this receives data from all our domain names (integration, test, register-home-to-rent, search-landlord-home-information).
+On the dashboard we can filter data by hostname to get environment specific data https://plausible.io/docs/subdomain-hostname-filter
+
+We will probably add a separate "site" for prod in the future and may restrict access to this (see above)
+
+## Google Analytics (GA)
+
+Google Analytics uses cookies to track unique users, so full data is only available when users accept cookies.
+GA has been set up so that it can still send data such as page views to GA. It is unclear how useful this data will be but we can filter by whether or not the user has consented to cookies when it comes to viewing.
+
+### Google Analytics Team and Accounts
+In order to view the Google Analytics data, you will need to be added to the PRSD Google Analytics account.
+For that you need a google account with a .communities.gov.uk email address.
+
+If you don't have one already, you can create one from the google account sign in page by going to Create account -> For work or my business -> Get a Gmail address.
+When you get to the page asking you to choose an email address, there should be a "Use an existing email address" link next to the "Next" button - for some people this hasn't been appearing on the first try but has appeared later in the day.
+You should then be able to use your communities.gov.uk email address to create a google account.
+
+Once you have a google account, ask someone to add you to the Google Analytics account (at time of writing Jasmin, Isobel, Kiran and Rowan are on the account and can add more members).
+
+Once you are added, it should show up at https://analytics.google.com/
+
+### Debugging with Google Tag Assistant
