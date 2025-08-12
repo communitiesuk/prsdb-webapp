@@ -71,6 +71,13 @@ aws:
   s3:
     quarantineBucket: ${AWS_QUARANTINE_BUCKET:prsdb-quarantine-integration}
     safeBucket: ${S3_SAFE_BUCKET_KEY:prsdb-uploaded-files-integration}
+
+plausible:
+  domain-id: register-home-to-rent.communities.gov.uk
+
+google-analytics:
+  measurement-id: G-PDPW9SQ94W
+  cookie-domain: communities.gov.uk
 ---
 
 spring:
