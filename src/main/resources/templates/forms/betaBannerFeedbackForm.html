@@ -1,5 +1,5 @@
 <th:block th:fragment="betaBannerFeedbackForm">
-    <form id="feedback-form" method="post" th:action="@{/beta-banner-feedback}" th:object="${betaFeedbackModel}" novalidate>
+    <form id="feedback-form" method="post" th:action="${feedbackUrl}" th:object="${betaFeedbackModel}" novalidate>
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
         <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
 
