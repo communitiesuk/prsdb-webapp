@@ -11,9 +11,17 @@ class GlobalModelAttributes {
     @Value("\${google-analytics.measurement-id}")
     private lateinit var gaMeasurementId: String
 
+    @Value("\${google-analytics.cookie-domain}")
+    private lateinit var gaCookieDomain: String
+
+    @Value("\${plausible.domain-id}")
+    private lateinit var plausibleDomainId: String
+
     @ModelAttribute
     fun addGlobalModelAttributes(model: Model) {
         model.addAttribute("cookiesUrl", COOKIES_ROUTE)
         model.addAttribute("googleAnalyticsMeasurementId", gaMeasurementId)
+        model.addAttribute("googleAnalyticsCookieDomain", gaCookieDomain)
+        model.addAttribute("plausibleDomainId", plausibleDomainId)
     }
 }

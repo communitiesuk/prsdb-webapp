@@ -31,7 +31,7 @@ function updateGaConsent(isGranted = false) {
 }
 
 function deleteCookie(name) {
-    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=communities.gov.uk;';
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.GOOGLE_COOKIE_DOMAIN + ';';
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
 
