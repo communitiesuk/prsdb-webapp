@@ -22,21 +22,18 @@ Team members can be added in the "General" section)
 
 Note there may be a team limit of 10 members, so we may need to remove people if we reach that limit and instead add them as guests on the sites (see below).
 
-#### Restricting access to Plausible Analytics
+#### Restricting access to production Analytics
 
 We may need to only include people on the team who are authorized to view the production analytics (team members can see all "sites")
 We should be able to add people to view the test analytics only by going to the site settings and adding people as guests.
 
-From the [dashboard](https://plausible.io/sites), click on the three dots on the site you want to edit and select "Settings".
-Then go to the "People" section and invite guests from there (note I haven't actually tried this yet...)
-
 ### Viewing Plausible Analytics
 
 To view the analytics, from the [dashboard](https://plausible.io/sites) click on the site you want to view.
-At the moment, there is only register-home-to-rent.communities.gov.uk, this receives data from all our domain names (integration, test, register-home-to-rent, search-landlord-home-information).
+* prod.register-home-to-rent.communities.gov.uk will be for production (it won't receive anything until prod is live).
+* register-home-to-rent.communities.gov.uk is for everything else (integration, test, register-home-to-rent, search-landlord-home-information).
 On the dashboard we can filter data by hostname to get environment specific data https://plausible.io/docs/subdomain-hostname-filter
-
-We will probably add a separate "site" for prod in the future and may restrict access to this (see above)
+Each site will receive data from both the register-home-to-rent and the search-landlord-home-information domains.
 
 ## Google Analytics (GA)
 
@@ -57,6 +54,10 @@ Once you are added, it should show up at https://analytics.google.com/
 
 ### Viewing Google Analytics
 Google Analytics should viewable at https://analytics.google.com/
+
+There are two "Properties" set up on the PRSD account, one for PRSD Test and one for PRSD Prod.
+Each property will receive data from both the register-home-to-rent and the search-landlord-home-information domains.
+PRSD Test will receive data from all environments except production.
 
 We haven't set much up in the way of reports yet, but you should be able to see information such as page views, visitors etc.
 From manual testing, it looks like page titles show up for users who have accepted cookies, but not for those who haven't.
