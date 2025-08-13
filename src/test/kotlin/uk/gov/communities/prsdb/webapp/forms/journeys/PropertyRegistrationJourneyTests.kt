@@ -15,19 +15,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
 
 class PropertyRegistrationJourneyTests {
     @Mock
@@ -40,16 +34,7 @@ class PropertyRegistrationJourneyTests {
     lateinit var localAuthorityService: LocalAuthorityService
 
     @Mock
-    lateinit var landlordService: LandlordService
-
-    @Mock
     lateinit var addressLookupService: AddressLookupService
-
-    @Mock
-    lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
-
-    @Mock
-    lateinit var urlProvider: AbsoluteUrlProvider
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
@@ -58,10 +43,7 @@ class PropertyRegistrationJourneyTests {
         mockJourneyDataService = mock()
         mockPropertyRegistrationService = mock()
         localAuthorityService = mock()
-        landlordService = mock()
         addressLookupService = mock()
-        confirmationEmailSender = mock()
-        urlProvider = mock()
     }
 
     @Nested
@@ -72,11 +54,8 @@ class PropertyRegistrationJourneyTests {
 
         @BeforeEach
         fun beforeEach() {
-            whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(MockLandlordData.createLandlord())
-            whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
-
             whenever(
-                mockPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+                mockPropertyRegistrationService.registerProperty(
                     any(),
                     any(),
                     any(),
@@ -95,9 +74,6 @@ class PropertyRegistrationJourneyTests {
                     addressLookupService = addressLookupService,
                     propertyRegistrationService = mockPropertyRegistrationService,
                     localAuthorityService = localAuthorityService,
-                    landlordService = landlordService,
-                    confirmationEmailSender = confirmationEmailSender,
-                    absoluteUrlProvider = urlProvider,
                 )
             JourneyTestHelper.setMockUser(principalName)
         }
@@ -118,7 +94,7 @@ class PropertyRegistrationJourneyTests {
             completeStep(RegisterPropertyStepId.Declaration)
 
             // Assert
-            verify(mockPropertyRegistrationService).registerPropertyAndReturnPropertyRegistrationNumber(
+            verify(mockPropertyRegistrationService).registerProperty(
                 any(),
                 any(),
                 any(),
@@ -146,7 +122,7 @@ class PropertyRegistrationJourneyTests {
             completeStep(RegisterPropertyStepId.Declaration)
 
             // Assert
-            verify(mockPropertyRegistrationService).registerPropertyAndReturnPropertyRegistrationNumber(
+            verify(mockPropertyRegistrationService).registerProperty(
                 any(),
                 argThat { type -> type == PropertyType.FLAT },
                 any(),
@@ -176,7 +152,7 @@ class PropertyRegistrationJourneyTests {
             completeStep(RegisterPropertyStepId.Declaration)
 
             // Assert
-            verify(mockPropertyRegistrationService).registerPropertyAndReturnPropertyRegistrationNumber(
+            verify(mockPropertyRegistrationService).registerProperty(
                 any(),
                 any(),
                 argThat { type -> type == LicensingType.HMO_MANDATORY_LICENCE },
@@ -204,7 +180,7 @@ class PropertyRegistrationJourneyTests {
             completeStep(RegisterPropertyStepId.Declaration)
 
             // Assert
-            verify(mockPropertyRegistrationService).registerPropertyAndReturnPropertyRegistrationNumber(
+            verify(mockPropertyRegistrationService).registerProperty(
                 any(),
                 any(),
                 argThat { type -> type == LicensingType.NO_LICENSING },
