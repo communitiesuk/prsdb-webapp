@@ -46,8 +46,8 @@ class EicrSummaryRowsFactory(
             val fileUpload = uploadService.getFileUploadById(fileId)
 
             return when (fileUpload.status) {
-                FileUploadStatus.QUARANTINED -> EicrValue("forms.checkComplianceAnswers.eicr.notYetAvailable")
-                FileUploadStatus.DELETED -> EicrValue("forms.checkComplianceAnswers.eicr.virusScanFailed")
+                FileUploadStatus.QUARANTINED -> EicrValue("propertyCompliance.uploadedFile.virusScanPending")
+                FileUploadStatus.DELETED -> EicrValue("propertyCompliance.uploadedFile.virusScanFailed")
                 FileUploadStatus.SCANNED ->
                     EicrValue(
                         "forms.checkComplianceAnswers.eicr.download",

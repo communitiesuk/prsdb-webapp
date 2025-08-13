@@ -17,9 +17,6 @@
 
                 <div id="personal-details-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{::#personal-details-panel-content/content()})}">
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
-                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">landlordDetails.personalDetails.optionalChoices.heading</h2>
-                    <p class="govuk-hint" th:text="#{landlordDetails.personalDetails.optionalChoices.hint}">landlordDetails.personalDetails.optionalChoices.hint</p>
-                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}" ></dl>
                 </div>
 
                 <div id="registered-properties-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel-content/content()})}">

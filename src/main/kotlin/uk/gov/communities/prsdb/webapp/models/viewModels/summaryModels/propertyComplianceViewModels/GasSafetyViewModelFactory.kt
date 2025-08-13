@@ -72,10 +72,10 @@ class GasSafetyViewModelFactory(
                 "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
 
             uploadedFileStatus == FileUploadStatus.QUARANTINED ->
-                "propertyDetails.complianceInformation.gasSafety.virusScanPending"
+                "propertyCompliance.uploadedFile.virusScanPending"
 
             uploadedFileStatus == FileUploadStatus.DELETED ->
-                "propertyDetails.complianceInformation.gasSafety.virusScanFailed"
+                "propertyCompliance.uploadedFile.virusScanFailed"
 
             expired == true ->
                 "propertyDetails.complianceInformation.expired"
