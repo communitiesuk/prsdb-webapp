@@ -79,6 +79,13 @@ base-url:
   landlord: ${LANDLORD_BASE_URL}
   local-authority: ${LOCAL_AUTHORITY_BASE_URL}
 
+plausible:
+  domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
+
+google-analytics:
+  measurement-id: ${GOOGLE_ANALYTICS_MEASUREMENT_ID}
+  cookie-domain: ${GOOGLE_ANALYTICS_COOKIE_DOMAIN}
+
 ---
 
 spring:

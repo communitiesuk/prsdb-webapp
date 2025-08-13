@@ -27,6 +27,10 @@ function setup(onCookiesPage = false) {
     teardown = jsdom(html, {
         url: onCookiesPage ? 'https://example.com/cookies' : 'https://example.com'
     });
+
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = 'G-XXXXXXXXXX'
+    window.GOOGLE_COOKIE_DOMAIN = 'communities.gov.uk'
+    window.dataLayer = []
 }
 
 describe('Cookie Consent Handler', () => {
@@ -100,4 +104,69 @@ describe('Cookie Consent Handler', () => {
 
         assert.strictEqual(cookieBanner.hidden, true);
     });
+    describe('updates Google Analytics (GA) consent', () => {
+        test('to granted if the cookie_consent cookie is already set to true', () => {
+            document.cookie = 'cookie_consent=true';
+
+            addCookieConsentHandler();
+
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(true));
+        })
+
+        test('to denied and expires existing GA cookies if the cookie_consent cookie is already set to false', () => {
+            // Arrange
+            document.cookie = 'cookie_consent=false;';
+            document.cookie = '_ga=123;';
+            document.cookie = '_ga_XXXXXXXXXX=456;'
+            assert.strictEqual(document.cookie.includes('_ga='), true);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), true);
+
+            // Act
+            addCookieConsentHandler();
+
+            // Assert
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+            assert.strictEqual(document.cookie.includes('_ga='), false);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), false);
+        });
+
+        test('to denied if the cookie_consent cookie is not set', () => {
+            addCookieConsentHandler();
+
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+        });
+
+        test('to granted when cookies are accepted on the cookie banner', () => {
+            const acceptButton = document.getElementById('accept-cookies-button');
+
+            addCookieConsentHandler();
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+            acceptButton.click();
+
+            assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(true)[0]);
+        });
+        test('to denied and expires existing GA cookies when cookies are rejected on the cookie banner', () => {
+            document.cookie = '_ga=123; _ga_XXXXXXXXXX=456;';
+            document.cookie = '_ga_XXXXXXXXXX=456;'
+            assert.strictEqual(document.cookie.includes('_ga='), true);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), true);
+            const rejectButton = document.getElementById('reject-cookies-button');
+
+            addCookieConsentHandler();
+            assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
+            rejectButton.click();
+
+            assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(false)[0]);
+            assert.strictEqual(document.cookie.includes('_ga='), false);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), false);
+        });
+    });
 });
+
+function expectedDataLayer(granted) {
+    return [
+        ['consent', 'update', {
+            analytics_storage: granted ? 'granted' : 'denied'
+        }]
+    ];
+}
