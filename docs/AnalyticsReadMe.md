@@ -15,7 +15,7 @@ Modifying these requires a code change.
 ### Plausible Team
 
 To view the analytics on Plausible, you will need to be added to the Team on the Plausible account or be added as a guest on the sites.
-One of the dev team should be able to invite you (at time of writing, Rowan, Travis, Jasmin, Isobel and Kiran are on the team and can add more members).
+Check with your team lead who can add more members if you're unsure.
 
 (To edit the team, click on your name in the top right of the screen and select "Team settings" from the drop-down menu.
 Team members can be added in the "General" section)
@@ -48,7 +48,7 @@ If you don't have one already, you can create one from the google account sign i
 When you get to the page asking you to choose an email address, there should be a "Use an existing email address" link next to the "Next" button - for some people this hasn't been appearing on the first try but has appeared later in the day.
 You should then be able to use your communities.gov.uk email address to create a google account.
 
-Once you have a google account, ask someone to add you to the Google Analytics account (at time of writing Jasmin, Isobel, Kiran and Rowan are on the account and can add more members).
+Once you have a google account, ask someone to add you to the Google Analytics account (check with your team lead who can add more members if you're unsure).
 
 Once you are added, it should show up at https://analytics.google.com/
 
@@ -67,6 +67,6 @@ You can view Real-Time data by clicking on the "Realtime" section in the left-ha
 
 [Google Tag Assistant](https://tagassistant.google.com/) is useful tool for viewing analytics events being fired by a page.
 
-Click on "Add domain", enter the url you want to test(this can be a localhost url) and click "Connect". 
+Click on "Add domain", enter the url you want to test (this can be a localhost url) and click "Connect". 
 It will open the page in a new window and show you the events being fired in the left hand panel on the original window. You can see more details of the events by clicking on them.
 As you click around the site, you should see events being fired for page views and other interactions.
