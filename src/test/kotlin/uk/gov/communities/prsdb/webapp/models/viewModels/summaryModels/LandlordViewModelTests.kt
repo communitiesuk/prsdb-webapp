@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -316,12 +315,6 @@ class LandlordViewModelTests {
         assertEquals(addressString, oneLineAddress)
     }
 
-    @Disabled
-    @Test
-    fun getConsentInformation() {
-        TODO("PRSD-746")
-    }
-
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
     fun `LandlordViewModel populates change links in rows when landlord`(isVerified: Boolean) {
@@ -366,9 +359,6 @@ class LandlordViewModelTests {
                 assertNull(i.action)
             }
         }
-
-        // TODO PRSD-746 change assertion for consentInformation once links have been added
-        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.action) }
     }
 
     @Test
@@ -381,6 +371,5 @@ class LandlordViewModelTests {
 
         // Assert
         viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.action) }
-        viewModel.consentInformation.forEach { consentInformation -> assertNull(consentInformation.action) }
     }
 }
