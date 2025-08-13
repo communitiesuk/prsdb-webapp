@@ -40,14 +40,12 @@
 </script>
 <!--/*@thymesVar id="googleAnalyticsMeasurementId" type="String"*/-->
 <script async th:src="'https://www.googletagmanager.com/gtag/js?id='+${googleAnalyticsMeasurementId}"></script>
-<script th:inline="javascript"
-        th:with="measurementIdAsString=${googleAnalyticsMeasurementId}, googleAnalyticsCookieDomainString=${googleAnalyticsCookieDomain}"
->
+<script th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
     <!-- Google tag (gtag.js) -->
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', [[${measurementIdAsString}]], {'cookie_domain': [[${googleAnalyticsCookieDomainString}]]})
+    gtag('config', [[${measurementIdAsString}]])
 </script>
 <script th:inline="javascript">
     // Add environment variables to the window so they can be accessed in js scripts
