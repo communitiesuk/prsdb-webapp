@@ -55,7 +55,7 @@ class RegisterPropertyControllerTests(
 
     @BeforeEach
     fun setupMocks() {
-        whenever(propertyRegistrationJourneyFactory.create(any())).thenReturn(propertyRegistrationJourney)
+        whenever(propertyRegistrationJourneyFactory.create()).thenReturn(propertyRegistrationJourney)
         whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.journeyDataKey).thenReturn(PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY)
