@@ -22,14 +22,8 @@
                     </th:block>
                 </ul>
 
-                <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content})}">
-                    <th:block id="personal-details-panel-content">
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}"></dl>
-                        <h2 class="govuk-heading-m"
-                            th:text="#{landlordDetails.personalDetails.optionalChoices.heading}">
-                            landlordDetails.personalDetails.optionalChoices.heading</h2>
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.consentInformation})}"></dl>
-                    </th:block>
+                <div id="personal-details-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{:: #personal-details-panel-content/content()})}">
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}"></dl>
                 </div>
 
                 <div th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{:: #registered-properties-panel-content})}">

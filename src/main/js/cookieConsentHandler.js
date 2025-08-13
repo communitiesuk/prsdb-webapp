@@ -21,19 +21,17 @@ function updateGaConsent(isGranted = false) {
     }
 
     gtag('consent', 'update', {
-        ad_user_data: isGranted ? 'granted' : 'denied',
-        ad_personalization: isGranted ? 'granted' : 'denied',
-        ad_storage: isGranted ? 'granted' : 'denied',
         analytics_storage: isGranted ? 'granted' : 'denied'
     })
 
     if (!isGranted) {
         deleteCookie("_ga")
-        deleteCookie("_ga_PDPW9SQ94W")
+        deleteCookie("_ga_" + window.GOOGLE_ANALYTICS_MEASUREMENT_ID.slice(2))
     }
 }
 
 function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.GOOGLE_COOKIE_DOMAIN + ';';
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
 

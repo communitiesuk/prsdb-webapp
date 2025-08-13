@@ -24,6 +24,8 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import java.time.Instant
 
 @PrsdbWebService
@@ -38,6 +40,8 @@ class PropertyRegistrationService(
     private val localAuthorityService: LocalAuthorityService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) {
     fun getIsAddressRegistered(
         uprn: Long,
@@ -60,7 +64,7 @@ class PropertyRegistrationService(
     }
 
     @Transactional
-    fun registerPropertyAndReturnPropertyRegistrationNumber(
+    fun registerProperty(
         address: AddressDataModel,
         propertyType: PropertyType,
         licenseType: LicensingType,
@@ -98,6 +102,17 @@ class PropertyRegistrationService(
             )
 
         address.uprn?.let { registeredAddressCache.setCachedAddressRegisteredResult(it, true) }
+
+        setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+
+        confirmationEmailSender.sendEmail(
+            landlord.email,
+            PropertyRegistrationConfirmationEmail(
+                RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                address.singleLineAddress,
+                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+            ),
+        )
 
         return propertyOwnership.registrationNumber
     }

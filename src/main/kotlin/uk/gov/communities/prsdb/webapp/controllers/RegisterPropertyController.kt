@@ -78,11 +78,9 @@ class RegisterPropertyController(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
-        model: Model,
-        principal: Principal,
     ): ModelAndView =
         propertyRegistrationJourneyFactory
-            .create(principal.name)
+            .create()
             .getModelAndViewForStep(
                 stepName,
                 subpage,
@@ -90,9 +88,9 @@ class RegisterPropertyController(
             )
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
-    fun getTaskList(principal: Principal): ModelAndView =
+    fun getTaskList(): ModelAndView =
         propertyRegistrationJourneyFactory
-            .create(principal.name)
+            .create()
             .getModelAndViewForTaskList()
 
     @PostMapping("/{stepName}")
@@ -101,11 +99,10 @@ class RegisterPropertyController(
         @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
         @RequestParam formData: PageData,
-        model: Model,
         principal: Principal,
     ): ModelAndView =
         propertyRegistrationJourneyFactory
-            .create(principal.name)
+            .create()
             .completeStep(
                 stepName,
                 formData,
@@ -115,10 +112,7 @@ class RegisterPropertyController(
             )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun getConfirmation(model: Model): String {
         val propertyRegistrationNumber =
             propertyRegistrationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(

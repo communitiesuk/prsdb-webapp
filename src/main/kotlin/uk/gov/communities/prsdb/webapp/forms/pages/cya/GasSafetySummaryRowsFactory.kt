@@ -48,8 +48,8 @@ class GasSafetySummaryRowsFactory(
             val fileUpload = uploadService.getFileUploadById(fileId)
 
             return when (fileUpload.status) {
-                FileUploadStatus.QUARANTINED -> GasSafetyCertificateValue("forms.checkComplianceAnswers.gasSafety.notYetAvailable")
-                FileUploadStatus.DELETED -> GasSafetyCertificateValue("forms.checkComplianceAnswers.gasSafety.virusScanFailed")
+                FileUploadStatus.QUARANTINED -> GasSafetyCertificateValue("propertyCompliance.uploadedFile.virusScanPending")
+                FileUploadStatus.DELETED -> GasSafetyCertificateValue("propertyCompliance.uploadedFile.virusScanFailed")
                 FileUploadStatus.SCANNED ->
                     GasSafetyCertificateValue(
                         "forms.checkComplianceAnswers.gasSafety.download",

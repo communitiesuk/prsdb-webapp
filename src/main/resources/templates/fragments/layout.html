@@ -22,7 +22,8 @@
           th:href="@{/assets/css/accessible-autocomplete.min.css}"/>
     <link rel="stylesheet" href="/static/assets/css/moj-frontend.min.css" th:href="@{/assets/css/moj-frontend.min.css}">
     <link rel="stylesheet" href="/static/assets/css/custom.css" th:href="@{/assets/css/custom.css}">
-    <script defer data-domain="register-home-to-rent.communities.gov.uk" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
+    <!--/*@thymesVar id="plausibleDomainId" type="String"*/-->
+    <script defer th:attr="data-domain=${plausibleDomainId}" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
     <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 </head>
 <script>
@@ -37,13 +38,19 @@
         'wait_for_update': 500,
     });
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PDPW9SQ94W"></script>
-<script>
+<!--/*@thymesVar id="googleAnalyticsMeasurementId" type="String"*/-->
+<script async th:src="'https://www.googletagmanager.com/gtag/js?id='+${googleAnalyticsMeasurementId}"></script>
+<script th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
     <!-- Google tag (gtag.js) -->
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-PDPW9SQ94W');
+    gtag('config', [[${measurementIdAsString}]])
+</script>
+<script th:inline="javascript">
+    // Add environment variables to the window so they can be accessed in js scripts
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = [[${googleAnalyticsMeasurementId}]];
+    window.GOOGLE_COOKIE_DOMAIN = [[${googleAnalyticsCookieDomain}]];
 </script>
 <body class="govuk-template__body">
 <script>

@@ -13,6 +13,8 @@ import java.time.Duration
 class AwsS3FileDownloader(
     @Value("\${aws.s3.safeBucket}")
     val safeBucketName: String,
+    @Value("\${aws.s3.signatureDuration}")
+    val signatureDuration: Duration,
 ) : FileDownloader {
     override fun getDownloadUrl(
         fileUpload: FileUpload,
@@ -41,7 +43,7 @@ class AwsS3FileDownloader(
         val presignRequest =
             GetObjectPresignRequest
                 .builder()
-                .signatureDuration(Duration.ofMinutes(10))
+                .signatureDuration(signatureDuration)
                 .getObjectRequest(objectRequestBuilder.build())
                 .build()
 
