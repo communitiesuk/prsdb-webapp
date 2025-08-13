@@ -28,7 +28,7 @@ function setup(onCookiesPage = false) {
         url: onCookiesPage ? 'https://example.com/cookies' : 'https://example.com'
     });
 
-    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = 'G-PDPW9SQ94W'
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = 'G-XXXXXXXXXX'
     window.GOOGLE_COOKIE_DOMAIN = 'communities.gov.uk'
     window.dataLayer = []
 }
@@ -117,9 +117,9 @@ describe('Cookie Consent Handler', () => {
             // Arrange
             document.cookie = 'cookie_consent=false;';
             document.cookie = '_ga=123;';
-            document.cookie = '_ga_PDPW9SQ94W=456;'
+            document.cookie = '_ga_XXXXXXXXXX=456;'
             assert.strictEqual(document.cookie.includes('_ga='), true);
-            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), true);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), true);
 
             // Act
             addCookieConsentHandler();
@@ -127,7 +127,7 @@ describe('Cookie Consent Handler', () => {
             // Assert
             assert.deepStrictEqual(window.dataLayer, expectedDataLayer(false));
             assert.strictEqual(document.cookie.includes('_ga='), false);
-            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), false);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), false);
         });
 
         test('to denied if the cookie_consent cookie is not set', () => {
@@ -146,10 +146,10 @@ describe('Cookie Consent Handler', () => {
             assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(true)[0]);
         });
         test('to denied and expires existing GA cookies when cookies are rejected on the cookie banner', () => {
-            document.cookie = '_ga=123; _ga_PDPW9SQ94W=456;';
-            document.cookie = '_ga_PDPW9SQ94W=456;'
+            document.cookie = '_ga=123; _ga_XXXXXXXXXX=456;';
+            document.cookie = '_ga_XXXXXXXXXX=456;'
             assert.strictEqual(document.cookie.includes('_ga='), true);
-            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), true);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), true);
             const rejectButton = document.getElementById('reject-cookies-button');
 
             addCookieConsentHandler();
@@ -158,7 +158,7 @@ describe('Cookie Consent Handler', () => {
 
             assert.deepStrictEqual(window.dataLayer[1],  expectedDataLayer(false)[0]);
             assert.strictEqual(document.cookie.includes('_ga='), false);
-            assert.strictEqual(document.cookie.includes('_ga_PDPW9SQ94W='), false);
+            assert.strictEqual(document.cookie.includes('_ga_XXXXXXXXXX='), false);
         });
     });
 });
