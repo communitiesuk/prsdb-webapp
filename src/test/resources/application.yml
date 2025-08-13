@@ -23,6 +23,7 @@ aws:
   s3:
     quarantineBucket: 'quarantine-bucket'
     safeBucket: 'safe-bucket'
+    signatureDuration: '1h'
 
 plausible:
   domain-id: register-home-to-rent.communities.gov.uk

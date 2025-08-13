@@ -371,3 +371,12 @@ VALUES (1, 8, '01/01/25', '01/01/25',
         true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+
+INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
+VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
+SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
+
+INSERT INTO certificate_upload (id, created_date, file_upload_id, property_ownership_id, category)
+VALUES (1, '09/13/24', 1, 1, 1);
+SELECT setval(pg_get_serial_sequence('certificate_upload', 'id'), (SELECT MAX(id) FROM certificate_upload));

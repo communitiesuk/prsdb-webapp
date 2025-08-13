@@ -34,3 +34,9 @@ INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, c
 VALUES (1, true, 0, 1, 1, 2, 2, 1, 1, '3/26/25'),
        (2, true, 0, 1, 1, 2, 3, 1, 2, '3/26/25'),
        (3, true, 0, 1, 1, 2, 4, 1, 3, '3/26/25');
+
+INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
+VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
+
+INSERT INTO certificate_upload (id, created_date, file_upload_id, property_ownership_id, category)
+VALUES (1, '09/13/24', 1, 1, 1);
