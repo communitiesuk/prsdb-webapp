@@ -4,7 +4,7 @@
 <html id="page" th:replace="~{fragments/layout :: layout(#{cookies.title}, ~{::#page/content()}, false)}">
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backLink</a>
     <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
-        <div id="success-banner" th:replace="~{fragments/banners/notificationBanner :: notificationBanner(title=#{cookies.successBanner.title}, content=~{::#success-banner/content()}, isSuccess=true)}">
+        <div id="success-banner" th:replace="~{fragments/banners/notificationBanner :: notificationBanner(title=#{cookies.successBanner.title}, content=~{::#success-banner/content()}, isSuccess=true, hidden=true)}">
             <h3 class="govuk-notification-banner__heading" th:text="#{cookies.successBanner.heading}">cookies.successBanner.heading</h3>
             <p class="govuk-body" th:text="#{cookies.successBanner.body}"></p>
             <a class="govuk-notification-banner__link" th:href="@{${backUrl}}" th:text="#{cookies.successBanner.link}">cookies.successBanner.link</a>
@@ -57,11 +57,19 @@
                 </tbody>
             </table>
         </section>
-        <form th:object="${consentWrapper}" method="post" novalidate>
+        <form th:object="${consentWrapper}" method="post" novalidate hidden>
             <th:block id="fieldSet" th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldSet/content()}, fieldName='consent', fieldSetHeading=#{cookies.fieldSetHeading}, fieldSetHint=null, headingSize='m')}">
                 <th:block th:replace="~{fragments/forms/radios :: radios(label=null, fieldName='consent', hint=null, options=${radioOptions}, areInline=true)}"></th:block>
             </th:block>
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{cookies.button})}"></button>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(buttonText=#{cookies.button}, id='submit-consent-button')}"></button>
         </form>
+        <noscript>
+            <h2 class="govuk-heading-m" th:text="#{cookies.noScript.heading}">cookies.noScript.heading</h2>
+            <p class="govuk-body" th:text="#{cookies.noScript.bullet.heading}">cookies.noScript.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{cookies.noScript.bullet.one}">cookies.noScript.bullet.one</li>
+                <li th:text="#{cookies.noScript.bullet.two}">cookies.noScript.bullet.two</li>
+            </ul>
+        </noscript>
     </main>
 </html>

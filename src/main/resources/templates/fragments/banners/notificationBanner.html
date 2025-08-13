@@ -1,6 +1,6 @@
-<div th:fragment="notificationBanner(title, content)" th:with="isSuccess=${isSuccess ?: false}"
+<div th:fragment="notificationBanner(title, content)" th:with="isSuccess=${isSuccess ?: false}, hidden=${hidden ?: false}"
      class="govuk-notification-banner" th:classappend="${isSuccess ? 'govuk-notification-banner--success' : ''}"
-     th:attr="role=${isSuccess ? 'alert' : 'region'}"
+     th:attr="role=${isSuccess ? 'alert' : 'region'}, hidden=${hidden}"
      aria-labelledby="govuk-notification-banner-title"
      data-module="govuk-notification-banner">
     <div class="govuk-notification-banner__header">
