@@ -55,4 +55,17 @@ Once you have a google account, ask someone to add you to the Google Analytics a
 
 Once you are added, it should show up at https://analytics.google.com/
 
+### Viewing Google Analytics
+Google Analytics should viewable at https://analytics.google.com/
+
+We haven't set much up in the way of reports yet, but you should be able to see information such as page views, visitors etc.
+From manual testing, it looks like page titles show up for users who have accepted cookies, but not for those who haven't.
+You can view Real-Time data by clicking on the "Realtime" section in the left-hand menu - note it can take a while for events to show up here!
+
 ### Debugging with Google Tag Assistant
+
+[Google Tag Assistant](https://tagassistant.google.com/) is useful tool for viewing analytics events being fired by a page.
+
+Click on "Add domain", enter the url you want to test(this can be a localhost url) and click "Connect". 
+It will open the page in a new window and show you the events being fired in the left hand panel on the original window. You can see more details of the events by clicking on them.
+As you click around the site, you should see events being fired for page views and other interactions.
