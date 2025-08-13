@@ -108,6 +108,15 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.incompleteComplianceForm = incompleteComplianceForm
     }
 
+    constructor(propertyOwnership: PropertyOwnership) : this() {
+        this.isActive = propertyOwnership.isActive
+        this.occupancyType = propertyOwnership.occupancyType
+        this.ownershipType = propertyOwnership.ownershipType
+        this.currentNumHouseholds = propertyOwnership.currentNumHouseholds
+        this.currentNumTenants = propertyOwnership.currentNumTenants
+        this.license = propertyOwnership.license?.let { License(it) }
+    }
+
     val isOccupied: Boolean
         get() = currentNumTenants > 0
 

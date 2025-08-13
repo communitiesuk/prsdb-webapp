@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 
@@ -33,6 +34,8 @@ class PropertyOwnershipService(
     private val licenseService: LicenseService,
     private val formContextService: FormContextService,
     private val backLinkService: BackUrlStorageService,
+    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -181,6 +184,8 @@ class PropertyOwnershipService(
         checkUpdateIsValid()
         val propertyOwnership = getPropertyOwnership(id)
 
+        val originalPropertyOwnership = PropertyOwnership(propertyOwnership)
+
         update.ownershipType?.let { propertyOwnership.ownershipType = it }
         update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
         update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
@@ -193,6 +198,46 @@ class PropertyOwnershipService(
                     update.licenceNumber,
                 )
             propertyOwnership.license = updatedLicence
+        }
+
+        sendUpdateConfirmationEmail(propertyOwnership, originalPropertyOwnership)
+    }
+
+    private fun sendUpdateConfirmationEmail(
+        propertyOwnership: PropertyOwnership,
+        originalPropertyOwnership: PropertyOwnership,
+    ) {
+        val hasOwnershipTypeChanged = propertyOwnership.ownershipType != originalPropertyOwnership.ownershipType
+        val hasLicensingChanged =
+            propertyOwnership.license?.licenseType != originalPropertyOwnership.license?.licenseType ||
+                propertyOwnership.license?.licenseNumber != originalPropertyOwnership.license?.licenseNumber
+        val hasOccupationChanged = propertyOwnership.isOccupied != originalPropertyOwnership.isOccupied
+        val hasNumberOfHouseholdsChanged =
+            propertyOwnership.currentNumHouseholds != originalPropertyOwnership.currentNumHouseholds
+        val hasNumberOfPeopleChanged =
+            propertyOwnership.currentNumTenants != originalPropertyOwnership.currentNumTenants
+
+        val updatedBullets =
+            listOfNotNull(
+                if (hasOwnershipTypeChanged) "ownership type" else null,
+                if (hasLicensingChanged) "licensing information" else null,
+                if (hasOccupationChanged) "whether the property is occupied by tenants" else null,
+                if (!hasOccupationChanged && hasNumberOfHouseholdsChanged) "the number of households living in this property" else null,
+                if (!hasOccupationChanged && hasNumberOfPeopleChanged) "the number of people living in this property" else null,
+            )
+        if (!updatedBullets.isEmpty()) {
+            updateConfirmationEmailService.sendEmail(
+                propertyOwnership.primaryLandlord.email,
+                PropertyUpdateConfirmation(
+                    singleLineAddress = propertyOwnership.property.address.singleLineAddress,
+                    registrationNumber =
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(propertyOwnership.registrationNumber)
+                            .toString(),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    updatedBullets = updatedBullets,
+                ),
+            )
         }
     }
 

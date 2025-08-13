@@ -23,4 +23,8 @@ class License(
         this.licenseType = licenseType
         this.licenseNumber = licenseNumber
     }
+    constructor(license: License) : this() {
+        this.licenseType = license.licenseType
+        this.licenseNumber = license.licenseNumber
+    }
 }
