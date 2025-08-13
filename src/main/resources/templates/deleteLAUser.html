@@ -19,7 +19,7 @@
             <section>
                 <p class="govuk-body" th:text="#{deleteLAUser.para.one}">deleteLAUser.para.one</p>
                 <p class="govuk-body" th:text="#{deleteLAUser.para.two}">deleteLAUser.para.two</p>
-                <div th:replace="~{fragments/warningText :: warningText(#{deleteLAUser.warning})}">deleteLAUser.warning</div>
+                <p class="govuk-body" th:text="#{deleteLAUser.para.three}">deleteLAUser.para.three</p>
             </section>
             <form method="post" th:action="@{''}">
                 <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{deleteLAUser.deleteAccountButton})}"></button>
