@@ -101,6 +101,14 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PropertyUpdateConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    LandlordUpdateConfirmation(
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        URI("https://example.com"),
+                        "Thing you changed",
+                    ),
+                    "/emails/LandlordUpdateConfirmation.md",
+                ),
             )
 
         private fun createLocalAuthority(

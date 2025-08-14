@@ -70,5 +70,11 @@
     "name": "Property Update Confirmation",
     "subject": "GOV.UK - You have updated a property on the PRS database",
     "bodyLocation": "/emails/PropertyUpdateConfirmation.md"
+  },
+  {
+    "id": "03e610ae-7ea7-4b32-86e9-77b54f2211cc",
+    "name": "Landlord Update Confirmation",
+    "subject": "GOV.UK - You have updated your landlord details on the PRS database",
+    "bodyLocation": "/emails/LandlordUpdateConfirmation.md"
   }
 ]
