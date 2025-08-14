@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
-import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TENANCY_TYPES_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
@@ -44,7 +43,7 @@ class RegisterLandlordController(
     fun index(model: Model): CharSequence {
         model.addAttribute(
             "registerAsALandlordInitialStep",
-            "$LANDLORD_REGISTRATION_ROUTE/${START_PAGE_PATH_SEGMENT}",
+            "$LANDLORD_REGISTRATION_ROUTE/${PRIVACY_NOTICE_PATH_SEGMENT}",
         )
         model.addAttribute("oneLoginInfoUrl", ONE_LOGIN_INFO_URL)
         model.addAttribute("provingYourIdentity", ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY)
@@ -54,13 +53,15 @@ class RegisterLandlordController(
         return "registerAsALandlord"
     }
 
-    @GetMapping("/${START_PAGE_PATH_SEGMENT}")
-    fun getStart(principal: Principal): String {
+    @GetMapping("/${PRIVACY_NOTICE_PATH_SEGMENT}")
+    fun getPrivacyNotice(principal: Principal): ModelAndView =
         if (userRolesService.getHasLandlordUserRole(principal.name)) {
-            return "redirect:${LANDLORD_DASHBOARD_URL}"
+            ModelAndView("redirect:${LANDLORD_DASHBOARD_URL}")
+        } else {
+            landlordRegistrationJourneyFactory
+                .create()
+                .getModelAndViewForStep(PRIVACY_NOTICE_PATH_SEGMENT, null)
         }
-        return "redirect:${PRIVACY_NOTICE_PATH_SEGMENT}"
-    }
 
     @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
     fun getVerifyIdentity(
