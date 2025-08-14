@@ -55,7 +55,12 @@ class RegisterLandlordController(
     }
 
     @GetMapping("/${START_PAGE_PATH_SEGMENT}")
-    fun getStart(): String = "redirect:${PRIVACY_NOTICE_PATH_SEGMENT}"
+    fun getStart(principal: Principal): String {
+        if (userRolesService.getHasLandlordUserRole(principal.name)) {
+            return "redirect:${LANDLORD_DASHBOARD_URL}"
+        }
+        return "redirect:${PRIVACY_NOTICE_PATH_SEGMENT}"
+    }
 
     @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
     fun getVerifyIdentity(
@@ -63,10 +68,6 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): ModelAndView {
-        if (userRolesService.getHasLandlordUserRole(principal.name)) {
-            return ModelAndView("redirect:${LANDLORD_DASHBOARD_URL}")
-        }
-
         val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourneyFactory
