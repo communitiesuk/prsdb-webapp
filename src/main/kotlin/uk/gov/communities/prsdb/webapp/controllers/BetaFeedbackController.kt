@@ -24,7 +24,7 @@ class BetaFeedbackController {
         request: HttpServletRequest,
     ): String? {
         val formModel = BetaFeedbackModel()
-        model.addAttribute("betaFeedbackModel", formModel)
+        model.addAttribute("formModel", formModel)
         val referrer = request.getHeader("referer")
         model.addAttribute("referrerHeader", referrer)
         model.addAttribute("backUrl", referrer)
@@ -65,6 +65,7 @@ class BetaFeedbackController {
             val referrer = request.getHeader("referer")
             model.addAttribute("referrerHeader", referrer)
             model.addAttribute("backUrl", referrer)
+            model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
         return "redirect:$redirectPath"
@@ -122,7 +123,7 @@ class BetaFeedbackController {
             bindingResult,
             model,
             request,
-            "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}",
+            "/$LANDLORD_PATH_SEGMENT/$FEEDBACK_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT",
         )
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
@@ -138,6 +139,21 @@ class BetaFeedbackController {
             bindingResult,
             model,
             request,
-            "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}",
+            "/$LOCAL_AUTHORITY_PATH_SEGMENT/$FEEDBACK_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT",
+        )
+
+    @PostMapping("/${FEEDBACK_PATH_SEGMENT}")
+    fun submitFeedback(
+        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        bindingResult: BindingResult,
+        model: Model,
+        request: HttpServletRequest,
+    ): String =
+        handleFeedbackSubmission(
+            betaFeedbackModel,
+            bindingResult,
+            model,
+            request,
+            "/$FEEDBACK_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT",
         )
 }

@@ -1,4 +1,5 @@
 <th:block th:fragment="betaBannerFeedbackForm">
+    <section>
     <form id="feedback-form" method="post" th:action="${feedbackUrl}" th:object="${betaFeedbackModel}" novalidate>
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
         <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
@@ -29,4 +30,13 @@
             </button>
         </div>
     </form>
+    </section>
+    <section>
+        <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
+        <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
+        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.one}">betaBannerFeedback.paragraph.one</p>
+        <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.four}">betaBannerFeedback.heading.four</h3>
+        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.two}" style="margin-bottom: 0;">betaBannerFeedback.paragraph.two</p>
+        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.three}" style="margin-top: 0;">betaBannerFeedback.paragraph.three</p>
+    </section>
 </th:block>
