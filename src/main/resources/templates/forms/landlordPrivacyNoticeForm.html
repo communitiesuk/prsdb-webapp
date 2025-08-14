@@ -20,9 +20,15 @@
             </span>
         </p>
         <p class="govuk-body" th:text="#{registerAsALandlord.privacyNotice.paragraph.two}">registerAsALandlord.privacyNotice.paragraph.two</p>
-        <ol class="govuk-list govuk-list--number">
-            <li th:utext="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one</li>
-            <li th:utext="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two</li>
+        <ol class="govuk-list govuk-list--number govuk-!-font-weight-bold">
+            <li>
+                <span th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.boldText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.boldText</span>
+                <span style="font-weight: normal" th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.normalText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.normalText</span>
+            </li>
+            <li>
+                <span th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.boldText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.boldText</span>
+                <span style="font-weight: normal" th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.normalText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.normalText</span>
+            </li>
         </ol>
         <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.privacyNotice.checkBox.heading}">registerAsALandlord.privacyNotice.checkBox.heading</h2>
         <th:block
