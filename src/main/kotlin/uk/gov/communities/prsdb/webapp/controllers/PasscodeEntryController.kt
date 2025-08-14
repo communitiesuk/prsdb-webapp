@@ -78,7 +78,11 @@ class PasscodeEntryController(
     }
 
     @GetMapping("/$PASSCODE_ALREADY_USED_PATH_SEGMENT")
-    fun passcodeAlreadyUsed(model: Model): String {
+    fun passcodeAlreadyUsed(
+        model: Model,
+        session: HttpSession,
+    ): String {
+        session.removeAttribute(SUBMITTED_PASSCODE)
         model.addAttribute("passcodeEntryUrl", PASSCODE_ENTRY_ROUTE)
         return "passcodeAlreadyUsed"
     }
