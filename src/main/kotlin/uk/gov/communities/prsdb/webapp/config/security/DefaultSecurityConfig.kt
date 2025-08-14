@@ -47,7 +47,7 @@ class DefaultSecurityConfig(
                     .permitAll()
                     .requestMatchers("/local/**")
                     .permitAll()
-                    .requestMatchers("$COOKIES_ROUTE/**")
+                    .requestMatchers(COOKIES_ROUTE)
                     .permitAll()
                     .anyRequest()
                     .authenticated()

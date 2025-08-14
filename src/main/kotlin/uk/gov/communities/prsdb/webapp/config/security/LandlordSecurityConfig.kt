@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.controllers.CookiesController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
@@ -46,6 +47,8 @@ class LandlordSecurityConfig(
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
                     .permitAll()
                     .requestMatchers(PasscodeEntryController.PASSCODE_ENTRY_ROUTE)
+                    .permitAll()
+                    .requestMatchers(CookiesController.LL_COOKIES_ROUTE)
                     .permitAll()
                     .anyRequest()
                     .authenticated()
