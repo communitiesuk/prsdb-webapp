@@ -11,9 +11,9 @@ import java.time.LocalDate
 
 class JourneyPageDataBuilder {
     companion object {
-        fun beforeLandlordRegistrationConfirmIdentity() = JourneyDataBuilder().withVerifiedUser()
+        fun beforeLandlordRegistrationConfirmIdentity() = JourneyDataBuilder().withPrivacyNotice().withVerifiedUser()
 
-        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withVerifyIdentityUnverified()
+        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withPrivacyNotice().withVerifyIdentityUnverified()
 
         fun beforeLandlordRegistrationName() = beforeLandlordRegistrationIdentityNotVerified().withIdentityNotVerified()
 

@@ -49,14 +49,14 @@ class RegisterLandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getVerifyIdentity returns 302 for authenticated user with Landlord role and verified identity`() {
+    fun `getPrivacyNotice returns 302 for authenticated user with Landlord role`() {
         val idToken = OidcIdToken("token", Instant.now(), Instant.now().plusSeconds(60), mapOf("sub" to "123"))
         val userInfo = OidcUserInfo(mapOf(OneLoginClaimKeys.DOMAIN to "123"))
         val oidcUser: OidcUser = DefaultOidcUser(listOf(), idToken, userInfo)
 
         whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(true)
         mvc
-            .get("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/verify-identity") {
+            .get(RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE) {
                 with(oidcLogin().oidcUser(oidcUser))
             }.andExpectAll {
                 status { is3xxRedirection() }

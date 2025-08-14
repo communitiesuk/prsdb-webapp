@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
@@ -19,10 +18,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
@@ -30,9 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoContactAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
-import java.time.LocalDate
 
 class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
@@ -44,28 +39,6 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
             BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Private Rented Sector (PRS) Database")
         }
-
-        @Test
-        fun `the 'Start Now' button directs an unverified user to the landlord registration identity not verified page`(page: Page) {
-            whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
-            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
-            landlordRegistrationStartPage.startButton.clickAndWait()
-            assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
-        }
-
-        @Test
-        fun `the 'Start Now' button directs a verified user to the identity confirmation page`(page: Page) {
-            val verifiedIdentityMap =
-                mutableMapOf<String, Any?>(
-                    VerifiedIdentityModel.NAME_KEY to "name",
-                    VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
-                )
-            whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
-
-            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
-            landlordRegistrationStartPage.startButton.clickAndWait()
-            assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
-        }
     }
 
     @Nested
@@ -76,6 +49,23 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             startPage.startButton.clickAndWait()
             val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
+        }
+
+        @Test
+        fun `navigating to the Privacy Notice page directs a registered landlord to the landlord dashboard page`(page: Page) {
+            navigator.goToLandlordRegistrationPrivacyNoticePage()
+            val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
+            BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationStepPrivacyNotice {
+        @Test
+        fun `Submitting without agreeing to privacy notice returns an error`() {
+            val privacyNoticePage = navigator.goToLandlordRegistrationPrivacyNoticePage()
+            privacyNoticePage.submitWithoutAgreeing()
+            assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must agree to the privacy notice to continue")
         }
     }
 

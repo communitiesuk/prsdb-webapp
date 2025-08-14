@@ -51,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
@@ -124,6 +125,8 @@ class JourneyDataBuilder(
 
         private val defaultLandlordJourneyData: JourneyData =
             mapOf(
+                LandlordRegistrationStepId.PrivacyNotice.urlPathSegment to
+                    mapOf(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true),
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment to mapOf(),
                 LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment to mapOf(),
                 LandlordRegistrationStepId.Name.urlPathSegment to mapOf("name" to "Arthur Dent"),
@@ -327,6 +330,12 @@ class JourneyDataBuilder(
         journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment] =
             mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
 
+        return this
+    }
+
+    fun withPrivacyNotice(): JourneyDataBuilder {
+        journeyData[LandlordRegistrationStepId.PrivacyNotice.urlPathSegment] =
+            mapOf(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true)
         return this
     }
 

@@ -80,6 +80,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
@@ -181,6 +182,11 @@ class Navigator(
     fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
         navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
         return createValidPage(page, StartPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationPrivacyNoticePage(): PrivacyNoticePageLandlordRegistration {
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE)
+        return createValidPage(page, PrivacyNoticePageLandlordRegistration::class)
     }
 
     fun skipToLandlordRegistrationConfirmIdentityPage(): ConfirmIdentityFormPageLandlordRegistration {
