@@ -10,6 +10,29 @@ export function addCookieConsentHandler() {
     if (consentCookieValue == null && !onCookiePage) {
        new CookieBanner().display();
     }
+
+    updateGaConsent(consentCookieValue === 'true');
+}
+
+function updateGaConsent(isGranted = false) {
+    const gtag = window.gtag || function (...args) {
+        window.dataLayer = window.dataLayer || []
+        window.dataLayer.push(args)
+    }
+
+    gtag('consent', 'update', {
+        analytics_storage: isGranted ? 'granted' : 'denied'
+    })
+
+    if (!isGranted) {
+        deleteCookie("_ga")
+        deleteCookie("_ga_" + window.GOOGLE_ANALYTICS_MEASUREMENT_ID.slice(2))
+    }
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.GOOGLE_COOKIE_DOMAIN + ';';
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 }
 
 class CookieBanner {
@@ -53,6 +76,8 @@ class CookieBanner {
             const confirmationMessageText = consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText;
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
+
+            updateGaConsent(consentValue);
         });
     }
 

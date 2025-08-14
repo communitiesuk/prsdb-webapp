@@ -4,21 +4,26 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
 open class SummaryCard(
-    parentLocator: Locator,
-    index: Int = 0,
-) : BaseComponent(parentLocator.locator(".govuk-summary-card").nth(index)) {
-    constructor(page: Page, index: Int = 0) : this(page.locator("html"), index)
+    locator: Locator,
+) : BaseComponent(locator) {
+    constructor(page: Page, index: Int = 0) : this(page.locator(DEFAULT_SELECTOR).nth(index))
+
+    constructor(page: Page, title: String) : this(page.locator(DEFAULT_SELECTOR, Page.LocatorOptions().setHasText(title)))
 
     val title = Heading(locator.locator("h2.govuk-summary-card__title"))
 
-    fun actions(text: String) = SummaryCardActions(locator, text)
+    fun getAction(text: String) = SummaryCardAction(locator, text)
 
-    open val summaryCardList = SummaryList(locator)
+    open val summaryList = SummaryList(locator)
 
-    class SummaryCardActions(
+    class SummaryCardAction(
         parentLocator: Locator,
         text: String,
-    ) : BaseComponent(parentLocator.locator(".govuk-summary-card__actions")) {
-        val actionLink = Link.byText(locator, text)
+    ) : BaseComponent(parentLocator.locator(".govuk-summary-card__action", Locator.LocatorOptions().setHasText(text))) {
+        val link = Link.default(locator)
+    }
+
+    companion object {
+        private const val DEFAULT_SELECTOR = ".govuk-summary-card"
     }
 }

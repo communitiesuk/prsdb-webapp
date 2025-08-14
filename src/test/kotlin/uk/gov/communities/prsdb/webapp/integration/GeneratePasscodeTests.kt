@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeLimitExceededPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-class GeneratePasscodeTests : JourneyTestWithSeedData("data-local.sql") {
+class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoSpyBean
     lateinit var passcodeRepository: PasscodeRepository
 

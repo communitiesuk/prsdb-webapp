@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -12,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertEquals
 
-class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
+class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class LandlordDetailsView {
         @Test
@@ -30,7 +29,7 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Local authority")
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Local council")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Property licence")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Tenanted")
         }
@@ -73,7 +72,7 @@ class LandlordDetailTests : SinglePageTestWithSeedData("data-local.sql") {
             assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Registration number")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Local authority")
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Local council")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Licensing type")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(4)).containsText("Tenanted")
         }

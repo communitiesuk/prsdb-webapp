@@ -25,7 +25,7 @@ import kotlin.collections.mapOf
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
-class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
+class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") {
     @Nested
     inner class LandlordSearchTests {
         @Test
@@ -144,17 +144,17 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             assertThat(filter.panel).isVisible()
 
             // Apply LA filter
-            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
+            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my council")
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             val laFilterSelectedHeadingText = filter.selectedHeadings.first().innerText()
-            assertContains(laFilterSelectedHeadingText, "Show landlords operating in my authority")
+            assertContains(laFilterSelectedHeadingText, "Show landlords operating in my council")
             val resultTable = searchLandlordRegisterPage.resultTable
             assertEquals(1, resultTable.rows.count())
 
             // Remove LA filter
-            filter.getRemoveFilterTag("Landlords in my authority").clickAndWait()
+            filter.getRemoveFilterTag("Landlords in my council").clickAndWait()
             assertThat(filter.selectedHeadings).hasCount(0)
             assertThat(resultTable.rows).not().hasCount(0)
 
@@ -176,13 +176,13 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
 
             // Apply LA filter
             val filter = searchLandlordRegisterPage.filterPanel
-            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my authority")
+            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my council")
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             // Search again
             searchLandlordRegisterPage.searchBar.search("PRSD")
-            assertThat(filter.getRemoveFilterTag("Landlords in my authority")).isVisible()
+            assertThat(filter.getRemoveFilterTag("Landlords in my council")).isVisible()
         }
 
         @Test
@@ -237,7 +237,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             assertThat(resultTable.headerRow.getCell(REG_NUM_COL_INDEX)).containsText("Registration number")
             assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("P-CCCT-GRKQ")
 
-            assertThat(resultTable.headerRow.getCell(LA_COL_INDEX)).containsText("Local authority")
+            assertThat(resultTable.headerRow.getCell(LA_COL_INDEX)).containsText("Local council")
             assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
 
             assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
@@ -349,12 +349,12 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             assertTrue(filter.panel.isVisible)
 
             // Apply LA filter
-            val laFilter = filter.getFilterCheckboxes("Show properties in my authority")
+            val laFilter = filter.getFilterCheckboxes("Show properties in my council")
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             val laFilterSelectedHeadingText = filter.selectedHeadings.nth(0).innerText()
-            assertContains(laFilterSelectedHeadingText, "Show properties in my authority")
+            assertContains(laFilterSelectedHeadingText, "Show properties in my council")
             assertEquals(expectedPropertyInLACount, resultTable.rows.count())
 
             // Apply Selective license filter
@@ -372,7 +372,7 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
             assertEquals(expectedPropertyInLAWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
             // Remove LA filter
-            filter.getRemoveFilterTag("Properties in my authority").clickAndWait()
+            filter.getRemoveFilterTag("Properties in my council").clickAndWait()
             assertEquals(1, filter.selectedHeadings.count())
             assertEquals(expectedPropertyWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
@@ -391,13 +391,13 @@ class SearchRegisterTests : SinglePageTestWithSeedData("data-search.sql") {
 
             // Apply LA filter
             val filter = searchPropertyRegisterPage.filterPanel
-            val laFilter = filter.getFilterCheckboxes("Show properties in my authority")
+            val laFilter = filter.getFilterCheckboxes("Show properties in my council")
             laFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             // Search again
             searchPropertyRegisterPage.searchBar.search("PRSD")
-            assertThat(filter.getRemoveFilterTag("Properties in my authority")).isVisible()
+            assertThat(filter.getRemoveFilterTag("Properties in my council")).isVisible()
         }
 
         @Test

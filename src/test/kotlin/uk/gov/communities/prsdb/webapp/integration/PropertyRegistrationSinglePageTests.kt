@@ -21,9 +21,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class TaskListStep {
         @Test
@@ -60,18 +61,19 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
         }
 
         @Test
-        fun `If no addresses are returned, user can search again or enter address manually via the No Address Found step`(page: Page) {
-            // Lookup address finds no results
+        fun `If no English addresses are found, user can search again or enter address manually via the No Address Found step`(page: Page) {
+            // Lookup address finds no English results
             val houseNumber = "15"
             val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode)).thenReturn("{}")
+            whenever(osPlacesClient.search(houseNumber, postcode, true)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // redirect to noAddressFoundPage
             val noAddressFoundPage = BasePage.assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(houseNumber)
-            BaseComponent.assertThat(noAddressFoundPage.heading).containsText(postcode)
+            BaseComponent
+                .assertThat(noAddressFoundPage.heading)
+                .containsText("No matching address in England found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
@@ -130,7 +132,7 @@ class PropertyRegistrationSinglePageTests : SinglePageTestWithSeedData("data-loc
             val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
             selectLocalAuthorityPage.form.submit()
             assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
-                .containsText("Select a local authority to continue")
+                .containsText("Select a local council to continue")
         }
     }
 

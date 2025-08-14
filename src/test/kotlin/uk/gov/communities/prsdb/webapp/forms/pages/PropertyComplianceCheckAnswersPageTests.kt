@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -15,13 +16,18 @@ import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
@@ -31,6 +37,12 @@ import java.time.LocalDate
 class PropertyComplianceCheckAnswersPageTests {
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @Mock
+    private lateinit var mockStepFactory: PropertyComplianceSharedStepFactory
+
+    @Mock
+    private lateinit var mockUploadService: UploadService
 
     private val certificateUrl: String = "https://example.com/certificate"
 
@@ -49,6 +61,8 @@ class PropertyComplianceCheckAnswersPageTests {
                 journeyDataService = mockJourneyDataService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 missingAnswersRedirect = "/property-compliance/missing-answers",
+                stepFactory = mockStepFactory,
+                uploadService = mockUploadService,
             ) { "any address" }
         val modelAndView = ModelAndView()
 
@@ -64,20 +78,49 @@ class PropertyComplianceCheckAnswersPageTests {
         val gasCertEngineerNum = "123456"
         val eicrIssueDate = LocalDate.now().minusDays(1)
         val epcDetails = MockEpcData.createEpcDataModel()
-        val hasFireSafetyDeclaration = true
+        val gasCertFileUploadId = 12345L
+        val eicrFileUploadId = 67890L
         val filteredJourneyData =
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(true)
                 .withGasSafetyIssueDate(gasCertIssueDate)
                 .withGasSafeEngineerNum(gasCertEngineerNum)
+                .withGasCertFileUploadId(gasCertFileUploadId)
                 .withGasSafetyCertUploadConfirmation()
                 .withEicrStatus(true)
                 .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadId(eicrFileUploadId)
                 .withEicrUploadConfirmation()
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
-                .withFireSafetyDeclaration(hasFireSafetyDeclaration)
                 .build()
+
+        val gasCertFileUpload =
+            FileUpload(
+                FileUploadStatus.SCANNED,
+                "gas-safety",
+                "pdf",
+                "1",
+                "1",
+            )
+        val eicrFileUpload =
+            FileUpload(
+                FileUploadStatus.SCANNED,
+                "eicr",
+                "pdf",
+                "1",
+                "1",
+            )
+        whenever(mockUploadService.getFileUploadById(gasCertFileUploadId))
+            .thenReturn(gasCertFileUpload)
+        whenever(mockUploadService.getFileUploadById(eicrFileUploadId))
+            .thenReturn(eicrFileUpload)
+
+        val gasDownloadUrl = "https://example.com/gas_safety_certificate.pdf"
+        whenever(mockUploadService.getDownloadUrl(gasCertFileUpload, "gas_safety_certificate.pdf")).thenReturn(gasDownloadUrl)
+
+        val eicrDownloadUrl = "https://example.com/eicr.pdf"
+        whenever(mockUploadService.getDownloadUrl(eicrFileUpload, "eicr.pdf")).thenReturn(eicrDownloadUrl)
 
         val expectedGasSafetyData =
             listOf(
@@ -85,6 +128,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.gasSafety.certificate",
                     "forms.checkComplianceAnswers.gasSafety.download",
                     PropertyComplianceStepId.GasSafety.urlPathSegment,
+                    gasDownloadUrl,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.certificate.issueDate",
@@ -108,6 +152,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.eicr.certificate",
                     "forms.checkComplianceAnswers.eicr.download",
                     PropertyComplianceStepId.EICR.urlPathSegment,
+                    eicrDownloadUrl,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.certificate.issueDate",
@@ -127,6 +172,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -143,8 +189,9 @@ class PropertyComplianceCheckAnswersPageTests {
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                    hasFireSafetyDeclaration,
+                    true,
                     PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                    actionValue = "forms.links.view",
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
@@ -159,6 +206,9 @@ class PropertyComplianceCheckAnswersPageTests {
                     actionValue = "forms.links.view",
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
@@ -177,7 +227,6 @@ class PropertyComplianceCheckAnswersPageTests {
     @Test
     fun `the correct summary rows appear when certificates are missing`() {
         // Arrange
-        val hasFireSafetyDeclaration = false
         val filteredJourneyData =
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(false)
@@ -185,7 +234,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrStatus(false)
                 .withMissingEicrExemption()
                 .withEpcMissingStep()
-                .withFireSafetyDeclaration(hasFireSafetyDeclaration)
                 .build()
 
         val expectedGasSafetyData =
@@ -227,39 +275,20 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
-        val expectedResponsibilityData =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                    hasFireSafetyDeclaration,
-                    PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
-                    true,
-                    PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.responsibilityToTenants",
-                    true,
-                    PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-            )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
         val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
-        val returnedResponsibilityData = summaryData["responsibilityData"] as List<SummaryListRowViewModel>
 
         // Assert
         assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
         assertIterableEquals(expectedEicrData, returnedEicrData)
         assertIterableEquals(expectedEpcData, returnedEpcData)
-        assertIterableEquals(expectedResponsibilityData, returnedResponsibilityData)
     }
 
     @Test
@@ -273,6 +302,7 @@ class PropertyComplianceCheckAnswersPageTests {
             JourneyDataBuilder()
                 .withGasSafetyCertStatus(true)
                 .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafetyOutdatedConfirmation()
                 .withEicrStatus(true)
                 .withEicrIssueDate(eicrIssueDate)
                 .withEicrOutdatedConfirmation()
@@ -280,7 +310,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withCheckAutoMatchedEpcResult(true)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedGasSafetyData =
@@ -326,6 +355,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -344,6 +374,9 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
@@ -354,6 +387,96 @@ class PropertyComplianceCheckAnswersPageTests {
         assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
         assertIterableEquals(expectedEicrData, returnedEicrData)
         assertIterableEquals(expectedEpcData, returnedEpcData)
+    }
+
+    @Test
+    fun `getSummaryRows throws an exception if there are multiple confirmations in the gas safety data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafeEngineerNum()
+                .withGasSafetyCertUploadConfirmation()
+                .withGasSafetyOutdatedConfirmation()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadConfirmation()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        // Act
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
+    }
+
+    @Test
+    fun `getSummaryRows throws an exception if there are no confirmations in the gas safety data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafeEngineerNum()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadConfirmation()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        // Act
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
+    }
+
+    @Test
+    fun `getSummaryRows throws an exception if there are multiple confirmations in the eicr data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafetyOutdatedConfirmation()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withEicrUploadConfirmation()
+                .withEicrExemptionConfirmation()
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        // Act
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
+    }
+
+    @Test
+    fun `getSummaryRows throws an exception if there are no confirmations in the eicr data`() {
+        // Arrange
+        val gasCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val epcDetails = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(1).toKotlinLocalDate())
+        val filteredJourneyData =
+            JourneyDataBuilder()
+                .withGasSafetyCertStatus(true)
+                .withGasSafetyIssueDate(gasCertIssueDate)
+                .withGasSafetyOutdatedConfirmation()
+                .withEicrStatus(true)
+                .withEicrIssueDate(eicrIssueDate)
+                .withAutoMatchedEpcDetails(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .build()
+
+        // Act
+        assertThrows<PrsdbWebException> { getSummaryData(filteredJourneyData, expectEpcUrl = false) }
     }
 
     @Test
@@ -373,7 +496,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrExemptionConfirmation()
                 .withEpcExemptionReason(epcExemption)
                 .withEpcExemptionConfirmationStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedGasSafetyData =
@@ -416,6 +538,9 @@ class PropertyComplianceCheckAnswersPageTests {
                 ),
             )
 
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
+
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
@@ -438,7 +563,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withEicrStatus(false)
                 .withMissingEicrExemption()
                 .withEpcNotFoundStep()
-                .withFireSafetyDeclaration(true)
                 .build()
         val expectedEpcData =
             listOf(
@@ -453,6 +577,9 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExemptionReasonStepId).thenReturn(PropertyComplianceStepId.EpcExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = false)
@@ -476,7 +603,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -486,6 +612,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -503,6 +630,9 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
@@ -527,7 +657,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withCheckAutoMatchedEpcResult(true)
                 .withMeesExemptionCheckStep(true)
                 .withMeesExemptionReasonStep(meesExemption)
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -537,6 +666,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -554,6 +684,10 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.MeesExemptionReason.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
@@ -576,7 +710,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withAutoMatchedEpcDetails(epcDetails)
                 .withCheckAutoMatchedEpcResult(true)
                 .withMeesExemptionCheckStep(false)
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -586,6 +719,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.view",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -603,6 +737,11 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
+        whenever(mockStepFactory.meesExemptionCheckStepId).thenReturn(PropertyComplianceStepId.MeesExemptionCheck)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
@@ -630,7 +769,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withMeesExemptionReasonStep(meesExemption)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -640,6 +778,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -662,6 +801,10 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)
@@ -687,7 +830,6 @@ class PropertyComplianceCheckAnswersPageTests {
                 .withMeesExemptionCheckStep(false)
                 .withEpcExpiryCheckStep(tenancyStartedBeforeExpiry)
                 .withEpcExpiredStep()
-                .withFireSafetyDeclaration(true)
                 .build()
 
         val expectedEpcData =
@@ -697,6 +839,7 @@ class PropertyComplianceCheckAnswersPageTests {
                     "forms.checkComplianceAnswers.epc.viewExpired",
                     PropertyComplianceStepId.EPC.urlPathSegment,
                     certificateUrl,
+                    valueUrlOpensNewTab = true,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryDate",
@@ -719,6 +862,10 @@ class PropertyComplianceCheckAnswersPageTests {
                     PropertyComplianceStepId.EPC.urlPathSegment,
                 ),
             )
+
+        whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
+        whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
+        whenever(mockStepFactory.meesExemptionReasonStepId).thenReturn(PropertyComplianceStepId.MeesExemptionReason)
 
         // Act
         val summaryData = getSummaryData(filteredJourneyData, expectEpcUrl = true)

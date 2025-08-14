@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -21,32 +22,27 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
-class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     val addressFound = "Entirely new test address"
 
     @BeforeEach
     fun setup() {
-        val addressJson2 =
-            "{'DPA':{'ADDRESS':'2, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':114,'UPRN':'22','BUILDING_NUMBER':2,'POSTCODE':'EG1 2AB'}}"
-        val addressJson3 =
-            "{'DPA':{'ADDRESS':'3, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':116,'UPRN':'973','BUILDING_NUMBER':3,'POSTCODE':'EG1 2AB'}}"
-        whenever(
-            osPlacesClient.search(any(), any()),
-        ).thenReturn(
-            "{'results':[" +
-                "{'DPA':{'ADDRESS':'$addressFound','LOCAL_CUSTODIAN_CODE':28,'UPRN':'7923','BUILDING_NUMBER':9,'POSTCODE':'EG1 2AB'}}," +
-                "$addressJson2,$addressJson3,]}",
-        )
+        val addresses =
+            listOf(
+                AddressDataModel(addressFound),
+                AddressDataModel("2, Example Road, EG1 2AB"),
+                AddressDataModel("3, Example Road, EG1 2AB"),
+            )
+        whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(MockOSPlacesAPIResponses.createResponse(addresses))
     }
 
     @Nested
-    inner class NameUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
+    inner class NameUpdates : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their name`(page: Page) {
             // Details page
@@ -66,7 +62,7 @@ class LandlordDetailsUpdateJourneyTests : JourneyTestWithSeedData("data-local.sq
     }
 
     @Nested
-    inner class DateOfBirthUpdates : NestedJourneyTestWithSeedData("data-unverified-landlord.sql") {
+    inner class DateOfBirthUpdates : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
         @Test
         fun `An unverified landlord can update their date of birth`(page: Page) {
             // Details page

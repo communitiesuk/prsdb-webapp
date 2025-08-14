@@ -9,6 +9,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -19,8 +20,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompleteCompiancesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
@@ -50,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyRiskPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionMissingPagePropertyCompliance
@@ -67,10 +67,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.time.format.DateTimeFormatter
@@ -79,7 +81,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
@@ -89,6 +91,9 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     @MockitoBean
     private lateinit var partialComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>
 
+    @MockitoBean
+    private lateinit var fileUploader: FileUploader
+
     @BeforeEach
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(ABSOLUTE_DASHBOARD_URL))
@@ -96,7 +101,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (in-date certs, declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (in-date certs)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -119,7 +124,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         gasSafeEngineerNumPage.submitEngineerNum("1234567")
         val gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
+        // Gas Safety Cert. Upload page
+        whenever(
+            fileUploader.uploadFile(
+                any(),
+                any(),
+            ),
+        ).thenReturn(UploadedFileLocator("validGasSafety", "mockETag", "mockVersionId"))
+
         gasSafetyUploadPage.uploadCertificate("validFile.png")
         val gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
@@ -136,7 +148,14 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         eicrIssueDatePage.submitDate(currentDate)
         val eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
 
-        // TODO: PRSD-1352 - decide what to do about local file uploads in tests
+        // EICR Upload page
+        whenever(
+            fileUploader.uploadFile(
+                any(),
+                any(),
+            ),
+        ).thenReturn(UploadedFileLocator("validEicr", "mockETag", "mockVersionId"))
+
         eicrUploadPage.uploadCertificate("validFile.png")
         val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)
 
@@ -166,23 +185,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
-        assertThat(
-            fireSafetyDeclarationPage.form.fieldHeading,
-        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
-        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(
-                responsibilityToTenantsPage.heading,
-            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -212,13 +227,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
             ),
         )
 
-        // Go to Incomplete Compliances page
+        // Go to Compliance Actions page
         confirmationPage.addForAnotherPropertyButton.clickAndWait()
-        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (outdated certs, declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (outdated certs)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -330,23 +345,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
-        assertThat(
-            fireSafetyDeclarationPage.form.fieldHeading,
-        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
-        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(
-                responsibilityToTenantsPage.heading,
-            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -386,13 +397,13 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
             ),
         )
 
-        // Go to Incomplete Compliances page
+        // Go to Compliance Actions page
         confirmationPage.addForAnotherPropertyButton.clickAndWait()
-        assertPageIs(page, LandlordIncompleteCompiancesPage::class)
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions, declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (no certs, exemptions)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -455,23 +466,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
-        assertThat(
-            fireSafetyDeclarationPage.form.fieldHeading,
-        ).containsText("Have you followed all fire safety responsibilities relevant for this property?")
-        fireSafetyDeclarationPage.submitHasDeclaredFireSafety()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(
-                responsibilityToTenantsPage.heading,
-            ).containsText("Make sure you follow your legal responsibilities to your tenants")
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -507,7 +514,7 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
     }
 
     @Test
-    fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions, no declaration)`(page: Page) {
+    fun `User can navigate whole journey if pages are filled in correctly (no certs, no exemptions)`(page: Page) {
         // Start page
         val startPage = navigator.goToPropertyComplianceStartPage(PROPERTY_OWNERSHIP_ID)
         assertThat(startPage.heading).containsText("Add compliance information")
@@ -553,19 +560,19 @@ class PropertyComplianceJourneyTests : JourneyTestWithSeedData("data-local.sql")
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        fireSafetyDeclarationPage.submitHasNotDeclaredFireSafety()
-        val fireSafetyRiskPage = assertPageIs(page, FireSafetyRiskPagePropertyCompliance::class, urlArguments)
-
-        // Fire Safety Risk page
-        BaseComponent.assertThat(fireSafetyRiskPage.heading).containsText("Your property is at risk of fire")
-        fireSafetyRiskPage.form.submit()
+        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
+        BaseComponent
+            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .containsText("Make sure you follow your legal responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 

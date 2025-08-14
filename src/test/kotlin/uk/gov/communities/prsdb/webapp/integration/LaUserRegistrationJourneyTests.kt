@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.verify
@@ -19,11 +20,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.ConfirmationPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.InvalidLinkPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
-class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-not-lauser.sql") {
+class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-lauser.sql") {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
 
@@ -51,10 +54,12 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
 
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
+        // Accept invitation route
+        navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invitation.token.toString())
+        val landingPage = assertPageIs(page, LandingPageLaUserRegistration::class)
         // Landing page - render
-        val landingPage = navigator.skipToLaUserRegistrationLandingPage(invitation.token)
         assertThat(landingPage.headingCaption).containsText("Before you register")
-        assertThat(landingPage.heading).containsText("Registering as a local authority user")
+        assertThat(landingPage.heading).containsText("Registering as a local council user")
         // Submit and go to next page
         landingPage.clickBeginButton()
         val namePage = assertPageIs(page, NameFormPageLaUserRegistration::class)
@@ -94,5 +99,19 @@ class LaUserRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-no
         val dashboard = assertPageIs(page, LocalAuthorityDashboardPage::class)
 
         assertThat(dashboard.bannerSubHeading).containsText("Local council")
+    }
+
+    @Nested
+    inner class WithExpiredToken : NestedIntegrationTestWithMutableData("data-mockuser-with-expired-invitation.sql") {
+        @Test
+        fun `User with an expired token is redirected to the invalid link page`(page: Page) {
+            val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
+            navigator.navigateToLaUserRegistrationAcceptInvitationRoute(expiredToken)
+            val invalidLinkPage = assertPageIs(page, InvalidLinkPageLaUserRegistration::class)
+            assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
+            assertThat(
+                invalidLinkPage.description,
+            ).containsText("Contact the PRS Database admin user at your local council to ask for another invite.")
+        }
     }
 }

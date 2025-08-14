@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 
-open class DeclarationBasePage(
+abstract class DeclarationBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {

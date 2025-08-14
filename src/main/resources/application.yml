@@ -65,15 +65,26 @@ epc:
 server:
   error:
     path: /error
+  tomcat:
+    redirect-context-root: false
+  forward-headers-strategy: native
 
 aws:
   s3:
+    signatureDuration: ${AWS_S3_SIGNATURE_DURATION:1h}
     quarantineBucket: ${AWS_QUARANTINE_BUCKET}
     safeBucket: ${S3_SAFE_BUCKET_KEY}
 
 base-url:
   landlord: ${LANDLORD_BASE_URL}
   local-authority: ${LOCAL_AUTHORITY_BASE_URL}
+
+plausible:
+  domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
+
+google-analytics:
+  measurement-id: ${GOOGLE_ANALYTICS_MEASUREMENT_ID}
+  cookie-domain: ${GOOGLE_ANALYTICS_COOKIE_DOMAIN}
 
 ---
 

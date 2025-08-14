@@ -22,22 +22,20 @@ class LandlordIncompletePropertiesPage(
     val secondSummaryCard = IncompletePropertySummaryCard(page, 1)
 
     class IncompletePropertySummaryCard(
-        parentLocator: Locator,
+        page: Page,
         index: Int,
-    ) : SummaryCard(parentLocator, index) {
-        constructor(page: Page, index: Int) : this(page.locator("html"), index)
+    ) : SummaryCard(page, index) {
+        override val summaryList = IncompletePropertiesSummaryCardList(locator)
 
-        override val summaryCardList = IncompletePropertiesSummaryCardList(locator)
+        val continueLink = this.getAction("Continue").link
 
-        val continueLink = this.actions("Continue").actionLink
-
-        val deleteLink = this.actions("Delete").actionLink
+        val deleteLink = this.getAction("Delete").link
 
         class IncompletePropertiesSummaryCardList(
             locator: Locator,
         ) : SummaryList(locator) {
             val propertyAddressRow = getRow("Property address")
-            val localAuthorityRow = getRow("Local authority")
+            val localAuthorityRow = getRow("Local council")
             val completeByRow = getRow("Complete by")
         }
     }

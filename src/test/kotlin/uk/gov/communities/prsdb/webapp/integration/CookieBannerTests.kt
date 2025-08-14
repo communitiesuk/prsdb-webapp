@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertTrue
 
-class CookieBannerTests : SinglePageTestWithSeedData("data-local.sql") {
+class CookieBannerTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `Cookie banner can be used to accept cookies, then confirmation can be hidden`(browserContext: BrowserContext) {
         // Load dashboard page

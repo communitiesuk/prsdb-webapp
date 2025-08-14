@@ -17,12 +17,15 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
+import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
+import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginalJourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -39,26 +42,32 @@ class PropertyComplianceOriginalJourneyDataTest {
                 Arguments.of(
                     Named.of("with in date certs", PropertyComplianceBuilder.createWithInDateCerts()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with expired certs", PropertyComplianceBuilder.createWithExpiredCerts()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with naturally expired certs", PropertyComplianceBuilder.createWithNaturallyExpiredCerts()),
                     Named.of("an expired equivalent", ::isUpdatedAnExpiredVersionOfOriginal),
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with cert exemptions", PropertyComplianceBuilder.createWithCertExemptions()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with missing certs", PropertyComplianceBuilder.createWithMissingCerts()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of("with low epc rating", PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()),
                     namedExactlyTheSame,
+                    false,
                 ),
                 Arguments.of(
                     Named.of(
@@ -66,12 +75,27 @@ class PropertyComplianceOriginalJourneyDataTest {
                         PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(),
                     ),
                     namedExactlyTheSame,
+                    false,
+                ),
+                Arguments.of(
+                    Named.of(
+                        "with low epc rating for updating mees only",
+                        PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(),
+                    ),
+                    namedExactlyTheSame,
+                    true,
+                ),
+                Arguments.of(
+                    Named.of(
+                        "with low epc rating and mees exemption for updating mees only",
+                        PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(),
+                    ),
+                    namedExactlyTheSame,
+                    true,
                 ),
             )
 
         val namedExactlyTheSame = Named.of("exactly the same", ::areAllComplianceValuesTheSame)
-
-        val finalSubmissionStepId = PropertyComplianceStepId.UpdateEpcCheckYourAnswers
 
         fun areAllComplianceValuesTheSame(
             original: PropertyCompliance,
@@ -117,7 +141,7 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var propertyComplianceRepository: PropertyComplianceRepository
     private lateinit var propertyOwnershipService: PropertyOwnershipService
     private lateinit var session: HttpSession
-    private lateinit var fileUploadRepository: FileUploadRepository
+    private lateinit var certificateUploadRepository: CertificateUploadRepository
 
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
     private lateinit var epcLookupService: EpcLookupService
@@ -127,18 +151,20 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var propertyComplianceService: PropertyComplianceService
     private lateinit var journeyFactory: PropertyComplianceUpdateJourneyFactory
 
+    private lateinit var stepFactory: PropertyComplianceSharedStepFactory
+
     @BeforeEach
     fun setUp() {
         propertyComplianceRepository = mock()
         propertyOwnershipService = mock()
         session = mock()
-        fileUploadRepository = mock()
+        certificateUploadRepository = mock()
         propertyComplianceService =
             PropertyComplianceService(
                 propertyComplianceRepository = propertyComplianceRepository,
                 propertyOwnershipService = propertyOwnershipService,
                 session = session,
-                fileUploadRepository = fileUploadRepository,
+                certificateUploadRepository = certificateUploadRepository,
             )
 
         journeyDataServiceFactory = mock()
@@ -146,6 +172,8 @@ class PropertyComplianceOriginalJourneyDataTest {
 
         validatorFactory = Validation.buildDefaultValidatorFactory()
         validator = SpringValidatorAdapter(validatorFactory.validator)
+
+        stepFactory = mock()
 
         this.journeyFactory =
             PropertyComplianceUpdateJourneyFactory(
@@ -155,6 +183,8 @@ class PropertyComplianceOriginalJourneyDataTest {
                 propertyOwnershipService = propertyOwnershipService,
                 epcCertificateUrlProvider = EpcCertificateUrlProvider(PropertyComplianceBuilder.TEST_EPC_BASE_URL),
                 epcLookupService = epcLookupService,
+                certificateUploadService = mock(),
+                uploadService = mock(),
             )
     }
 
@@ -167,9 +197,14 @@ class PropertyComplianceOriginalJourneyDataTest {
     @MethodSource("getOriginalJourneyDataTestCases")
     fun `A compliance record leads to original journey data that, allows retrieving the final submission step`(
         originalRecord: PropertyCompliance,
+        complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
+        meesOnlyUpdate: Boolean,
     ) {
         // Arrange
-        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val finalSubmissionStepId = getFinalSubmissionStepId(meesOnlyUpdate)
+        setupStepFactory(meesOnlyUpdate)
+
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, stepFactory)
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
@@ -195,15 +230,24 @@ class PropertyComplianceOriginalJourneyDataTest {
     fun `Original journey data recreates the original record`(
         originalRecord: PropertyCompliance,
         complianceRecordsMatch: (PropertyCompliance, PropertyCompliance) -> Boolean,
+        meesOnlyUpdate: Boolean = false,
     ) {
         // Arrange
-        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord)
+        val finalSubmissionStepId = getFinalSubmissionStepId(meesOnlyUpdate)
+        setupStepFactory(meesOnlyUpdate)
+        val originalJourneyData = PropertyComplianceOriginalJourneyData.fromPropertyCompliance(originalRecord, stepFactory)
+
         val journeyDataService = mock<JourneyDataService>()
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
         whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
-        whenever(fileUploadRepository.getReferenceById(any())).thenReturn(originalRecord.gasSafetyFileUpload, originalRecord.eicrFileUpload)
+        whenever(
+            certificateUploadRepository.findByFileUpload_Id(any()),
+        ).thenReturn(
+            originalRecord.gasSafetyFileUpload?.let { CertificateUpload(it, FileCategory.GasSafetyCert, mock()) },
+            originalRecord.eicrFileUpload?.let { CertificateUpload(it, FileCategory.Eirc, mock()) },
+        )
 
         // Act
         val journey =
@@ -251,4 +295,112 @@ class PropertyComplianceOriginalJourneyDataTest {
         epcExemptionReason: ${original.epcExemptionReason} -> ${new.epcExemptionReason},
         epcMeesExemptionReason: ${original.epcMeesExemptionReason} -> ${new.epcMeesExemptionReason}
         """.trimIndent()
+
+    private fun setupStepFactory(meesOnlyUpdate: Boolean) {
+        whenever(stepFactory.epcNotAutomatchedStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcNotAutomatched
+            } else {
+                PropertyComplianceStepId.EpcNotAutoMatched
+            },
+        )
+        whenever(stepFactory.checkAutoMatchedEpcStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc
+            } else {
+                PropertyComplianceStepId.CheckAutoMatchedEpc
+            },
+        )
+        whenever(stepFactory.checkMatchedEpcStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc
+            } else {
+                PropertyComplianceStepId.CheckMatchedEpc
+            },
+        )
+        whenever(stepFactory.epcLookupStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcLookup
+            } else {
+                PropertyComplianceStepId.EpcLookup
+            },
+        )
+        whenever(stepFactory.epcNotFoundStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcNotFound
+            } else {
+                PropertyComplianceStepId.EpcNotFound
+            },
+        )
+        whenever(stepFactory.epcExpiryCheckStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck
+            } else {
+                PropertyComplianceStepId.EpcExpiryCheck
+            },
+        )
+        whenever(stepFactory.epcExpiredStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExpired
+            } else {
+                PropertyComplianceStepId.EpcExpired
+            },
+        )
+        whenever(stepFactory.epcExemptionReasonStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExemptionReason
+            } else {
+                PropertyComplianceStepId.EpcExemptionReason
+            },
+        )
+        whenever(stepFactory.epcExemptionConfirmationStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation
+            } else {
+                PropertyComplianceStepId.EpcExemptionConfirmation
+            },
+        )
+        whenever(stepFactory.meesExemptionCheckStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionCheck
+            } else {
+                PropertyComplianceStepId.MeesExemptionCheck
+            },
+        )
+        whenever(stepFactory.meesExemptionReasonStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionReason
+            } else {
+                PropertyComplianceStepId.MeesExemptionReason
+            },
+        )
+        whenever(stepFactory.meesExemptionConfirmationStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation
+            } else {
+                PropertyComplianceStepId.MeesExemptionConfirmation
+            },
+        )
+        whenever(stepFactory.lowEnergyRatingStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesLowEnergyRating
+            } else {
+                PropertyComplianceStepId.LowEnergyRating
+            },
+        )
+        whenever(stepFactory.epcCheckYourAnswersStepId).thenReturn(
+            if (meesOnlyUpdate) {
+                PropertyComplianceStepId.UpdateMeesCheckYourAnswers
+            } else {
+                PropertyComplianceStepId.UpdateEpcCheckYourAnswers
+            },
+        )
+    }
+
+    private fun getFinalSubmissionStepId(meesOnlyUpdate: Boolean) =
+        if (meesOnlyUpdate) {
+            PropertyComplianceStepId.UpdateMeesCheckYourAnswers
+        } else {
+            PropertyComplianceStepId.UpdateEpcCheckYourAnswers
+        }
 }

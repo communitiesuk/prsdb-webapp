@@ -27,7 +27,8 @@ class PropertyComplianceBuilder {
     }
 
     fun withGasSafetyCert(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyFileUpload = FileUpload(FileUploadStatus.QUARANTINED, "property_1_gas_safety_certificate.pdf")
+        propertyCompliance.gasSafetyFileUpload =
+            FileUpload(FileUploadStatus.SCANNED, "property_1_gas_safety_certificate", "pdf", "etag", "versionId")
         propertyCompliance.gasSafetyCertIssueDate = issueDate
         propertyCompliance.gasSafetyCertEngineerNum = "1234567"
         return this
@@ -46,7 +47,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withEicr(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.eicrFileUpload = FileUpload(FileUploadStatus.QUARANTINED, "property_1_eicr.pdf")
+        propertyCompliance.eicrFileUpload = FileUpload(FileUploadStatus.SCANNED, "property_1_eicr.pdf", "pdf", "etag", "versionId")
         propertyCompliance.eicrIssueDate = issueDate
         return this
     }
@@ -91,11 +92,6 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withoutFireSafetyDeclaration(hasDeclared: Boolean = true): PropertyComplianceBuilder {
-        propertyCompliance.hasFireSafetyDeclaration = hasDeclared
-        return this
-    }
-
     companion object {
         fun createWithInDateCerts() =
             PropertyComplianceBuilder()
@@ -124,15 +120,6 @@ class PropertyComplianceBuilder {
             .withMeesExemption(exemption)
             .withLowEpcRating()
             .build()
-
-        fun createWithInDateCertsAndSetFireSafetyDeclaration(hasDeclared: Boolean) =
-            PropertyComplianceBuilder()
-                .withPropertyOwnership()
-                .withGasSafetyCert()
-                .withEicr()
-                .withEpc()
-                .withoutFireSafetyDeclaration(hasDeclared)
-                .build()
 
         fun createWithExpiredCerts() =
             PropertyComplianceBuilder()

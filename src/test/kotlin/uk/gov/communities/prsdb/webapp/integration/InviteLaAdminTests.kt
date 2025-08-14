@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
 
-class InviteLaAdminTests : JourneyTestWithSeedData("data-local.sql") {
+class InviteLaAdminTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `inviting a new LA admin ends with a confirmation page`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))

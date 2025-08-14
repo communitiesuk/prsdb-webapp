@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -24,10 +25,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -36,7 +40,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhon
 import java.net.URI
 import kotlin.test.assertNotNull
 
-class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-not-landlord.sql") {
+class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
@@ -48,11 +52,8 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
 
     @BeforeEach
     fun setup() {
-        whenever(
-            osPlacesClient.search(any(), any()),
-        ).thenReturn(
-            "{'results':[{'DPA':{'ADDRESS':'1, Example Road, EG1 2AB'," +
-                "'LOCAL_CUSTODIAN_CODE':28,'UPRN':'1','BUILDING_NUMBER':1,'POSTCODE':'EG1 2AB'}}]}",
+        whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(
+            MockOSPlacesAPIResponses.createResponse(AddressDataModel("1, Example Road, EG1 2AB")),
         )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
@@ -162,7 +163,10 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, selected address)`(
         page: Page,
     ) {
-        val namePage = navigator.skipToLandlordRegistrationNamePage()
+        val identityNotVerifiedPage = navigator.skipToLandlordRegistrationIdentityNotVerifiedPage()
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
         namePage.submitName("landlord name")
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
@@ -215,7 +219,10 @@ class LandlordRegistrationJourneyTests : JourneyTestWithSeedData("data-mockuser-
     fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, manual address)`(
         page: Page,
     ) {
-        val namePage = navigator.skipToLandlordRegistrationNamePage()
+        val identityNotVerifiedPage = navigator.skipToLandlordRegistrationIdentityNotVerifiedPage()
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
         namePage.submitName("landlord name")
 
         val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)

@@ -4,7 +4,9 @@ import org.apache.http.HttpException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
@@ -28,35 +30,86 @@ class OSPlacesAddressLookupServiceTests {
 
     @Test
     fun `search returns a corresponding list of addresses`() {
+        val restrictToEngland = false
         val invalidCustodianCode = 10000000
 
         val addressesJSON =
-            "{'results':[" +
-                "{'DPA':{'ADDRESS':'1, Example Road, EG','LOCAL_CUSTODIAN_CODE':1,'UPRN':'1234','BUILDING_NUMBER':1,'POSTCODE':'EG'}}," +
-                "{'DPA':{'ADDRESS':'2, Example Road, EG','LOCAL_CUSTODIAN_CODE':2,'UPRN':'','BUILDING_NUMBER':2,'POSTCODE':'EG'}}," +
-                "{'DPA':{'ADDRESS':'Main, Example Road, EG','LOCAL_CUSTODIAN_CODE':$invalidCustodianCode," +
-                "'UPRN':'','BUILDING_NAME':'Main','POSTCODE':'EG'}}" +
-                "]}"
-        val expectedAddresses =
+            """
+            {
+                "results": [
+                    {
+                        "DPA": {
+                            "ADDRESS": "1, Example Road, EG",
+                            "LOCAL_CUSTODIAN_CODE": 1,
+                            "UPRN": "1234",
+                            "BUILDING_NUMBER": 1,
+                            "POSTCODE": "EG",
+                            "COUNTRY_CODE": "E"
+                        }
+                    },
+                    {
+                        "DPA": {
+                            "ADDRESS": "2, Example Road, EG",
+                            "LOCAL_CUSTODIAN_CODE": 2,
+                            "UPRN": "",
+                            "BUILDING_NUMBER": 2,
+                            "POSTCODE": "EG",
+                            "COUNTRY_CODE": "E"
+                        }
+                    },
+                    {
+                        "DPA": {
+                            "ADDRESS": "Main, Example Road, EG",
+                            "LOCAL_CUSTODIAN_CODE": $invalidCustodianCode,
+                            "UPRN": "",
+                            "BUILDING_NAME": "Main",
+                            "POSTCODE": "EG",
+                            "COUNTRY_CODE": "E"
+                        }
+                    },
+                    {
+                        "DPA": {
+                            "ADDRESS": "Welsh House, Non-England Street, WG",
+                            "LOCAL_CUSTODIAN_CODE": 100,
+                            "UPRN": "5678",
+                            "BUILDING_NAME": Welsh House,
+                            "POSTCODE": "WG",
+                            "COUNTRY_CODE": "W"
+                        }
+                    },
+                ]
+            }
+            """
+
+        val expectedAddressDataModels =
             listOf(
                 AddressDataModel(
-                    "1, Example Road, EG",
+                    singleLineAddress = "1, Example Road, EG",
                     localAuthorityId = 1,
-                    1234,
+                    uprn = 1234,
                     buildingNumber = "1",
                     postcode = "EG",
                 ),
-                AddressDataModel("2, Example Road, EG", localAuthorityId = 2, buildingNumber = "2", postcode = "EG"),
                 AddressDataModel(
-                    "Main, Example Road, EG",
+                    singleLineAddress = "2, Example Road, EG",
+                    localAuthorityId = 2,
+                    buildingNumber = "2",
+                    postcode = "EG",
+                ),
+                AddressDataModel(
+                    singleLineAddress = "Main, Example Road, EG",
                     buildingName = "Main",
                     postcode = "EG",
                 ),
+                AddressDataModel(
+                    singleLineAddress = "Welsh House, Non-England Street, WG",
+                    uprn = 5678,
+                    buildingName = "Welsh House",
+                    postcode = "WG",
+                ),
             )
 
-        whenever(
-            mockOSPlacesClient.search(anyString(), anyString()),
-        ).thenReturn(addressesJSON)
+        whenever(mockOSPlacesClient.search(anyString(), anyString(), eq(restrictToEngland))).thenReturn(addressesJSON)
 
         whenever(mockLocalAuthorityService.retrieveLocalAuthorityByCustodianCode(anyString())).then {
             val custodianCode =
@@ -67,14 +120,14 @@ class OSPlacesAddressLookupServiceTests {
             if (custodianCode == invalidCustodianCode) null else LocalAuthority(custodianCode)
         }
 
-        val addresses = addressLookupService.search("", "")
+        val addresses = addressLookupService.search("", "", restrictToEngland)
 
-        assertEquals(expectedAddresses, addresses)
+        assertEquals(expectedAddressDataModels, addresses)
     }
 
     @Test
-    fun `searchByPostcode throws a HTTP error if the API call fails`() {
-        doAnswer { throw HttpException() }.whenever(mockOSPlacesClient).search(anyString(), anyString())
+    fun `search throws a HTTP error if the API call fails`() {
+        doAnswer { throw HttpException() }.whenever(mockOSPlacesClient).search(anyString(), anyString(), anyBoolean())
 
         assertThrows<HttpException> { addressLookupService.search("", "EG") }
     }

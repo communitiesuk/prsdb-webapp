@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -36,13 +37,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.net.URI
 import kotlin.test.assertTrue
 
-class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @MockitoSpyBean
@@ -53,33 +56,8 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
 
     @BeforeEach
     fun setup() {
-        whenever(
-            osPlacesClient.search(any(), any()),
-        ).thenReturn(
-            """
-            {
-              "results": [
-                {
-                  "DPA": {
-                    "ADDRESS": "1, Example Road, EG1 2AB",
-                    "LOCAL_CUSTODIAN_CODE": 114,
-                    "UPRN": "1",
-                    "BUILDING_NUMBER": 1,
-                    "POSTCODE": "EG1 2AB"
-                  }
-                },
-                {
-                  "DPA": {
-                    "ADDRESS": "already registered address",
-                    "LOCAL_CUSTODIAN_CODE": 114,
-                    "UPRN": "1123456",
-                    "BUILDING_NUMBER": 1,
-                    "POSTCODE": "EG1 3CD"
-                  }
-                }
-              ]
-            }
-            """.trimIndent(),
+        whenever(osPlacesClient.search(any(), any(), eq(true))).thenReturn(
+            MockOSPlacesAPIResponses.createResponse(AddressDataModel(singleLineAddress = "1, Example Road, EG1 2AB")),
         )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
@@ -237,7 +215,7 @@ class PropertyRegistrationJourneyTests : JourneyTestWithSeedData("data-local.sql
         val selectLocalAuthorityPage = assertPageIs(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
 
         // Select local authority - render page
-        assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local authority area is your property in?")
+        assertThat(selectLocalAuthorityPage.form.fieldsetHeading).containsText("What local council area is your property in?")
         assertThat(selectLocalAuthorityPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         selectLocalAuthorityPage.submitLocalAuthority("BATH AND NORTH EAST SOMERSET COUNCIL", "BATH AND NORTH EAST SOMERSET COUNCIL")

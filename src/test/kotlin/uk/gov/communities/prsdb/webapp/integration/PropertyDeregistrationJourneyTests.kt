@@ -9,12 +9,38 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
-class PropertyDeregistrationJourneyTests : JourneyTestWithSeedData("data-local.sql") {
+class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1
         val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
         assertThat(deregisterPropertyAreYouSurePage.form.fieldsetHeading).containsText("1, Example Road, EG")
+        deregisterPropertyAreYouSurePage.submitWantsToProceed()
+
+        val reasonPage =
+            assertPageIs(
+                page,
+                ReasonPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        reasonPage.submitReason("No longer own this property")
+
+        val confirmationPage =
+            assertPageIs(
+                page,
+                ConfirmationPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+
+        confirmationPage.goToDashboardButton.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can delete a property record that has compliance information`(page: Page) {
+        val propertyOwnershipId = 8
+        val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
         deregisterPropertyAreYouSurePage.submitWantsToProceed()
 
         val reasonPage =

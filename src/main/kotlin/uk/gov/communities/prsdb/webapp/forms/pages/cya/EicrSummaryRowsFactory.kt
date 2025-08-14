@@ -4,22 +4,26 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionConfirmation
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrExemptionMissing
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEicrUploadConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class EicrSummaryRowsFactory(
     val doesDataHaveEicr: (JourneyData) -> Boolean,
     val eicrStartingStep: PropertyComplianceStepId,
     val changeExemptionStep: PropertyComplianceStepId,
+    val uploadService: UploadService,
 ) {
     fun createRows(filteredJourneyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>()
@@ -33,24 +37,38 @@ class EicrSummaryRowsFactory(
             }.toList()
 
     private fun getEicrStatusRow(filteredJourneyData: JourneyData): SummaryListRowViewModel {
-        val fieldValue =
-            // TODO PRSD-976: Add link to gas safety cert (or appropriate message if virus scan failed)
-            if (filteredJourneyData.getHasCompletedEicrUploadConfirmation()) {
-                "forms.checkComplianceAnswers.eicr.download"
-            } else if (filteredJourneyData.getHasCompletedEicrOutdated()) {
-                "forms.checkComplianceAnswers.certificate.expired"
-            } else if (filteredJourneyData.getHasCompletedEicrExemptionConfirmation()) {
-                "forms.checkComplianceAnswers.certificate.notRequired"
-            } else if (filteredJourneyData.getHasCompletedEicrExemptionMissing()) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
-            } else {
-                throw PrsdbWebException("Unexpected EICR status in journey data.")
+        data class EicrValue(
+            val fieldValue: String,
+            val downloadUrl: String? = null,
+        )
+
+        fun createEicrValueForFileUpload(fileId: Long): EicrValue {
+            val fileUpload = uploadService.getFileUploadById(fileId)
+
+            return when (fileUpload.status) {
+                FileUploadStatus.QUARANTINED -> EicrValue("propertyCompliance.uploadedFile.virusScanPending")
+                FileUploadStatus.DELETED -> EicrValue("propertyCompliance.uploadedFile.virusScanFailed")
+                FileUploadStatus.SCANNED ->
+                    EicrValue(
+                        "forms.checkComplianceAnswers.eicr.download",
+                        uploadService.getDownloadUrl(fileUpload, "eicr.${fileUpload.extension}"),
+                    )
+            }
+        }
+
+        val eicrValue =
+            when (EicrStatus.fromJourneyData(filteredJourneyData)) {
+                EicrStatus.UPLOADED -> createEicrValueForFileUpload(filteredJourneyData.getEicrUploadId()!!.toLong())
+                EicrStatus.EXEMPTION -> EicrValue("forms.checkComplianceAnswers.certificate.notRequired")
+                EicrStatus.MISSING -> EicrValue("forms.checkComplianceAnswers.certificate.notAdded")
+                EicrStatus.OUTDATED -> EicrValue("forms.checkComplianceAnswers.certificate.expired")
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.eicr.certificate",
-            fieldValue,
+            eicrValue.fieldValue,
             eicrStartingStep.urlPathSegment,
+            eicrValue.downloadUrl,
         )
     }
 
@@ -83,5 +101,27 @@ class EicrSummaryRowsFactory(
             fieldValue,
             changeExemptionStep.urlPathSegment,
         )
+    }
+}
+
+private enum class EicrStatus {
+    UPLOADED,
+    EXEMPTION,
+    MISSING,
+    OUTDATED,
+    ;
+
+    companion object {
+        fun fromJourneyData(data: JourneyData): EicrStatus {
+            val statusList =
+                listOfNotNull(
+                    if (data.getHasCompletedEicrUploadConfirmation()) UPLOADED else null,
+                    if (data.getHasCompletedEicrExemptionConfirmation()) EXEMPTION else null,
+                    if (data.getHasCompletedEicrExemptionMissing()) MISSING else null,
+                    if (data.getHasCompletedEicrOutdated()) OUTDATED else null,
+                )
+            return statusList.singleOrNull()
+                ?: throw PrsdbWebException("Filtered journey data does not have a single EICR status: $statusList")
+        }
     }
 }

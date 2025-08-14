@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -11,7 +12,32 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class PropertyComplianceUpdateSinglePageTests : SinglePageTestWithSeedData("data-local.sql") {
+class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Test
+    fun `Submitting UpdateGasSafetyStep with no option selected returns an error`() {
+        val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
+        updateGasSafetyPage.form.submit()
+        assertThat(
+            updateGasSafetyPage.form.getErrorMessage(),
+        ).containsText("Select whether you want to add a new certificate or exemption")
+    }
+
+    @Test
+    fun `Submitting UpdateEicrStep with no option selected returns an error`() {
+        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
+        updateEicrPage.form.submit()
+        assertThat(updateEicrPage.form.getErrorMessage())
+            .containsText("Select whether you want to add a new EICR or exemption")
+    }
+
+    @Test
+    fun `Submitting UpdateEpcStep with no value entered returns an error`() {
+        val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
+        updateEpcPage.form.submit()
+        assertThat(updateEpcPage.form.getErrorMessage())
+            .containsText("Select whether you want to add a new certificate or exemption")
+    }
+
     @Test
     fun `User can review their fire safety declaration`(page: Page) {
         // Go to property compliance tab of property record

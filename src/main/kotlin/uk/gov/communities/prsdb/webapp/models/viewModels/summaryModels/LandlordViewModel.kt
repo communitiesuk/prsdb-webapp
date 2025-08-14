@@ -19,24 +19,6 @@ class LandlordViewModel(
 
     val name: String = landlord.name
 
-    // TODO PRSD-746 - add user consent information to this page once it is captured (this will need to be passed into the constructor since this is a view model)
-    val consentInformation: List<SummaryListRowViewModel> =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addRow(
-                    "landlordDetails.personalDetails.optionalChoices.legalChanges",
-                    "TODO PRSD-746",
-                    null,
-                    withActionLink = withChangeLinks,
-                )
-                addRow(
-                    "landlordDetails.personalDetails.optionalChoices.research",
-                    "TODO PRSD-746",
-                    null,
-                    withActionLink = withChangeLinks,
-                )
-            }
-
     val personalDetails: List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {

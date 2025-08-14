@@ -13,15 +13,21 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
+import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.time.LocalDate
 import kotlin.test.assertFalse
@@ -39,7 +45,7 @@ class PropertyComplianceServiceTests {
     private lateinit var mockSession: HttpSession
 
     @Mock
-    private lateinit var mockFileUploadRepository: FileUploadRepository
+    private lateinit var mockCertificateUploadRepository: CertificateUploadRepository
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -52,9 +58,9 @@ class PropertyComplianceServiceTests {
             .thenReturn(expectedPropertyCompliance.propertyOwnership)
         whenever(mockPropertyComplianceRepository.save(any())).thenReturn(expectedPropertyCompliance)
 
-        whenever(mockFileUploadRepository.getReferenceById(any())).thenReturn(
-            expectedPropertyCompliance.gasSafetyFileUpload,
-            expectedPropertyCompliance.eicrFileUpload,
+        whenever(mockCertificateUploadRepository.findByFileUpload_Id(any())).thenReturn(
+            expectedPropertyCompliance.gasSafetyFileUpload?.let { CertificateUpload(it, mock(), mock()) },
+            expectedPropertyCompliance.eicrFileUpload?.let { CertificateUpload(it, mock(), mock()) },
         )
 
         val returnedPropertyCompliance =
@@ -75,7 +81,6 @@ class PropertyComplianceServiceTests {
                 epcEnergyRating = expectedPropertyCompliance.epcEnergyRating,
                 epcExemptionReason = expectedPropertyCompliance.epcExemptionReason,
                 epcMeesExemptionReason = expectedPropertyCompliance.epcMeesExemptionReason,
-                hasFireSafetyDeclaration = expectedPropertyCompliance.hasFireSafetyDeclaration,
             )
 
         val propertyComplianceCaptor = captor<PropertyCompliance>()
@@ -128,11 +133,49 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
+    fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant properties`() {
+        // Arrange
+        val landlordBaseUserId = "baseUserId"
+        val nonCompliantProperties =
+            listOf(PropertyComplianceBuilder.createWithMissingCerts(), PropertyComplianceBuilder.createWithExpiredCerts())
+        val compliances = nonCompliantProperties + PropertyComplianceBuilder.createWithInDateCerts()
+
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+        ).thenReturn(compliances)
+
+        // Act
+        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+
+        // Assert
+        assertEquals(nonCompliantProperties.size, returnedCount)
+    }
+
+    @Test
+    fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant properties`() {
+        // Arrange
+        val landlordBaseUserId = "baseUserId"
+        val nonCompliantProperty = PropertyComplianceBuilder.createWithMissingCerts()
+        val compliances = listOf(PropertyComplianceBuilder.createWithInDateCerts(), nonCompliantProperty)
+
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+        ).thenReturn(compliances)
+
+        // Act
+        val returnedNonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+
+        // Assert
+        val expectedNonCompliantProperties = listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperty))
+        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
+    }
+
+    @Test
     fun `updatePropertyCompliance changes the certificates associated with the given update model's non-null values`() {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -159,7 +202,10 @@ class PropertyComplianceServiceTests {
         assertEquals(updateModel.gasSafetyCertUpdate?.issueDate, propertyCompliance.gasSafetyCertIssueDate)
         assertEquals(updateModel.gasSafetyCertUpdate?.engineerNum, propertyCompliance.gasSafetyCertEngineerNum)
         assertEquals(updateModel.gasSafetyCertUpdate?.exemptionReason, propertyCompliance.gasSafetyCertExemptionReason)
-        assertEquals(updateModel.gasSafetyCertUpdate?.exemptionOtherReason, propertyCompliance.gasSafetyCertExemptionOtherReason)
+        assertEquals(
+            updateModel.gasSafetyCertUpdate?.exemptionOtherReason,
+            propertyCompliance.gasSafetyCertExemptionOtherReason,
+        )
     }
 
     @Test
@@ -167,7 +213,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -206,7 +252,7 @@ class PropertyComplianceServiceTests {
         // Arrange
         val propertyCompliance =
             MockPropertyComplianceData.createPropertyCompliance(
-                gasSafetyCertS3Key = "s3Key",
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
                 gasSafetyCertIssueDate = LocalDate.now(),
                 gasSafetyCertEngineerNum = "1234567",
                 gasSafetyCertExemptionReason = null,
@@ -285,5 +331,36 @@ class PropertyComplianceServiceTests {
         whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionSet)
 
         assertFalse(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
+    }
+
+    @Test
+    fun `deletePropertyCompliance deletes the given PropertyCompliance`() {
+        val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+        propertyComplianceService.deletePropertyCompliance(propertyCompliance)
+
+        verify(mockPropertyComplianceRepository).delete(propertyCompliance)
+    }
+
+    @Test
+    fun `deletePropertyCompliancesByOwnershipIds deletes PropertyCompliances with the given PropertyOwnershipIds`() {
+        val propertyOwnershipIds =
+            listOf(
+                1L,
+                2L,
+            )
+
+        propertyComplianceService.deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
+
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
+    }
+
+    @Test
+    fun `deletePropertyComplianceByOwnershipId deletes the PropertyCompliance with the given PropertyOwnershipId`() {
+        val propertyOwnershipId = 1L
+
+        propertyComplianceService.deletePropertyComplianceByOwnershipId(propertyOwnershipId)
+
+        verify(mockPropertyComplianceRepository).deleteByPropertyOwnership_Id(propertyOwnershipId)
     }
 }

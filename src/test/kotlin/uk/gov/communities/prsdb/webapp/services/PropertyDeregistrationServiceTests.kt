@@ -24,13 +24,19 @@ class PropertyDeregistrationServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
+    private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @Mock
     private lateinit var mockHttpSession: HttpSession
 
     @InjectMocks
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
 
+    @Mock
+    private lateinit var mockFormContextService: FormContextService
+
     @Test
-    fun `deregisterProperty deletes the property, license and property ownership`() {
+    fun `deregisterProperty deletes the property, license, compliance and property ownership`() {
         val licence = License()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(license = licence)
         val propertyOwnershipId = propertyOwnership.id
@@ -38,13 +44,14 @@ class PropertyDeregistrationServiceTests {
         // Act
         propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
+        verify(mockPropertyComplianceService).deletePropertyComplianceByOwnershipId(propertyOwnership.id)
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
         verify(mockPropertyService).deleteProperty(propertyOwnership.property)
         verify(mockLicenceService).deleteLicense(licence)
     }
 
     @Test
-    fun `deregisterProperties deletes the property, license and property ownership for all properties`() {
+    fun `deregisterProperties deletes the property, license, compliance and property ownership for all properties`() {
         val license = License()
         val properties =
             listOf(
@@ -57,11 +64,49 @@ class PropertyDeregistrationServiceTests {
                 MockLandlordData.createPropertyOwnership(property = properties[1]),
             )
 
+        val propertyOwnershipIds = propertyOwnerships.map { it.id }
+
         propertyDeregistrationService.deregisterProperties(propertyOwnerships)
 
+        verify(mockPropertyComplianceService).deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
         verify(mockPropertyOwnershipService).deletePropertyOwnerships(propertyOwnerships)
         verify(mockPropertyService).deleteProperties(properties)
         verify(mockLicenceService).deleteLicenses(listOf(license))
+    }
+
+    @Test
+    fun `deregisterProperty deletes the incompleteComplianceForm for the property ownership`() {
+        val incompleteCompliance = MockLandlordData.createPropertyComplianceFormContext()
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                incompleteComplianceForm = incompleteCompliance,
+            )
+        val propertyOwnershipId = propertyOwnership.id
+        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
+        // Act
+        propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
+
+        verify(mockFormContextService).deleteFormContext(incompleteCompliance)
+        verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
+    }
+
+    @Test
+    fun `deregisterProperties deletes the incompleteComplianceForms for all properties`() {
+        val incompleteCompliances =
+            listOf(
+                MockLandlordData.createPropertyComplianceFormContext(),
+                MockLandlordData.createPropertyComplianceFormContext(),
+            )
+        val propertyOwnerships =
+            listOf(
+                MockLandlordData.createPropertyOwnership(incompleteComplianceForm = incompleteCompliances[0]),
+                MockLandlordData.createPropertyOwnership(incompleteComplianceForm = incompleteCompliances[1]),
+            )
+
+        propertyDeregistrationService.deregisterProperties(propertyOwnerships)
+
+        verify(mockFormContextService).deleteFormContexts(incompleteCompliances)
+        verify(mockPropertyOwnershipService).deletePropertyOwnerships(propertyOwnerships)
     }
 
     @Test

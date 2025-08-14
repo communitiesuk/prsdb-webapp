@@ -12,11 +12,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.InvalidLinkPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
-class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mockuser-not-lauser.sql") {
+class LaUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-lauser.sql") {
     @Autowired
     lateinit var localAuthorityService: LocalAuthorityService
 
@@ -37,7 +38,21 @@ class LaUserRegistrationSinglePageTests : SinglePageTestWithSeedData("data-mocku
     }
 
     @Nested
-    inner class LaUserRegistrationStepLandingPage : NestedSinglePageTestWithSeedData("data-local.sql") {
+    inner class LaUserRegistrationAcceptInvitationRoute {
+        @Test
+        fun `Navigating here with an invalid token redirects to the invalid link page`(page: Page) {
+            val invalidToken = "1234abcd-5678-abcd-1234-567abcd1111d"
+            navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invalidToken)
+            val invalidLinkPage = BasePage.assertPageIs(page, InvalidLinkPageLaUserRegistration::class)
+            BaseComponent.assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
+            assertThat(
+                invalidLinkPage.description,
+            ).containsText("Contact the PRS Database admin user at your local council to ask for another invite.")
+        }
+    }
+
+    @Nested
+    inner class LaUserRegistrationStepLandingPage : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `Navigating here as a registered local authority user redirects to the LA dashboard page`(page: Page) {
             navigator.navigateToLaUserRegistrationLandingPage(invitation.token)

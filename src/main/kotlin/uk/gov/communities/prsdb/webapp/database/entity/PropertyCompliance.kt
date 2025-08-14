@@ -73,7 +73,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var epcMeesExemptionReason: MeesExemptionReason? = null
 
-    var hasFireSafetyDeclaration: Boolean = false
+    val hasFireSafetyDeclaration: Boolean = true
 
     val hasKeepPropertySafeDeclaration: Boolean = true
 
@@ -137,7 +137,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     constructor(
         propertyOwnership: PropertyOwnership,
-        hasFireSafetyDeclaration: Boolean,
         gasSafetyCertUpload: FileUpload? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyCertEngineerNum: String? = null,
@@ -170,6 +169,5 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.epcEnergyRating = epcEnergyRating
         this.epcExemptionReason = epcExemptionReason
         this.epcMeesExemptionReason = epcMeesExemptionReason
-        this.hasFireSafetyDeclaration = hasFireSafetyDeclaration
     }
 }

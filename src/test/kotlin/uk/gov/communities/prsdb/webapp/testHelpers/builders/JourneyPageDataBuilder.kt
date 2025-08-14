@@ -7,14 +7,17 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.time.LocalDate
 
 class JourneyPageDataBuilder {
     companion object {
         fun beforeLandlordRegistrationConfirmIdentity() = JourneyDataBuilder().withVerifiedUser()
 
-        fun beforeLandlordRegistrationName() = JourneyDataBuilder().withUnverifiedUser(name = null)
+        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withVerifyIdentityUnverified()
 
-        fun beforeLandlordRegistrationDob() = JourneyDataBuilder().withUnverifiedUser(dob = null)
+        fun beforeLandlordRegistrationName() = beforeLandlordRegistrationIdentityNotVerified().withIdentityNotVerified()
+
+        fun beforeLandlordRegistrationDob() = beforeLandlordRegistrationName().withNameUnverifiedLandlordData()
 
         fun beforeLandlordRegistrationEmail() = beforeLandlordRegistrationConfirmIdentity()
 
@@ -145,7 +148,7 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyComplianceFireSafetyDeclaration() = beforePropertyComplianceEpc().withMissingEpcExemption()
 
-        fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration(true)
+        fun beforePropertyComplianceKeepPropertySafe() = beforePropertyComplianceFireSafetyDeclaration().withFireSafetyDeclaration()
 
         fun beforePropertyComplianceResponsibilityToTenants() = beforePropertyComplianceKeepPropertySafe().withKeepPropertySafeDeclaration()
 
@@ -155,5 +158,31 @@ class JourneyPageDataBuilder {
         fun beforeLandlordDetailsUpdateSelectAddress() = JourneyDataBuilder().withLookupAddress()
 
         fun beforePropertyDeregistrationReason() = JourneyDataBuilder().withWantsToProceed()
+
+        fun beforePropertyComplianceEicrUpdate(
+            gasSafetyIssueDate: LocalDate = LocalDate.now(),
+            gasSafeEngineerNumber: String = "1234567",
+            gasCertificatefileUploadId: Long = 2L,
+        ) = JourneyDataBuilder()
+            .withExistingCompliance()
+            .withNewGasSafetyCertStatus(true)
+            .withGasSafetyIssueDate(gasSafetyIssueDate)
+            .withGasSafeEngineerNum(gasSafeEngineerNumber)
+            .withGasCertFileUploadId(gasCertificatefileUploadId)
+            .withGasSafetyCertUploadConfirmation()
+            .withGasSafetyUpdateCheckYourAnswers()
+
+        fun beforePropertyComplianceEpcUpdate(
+            gasSafetyIssueDate: LocalDate = LocalDate.now(),
+            gasSafeEngineerNumber: String = "1234567",
+            gasCertificatefileUploadId: Long = 2L,
+            eicrIssueDate: LocalDate = LocalDate.now(),
+            eicrFileUploadId: Long = 1L,
+        ) = beforePropertyComplianceEicrUpdate(gasSafetyIssueDate, gasSafeEngineerNumber, gasCertificatefileUploadId)
+            .withNewEicrStatus(true)
+            .withEicrIssueDate(eicrIssueDate)
+            .withEicrUploadId(eicrFileUploadId)
+            .withEicrUploadConfirmation()
+            .withEicrUpdateCheckYourAnswers()
     }
 }

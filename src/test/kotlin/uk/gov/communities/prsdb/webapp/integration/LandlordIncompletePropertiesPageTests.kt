@@ -6,7 +6,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.integration.SinglePageTestWithSeedData.NestedSinglePageTestWithSeedData
+import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 class LandlordIncompletePropertiesPageTests : IntegrationTest() {
     @Nested
     inner class LandlordsWithIncompleteProperties :
-        NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-incomplete-properties.sql") {
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-incomplete-properties.sql") {
         @Test
         fun `the page loads with heading and subheading`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
@@ -45,18 +45,18 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
 
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
 
-            assertThat(incompletePropertiesPage.firstSummaryCard.summaryCardList.propertyAddressRow).containsText("4, Example Road, EG")
+            assertThat(incompletePropertiesPage.firstSummaryCard.summaryList.propertyAddressRow).containsText("4, Example Road, EG")
             assertThat(
-                incompletePropertiesPage.firstSummaryCard.summaryCardList.localAuthorityRow,
+                incompletePropertiesPage.firstSummaryCard.summaryList.localAuthorityRow,
             ).containsText("SOUTH GLOUCESTERSHIRE COUNCIL")
             assertThat(
-                incompletePropertiesPage.firstSummaryCard.summaryCardList.completeByRow,
+                incompletePropertiesPage.firstSummaryCard.summaryList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
 
-            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.propertyAddressRow).containsText("5, Example Road, EG")
-            assertThat(incompletePropertiesPage.secondSummaryCard.summaryCardList.localAuthorityRow).containsText("NORTH SOMERSET COUNCIL")
+            assertThat(incompletePropertiesPage.secondSummaryCard.summaryList.propertyAddressRow).containsText("5, Example Road, EG")
+            assertThat(incompletePropertiesPage.secondSummaryCard.summaryList.localAuthorityRow).containsText("NORTH SOMERSET COUNCIL")
             assertThat(
-                incompletePropertiesPage.secondSummaryCard.summaryCardList.completeByRow,
+                incompletePropertiesPage.secondSummaryCard.summaryList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
 
@@ -79,7 +79,7 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LandlordsWithNoIncompleteProperties : NestedSinglePageTestWithSeedData("data-mockuser-landlord-with-properties.sql") {
+    inner class LandlordsWithNoIncompleteProperties : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
         @Test
         fun `the page loads with heading and page text`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()

@@ -1,6 +1,6 @@
 <div th:fragment="summaryCard(title, cardNumber, actions, summaryList)" class="govuk-summary-card">
     <div class="govuk-summary-card__title-wrapper">
-        <h2 class="govuk-summary-card__title" th:text="${cardNumber != null} ? #{${title}} + ' ' + ${cardNumber} : #{${title}}">
+        <h2 class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
             Title of the summary card
         </h2>
         <ul th:unless="${actions == null or #lists.isEmpty(actions)}" class="govuk-summary-card__actions">

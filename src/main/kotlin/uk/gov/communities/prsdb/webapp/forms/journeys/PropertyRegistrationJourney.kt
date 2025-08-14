@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
@@ -41,15 +40,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
@@ -59,9 +54,6 @@ class PropertyRegistrationJourney(
     private val addressLookupService: AddressLookupService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val localAuthorityService: LocalAuthorityService,
-    private val landlordService: LandlordService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -173,6 +165,7 @@ class PropertyRegistrationJourney(
             addressLookupService = addressLookupService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
+            restrictToEngland = true,
         )
 
     private fun selectAddressStep() =
@@ -224,15 +217,14 @@ class PropertyRegistrationJourney(
             page =
                 Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "noAddressFoundPage",
+                    templateName = "forms/noAddressFoundForm",
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
+                            "restrictToEngland" to true,
                             "postcode" to getHouseNameOrNumberAndPostcode().second,
                             "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
-                            "searchAgainUrl" to
-                                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
-                                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+                            "searchAgainUrl" to RegisterPropertyStepId.LookupAddress.urlPathSegment,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -614,27 +606,15 @@ class PropertyRegistrationJourney(
         try {
             val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
-            val propertyRegistrationNumber =
-                propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
-                    address = address,
-                    propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(filteredJourneyData)!!,
-                    licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!,
-                    licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(filteredJourneyData)!!,
-                    ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(filteredJourneyData)!!,
-                    numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(filteredJourneyData),
-                    numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(filteredJourneyData),
-                    baseUserId = baseUserId,
-                )
-
-            propertyRegistrationService.setLastPrnRegisteredThisSession(propertyRegistrationNumber.number)
-
-            confirmationEmailSender.sendEmail(
-                landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email,
-                PropertyRegistrationConfirmationEmail(
-                    RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
-                    address.singleLineAddress,
-                    absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                ),
+            propertyRegistrationService.registerProperty(
+                address = address,
+                propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(filteredJourneyData)!!,
+                licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!,
+                licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(filteredJourneyData)!!,
+                ownershipType = PropertyRegistrationJourneyDataHelper.getOwnershipType(filteredJourneyData)!!,
+                numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(filteredJourneyData),
+                numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(filteredJourneyData),
+                baseUserId = baseUserId,
             )
 
             journeyDataService.deleteJourneyData()

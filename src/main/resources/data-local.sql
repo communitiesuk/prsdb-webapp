@@ -357,7 +357,7 @@ VALUES (1, 8, '01/01/25', '01/01/25',
        (4, 11, '01/01/25', '01/01/25',
         null, null, null, 0, null,
         null, null, 1, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2030-12-03', null, 'c', null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-02-28', null, 'g', null, 7,
         true, true, true),
         (5, 12, '01/01/25', null,
         null, null, null, 0, null,
@@ -371,3 +371,12 @@ VALUES (1, 8, '01/01/25', '01/01/25',
         true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+
+INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
+VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
+SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
+
+INSERT INTO certificate_upload (id, created_date, file_upload_id, property_ownership_id, category)
+VALUES (1, '09/13/24', 1, 1, 1);
+SELECT setval(pg_get_serial_sequence('certificate_upload', 'id'), (SELECT MAX(id) FROM certificate_upload));

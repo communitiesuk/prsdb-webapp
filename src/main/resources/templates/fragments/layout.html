@@ -22,7 +22,36 @@
           th:href="@{/assets/css/accessible-autocomplete.min.css}"/>
     <link rel="stylesheet" href="/static/assets/css/moj-frontend.min.css" th:href="@{/assets/css/moj-frontend.min.css}">
     <link rel="stylesheet" href="/static/assets/css/custom.css" th:href="@{/assets/css/custom.css}">
+    <!--/*@thymesVar id="plausibleDomainId" type="String"*/-->
+    <script defer th:attr="data-domain=${plausibleDomainId}" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
+    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 </head>
+<script>
+    <!-- Set consent for google tag to denied by default -->
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'ad_storage': 'denied',
+        'analytics_storage': 'denied',
+        'wait_for_update': 500,
+    });
+</script>
+<!--/*@thymesVar id="googleAnalyticsMeasurementId" type="String"*/-->
+<script async th:src="'https://www.googletagmanager.com/gtag/js?id='+${googleAnalyticsMeasurementId}"></script>
+<script th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
+    <!-- Google tag (gtag.js) -->
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', [[${measurementIdAsString}]])
+</script>
+<script th:inline="javascript">
+    // Add environment variables to the window so they can be accessed in js scripts
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = [[${googleAnalyticsMeasurementId}]];
+    window.GOOGLE_COOKIE_DOMAIN = [[${googleAnalyticsCookieDomain}]];
+</script>
 <body class="govuk-template__body">
 <script>
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');

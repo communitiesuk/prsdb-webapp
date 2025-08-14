@@ -54,17 +54,37 @@ enum class PropertyComplianceStepId(
     MeesExemptionConfirmation("mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Epc),
     LowEnergyRating("low-energy-rating", PropertyComplianceGroupIdentifier.Epc),
     UpdateEpcCheckYourAnswers("epc-check-your-answers", PropertyComplianceGroupIdentifier.Epc, true),
+    UpdateMeesEpcNotAutomatched("update-mees-epc-not-automatched", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesCheckAutoMatchedEpc("update-mees-check-auto-matched-epc", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesCheckMatchedEpc("update-mees-check-matched-epc", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcLookup("update-mees-epc-lookup", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcNotFound("update-mees-epc-not-found", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcExpiryCheck("update-mees-epc-expiry-check", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcExpired("update-mees-epc-expired", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcMissing("update-mees-epc-missing", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcExemptionReason("update-mees-epc-exemption-reason", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesEpcExemptionConfirmation("update-mees-epc-exemption-confirmation", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesMeesExemptionCheck("update-mees-mees-exemption-check", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesMeesExemptionReason("update-mees-mees-exemption-reason", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesMeesExemptionConfirmation("update-mees-mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesLowEnergyRating("update-mees-low-energy-rating", PropertyComplianceGroupIdentifier.Mees),
+    UpdateMeesCheckYourAnswers("mees-check-your-answers", PropertyComplianceGroupIdentifier.Mees, true),
     FireSafetyDeclaration(FIRE_SAFETY_PATH_SEGMENT, PropertyComplianceGroupIdentifier.FireSafety),
-    FireSafetyRisk("fire-safety-risk", PropertyComplianceGroupIdentifier.FireSafety),
     KeepPropertySafe(KEEP_PROPERTY_SAFE_PATH_SEGMENT, PropertyComplianceGroupIdentifier.KeepPropertySafe),
     ResponsibilityToTenants(RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT, PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
     CheckAndSubmit("check-and-submit", PropertyComplianceGroupIdentifier.CheckAndSubmit),
+    ;
+
+    companion object {
+        fun fromPathSegment(segment: String) = PropertyComplianceStepId.entries.find { it.urlPathSegment == segment }
+    }
 }
 
 enum class PropertyComplianceGroupIdentifier {
     GasSafety,
     Eicr,
     Epc,
+    Mees,
     FireSafety,
     KeepPropertySafe,
     ResponsibilityToTenants,
