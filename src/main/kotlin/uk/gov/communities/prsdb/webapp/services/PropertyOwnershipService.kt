@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
@@ -235,7 +236,7 @@ class PropertyOwnershipService(
                             .fromRegistrationNumber(propertyOwnership.registrationNumber)
                             .toString(),
                     dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                    updatedBullets = updatedBullets,
+                    updatedBullets = EmailBulletPointList(updatedBullets),
                 ),
             )
         }

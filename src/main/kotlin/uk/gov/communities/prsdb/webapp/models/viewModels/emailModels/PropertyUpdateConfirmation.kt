@@ -6,7 +6,7 @@ data class PropertyUpdateConfirmation(
     val singleLineAddress: String,
     val registrationNumber: String,
     val dashboardUrl: URI,
-    val updatedBullets: List<String>,
+    val updatedBullets: EmailBulletPointList,
 ) : EmailTemplateModel {
     private val singleLineAddressKey = "single line address"
     private val registrationNumberKey = "registration number"
@@ -20,6 +20,6 @@ data class PropertyUpdateConfirmation(
             singleLineAddressKey to singleLineAddress,
             registrationNumberKey to registrationNumber,
             dashboardUrlKey to dashboardUrl.toASCIIString(),
-            updatedBulletsKey to updatedBullets.joinToString(separator = "\n* ", prefix = "* "),
+            updatedBulletsKey to updatedBullets.toString(),
         )
 }

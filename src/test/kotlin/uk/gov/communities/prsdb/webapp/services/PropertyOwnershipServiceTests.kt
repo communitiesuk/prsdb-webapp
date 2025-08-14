@@ -624,7 +624,6 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
@@ -660,7 +659,6 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
@@ -741,8 +739,8 @@ class PropertyOwnershipServiceTests {
         verify(emailNotificationService).sendEmail(
             eq(propertyOwnership.primaryLandlord.email),
             argThat { email ->
-                email.updatedBullets.containsAll(expectedEmailBullets) &&
-                    email.updatedBullets.size == expectedEmailBullets.size &&
+                email.updatedBullets.bulletPoints.containsAll(expectedEmailBullets) &&
+                    email.updatedBullets.bulletPoints.size == expectedEmailBullets.size &&
                     email.singleLineAddress == propertyOwnership.property.address.singleLineAddress &&
                     email.registrationNumber == expectedRegistrationNumber.toString()
             },
