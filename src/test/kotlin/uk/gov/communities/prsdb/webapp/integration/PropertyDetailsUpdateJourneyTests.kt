@@ -37,7 +37,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     @BeforeEach
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("something"))
+            .thenReturn(URI("example.com"))
     }
 
     @Test
