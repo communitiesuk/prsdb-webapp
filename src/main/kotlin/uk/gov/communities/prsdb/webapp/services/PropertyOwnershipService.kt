@@ -184,8 +184,7 @@ class PropertyOwnershipService(
     ) {
         checkUpdateIsValid()
         val propertyOwnership = getPropertyOwnership(id)
-
-        val originalPropertyOwnership = PropertyOwnership(propertyOwnership)
+        val wasPropertyOccupied = propertyOwnership.isOccupied
 
         update.ownershipType?.let { propertyOwnership.ownershipType = it }
         update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
@@ -201,31 +200,27 @@ class PropertyOwnershipService(
             propertyOwnership.license = updatedLicence
         }
 
-        sendUpdateConfirmationEmail(propertyOwnership, originalPropertyOwnership)
+        sendUpdateConfirmationEmail(propertyOwnership, update, wasPropertyOccupied)
     }
 
     private fun sendUpdateConfirmationEmail(
         propertyOwnership: PropertyOwnership,
-        originalPropertyOwnership: PropertyOwnership,
+        update: PropertyOwnershipUpdateModel,
+        wasPropertyOccupied: Boolean,
     ) {
-        val hasOwnershipTypeChanged = propertyOwnership.ownershipType != originalPropertyOwnership.ownershipType
-        val hasLicensingChanged =
-            propertyOwnership.license?.licenseType != originalPropertyOwnership.license?.licenseType ||
-                propertyOwnership.license?.licenseNumber != originalPropertyOwnership.license?.licenseNumber
-        val hasOccupationChanged = propertyOwnership.isOccupied != originalPropertyOwnership.isOccupied
-        val hasNumberOfHouseholdsChanged =
-            propertyOwnership.currentNumHouseholds != originalPropertyOwnership.currentNumHouseholds
-        val hasNumberOfPeopleChanged =
-            propertyOwnership.currentNumTenants != originalPropertyOwnership.currentNumTenants
+        val isUpdatingFromOccupiedToOccupied = update.numberOfPeople?.let { wasPropertyOccupied && it > 0 } ?: false
+        val hasNumberOfHouseholdsChanged = update.numberOfHouseholds?.let { wasPropertyOccupied && it > 0 } ?: false
+        val isUpdatingOccupationStatus = update.numberOfPeople != null && !isUpdatingFromOccupiedToOccupied
 
         val updatedBullets =
             listOfNotNull(
-                if (hasOwnershipTypeChanged) "ownership type" else null,
-                if (hasLicensingChanged) "licensing information" else null,
-                if (hasOccupationChanged) "whether the property is occupied by tenants" else null,
-                if (!hasOccupationChanged && hasNumberOfHouseholdsChanged) "the number of households living in this property" else null,
-                if (!hasOccupationChanged && hasNumberOfPeopleChanged) "the number of people living in this property" else null,
+                if (update.ownershipType != null) "ownership type" else null,
+                if (update.isLicenceUpdatable()) "licensing information" else null,
+                if (isUpdatingOccupationStatus) "whether the property is occupied by tenants" else null,
+                if (hasNumberOfHouseholdsChanged) "the number of households living in this property" else null,
+                if (isUpdatingFromOccupiedToOccupied) "the number of people living in this property" else null,
             )
+
         if (!updatedBullets.isEmpty()) {
             updateConfirmationEmailService.sendEmail(
                 propertyOwnership.primaryLandlord.email,
