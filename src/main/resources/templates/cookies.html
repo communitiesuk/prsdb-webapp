@@ -1,8 +1,92 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel>"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::main}, false)}">
-    <main class="govuk-main-wrapper">
-        <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-            <h1 class="govuk-heading-l">TODO: Implement cookies page</h1>
+<html id="page" th:replace="~{fragments/layout :: layout(#{cookies.title}, ~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backLink</a>
+    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+        <div id="success-banner" th:replace="~{fragments/banners/notificationBanner :: notificationBanner(title=#{cookies.successBanner.title}, content=~{::#success-banner/content()}, isSuccess=true, hidden=true)}">
+            <h3 class="govuk-notification-banner__heading" th:text="#{cookies.successBanner.heading}">cookies.successBanner.heading</h3>
+            <p class="govuk-body" th:text="#{cookies.successBanner.body}"></p>
+            <a class="govuk-notification-banner__link" th:href="@{${backUrl}}" th:text="#{cookies.successBanner.link}">cookies.successBanner.link</a>
         </div>
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{cookies.heading}">cookies.heading</h1>
+            <p class="govuk-body" th:text="#{cookies.paragraph.one}">cookies.paragraph.one</p>
+            <p class="govuk-body" th:text="#{cookies.paragraph.two}">cookies.paragraph.two</p>
+            <p class="govuk-body" th:text="#{cookies.paragraph.three}">cookies.paragraph.three</p>
+        </header>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{cookies.essential.heading}">cookies.essential.heading</h2>
+            <p class="govuk-body" th:text="#{cookies.essential.paragraph}">cookies.essential.paragraph</p>
+            <table th:replace="~{fragments/tables/table :: table(${ {'cookies.table.heading.name', 'cookies.table.heading.purpose', 'cookies.table.heading.expires'} }, ~{::#essential-tbody}, null)}">
+                <tbody class="govuk-table__body" id="essential-tbody">
+                    <tr class="govuk_table__row">
+                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.name}">cookies.essential.table.session.name</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.purpose}">cookies.essential.table.session.purpose</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.expires}">cookies.essential.table.session.expires</td>
+                    </tr>
+                    <tr class="govuk_table__row">
+                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.consent.name}">cookies.essential.table.consent.name</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.consent.purpose}">cookies.essential.table.consent.purpose</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.consent.expires}">cookies.essential.table.consent.expires</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{cookies.analytics.heading}">cookies.analytics.heading</h2>
+            <p class="govuk-body" th:text="#{cookies.analytics.paragraph.one}">cookies.analytics.paragraph.one</p>
+            <p class="govuk-body" th:text="#{cookies.analytics.paragraph.two}">cookies.analytics.paragraph.two</p>
+            <p class="govuk-body" th:text="#{cookies.analytics.bullet.heading}">cookies.analytics.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{cookies.analytics.bullet.one}">cookies.analytics.bullet.one</li>
+                <li th:text="#{cookies.analytics.bullet.two}">cookies.analytics.bullet.two</li>
+                <li th:text="#{cookies.analytics.bullet.three}">cookies.analytics.bullet.three</li>
+            </ul>
+            <table th:replace="~{fragments/tables/table :: table(${ {'cookies.table.heading.name', 'cookies.table.heading.purpose', 'cookies.table.heading.expires'} }, ~{::#analytics-tbody}, null)}">
+                <tbody class="govuk-table__body" id="analytics-tbody">
+                    <tr class="govuk_table__row">
+                        <td class="govuk-table__cell" th:text="#{cookies.analytics.table.ga.name}">cookies.analytics.table.ga.name</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.analytics.table.ga.purpose}">cookies.analytics.table.ga.purpose</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.analytics.table.ga.expires}">cookies.analytics.table.ga.expires</td>
+                    </tr>
+                    <tr class="govuk_table__row">
+                        <td class="govuk-table__cell" th:text="#{cookies.analytics.table.gaId.name}">cookies.analytics.table.gaId.name</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.analytics.table.gaId.purpose}">cookies.analytics.table.gaId.purpose</td>
+                        <td class="govuk-table__cell" th:text="#{cookies.analytics.table.gaId.expires}">cookies.analytics.table.gaId.expires</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <form method="post" novalidate>
+            <div class="govuk-form-group">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                        <h2 class="govuk-fieldset__heading" th:text="#{cookies.fieldSetHeading}">#{cookies.fieldSetHeading}</h2>
+                    </legend>
+                    <div class="govuk-form-group">
+                        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios" data-govuk-radios-init>
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" type="radio" value="true" id="consent-yes" name="consent">
+                                <label class="govuk-label govuk-radios__label" for="consent-yes" th:text="#{forms.radios.option.yes.label}">forms.radios.option.yes.label</label>
+                            </div>
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" type="radio" value="false" id="consent-no" name="consent">
+                                <label class="govuk-label govuk-radios__label" for="consent-no" th:text="#{forms.radios.option.no.label}">forms.radios.option.yes.label</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(buttonText=#{cookies.button}, id='submit-consent-button')}"></button>
+        </form>
+        <noscript>
+            <h2 class="govuk-heading-m" th:text="#{cookies.noScript.heading}">cookies.noScript.heading</h2>
+            <p class="govuk-body" th:text="#{cookies.noScript.bullet.heading}">cookies.noScript.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{cookies.noScript.bullet.one}">cookies.noScript.bullet.one</li>
+                <li th:text="#{cookies.noScript.bullet.two}">cookies.noScript.bullet.two</li>
+            </ul>
+        </noscript>
     </main>
 </html>
