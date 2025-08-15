@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.whenever
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 
+@ActiveProfiles("require-passcode")
 class PasscodeEntrySinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @MockitoBean
     lateinit var passcodeService: PasscodeService

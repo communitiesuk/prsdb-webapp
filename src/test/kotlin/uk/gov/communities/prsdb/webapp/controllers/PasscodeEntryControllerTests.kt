@@ -5,18 +5,21 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import kotlin.test.Test
 
 @WebMvcTest(PasscodeEntryController::class)
+@ActiveProfiles("require-passcode")
 class PasscodeEntryControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -158,6 +161,19 @@ class PasscodeEntryControllerTests(
             }
             .andExpect {
                 status { isUnsupportedMediaType() }
+            }
+    }
+
+    @Test
+    fun `passcodeAlreadyUsed GET returns 200 and displays passcode-already-used page for unauthenticated users`() {
+        mvc
+            .get(PASSCODE_ALREADY_USED_ROUTE)
+            .andExpect {
+                status { isOk() }
+                view { name("passcodeAlreadyUsed") }
+                model {
+                    attribute("passcodeEntryUrl", PASSCODE_ENTRY_ROUTE)
+                }
             }
     }
 }
