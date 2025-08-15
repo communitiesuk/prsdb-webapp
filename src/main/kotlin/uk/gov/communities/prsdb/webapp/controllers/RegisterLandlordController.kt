@@ -43,7 +43,7 @@ class RegisterLandlordController(
     fun index(model: Model): CharSequence {
         model.addAttribute(
             "registerAsALandlordInitialStep",
-            "$LANDLORD_REGISTRATION_ROUTE/${PRIVACY_NOTICE_PATH_SEGMENT}",
+            LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
         )
         model.addAttribute("oneLoginInfoUrl", ONE_LOGIN_INFO_URL)
         model.addAttribute("provingYourIdentity", ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY)
