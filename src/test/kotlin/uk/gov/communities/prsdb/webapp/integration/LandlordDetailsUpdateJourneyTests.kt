@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
+import java.net.URI
 
 class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
@@ -39,6 +40,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 AddressDataModel("3, Example Road, EG1 2AB"),
             )
         whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(MockOSPlacesAPIResponses.createResponse(addresses))
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com"))
     }
 
     @Nested
