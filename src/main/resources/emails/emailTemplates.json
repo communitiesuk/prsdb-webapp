@@ -64,5 +64,11 @@
     "name": "Virus Scan Unsuccessful",
     "subject": "((subject certificate type)) for a property failed our virus scan",
     "bodyLocation": "/emails/VirusScanUnsuccessful.md"
+  },
+  {
+    "id": "0ec8d025-1c06-4265-9b5d-37427b4acfc8",
+    "name": "Property Update Confirmation",
+    "subject": "GOV.UK - You have updated a property on the PRS database",
+    "bodyLocation": "/emails/PropertyUpdateConfirmation.md"
   }
 ]

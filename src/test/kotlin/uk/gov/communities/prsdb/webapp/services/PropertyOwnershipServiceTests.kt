@@ -4,16 +4,22 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -40,11 +46,13 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
+import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -65,6 +73,12 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
+
+    @Mock
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var emailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -624,6 +638,40 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `updatePropertyOwnership does not send a confirmation email if the update is empty`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+                currentNumHouseholds = 2,
+                currentNumTenants = 4,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
+            )
+        val updateModel =
+            PropertyOwnershipUpdateModel(
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
+
+        // Assert
+        verify(emailNotificationService, never()).sendEmail(
+            any(),
+            any(),
+        )
+    }
+
+    @Test
     fun `updatePropertyOwnership changes the fields associated with the given update model's non-null values`() {
         // Arrange
         val propertyOwnership =
@@ -652,6 +700,8 @@ class PropertyOwnershipServiceTests {
             mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
         ).thenReturn(updateLicence)
 
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
 
@@ -661,6 +711,41 @@ class PropertyOwnershipServiceTests {
         assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
         assertEquals(updateModel.licensingType, propertyOwnership.license?.licenseType)
         assertEquals(updateModel.licenceNumber, propertyOwnership.license?.licenseNumber)
+    }
+
+    @MethodSource("updatesAndConfirmationEmails")
+    @ParameterizedTest(name = "[{index}] For {0} where the update {1} reports {2}")
+    fun `updatePropertyOwnership sends a matching confirmation email when updating a property ownership`(
+        propertyOwnership: PropertyOwnership,
+        update: PropertyOwnershipUpdateModel,
+        expectedEmailBullets: List<String>,
+    ) {
+        // Arrange
+        update.licenceNumber?.let {
+            val updateLicence = License(update.licensingType!!, it)
+            whenever(mockLicenseService.updateLicence(propertyOwnership.license, update.licensingType, update.licenceNumber))
+                .thenReturn(updateLicence)
+        }
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id))
+            .thenReturn(propertyOwnership)
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+
+        // Act
+        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, update) {}
+
+        // Assert
+        val expectedRegistrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber)
+        verify(emailNotificationService).sendEmail(
+            eq(propertyOwnership.primaryLandlord.email),
+            argThat { email ->
+                email.updatedBullets.bulletPoints.containsAll(expectedEmailBullets) &&
+                    email.updatedBullets.bulletPoints.size == expectedEmailBullets.size &&
+                    email.singleLineAddress == propertyOwnership.property.address.singleLineAddress &&
+                    email.registrationNumber == expectedRegistrationNumber.toString()
+            },
+        )
     }
 
     @Test
@@ -728,6 +813,8 @@ class PropertyOwnershipServiceTests {
         whenever(
             mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
         ).thenReturn(null)
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
@@ -888,6 +975,153 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+        }
+    }
+
+    companion object {
+        fun occupiedPropertyOwnership(): Named<PropertyOwnership> =
+            Named.of(
+                "an occupied property",
+                MockLandlordData.createPropertyOwnership(
+                    ownershipType = OwnershipType.FREEHOLD,
+                    currentNumHouseholds = 2,
+                    currentNumTenants = 4,
+                    license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
+                ),
+            )
+
+        fun unoccupiedPropertyOwnership(): Named<PropertyOwnership> =
+            Named.of(
+                "an unoccupied property",
+                MockLandlordData.createPropertyOwnership(
+                    ownershipType = OwnershipType.FREEHOLD,
+                    currentNumHouseholds = 0,
+                    currentNumTenants = 0,
+                    license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
+                ),
+            )
+
+        @JvmStatic
+        fun updatesAndConfirmationEmails(): List<Arguments> {
+            val referenceOccupied = occupiedPropertyOwnership().payload
+            val referenceUnoccupied = unoccupiedPropertyOwnership().payload
+            return listOf(
+                Arguments.of(
+                    occupiedPropertyOwnership(),
+                    Named.of(
+                        "changes all fields such that the property is still occupied",
+                        PropertyOwnershipUpdateModel(
+                            ownershipType = OwnershipType.LEASEHOLD,
+                            numberOfHouseholds = 1,
+                            numberOfPeople = 2,
+                            licensingType = LicensingType.HMO_MANDATORY_LICENCE,
+                            licenceNumber = "licenceNumberMandatory",
+                        ),
+                    ),
+                    Named.of(
+                        "all fields changed except occupancy",
+                        listOf(
+                            "ownership type",
+                            "licensing information",
+                            "the number of households living in this property",
+                            "the number of people living in this property",
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    occupiedPropertyOwnership(),
+                    Named.of(
+                        "changes it to unoccupied",
+                        PropertyOwnershipUpdateModel(
+                            ownershipType = null,
+                            numberOfHouseholds = 0,
+                            numberOfPeople = 0,
+                            licensingType = null,
+                            licenceNumber = null,
+                        ),
+                    ),
+                    Named.of(
+                        "an occupancy change",
+                        listOf("whether the property is occupied by tenants"),
+                    ),
+                ),
+                Arguments.of(
+                    unoccupiedPropertyOwnership(),
+                    Named.of(
+                        "changes it to occupied",
+                        PropertyOwnershipUpdateModel(
+                            ownershipType = null,
+                            numberOfHouseholds = 3,
+                            numberOfPeople = 5,
+                            licensingType = null,
+                            licenceNumber = null,
+                        ),
+                    ),
+                    Named.of(
+                        "an occupancy change",
+                        listOf("whether the property is occupied by tenants"),
+                    ),
+                ),
+                Arguments.of(
+                    unoccupiedPropertyOwnership(),
+                    Named.of(
+                        "changes all non-occupancy fields to the same values as before",
+                        PropertyOwnershipUpdateModel(
+                            ownershipType = referenceUnoccupied.ownershipType,
+                            numberOfHouseholds = null,
+                            numberOfPeople = null,
+                            licensingType = referenceUnoccupied.license?.licenseType,
+                            licenceNumber = referenceUnoccupied.license?.licenseNumber,
+                        ),
+                    ),
+                    Named.of(
+                        "all non-occupancy fields changed",
+                        listOf(
+                            "ownership type",
+                            "licensing information",
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    unoccupiedPropertyOwnership(),
+                    Named.of(
+                        "changes it from empty to empty",
+                        PropertyOwnershipUpdateModel(
+                            ownershipType = null,
+                            numberOfHouseholds = 0,
+                            numberOfPeople = 0,
+                            licensingType = null,
+                            licenceNumber = null,
+                        ),
+                    ),
+                    Named.of(
+                        "an occupancy change",
+                        listOf(
+                            "whether the property is occupied by tenants",
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    occupiedPropertyOwnership(),
+                    Named.of(
+                        "changes the number of households and people to what they were before",
+                        PropertyOwnershipUpdateModel(
+                            ownershipType = null,
+                            numberOfHouseholds = referenceOccupied.currentNumHouseholds,
+                            numberOfPeople = referenceOccupied.currentNumTenants,
+                            licensingType = null,
+                            licenceNumber = null,
+                        ),
+                    ),
+                    Named.of(
+                        "a change to the number of households and people",
+                        listOf(
+                            "the number of households living in this property",
+                            "the number of people living in this property",
+                        ),
+                    ),
+                ),
+            )
         }
     }
 }
