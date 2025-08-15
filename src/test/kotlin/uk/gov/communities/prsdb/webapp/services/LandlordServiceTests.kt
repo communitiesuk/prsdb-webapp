@@ -150,7 +150,7 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `createLandlord creates a landlord and returns its LRN`() {
+    fun `createLandlord creates a landlord and returns the landlord created`() {
         // Arrange
         val baseUserId = "baseUserId"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
