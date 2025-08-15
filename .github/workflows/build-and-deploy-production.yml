@@ -1,0 +1,18 @@
+name: Build and Deploy Production
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  build-and-deploy-production:
+    uses: ./.github/workflows/build-and-deploy.yml
+    with:
+      environment: "production"
+      build-and-deploy-role: "arn:aws:iam::879161327637:role/production-push-image"
+      migrations-role: "arn:aws:iam::879161327637:role/production-rds-access"
+      update-ecs-role: "arn:aws:iam::879161327637:role/github-actions-terraform-admin"
+      ecr-repository: "production-webapp"
+      account-id: "879161327637"
+      branch: "main"
+    secrets: inherit
