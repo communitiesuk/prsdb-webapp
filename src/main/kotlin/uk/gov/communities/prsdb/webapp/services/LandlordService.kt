@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPro
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
@@ -28,8 +29,9 @@ class LandlordService(
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
-    private val updateConfirmationEmailService: EmailNotificationService<LandlordUpdateConfirmation>,
+    private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) {
     fun retrieveLandlordByRegNum(regNum: RegistrationNumberDataModel): Landlord? {
         if (regNum.type != RegistrationNumberType.LANDLORD) {
@@ -58,20 +60,31 @@ class LandlordService(
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
-        return landlordRepository.save(
-            Landlord(
-                baseUser,
-                name,
-                email,
-                phoneNumber,
-                address,
-                registrationNumber,
-                countryOfResidence,
-                isVerified,
-                nonEnglandOrWalesAddress,
-                dateOfBirth,
+        val landlord =
+            landlordRepository.save(
+                Landlord(
+                    baseUser,
+                    name,
+                    email,
+                    phoneNumber,
+                    address,
+                    registrationNumber,
+                    countryOfResidence,
+                    isVerified,
+                    nonEnglandOrWalesAddress,
+                    dateOfBirth,
+                ),
+            )
+
+        registrationConfirmationSender.sendEmail(
+            landlord.email,
+            LandlordRegistrationConfirmationEmail(
+                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),
         )
+
+        return landlord
     }
 
     @Transactional
@@ -158,7 +171,7 @@ class LandlordService(
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->
-                updateConfirmationEmailService.sendEmail(
+                updateConfirmationSender.sendEmail(
                     email,
                     LandlordUpdateConfirmation(
                         registrationNumber =
