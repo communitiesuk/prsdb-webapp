@@ -53,7 +53,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Test
         fun `navigating to the Privacy Notice page directs a registered landlord to the landlord dashboard page`(page: Page) {
-            navigator.goToLandlordRegistrationPrivacyNoticePage()
+            navigator.navigateToLandlordRegistrationPrivacyNoticePage()
             val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
         }
@@ -66,16 +66,6 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val privacyNoticePage = navigator.goToLandlordRegistrationPrivacyNoticePage()
             privacyNoticePage.submitWithoutAgreeing()
             assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must agree to the privacy notice to continue")
-        }
-    }
-
-    @Nested
-    inner class LandlordRegistrationStepVerifyIdentity : NestedIntegrationTestWithImmutableData("data-local.sql") {
-        @Test
-        fun `Navigating here as a registered landlord redirects to the landlord dashboard page`(page: Page) {
-            navigator.navigateToLandlordRegistrationVerifyIdentityPage()
-            val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
-            BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
         }
     }
 

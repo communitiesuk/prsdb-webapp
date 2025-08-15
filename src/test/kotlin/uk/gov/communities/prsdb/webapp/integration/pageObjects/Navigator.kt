@@ -67,12 +67,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
@@ -189,28 +187,8 @@ class Navigator(
         return createValidPage(page, PrivacyNoticePageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationConfirmIdentityPage(): ConfirmIdentityFormPageLandlordRegistration {
-        setJourneyDataInSession(
-            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLandlordRegistrationConfirmIdentity().build(),
-        )
-        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment}")
-        return createValidPage(page, ConfirmIdentityFormPageLandlordRegistration::class)
-    }
-
-    fun navigateToLandlordRegistrationVerifyIdentityPage() {
-        navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.VerifyIdentity.urlPathSegment}")
-    }
-
-    fun skipToLandlordRegistrationIdentityNotVerifiedPage(): IdentityNotVerifiedFormPageLandlordRegistration {
-        setJourneyDataInSession(
-            LandlordRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLandlordRegistrationIdentityNotVerified().build(),
-        )
-        navigate(
-            "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment}",
-        )
-        return createValidPage(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
+    fun navigateToLandlordRegistrationPrivacyNoticePage() {
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE)
     }
 
     fun skipToLandlordRegistrationNamePage(): NameFormPageLandlordRegistration {

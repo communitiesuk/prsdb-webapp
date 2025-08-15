@@ -56,7 +56,7 @@ class RegisterLandlordController(
     @GetMapping("/${PRIVACY_NOTICE_PATH_SEGMENT}")
     fun getPrivacyNotice(principal: Principal): ModelAndView =
         if (userRolesService.getHasLandlordUserRole(principal.name)) {
-            ModelAndView("redirect:${LANDLORD_DASHBOARD_URL}")
+            ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
         } else {
             landlordRegistrationJourneyFactory
                 .create()
