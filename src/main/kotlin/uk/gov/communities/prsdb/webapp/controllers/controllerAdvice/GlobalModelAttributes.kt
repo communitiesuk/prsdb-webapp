@@ -28,4 +28,7 @@ class GlobalModelAttributes(
         model.addAttribute("googleAnalyticsCookieDomain", gaCookieDomain)
         model.addAttribute("plausibleDomainId", plausibleDomainId)
     }
+
+    @ModelAttribute("feedbackBannerUrl")
+    fun addFeedbackBannerUrl(): String = "/feedback"
 }
