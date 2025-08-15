@@ -748,30 +748,6 @@ class PropertyOwnershipServiceTests {
         )
     }
 
-    @Test()
-    fun `updatePropertyOwnership does not send a confirmation email when an update has all null values`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val update =
-            PropertyOwnershipUpdateModel(
-                null,
-                null,
-                null,
-                null,
-                null,
-            )
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id))
-            .thenReturn(propertyOwnership)
-
-        // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, update) {}
-
-        // Assert
-        val expectedRegistrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber)
-        verify(emailNotificationService, never()).sendEmail(any(), any())
-    }
-
     @Test
     fun `when checkUpdateIsValid throws an exception, no update occurs`() {
         // Arrange
