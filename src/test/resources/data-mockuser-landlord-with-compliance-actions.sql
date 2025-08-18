@@ -16,9 +16,9 @@ VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2),
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified)
+                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified, has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
-        'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false);
+        'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false, true),;
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
