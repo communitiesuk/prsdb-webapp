@@ -14,5 +14,5 @@ jobs:
       update-ecs-role: "arn:aws:iam::879161327637:role/github-actions-terraform-admin"
       ecr-repository: "production-webapp"
       account-id: "879161327637"
-      branch: "main"
+      branch: "production"
     secrets: inherit
