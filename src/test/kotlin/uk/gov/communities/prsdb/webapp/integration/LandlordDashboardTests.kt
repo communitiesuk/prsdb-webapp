@@ -48,7 +48,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     fun `the view landlord record button links to the landlord details page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewLandlordRecordButton.clickAndWait()
-        assertPageIs(page, LandlordPrivacyNoticePage::class)
+        assertPageIs(page, LandlordDetailsPage::class)
     }
 
     @Test
@@ -69,7 +69,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     fun `the privacy notice link goes to the privacy notice page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.privacyNoticeLink.clickAndWait()
-        assertPageIs(page, ComplianceActionsPage::class)
+        assertPageIs(page, LandlordPrivacyNoticePage::class)
     }
 
     @Nested
