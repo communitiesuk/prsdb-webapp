@@ -6,10 +6,8 @@ import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 
@@ -18,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
     private val localAuthorityRepository: LocalAuthorityRepository,
-    private val oneLoginUserRepository: OneLoginUserRepository,
+    private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
 ) {
     companion object {
@@ -35,7 +33,8 @@ class PasscodeService(
         }
 
         val localAuthority =
-            localAuthorityRepository.findById(localAuthorityId.toInt())
+            localAuthorityRepository
+                .findById(localAuthorityId.toInt())
                 .orElseThrow { IllegalArgumentException("LocalAuthority with id $localAuthorityId not found") }
 
         var passcodeString: String
@@ -52,9 +51,7 @@ class PasscodeService(
         return passcodeRepository.save(passcode)
     }
 
-    private fun getLastGeneratedPasscode(): String? {
-        return session.getAttribute(LAST_GENERATED_PASSCODE) as String?
-    }
+    private fun getLastGeneratedPasscode(): String? = session.getAttribute(LAST_GENERATED_PASSCODE) as String?
 
     private fun setLastGeneratedPasscode(passcode: String) {
         session.setAttribute(LAST_GENERATED_PASSCODE, passcode)
@@ -66,26 +63,16 @@ class PasscodeService(
         return generatedPasscode.passcode
     }
 
-    fun getOrGeneratePasscode(localAuthorityId: Long): String {
-        return getLastGeneratedPasscode() ?: generateAndStorePasscode(localAuthorityId)
-    }
+    fun getOrGeneratePasscode(localAuthorityId: Long): String = getLastGeneratedPasscode() ?: generateAndStorePasscode(localAuthorityId)
 
     fun isValidPasscode(passcode: String): Boolean {
         val normalizedPasscode = normalizePasscode(passcode)
         return passcodeRepository.existsByPasscode(normalizedPasscode)
     }
 
-    private fun normalizePasscode(passcode: String): String {
-        return passcode.trim().uppercase()
-    }
+    fun hasUserClaimedPasscode(userId: String) = passcodeRepository.existsByBaseUser_Id(userId)
 
-    fun hasUserClaimedPasscode(userId: String): Boolean {
-        return passcodeRepository.findByBaseUser_Id(userId) != null
-    }
-
-    fun findPasscode(passcodeString: String): Passcode? {
-        return passcodeRepository.findByPasscode(normalizePasscode(passcodeString))
-    }
+    fun findPasscode(passcodeString: String): Passcode? = passcodeRepository.findByPasscode(normalizePasscode(passcodeString))
 
     @Transactional
     fun claimPasscodeForUser(
@@ -99,13 +86,8 @@ class PasscodeService(
             return false
         }
 
-        // Find or create the OneLoginUser
-        val user =
-            oneLoginUserRepository.findById(userId).orElse(null)
-                ?: OneLoginUser(userId).also { oneLoginUserRepository.save(it) }
-
+        val user = oneLoginUserService.findOrCreate1LUser(userId)
         passcode.claimByUser(user)
-        passcodeRepository.save(passcode)
         return true
     }
 
@@ -117,9 +99,10 @@ class PasscodeService(
         return passcode.baseUser?.id == userId
     }
 
-    private fun generateRandomPasscodeString(): String {
-        return (1..PASSCODE_LENGTH)
+    private fun generateRandomPasscodeString(): String =
+        (1..PASSCODE_LENGTH)
             .map { SAFE_CHARACTERS_CHARSET.random() }
             .joinToString("")
-    }
+
+    private fun normalizePasscode(passcode: String): String = passcode.trim().uppercase()
 }

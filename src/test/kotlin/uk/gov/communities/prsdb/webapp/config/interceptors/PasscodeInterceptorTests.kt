@@ -16,9 +16,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
-import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.security.Principal
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -92,7 +91,7 @@ class PasscodeInterceptorTests {
     fun `preHandle allows unauthenticated user with valid passcode in session`() {
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(null)
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABC123")
+        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
 
         val result = passcodeInterceptor.preHandle(request, response, handler)
 
@@ -104,9 +103,9 @@ class PasscodeInterceptorTests {
     fun `preHandle allows authenticated user who has claimed a passcode`() {
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("user123")
+        whenever(principal.name).thenReturn("userID")
         whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
-        whenever(passcodeService.hasUserClaimedPasscode("user123")).thenReturn(true)
+        whenever(passcodeService.hasUserClaimedPasscode("userID")).thenReturn(true)
 
         val result = passcodeInterceptor.preHandle(request, response, handler)
 
@@ -118,9 +117,9 @@ class PasscodeInterceptorTests {
     fun `preHandle redirects authenticated user without claimed passcode to entry page`() {
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("user123")
+        whenever(principal.name).thenReturn("userID")
         whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
-        whenever(passcodeService.hasUserClaimedPasscode("user123")).thenReturn(false)
+        whenever(passcodeService.hasUserClaimedPasscode("userID")).thenReturn(false)
 
         val result = passcodeInterceptor.preHandle(request, response, handler)
 
@@ -130,15 +129,13 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle allows authenticated user with valid passcode claimed by same user`() {
-        val passcode = mock(Passcode::class.java)
-        val user = mock(OneLoginUser::class.java)
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("user123")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABC123")
-        whenever(passcodeService.findPasscode("ABC123")).thenReturn(passcode)
-        whenever(passcode.baseUser).thenReturn(user)
-        whenever(passcodeService.isPasscodeClaimedByUser("ABC123", "user123")).thenReturn(true)
+        whenever(principal.name).thenReturn("userID")
+        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createOneLoginUser("userID"))
+        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
+        whenever(passcodeService.isPasscodeClaimedByUser("ABCDEF", "userID")).thenReturn(true)
 
         val result = passcodeInterceptor.preHandle(request, response, handler)
 
@@ -148,15 +145,13 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle redirects to already used page when passcode claimed by different user`() {
-        val passcode = mock(Passcode::class.java)
-        val otherUser = mock(OneLoginUser::class.java)
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("user123")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABC123")
-        whenever(passcodeService.findPasscode("ABC123")).thenReturn(passcode)
-        whenever(passcode.baseUser).thenReturn(otherUser)
-        whenever(passcodeService.isPasscodeClaimedByUser("ABC123", "user123")).thenReturn(false)
+        whenever(principal.name).thenReturn("userID")
+        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createOneLoginUser("otherUserID"))
+        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
+        whenever(passcodeService.isPasscodeClaimedByUser("ABCDEF", "userID")).thenReturn(false)
 
         val result = passcodeInterceptor.preHandle(request, response, handler)
 
@@ -166,27 +161,43 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle claims unclaimed passcode for authenticated user`() {
-        val passcode = mock(Passcode::class.java)
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("user123")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABC123")
-        whenever(passcodeService.findPasscode("ABC123")).thenReturn(passcode)
-        whenever(passcode.baseUser).thenReturn(null)
-        whenever(passcodeService.claimPasscodeForUser("ABC123", "user123")).thenReturn(true)
+        whenever(principal.name).thenReturn("userID")
+        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = null)
+        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
+        whenever(passcodeService.claimPasscodeForUser("ABCDEF", "userID")).thenReturn(true)
 
         val result = passcodeInterceptor.preHandle(request, response, handler)
 
         assertTrue(result)
-        verify(passcodeService).claimPasscodeForUser("ABC123", "user123")
+        verify(passcodeService).claimPasscodeForUser("ABCDEF", "userID")
         verify(response, never()).sendRedirect(anyString())
+    }
+
+    @Test
+    fun `preHandle redirects to entry page if claiming an unclaimed passcode for authenticated user fails`() {
+        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
+        whenever(request.userPrincipal).thenReturn(principal)
+        whenever(principal.name).thenReturn("userID")
+        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = null)
+        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
+        whenever(passcodeService.claimPasscodeForUser("ABCDEF", "userID")).thenReturn(false)
+
+        val result = passcodeInterceptor.preHandle(request, response, handler)
+
+        assertFalse(result)
+        verify(passcodeService).claimPasscodeForUser("ABCDEF", "userID")
+        verify(response).sendRedirect(PASSCODE_ENTRY_ROUTE)
     }
 
     @Test
     fun `preHandle redirects to entry page when passcode not found`() {
         whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
         whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("user123")
+        whenever(principal.name).thenReturn("userID")
         whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("INVALID")
         whenever(passcodeService.findPasscode("INVALID")).thenReturn(null)
 

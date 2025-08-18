@@ -49,12 +49,10 @@ class PasscodeEntryControllerTests(
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 param("passcode", validPasscode)
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(LANDLORD_REGISTRATION_ROUTE)
-            }
-            .andExpect {
+            }.andExpect {
                 request {
                     sessionAttribute(SUBMITTED_PASSCODE, validPasscode)
                 }
@@ -73,12 +71,10 @@ class PasscodeEntryControllerTests(
                 param("passcode", validPasscode)
                 sessionAttr(PASSCODE_REDIRECT_URL, redirectUrl)
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(redirectUrl)
-            }
-            .andExpect {
+            }.andExpect {
                 request {
                     sessionAttribute(SUBMITTED_PASSCODE, validPasscode)
                     sessionAttributeDoesNotExist(PASSCODE_REDIRECT_URL)
@@ -96,8 +92,7 @@ class PasscodeEntryControllerTests(
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 param("passcode", invalidPasscode)
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 view { name("passcodeEntry") }
                 model {
@@ -113,8 +108,7 @@ class PasscodeEntryControllerTests(
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 param("passcode", "")
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 view { name("passcodeEntry") }
                 model {
@@ -129,8 +123,7 @@ class PasscodeEntryControllerTests(
             .post(PASSCODE_ENTRY_ROUTE) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 view { name("passcodeEntry") }
                 model {
@@ -145,8 +138,7 @@ class PasscodeEntryControllerTests(
             .post(PASSCODE_ENTRY_ROUTE) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 param("passcode", "ABC123")
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
             }
     }
@@ -158,14 +150,13 @@ class PasscodeEntryControllerTests(
                 contentType = MediaType.APPLICATION_JSON
                 content = """{"passcode": "ABC123"}"""
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isUnsupportedMediaType() }
             }
     }
 
     @Test
-    fun `passcodeAlreadyUsed GET returns 200 and displays passcode-already-used page for unauthenticated users`() {
+    fun `passcodeAlreadyUsed GET returns 200 and displays passcode already used page for unauthenticated users`() {
         mvc
             .get(PASSCODE_ALREADY_USED_ROUTE)
             .andExpect {

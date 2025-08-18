@@ -6,8 +6,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
-import org.hibernate.annotations.Cascade
-import org.hibernate.annotations.CascadeType
 
 @Entity
 class Passcode() : ModifiableAuditableEntity() {
@@ -21,7 +19,6 @@ class Passcode() : ModifiableAuditableEntity() {
         private set
 
     @OneToOne(optional = true)
-    @Cascade(CascadeType.MERGE)
     @JoinColumn(name = "subject_identifier", nullable = true, foreignKey = ForeignKey(name = "FK_PASSCODE_1L_USER"))
     var baseUser: OneLoginUser? = null
         private set
