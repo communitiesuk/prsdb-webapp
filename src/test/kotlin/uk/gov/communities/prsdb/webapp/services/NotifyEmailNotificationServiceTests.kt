@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -20,12 +21,15 @@ import uk.gov.service.notify.NotificationClientException
 
 class NotifyEmailNotificationServiceTests {
     private lateinit var notifyClient: NotificationClient
+    private lateinit var notifyIdService: NotifyIdService
     private lateinit var emailNotificationService: NotifyEmailNotificationService<TestEmailTemplate>
 
     @BeforeEach
     fun setup() {
-        notifyClient = Mockito.mock(NotificationClient::class.java)
-        emailNotificationService = NotifyEmailNotificationService(notifyClient)
+        notifyClient = mock()
+        notifyIdService = mock()
+
+        emailNotificationService = NotifyEmailNotificationService(notifyClient, notifyIdService)
     }
 
     private class TestEmailTemplate(
@@ -44,6 +48,9 @@ class NotifyEmailNotificationServiceTests {
         val expectedTemplateId = EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL
         val email = TestEmailTemplate(expectedHashmap, expectedTemplateId)
         val recipientEmail = "an email address"
+        val expectedNotifyIdValue = "some id value"
+
+        whenever(notifyIdService.getIdValue(expectedTemplateId)).thenReturn(expectedNotifyIdValue)
 
         // Act
         emailNotificationService.sendEmail(recipientEmail, email)
@@ -53,7 +60,7 @@ class NotifyEmailNotificationServiceTests {
             .verify(
                 notifyClient,
                 Mockito.times(1),
-            ).sendEmail(expectedTemplateId.idValue, recipientEmail, expectedHashmap, null)
+            ).sendEmail(expectedNotifyIdValue, recipientEmail, expectedHashmap, null)
     }
 
     @ParameterizedTest
