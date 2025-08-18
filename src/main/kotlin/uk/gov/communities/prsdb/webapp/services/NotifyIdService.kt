@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
+import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
 import kotlin.jvm.javaClass
 
@@ -13,7 +14,12 @@ import kotlin.jvm.javaClass
 class NotifyIdService(
     @Value("\${notify.use-production-notify}") private val useProductionNotify: Boolean,
 ) {
-    private val testIdName: String = if (useProductionNotify) "prod_id" else "test_id"
+    private val testIdName: String =
+        if (useProductionNotify) {
+            JsonDeserializationKeys.PRODUCTION_NOTIFY_ID_KEY
+        } else {
+            JsonDeserializationKeys.TEST_NOTIFY_ID_KEY
+        }
 
     private val json: Json = Json { ignoreUnknownKeys = true }
 
