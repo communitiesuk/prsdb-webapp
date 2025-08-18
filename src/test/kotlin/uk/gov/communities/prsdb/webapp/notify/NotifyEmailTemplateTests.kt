@@ -5,12 +5,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
+import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
@@ -28,10 +28,13 @@ import uk.gov.service.notify.TemplateList
  */
 
 @EnabledIf("canFetchNotifyTemplates")
-@SpringBootTest(classes = [NotifyConfig::class])
+@SpringBootTest(classes = [NotifyConfig::class, EmailTemplateMetadataFactory::class])
 class NotifyEmailTemplateTests {
     @Autowired
     private lateinit var notifyClient: NotificationClient
+
+    @Autowired
+    private lateinit var emailTemplateMetadataFactory: EmailTemplateMetadataFactory
 
     companion object NotifyTestsCompanion {
         lateinit var notifyTemplates: TemplateList
@@ -56,20 +59,29 @@ class NotifyEmailTemplateTests {
     @ParameterizedTest(name = "{0}")
     @EnumSource(EmailTemplateId::class)
     fun `notify contains a template for each template id`(id: EmailTemplateId) {
-        notifyTemplates.templates.single { template -> template.id.toString() == id.idValue }
+        val metadata =
+            emailTemplateMetadataFactory.metadataList.singleOrNull { templateMetadata ->
+                templateMetadata.enumName ==
+                    id.name
+            }
+
+        notifyTemplates.templates.single { template -> template.id.toString() == metadata?.id }
     }
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(EmailTemplateId::class)
     fun `there is a source controlled copy for each template id`(id: EmailTemplateId) {
-        var metadataList = EmailTemplateMetadata.metadataList
+        val metadataList = emailTemplateMetadataFactory.metadataList
 
-        metadataList.single { templateMetadata -> templateMetadata.id == id.idValue }
+        metadataList.single { templateMetadata -> templateMetadata.enumName == id.name }
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata#getMetadataList")
-    fun `all source controlled templates match their notify equivalent`(metadata: EmailTemplateMetadata) {
+    @EnumSource(EmailTemplateId::class)
+    fun `all source controlled templates match their notify equivalent`(id: EmailTemplateId) {
+        // Arrange
+        val metadata = emailTemplateMetadataFactory.metadataList.single { templateMetadata -> templateMetadata.enumName == id.name }
+
         // Act
         var templateId = metadata.id
         var notifyTemplate = notifyTemplates.templates.single { template -> template.id.toString() == templateId }
