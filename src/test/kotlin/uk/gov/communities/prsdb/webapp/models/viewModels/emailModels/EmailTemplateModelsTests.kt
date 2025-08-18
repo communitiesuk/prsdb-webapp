@@ -67,7 +67,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     FullPropertyComplianceConfirmationEmail(
                         "1 Street Name, Town, Country, AB1 2CD",
-                        EmailBulletPointList(listOf("certificate 1", "certificate 2")),
+                        EmailBulletPointList("certificate 1", "certificate 2"),
                         "https://emample.com",
                     ),
                     "/emails/FullPropertyComplianceConfirmation.md",
@@ -75,8 +75,8 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     PartialPropertyComplianceConfirmationEmail(
                         "1 Street Name, Town, Country, AB1 2CD",
-                        EmailBulletPointList(listOf("certificate 1", "certificate 2")),
-                        EmailBulletPointList(listOf("certificate 3", "certificate 4")),
+                        EmailBulletPointList("certificate 1", "certificate 2"),
+                        EmailBulletPointList("certificate 3", "certificate 4"),
                         "https://emample.com",
                     ),
                     "/emails/PartialPropertyComplianceConfirmation.md",
@@ -91,6 +91,23 @@ class EmailTemplateModelsTests {
                         URI("https://example.com/property/12345"),
                     ),
                     "/emails/VirusScanUnsuccessful.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyUpdateConfirmation(
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        "P-XXX-YYY",
+                        URI("https://example.com"),
+                        EmailBulletPointList("Thing you changed"),
+                    ),
+                    "/emails/PropertyUpdateConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    LandlordUpdateConfirmation(
+                        "1 Street Name, Town, Country, AB1 2CD",
+                        URI("https://example.com"),
+                        "Thing you changed",
+                    ),
+                    "/emails/LandlordUpdateConfirmation.md",
                 ),
             )
 

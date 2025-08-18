@@ -1,0 +1,39 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="options" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="landlordPrivacyNoticeUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'agreesToPrivacyNotice', #{registerAsALandlord.privacyNotice.fieldSetHeading}, null)}">
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{registerAsALandlord.privacyNotice.paragraph.one.beforeLink}">registerAsALandlord.privacyNotice.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:text="#{registerAsALandlord.privacyNotice.paragraph.one.linkText}" th:href="${landlordPrivacyNoticeUrl}" rel="noreferrer noopener" target="_blank">
+                registerAsALandlord.privacyNotice.paragraph.one.linkText
+            </a>
+            <span th:remove="tag" th:text="#{registerAsALandlord.privacyNotice.paragraph.one.afterLink}">
+                    registerAsALandlord.privacyNotice.paragraph.one.afterLink
+            </span>
+        </p>
+        <p class="govuk-body" th:text="#{registerAsALandlord.privacyNotice.paragraph.two}">registerAsALandlord.privacyNotice.paragraph.two</p>
+        <ol class="govuk-list govuk-list--number govuk-!-font-weight-bold">
+            <li>
+                <span th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.boldText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.boldText</span>
+                <span style="font-weight: normal" th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.normalText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.one.normalText</span>
+            </li>
+            <li>
+                <span th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.boldText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.boldText</span>
+                <span style="font-weight: normal" th:text="#{registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.normalText}">registerAsALandlord.privacyNotice.paragraph.three.numberedBullet.two.normalText</span>
+            </li>
+        </ol>
+        <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.privacyNotice.checkBox.heading}">registerAsALandlord.privacyNotice.checkBox.heading</h2>
+        <th:block
+                th:replace="~{fragments/forms/checkboxes :: checkboxes(null,'agreesToPrivacyNotice',null, ${options})}"></th:block>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+</th:block>
+</html>

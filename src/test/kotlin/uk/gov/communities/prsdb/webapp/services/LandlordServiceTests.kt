@@ -5,16 +5,21 @@ import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
-import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
@@ -32,10 +37,13 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPro
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import java.net.URI
 import java.time.LocalDate
 import kotlin.reflect.full.hasAnnotation
 import kotlin.test.assertNull
@@ -60,8 +68,33 @@ class LandlordServiceTests {
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
-    @InjectMocks
+    @Mock
+    private lateinit var updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>
+
+    @Mock
+    private lateinit var registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @Mock
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     private lateinit var landlordService: LandlordService
+
+    // Need to inject mocks manually as "injectMocks" gets confused between the two EmailNotificationServices
+    @BeforeEach
+    fun setup() {
+        landlordService =
+            LandlordService(
+                mockLandlordRepository,
+                mockOneLoginUserService,
+                mockLandlordWithListedPropertyCountRepository,
+                mockAddressService,
+                mockRegistrationNumberService,
+                mockBackUrlStorageService,
+                updateConfirmationSender,
+                absoluteUrlProvider,
+                registrationConfirmationSender,
+            )
+    }
 
     @Test
     fun `retrieveLandlordByRegNum returns a landlord given its registration number`() {
@@ -117,7 +150,8 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `createLandlord creates a landlord and returns its LRN`() {
+    fun `createLandlord creates a landlord and returns the landlord created`() {
+        // Arrange
         val baseUserId = "baseUserId"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
 
@@ -145,7 +179,9 @@ class LandlordServiceTests {
             registrationNumber,
         )
         whenever(mockLandlordRepository.save(any())).thenReturn(expectedLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com"))
 
+        // Act
         val createdLandlord =
             landlordService.createLandlord(
                 baseUserId,
@@ -157,11 +193,47 @@ class LandlordServiceTests {
                 true,
             )
 
+        // Assert
         val landlordCaptor = captor<Landlord>()
         verify(mockLandlordRepository).save(landlordCaptor.capture())
         assertTrue(ReflectionEquals(expectedLandlord, "id").matches(landlordCaptor.value))
 
         assertEquals(expectedLandlord, createdLandlord)
+    }
+
+    @Test
+    fun `createLandlord sends a confirmation email for the landlord created`() {
+        // Arrange
+        val expectedLandlord = createLandlord()
+
+        whenever(mockOneLoginUserService.findOrCreate1LUser(any())).thenReturn(expectedLandlord.baseUser)
+        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedLandlord.address)
+        whenever(mockRegistrationNumberService.createRegistrationNumber(any()))
+            .thenReturn(expectedLandlord.registrationNumber)
+
+        whenever(mockLandlordRepository.save(any())).thenReturn(expectedLandlord)
+        val dashboardUri = URI("example.com/dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
+
+        // Act
+        landlordService.createLandlord(
+            "baseUserId",
+            "name",
+            "example@email.com",
+            "07123456789",
+            mock(),
+            ENGLAND_OR_WALES,
+            true,
+        )
+
+        // Assert
+        verify(registrationConfirmationSender).sendEmail(
+            expectedLandlord.email,
+            LandlordRegistrationConfirmationEmail(
+                RegistrationNumberDataModel.fromRegistrationNumber(expectedLandlord.registrationNumber).toString(),
+                dashboardUri.toASCIIString(),
+            ),
+        )
     }
 
     @Test
@@ -421,6 +493,7 @@ class LandlordServiceTests {
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
         whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
         landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
@@ -431,6 +504,55 @@ class LandlordServiceTests {
         assertEquals(updateModel.phoneNumber, landlordEntity.phoneNumber)
         assertEquals(newAddress, landlordEntity.address)
         assertEquals(updateModel.dateOfBirth, landlordEntity.dateOfBirth)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUpdateAndExpectedEmailPairs")
+    fun `when a landlord is updated, a corresponding email is sent to each relevant email`(
+        updateModel: LandlordUpdateModel,
+        expectedDetail: String,
+    ) {
+        // Arrange
+        val originalEmailAddress = "original email"
+        val userId = "my id"
+        val landlordEntity =
+            createLandlord(
+                name = "original name",
+                email = originalEmailAddress,
+                phoneNumber = "original phone number",
+                address = createAddress("original address"),
+                dateOfBirth = LocalDate.of(1991, 1, 1),
+            )
+        updateModel.address?.let {
+            val address = Address(updateModel.address)
+            whenever(mockAddressService.findOrCreateAddress(it)).thenReturn(address)
+        }
+        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        // Act
+        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+
+        // Assert
+        val expectedEmailModel =
+            LandlordUpdateConfirmation(
+                RegistrationNumberDataModel.fromRegistrationNumber(landlordEntity.registrationNumber).toString(),
+                dashboardUrl,
+                expectedDetail,
+            )
+
+        verify(updateConfirmationSender).sendEmail(
+            eq(originalEmailAddress),
+            eq(expectedEmailModel),
+        )
+
+        updateModel.email?.let {
+            verify(updateConfirmationSender).sendEmail(
+                eq(it),
+                eq(expectedEmailModel),
+            )
+        }
     }
 
     @Test
@@ -500,5 +622,62 @@ class LandlordServiceTests {
 
         // Act, Assert
         assertFalse(landlordService.getLandlordHasRegisteredProperties(baseUserId))
+    }
+
+    companion object {
+        @JvmStatic
+        fun getUpdateAndExpectedEmailPairs() =
+            listOf(
+                Arguments.of(
+                    LandlordUpdateModel(
+                        "newEmail",
+                        null,
+                        null,
+                        null,
+                        null,
+                    ),
+                    "email address",
+                ),
+                Arguments.of(
+                    LandlordUpdateModel(
+                        null,
+                        "newName",
+                        null,
+                        null,
+                        null,
+                    ),
+                    "name",
+                ),
+                Arguments.of(
+                    LandlordUpdateModel(
+                        null,
+                        null,
+                        "new phone number",
+                        null,
+                        null,
+                    ),
+                    "telephone number",
+                ),
+                Arguments.of(
+                    LandlordUpdateModel(
+                        null,
+                        null,
+                        null,
+                        AddressDataModel.fromAddress(createAddress("new address")),
+                        null,
+                    ),
+                    "contact address",
+                ),
+                Arguments.of(
+                    LandlordUpdateModel(
+                        null,
+                        null,
+                        null,
+                        null,
+                        LocalDate.of(1922, 2, 2),
+                    ),
+                    "date of birth",
+                ),
+            )
     }
 }
