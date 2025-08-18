@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
@@ -47,7 +48,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     fun `the view landlord record button links to the landlord details page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewLandlordRecordButton.clickAndWait()
-        assertPageIs(page, LandlordDetailsPage::class)
+        assertPageIs(page, LandlordPrivacyNoticePage::class)
     }
 
     @Test
@@ -62,6 +63,13 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.rentersRightsBillLink.clickAndWait()
         assertTrue(page.url().contains("https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill"))
+    }
+
+    @Test
+    fun `the privacy notice link goes to the privacy notice page`(page: Page) {
+        val dashboard = navigator.goToLandlordDashboard()
+        dashboard.privacyNoticeLink.clickAndWait()
+        assertPageIs(page, ComplianceActionsPage::class)
     }
 
     @Nested
