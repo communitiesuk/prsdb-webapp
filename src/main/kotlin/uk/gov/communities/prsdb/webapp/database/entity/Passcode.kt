@@ -28,4 +28,8 @@ class Passcode() : ModifiableAuditableEntity() {
         this.localAuthority = localAuthority
         this.baseUser = baseUser
     }
+
+    fun claimByUser(user: OneLoginUser) {
+        this.baseUser = user
+    }
 }
