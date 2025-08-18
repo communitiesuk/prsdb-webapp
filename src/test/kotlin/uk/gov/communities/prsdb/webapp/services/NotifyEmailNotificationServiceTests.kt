@@ -14,7 +14,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
@@ -34,23 +34,23 @@ class NotifyEmailNotificationServiceTests {
 
     private class TestEmailTemplate(
         val hashMap: HashMap<String, String>,
-        override val templateId: EmailTemplateId,
+        override val template: EmailTemplate,
     ) : EmailTemplateModel {
         override fun toHashMap(): HashMap<String, String> = hashMap
 
-        constructor() : this(hashMapOf(), EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL)
+        constructor() : this(hashMapOf(), EmailTemplate.LOCAL_AUTHORITY_INVITATION_EMAIL)
     }
 
     @Test
     fun `sendEmail sends a matching email using the notification client`() {
         // Arrange
         val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
-        val expectedTemplateId = EmailTemplateId.LOCAL_AUTHORITY_INVITATION_EMAIL
+        val expectedTemplateId = EmailTemplate.LOCAL_AUTHORITY_INVITATION_EMAIL
         val email = TestEmailTemplate(expectedHashmap, expectedTemplateId)
         val recipientEmail = "an email address"
         val expectedNotifyIdValue = "some id value"
 
-        whenever(notifyIdService.getIdValue(expectedTemplateId)).thenReturn(expectedNotifyIdValue)
+        whenever(notifyIdService.getNotifyIdValue(expectedTemplateId)).thenReturn(expectedNotifyIdValue)
 
         // Act
         emailNotificationService.sendEmail(recipientEmail, email)

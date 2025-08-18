@@ -37,7 +37,7 @@ class EmailNotificationStubService<EmailModel : EmailTemplateModel> : EmailNotif
             ***************
             
             Email sent to:   $recipientAddress
-            Template used:   ${email.templateId.name}
+            Template used:   ${email.template.name}
             Personalisation: ${email.toHashMap()}
             """.trimIndent()
 

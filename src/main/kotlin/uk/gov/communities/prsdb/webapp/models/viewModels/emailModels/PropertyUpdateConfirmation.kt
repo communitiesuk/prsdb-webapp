@@ -13,7 +13,7 @@ data class PropertyUpdateConfirmation(
     private val dashboardUrlKey = "dashboard url"
     private val updatedBulletsKey = "updated bullets"
 
-    override val templateId = EmailTemplateId.PROPERTY_UPDATE_CONFIRMATION
+    override val template = EmailTemplate.PROPERTY_UPDATE_CONFIRMATION
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

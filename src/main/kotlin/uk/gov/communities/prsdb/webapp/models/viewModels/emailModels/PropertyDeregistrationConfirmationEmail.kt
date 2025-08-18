@@ -7,7 +7,7 @@ data class PropertyDeregistrationConfirmationEmail(
     private val prnKey = "prn number"
     private val addressKey = "property address"
 
-    override val templateId = EmailTemplateId.PROPERTY_DEREGISTRATION_CONFIRMATION
+    override val template = EmailTemplate.PROPERTY_DEREGISTRATION_CONFIRMATION
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

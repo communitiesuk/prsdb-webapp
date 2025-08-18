@@ -7,7 +7,7 @@ data class LocalAuthorityInvitationCancellationEmail(
 ) : EmailTemplateModel {
     private val localAuthorityKey = "name of council"
 
-    override val templateId = EmailTemplateId.LOCAL_AUTHORITY_INVITATION_CANCELLATION_EMAIL
+    override val template = EmailTemplate.LOCAL_AUTHORITY_INVITATION_CANCELLATION_EMAIL
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

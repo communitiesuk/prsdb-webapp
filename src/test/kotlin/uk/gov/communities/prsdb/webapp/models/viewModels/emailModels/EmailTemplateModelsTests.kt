@@ -133,12 +133,12 @@ class EmailTemplateModelsTests {
     @ParameterizedTest(name = "{0} keys match markdown")
     @MethodSource("templateList")
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
-        val emailTemplateMetadata = EmailTemplateMetadataFactory(null)
         // Arrange
+        val emailTemplateMetadata = EmailTemplateMetadataFactory(null)
         val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
         val storedMetadata =
             emailTemplateMetadata.metadataList.single { metadata ->
-                metadata.enumName == testData.model.templateId.name
+                metadata.enumName == testData.model.template.name
             }
 
         val subjectParameters = extractParameters(storedMetadata.subject)

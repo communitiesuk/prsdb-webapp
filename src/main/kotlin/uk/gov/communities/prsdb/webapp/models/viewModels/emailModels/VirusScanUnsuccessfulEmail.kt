@@ -17,7 +17,7 @@ data class VirusScanUnsuccessfulEmail(
     private val registrationNumberKey = "registration number"
     private val propertyUrlKey = "property url"
 
-    override val templateId = EmailTemplateId.VIRUS_SCAN_UNSUCCESSFUL
+    override val template = EmailTemplate.VIRUS_SCAN_UNSUCCESSFUL
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

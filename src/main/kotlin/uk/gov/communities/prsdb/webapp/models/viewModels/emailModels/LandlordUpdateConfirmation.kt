@@ -11,7 +11,7 @@ data class LandlordUpdateConfirmation(
     private val dashboardUrlKey = "dashboard url"
     private val updatedDetailKey = "updated detail"
 
-    override val templateId = EmailTemplateId.LANDLORD_UPDATE_CONFIRMATION
+    override val template = EmailTemplate.LANDLORD_UPDATE_CONFIRMATION
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

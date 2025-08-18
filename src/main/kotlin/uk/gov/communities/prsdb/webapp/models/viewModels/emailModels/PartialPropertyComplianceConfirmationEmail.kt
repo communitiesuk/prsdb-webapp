@@ -6,7 +6,7 @@ data class PartialPropertyComplianceConfirmationEmail(
     private val nonCompliantBulletPoints: EmailBulletPointList,
     val updateComplianceUrl: String,
 ) : EmailTemplateModel {
-    override val templateId = EmailTemplateId.PARTIAL_PROPERTY_COMPLIANCE_CONFIRMATION
+    override val template = EmailTemplate.PARTIAL_PROPERTY_COMPLIANCE_CONFIRMATION
 
     override fun toHashMap() =
         hashMapOf(

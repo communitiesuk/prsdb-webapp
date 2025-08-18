@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 interface EmailTemplateModel {
-    val templateId: EmailTemplateId
+    val template: EmailTemplate
 
     fun toHashMap(): HashMap<String, String>
 }
 
-enum class EmailTemplateId {
+enum class EmailTemplate {
     LOCAL_AUTHORITY_INVITATION_EMAIL,
     LOCAL_AUTHORITY_INVITATION_CANCELLATION_EMAIL,
     LOCAL_AUTHORITY_ADMIN_INVITATION_EMAIL,

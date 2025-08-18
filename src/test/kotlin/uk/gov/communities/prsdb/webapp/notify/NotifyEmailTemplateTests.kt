@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import uk.gov.service.notify.NotificationClient
@@ -57,8 +57,8 @@ class NotifyEmailTemplateTests {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(EmailTemplateId::class)
-    fun `notify contains a template for each template id`(id: EmailTemplateId) {
+    @EnumSource(EmailTemplate::class)
+    fun `notify contains a template for each template id`(id: EmailTemplate) {
         val metadata =
             emailTemplateMetadataFactory.metadataList.singleOrNull { templateMetadata ->
                 templateMetadata.enumName ==
@@ -69,16 +69,16 @@ class NotifyEmailTemplateTests {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(EmailTemplateId::class)
-    fun `there is a source controlled copy for each template id`(id: EmailTemplateId) {
+    @EnumSource(EmailTemplate::class)
+    fun `there is a source controlled copy for each template id`(id: EmailTemplate) {
         val metadataList = emailTemplateMetadataFactory.metadataList
 
         metadataList.single { templateMetadata -> templateMetadata.enumName == id.name }
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(EmailTemplateId::class)
-    fun `all source controlled templates match their notify equivalent`(id: EmailTemplateId) {
+    @EnumSource(EmailTemplate::class)
+    fun `all source controlled templates match their notify equivalent`(id: EmailTemplate) {
         // Arrange
         val metadata = emailTemplateMetadataFactory.metadataList.single { templateMetadata -> templateMetadata.enumName == id.name }
 

@@ -5,7 +5,7 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import kotlin.test.assertEquals
 
 class NotifyIdServiceTests {
@@ -27,28 +27,28 @@ class NotifyIdServiceTests {
 
     @Disabled("Disabled until we can include production IDs")
     @ParameterizedTest
-    @EnumSource(EmailTemplateId::class)
-    fun `getIdValue_returns_production_id_values_if_production_is_set`(id: EmailTemplateId) {
+    @EnumSource(EmailTemplate::class)
+    fun `getIdValue returns production Notify id values if production is set`(id: EmailTemplate) {
         // Arrange
         val service = NotifyIdService(useProductionNotify = true)
         val metadata = metadataList.firstOrNull { it.enumName == id.name }
 
         // Act
-        val idValue = service.getIdValue(id)
+        val idValue = service.getNotifyIdValue(id)
 
         // Assert
         assertEquals(metadata?.prod_id, idValue)
     }
 
     @ParameterizedTest
-    @EnumSource(EmailTemplateId::class)
-    fun `getIdValue_returns_test_id_values_if_production_is_not_set`(id: EmailTemplateId) {
+    @EnumSource(EmailTemplate::class)
+    fun `getIdValue returns test Notify id values if production is not set`(id: EmailTemplate) {
         // Arrange
         val service = NotifyIdService(useProductionNotify = false)
         val metadata = metadataList.firstOrNull { it.enumName == id.name }
 
         // Act
-        val idValue = service.getIdValue(id)
+        val idValue = service.getNotifyIdValue(id)
 
         // Assert
         assertEquals(metadata?.test_id, idValue)

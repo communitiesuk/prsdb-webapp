@@ -21,7 +21,7 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     ) {
         val emailParameters = email.toHashMap()
         try {
-            val idValue = notifyIdService.getIdValue(email.templateId)
+            val idValue = notifyIdService.getNotifyIdValue(email.template)
             notificationClient.sendEmail(idValue, recipientAddress, emailParameters, null)
         } catch (notifyException: NotificationClientException) {
             throwEmailSendException(notifyException)

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
 import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateId
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import kotlin.jvm.javaClass
 
 @ApplicationScope
@@ -14,7 +14,7 @@ import kotlin.jvm.javaClass
 class NotifyIdService(
     @Value("\${notify.use-production-notify}") private val useProductionNotify: Boolean,
 ) {
-    private val testIdName: String =
+    private val notifyIdKeyForEnvironment: String =
         if (useProductionNotify) {
             JsonDeserializationKeys.PRODUCTION_NOTIFY_ID_KEY
         } else {
@@ -23,20 +23,21 @@ class NotifyIdService(
 
     private val json: Json = Json { ignoreUnknownKeys = true }
 
-    private val notifyIdMap: Map<EmailTemplateId, NotifyIdData> =
+    private val notifyIdMap: Map<EmailTemplate, NotifyIdData> =
         json
             .decodeFromString<List<NotifyIdData>>(
                 javaClass
                     .getResource("/emails/emailTemplates.json")
                     ?.readText()
-                    ?.replace("\"$testIdName\"", "\"id\"") ?: throw IllegalStateException("Email template JSON not found"),
-            ).associateBy { EmailTemplateId.valueOf(it.enumName) }
+                    ?.replace("\"$notifyIdKeyForEnvironment\"", "\"notifyId\"")
+                    ?: throw IllegalStateException("Email template JSON not found"),
+            ).associateBy { EmailTemplate.valueOf(it.enumName) }
 
     @Serializable
     private data class NotifyIdData(
-        val id: String,
+        val notifyId: String,
         val enumName: String,
     )
 
-    fun getIdValue(id: EmailTemplateId): String = notifyIdMap[id]!!.id
+    fun getNotifyIdValue(emailTemplate: EmailTemplate): String = notifyIdMap[emailTemplate]!!.notifyId
 }
