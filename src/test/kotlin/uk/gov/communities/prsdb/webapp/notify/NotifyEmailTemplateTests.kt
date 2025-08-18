@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.notify
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.condition.EnabledIf
 import org.junit.jupiter.params.ParameterizedTest
@@ -76,8 +76,7 @@ class NotifyEmailTemplateTests {
 
         // Assert
         assertBodiesMatch(metadata, notifyTemplate)
-        Assertions.assertEquals(metadata.name, notifyTemplate.name, "Notify template name did not match")
-        Assertions.assertEquals(
+        assertEquals(
             metadata.subject,
             notifyTemplate.subject.orElse(null),
             "Notify template subject did not match",
@@ -97,6 +96,6 @@ class NotifyEmailTemplateTests {
         // Notify returns body with CRLF end lines: convert to LF before comparison
         var cleanedNotifyBody = notifyBody.replace("\r", "")
 
-        Assertions.assertEquals(cleanedStoredBody, cleanedNotifyBody, "Notify template body did not match")
+        assertEquals(cleanedStoredBody, cleanedNotifyBody, "Notify template body did not match")
     }
 }

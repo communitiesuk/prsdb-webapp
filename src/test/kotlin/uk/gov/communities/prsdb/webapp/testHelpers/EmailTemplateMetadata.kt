@@ -6,18 +6,22 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class EmailTemplateMetadata(
     val id: String,
-    val name: String,
+    val enumName: String,
     val subject: String,
     val bodyLocation: String,
 ) {
-    override fun toString() = name
-
     companion object {
+        val json: Json = Json { ignoreUnknownKeys = true }
+
         // Has to be static so it can be used in parameterized tests
         @JvmStatic
         val metadataList: List<EmailTemplateMetadata> =
-            Json.decodeFromString<List<EmailTemplateMetadata>>(
-                javaClass.getResource("/emails/emailTemplates.json")?.readText() ?: "",
+            json.decodeFromString<List<EmailTemplateMetadata>>(
+                javaClass
+                    .getResource("/emails/emailTemplates.json")
+                    ?.readText()
+                    ?.replace("\"test_id\"", "\"id\"")
+                    ?: "",
             )
     }
 }
