@@ -1,5 +1,6 @@
 <th:block th:fragment="betaBannerFeedbackForm">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.heading}, #{betaBannerFeedback.intro})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.heading}, null)}">
+        <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
         <form id="feedback-form" method="post" th:action="${feedbackUrl}" th:object="${formModel}" novalidate>
             <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
             <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
