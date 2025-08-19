@@ -54,6 +54,7 @@ class LandlordRegistrationJourneyTests {
                     addressDataModel = anyOrNull(),
                     countryOfResidence = anyOrNull(),
                     isVerified = anyOrNull(),
+                    hasAcceptedPrivacyNotice = anyOrNull(),
                     nonEnglandOrWalesAddress = anyOrNull(),
                     dateOfBirth = anyOrNull(),
                 ),
@@ -106,6 +107,7 @@ class LandlordRegistrationJourneyTests {
                 addressDataModel = any(),
                 countryOfResidence = any(),
                 isVerified = any(),
+                hasAcceptedPrivacyNotice = any(),
                 nonEnglandOrWalesAddress = argThat { internationalAddress -> internationalAddress.isNullOrBlank() },
                 dateOfBirth = any(),
             )

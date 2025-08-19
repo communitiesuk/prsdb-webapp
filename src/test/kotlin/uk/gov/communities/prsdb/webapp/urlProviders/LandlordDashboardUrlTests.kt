@@ -179,6 +179,7 @@ class LandlordDashboardUrlTests(
             mock(),
             "Test Country",
             isVerified = true,
+            hasAcceptedPrivacyNotice = true,
             nonEnglandOrWalesAddress = null,
             dateOfBirth = LocalDate.of(1990, 1, 1),
         )
