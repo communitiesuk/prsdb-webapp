@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
@@ -180,6 +181,27 @@ class PropertyComplianceController(
                 principal,
                 checkingAnswersForStep,
             )
+    }
+
+    @GetMapping("/$FEEDBACK_PATH_SEGMENT")
+    fun getFeedback(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+        model: Model,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No property compliance was added for property ownership $propertyOwnershipId in this session",
+            )
+        }
+
+        // TODO PRSD-1302 Back url does not yet have a defined destination.
+        model.addAttribute("backUrl", getPropertyCompliancePath(propertyOwnershipId))
+
+        return "feedback"
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
