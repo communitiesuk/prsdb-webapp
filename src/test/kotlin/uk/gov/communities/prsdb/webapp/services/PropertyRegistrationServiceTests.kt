@@ -27,12 +27,16 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
@@ -50,8 +54,11 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -84,6 +91,12 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockSession: HttpSession
+
+    @Mock
+    lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+
+    @Mock
+    lateinit var urlProvider: AbsoluteUrlProvider
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -164,7 +177,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerPropertyAndReturnPropertyRegistrationNumber throws an error if the given address is registered`() {
+    fun `registerProperty throws an error if the given address is registered`() {
         val registeredAddress = AddressDataModel(singleLineAddress = "1 Example Road", uprn = 0L)
 
         val spiedOnPropertyRegistrationService = spy(propertyRegistrationService)
@@ -174,7 +187,7 @@ class PropertyRegistrationServiceTests {
 
         val errorThrown =
             assertThrows<EntityExistsException> {
-                spiedOnPropertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+                spiedOnPropertyRegistrationService.registerProperty(
                     registeredAddress,
                     PropertyType.DETACHED_HOUSE,
                     LicensingType.NO_LICENSING,
@@ -190,14 +203,14 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerPropertyAndReturnPropertyRegistrationNumber throws an error if the logged in user is not a landlord`() {
+    fun `registerProperty throws an error if the logged in user is not a landlord`() {
         val nonLandlordUserId = "baseUserId"
 
         whenever(mockLandlordRepository.findByBaseUser_Id(nonLandlordUserId)).thenReturn(null)
 
         val errorThrown =
             assertThrows<EntityNotFoundException> {
-                propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+                propertyRegistrationService.registerProperty(
                     AddressDataModel("1 Example Road"),
                     PropertyType.DETACHED_HOUSE,
                     LicensingType.NO_LICENSING,
@@ -213,7 +226,8 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerPropertyAndReturnPropertyRegistrationNumber registers the property if all fields are populated`() {
+    fun `registerProperty registers the property if all fields are populated`() {
+        // Arrange
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val propertyType = PropertyType.DETACHED_HOUSE
         val licenceType = LicensingType.SELECTIVE_LICENCE
@@ -252,9 +266,11 @@ class PropertyRegistrationServiceTests {
                 license = licence,
             ),
         ).thenReturn(expectedPropertyOwnership)
+        whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
+        // Act
         val propertyRegistrationNumber =
-            propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+            propertyRegistrationService.registerProperty(
                 addressDataModel,
                 propertyType,
                 licenceType,
@@ -265,11 +281,77 @@ class PropertyRegistrationServiceTests {
                 landlord.baseUser.id,
             )
 
+        // Assert
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+        verify(mockPropertyOwnershipService).createPropertyOwnership(
+            ownershipType = ownershipType,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            primaryLandlord = landlord,
+            property = property,
+            license = licence,
+        )
     }
 
     @Test
-    fun `registerPropertyAndReturnPropertyRegistrationNumber registers the property if there is no license`() {
+    fun `registerProperty sends a confirmation email and caches the registration number when it registers the property`() {
+        // Arrange
+        val landlord = MockLandlordData.createLandlord()
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 5678)
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                primaryLandlord = landlord,
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
+        whenever(mockPropertyService.activateOrCreateProperty(any(), any()))
+            .thenReturn(expectedPropertyOwnership.property)
+        whenever(mockLicenceService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                primaryLandlord = any(),
+                property = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                occupancyType = any(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+
+        val dashboardUri = URI("https:gov.uk")
+        whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            AddressDataModel.fromAddress(expectedPropertyOwnership.property.address),
+            PropertyType.DETACHED_HOUSE,
+            LicensingType.SELECTIVE_LICENCE,
+            "Licence",
+            OwnershipType.FREEHOLD,
+            2,
+            3,
+            "USER_ID",
+        )
+
+        // Assert
+        verify(confirmationEmailSender).sendEmail(
+            eq(landlord.email),
+            argThat<PropertyRegistrationConfirmationEmail> { email ->
+                email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
+                email.singleLineAddress == expectedPropertyOwnership.property.address.singleLineAddress &&
+                    email.prsdUrl == dashboardUri.toString()
+            },
+        )
+
+        verify(mockSession).setAttribute(eq(PROPERTY_REGISTRATION_NUMBER), eq(registrationNumber.number))
+    }
+
+    @Test
+    fun `registerProperty registers the property if there is no license`() {
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val propertyType = PropertyType.DETACHED_HOUSE
         val licenceType = LicensingType.NO_LICENSING
@@ -306,9 +388,10 @@ class PropertyRegistrationServiceTests {
                 license = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
+        whenever(urlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         val propertyRegistrationNumber =
-            propertyRegistrationService.registerPropertyAndReturnPropertyRegistrationNumber(
+            propertyRegistrationService.registerProperty(
                 addressDataModel,
                 propertyType,
                 licenceType,

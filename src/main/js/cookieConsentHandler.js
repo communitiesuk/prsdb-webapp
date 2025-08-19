@@ -5,13 +5,16 @@ const COOKIES_ROUTE = '/cookies';
 
 export function addCookieConsentHandler() {
     const consentCookieValue = cookieHelper.parse(document.cookie)[CONSENT_COOKIE_NAME];
+    const isConsentGranted = consentCookieValue === 'true';
     const onCookiePage = location.pathname.includes(COOKIES_ROUTE);
 
-    if (consentCookieValue == null && !onCookiePage) {
-       new CookieBanner().display();
+    if (onCookiePage) {
+        new CookieConsentForm().display(isConsentGranted);
+    } else if (consentCookieValue == null) {
+        new CookieBanner().display();
     }
 
-    updateGaConsent(consentCookieValue === 'true');
+    updateGaConsent(isConsentGranted);
 }
 
 function updateGaConsent(isGranted = false) {
@@ -21,20 +24,67 @@ function updateGaConsent(isGranted = false) {
     }
 
     gtag('consent', 'update', {
-        ad_user_data: isGranted ? 'granted' : 'denied',
-        ad_personalization: isGranted ? 'granted' : 'denied',
-        ad_storage: isGranted ? 'granted' : 'denied',
         analytics_storage: isGranted ? 'granted' : 'denied'
     })
 
     if (!isGranted) {
         deleteCookie("_ga")
-        deleteCookie("_ga_PDPW9SQ94W")
+        deleteCookie("_ga_" + window.GOOGLE_ANALYTICS_MEASUREMENT_ID.slice(2))
     }
 }
 
 function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.GOOGLE_COOKIE_DOMAIN + ';';
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+function createConsentCookie(consentValue) {
+    document.cookie = cookieHelper.serialize(CONSENT_COOKIE_NAME, consentValue, {
+            expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+            path: '/',
+            sameSite: true
+        }
+    );
+}
+
+class CookieConsentForm {
+    #form;
+    #yesRadio;
+    #noRadio;
+    #submitButton
+    #successBanner;
+
+    constructor() {
+        this.#form = document.querySelector("form");
+        this.#yesRadio = document.getElementById("consent-yes");
+        this.#noRadio = document.getElementById("consent-no");
+        this.#submitButton = document.getElementById("submit-consent-button");
+        this.#successBanner = document.querySelector(".govuk-notification-banner--success");
+    }
+
+    display(consentValue) {
+        this.#yesRadio.checked = consentValue;
+        this.#noRadio.checked = !consentValue;
+
+        this.#handleFormSubmission();
+
+        this.#form.hidden = false;
+    }
+
+    #handleFormSubmission() {
+        this.#form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const consentValue = this.#yesRadio.checked;
+            createConsentCookie(consentValue);
+            updateGaConsent(consentValue);
+
+            this.#submitButton.blur();
+
+            this.#successBanner.hidden = false;
+            window.scrollTo(0, 0);
+        });
+    }
 }
 
 class CookieBanner {
@@ -71,24 +121,14 @@ class CookieBanner {
 
     #handleCookiesConsentButton(button, consentValue) {
         button.addEventListener('click', () => {
-            this.#createConsentCookie(consentValue);
+            createConsentCookie(consentValue);
+            updateGaConsent(consentValue);
 
             this.#cookieMessage.hidden = true;
 
             const confirmationMessageText = consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText;
             this.#cookieConfirmationMessage.hidden = false;
             confirmationMessageText.hidden = false;
-
-            updateGaConsent(consentValue);
         });
-    }
-
-    #createConsentCookie(consentValue) {
-        document.cookie = cookieHelper.serialize(CONSENT_COOKIE_NAME, consentValue, {
-            expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
-                path: '/',
-                sameSite: true
-            }
-        );
     }
 }

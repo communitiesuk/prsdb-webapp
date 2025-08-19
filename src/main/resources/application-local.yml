@@ -48,6 +48,7 @@ one-login:
 
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
+  use-production-notify: false
 
 epc:
   base-url: https://api.epb-staging.digital.communities.gov.uk
@@ -71,6 +72,13 @@ aws:
   s3:
     quarantineBucket: ${AWS_QUARANTINE_BUCKET:prsdb-quarantine-integration}
     safeBucket: ${S3_SAFE_BUCKET_KEY:prsdb-uploaded-files-integration}
+
+plausible:
+  domain-id: register-home-to-rent.communities.gov.uk
+
+google-analytics:
+  measurement-id: G-NOTATAG123
+  cookie-domain: localhost
 ---
 
 spring:

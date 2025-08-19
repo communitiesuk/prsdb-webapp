@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
@@ -33,14 +32,12 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -50,12 +47,10 @@ class LandlordRegistrationJourney(
     journeyDataService: JourneyDataService,
     val addressLookupService: AddressLookupService,
     val landlordService: LandlordService,
-    val absoluteUrlProvider: AbsoluteUrlProvider,
-    val emailNotificationService: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     val securityContextService: SecurityContextService,
 ) : Journey<LandlordRegistrationStepId>(
         journeyType = JourneyType.LANDLORD_REGISTRATION,
-        initialStepId = LandlordRegistrationStepId.VerifyIdentity,
+        initialStepId = LandlordRegistrationStepId.PrivacyNotice,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -80,10 +75,10 @@ class LandlordRegistrationJourney(
 
     override val sections =
         listOf(
-            JourneySection(
-                privacyNoticeTasks(),
+            JourneySection.withOneTask(
+                JourneyTask.withOneStep(privacyNoticeStep()),
                 "registerAsALandlord.section.privacyNotice.heading",
-                "privacy-notice",
+                LandlordRegistrationStepId.PrivacyNotice.urlPathSegment,
             ),
             JourneySection(
                 registerDetailsTasks(),
@@ -96,8 +91,6 @@ class LandlordRegistrationJourney(
                 "check-and-submit",
             ),
         )
-
-    private fun privacyNoticeTasks(): List<JourneyTask<LandlordRegistrationStepId>> = emptyList()
 
     private fun registerDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
@@ -142,6 +135,35 @@ class LandlordRegistrationJourney(
             ),
         )
 
+    private fun privacyNoticeStep() =
+        Step(
+            id = LandlordRegistrationStepId.PrivacyNotice,
+            page =
+                Page(
+                    formModel = PrivacyNoticeFormModel::class,
+                    templateName = "forms/landlordPrivacyNoticeForm",
+                    content =
+                        mapOf(
+                            "title" to "registerAsALandlord.title",
+                            "fieldSetHeading" to "registerAsALandlord.privacyNotice.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.continue",
+                            // TODO PRSD-676 add url when created
+                            "landlordPrivacyNoticeUrl" to "#",
+                            "options" to
+                                listOf(
+                                    CheckboxViewModel(
+                                        value = "true",
+                                        labelMsgKey = "registerAsALandlord.privacyNotice.checkBox.label",
+                                    ),
+                                ),
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                        ),
+                    shouldDisplaySectionHeader = true,
+                ),
+            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.VerifyIdentity, null) },
+            saveAfterSubmit = false,
+        )
+
     private fun verifyIdentityStep() =
         Step(
             id = LandlordRegistrationStepId.VerifyIdentity,
@@ -162,7 +184,7 @@ class LandlordRegistrationJourney(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.identityNotVerified.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.continue",
-                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
                         ),
                     shouldDisplaySectionHeader = false,
                 ),
@@ -224,7 +246,7 @@ class LandlordRegistrationJourney(
                             "fieldSetHeading" to "forms.confirmDetails.heading",
                             "fieldSetHint" to "forms.confirmDetails.summary",
                             "submitButtonText" to "forms.buttons.confirmAndContinue",
-                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
                         ),
                     displaySectionHeader = true,
                 ),
@@ -591,25 +613,16 @@ class LandlordRegistrationJourney(
         }
 
     private fun declarationHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val landlord =
-            landlordService.createLandlord(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
-                name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
-                email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
-                phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
-                addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
-                countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
-                isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
-                nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
-                dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
-            )
-
-        emailNotificationService.sendEmail(
-            landlord.email,
-            LandlordRegistrationConfirmationEmail(
-                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-            ),
+        landlordService.createLandlord(
+            baseUserId = SecurityContextHolder.getContext().authentication.name,
+            name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
+            email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
+            phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
+            addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
+            countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
+            isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
+            nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
+            dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
         )
 
         journeyDataService.removeJourneyDataAndContextIdFromSession()

@@ -9,7 +9,7 @@ data class PropertyRegistrationConfirmationEmail(
     private val addressKey = "property address"
     private val prsdUrlKey = "prsd url"
 
-    override val templateId = EmailTemplateId.PROPERTY_REGISTRATION_CONFIRMATION
+    override val template = EmailTemplate.PROPERTY_REGISTRATION_CONFIRMATION
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

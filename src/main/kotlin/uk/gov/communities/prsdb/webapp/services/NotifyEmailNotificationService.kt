@@ -12,7 +12,8 @@ import uk.gov.service.notify.NotificationClientException
 
 @Service
 class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
-    var notificationClient: NotificationClient,
+    private val notificationClient: NotificationClient,
+    private val notifyIdService: NotifyIdService,
 ) : EmailNotificationService<EmailModel> {
     override fun sendEmail(
         recipientAddress: String,
@@ -20,7 +21,8 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     ) {
         val emailParameters = email.toHashMap()
         try {
-            notificationClient.sendEmail(email.templateId.idValue, recipientAddress, emailParameters, null)
+            val idValue = notifyIdService.getNotifyIdValue(email.template)
+            notificationClient.sendEmail(idValue, recipientAddress, emailParameters, null)
         } catch (notifyException: NotificationClientException) {
             throwEmailSendException(notifyException)
         }

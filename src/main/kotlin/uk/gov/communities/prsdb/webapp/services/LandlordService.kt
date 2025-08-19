@@ -15,8 +15,11 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPro
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
+import kotlin.String
 
 @PrsdbWebService
 class LandlordService(
@@ -26,6 +29,9 @@ class LandlordService(
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
+    private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) {
     fun retrieveLandlordByRegNum(regNum: RegistrationNumberDataModel): Landlord? {
         if (regNum.type != RegistrationNumberType.LANDLORD) {
@@ -54,20 +60,31 @@ class LandlordService(
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
-        return landlordRepository.save(
-            Landlord(
-                baseUser,
-                name,
-                email,
-                phoneNumber,
-                address,
-                registrationNumber,
-                countryOfResidence,
-                isVerified,
-                nonEnglandOrWalesAddress,
-                dateOfBirth,
+        val landlord =
+            landlordRepository.save(
+                Landlord(
+                    baseUser,
+                    name,
+                    email,
+                    phoneNumber,
+                    address,
+                    registrationNumber,
+                    countryOfResidence,
+                    isVerified,
+                    nonEnglandOrWalesAddress,
+                    dateOfBirth,
+                ),
+            )
+
+        registrationConfirmationSender.sendEmail(
+            landlord.email,
+            LandlordRegistrationConfirmationEmail(
+                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),
         )
+
+        return landlord
     }
 
     @Transactional
@@ -79,6 +96,8 @@ class LandlordService(
         checkUpdateIsValid()
         val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
 
+        val existingEmail = landlordEntity.email
+
         landlordUpdate.email?.let { landlordEntity.email = it }
         landlordUpdate.name?.let { landlordEntity.name = it }
         landlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
@@ -87,6 +106,11 @@ class LandlordService(
         }
         landlordUpdate.dateOfBirth?.let { landlordEntity.dateOfBirth = it }
 
+        sendUpdateConfirmationEmail(
+            landlordUpdate,
+            landlordEntity,
+            existingEmail,
+        )
         return landlordEntity
     }
 
@@ -126,5 +150,39 @@ class LandlordService(
             landlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId)
                 ?: throw EntityNotFoundException("Landlord with baseUserId $baseUserId not found")
         return landlordWithListedPropertyCount.listedPropertyCount > 0
+    }
+
+    private fun sendUpdateConfirmationEmail(
+        landlordUpdate: LandlordUpdateModel,
+        landlord: Landlord,
+        oldEmail: String,
+    ) {
+        val updatedDetail =
+            when {
+                landlordUpdate.name != null -> "name"
+                landlordUpdate.dateOfBirth != null -> "date of birth"
+                landlordUpdate.email != null -> "email address"
+                landlordUpdate.phoneNumber != null -> "telephone number"
+                landlordUpdate.address != null -> "contact address"
+                else -> null
+            }
+
+        val emails = listOf(landlord.email, oldEmail).distinct()
+
+        updatedDetail?.let { detail ->
+            emails.forEach { email ->
+                updateConfirmationSender.sendEmail(
+                    email,
+                    LandlordUpdateConfirmation(
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(landlord.registrationNumber)
+                                .toString(),
+                        dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                        updatedDetail = detail,
+                    ),
+                )
+            }
+        }
     }
 }

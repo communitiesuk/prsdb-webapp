@@ -11,6 +11,7 @@ spring:
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
+  use-production-notify: false
 
 os-places:
   api-key: ${OS_PLACES_API_KEY}
@@ -24,3 +25,10 @@ aws:
     quarantineBucket: 'quarantine-bucket'
     safeBucket: 'safe-bucket'
     signatureDuration: '1h'
+
+plausible:
+  domain-id: register-home-to-rent.communities.gov.uk
+
+google-analytics:
+  measurement-id: G-XXXXXXXXXX
+  cookie-domain: example.gov.uk
