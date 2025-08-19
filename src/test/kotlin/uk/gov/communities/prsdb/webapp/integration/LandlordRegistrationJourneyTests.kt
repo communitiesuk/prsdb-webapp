@@ -74,7 +74,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             )
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -140,7 +140,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             )
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -200,7 +200,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         // Set up no identity data from One login
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -265,7 +265,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         // Set up no identity data from One login
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)

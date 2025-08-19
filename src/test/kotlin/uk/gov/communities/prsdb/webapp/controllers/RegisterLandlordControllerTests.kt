@@ -48,6 +48,20 @@ class RegisterLandlordControllerTests(
     }
 
     @Test
+    fun `getStart returns 200 for unauthenticated user`() {
+        mvc.get(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE).andExpect {
+            status { isOk() }
+        }
+    }
+
+    @Test
+    fun `getStart returns 308 for authenticated user with trailing slash`() {
+        mvc.get("${RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE}/").andExpect {
+            status { isPermanentRedirect() }
+        }
+    }
+
+    @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getPrivacyNotice returns 302 for authenticated user with Landlord role`() {
         val idToken = OidcIdToken("token", Instant.now(), Instant.now().plusSeconds(60), mapOf("sub" to "123"))

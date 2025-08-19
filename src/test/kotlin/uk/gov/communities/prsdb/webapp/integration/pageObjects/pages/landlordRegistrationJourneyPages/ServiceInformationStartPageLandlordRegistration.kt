@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class StartPageLandlordRegistration(
+class ServiceInformationStartPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE) {
     val heading: Heading = Heading(page.locator("main h1"))
