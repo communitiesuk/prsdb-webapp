@@ -5,7 +5,7 @@ data class FullPropertyComplianceConfirmationEmail(
     private val compliantBulletPoints: EmailBulletPointList,
     val dashboardUrl: String,
 ) : EmailTemplateModel {
-    override val templateId = EmailTemplateId.FULL_PROPERTY_COMPLIANCE_CONFIRMATION
+    override val template = EmailTemplate.FULL_PROPERTY_COMPLIANCE_CONFIRMATION
 
     override fun toHashMap() =
         hashMapOf(

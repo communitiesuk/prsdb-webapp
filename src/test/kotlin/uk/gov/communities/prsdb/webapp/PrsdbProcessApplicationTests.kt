@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
@@ -62,6 +63,8 @@ class PrsdbProcessApplicationTests {
                 VirusScanProcessingService::class.java.simpleName,
                 AbsoluteUrlProvider::class.java.simpleName,
                 VirusAlertSender::class.java.simpleName,
+                // Beans with scopes use their simple name with the scope prefix as the bean name by default
+                "scopedtarget.${NotifyIdService::class.java.simpleName}",
                 // Beans with explicit names can retrieve their name by reflecting on the annotation using the `getExplicitBeanName` function
                 // e.g. getExplicitBeanName<Component>(YourComponentClassName::class),
                 // Beans added by @Import annotations use their fully qualified class name as the bean name by default

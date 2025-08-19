@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
+import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import java.net.URI
 
 class EmailTemplateModelsTests {
@@ -134,8 +134,12 @@ class EmailTemplateModelsTests {
     @MethodSource("templateList")
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
         // Arrange
+        val emailTemplateMetadata = EmailTemplateMetadataFactory(null)
         val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
-        val storedMetadata = EmailTemplateMetadata.metadataList.single { metadata -> metadata.id == testData.model.templateId.idValue }
+        val storedMetadata =
+            emailTemplateMetadata.metadataList.single { metadata ->
+                metadata.enumName == testData.model.template.name
+            }
 
         val subjectParameters = extractParameters(storedMetadata.subject)
         val bodyParameters = extractParameters(storedBody)

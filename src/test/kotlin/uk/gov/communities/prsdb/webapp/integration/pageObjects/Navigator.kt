@@ -177,6 +177,10 @@ class Navigator(
         return createValidPage(page, PasscodeEntryPage::class)
     }
 
+    fun navigateToLandlordRegistrationStartPage() {
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
+    }
+
     fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
         navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
         return createValidPage(page, StartPageLandlordRegistration::class)
@@ -1203,6 +1207,10 @@ class Navigator(
     fun goToLocalAuthorityDashboard(): LocalAuthorityDashboardPage {
         navigate(LOCAL_AUTHORITY_DASHBOARD_URL)
         return createValidPage(page, LocalAuthorityDashboardPage::class)
+    }
+
+    fun navigateToLandlordDashboard() {
+        navigate(LANDLORD_DASHBOARD_URL)
     }
 
     fun goToLandlordDashboard(): LandlordDashboardPage {

@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorit
 import kotlin.test.Test
 
 @WebMvcTest(GeneratePasscodeController::class)
+@ActiveProfiles("require-passcode")
 class GeneratePasscodeControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {

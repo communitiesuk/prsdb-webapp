@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropert
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -153,5 +154,11 @@ class MockLandlordData {
             ReflectionTestUtils.setField(formContext, "id", id)
             return formContext
         }
+
+        fun createPasscode(
+            code: String = "ABCDEF",
+            localAuthority: LocalAuthority = createLocalAuthority(),
+            baseUser: OneLoginUser? = createOneLoginUser(),
+        ) = Passcode(code, localAuthority, baseUser)
     }
 }

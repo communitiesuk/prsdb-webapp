@@ -24,11 +24,13 @@ import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.util.Optional
 
 class PasscodeServiceTests {
     private lateinit var mockPasscodeRepository: PasscodeRepository
     private lateinit var mockLocalAuthorityRepository: LocalAuthorityRepository
+    private lateinit var mockOneLoginUserService: OneLoginUserService
     private lateinit var mockSession: HttpSession
     private lateinit var passcodeService: PasscodeService
 
@@ -39,8 +41,9 @@ class PasscodeServiceTests {
     fun setup() {
         mockPasscodeRepository = mock()
         mockLocalAuthorityRepository = mock()
+        mockOneLoginUserService = mock()
         mockSession = mock()
-        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalAuthorityRepository, mockSession)
+        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalAuthorityRepository, mockOneLoginUserService, mockSession)
     }
 
     @Test
@@ -278,5 +281,54 @@ class PasscodeServiceTests {
 
         assertTrue(result)
         verify(mockPasscodeRepository).existsByPasscode(normalizedPasscode)
+    }
+
+    @Test
+    fun `claimPasscodeForUser returns false if the passcode doesn't exist`() {
+        val invalidPasscode = "INVALID"
+        whenever(mockPasscodeRepository.findByPasscode(invalidPasscode)).thenReturn(null)
+        assertFalse(passcodeService.claimPasscodeForUser(invalidPasscode, "userId"))
+    }
+
+    @Test
+    fun `claimPasscodeForUser returns false if the passcode is already claimed`() {
+        val claimedPasscode = MockLandlordData.createPasscode(code = "TAKEN", baseUser = MockLandlordData.createOneLoginUser())
+        whenever(mockPasscodeRepository.findByPasscode(claimedPasscode.passcode)).thenReturn(claimedPasscode)
+        assertFalse(passcodeService.claimPasscodeForUser(claimedPasscode.passcode, "userId"))
+    }
+
+    @Test
+    fun `claimPasscodeForUser returns true if the method claims the passcode for the user`() {
+        val availablePasscode = MockLandlordData.createPasscode(code = "FREE", baseUser = null)
+        val user = MockLandlordData.createOneLoginUser(id = "userId")
+        whenever(mockPasscodeRepository.findByPasscode(availablePasscode.passcode)).thenReturn(availablePasscode)
+        whenever(mockOneLoginUserService.findOrCreate1LUser(user.id)).thenReturn(user)
+
+        val result = passcodeService.claimPasscodeForUser(availablePasscode.passcode, user.id)
+
+        assertTrue(result)
+        verify(mockOneLoginUserService).findOrCreate1LUser(user.id)
+        assertEquals(user, availablePasscode.baseUser)
+    }
+
+    @Test
+    fun `isPasscodeClaimedByUser returns false if the passcode does not exist`() {
+        val passcode = "NON_EXISTENT"
+        whenever(mockPasscodeRepository.findByPasscode(passcode)).thenReturn(null)
+        assertFalse(passcodeService.isPasscodeClaimedByUser(passcode, "userId"))
+    }
+
+    @Test
+    fun `isPasscodeClaimedByUser returns false if the passcode is not claimed by the user`() {
+        val passcode = MockLandlordData.createPasscode(code = "TAKEN", baseUser = MockLandlordData.createOneLoginUser(id = "otherUserId"))
+        whenever(mockPasscodeRepository.findByPasscode(passcode.passcode)).thenReturn(passcode)
+        assertFalse(passcodeService.isPasscodeClaimedByUser(passcode.passcode, "userId"))
+    }
+
+    @Test
+    fun `isPasscodeClaimedByUser returns true if the passcode is claimed by the user`() {
+        val passcode = MockLandlordData.createPasscode(code = "CLAIMED", baseUser = MockLandlordData.createOneLoginUser(id = "userId"))
+        whenever(mockPasscodeRepository.findByPasscode(passcode.passcode)).thenReturn(passcode)
+        assertTrue(passcodeService.isPasscodeClaimedByUser(passcode.passcode, passcode.baseUser!!.id))
     }
 }

@@ -47,6 +47,8 @@ class LandlordSecurityConfig(
                     .permitAll()
                     .requestMatchers(PasscodeEntryController.PASSCODE_ENTRY_ROUTE)
                     .permitAll()
+                    .requestMatchers(PasscodeEntryController.PASSCODE_ALREADY_USED_ROUTE)
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
