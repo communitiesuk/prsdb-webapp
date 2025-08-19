@@ -56,27 +56,27 @@ class BetaFeedbackController {
         return "redirect:$redirectPath"
     }
 
-    @GetMapping("/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}")
+    @GetMapping(LANDLORD_FEEDBACK_URL)
     fun landlordFeedback(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
-    @GetMapping("/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}")
+    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL)
     fun landlordFeedbackSuccess(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedbackSuccess(model, request)
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping("/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}")
+    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
     fun localAuthorityFeedback(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping("/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}")
+    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL)
     fun localAuthorityFeedbackSuccess(
         model: Model,
         request: HttpServletRequest,
@@ -84,19 +84,19 @@ class BetaFeedbackController {
 
     // TODO: These are so that the feedback/success pages can be viewed locally, will need to be removed before production
     // worth noting that you need to manually go to /feedback/success
-    @GetMapping("/${FEEDBACK_PATH_SEGMENT}")
+    @GetMapping(FEEDBACK_URL)
     fun feedback(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
-    @GetMapping("/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}")
+    @GetMapping(FEEDBACK_SUCCESS_URL)
     fun feedbackSuccess(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedbackSuccess(model, request)
 
-    @PostMapping("/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}")
+    @PostMapping(LANDLORD_FEEDBACK_URL)
     fun submitLandlordFeedback(
         @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
@@ -108,11 +108,11 @@ class BetaFeedbackController {
             bindingResult,
             model,
             request,
-            "/$LANDLORD_PATH_SEGMENT/$FEEDBACK_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT",
+            LANDLORD_FEEDBACK_SUCCESS_URL,
         )
 
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @PostMapping("/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}")
+    @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
     fun submitLocalAuthorityFeedback(
         @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
@@ -124,10 +124,10 @@ class BetaFeedbackController {
             bindingResult,
             model,
             request,
-            "/$LOCAL_AUTHORITY_PATH_SEGMENT/$FEEDBACK_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT",
+            LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL,
         )
 
-    @PostMapping("/${FEEDBACK_PATH_SEGMENT}")
+    @PostMapping(FEEDBACK_URL)
     fun submitFeedback(
         @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
@@ -139,6 +139,15 @@ class BetaFeedbackController {
             bindingResult,
             model,
             request,
-            "/$FEEDBACK_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT",
+            FEEDBACK_SUCCESS_URL,
         )
+
+    companion object {
+        const val LANDLORD_FEEDBACK_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
+        const val LANDLORD_FEEDBACK_SUCCESS_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
+        const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
+        const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
+        const val FEEDBACK_URL = "/${FEEDBACK_PATH_SEGMENT}"
+        const val FEEDBACK_SUCCESS_URL = "/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
+    }
 }
