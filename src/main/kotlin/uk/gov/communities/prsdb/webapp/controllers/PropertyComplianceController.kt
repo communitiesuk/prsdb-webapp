@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
@@ -185,12 +186,20 @@ class PropertyComplianceController(
             )
     }
 
-    @GetMapping("/give-feedback-later")
+    @GetMapping("/$FEEDBACK_LATER_PATH_SEGMENT")
     fun sendFeedbackLater(
         @PathVariable propertyOwnershipId: Long,
         principal: Principal,
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No property compliance was added for property ownership $propertyOwnershipId in this session",
+            )
+        }
+
         val emailAddress = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord.email
 
         emailSender.sendEmail(emailAddress, GiveFeedbackLaterEmail())
