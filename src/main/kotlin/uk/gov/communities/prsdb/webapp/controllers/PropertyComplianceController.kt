@@ -61,6 +61,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorE
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -78,6 +80,7 @@ class PropertyComplianceController(
     private val propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory,
     private val validator: Validator,
     private val propertyComplianceService: PropertyComplianceService,
+    private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
 ) {
     @GetMapping
     fun index(
@@ -180,6 +183,19 @@ class PropertyComplianceController(
                 principal,
                 checkingAnswersForStep,
             )
+    }
+
+    @GetMapping("/give-feedback-later")
+    fun sendFeedbackLater(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        val emailAddress = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord.email
+
+        emailSender.sendEmail(emailAddress, GiveFeedbackLaterEmail())
+
+        return "redirect:$CONFIRMATION_PATH_SEGMENT"
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
