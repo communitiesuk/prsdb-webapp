@@ -34,8 +34,6 @@ class GeneratePasscodeController(
         return try {
             val passcode = passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong())
             model.addAttribute("passcode", passcode)
-
-            model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
             "generatePasscode"
         } catch (e: PasscodeLimitExceededException) {
             "error/passcodeLimit"
