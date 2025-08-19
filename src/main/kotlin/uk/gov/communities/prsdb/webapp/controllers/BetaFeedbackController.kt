@@ -19,30 +19,15 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedback
 @PrsdbController
 @RequestMapping
 class BetaFeedbackController {
-    private fun setupFeedbackModel(
+    private fun renderFeedback(
         model: Model,
         request: HttpServletRequest,
-    ): String? {
+    ): String {
         val formModel = BetaFeedbackModel()
         model.addAttribute("formModel", formModel)
         val referrer = request.getHeader("referer")
         model.addAttribute("referrerHeader", referrer)
         model.addAttribute("backUrl", referrer)
-        return referrer
-    }
-
-    private fun setupFeedbackSuccessModel(
-        model: Model,
-        request: HttpServletRequest,
-    ) {
-        model.addAttribute("backUrl", request.getHeader("referer"))
-    }
-
-    private fun renderFeedback(
-        model: Model,
-        request: HttpServletRequest,
-    ): String {
-        setupFeedbackModel(model, request)
         return "betaBannerFeedback"
     }
 
@@ -50,7 +35,7 @@ class BetaFeedbackController {
         model: Model,
         request: HttpServletRequest,
     ): String {
-        setupFeedbackSuccessModel(model, request)
+        model.addAttribute("backUrl", request.getHeader("referer"))
         return "betaBannerFeedbackSuccess"
     }
 
