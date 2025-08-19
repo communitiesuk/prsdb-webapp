@@ -1,42 +1,11 @@
 <th:block th:fragment="betaBannerFeedbackForm">
-    <section>
-    <form id="feedback-form" method="post" th:action="${feedbackUrl}" th:object="${betaFeedbackModel}" novalidate>
-        <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
-        <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
-
-        <div id="feedback-form-textarea" class="govuk-form-group" th:classappend="${#fields.hasErrors('feedback')} ? 'govuk-form-group--error'">
-            <header>
-                <h1 class="govuk-heading-l" th:text="#{betaBannerFeedback.heading}">betaBannerFeedback.heading</h1>
-                <p class="govuk-body" th:text="#{betaBannerFeedback.intro}" style="margin-bottom: 30px;">betaBannerFeedback.intro</p>
-            </header>
-            <div th:replace="~{fragments/forms/textArea :: textArea(
-                #{betaBannerFeedback.label},
-                'feedback',
-                #{betaBannerFeedback.hint},
-                1200
-            )}"></div>
-        </div>
-        <div class="govuk-form-group">
-            <div th:replace="~{fragments/forms/emailInput :: emailInput(
-                #{betaBannerFeedback.emailLabel},
-                'email',
-                null
-            )}"></div>
-        </div>
-        <div class="govuk-form-group">
-            <button type="submit" class="govuk-button" data-module="govuk-button"
-                th:text="#{betaBannerFeedback.buttonText}">
-                betaBannerFeedback.buttonText
-            </button>
-        </div>
-    </form>
-    </section>
-    <section>
-        <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
-        <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
-        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.one}">betaBannerFeedback.paragraph.one</p>
-        <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.four}">betaBannerFeedback.heading.four</h3>
-        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.two}" style="margin-bottom: 0;">betaBannerFeedback.paragraph.two</p>
-        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.three}" style="margin-top: 0;">betaBannerFeedback.paragraph.three</p>
-    </section>
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.heading}, #{betaBannerFeedback.intro})}">
+        <form id="feedback-form" method="post" th:action="${feedbackUrl}" th:object="${formModel}" novalidate>
+            <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
+            <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
+            <div th:replace="~{fragments/forms/textArea :: textArea(#{betaBannerFeedback.label}, 'feedback', #{betaBannerFeedback.hint}, 1200)}"></div>
+            <div th:replace="~{fragments/forms/emailInput :: emailInput(#{betaBannerFeedback.emailLabel}, 'email', null)}"></div>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{betaBannerFeedback.buttonText})}"></button>
+        </form>
+    </th:block>
 </th:block>

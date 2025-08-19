@@ -5,15 +5,7 @@
     <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
     <!--/*@thymesVar id="feedbackUrl" type="java.lang.String"*/-->
     <!--/*@thymesVar id="referrerHeader" type="java.lang.String"*/-->
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.heading}, #{betaBannerFeedback.intro})}">
-        <form id="feedback-form" method="post" th:action="${feedbackUrl}" th:object="${formModel}" novalidate>
-            <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}"></div>
-            <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
-            <div th:replace="~{fragments/forms/textArea :: textArea(#{betaBannerFeedback.label}, 'feedback', #{betaBannerFeedback.hint}, 1200)}"></div>
-            <div th:replace="~{fragments/forms/emailInput :: emailInput(#{betaBannerFeedback.emailLabel}, 'email', null)}"></div>
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{betaBannerFeedback.buttonText})}"></button>
-        </form>
-    </th:block>
+    <th:block th:replace="~{forms/betaBannerFeedbackForm :: betaBannerFeedbackForm}"></th:block>
     <section>
         <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
         <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
