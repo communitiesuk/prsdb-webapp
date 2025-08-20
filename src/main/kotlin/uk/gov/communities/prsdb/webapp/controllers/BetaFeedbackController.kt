@@ -47,7 +47,7 @@ class BetaFeedbackController {
 
     @PostMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun submitLandlordFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
@@ -63,7 +63,7 @@ class BetaFeedbackController {
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
     fun submitLocalAuthorityFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,

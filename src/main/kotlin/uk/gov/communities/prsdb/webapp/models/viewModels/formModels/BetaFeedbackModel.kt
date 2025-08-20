@@ -11,15 +11,16 @@ class BetaFeedbackModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.betaFeedback.error.missing",
+                messageKey = "betaBannerFeedback.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.betaFeedback.error.tooLong",
+                messageKey = "betaBannerFeedback.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
                 validatorArgs = arrayOf("0", BETA_FEEDBACK_MAX_LENGTH.toString()),
             ),
         ],
     )
     var feedback: String = ""
+    var email: String? = null
 }
