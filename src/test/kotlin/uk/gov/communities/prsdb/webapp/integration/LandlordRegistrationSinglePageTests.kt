@@ -35,7 +35,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class LandlordRegistrationServiceInformationStartPage {
         @Test
-        fun `index renders`(page: Page) {
+        fun `registerAsALandlord renders`(page: Page) {
             val landlordRegistrationServiceInformationPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
             BaseComponent
                 .assertThat(
@@ -47,7 +47,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class LandlordRegistrationWhatYouNeedToRegisterStartPage {
         @Test
-        fun `getStart renders`(page: Page) {
+        fun `the start page renders`(page: Page) {
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
             BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("What you need to register as a landlord")
         }
