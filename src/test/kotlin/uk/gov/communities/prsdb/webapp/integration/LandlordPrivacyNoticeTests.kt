@@ -32,10 +32,7 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Test
-    fun `the data protection email link opens the email client`(
-        browserContext: BrowserContext,
-        page: Page,
-    ) {
+    fun `the data protection email link is a mailto link for the correct email address`(page: Page) {
         val privacyNoticePage = navigator.goToLandlordPrivacyNoticePage()
         assertThat(privacyNoticePage.dataProtectionEmailLink)
             .hasAttribute("href", "mailto:dataprotection@communities.gov.uk")
