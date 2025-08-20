@@ -116,6 +116,12 @@ class LandlordService(
         return landlordEntity
     }
 
+    @Transactional
+    fun landlordHasRespondedToFeedback(landlord: Landlord): Landlord {
+        landlord.hasRespondedToFeedback = true
+        return landlordRepository.save(landlord)
+    }
+
     fun searchForLandlords(
         searchTerm: String,
         laBaseUserId: String,

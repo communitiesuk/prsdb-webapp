@@ -70,6 +70,9 @@ class Landlord() : ModifiableAuditableEntity() {
     var hasAcceptedPrivacyNotice: Boolean = false
         private set
 
+    @Column(nullable = true)
+    var hasRespondedToFeedback: Boolean? = false
+
     constructor(
         baseUser: OneLoginUser,
         name: String,
@@ -98,4 +101,7 @@ class Landlord() : ModifiableAuditableEntity() {
     }
 
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
+
+    val shouldSeeFeedback: Boolean
+        get() = hasRespondedToFeedback != true
 }

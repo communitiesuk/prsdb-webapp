@@ -24,7 +24,9 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_URL
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
@@ -66,6 +68,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCer
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -84,6 +87,7 @@ class PropertyComplianceController(
     private val validator: Validator,
     private val propertyComplianceService: PropertyComplianceService,
     private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
+    private val landlordService: LandlordService,
 ) {
     @GetMapping
     fun index(
@@ -196,10 +200,35 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
-        val emailAddress = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord.email
+        val landlord = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord
 
-        emailSender.sendEmail(emailAddress, GiveFeedbackLaterEmail())
+        emailSender.sendEmail(landlord.email, GiveFeedbackLaterEmail())
+        landlordService.landlordHasRespondedToFeedback(landlord)
 
+        return "redirect:$CONFIRMATION_PATH_SEGMENT"
+    }
+
+    @GetMapping("/$FEEDBACK_FORM_SEGMENT")
+    fun getFeedbackForm(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
+
+        landlordService.landlordHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
+        return "redirect:$FEEDBACK_FORM_URL"
+    }
+
+    @GetMapping("/$CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT")
+    fun getContinueToComplianceConfirmation(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
+
+        landlordService.landlordHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
         return "redirect:$CONFIRMATION_PATH_SEGMENT"
     }
 
@@ -212,9 +241,9 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
-        model.addAttribute("completeFeedbackLaterUrl", CONFIRMATION_PATH_SEGMENT)
-        model.addAttribute("startSurveyUrl", FEEDBACK_FORM_URL)
-        model.addAttribute("continueToComplianceUrl", CONFIRMATION_PATH_SEGMENT)
+        model.addAttribute("completeFeedbackLaterUrl", FEEDBACK_LATER_PATH_SEGMENT)
+        model.addAttribute("startSurveyUrl", FEEDBACK_FORM_SEGMENT)
+        model.addAttribute("continueToComplianceUrl", CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT)
 
         return "postComplianceFeedback"
     }
