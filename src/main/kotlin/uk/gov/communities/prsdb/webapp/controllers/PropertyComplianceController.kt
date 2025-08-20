@@ -192,13 +192,7 @@ class PropertyComplianceController(
         principal: Principal,
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No property compliance was added for property ownership $propertyOwnershipId in this session",
-            )
-        }
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
         val emailAddress = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord.email
 
@@ -214,13 +208,7 @@ class PropertyComplianceController(
         model: Model,
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No property compliance was added for property ownership $propertyOwnershipId in this session",
-            )
-        }
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
@@ -373,6 +361,15 @@ class PropertyComplianceController(
             model.addAttribute("howToRentGuideUrl", HOW_TO_RENT_GUIDE_URL)
             model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
             "forms/responsibilityToTenantsReview"
+        }
+    }
+
+    private fun throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId: Long) {
+        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No property compliance was added for property ownership $propertyOwnershipId in this session",
+            )
         }
     }
 
