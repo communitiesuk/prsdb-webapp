@@ -19,6 +19,63 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedback
 @PrsdbController
 @RequestMapping
 class BetaFeedbackController {
+    @GetMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
+    fun landlordFeedback(
+        model: Model,
+        request: HttpServletRequest,
+    ): String = renderFeedback(model, request)
+
+    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL, FEEDBACK_SUCCESS_URL)
+    fun landlordFeedbackSuccess(
+        model: Model,
+        request: HttpServletRequest,
+    ): String = renderFeedbackSuccess(model, request)
+
+    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
+    fun localAuthorityFeedback(
+        model: Model,
+        request: HttpServletRequest,
+    ): String = renderFeedback(model, request)
+
+    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL)
+    fun localAuthorityFeedbackSuccess(
+        model: Model,
+        request: HttpServletRequest,
+    ): String = renderFeedbackSuccess(model, request)
+
+    @PostMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
+    fun submitLandlordFeedback(
+        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        bindingResult: BindingResult,
+        model: Model,
+        request: HttpServletRequest,
+    ): String =
+        handleFeedbackSubmission(
+            betaFeedbackModel,
+            bindingResult,
+            model,
+            request,
+            LANDLORD_FEEDBACK_SUCCESS_URL,
+        )
+
+    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+    @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
+    fun submitLocalAuthorityFeedback(
+        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        bindingResult: BindingResult,
+        model: Model,
+        request: HttpServletRequest,
+    ): String =
+        handleFeedbackSubmission(
+            betaFeedbackModel,
+            bindingResult,
+            model,
+            request,
+            LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL,
+        )
+
     private fun renderFeedback(
         model: Model,
         request: HttpServletRequest,
@@ -55,92 +112,6 @@ class BetaFeedbackController {
         }
         return "redirect:$redirectPath"
     }
-
-    @GetMapping(LANDLORD_FEEDBACK_URL)
-    fun landlordFeedback(
-        model: Model,
-        request: HttpServletRequest,
-    ): String = renderFeedback(model, request)
-
-    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL)
-    fun landlordFeedbackSuccess(
-        model: Model,
-        request: HttpServletRequest,
-    ): String = renderFeedbackSuccess(model, request)
-
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
-    fun localAuthorityFeedback(
-        model: Model,
-        request: HttpServletRequest,
-    ): String = renderFeedback(model, request)
-
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL)
-    fun localAuthorityFeedbackSuccess(
-        model: Model,
-        request: HttpServletRequest,
-    ): String = renderFeedbackSuccess(model, request)
-
-    // TODO: These are so that the feedback/success pages can be viewed locally, will need to be removed before production
-    // worth noting that you need to manually go to /feedback/success
-    @GetMapping(FEEDBACK_URL)
-    fun feedback(
-        model: Model,
-        request: HttpServletRequest,
-    ): String = renderFeedback(model, request)
-
-    @GetMapping(FEEDBACK_SUCCESS_URL)
-    fun feedbackSuccess(
-        model: Model,
-        request: HttpServletRequest,
-    ): String = renderFeedbackSuccess(model, request)
-
-    @PostMapping(LANDLORD_FEEDBACK_URL)
-    fun submitLandlordFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
-        bindingResult: BindingResult,
-        model: Model,
-        request: HttpServletRequest,
-    ): String =
-        handleFeedbackSubmission(
-            betaFeedbackModel,
-            bindingResult,
-            model,
-            request,
-            LANDLORD_FEEDBACK_SUCCESS_URL,
-        )
-
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
-    fun submitLocalAuthorityFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
-        bindingResult: BindingResult,
-        model: Model,
-        request: HttpServletRequest,
-    ): String =
-        handleFeedbackSubmission(
-            betaFeedbackModel,
-            bindingResult,
-            model,
-            request,
-            LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL,
-        )
-
-    @PostMapping(FEEDBACK_URL)
-    fun submitFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
-        bindingResult: BindingResult,
-        model: Model,
-        request: HttpServletRequest,
-    ): String =
-        handleFeedbackSubmission(
-            betaFeedbackModel,
-            bindingResult,
-            model,
-            request,
-            FEEDBACK_SUCCESS_URL,
-        )
 
     companion object {
         const val LANDLORD_FEEDBACK_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
