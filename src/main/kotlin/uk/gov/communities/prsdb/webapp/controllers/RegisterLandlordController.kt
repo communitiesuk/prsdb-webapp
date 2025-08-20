@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TENANCY_TYPES_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -51,6 +52,7 @@ class RegisterLandlordController(
         model.addAttribute("rentersRightsBillGuideUrl", RENTERS_RIGHTS_BILL_GUIDE_URL)
         model.addAttribute("tenancyTypesGuideUrl", TENANCY_TYPES_GUIDE_URL)
         model.addAttribute("rentersRightsBillPRSD", RENTERS_RIGHTS_BILL_PRSD)
+        model.addAttribute("landlordPrivacyNoticeUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
         return "registerAsALandlord"
     }
 
