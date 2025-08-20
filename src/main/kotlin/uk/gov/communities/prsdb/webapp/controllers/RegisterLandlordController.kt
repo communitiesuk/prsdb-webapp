@@ -15,12 +15,13 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY
+import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
-import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TENANCY_TYPES_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -43,18 +44,26 @@ class RegisterLandlordController(
     fun index(model: Model): CharSequence {
         model.addAttribute(
             "registerAsALandlordInitialStep",
-            "$LANDLORD_REGISTRATION_ROUTE/${START_PAGE_PATH_SEGMENT}",
+            LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
         )
         model.addAttribute("oneLoginInfoUrl", ONE_LOGIN_INFO_URL)
         model.addAttribute("provingYourIdentity", ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY)
         model.addAttribute("rentersRightsBillGuideUrl", RENTERS_RIGHTS_BILL_GUIDE_URL)
         model.addAttribute("tenancyTypesGuideUrl", TENANCY_TYPES_GUIDE_URL)
         model.addAttribute("rentersRightsBillPRSD", RENTERS_RIGHTS_BILL_PRSD)
+        model.addAttribute("landlordPrivacyNoticeUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
         return "registerAsALandlord"
     }
 
-    @GetMapping("/${START_PAGE_PATH_SEGMENT}")
-    fun getStart(): String = "redirect:${IDENTITY_VERIFICATION_PATH_SEGMENT}"
+    @GetMapping("/${PRIVACY_NOTICE_PATH_SEGMENT}")
+    fun getPrivacyNotice(principal: Principal): ModelAndView =
+        if (userRolesService.getHasLandlordUserRole(principal.name)) {
+            ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
+        } else {
+            landlordRegistrationJourneyFactory
+                .create()
+                .getModelAndViewForStep(PRIVACY_NOTICE_PATH_SEGMENT, null)
+        }
 
     @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
     fun getVerifyIdentity(
@@ -62,10 +71,6 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): ModelAndView {
-        if (userRolesService.getHasLandlordUserRole(principal.name)) {
-            return ModelAndView("redirect:${LANDLORD_DASHBOARD_URL}")
-        }
-
         val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
 
         return landlordRegistrationJourneyFactory
@@ -130,5 +135,7 @@ class RegisterLandlordController(
         const val IDENTITY_VERIFICATION_PATH_SEGMENT = "verify-identity"
 
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
+
+        const val LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$PRIVACY_NOTICE_PATH_SEGMENT"
     }
 }

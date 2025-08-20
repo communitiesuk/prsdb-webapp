@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.context.annotation.Profile
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,6 +18,7 @@ import java.security.Principal
 @PreAuthorize("hasRole('LA_ADMIN')")
 @PrsdbController
 @RequestMapping(GeneratePasscodeController.GENERATE_PASSCODE_URL)
+@Profile("require-passcode")
 class GeneratePasscodeController(
     private val passcodeService: PasscodeService,
     private val localAuthorityDataService: LocalAuthorityDataService,
@@ -32,8 +34,6 @@ class GeneratePasscodeController(
         return try {
             val passcode = passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong())
             model.addAttribute("passcode", passcode)
-
-            model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
             "generatePasscode"
         } catch (e: PasscodeLimitExceededException) {
             "error/passcodeLimit"

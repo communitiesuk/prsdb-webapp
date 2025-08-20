@@ -48,6 +48,7 @@ one-login:
 
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
+  use-production-notify: false
 
 epc:
   base-url: https://api.epb-staging.digital.communities.gov.uk
