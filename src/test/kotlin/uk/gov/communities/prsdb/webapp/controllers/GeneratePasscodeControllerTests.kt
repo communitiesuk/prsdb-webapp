@@ -67,7 +67,6 @@ class GeneratePasscodeControllerTests(
                 model {
                     attribute("passcode", testPasscode)
                     attribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
-                    attribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
                 }
             }
     }
@@ -95,8 +94,7 @@ class GeneratePasscodeControllerTests(
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { is3xxRedirection() }
             }
     }
@@ -108,8 +106,7 @@ class GeneratePasscodeControllerTests(
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
             }
     }
@@ -128,8 +125,7 @@ class GeneratePasscodeControllerTests(
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 view { name("generatePasscode") }
                 model {
@@ -153,8 +149,7 @@ class GeneratePasscodeControllerTests(
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isOk() }
                 view { name("error/passcodeLimit") }
             }
@@ -177,8 +172,7 @@ class GeneratePasscodeControllerTests(
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())
-            }
-            .andExpect {
+            }.andExpect {
                 status { isForbidden() }
             }
     }
