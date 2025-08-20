@@ -70,3 +70,5 @@ const val COMPLAINTS_PROCEDURE_URL =
     "https://www.gov.uk/government/organisations/ministry-of-housing-communities-local-government/about/complaints-procedure"
 
 const val INFORMATION_COMMISSIONERS_OFFICE_URL = "https://ico.org.uk/"
+
+const val FEEDBACK_FORM_URL = "https://example.com/feedback-form"

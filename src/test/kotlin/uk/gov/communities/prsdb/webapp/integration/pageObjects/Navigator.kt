@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.ADD_COMPLIANCE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
@@ -47,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -1209,6 +1211,11 @@ class Navigator(
     fun goToLocalAuthorityDashboard(): LocalAuthorityDashboardPage {
         navigate(LOCAL_AUTHORITY_DASHBOARD_URL)
         return createValidPage(page, LocalAuthorityDashboardPage::class)
+    }
+
+    fun goToGeneratePasscodePage(): GeneratePasscodePage {
+        navigate(GENERATE_PASSCODE_URL)
+        return createValidPage(page, GeneratePasscodePage::class)
     }
 
     fun navigateToLandlordDashboard() {

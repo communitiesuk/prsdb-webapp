@@ -1,0 +1,9 @@
+<th:block th:fragment="betaBannerFeedbackForm">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.heading}, null)}">
+        <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
+        <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
+        <div th:replace="~{fragments/forms/textArea :: textArea(#{betaBannerFeedback.label}, 'feedback', #{betaBannerFeedback.hint}, 1200)}"></div>
+        <div th:replace="~{fragments/forms/emailInput :: emailInput(#{betaBannerFeedback.emailLabel}, 'email', null)}"></div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{betaBannerFeedback.buttonText})}"></button>
+</th:block>

@@ -39,13 +39,13 @@ class LocalAuthorityDashboardController(
                 "navLinks",
                 listOf(
                     NavigationLinkViewModel(
-                        ManageLocalAuthorityUsersController.getLaManageUsersRoute(localAuthorityUser.localAuthority.id),
-                        "navLink.manageUsers.title",
+                        GeneratePasscodeController.GENERATE_PASSCODE_URL,
+                        "navLink.generatePasscode.title",
                         false,
                     ),
                     NavigationLinkViewModel(
-                        GeneratePasscodeController.GENERATE_PASSCODE_URL,
-                        "navLink.generatePasscode.title",
+                        ManageLocalAuthorityUsersController.getLaManageUsersRoute(localAuthorityUser.localAuthority.id),
+                        "navLink.manageUsers.title",
                         false,
                     ),
                 ),
