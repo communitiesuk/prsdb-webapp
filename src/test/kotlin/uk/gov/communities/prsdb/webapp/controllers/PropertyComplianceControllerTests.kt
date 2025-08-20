@@ -602,7 +602,7 @@ class PropertyComplianceControllerTests(
 
             mvc.get(validFeedbackUrl).andExpect {
                 status { isOk() }
-                view { name("feedback") }
+                view { name("postComplianceFeedback") }
             }
         }
     }
