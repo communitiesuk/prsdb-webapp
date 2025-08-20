@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_URL
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
@@ -200,6 +201,10 @@ class PropertyComplianceController(
 
         // TODO PRSD-1302 Back url does not yet have a defined destination.
         model.addAttribute("backUrl", getPropertyCompliancePath(propertyOwnershipId))
+
+        model.addAttribute("completeFeedbackLaterUrl", CONFIRMATION_PATH_SEGMENT)
+        model.addAttribute("startSurveyUrl", FEEDBACK_FORM_URL)
+        model.addAttribute("continueToComplianceUrl", CONFIRMATION_PATH_SEGMENT)
 
         return "feedback"
     }

@@ -25,11 +25,11 @@
         </section>
         <section class="govuk-!-margin-top-6">
             <p class="govuk-body">
-                <a class="govuk-link" th:text="#{feedback.startSurvey.linkText}" th:href="#{feedback.startSurvey.url}" rel="noreferrer noopener" target="_blank">feedback.startSurvey.linkText</a>
+                <a class="govuk-link" th:text="#{feedback.startSurvey.linkText}" th:href="${startSurveyUrl}" rel="noreferrer noopener" target="_blank">feedback.startSurvey.linkText</a>
             </p>
             <div class="govuk-button-group">
-                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(#{feedback.completeLater.url}, #{feedback.completeLater.buttonText})}"></button>
-                <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(#{feedback.continueCompliance.url}, #{feedback.continueCompliance.buttonText})}"></button>
+                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${completeFeedbackLaterUrl}, #{feedback.completeLater.buttonText})}"></button>
+                <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${continueToComplianceUrl}, #{feedback.continueCompliance.buttonText})}"></button>
             </div>
         </section>
     </main>
