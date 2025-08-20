@@ -185,7 +185,7 @@ class PropertyComplianceController(
     }
 
     @GetMapping("/$FEEDBACK_PATH_SEGMENT")
-    fun getFeedback(
+    fun getPostComplianceFeedback(
         @PathVariable propertyOwnershipId: Long,
         principal: Principal,
         model: Model,
@@ -206,7 +206,7 @@ class PropertyComplianceController(
         model.addAttribute("startSurveyUrl", FEEDBACK_FORM_URL)
         model.addAttribute("continueToComplianceUrl", CONFIRMATION_PATH_SEGMENT)
 
-        return "feedback"
+        return "postComplianceFeedback"
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
