@@ -33,19 +33,31 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Nested
-    inner class LandlordRegistrationStartPage {
+    inner class LandlordRegistrationServiceInformationStartPage {
         @Test
-        fun `registerAsALandlord page renders`(page: Page) {
-            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
-            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Private Rented Sector (PRS) Database")
+        fun `registerAsALandlord renders`(page: Page) {
+            val landlordRegistrationServiceInformationPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+            BaseComponent
+                .assertThat(
+                    landlordRegistrationServiceInformationPage.heading,
+                ).containsText("Private Rented Sector (PRS) Database")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationWhatYouNeedToRegisterStartPage {
+        @Test
+        fun `the start page renders`(page: Page) {
+            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
+            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("What you need to register as a landlord")
         }
     }
 
     @Nested
     inner class AlreadyRegistered : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
-        fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
-            val startPage = navigator.goToLandlordRegistrationStartPage()
+        fun `the 'Start' button directs a registered landlord to the landlord dashboard page`(page: Page) {
+            val startPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
             startPage.startButton.clickAndWait()
             val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")

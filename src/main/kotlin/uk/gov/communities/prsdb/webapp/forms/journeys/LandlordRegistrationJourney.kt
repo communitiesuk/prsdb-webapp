@@ -156,7 +156,7 @@ class LandlordRegistrationJourney(
                                         labelMsgKey = "registerAsALandlord.privacyNotice.checkBox.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),

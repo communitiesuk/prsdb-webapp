@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeAlreadyUsedPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 
 @ActiveProfiles("require-passcode")
 class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql") {
@@ -28,11 +28,11 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         // Store submitted passcode in session and redirect to previous page
         val passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
         passcodeEntryPage.submitPasscode("FREE01")
-        assertPageIs(page, StartPageLandlordRegistration::class)
+        assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
 
         // As passcode is in session, the user can access public pages without re-entering it
         navigator.navigateToLandlordRegistrationStartPage()
-        assertPageIs(page, StartPageLandlordRegistration::class)
+        assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
     }
 
     @Test
@@ -42,11 +42,11 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         // Store submitted passcode in session and redirect to previous page
         val passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
         passcodeEntryPage.submitPasscode("TAKEN1")
-        assertPageIs(page, StartPageLandlordRegistration::class)
+        assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
 
         // As passcode is in session, the user can access public pages without re-entering it
         navigator.navigateToLandlordRegistrationStartPage()
-        assertPageIs(page, StartPageLandlordRegistration::class)
+        assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
     }
 
     @Test
@@ -81,7 +81,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         // Store submitted passcode in session and redirect to previous page
         val passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
         passcodeEntryPage.submitPasscode("FREE01")
-        assertPageIs(page, StartPageLandlordRegistration::class)
+        assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
 
         // Access a restricted page, which logs the user in and claims the passcode
         navigator.navigateToLandlordDashboard()
@@ -102,7 +102,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         // Store submitted passcode in session and redirect to previous page
         val passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
         passcodeEntryPage.submitPasscode("TAKEN1")
-        assertPageIs(page, StartPageLandlordRegistration::class)
+        assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
 
         // Access a restricted page, which logs the user in and determines that the passcode was claimed by another user
         navigator.navigateToLandlordDashboard()

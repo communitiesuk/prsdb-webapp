@@ -1,0 +1,70 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registerAsALandlordInitialStep" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title},~{::#main-content/content()}, false)}">
+<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+<main class="govuk-main-wrapper">
+        <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+            <header>
+                <span class="govuk-caption-l" th:text="#{registerAsALandlord.whatYouNeedToRegister.heading.caption}">registerAsALandlord.whatYouNeedToRegister.heading.caption</span>
+                <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.whatYouNeedToRegister.heading}">registerAsALandlord.whatYouNeedToRegister.heading</h1>
+            </header>
+            <section>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.one.paragraph.one}">registerAsALandlord.whatYouNeedToRegister.paragraph.one</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.whatYouNeedToRegister.section.one.bullet.one}">
+                        registerAsALandlord.whatYouNeedToRegister.section.one.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.whatYouNeedToRegister.section.one.bullet.two}">
+                        registerAsALandlord.whatYouNeedToRegister.section.one.bullet.two
+                    </li>
+                    <li th:text="#{registerAsALandlord.whatYouNeedToRegister.section.one.bullet.three}">
+                        registerAsALandlord.whatYouNeedToRegister.section.one.bullet.three
+                    </li>
+                </ul>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.one.paragraph.two}">
+                    registerAsALandlord.whatYouNeedToRegister.section.one.paragraph.two
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.two.subheading}">
+                    registerAsALandlord.whatYouNeedToRegister.section.two.subheading
+                </h2>
+                <p class="govuk-body" th:utext="#{registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.one}">
+                    registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.one
+                </p>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.two}">
+                    registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.two
+                </p>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.three}">
+                    registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.three
+                </p>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.four}">
+                    registerAsALandlord.whatYouNeedToRegister.section.two.paragraph.four
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.three.subheading}">
+                    registerAsALandlord.whatYouNeedToRegister.section.three.subheading
+                </h2>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.three.paragraph.one}">
+                    registerAsALandlord.whatYouNeedToRegister.section.three.paragraph.one
+                </p>
+                <p class="govuk-body" th:text="#{registerAsALandlord.whatYouNeedToRegister.section.three.paragraph.two}">
+                    registerAsALandlord.whatYouNeedToRegister.section.three.paragraph.two
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerAsALandlord.whatYouNeedToRegister.section.three.bullet.one}">
+                        registerAsALandlord.whatYouNeedToRegister.section.three.bullet.one
+                    </li>
+                    <li th:text="#{registerAsALandlord.whatYouNeedToRegister.section.three.bullet.two}">
+                        registerAsALandlord.whatYouNeedToRegister.section.three.bullet.two
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerAsALandlordInitialStep}, #{startButtonText})}"></button>
+            </section>
+        </div>
+    </main>
+</html>
