@@ -44,7 +44,7 @@ class LocalAuthorityDashboardTests : IntegrationTestWithImmutableData("data-loca
         @Test
         fun `the manage users button is not visible`(page: Page) {
             val dashboard = navigator.goToLocalAuthorityDashboard()
-            assertThat(dashboard.manageUsersButton).isHidden()
+            assertThat(dashboard.manageUsersLink).isHidden()
         }
     }
 
@@ -53,7 +53,7 @@ class LocalAuthorityDashboardTests : IntegrationTestWithImmutableData("data-loca
         @Test
         fun `the manage users button is visible and when clicked redirects to the manage users page`(page: Page) {
             val dashboard = navigator.goToLocalAuthorityDashboard()
-            dashboard.manageUsersButton.clickAndWait()
+            dashboard.manageUsersLink.clickAndWait()
             assertPageIs(page, ManageLaUsersPage::class)
         }
     }
