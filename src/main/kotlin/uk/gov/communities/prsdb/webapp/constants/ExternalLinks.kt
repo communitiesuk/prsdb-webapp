@@ -65,3 +65,5 @@ const val RENTERS_RIGHTS_BILL_PRSD =
         "/guide-to-the-renters-rights-bill#private-rented-sector-database"
 
 const val TENANCY_TYPES_GUIDE_URL = "https://www.gov.uk/private-renting-tenancy-agreements/tenancy-types"
+
+const val FEEDBACK_FORM_URL = "https://example.com/feedback-form"

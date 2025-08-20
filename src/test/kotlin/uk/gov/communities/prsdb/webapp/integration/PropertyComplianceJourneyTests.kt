@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FeedbackPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
@@ -206,6 +207,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .assertThat(checkAndSubmitPage.form.fieldsetHeading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
@@ -367,6 +372,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
+
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
         assertContains(confirmationPage.heading.getText(), "You need to take action")
@@ -488,6 +497,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
+
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
         BaseComponent
@@ -581,6 +594,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .assertThat(checkAndSubmitPage.form.fieldsetHeading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
