@@ -1,22 +1,19 @@
 <!DOCTYPE html>
-<html id="main-content"
-      th:replace="~{fragments/layout :: layout(#{passcodeEntry.title}, ~{::#main-content/content()}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
-<main class="govuk-main-wrapper">
-    <div id="page-contents"
-         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <h1 class="govuk-heading-l" th:text="#{passcodeEntry.heading}">passcodeEntry.heading</h1>
-
+<html th:replace="~{fragments/layout :: layout(#{passcodeEntry.title}, ~{::main}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
+    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
         <!--/*/ <th:block th:object="${passcodeRequestModel}" th:if="passcodeRequestModel != null"> /*/-->
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
         <!--/*/ </th:block> /*/-->
 
-        <p class="govuk-body" th:text="#{passcodeEntry.description}">passcodeEntry.description</p>
+        <h1 class="govuk-heading-l" th:text="#{passcodeEntry.heading}">passcodeEntry.heading</h1>
 
-        <form th:action="@{''}" id="passcode-form" method="post" th:object="${passcodeRequestModel}"
-              novalidate>
-            <input th:replace="~{fragments/forms/basicTextInput :: textInput(#{passcodeEntry.fieldName}, 'passcode', null)}">
+        <p class="govuk-body" th:text="#{passcodeEntry.paragraph.one}">passcodeEntry.paragraph.one</p>
+        <p class="govuk-body" th:text="#{passcodeEntry.paragraph.two}">passcodeEntry.paragraph.two</p>
+        <p class="govuk-body" th:text="#{passcodeEntry.paragraph.three}">passcodeEntry.paragraph.three</p>
+
+        <form th:action="@{''}" id="passcode-form" method="post" th:object="${passcodeRequestModel}" novalidate>
+            <input th:replace="~{fragments/forms/basicTextInput :: textInput(label=#{passcodeEntry.passcodeLabel}, fieldName='passcode', hint=null, labelSize='m')}">
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
         </form>
-    </div>
-</main>
+    </main>
 </html>
