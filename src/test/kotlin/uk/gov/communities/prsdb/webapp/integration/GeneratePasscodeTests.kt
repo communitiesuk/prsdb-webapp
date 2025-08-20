@@ -23,7 +23,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     fun `local authority admin can access generate passcode page from dashboard and navigate back`(page: Page) {
         // Navigate to generate passcode page from LA dashboard
         val dashboardPage = navigator.goToLocalAuthorityDashboard()
-        dashboardPage.clickGeneratePasscode()
+        dashboardPage.generatePasscodeLink.clickAndWait()
         val generatePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
 
         // Verify passcode is displayed
@@ -81,7 +81,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
 
         // Try to reach the generate passcode page from the LA dashboard
         val dashboardPage = navigator.goToLocalAuthorityDashboard()
-        dashboardPage.clickGeneratePasscode()
+        dashboardPage.generatePasscodeLink.clickAndWait()
 
         // Verify we're redirected to the passcode limit error page
         val errorPage = assertPageIs(page, PasscodeLimitExceededPage::class)
@@ -92,7 +92,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     fun `exceeding maximum passcode limit when generating new passcode redirects to error page`(page: Page) {
         // Navigate to generate passcode page first (this should work normally)
         val dashboardPage = navigator.goToLocalAuthorityDashboard()
-        dashboardPage.clickGeneratePasscode()
+        dashboardPage.generatePasscodeLink.clickAndWait()
         val generatePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
 
         // Verify initial passcode is generated
