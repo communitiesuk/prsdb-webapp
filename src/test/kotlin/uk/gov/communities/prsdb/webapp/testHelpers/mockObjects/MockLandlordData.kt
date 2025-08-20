@@ -43,6 +43,7 @@ class MockLandlordData {
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 0L),
             countryOfResidence: String = ENGLAND_OR_WALES,
             isVerified: Boolean = true,
+            hasAcceptedPrivacyNotice: Boolean = true,
             nonEnglandOrWalesAddress: String? = null,
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),
@@ -57,6 +58,7 @@ class MockLandlordData {
                     registrationNumber = registrationNumber,
                     countryOfResidence = countryOfResidence,
                     isVerified = isVerified,
+                    hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice,
                     nonEnglandOrWalesAddress = nonEnglandOrWalesAddress,
                     dateOfBirth = dateOfBirth,
                 )

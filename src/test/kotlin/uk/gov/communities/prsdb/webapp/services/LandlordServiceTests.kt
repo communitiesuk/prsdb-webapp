@@ -169,6 +169,7 @@ class LandlordServiceTests {
                 registrationNumber,
                 ENGLAND_OR_WALES,
                 true,
+                true,
                 null,
                 null,
             )
@@ -190,6 +191,7 @@ class LandlordServiceTests {
                 "07123456789",
                 addressDataModel,
                 ENGLAND_OR_WALES,
+                true,
                 true,
             )
 
@@ -223,6 +225,7 @@ class LandlordServiceTests {
             "07123456789",
             mock(),
             ENGLAND_OR_WALES,
+            true,
             true,
         )
 
