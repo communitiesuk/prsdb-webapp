@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_URL
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
@@ -63,6 +64,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorE
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -80,6 +83,7 @@ class PropertyComplianceController(
     private val propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory,
     private val validator: Validator,
     private val propertyComplianceService: PropertyComplianceService,
+    private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
 ) {
     @GetMapping
     fun index(
@@ -184,6 +188,21 @@ class PropertyComplianceController(
             )
     }
 
+    @GetMapping("/$FEEDBACK_LATER_PATH_SEGMENT")
+    fun sendFeedbackLater(
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
+
+        val emailAddress = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord.email
+
+        emailSender.sendEmail(emailAddress, GiveFeedbackLaterEmail())
+
+        return "redirect:$CONFIRMATION_PATH_SEGMENT"
+    }
+
     @GetMapping("/$FEEDBACK_PATH_SEGMENT")
     fun getPostComplianceFeedback(
         @PathVariable propertyOwnershipId: Long,
@@ -191,13 +210,7 @@ class PropertyComplianceController(
         model: Model,
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No property compliance was added for property ownership $propertyOwnershipId in this session",
-            )
-        }
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
         model.addAttribute("completeFeedbackLaterUrl", CONFIRMATION_PATH_SEGMENT)
         model.addAttribute("startSurveyUrl", FEEDBACK_FORM_URL)
@@ -213,13 +226,7 @@ class PropertyComplianceController(
         model: Model,
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No property compliance was added for property ownership $propertyOwnershipId in this session",
-            )
-        }
+        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
@@ -372,6 +379,15 @@ class PropertyComplianceController(
             model.addAttribute("howToRentGuideUrl", HOW_TO_RENT_GUIDE_URL)
             model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
             "forms/responsibilityToTenantsReview"
+        }
+    }
+
+    private fun throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId: Long) {
+        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No property compliance was added for property ownership $propertyOwnershipId in this session",
+            )
         }
     }
 

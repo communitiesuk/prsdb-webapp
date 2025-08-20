@@ -28,6 +28,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
@@ -47,6 +48,8 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplian
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -75,6 +78,9 @@ class PropertyComplianceControllerTests(
 
     @MockitoBean
     private lateinit var validator: Validator
+
+    @MockitoBean
+    private lateinit var emailSender: EmailNotificationService<GiveFeedbackLaterEmail>
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -603,6 +609,61 @@ class PropertyComplianceControllerTests(
             mvc.get(validFeedbackUrl).andExpect {
                 status { isOk() }
                 view { name("postComplianceFeedback") }
+            }
+        }
+    }
+
+    @Nested
+    inner class SendFeedbackEmail {
+        private val validPropertyComplianceSendFeedbackUrl = "$validPropertyComplianceUrl/$FEEDBACK_LATER_PATH_SEGMENT"
+        private val invalidPropertyComplianceSendFeedbackUrl = "$invalidPropertyComplianceUrl/$FEEDBACK_LATER_PATH_SEGMENT"
+
+        @Test
+        fun `sendFeedbackEmail returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceSendFeedbackUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `sendFeedbackEmail returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceSendFeedbackUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `sendFeedbackEmail returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceSendFeedbackUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `sendFeedbackEmail returns 404 if the landlord didn't add compliance details for the property this session`() {
+            whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(false)
+
+            mvc.get(validPropertyComplianceSendFeedbackUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `sendFeedbackEmail returns a redirect for if the landlord added compliance details for the property this session`() {
+            val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getPropertyOwnership(validPropertyOwnershipId),
+            ).thenReturn(propertyCompliance.propertyOwnership)
+
+            mvc.get(validPropertyComplianceSendFeedbackUrl).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(CONFIRMATION_PATH_SEGMENT)
             }
         }
     }
