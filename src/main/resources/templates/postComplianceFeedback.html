@@ -1,7 +1,6 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="page"  th:replace="~{fragments/layout :: layout(#{feedback.title},  ~{::#page/content()}, false)}">
-    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper" id="main-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#main-content/content()})}">
         <header>
             <h1 class="govuk-heading-l" th:text="#{feedback.heading}">feedback.heading</h1>

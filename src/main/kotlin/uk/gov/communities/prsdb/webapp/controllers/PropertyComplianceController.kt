@@ -199,9 +199,6 @@ class PropertyComplianceController(
             )
         }
 
-        // TODO PRSD-1302 Back url does not yet have a defined destination.
-        model.addAttribute("backUrl", getPropertyCompliancePath(propertyOwnershipId))
-
         model.addAttribute("completeFeedbackLaterUrl", CONFIRMATION_PATH_SEGMENT)
         model.addAttribute("startSurveyUrl", FEEDBACK_FORM_URL)
         model.addAttribute("continueToComplianceUrl", CONFIRMATION_PATH_SEGMENT)
