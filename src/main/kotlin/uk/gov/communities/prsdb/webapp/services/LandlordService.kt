@@ -53,6 +53,7 @@ class LandlordService(
         addressDataModel: AddressDataModel,
         countryOfResidence: String,
         isVerified: Boolean,
+        hasAcceptedPrivacyNotice: Boolean,
         nonEnglandOrWalesAddress: String? = null,
         dateOfBirth: LocalDate? = null,
     ): Landlord {
@@ -71,6 +72,7 @@ class LandlordService(
                     registrationNumber,
                     countryOfResidence,
                     isVerified,
+                    hasAcceptedPrivacyNotice,
                     nonEnglandOrWalesAddress,
                     dateOfBirth,
                 ),

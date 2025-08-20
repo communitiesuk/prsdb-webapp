@@ -621,6 +621,7 @@ class LandlordRegistrationJourney(
             addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
             countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
             isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
+            hasAcceptedPrivacyNotice = LandlordRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData) ?: false,
             nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
             dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
         )
