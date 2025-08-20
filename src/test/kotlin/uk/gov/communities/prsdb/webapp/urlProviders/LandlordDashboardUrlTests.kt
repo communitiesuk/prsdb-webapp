@@ -20,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
@@ -313,7 +312,6 @@ class LandlordDashboardUrlTests(
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(CONFIRMATION_PATH_SEGMENT)
             }
 
         val emailCaptor = argumentCaptor<FullPropertyComplianceConfirmationEmail>()

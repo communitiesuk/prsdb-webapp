@@ -29,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
@@ -555,6 +556,59 @@ class PropertyComplianceControllerTests(
                 status { isOk() }
                 model { attribute("confirmationMessageKeys", samePropertyValuesAs(expectedConfirmationMessageKeys)) }
                 view { name("fullyCompliantPropertyConfirmation") }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetFeedback {
+        private val validFeedbackUrl = "$validPropertyComplianceUrl/$FEEDBACK_PATH_SEGMENT"
+        private val invalidFeedbackUrl = "$invalidPropertyComplianceUrl/$FEEDBACK_PATH_SEGMENT"
+
+        @Test
+        fun `getFeedback returns a redirect for unauthenticated user`() {
+            mvc.get(validFeedbackUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getFeedback returns 403 for an unauthorised user`() {
+            mvc.get(validFeedbackUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFeedback returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidFeedbackUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFeedback returns 404 if the landlord didn't add compliance details for the property this session`() {
+            whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(false)
+
+            mvc.get(validFeedbackUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFeedback returns 200 for if the landlord added compliance details for the property this session`() {
+            val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(propertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(propertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(propertyCompliance)
+
+            mvc.get(validFeedbackUrl).andExpect {
+                status { isOk() }
+                view { name("postComplianceFeedback") }
             }
         }
     }

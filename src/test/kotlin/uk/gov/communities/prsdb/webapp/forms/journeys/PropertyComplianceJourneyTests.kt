@@ -19,7 +19,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
@@ -874,7 +874,7 @@ class PropertyComplianceJourneyTests {
                 )
             verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId)
             verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyOwnershipId)
-            assertEquals("redirect:$CONFIRMATION_PATH_SEGMENT", returnedModelAndView.viewName)
+            assertEquals("redirect:$FEEDBACK_PATH_SEGMENT", returnedModelAndView.viewName)
         }
 
         @Test
