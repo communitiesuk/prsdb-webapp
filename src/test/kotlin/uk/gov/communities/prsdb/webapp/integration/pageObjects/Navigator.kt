@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
@@ -53,6 +54,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLa
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
@@ -83,7 +85,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.WhatYouNeedToRegisterStartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAndSubmitPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAutoMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EicrExemptionOtherReasonPagePropertyCompliance
@@ -183,9 +187,14 @@ class Navigator(
         navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
     }
 
-    fun goToLandlordRegistrationStartPage(): StartPageLandlordRegistration {
+    fun goToLandlordRegistrationServiceInformationStartPage(): ServiceInformationStartPageLandlordRegistration {
         navigate(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
-        return createValidPage(page, StartPageLandlordRegistration::class)
+        return createValidPage(page, ServiceInformationStartPageLandlordRegistration::class)
+    }
+
+    fun goToLandlordRegistrationWhatYouNeedToRegisterStartPage(): WhatYouNeedToRegisterStartPageLandlordRegistration {
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
+        return createValidPage(page, WhatYouNeedToRegisterStartPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationPrivacyNoticePage(): PrivacyNoticePageLandlordRegistration {
@@ -963,6 +972,26 @@ class Navigator(
         )
     }
 
+    fun skipToPropertyComplianceCheckAnswersPage(propertyOwnershipId: Long): CheckAndSubmitPagePropertyCompliance {
+        setJourneyDataInSession(
+            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
+            JourneyPageDataBuilder
+                .beforePropertyComplianceCheckAnswers()
+                .withResponsibilityToTenantsDeclaration()
+                .build(),
+        )
+
+        navigate(
+            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+                "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
+        )
+        return createValidPage(
+            page,
+            CheckAndSubmitPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
     fun goToPropertyComplianceUpdateUpdateGasSafetyPage(propertyOwnershipId: Long): UpdateGasSafetyPagePropertyComplianceUpdate {
         navigate(
             PropertyComplianceController.getUpdatePropertyComplianceStepPath(
@@ -1223,6 +1252,11 @@ class Navigator(
     fun goToLandlordDashboard(): LandlordDashboardPage {
         navigate(LANDLORD_DASHBOARD_URL)
         return createValidPage(page, LandlordDashboardPage::class)
+    }
+
+    fun goToLandlordPrivacyNoticePage(): LandlordPrivacyNoticePage {
+        navigate(LANDLORD_PRIVACY_NOTICE_ROUTE)
+        return createValidPage(page, LandlordPrivacyNoticePage::class)
     }
 
     fun goToLandlordIncompleteProperties(): LandlordIncompletePropertiesPage {

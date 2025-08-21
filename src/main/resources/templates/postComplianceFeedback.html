@@ -1,0 +1,33 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="page"  th:replace="~{fragments/layout :: layout(#{feedback.title},  ~{::#page/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{feedback.heading}">feedback.heading</h1>
+            <p class="govuk-body" th:text="#{feedback.intro.paragraph.one}">feedback.intro.paragraph.one</p>
+            <p class="govuk-body" th:text="#{feedback.intro.paragraph.two}">feedback.intro.paragraph.two</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{feedback.intro.bullet.one}">feedback.intro.bullet.one</li>
+                <li th:text="#{feedback.intro.bullet.two}">feedback.intro.bullet.two</li>
+                <li th:text="#{feedback.intro.bullet.three}">feedback.intro.bullet.three</li>
+            </ul>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{feedback.survey.paragraph.one}">feedback.survey.paragraph.one</p>
+            <p class="govuk-body" th:text="#{feedback.survey.paragraph.two}">feedback.survey.paragraph.two</p>
+            <p class="govuk-body" th:text="#{feedback.survey.paragraph.three}">feedback.survey.paragraph.three</p>
+            <h2 class="govuk-heading-s" th:text="#{feedback.afterSurvey.heading}">feedback.afterSurvey.heading</h2>
+            <p class="govuk-body" th:text="#{feedback.afterSurvey.paragraph.one}">feedback.afterSurvey.paragraph.one</p>
+            <p class="govuk-body" th:text="#{feedback.afterSurvey.paragraph.two}">feedback.afterSurvey.paragraph.two</p>
+            <p class="govuk-body">
+                <a class="govuk-link" th:text="#{feedback.startSurvey.linkText}" th:href="${startSurveyUrl}" rel="noreferrer noopener" target="_blank">feedback.startSurvey.linkText</a>
+            </p>
+            <div class="govuk-button-group">
+                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${completeFeedbackLaterUrl}, #{feedback.completeLater.buttonText})}"></button>
+                <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${continueToComplianceUrl}, #{feedback.continueCompliance.buttonText})}"></button>
+            </div>
+        </section>
+    </div>
+</main>
+</html>

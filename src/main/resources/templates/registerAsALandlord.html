@@ -35,7 +35,7 @@
                         registerAsALandlord.access.paragraph.three.afterLink
                     </span>
                 </p>
-                <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordInitialStep}, #{forms.buttons.startNow})}"></a>
+                <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordStartPageRoute}, #{forms.buttons.startNow})}"></a>
             </section>
             <section>
                 <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.about.heading}">
@@ -241,8 +241,7 @@
                     <span th:remove="tag" th:text="#{registerAsALandlord.informationManagement.paragraph.five.beforeLink}">
                     registerAsALandlord.informationManagement.paragraph.five.beforeLink
                     </span>
-                    <!-- TODO: placeholder link below. Should be updated as part of PRSD-676 -->
-                    <a class="govuk-link" th:text="#{registerAsALandlord.informationManagement.paragraph.five.link}" rel="noreferrer noopener" target="_blank" href=#>
+                    <a class="govuk-link" th:text="#{registerAsALandlord.informationManagement.paragraph.five.link}" rel="noreferrer noopener" target="_blank" th:href="${landlordPrivacyNoticeUrl}">
                         registerAsALandlord.informationManagement.paragraph.five.link
                     </a>
                     <span th:remove="tag" class="govuk-body-m" th:text="#{registerAsALandlord.informationManagement.paragraph.five.afterLink}">

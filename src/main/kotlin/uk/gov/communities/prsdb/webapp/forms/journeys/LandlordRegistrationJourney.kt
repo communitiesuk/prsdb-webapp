@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.ConfirmIdentityPage
@@ -147,8 +148,7 @@ class LandlordRegistrationJourney(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "registerAsALandlord.privacyNotice.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.continue",
-                            // TODO PRSD-676 add url when created
-                            "landlordPrivacyNoticeUrl" to "#",
+                            "landlordPrivacyNoticeUrl" to LANDLORD_PRIVACY_NOTICE_ROUTE,
                             "options" to
                                 listOf(
                                     CheckboxViewModel(
@@ -156,7 +156,7 @@ class LandlordRegistrationJourney(
                                         labelMsgKey = "registerAsALandlord.privacyNotice.checkBox.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -621,6 +621,7 @@ class LandlordRegistrationJourney(
             addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
             countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
             isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
+            hasAcceptedPrivacyNotice = LandlordRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData) ?: false,
             nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
             dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
         )

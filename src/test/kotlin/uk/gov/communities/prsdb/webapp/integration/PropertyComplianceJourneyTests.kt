@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcNotFoundPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.EpcSupersededPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FeedbackPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.FireSafetyDeclarationPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafeEngineerNumPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionConfirmationPagePropertyCompliance
@@ -97,7 +98,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @BeforeEach
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(ABSOLUTE_DASHBOARD_URL))
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(PROPERTY_OWNERSHIP_ID)).thenReturn(URI(ABSOLUTE_COMPLIANCE_INFO_URL))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI(ABSOLUTE_COMPLIANCE_INFO_URL))
     }
 
     @Test
@@ -206,6 +207,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .assertThat(checkAndSubmitPage.form.fieldsetHeading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
@@ -367,6 +372,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
+
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
         assertContains(confirmationPage.heading.getText(), "You need to take action")
@@ -488,6 +497,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
+
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
         BaseComponent
@@ -581,6 +594,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             .assertThat(checkAndSubmitPage.form.fieldsetHeading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
@@ -683,8 +700,69 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
     }
 
+    @Test
+    fun `User is not shown feedback page again if they choose give feedback later`(page: Page) {
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.surveyLaterButton.clickAndWait()
+
+        // Confirmation page
+        assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
+
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        secondCheckAndSubmitPage.form.submit()
+        assertPageIs(
+            page,
+            ConfirmationPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to OTHER_PROPERTY_OWNERSHIP_ID.toString()),
+        )
+    }
+
+    @Test
+    fun `User is not shown feedback page again if they open the feedback form`(page: Page) {
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.surveyNowLink.clickAndWait()
+
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        secondCheckAndSubmitPage.form.submit()
+        assertPageIs(
+            page,
+            ConfirmationPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to OTHER_PROPERTY_OWNERSHIP_ID.toString()),
+        )
+    }
+
+    @Test
+    fun `User is not shown feedback page again if they skip the feedback`(page: Page) {
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        checkAndSubmitPage.form.submit()
+
+        // Feedback page
+        val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
+        feedbackPage.skipSurveyButton.clickAndWait()
+
+        // Confirmation page
+        assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
+
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        secondCheckAndSubmitPage.form.submit()
+        assertPageIs(
+            page,
+            ConfirmationPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to OTHER_PROPERTY_OWNERSHIP_ID.toString()),
+        )
+    }
+
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
+        private const val OTHER_PROPERTY_OWNERSHIP_ID = 4L
         private const val LANDLORD_EMAIL = "alex.surname@example.com"
         private const val PROPERTY_ADDRESS = "1, Example Road, EG"
 

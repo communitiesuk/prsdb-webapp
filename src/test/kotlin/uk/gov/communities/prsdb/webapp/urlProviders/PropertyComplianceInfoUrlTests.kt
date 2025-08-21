@@ -20,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -35,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -79,7 +79,7 @@ class PropertyComplianceInfoUrlTests(
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
-    @Mock
+    @MockitoBean
     private lateinit var mockEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean
@@ -87,6 +87,9 @@ class PropertyComplianceInfoUrlTests(
 
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
+
+    @MockitoBean
+    private lateinit var landlordService: LandlordService
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 
@@ -162,7 +165,6 @@ class PropertyComplianceInfoUrlTests(
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(CONFIRMATION_PATH_SEGMENT)
             }
 
         val emailCaptor = argumentCaptor<PartialPropertyComplianceConfirmationEmail>()

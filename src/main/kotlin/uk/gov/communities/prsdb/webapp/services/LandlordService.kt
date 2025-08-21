@@ -53,6 +53,7 @@ class LandlordService(
         addressDataModel: AddressDataModel,
         countryOfResidence: String,
         isVerified: Boolean,
+        hasAcceptedPrivacyNotice: Boolean,
         nonEnglandOrWalesAddress: String? = null,
         dateOfBirth: LocalDate? = null,
     ): Landlord {
@@ -71,6 +72,7 @@ class LandlordService(
                     registrationNumber,
                     countryOfResidence,
                     isVerified,
+                    hasAcceptedPrivacyNotice,
                     nonEnglandOrWalesAddress,
                     dateOfBirth,
                 ),
@@ -112,6 +114,12 @@ class LandlordService(
             existingEmail,
         )
         return landlordEntity
+    }
+
+    @Transactional
+    fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
+        landlord.hasRespondedToFeedback = true
+        return landlordRepository.save(landlord)
     }
 
     fun searchForLandlords(

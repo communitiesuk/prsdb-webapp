@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailForm
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import java.time.LocalDate
@@ -154,6 +155,13 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
         fun isIdentityVerified(journeyData: JourneyData) =
             getVerifiedName(journeyData) != null &&
                 getVerifiedDOB(journeyData) != null
+
+        fun getHasAcceptedPrivacyNotice(journeyData: JourneyData) =
+            getFieldBooleanValue(
+                journeyData,
+                LandlordRegistrationStepId.PrivacyNotice.urlPathSegment,
+                PrivacyNoticeFormModel::agreesToPrivacyNotice.name,
+            )
 
         fun isManualAddressChosen(
             journeyData: JourneyData,

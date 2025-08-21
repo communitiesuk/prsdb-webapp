@@ -66,6 +66,13 @@ class Landlord() : ModifiableAuditableEntity() {
     var isVerified: Boolean = false
         private set
 
+    @Column(nullable = false)
+    var hasAcceptedPrivacyNotice: Boolean = false
+        private set
+
+    @Column(nullable = true)
+    var hasRespondedToFeedback: Boolean? = false
+
     constructor(
         baseUser: OneLoginUser,
         name: String,
@@ -75,6 +82,7 @@ class Landlord() : ModifiableAuditableEntity() {
         registrationNumber: RegistrationNumber,
         countryOfResidence: String,
         isVerified: Boolean,
+        hasAcceptedPrivacyNotice: Boolean,
         nonEnglandOrWalesAddress: String?,
         dateOfBirth: LocalDate?,
     ) : this() {
@@ -86,10 +94,14 @@ class Landlord() : ModifiableAuditableEntity() {
         this.registrationNumber = registrationNumber
         this.countryOfResidence = countryOfResidence
         this.isVerified = isVerified
+        this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice
         this.nonEnglandOrWalesAddress = nonEnglandOrWalesAddress
         this.dateOfBirth = dateOfBirth
         this.isActive = true
     }
 
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
+
+    val shouldSeeFeedback: Boolean
+        get() = hasRespondedToFeedback != true
 }
