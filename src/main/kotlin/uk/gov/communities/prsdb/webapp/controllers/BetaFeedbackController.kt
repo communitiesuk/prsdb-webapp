@@ -14,11 +14,15 @@ import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
+import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 
 @PrsdbController
 @RequestMapping
-class BetaFeedbackController {
+class BetaFeedbackController(
+    private val emailService: NotifyEmailNotificationService<BetaFeedbackEmail>,
+) {
     @GetMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun landlordFeedback(
         model: Model,
@@ -110,6 +114,13 @@ class BetaFeedbackController {
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
+        val feedbackEmail =
+            BetaFeedbackEmail(
+                feedback = betaFeedbackModel.feedback,
+                email = betaFeedbackModel.email,
+                referrer = request.getHeader("referer"),
+            )
+        emailService.sendEmail("Team-PRSDB@Softwire.com", feedbackEmail)
         return "redirect:$redirectPath"
     }
 
