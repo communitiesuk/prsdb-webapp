@@ -1,0 +1,7 @@
+<li th:fragment="partiallyBoldBullet(boldText, remainingText, content)" >
+    <span class="govuk-!-font-weight-bold" th:text="${boldText}">Bold text</span>
+    <span th:text="${remainingText}">Remaining text</span>
+   <th:block th:unless="${content} == null">
+       <div th:replace="${content}"></div>
+   </th:block>
+</li>
