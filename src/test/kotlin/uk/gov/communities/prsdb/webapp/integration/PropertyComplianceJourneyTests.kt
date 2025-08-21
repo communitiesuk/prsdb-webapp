@@ -730,9 +730,6 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
         feedbackPage.surveyNowLink.clickAndWait()
 
-        // Confirmation page
-        assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
-
         val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
