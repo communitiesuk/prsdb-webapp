@@ -45,6 +45,7 @@ class LocalAuthorityUser(
         localAuthority: LocalAuthority,
         name: String,
         email: String,
+        hasAcceptedPrivacyNotice: Boolean,
     ) :
         this(id) {
         this.baseUser = baseUser
@@ -52,6 +53,7 @@ class LocalAuthorityUser(
         this.localAuthority = localAuthority
         this.name = name
         this.email = email
+        this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice
     }
 
     constructor(
