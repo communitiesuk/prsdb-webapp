@@ -1,10 +1,10 @@
 # New Beta Feedback Submission
 
-**Feedback:**  
+## Feedback: 
 ((feedback))
 
-**Email:**  
+## Email:  
 ((email))
 
-**Referrer:**  
+## Referrer:  
 ((referrer))
