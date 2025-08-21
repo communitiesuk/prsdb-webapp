@@ -117,7 +117,7 @@ class LandlordService(
     }
 
     @Transactional
-    fun landlordHasRespondedToFeedback(landlord: Landlord): Landlord {
+    fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
         landlord.hasRespondedToFeedback = true
         return landlordRepository.save(landlord)
     }

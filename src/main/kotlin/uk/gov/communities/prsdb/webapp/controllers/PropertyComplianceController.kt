@@ -203,7 +203,7 @@ class PropertyComplianceController(
         val landlord = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord
 
         emailSender.sendEmail(landlord.email, GiveFeedbackLaterEmail())
-        landlordService.landlordHasRespondedToFeedback(landlord)
+        landlordService.setHasRespondedToFeedback(landlord)
 
         return "redirect:$CONFIRMATION_PATH_SEGMENT"
     }
@@ -216,7 +216,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
-        landlordService.landlordHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
+        landlordService.setHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
         return "redirect:$FEEDBACK_FORM_URL"
     }
 
@@ -228,7 +228,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
 
-        landlordService.landlordHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
+        landlordService.setHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
         return "redirect:$CONFIRMATION_PATH_SEGMENT"
     }
 

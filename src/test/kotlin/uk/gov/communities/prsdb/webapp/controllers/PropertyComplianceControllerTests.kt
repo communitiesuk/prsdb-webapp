@@ -695,7 +695,7 @@ class PropertyComplianceControllerTests(
                 redirectedUrl(destination)
             }
 
-            verify(landlordService).landlordHasRespondedToFeedback(
+            verify(landlordService).setHasRespondedToFeedback(
                 eq(propertyCompliance.propertyOwnership.primaryLandlord),
             )
         }
