@@ -17,6 +17,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -281,6 +282,22 @@ class PasscodeServiceTests {
 
         assertTrue(result)
         verify(mockPasscodeRepository).existsByPasscode(normalizedPasscode)
+    }
+
+    @Test
+    fun `hasUserClaimedAPasscode returns true if the HAS_USER_CLAIMED_A_PASSCODE flag is set in session`() {
+        whenever(mockSession.getAttribute(HAS_USER_CLAIMED_A_PASSCODE)).thenReturn(true)
+        assertTrue(passcodeService.hasUserClaimedAPasscode("userId"))
+    }
+
+    @Test
+    fun `hasUserClaimedAPasscode checks the database if the HAS_USER_CLAIMED_A_PASSCODE flag is not set in session`() {
+        val userId = "userId"
+        whenever(mockSession.getAttribute(HAS_USER_CLAIMED_A_PASSCODE)).thenReturn(null)
+        whenever(mockPasscodeRepository.existsByBaseUser_Id(userId)).thenReturn(true)
+
+        assertTrue(passcodeService.hasUserClaimedAPasscode(userId))
+        verify(mockPasscodeRepository).existsByBaseUser_Id(userId)
     }
 
     @Test
