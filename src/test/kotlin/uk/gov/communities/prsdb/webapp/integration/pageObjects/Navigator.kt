@@ -23,6 +23,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
@@ -1243,6 +1245,14 @@ class Navigator(
     fun goToGeneratePasscodePage(): GeneratePasscodePage {
         navigate(GENERATE_PASSCODE_URL)
         return createValidPage(page, GeneratePasscodePage::class)
+    }
+
+    fun navigateToPasscodeEntryPage() {
+        navigate(PASSCODE_ENTRY_ROUTE)
+    }
+
+    fun navigateToPasscodeUsedPage() {
+        navigate(PASSCODE_ALREADY_USED_ROUTE)
     }
 
     fun navigateToLandlordDashboard() {

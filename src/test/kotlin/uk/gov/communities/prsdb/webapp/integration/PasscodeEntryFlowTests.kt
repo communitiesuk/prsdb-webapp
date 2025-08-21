@@ -114,4 +114,20 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         navigator.navigateToLandlordRegistrationStartPage()
         assertPageIs(page, PasscodeEntryPage::class)
     }
+
+    @Test
+    fun `Users who have claimed a passcode can't access passcode pages`(page: Page) {
+        // Claim a passcode and redirect to previous page
+        navigator.navigateToLandlordDashboard()
+        val passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
+        passcodeEntryPage.submitPasscode("FREE01")
+        assertPageIs(page, LandlordDashboardPage::class)
+
+        // Try to access passcode pages
+        navigator.navigateToPasscodeEntryPage()
+        assertPageIs(page, LandlordDashboardPage::class)
+
+        navigator.navigateToPasscodeUsedPage()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
 }

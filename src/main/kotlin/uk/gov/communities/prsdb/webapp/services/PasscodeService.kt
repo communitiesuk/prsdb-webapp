@@ -94,14 +94,6 @@ class PasscodeService(
         return true
     }
 
-    fun isPasscodeClaimedByUser(
-        passcodeString: String,
-        userId: String,
-    ): Boolean {
-        val passcode = findPasscode(passcodeString) ?: return false
-        return passcode.baseUser?.id == userId
-    }
-
     private fun generateRandomPasscodeString(): String =
         (1..PASSCODE_LENGTH)
             .map { SAFE_CHARACTERS_CHARSET.random() }

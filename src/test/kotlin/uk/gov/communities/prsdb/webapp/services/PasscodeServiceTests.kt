@@ -327,25 +327,4 @@ class PasscodeServiceTests {
         verify(mockOneLoginUserService).findOrCreate1LUser(user.id)
         assertEquals(user, availablePasscode.baseUser)
     }
-
-    @Test
-    fun `isPasscodeClaimedByUser returns false if the passcode does not exist`() {
-        val passcode = "NON_EXISTENT"
-        whenever(mockPasscodeRepository.findByPasscode(passcode)).thenReturn(null)
-        assertFalse(passcodeService.isPasscodeClaimedByUser(passcode, "userId"))
-    }
-
-    @Test
-    fun `isPasscodeClaimedByUser returns false if the passcode is not claimed by the user`() {
-        val passcode = MockLandlordData.createPasscode(code = "TAKEN", baseUser = MockLandlordData.createOneLoginUser(id = "otherUserId"))
-        whenever(mockPasscodeRepository.findByPasscode(passcode.passcode)).thenReturn(passcode)
-        assertFalse(passcodeService.isPasscodeClaimedByUser(passcode.passcode, "userId"))
-    }
-
-    @Test
-    fun `isPasscodeClaimedByUser returns true if the passcode is claimed by the user`() {
-        val passcode = MockLandlordData.createPasscode(code = "CLAIMED", baseUser = MockLandlordData.createOneLoginUser(id = "userId"))
-        whenever(mockPasscodeRepository.findByPasscode(passcode.passcode)).thenReturn(passcode)
-        assertTrue(passcodeService.isPasscodeClaimedByUser(passcode.passcode, passcode.baseUser!!.id))
-    }
 }
