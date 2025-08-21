@@ -50,21 +50,21 @@ SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM
 
 INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
-VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 2, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true,
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 2, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true,
-       ('urn:fdc:gov.uk:2022:PQRST', false, 2, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true,
+VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 2, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
+       ('urn:fdc:gov.uk:2022:UVWXY', true, 2, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('urn:fdc:gov.uk:2022:PQRST', false, 2, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 2, '10/09/24', '10/09/24',
         'Jasmin Conterio',
-        'jasmin.conterio@softwire.com', true,
+        'jasmin.conterio@softwire.com', true),
        ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 2, '10/02/24', '10/02/24',
         'Isobel Ibironke',
-        'isobel.ibironke@softwire.com', true,
+        'isobel.ibironke@softwire.com', true),
        ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 2, '10/15/24', '10/15/24',
         'PRSDB LA Admin',
-        'Team-PRSDB+laadmin@softwire.com', true,
+        'Team-PRSDB+laadmin@softwire.com', true),
        ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 2, '10/15/24', '10/15/24',
         'PRSDB La User',
-        'Team-PRSDB+lauser@softwire.com', true;
+        'Team-PRSDB+lauser@softwire.com', true);
 
 SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
 
