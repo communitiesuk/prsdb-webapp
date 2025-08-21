@@ -114,11 +114,16 @@ class BetaFeedbackController(
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
+
+        val escapeRegex = Regex("""([^A-Za-z0-9._~\-\n\r @])""")
+        val escapedFeedback = betaFeedbackModel.feedback.replace(escapeRegex, """\\$1""")
+        val escapedEmail = betaFeedbackModel.email?.replace(escapeRegex, """\\$1""")
+
         val feedbackEmail =
             BetaFeedbackEmail(
-                feedback = betaFeedbackModel.feedback,
-                email = betaFeedbackModel.email,
-                referrer = request.getHeader("referer"),
+                feedback = escapedFeedback,
+                email = escapedEmail,
+                referrer = betaFeedbackModel.referrerHeader,
             )
         emailService.sendEmail("Team-PRSDB@Softwire.com", feedbackEmail)
         return "redirect:$redirectPath"

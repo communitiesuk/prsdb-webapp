@@ -23,4 +23,5 @@ class BetaFeedbackModel {
     )
     var feedback: String = ""
     var email: String? = null
+    var referrerHeader: String? = null
 }
