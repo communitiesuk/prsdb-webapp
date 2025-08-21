@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 
 class LaUserRegistrationJourneyDataHelper : JourneyDataHelper() {
     companion object {
@@ -19,6 +20,13 @@ class LaUserRegistrationJourneyDataHelper : JourneyDataHelper() {
                 journeyData,
                 RegisterLaUserStepId.Email.urlPathSegment,
                 EmailFormModel::emailAddress.name,
+            )
+
+        fun getHasAcceptedPrivacyNotice(journeyData: JourneyData) =
+            getFieldBooleanValue(
+                journeyData,
+                RegisterLaUserStepId.PrivacyNotice.urlPathSegment,
+                PrivacyNoticeFormModel::agreesToPrivacyNotice.name,
             )
     }
 }

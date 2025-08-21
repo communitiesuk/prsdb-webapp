@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.validation.TrueConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class PrivacyNoticeFormModel : FormModel {
+class LandlordPrivacyNoticeFormModel : PrivacyNoticeFormModel() {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -15,5 +15,22 @@ class PrivacyNoticeFormModel : FormModel {
             ),
         ],
     )
-    var agreesToPrivacyNotice: Boolean = false
+    override var agreesToPrivacyNotice: Boolean = false
+}
+
+@IsValidPrioritised
+class LocalAuthorityPrivacyNoticeFormModel : PrivacyNoticeFormModel() {
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                messageKey = "registerLAUser.privacyNotice.checkbox.error.missing",
+                validatorType = TrueConstraintValidator::class,
+            ),
+        ],
+    )
+    override var agreesToPrivacyNotice: Boolean = false
+}
+
+abstract class PrivacyNoticeFormModel : FormModel {
+    abstract var agreesToPrivacyNotice: Boolean
 }

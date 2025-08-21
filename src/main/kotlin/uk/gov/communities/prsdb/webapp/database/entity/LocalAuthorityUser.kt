@@ -34,6 +34,10 @@ class LocalAuthorityUser(
     lateinit var localAuthority: LocalAuthority
         private set
 
+    @Column(nullable = false)
+    var hasAcceptedPrivacyNotice: Boolean = false
+        private set
+
     constructor(
         id: Long,
         baseUser: OneLoginUser,
@@ -56,11 +60,13 @@ class LocalAuthorityUser(
         localAuthority: LocalAuthority,
         name: String,
         email: String,
+        hasAcceptedPrivacyNotice: Boolean,
     ) : this() {
         this.baseUser = baseUser
         this.isManager = isManager
         this.localAuthority = localAuthority
         this.name = name
         this.email = email
+        this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice
     }
 }
