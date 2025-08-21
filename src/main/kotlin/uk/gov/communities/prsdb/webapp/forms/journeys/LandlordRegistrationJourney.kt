@@ -418,7 +418,7 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.manualAddress.fieldSetHint",
+                            "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
                             "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
                             "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
                             "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
