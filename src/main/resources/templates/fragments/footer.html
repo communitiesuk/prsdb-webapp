@@ -1,13 +1,14 @@
+<!--/*@thymesVar id="prsdbEmail" type="java.lang.String"*/-->
+<!--/*@thymesVar id="cookiesUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="landlordPrivacyUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="localCouncilPrivacyUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="rentersRightsBillUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="mhclgUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="licenceUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="copyrightUrl" type="java.lang.String"*/-->
 <footer class="govuk-footer">
     <div class="govuk-width-container">
-        <svg
-                focusable="false"
-                role="presentation"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 64 60"
-                height="30"
-                width="32"
-                fill="currentcolor" class="govuk-footer__crown">
+        <svg focusable="false" role="presentation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 60" height="30" width="32" fill="currentcolor" class="govuk-footer__crown">
             <g>
                 <circle cx="20" cy="17.6" r="3.7"/>
                 <circle cx="10.2" cy="23.5" r="3.7"/>
@@ -22,32 +23,43 @@
         </svg>
         <div class="govuk-footer__meta">
             <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
-                <svg
-                        aria-hidden="true"
-                        focusable="false"
-                        class="govuk-footer__licence-logo"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 483.2 195.7"
-                        height="17"
-                        width="41">
-                    <path
-                            fill="currentColor"
-                            d="M421.5 142.8V.1l-50.7 32.3v161.1h112.4v-50.7zm-122.3-9.6A47.12 47.12 0 0 1 221 97.8c0-26 21.1-47.1 47.1-47.1 16.7 0 31.4 8.7 39.7 21.8l42.7-27.2A97.63 97.63 0 0 0 268.1 0c-36.5 0-68.3 20.1-85.1 49.7A98 98 0 0 0 97.8 0C43.9 0 0 43.9 0 97.8s43.9 97.8 97.8 97.8c36.5 0 68.3-20.1 85.1-49.7a97.76 97.76 0 0 0 149.6 25.4l19.4 22.2h3v-87.8h-80l24.3 27.5zM97.8 145c-26 0-47.1-21.1-47.1-47.1s21.1-47.1 47.1-47.1 47.2 21 47.2 47S123.8 145 97.8 145"/>
+                <h2 class="govuk-visually-hidden" th:text="#{footer.supportLinks}">footer.supportLinks</h2>
+                <div class="govuk-footer__meta-custom">
+                    <span th:remove="tag" th:text="#{footer.email.beforeLink}">footer.email.beforeLink</span>
+                    <a class="govuk-footer__link" th:href="${'mailto:' + prsdbEmail}" th:text="#{footer.email.link}">footer.email.link
+                    </a><span th:remove="tag" th:text="#{footer.email.afterLink}">footer.email.afterLink</span>
+                    <br>
+                    <span th:remove="tag" th:text="#{footer.phone}">footer.phone</span>
+                </div>
+                <ul class="govuk-footer__inline-list">
+                    <li class="govuk-footer__inline-list-item">
+                        <a class="govuk-footer__link" th:href="${cookiesUrl}" th:text="#{footer.cookies.link}">footer.cookies.link</a>
+                    </li>
+                    <li class="govuk-footer__inline-list-item">
+                        <a class="govuk-footer__link" th:href="${landlordPrivacyUrl}" th:text="#{footer.landlordPrivacyNotice.link}">footer.landlordPrivacyNotice.link</a>
+                    </li>
+                    <li class="govuk-footer__inline-list-item">
+                        <a class="govuk-footer__link" th:href="${localCouncilPrivacyUrl}" th:text="#{footer.localCouncilPrivacyNotice.link}">footer.localCouncilPrivacyNotice.link</a>
+                    </li>
+                    <li class="govuk-footer__inline-list-item">
+                        <a class="govuk-footer__link" th:href="${rentersRightsBillUrl}" th:text="#{footer.rentersRightsBill.link}">footer.rentersRightsBill.link</a>
+                    </li>
+                </ul>
+                <div class="govuk-footer__meta-custom">
+                    <span th:remove="tag" th:text="#{footer.builtBy.beforeLink}">footer.builtBy.beforeLink</span>
+                    <a class="govuk-footer__link" th:href="${mhclgUrl}" th:text="#{footer.builtBy.link}">footer.builtBy.link</a>
+                </div>
+                <svg aria-hidden="true" focusable="false" class="govuk-footer__licence-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 483.2 195.7" height="17" width="41">
+                    <path fill="currentColor" d="M421.5 142.8V.1l-50.7 32.3v161.1h112.4v-50.7zm-122.3-9.6A47.12 47.12 0 0 1 221 97.8c0-26 21.1-47.1 47.1-47.1 16.7 0 31.4 8.7 39.7 21.8l42.7-27.2A97.63 97.63 0 0 0 268.1 0c-36.5 0-68.3 20.1-85.1 49.7A98 98 0 0 0 97.8 0C43.9 0 0 43.9 0 97.8s43.9 97.8 97.8 97.8c36.5 0 68.3-20.1 85.1-49.7a97.76 97.76 0 0 0 149.6 25.4l19.4 22.2h3v-87.8h-80l24.3 27.5zM97.8 145c-26 0-47.1-21.1-47.1-47.1s21.1-47.1 47.1-47.1 47.2 21 47.2 47S123.8 145 97.8 145"/>
                 </svg>
                 <span class="govuk-footer__licence-description">
-                  All content is available under the
-                  <a
-                          class="govuk-footer__link"
-                          href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
-                          rel="license">Open Government Licence v3.0</a>, except where otherwise stated
+                    <span th:remove="tag" th:text="#{footer.licence.beforeLink}">footer.licence.beforeLink</span>
+                    <a class="govuk-footer__link" rel="license" th:href="${licenceUrl}" th:text="#{footer.licence.link}">footer.licence.link</a>
+                    <span th:remove="tag" th:text="#{footer.licence.afterLink}">footer.licence.afterLink</span>
                 </span>
             </div>
             <div class="govuk-footer__meta-item">
-                <a
-                        class="govuk-footer__link govuk-footer__copyright-logo"
-                        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/">
-                    © Crown copyright
-                </a>
+                <a class="govuk-footer__link govuk-footer__copyright-logo" th:href="${copyrightUrl}" th:text="#{footer.crownCopyright}"></a>
             </div>
         </div>
     </div>
