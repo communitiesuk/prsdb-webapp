@@ -8,5 +8,5 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class PasscodeAlreadyUsedPage(
     page: Page,
 ) : BasePage(page, PASSCODE_ALREADY_USED_PATH_SEGMENT) {
-    val tryAnotherPasscodeButton = Button.byText(page, "Try another passcode")
+    val enterPasscodeButton = Button.byText(page, "Enter a passcode")
 }

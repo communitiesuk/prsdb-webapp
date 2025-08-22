@@ -107,7 +107,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         // Access a restricted page, which logs the user in and determines that the passcode was claimed by another user
         navigator.navigateToLandlordDashboard()
         val passcodeUsedPage = assertPageIs(page, PasscodeAlreadyUsedPage::class)
-        passcodeUsedPage.tryAnotherPasscodeButton.clickAndWait()
+        passcodeUsedPage.enterPasscodeButton.clickAndWait()
         assertPageIs(page, PasscodeEntryPage::class)
 
         // Accessing the PasscodeAlreadyUsedPage clears the passcode from session
