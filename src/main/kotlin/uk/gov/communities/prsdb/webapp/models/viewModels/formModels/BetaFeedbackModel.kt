@@ -4,10 +4,21 @@ import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.LengthConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.OptionalEmailConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class BetaFeedbackModel {
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                messageKey = "betaBannerFeedback.error.invalidEmail",
+                validatorType = OptionalEmailConstraintValidator::class,
+            ),
+        ],
+    )
+    var email: String? = null
+
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -22,6 +33,5 @@ class BetaFeedbackModel {
         ],
     )
     var feedback: String = ""
-    var email: String? = null
     var referrerHeader: String? = null
 }
