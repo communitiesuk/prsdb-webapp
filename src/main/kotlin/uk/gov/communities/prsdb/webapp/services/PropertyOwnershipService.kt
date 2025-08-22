@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOw
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
 
 @PrsdbWebService
@@ -105,9 +106,9 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
-    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
+    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(
+            RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
             )
@@ -117,7 +118,6 @@ class PropertyOwnershipService(
         retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
             RegisteredPropertyViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                isLaView = true,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
             )
         }
