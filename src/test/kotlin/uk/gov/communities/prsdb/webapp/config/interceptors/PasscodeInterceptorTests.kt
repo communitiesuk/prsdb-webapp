@@ -75,7 +75,6 @@ class PasscodeInterceptorTests {
         mockRequest.requestURI = LOCAL_AUTHORITY_DASHBOARD_URL
 
         assertTrue(callPreHandle())
-        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
         verify(mockResponse, never()).sendRedirect(anyString())
     }
 
@@ -84,7 +83,6 @@ class PasscodeInterceptorTests {
         mockRequest.requestURI = PASSCODE_ENTRY_ROUTE
 
         assertTrue(callPreHandle())
-        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
         verify(mockResponse, never()).sendRedirect(anyString())
     }
 
@@ -93,7 +91,6 @@ class PasscodeInterceptorTests {
         mockRequest.requestURI = INVALID_PASSCODE_ROUTE
 
         assertTrue(callPreHandle())
-        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
         verify(mockResponse, never()).sendRedirect(anyString())
     }
 

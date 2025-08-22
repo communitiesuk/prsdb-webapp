@@ -29,7 +29,7 @@ class PasscodeInterceptor(
         // Only apply interceptor to non-passcode landlord routes
         val currentPath = request.requestURI
         if (!currentPath.startsWith("/$LANDLORD_PATH_SEGMENT/") || currentPath in passcodeRoutes) {
-            return removePasscodeRedirectAndReturnTrue(request)
+            return true
         }
 
         return if (principal == null) {
