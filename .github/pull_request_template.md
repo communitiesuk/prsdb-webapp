@@ -32,5 +32,7 @@ Delete any that are not applicable, and add explanation below for any that are a
 - [ ] Test suite has been run in full locally and is passing
 - [ ] Branch has been rebased onto main and run locally, with everything working as expected (both for your new feature
   and any related functionality)
+- [ ] TODO comments referencing this JIRA ticket have been searched for and removed - if a future PR will address them,
+  mention that here
 - [ ] Seed data has been updated as needed for your feature to be tested without having to e.g. register a new property
 - [ ] Any special release instructions (e.g. the database will need resetting) have been added as checklist items to a draft PR (merging `main` into `test`) for the next release
