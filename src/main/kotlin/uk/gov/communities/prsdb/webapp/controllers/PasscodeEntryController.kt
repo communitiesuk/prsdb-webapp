@@ -68,13 +68,7 @@ class PasscodeEntryController(
 
         // Check for redirect URL in session, otherwise use landlord registration index page
         val redirectUrl = session.getAttribute(PASSCODE_REDIRECT_URL) as? String
-        return if (redirectUrl != null) {
-            // Clear the redirect URL from session after using it
-            session.removeAttribute(PASSCODE_REDIRECT_URL)
-            "redirect:$redirectUrl"
-        } else {
-            "redirect:$LANDLORD_REGISTRATION_ROUTE"
-        }
+        return "redirect:${redirectUrl ?: LANDLORD_REGISTRATION_ROUTE}"
     }
 
     @GetMapping("/$INVALID_PASSCODE_PATH_SEGMENT")

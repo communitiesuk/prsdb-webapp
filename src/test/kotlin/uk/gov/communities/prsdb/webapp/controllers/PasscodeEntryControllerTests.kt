@@ -52,10 +52,7 @@ class PasscodeEntryControllerTests(
             }.andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(LANDLORD_REGISTRATION_ROUTE)
-            }.andExpect {
-                request {
-                    sessionAttribute(SUBMITTED_PASSCODE, validPasscode)
-                }
+                request { sessionAttribute(SUBMITTED_PASSCODE, validPasscode) }
             }
     }
 
@@ -74,11 +71,7 @@ class PasscodeEntryControllerTests(
             }.andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(redirectUrl)
-            }.andExpect {
-                request {
-                    sessionAttribute(SUBMITTED_PASSCODE, validPasscode)
-                    sessionAttributeDoesNotExist(PASSCODE_REDIRECT_URL)
-                }
+                request { sessionAttribute(SUBMITTED_PASSCODE, validPasscode) }
             }
     }
 
@@ -95,9 +88,7 @@ class PasscodeEntryControllerTests(
             }.andExpect {
                 status { isOk() }
                 view { name("passcodeEntry") }
-                model {
-                    attributeHasFieldErrors("passcodeRequestModel", "passcode")
-                }
+                model { attributeHasFieldErrors("passcodeRequestModel", "passcode") }
             }
     }
 
@@ -111,9 +102,7 @@ class PasscodeEntryControllerTests(
             }.andExpect {
                 status { isOk() }
                 view { name("passcodeEntry") }
-                model {
-                    attributeHasFieldErrors("passcodeRequestModel", "passcode")
-                }
+                model { attributeHasFieldErrors("passcodeRequestModel", "passcode") }
             }
     }
 
@@ -126,9 +115,7 @@ class PasscodeEntryControllerTests(
             }.andExpect {
                 status { isOk() }
                 view { name("passcodeEntry") }
-                model {
-                    attributeHasFieldErrors("passcodeRequestModel", "passcode")
-                }
+                model { attributeHasFieldErrors("passcodeRequestModel", "passcode") }
             }
     }
 

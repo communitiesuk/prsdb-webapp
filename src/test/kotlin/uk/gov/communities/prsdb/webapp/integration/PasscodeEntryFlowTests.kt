@@ -116,6 +116,24 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
     }
 
     @Test
+    fun `Users are still redirected to their original previous page after being sent to the invalid passcode page`(page: Page) {
+        navigator.navigateToLandlordDashboard()
+
+        // Store submitted passcode in session and redirect to previous page
+        var passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
+        passcodeEntryPage.submitPasscode("TAKEN1")
+
+        // Previous page is restricted, so it's determined that the passcode was claimed by another user
+        val invalidPasscodePage = assertPageIs(page, InvalidPasscodePage::class)
+        invalidPasscodePage.enterPasscodeButton.clickAndWait()
+        passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
+
+        // Store submitted passcode in session and redirect to (original) previous page
+        passcodeEntryPage.submitPasscode("FREE01")
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
     fun `Users who have claimed a passcode can't access passcode pages`(page: Page) {
         // Claim a passcode and redirect to previous page
         navigator.navigateToLandlordDashboard()
