@@ -72,7 +72,7 @@ class PropertyRegistrationJourney(
         getTaskListViewModelFactory(
             "registerProperty.title",
             "registerProperty.taskList.heading",
-            listOf("registerProperty.taskList.subtitle"),
+            listOf("registerProperty.taskList.subtitle.one", "registerProperty.taskList.subtitle.two"),
             backUrl = RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE,
         )
 
@@ -86,6 +86,7 @@ class PropertyRegistrationJourney(
             JourneyTask.withOneStep(
                 ownershipTypeStep(),
                 "registerProperty.taskList.register.selectOwnership",
+                "registerProperty.taskList.register.selectOwnership.hint",
             ),
             licensingTask(),
             occupancyTask(),
@@ -137,6 +138,7 @@ class PropertyRegistrationJourney(
                 numberOfPeopleStep(),
             ),
             "registerProperty.taskList.register.addTenancyInfo",
+            "registerProperty.taskList.register.addTenancyInfo.hint",
         )
 
     private fun lookupAddressStep() =
