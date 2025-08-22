@@ -51,7 +51,6 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.localAuthority",
                 "propertyDetails.propertyRecord.propertyType",
                 "propertyDetails.propertyRecord.ownershipType",
-                "propertyDetails.propertyRecord.licensingType",
                 "propertyDetails.propertyRecord.occupied",
                 "propertyDetails.propertyRecord.numberOfHouseholds",
                 "propertyDetails.propertyRecord.numberOfPeople",
@@ -60,6 +59,32 @@ class PropertyDetailsViewModelTests {
         // Act
         val viewModel = PropertyDetailsViewModel(propertyOwnership)
         val headerList = viewModel.propertyRecord.map { it.fieldHeading }
+
+        // Assert
+        assertEquals(expectedHeaderList, headerList)
+    }
+
+    @Test
+    fun `licensing information details are in the correct order`() {
+        // Arrange
+        val propertyOwnership =
+            createPropertyOwnership(
+                property =
+                    createProperty(
+                        address = createAddress(uprn = 1234.toLong()),
+                    ),
+                currentNumTenants = 2,
+            )
+
+        val expectedHeaderList =
+            listOf(
+                "propertyDetails.propertyRecord.licensingInformation.licensingType",
+                "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+            )
+
+        // Act
+        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val headerList = viewModel.licensingInformation.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -145,15 +170,16 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership)
 
-        val propertyRecordLicenseDetails =
-            (
-                viewModel.propertyRecord
-                    .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingType" }
-                    .fieldValue as List<*>
-            ).filterIsInstance<String>()
+        val propertyRecordLicenseType =
+            viewModel.propertyRecord
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
-        assertEquals("forms.licensingType.radios.option.hmoMandatory.label", propertyRecordLicenseDetails[0])
-        assertEquals("L1234", propertyRecordLicenseDetails[1])
+        val propertyRecordLicenseNumber =
+            viewModel.propertyRecord
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingNumber" }
+
+        assertEquals("forms.licensingType.radios.option.hmoMandatory.label", propertyRecordLicenseType.fieldValue)
+        assertEquals("L1234", propertyRecordLicenseNumber.fieldValue)
     }
 
     @Test
@@ -165,7 +191,7 @@ class PropertyDetailsViewModelTests {
         val viewModelDeclaredNoLicense = PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense)
         val propertyRecordDeclaredNoLicense =
             viewModelDeclaredNoLicense.propertyRecord
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingType" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals(
             "forms.checkPropertyAnswers.propertyDetails.noLicensing",
@@ -248,7 +274,7 @@ class PropertyDetailsViewModelTests {
 
         val changeLinkCount = viewModel.propertyRecord.count { it.action != null }
 
-        assertEquals(5, changeLinkCount)
+        assertEquals(6, changeLinkCount)
     }
 
     @Test

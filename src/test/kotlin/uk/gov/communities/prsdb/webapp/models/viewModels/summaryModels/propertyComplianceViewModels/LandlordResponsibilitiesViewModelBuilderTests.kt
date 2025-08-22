@@ -41,7 +41,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
-                            "commonText.yes",
+                            "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
@@ -52,7 +52,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
-                            "commonText.yes",
+                            "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
@@ -63,7 +63,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
-                            "commonText.yes",
+                            "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
@@ -80,17 +80,17 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
-                            "commonText.yes",
+                            "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             null,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
-                            "commonText.yes",
+                            "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             null,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
-                            "commonText.yes",
+                            "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             null,
                         ),
                     ),
