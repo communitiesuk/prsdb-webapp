@@ -29,7 +29,7 @@ class PasscodeInterceptor(
         // Only apply interceptor to non-passcode landlord routes
         val currentPath = request.requestURI
         if (!currentPath.startsWith("/$LANDLORD_PATH_SEGMENT/") || currentPath in passcodeRoutes) {
-            return true
+            return removePasscodeRedirectAndReturnTrue(request)
         }
 
         return if (principal == null) {
@@ -46,7 +46,7 @@ class PasscodeInterceptor(
         if (request.requestURI in passcodeRoutes) {
             redirectToDashboardAndReturnFalse(response)
         } else {
-            true
+            removePasscodeRedirectAndReturnTrue(request)
         }
 
     private fun handleUnauthenticatedUser(
@@ -54,7 +54,7 @@ class PasscodeInterceptor(
         response: HttpServletResponse,
     ): Boolean =
         if (request.session.getAttribute(SUBMITTED_PASSCODE) != null) {
-            true
+            removePasscodeRedirectAndReturnTrue(request)
         } else {
             redirectToPasscodeEntryAndReturnFalse(request, response)
         }
@@ -95,10 +95,15 @@ class PasscodeInterceptor(
         submittedPasscode: String,
     ): Boolean =
         if (passcodeService.claimPasscodeForUser(submittedPasscode, userId)) {
-            true
+            removePasscodeRedirectAndReturnTrue(request)
         } else {
             redirectToInvalidPasscodeAndReturnFalse(response)
         }
+
+    private fun removePasscodeRedirectAndReturnTrue(request: HttpServletRequest): Boolean {
+        request.session.removeAttribute(PASSCODE_REDIRECT_URL)
+        return true
+    }
 
     private fun redirectToDashboardAndReturnFalse(response: HttpServletResponse): Boolean {
         response.sendRedirect(LANDLORD_DASHBOARD_URL)

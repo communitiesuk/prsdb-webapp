@@ -291,13 +291,14 @@ class PasscodeServiceTests {
     }
 
     @Test
-    fun `hasUserClaimedAPasscode checks the database if the HAS_USER_CLAIMED_A_PASSCODE flag is not set in session`() {
+    fun `hasUserClaimedAPasscode checks the database and sets the HAS_USER_CLAIMED_A_PASSCODE flag if it's not set in session`() {
         val userId = "userId"
         whenever(mockSession.getAttribute(HAS_USER_CLAIMED_A_PASSCODE)).thenReturn(null)
         whenever(mockPasscodeRepository.existsByBaseUser_Id(userId)).thenReturn(true)
 
         assertTrue(passcodeService.hasUserClaimedAPasscode(userId))
         verify(mockPasscodeRepository).existsByBaseUser_Id(userId)
+        verify(mockSession).setAttribute(HAS_USER_CLAIMED_A_PASSCODE, true)
     }
 
     @Test
