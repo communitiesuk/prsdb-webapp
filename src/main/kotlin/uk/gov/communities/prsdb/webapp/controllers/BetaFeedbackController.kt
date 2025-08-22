@@ -124,6 +124,7 @@ class BetaFeedbackController(
                 email = betaFeedbackModel.email,
                 referrer = betaFeedbackModel.referrerHeader,
             )
+        // TODO: PRSD-1441 - email needs updating with env variable
         emailService.sendEmail("Team-PRSDB@Softwire.com", feedbackEmail)
         return "redirect:$redirectPath"
     }
