@@ -14,11 +14,15 @@ import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
+import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 
 @PrsdbController
 @RequestMapping
-class BetaFeedbackController {
+class BetaFeedbackController(
+    private val emailService: NotifyEmailNotificationService<BetaFeedbackEmail>,
+) {
     @GetMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun landlordFeedback(
         model: Model,
@@ -47,7 +51,7 @@ class BetaFeedbackController {
 
     @PostMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun submitLandlordFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
@@ -63,7 +67,7 @@ class BetaFeedbackController {
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
     fun submitLocalAuthorityFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
@@ -110,6 +114,18 @@ class BetaFeedbackController {
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
+
+        val escapeRegex = Regex("""([\[\]\(\)])""")
+        val escapedFeedback = betaFeedbackModel.feedback.replace(escapeRegex, """\\$1""")
+
+        val feedbackEmail =
+            BetaFeedbackEmail(
+                feedback = escapedFeedback,
+                email = betaFeedbackModel.email,
+                referrer = betaFeedbackModel.referrerHeader,
+            )
+        // TODO: PRSD-1441 - email needs updating with env variable
+        emailService.sendEmail("Team-PRSDB@Softwire.com", feedbackEmail)
         return "redirect:$redirectPath"
     }
 
