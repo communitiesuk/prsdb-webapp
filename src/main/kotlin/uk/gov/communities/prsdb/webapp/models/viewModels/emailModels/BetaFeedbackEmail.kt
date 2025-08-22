@@ -11,6 +11,6 @@ data class BetaFeedbackEmail(
         hashMapOf(
             "feedback" to feedback,
             "email" to (email ?: "Email not provided"),
-            "referrer" to (referrer ?: "Referrer not provided"),
+            "referrer" to (referrer ?: "Unable to determine previous page"),
         )
 }
