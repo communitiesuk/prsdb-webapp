@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
-import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -57,7 +56,6 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.englandOrWalesResident",
                 "landlordDetails.personalDetails.contactAddress",
             )
 
@@ -88,7 +86,6 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.englandOrWalesResident",
                 "landlordDetails.personalDetails.country",
                 "landlordDetails.personalDetails.nonEnglandOrWalesAddress",
                 "landlordDetails.personalDetails.englandOrWalesAddress",
@@ -210,31 +207,6 @@ class LandlordViewModelTests {
                 .single { it.fieldHeading == "landlordDetails.personalDetails.telephoneNumber" }
                 .getConvertedFieldValue()
         assertEquals(phoneNumber, landlordPhoneNumber)
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `Landlord personal details shows the correct residency`(isEnglandOrWalesResident: Boolean) {
-        // Arrange
-        val testLandlord =
-            if (isEnglandOrWalesResident) {
-                MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null, countryOfResidence = ENGLAND_OR_WALES)
-            } else {
-                MockLandlordData.createLandlord(
-                    nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
-                    countryOfResidence = "USA",
-                )
-            }
-
-        // Act
-        val viewModel = LandlordViewModel(testLandlord)
-
-        // Assert
-        val displayedResidency =
-            viewModel.personalDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.englandOrWalesResident" }
-                .fieldValue
-        assertEquals(displayedResidency, isEnglandOrWalesResident)
     }
 
     @Test

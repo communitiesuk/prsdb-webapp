@@ -68,14 +68,6 @@ class LandlordViewModel(
                     "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment}",
                     withActionLink = withChangeLinks,
                 )
-                addRow(
-                    "landlordDetails.personalDetails.englandOrWalesResident",
-                    isEnglandOrWalesResident,
-                    changeLinkMessageKey,
-                    // TODO: PRSD-688 "$UPDATE_ROUTE/country-of-residence",
-                    null,
-                    withActionLink = withChangeLinks,
-                )
                 if (isEnglandOrWalesResident) {
                     addRow(
                         "landlordDetails.personalDetails.contactAddress",

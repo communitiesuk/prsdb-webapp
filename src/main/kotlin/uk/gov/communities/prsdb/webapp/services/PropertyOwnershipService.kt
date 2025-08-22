@@ -25,7 +25,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOw
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -105,19 +106,18 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
-    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyViewModel> =
+    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(
+            RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
             )
         }
 
-    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
+    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyLocalCouncilViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(
+            RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                isLaView = true,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
             )
         }
