@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InvalidPasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeAlreadyUsedPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
@@ -96,7 +96,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
     }
 
     @Test
-    fun `Users are redirected to passcode already claimed page after login if they submit an already claimed passcode`(page: Page) {
+    fun `Users are redirected to invalid passcode page after login if they submit an already claimed passcode`(page: Page) {
         navigator.navigateToLandlordRegistrationStartPage()
 
         // Store submitted passcode in session and redirect to previous page
@@ -106,13 +106,31 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
 
         // Access a restricted page, which logs the user in and determines that the passcode was claimed by another user
         navigator.navigateToLandlordDashboard()
-        val passcodeUsedPage = assertPageIs(page, PasscodeAlreadyUsedPage::class)
-        passcodeUsedPage.tryAnotherPasscodeButton.clickAndWait()
+        val invalidPasscodePage = assertPageIs(page, InvalidPasscodePage::class)
+        invalidPasscodePage.enterPasscodeButton.clickAndWait()
         assertPageIs(page, PasscodeEntryPage::class)
 
-        // Accessing the PasscodeAlreadyUsedPage clears the passcode from session
+        // Accessing the invalid passcode page clears the passcode from session
         navigator.navigateToLandlordRegistrationStartPage()
         assertPageIs(page, PasscodeEntryPage::class)
+    }
+
+    @Test
+    fun `Users are still redirected to their original previous page after being sent to the invalid passcode page`(page: Page) {
+        navigator.navigateToLandlordDashboard()
+
+        // Store submitted passcode in session and redirect to previous page
+        var passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
+        passcodeEntryPage.submitPasscode("TAKEN1")
+
+        // Previous page is restricted, so it's determined that the passcode was claimed by another user
+        val invalidPasscodePage = assertPageIs(page, InvalidPasscodePage::class)
+        invalidPasscodePage.enterPasscodeButton.clickAndWait()
+        passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
+
+        // Store submitted passcode in session and redirect to (original) previous page
+        passcodeEntryPage.submitPasscode("FREE01")
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
@@ -127,7 +145,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         navigator.navigateToPasscodeEntryPage()
         assertPageIs(page, LandlordDashboardPage::class)
 
-        navigator.navigateToPasscodeUsedPage()
+        navigator.navigateToInvalidPasscodePage()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 }
