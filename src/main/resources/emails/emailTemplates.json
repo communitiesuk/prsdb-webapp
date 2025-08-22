@@ -22,7 +22,7 @@
   },
   {
     "test_id": "9f2ddab0-590d-467f-bc26-f0b5f283ae18",
-    "prod_id": null,
+    "prod_id": "966f39dc-263d-49b3-b14d-35bc1160b783",
     "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "GOV.UK - You have registered as a landlord on the PRS Database",
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
