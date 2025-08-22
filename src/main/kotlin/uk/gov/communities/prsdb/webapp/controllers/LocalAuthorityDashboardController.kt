@@ -56,8 +56,7 @@ class LocalAuthorityDashboardController(
         model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
-        // TODO PRSD-1425: link to content
-        model.addAttribute("privacyNoticeUrl", "#")
+        model.addAttribute("privacyNoticeUrl", LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
         model.addAttribute(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_PRSD,

@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.InvalidLinkPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.PrivacyNoticePageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
@@ -62,6 +63,11 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
         assertThat(landingPage.heading).containsText("Registering as a local council user")
         // Submit and go to next page
         landingPage.clickBeginButton()
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLaUserRegistration::class)
+
+        // Privacy notice page
+        privacyNoticePage.form.iAgreeCheckbox.check()
+        privacyNoticePage.form.submit()
         val namePage = assertPageIs(page, NameFormPageLaUserRegistration::class)
 
         // Name page - render

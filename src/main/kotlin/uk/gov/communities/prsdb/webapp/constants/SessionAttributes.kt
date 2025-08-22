@@ -23,3 +23,5 @@ const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
 const val SUBMITTED_PASSCODE = "submittedPasscode"
 
 const val PASSCODE_REDIRECT_URL = "passcodeRedirectUrl"
+
+const val HAS_USER_CLAIMED_A_PASSCODE = "hasUserClaimedAPasscode"

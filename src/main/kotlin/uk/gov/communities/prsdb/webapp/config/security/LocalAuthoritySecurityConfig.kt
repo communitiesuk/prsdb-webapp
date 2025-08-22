@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
@@ -24,6 +25,8 @@ class LocalAuthoritySecurityConfig(
             .securityMatcher("/$LOCAL_AUTHORITY_PATH_SEGMENT/**")
             .authorizeHttpRequests { requests ->
                 requests
+                    .requestMatchers(LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
