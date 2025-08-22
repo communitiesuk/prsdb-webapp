@@ -51,13 +51,13 @@ class BetaFeedbackController(
 
     @PostMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun submitLandlordFeedback(
-        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute formModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
     ): String =
         handleFeedbackSubmission(
-            betaFeedbackModel,
+            formModel,
             bindingResult,
             model,
             request,
@@ -67,13 +67,13 @@ class BetaFeedbackController(
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
     fun submitLocalAuthorityFeedback(
-        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute formModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
     ): String =
         handleFeedbackSubmission(
-            betaFeedbackModel,
+            formModel,
             bindingResult,
             model,
             request,
@@ -115,14 +115,13 @@ class BetaFeedbackController(
             return "betaBannerFeedback"
         }
 
-        val escapeRegex = Regex("""([^A-Za-z0-9._~\-\n\r @])""")
+        val escapeRegex = Regex("""([\[\]\(\)])""")
         val escapedFeedback = betaFeedbackModel.feedback.replace(escapeRegex, """\\$1""")
-        val escapedEmail = betaFeedbackModel.email?.replace(escapeRegex, """\\$1""")
 
         val feedbackEmail =
             BetaFeedbackEmail(
                 feedback = escapedFeedback,
-                email = escapedEmail,
+                email = betaFeedbackModel.email,
                 referrer = betaFeedbackModel.referrerHeader,
             )
         emailService.sendEmail("Team-PRSDB@Softwire.com", feedbackEmail)
