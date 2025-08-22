@@ -79,9 +79,7 @@ class PasscodeInterceptor(
         userId: String,
         submittedPasscode: String,
     ): Boolean {
-        val passcode =
-            passcodeService.findPasscode(submittedPasscode)
-                ?: return redirectToPasscodeEntryAndReturnFalse(request, response)
+        val passcode = passcodeService.findPasscode(submittedPasscode) ?: return redirectToInvalidPasscodeAndReturnFalse(response)
 
         return if (passcode.baseUser == null) {
             handleUnclaimedPasscode(request, response, userId, submittedPasscode)
@@ -99,7 +97,7 @@ class PasscodeInterceptor(
         if (passcodeService.claimPasscodeForUser(submittedPasscode, userId)) {
             true
         } else {
-            redirectToPasscodeEntryAndReturnFalse(request, response)
+            redirectToInvalidPasscodeAndReturnFalse(response)
         }
 
     private fun redirectToDashboardAndReturnFalse(response: HttpServletResponse): Boolean {

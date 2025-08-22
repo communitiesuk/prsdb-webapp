@@ -128,7 +128,7 @@ class PasscodeInterceptorTests {
     }
 
     @Test
-    fun `preHandle redirects authenticated users without a claimed or valid session passcode to entry page`() {
+    fun `preHandle redirects authenticated users without a claimed or valid session passcode to invalid passcode page`() {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
@@ -137,8 +137,7 @@ class PasscodeInterceptorTests {
         whenever(mockPasscodeService.findPasscode(sessionPasscode)).thenReturn(null)
 
         assertFalse(callPreHandle())
-        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_DASHBOARD_URL)
-        verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 
     @Test
@@ -156,7 +155,7 @@ class PasscodeInterceptorTests {
     }
 
     @Test
-    fun `preHandle redirects authenticated users with a valid unclaimed session passcode to entry page if claiming it fails`() {
+    fun `preHandle redirects authenticated users with a valid unclaimed session passcode to invalid passcode page if claiming it fails`() {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
@@ -167,8 +166,7 @@ class PasscodeInterceptorTests {
 
         assertFalse(callPreHandle())
         verify(mockPasscodeService).claimPasscodeForUser(passcode.passcode, userId)
-        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_DASHBOARD_URL)
-        verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 
     @Test
