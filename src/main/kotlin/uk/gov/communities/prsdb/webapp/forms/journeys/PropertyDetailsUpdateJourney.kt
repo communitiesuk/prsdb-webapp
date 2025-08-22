@@ -145,6 +145,16 @@ class PropertyDetailsUpdateJourney(
                                         labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
+                                    RadiosButtonViewModel(
+                                        value = OwnershipType.SHARE_OF_FREEHOLD,
+                                        labelMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.label",
+                                        hintMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.hint",
+                                    ),
+                                    RadiosButtonViewModel(
+                                        value = OwnershipType.COMMONHOLD,
+                                        labelMsgKey = "forms.ownershipType.radios.option.commonhold.label",
+                                        hintMsgKey = "forms.ownershipType.radios.option.commonhold.hint",
+                                    ),
                                 ),
                             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             "showWarning" to true,
