@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
-data class RegisteredPropertyViewModel(
+data class RegisteredPropertyLocalCouncilViewModel(
     val address: String,
     val registrationNumber: String,
     val localAuthorityName: String,
@@ -19,8 +19,8 @@ data class RegisteredPropertyViewModel(
         fun fromPropertyOwnership(
             propertyOwnership: PropertyOwnership,
             currentUrlKey: Int? = null,
-        ): RegisteredPropertyViewModel =
-            RegisteredPropertyViewModel(
+        ): RegisteredPropertyLocalCouncilViewModel =
+            RegisteredPropertyLocalCouncilViewModel(
                 address = propertyOwnership.property.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
@@ -38,6 +38,31 @@ data class RegisteredPropertyViewModel(
                 recordLink =
                     PropertyDetailsController
                         .getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
+                        .overrideBackLinkForUrl(currentUrlKey),
+            )
+    }
+}
+
+data class RegisteredPropertyLandlordViewModel(
+    val address: String,
+    val registrationNumber: String,
+    val recordLink: String,
+) {
+    companion object {
+        fun fromPropertyOwnership(
+            propertyOwnership: PropertyOwnership,
+            currentUrlKey: Int? = null,
+        ): RegisteredPropertyLandlordViewModel =
+            RegisteredPropertyLandlordViewModel(
+                address = propertyOwnership.property.address.singleLineAddress,
+                registrationNumber =
+                    RegistrationNumberDataModel
+                        .fromRegistrationNumber(
+                            propertyOwnership.registrationNumber,
+                        ).toString(),
+                recordLink =
+                    PropertyDetailsController
+                        .getPropertyDetailsPath(propertyOwnership.id, isLaView = false)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }

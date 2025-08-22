@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -40,7 +41,7 @@ class RegisteredPropertyViewModelTests {
         val expectedRecordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
 
         val expectedRegisteredPropertyViewModel =
-            RegisteredPropertyViewModel(
+            RegisteredPropertyLocalCouncilViewModel(
                 address,
                 expectedRegistrationNumber,
                 expectedLocalAuthority,
@@ -49,7 +50,7 @@ class RegisteredPropertyViewModelTests {
                 expectedRecordLink,
             )
 
-        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(expectedRegisteredPropertyViewModel, result)
     }
@@ -66,7 +67,7 @@ class RegisteredPropertyViewModelTests {
     ) {
         val propertyOwnership = createPropertyOwnership(currentNumTenants = currentNumTenants)
 
-        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(result.isTenantedMessageKey, expectedMessageKey)
     }
@@ -86,7 +87,7 @@ class RegisteredPropertyViewModelTests {
 
         val propertyOwnership = createPropertyOwnership(license = licence)
 
-        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(result.licenseTypeMessageKey, expectedDisplayName)
     }
@@ -95,8 +96,31 @@ class RegisteredPropertyViewModelTests {
     fun `Returns correct licensing display name for property with no licence`() {
         val propertyOwnership = createPropertyOwnership(license = null)
 
-        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
+        val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(result.licenseTypeMessageKey, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
+    }
+
+    @Nested
+    inner class RegisteredPropertyLandlordViewModelTests {
+        @Test
+        fun `Returns a corresponding RegisteredPropertyLandlordViewModel from a PropertyOwnership`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            val expectedRegisteredPropertyLandlordViewModel =
+                RegisteredPropertyLandlordViewModel(
+                    address = propertyOwnership.property.address.singleLineAddress,
+                    registrationNumber =
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(
+                                propertyOwnership.registrationNumber,
+                            ).toString(),
+                    recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id),
+                )
+
+            val result = RegisteredPropertyLandlordViewModel.fromPropertyOwnership(propertyOwnership)
+
+            assertEquals(expectedRegisteredPropertyLandlordViewModel, result)
+        }
     }
 }

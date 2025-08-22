@@ -49,7 +49,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOw
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
@@ -266,9 +266,9 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
 
-            val expectedResults: List<RegisteredPropertyViewModel> =
+            val expectedResults: List<RegisteredPropertyLocalCouncilViewModel> =
                 listOf(
-                    RegisteredPropertyViewModel(
+                    RegisteredPropertyLocalCouncilViewModel(
                         address = propertyOwnership1.property.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
@@ -282,7 +282,7 @@ class PropertyOwnershipServiceTests {
                                 .getPropertyDetailsPath(propertyOwnership1.id, isLaView = true)
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
-                    RegisteredPropertyViewModel(
+                    RegisteredPropertyLocalCouncilViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel

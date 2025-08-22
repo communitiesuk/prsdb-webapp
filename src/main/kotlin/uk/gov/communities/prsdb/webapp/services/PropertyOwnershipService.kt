@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBullet
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -114,9 +114,9 @@ class PropertyOwnershipService(
             )
         }
 
-    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyViewModel> =
+    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyLocalCouncilViewModel> =
         retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
-            RegisteredPropertyViewModel.fromPropertyOwnership(
+            RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
             )
