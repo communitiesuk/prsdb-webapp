@@ -21,10 +21,10 @@
     "bodyLocation": "/emails/LocalAuthorityAdminInvitation.md"
   },
   {
-    "test_id": "1bd9e020-d6f8-494f-ae6a-904e642d3f55",
+    "test_id": "9f2ddab0-590d-467f-bc26-f0b5f283ae18",
     "prod_id": null,
     "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - Your landlord registration number",
+    "subject": "GOV.UK - You have registered as a landlord on the PRS Database",
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
