@@ -4,23 +4,32 @@
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{forms.numberOfHouseholds.heading}">
+        forms.numberOfHouseholds.heading
+    </h1>
+    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.one}">
+        forms.numberOfHouseholds.paragraph.one
+    </p>
+    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.two}">
+        forms.numberOfHouseholds.paragraph.two
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{forms.numberOfHouseholds.bullet.point.one}">forms.numberOfHouseholds.bullet.point.one</li>
+        <li th:text="#{forms.numberOfHouseholds.bullet.point.two}">forms.numberOfHouseholds.bullet.point.two</li>
+        <li th:text="#{forms.numberOfHouseholds.bullet.point.three}">forms.numberOfHouseholds.bullet.point.three</li>
+    </ul>
+    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.three}">
+        forms.numberOfHouseholds.paragraph.three
+    </p>
+</th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{${fieldSetHeading}}, null)}">
-        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfHouseholds', null, 2)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{${fieldSetHeading}}, null)}">
+        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfHouseholds', null, 2)}">
         </div>
     </th:block>
-    <details id="details-content" th:replace="~{fragments/details :: details(#{'forms.numberOfHouseholds.details.summary.text'},~{::#details-content/content()})}">
-        <div class="govuk-details__text">
-            <p  th:text="#{'forms.numberOfHouseholds.details.text.paragraph.one'}">
-                forms.numberOfHouseholds.details.text.paragraph.one
-            </p>
-            <p th:text="#{'forms.numberOfHouseholds.details.text.paragraph.two'}">
-                forms.numberOfHouseholds.details.text.paragraph.two
-            </p>
-        </div>
-    </details>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
 </html>

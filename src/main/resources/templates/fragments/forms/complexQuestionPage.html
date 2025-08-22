@@ -1,0 +1,20 @@
+<th:block th:fragment="complexQuestionPage(title, formModel, formContent, questionContent, backUrl, sectionHeaderInfo)" th:with="enctype=${enctype ?: 'application/x-www-form-urlencoded'}, formId=${formId}">
+    <th:block id="main-content"
+              th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()}, ${#fields.hasErrors('${formModel.*}')})}">
+        <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back
+            link</a>
+        <main class="govuk-main-wrapper">
+            <div id="page-content"
+                 th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+                <th:block th:object="${formModel}">
+                    <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
+                </th:block>
+              <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
+                <th:block th:replace="${questionContent}"></th:block>
+                <form th:action="@{''}" method="post" novalidate th:object="${formModel}" th:attrappend="enctype=${enctype}" th:id="${formId}">
+                    <th:block th:replace="${formContent}"></th:block>
+                </form>
+            </div>
+        </main>
+    </th:block>
+</th:block>

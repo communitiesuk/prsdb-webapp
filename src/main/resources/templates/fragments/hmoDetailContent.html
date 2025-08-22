@@ -1,0 +1,20 @@
+
+<th:block th:fragment="hmoDetailContent(additionalContent)">
+    <th:block th:unless="${additionalContent == null}">
+        <p class="govuk-body">
+            <span th:text="#{forms.hmoShared.detail.paragraph.one.beforeLink}">forms.hmoShared.detail.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="@{${additionalContent.linkUrl}}" target="_blank" rel="noopener" th:text="#{forms.hmoShared.detail.paragraph.one.link.text}">
+                forms.hmoShared.detail.paragraph.one.linkText</a>
+            <span th:text="#{forms.hmoShared.detail.paragraph.one.afterLink}">forms.hmoShared.detail.paragraph.one.afterLink</span>
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.hmoShared.detail.bullet.one}">forms.hmoShared.detail.bullet.one</li>
+            <li th:text="#{forms.hmoShared.detail.bullet.two}">forms.hmoShared.detail.bullet.two</li>
+        </ul>
+        <p class="govuk-body" th:text="#{${additionalContent.paragraphTwo}}">additionalContent.paragraph.two</p>
+        <p class="govuk-body" th:text="#{${additionalContent.paragraphThree}}">additionalContent.paragraph.three</p>
+        <ul th:unless="${additionalContent.bulletPoints == null}">
+            <li th:each="bulletPoint : ${additionalContent.bulletPoints}" th:text="#{${bulletPoint}}">bulletPoint</li>
+        </ul>
+    </th:block>
+</th:block>

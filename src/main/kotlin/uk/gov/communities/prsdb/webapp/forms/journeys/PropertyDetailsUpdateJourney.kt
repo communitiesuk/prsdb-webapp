@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -145,6 +146,16 @@ class PropertyDetailsUpdateJourney(
                                         labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
+                                    RadiosButtonViewModel(
+                                        value = OwnershipType.SHARE_OF_FREEHOLD,
+                                        labelMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.label",
+                                        hintMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.hint",
+                                    ),
+                                    RadiosButtonViewModel(
+                                        value = OwnershipType.COMMONHOLD,
+                                        labelMsgKey = "forms.ownershipType.radios.option.commonhold.label",
+                                        hintMsgKey = "forms.ownershipType.radios.option.commonhold.hint",
+                                    ),
                                 ),
                             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                             "showWarning" to true,
@@ -230,12 +241,15 @@ class PropertyDetailsUpdateJourney(
                             "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
                             "label" to "forms.hmoMandatoryLicence.label",
                             "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",
-                            "detailMainText" to "forms.hmoMandatoryLicence.detail.paragraph.one",
                             "detailAdditionalContent" to
-                                mapOf(
-                                    "bulletOne" to "forms.hmoMandatoryLicence.detail.bullet.one",
-                                    "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
-                                    "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
+                                HMOAdditionalDetailModel(
+                                    "forms.hmoMandatoryLicence.detail.paragraph.two",
+                                    "forms.hmoMandatoryLicence.detail.paragraph.three",
+                                    listOf(
+                                        "forms.hmoMandatoryLicence.detail.bullet.one",
+                                        "forms.hmoMandatoryLicence.detail.bullet.two",
+                                        "forms.hmoMandatoryLicence.detail.bullet.three",
+                                    ),
                                 ),
                         ),
                 ),
@@ -256,7 +270,11 @@ class PropertyDetailsUpdateJourney(
                             "fieldSetHeading" to "forms.hmoAdditionalLicence.fieldSetHeading",
                             "label" to "forms.hmoAdditionalLicence.label",
                             "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
-                            "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
+                            "detailAdditionalContent" to
+                                HMOAdditionalDetailModel(
+                                    "forms.hmoAdditionalLicence.detail.paragraph.two",
+                                    "forms.hmoAdditionalLicence.detail.paragraph.three",
+                                ),
                         ),
                 ),
             nextAction = { _, _ -> Pair(UpdatePropertyDetailsStepId.CheckYourLicensingAnswers, null) },

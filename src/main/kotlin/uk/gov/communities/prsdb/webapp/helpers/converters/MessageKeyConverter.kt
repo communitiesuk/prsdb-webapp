@@ -44,6 +44,8 @@ class MessageKeyConverter {
             when (ownershipType) {
                 OwnershipType.FREEHOLD -> "forms.ownershipType.radios.option.freehold.label"
                 OwnershipType.LEASEHOLD -> "forms.ownershipType.radios.option.leasehold.label"
+                OwnershipType.SHARE_OF_FREEHOLD -> "forms.ownershipType.radios.option.shareOfFreehold.label"
+                OwnershipType.COMMONHOLD -> "forms.ownershipType.radios.option.commonhold.label"
             }
 
         private fun convertPropertyType(propertyType: PropertyType): String =
