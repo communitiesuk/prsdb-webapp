@@ -56,7 +56,7 @@ class LaUserRegistrationJourneyTests {
         completeHandleSubmitAndRedirect()
 
         // Assert
-        verify(mockLocalAuthorityDataService).registerUserAndReturnID(baseUserId, localAuthority, name, email, invitedAsAdmin)
+        verify(mockLocalAuthorityDataService).registerUserAndReturnID(baseUserId, localAuthority, name, email, invitedAsAdmin, true)
         verify(mockLocalAuthorityDataService).setLastUserIdRegisteredThisSession(expectedLaUser.id)
     }
 
@@ -140,6 +140,7 @@ class LaUserRegistrationJourneyTests {
                 localAuthority = localAuthority,
                 name = name,
                 email = email,
+                hasAcceptedPrivacyNotice = true,
             )
 
         whenever(
@@ -149,6 +150,7 @@ class LaUserRegistrationJourneyTests {
                 name = eq(name),
                 email = eq(email),
                 invitedAsAdmin = eq(invitedAsAdmin),
+                hasAcceptedPrivacyNotice = eq(true),
             ),
         ).thenReturn(newLaUser.id)
 
