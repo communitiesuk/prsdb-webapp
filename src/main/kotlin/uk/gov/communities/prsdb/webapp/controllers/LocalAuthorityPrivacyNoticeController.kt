@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeCo
 class LocalAuthorityPrivacyNoticeController {
     @GetMapping
     fun getPrivacyNoticePage(model: Model): String {
-        model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
         model.addAttribute("complaintsProcedureUrl", COMPLAINTS_PROCEDURE_URL)
+        model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
         model.addAttribute("informationCommissionersOfficeUrl", INFORMATION_COMMISSIONERS_OFFICE_URL)
         return "localAuthorityPrivacyNotice"
     }
