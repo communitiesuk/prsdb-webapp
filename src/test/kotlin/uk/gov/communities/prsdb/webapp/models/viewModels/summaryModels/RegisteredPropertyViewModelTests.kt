@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -17,9 +16,8 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class RegisteredPropertyViewModelTests {
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `Returns a corresponding RegisteredPropertyViewModel from a PropertyOwnership when`(isLaView: Boolean) {
+    @Test
+    fun `Returns a corresponding RegisteredPropertyViewModel from a PropertyOwnership`() {
         val address = "11 Example Road, EG1 2AB"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
@@ -39,7 +37,7 @@ class RegisteredPropertyViewModelTests {
             RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
         val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         val expectedIsTenantedMessageKey = "commonText.no"
-        val expectedRecordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView)
+        val expectedRecordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
 
         val expectedRegisteredPropertyViewModel =
             RegisteredPropertyViewModel(
@@ -51,7 +49,7 @@ class RegisteredPropertyViewModelTests {
                 expectedRecordLink,
             )
 
-        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership, isLaView)
+        val result = RegisteredPropertyViewModel.fromPropertyOwnership(propertyOwnership)
 
         assertEquals(expectedRegisteredPropertyViewModel, result)
     }
