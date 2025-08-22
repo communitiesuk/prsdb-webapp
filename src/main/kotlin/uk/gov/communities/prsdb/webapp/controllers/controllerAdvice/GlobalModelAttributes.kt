@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController.Companion.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE
@@ -36,6 +37,9 @@ class GlobalModelAttributes(
         model.addAttribute("googleAnalyticsCookieDomain", gaCookieDomain)
         model.addAttribute("plausibleDomainId", plausibleDomainId)
 
+        // Feedback banner attributes
+        model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
+
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)
         model.addAttribute("landlordPrivacyUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
@@ -45,7 +49,4 @@ class GlobalModelAttributes(
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
     }
-
-    @ModelAttribute("feedbackBannerUrl")
-    fun addFeedbackBannerUrl(): String = "/feedback"
 }
