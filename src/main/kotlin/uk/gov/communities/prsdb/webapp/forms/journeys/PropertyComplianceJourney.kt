@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
@@ -557,7 +558,11 @@ class PropertyComplianceJourney(
 
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
-        return FEEDBACK_PATH_SEGMENT
+        return if (propertyCompliance.propertyOwnership.primaryLandlord.shouldSeeFeedback) {
+            FEEDBACK_PATH_SEGMENT
+        } else {
+            CONFIRMATION_PATH_SEGMENT
+        }
     }
 
     private fun getPropertyAddress() =

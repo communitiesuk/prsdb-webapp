@@ -2,8 +2,11 @@ package uk.gov.communities.prsdb.webapp.forms.journeys
 
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
+import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
@@ -12,8 +15,10 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LocalAuthorityPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
@@ -46,6 +51,7 @@ class LaUserRegistrationJourney(
             initialStepId,
             setOf(
                 landingPageStep(),
+                privacyNoticeStep(),
                 registerUserStep(),
                 emailStep(),
                 checkAnswersStep(),
@@ -65,6 +71,32 @@ class LaUserRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerLAUser.title",
+                        ),
+                ),
+            nextAction = { _, _ -> Pair(RegisterLaUserStepId.PrivacyNotice, null) },
+            saveAfterSubmit = false,
+        )
+
+    private fun privacyNoticeStep() =
+        Step(
+            id = RegisterLaUserStepId.PrivacyNotice,
+            page =
+                Page(
+                    formModel = LocalAuthorityPrivacyNoticeFormModel::class,
+                    templateName = "forms/localAuthorityPrivacyNoticeForm",
+                    content =
+                        mapOf(
+                            "title" to "registerLAUser.title",
+                            "submitButtonText" to "forms.buttons.continue",
+                            "localAuthorityPrivacyNoticeUrl" to LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE,
+                            "options" to
+                                listOf(
+                                    CheckboxViewModel(
+                                        value = "true",
+                                        labelMsgKey = "registerLAUser.privacyNotice.checkBox.label",
+                                    ),
+                                ),
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLaUserStepId.Name, null) },
@@ -127,6 +159,7 @@ class LaUserRegistrationJourney(
                 name = LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
                 email = LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 invitedAsAdmin = invitation.invitedAsAdmin,
+                hasAcceptedPrivacyNotice = LaUserRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData)!!,
             )
 
         localAuthorityDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)

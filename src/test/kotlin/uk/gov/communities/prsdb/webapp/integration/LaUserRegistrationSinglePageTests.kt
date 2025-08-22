@@ -73,6 +73,16 @@ class LaUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data
     }
 
     @Nested
+    inner class LaUserRegistrationPrivacyNoticeName {
+        @Test
+        fun `Submitting without confirming returns an error`() {
+            val privacyNoticePage = navigator.skipToLaUserRegistrationPrivacyNoticePage(invitation.token)
+            privacyNoticePage.form.submit()
+            assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must confirm you’ve read the privacy notice to continue")
+        }
+    }
+
+    @Nested
     inner class LaUserRegistrationStepEmail {
         @Test
         fun `Submitting an empty e-mail address returns an error`() {
