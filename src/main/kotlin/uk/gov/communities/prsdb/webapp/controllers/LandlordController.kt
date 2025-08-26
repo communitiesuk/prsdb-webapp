@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
+import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -82,12 +82,9 @@ class LandlordController(
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         model.addAttribute("addComplianceUrl", ADD_COMPLIANCE_URL)
 
-        model.addAttribute("updatesToPilotUrl", "#")
-        model.addAttribute("policyUpdatesUrl", "#")
         model.addAttribute("privacyNoticeUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
-        model.addAttribute("howToLetUrl", "#")
-        model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_PRSD)
-        model.addAttribute("keepingPropertyCompliantUrl", "#")
+        model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
+        model.addAttribute("registerLandlordUrl", RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
 
         return "landlordDashboard"
     }
