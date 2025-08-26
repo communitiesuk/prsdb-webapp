@@ -77,6 +77,8 @@ const val INFORMATION_COMMISSIONERS_OFFICE_URL = "https://ico.org.uk/"
 
 const val FEEDBACK_FORM_URL = "https://forms.cloud.microsoft/e/q1mupnMCMY"
 
+const val RENTING_OUT_AN_HMO_URL = "https://www.gov.uk/renting-out-a-property/houses-in-multiple-occupation-hmo"
+
 const val GOV_LICENCE_URL = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
 
 const val CROWN_COPYRIGHT_URL =

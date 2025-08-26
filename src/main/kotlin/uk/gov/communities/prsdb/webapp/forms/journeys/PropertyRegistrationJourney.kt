@@ -41,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
@@ -72,7 +73,7 @@ class PropertyRegistrationJourney(
         getTaskListViewModelFactory(
             "registerProperty.title",
             "registerProperty.taskList.heading",
-            listOf("registerProperty.taskList.subtitle"),
+            listOf("registerProperty.taskList.subtitle.one", "registerProperty.taskList.subtitle.two"),
             backUrl = RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE,
         )
 
@@ -86,6 +87,7 @@ class PropertyRegistrationJourney(
             JourneyTask.withOneStep(
                 ownershipTypeStep(),
                 "registerProperty.taskList.register.selectOwnership",
+                "registerProperty.taskList.register.selectOwnership.hint",
             ),
             licensingTask(),
             occupancyTask(),
@@ -137,6 +139,7 @@ class PropertyRegistrationJourney(
                 numberOfPeopleStep(),
             ),
             "registerProperty.taskList.register.addTenancyInfo",
+            "registerProperty.taskList.register.addTenancyInfo.hint",
         )
 
     private fun lookupAddressStep() =
@@ -353,6 +356,16 @@ class PropertyRegistrationJourney(
                                         labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
                                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                                     ),
+                                    RadiosButtonViewModel(
+                                        value = OwnershipType.SHARE_OF_FREEHOLD,
+                                        labelMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.label",
+                                        hintMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.hint",
+                                    ),
+                                    RadiosButtonViewModel(
+                                        value = OwnershipType.COMMONHOLD,
+                                        labelMsgKey = "forms.ownershipType.radios.option.commonhold.label",
+                                        hintMsgKey = "forms.ownershipType.radios.option.commonhold.hint",
+                                    ),
                                 ),
                             "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
@@ -435,12 +448,15 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
                             "label" to "forms.hmoMandatoryLicence.label",
                             "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",
-                            "detailMainText" to "forms.hmoMandatoryLicence.detail.paragraph.one",
                             "detailAdditionalContent" to
-                                mapOf(
-                                    "bulletOne" to "forms.hmoMandatoryLicence.detail.bullet.one",
-                                    "bulletTwo" to "forms.hmoMandatoryLicence.detail.bullet.two",
-                                    "text" to "forms.hmoMandatoryLicence.detail.paragraph.two",
+                                HMOAdditionalDetailModel(
+                                    "forms.hmoMandatoryLicence.detail.paragraph.two",
+                                    "forms.hmoMandatoryLicence.detail.paragraph.three",
+                                    listOf(
+                                        "forms.hmoMandatoryLicence.detail.bullet.one",
+                                        "forms.hmoMandatoryLicence.detail.bullet.two",
+                                        "forms.hmoMandatoryLicence.detail.bullet.three",
+                                    ),
                                 ),
                         ),
                     shouldDisplaySectionHeader = true,
@@ -461,7 +477,11 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.hmoAdditionalLicence.fieldSetHeading",
                             "label" to "forms.hmoAdditionalLicence.label",
                             "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
-                            "detailMainText" to "forms.hmoAdditionalLicence.detail.text",
+                            "detailAdditionalContent" to
+                                HMOAdditionalDetailModel(
+                                    "forms.hmoAdditionalLicence.detail.paragraph.two",
+                                    "forms.hmoAdditionalLicence.detail.paragraph.three",
+                                ),
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -479,6 +499,7 @@ class PropertyRegistrationJourney(
                         mapOf(
                             "title" to "registerProperty.title",
                             "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
+                            "fieldSetHint" to "forms.occupancy.fieldSetHint",
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(

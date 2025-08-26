@@ -15,10 +15,29 @@
                         <h2 class="govuk-heading-m" th:text="#{registerProperty.onceYouRegister.heading}">
                             registerProperty.onceYouRegister.heading
                         </h2>
-                        <p class="govuk-body" th:utext="#{registerProperty.onceYouRegister.paragraph.one}">registerProperty.intro.paragraph.one</p>
+                        <p class="govuk-body" th:utext="#{registerProperty.onceYouRegister.paragraph.one}">registerProperty.onceYouRegister.paragraph.one</p>
                         <p class="govuk-body" th:text="#{registerProperty.onceYouRegister.paragraph.two}">registerProperty.onceYouRegister.paragraph.two</p>
                         <p class="govuk-body" th:text="#{registerProperty.onceYouRegister.paragraph.three}">registerProperty.onceYouRegister.paragraph.three</p>
-
+                        <p class="govuk-body" th:text="#{registerProperty.onceYouRegister.paragraph.four}">registerProperty.onceYouRegister.paragraph.four</p>
+                    </section>
+                    <section>
+                        <h2 class="govuk-heading-m" th:text="#{registerProperty.doNotAddFalseInfo.heading}">
+                            registerProperty.doNotAddFalseInfo.heading
+                        </h2>
+                        <p class="govuk-body" th:text="#{registerProperty.doNotAddFalseInfo.paragraph.one}">
+                            registerProperty.doNotAddFalseInfo.paragraph.one
+                        </p>
+                        <p class="govuk-body" th:text="#{registerProperty.doNotAddFalseInfo.paragraph.two}">
+                            registerProperty.doNotAddFalseInfo.paragraph.two
+                        </p>
+                        <ul class="govuk-list govuk-list--bullet">
+                            <li th:text="#{registerProperty.doNotAddFalseInfo.bullet.one}">
+                                registerProperty.doNotAddFalseInfo.bullet.one
+                            </li>
+                            <li th:text="#{registerProperty.doNotAddFalseInfo.bullet.two}">
+                                registerProperty.doNotAddFalseInfo.bullet.two
+                            </li>
+                        </ul>
                     </section>
                     <section>
                         <h2 class="govuk-heading-m" th:text="#{registerProperty.beforeYouBegin.heading}">
@@ -26,6 +45,9 @@
                         </h2>
                         <p class="govuk-body" th:text="#{registerProperty.beforeYouBegin.paragraph.one}">
                             registerProperty.beforeYouBegin.paragraph.one
+                        </p>
+                        <p class="govuk-body" th:text="#{registerProperty.beforeYouBegin.paragraph.two}">
+                            registerProperty.beforeYouBegin.paragraph.two
                         </p>
                         <ul class="govuk-list govuk-list--bullet">
                             <li th:text="#{registerProperty.beforeYouBegin.bullet.one}">
@@ -47,9 +69,6 @@
                                 registerProperty.beforeYouBegin.bullet.six
                             </li>
                         </ul>
-                        <p class="govuk-body" th:text="#{registerProperty.beforeYouBegin.paragraph.end}">
-                            registerProperty.beforeYouBegin.paragraph.end
-                        </p>
                     </section>
                     <section>
                         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyInitialStep}, #{forms.buttons.startNow})}"></a>
