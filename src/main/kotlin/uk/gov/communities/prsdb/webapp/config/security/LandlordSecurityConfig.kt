@@ -48,7 +48,7 @@ class LandlordSecurityConfig(
                     .permitAll()
                     .requestMatchers(PasscodeEntryController.PASSCODE_ENTRY_ROUTE)
                     .permitAll()
-                    .requestMatchers(PasscodeEntryController.PASSCODE_ALREADY_USED_ROUTE)
+                    .requestMatchers(PasscodeEntryController.INVALID_PASSCODE_ROUTE)
                     .permitAll()
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
                     .permitAll()

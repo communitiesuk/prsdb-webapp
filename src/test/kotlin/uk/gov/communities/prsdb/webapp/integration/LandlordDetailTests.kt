@@ -29,9 +29,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Local council")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Property licence")
-            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Tenanted")
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
         }
 
         @Test

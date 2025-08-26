@@ -341,7 +341,7 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                            "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "postcodeHint" to "forms.lookupAddress.postcode.hint",
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
@@ -418,9 +418,9 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.manualAddress.fieldSetHint",
-                            "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
-                            "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                            "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
+                            "addressLineOneLabel" to "forms.manualAddress.landlordRegistration.addressLineOne.label",
+                            "addressLineTwoLabel" to "forms.manualAddress.landlordRegistration.addressLineTwo.label",
                             "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
                             "countyLabel" to "forms.manualAddress.county.label",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
