@@ -43,7 +43,8 @@ abstract class PropertyDetailsBasePage(
         val occupancyRow = getRow("Occupied by tenants")
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfPeopleRow = getRow("Number of people")
-        val licensingRow = getRow("Licensing type")
+        val licensingTypeRow = getRow("Licensing type")
+        val licensingNumberRow = getRow("Licensing number")
     }
 
     class PropertyComplianceSummaryList(
@@ -53,8 +54,8 @@ abstract class PropertyDetailsBasePage(
         val eicrRow = getRow("Electrical Installation Condition Report (EICR)")
         val epcRow = getRow("Energy Performance Certificate (EPC)")
         val meesExemptionRow = getRow("MEES exemption")
-        val fireSafetyRow = getRow("Followed fire safety responsibilities")
-        val propertySafetyRow = getRow("Understood your responsibility to keep your property safe")
-        val responsibilityToTenantsRow = getRow("Understood your responsibilities to tenants")
+        val fireSafetyRow = getRow("Fire safety responsibilities")
+        val propertySafetyRow = getRow("Health and safety in rental properties")
+        val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
     }
 }
