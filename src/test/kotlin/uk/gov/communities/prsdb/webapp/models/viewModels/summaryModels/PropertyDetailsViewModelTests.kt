@@ -69,11 +69,7 @@ class PropertyDetailsViewModelTests {
         // Arrange
         val propertyOwnership =
             createPropertyOwnership(
-                property =
-                    createProperty(
-                        address = createAddress(uprn = 1234.toLong()),
-                    ),
-                currentNumTenants = 2,
+                license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
             )
 
         val expectedHeaderList =
@@ -88,6 +84,42 @@ class PropertyDetailsViewModelTests {
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
+    }
+
+    @Test
+    fun `Licensing number row is hidden when the property has a license record with NOLICENSING type`() {
+        // Arrange
+        val propertyOwnership =
+            createPropertyOwnership(
+                license = License(LicensingType.NO_LICENSING, ""),
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+
+        assertNull(
+            viewModel.licensingInformation.firstOrNull {
+                it.fieldHeading ==
+                    "propertyDetails.propertyRecord.licensingInformation.licensingNumber"
+            },
+        )
+    }
+
+    @Test
+    fun `Licensing number row is hidden when the property has no license`() {
+        // Arrange
+        val propertyOwnership =
+            createPropertyOwnership(
+                license = null,
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+
+        assertNull(
+            viewModel.licensingInformation.firstOrNull {
+                it.fieldHeading ==
+                    "propertyDetails.propertyRecord.licensingInformation.licensingNumber"
+            },
+        )
     }
 
     @Test
@@ -171,11 +203,11 @@ class PropertyDetailsViewModelTests {
         val viewModel = PropertyDetailsViewModel(propertyOwnership)
 
         val propertyRecordLicenseType =
-            viewModel.propertyRecord
+            viewModel.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         val propertyRecordLicenseNumber =
-            viewModel.propertyRecord
+            viewModel.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingNumber" }
 
         assertEquals("forms.licensingType.radios.option.hmoMandatory.label", propertyRecordLicenseType.fieldValue)
@@ -190,7 +222,7 @@ class PropertyDetailsViewModelTests {
             )
         val viewModelDeclaredNoLicense = PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense)
         val propertyRecordDeclaredNoLicense =
-            viewModelDeclaredNoLicense.propertyRecord
+            viewModelDeclaredNoLicense.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals(
@@ -202,8 +234,8 @@ class PropertyDetailsViewModelTests {
             createPropertyOwnership()
         val viewModelNullLicense = PropertyDetailsViewModel(propertyOwnershipNullLicense)
         val propertyRecordNullLicense =
-            viewModelNullLicense.propertyRecord
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingType" }
+            viewModelNullLicense.licensingInformation
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals("forms.checkPropertyAnswers.propertyDetails.noLicensing", propertyRecordNullLicense.fieldValue)
     }
@@ -272,9 +304,13 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true)
 
-        val changeLinkCount = viewModel.propertyRecord.count { it.action != null }
+        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
 
-        assertEquals(6, changeLinkCount)
+        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.action != null }
+
+        val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount
+
+        assertEquals(5, totalChangeLinkCount)
     }
 
     @Test

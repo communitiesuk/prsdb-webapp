@@ -113,16 +113,11 @@ class PropertyDetailsViewModel(
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
                     withChangeLinks,
                 )
-                addRow(
-                    "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
-                    if (propertyOwnership.license == null || propertyOwnership.license!!.licenseType == LicensingType.NO_LICENSING) {
-                        MessageKeyConverter.convert(LicensingType.NO_LICENSING)
-                    } else {
-                        propertyOwnership.license!!.licenseNumber
-                    },
-                    changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
-                    withChangeLinks,
-                )
+                if (propertyOwnership.license != null && propertyOwnership.license!!.licenseType != LicensingType.NO_LICENSING) {
+                    addRow(
+                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+                        propertyOwnership.license!!.licenseNumber,
+                    )
+                }
             }.toList()
 }
