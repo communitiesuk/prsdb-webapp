@@ -29,10 +29,6 @@ class IncompletePropertyViewModelBuilder {
                         dataModel.singleLineAddress,
                     )
                     addRow(
-                        "landlord.incompleteProperties.summaryRow.localAuthority",
-                        dataModel.localAuthorityName,
-                    )
-                    addRow(
                         "landlord.incompleteProperties.summaryRow.completeBy",
                         dataModel.completeByDate,
                     )
