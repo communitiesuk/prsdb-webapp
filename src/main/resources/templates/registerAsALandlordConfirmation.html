@@ -41,6 +41,17 @@
             <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.propertyRegistration.paragraph.two}">
                 registerAsALandlord.confirmation.propertyRegistration.paragraph.two
             </p>
+            <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.propertyRegistration.paragraph.three}">
+                registerAsALandlord.confirmation.propertyRegistration.paragraph.three
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerAsALandlord.confirmation.propertyRegistration.bullet.one}">
+                    registerAsALandlord.confirmation.propertyRegistration.bullet.one
+                </li>
+                <li th:text="#{registerAsALandlord.confirmation.propertyRegistration.bullet.two}">
+                    registerAsALandlord.confirmation.propertyRegistration.bullet.two
+                </li>
+            </ul>
         </section>
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
             common.confirmationPage.goToDashboard

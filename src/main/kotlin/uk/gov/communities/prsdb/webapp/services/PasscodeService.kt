@@ -71,8 +71,16 @@ class PasscodeService(
         return passcodeRepository.existsByPasscode(normalizedPasscode)
     }
 
-    fun hasUserClaimedAPasscode(userId: String) =
-        session.getAttribute(HAS_USER_CLAIMED_A_PASSCODE) as Boolean? == true || passcodeRepository.existsByBaseUser_Id(userId)
+    fun hasUserClaimedAPasscode(userId: String): Boolean {
+        val cachedResult = session.getAttribute(HAS_USER_CLAIMED_A_PASSCODE) as Boolean?
+        return if (cachedResult != null) {
+            cachedResult
+        } else {
+            val databaseResult = passcodeRepository.existsByBaseUser_Id(userId)
+            session.setAttribute(HAS_USER_CLAIMED_A_PASSCODE, databaseResult)
+            databaseResult
+        }
+    }
 
     fun findPasscode(passcodeString: String): Passcode? = passcodeRepository.findByPasscode(normalizePasscode(passcodeString))
 

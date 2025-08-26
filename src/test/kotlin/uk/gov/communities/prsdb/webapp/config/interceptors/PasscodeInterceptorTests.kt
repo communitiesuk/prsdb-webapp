@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -56,6 +56,7 @@ class PasscodeInterceptorTests {
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(true)
 
         assertTrue(callPreHandle())
+        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
         verify(mockResponse, never()).sendRedirect(anyString())
     }
 
@@ -86,8 +87,8 @@ class PasscodeInterceptorTests {
     }
 
     @Test
-    fun `preHandle allows passcode already used route when user has not claimed a passcode`() {
-        mockRequest.requestURI = PASSCODE_ENTRY_ROUTE
+    fun `preHandle allows invalid passcode route when user has not claimed a passcode`() {
+        mockRequest.requestURI = INVALID_PASSCODE_ROUTE
 
         assertTrue(callPreHandle())
         verify(mockResponse, never()).sendRedirect(anyString())
@@ -112,6 +113,7 @@ class PasscodeInterceptorTests {
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
 
         assertTrue(callPreHandle())
+        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
         verify(mockResponse, never()).sendRedirect(anyString())
     }
 
@@ -128,7 +130,7 @@ class PasscodeInterceptorTests {
     }
 
     @Test
-    fun `preHandle redirects authenticated users without a claimed or valid session passcode to entry page`() {
+    fun `preHandle redirects authenticated users without a claimed or valid session passcode to invalid passcode page`() {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
@@ -137,8 +139,7 @@ class PasscodeInterceptorTests {
         whenever(mockPasscodeService.findPasscode(sessionPasscode)).thenReturn(null)
 
         assertFalse(callPreHandle())
-        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_DASHBOARD_URL)
-        verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 
     @Test
@@ -152,11 +153,12 @@ class PasscodeInterceptorTests {
 
         assertTrue(callPreHandle())
         verify(mockPasscodeService).claimPasscodeForUser(passcode.passcode, userId)
+        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
         verify(mockResponse, never()).sendRedirect(anyString())
     }
 
     @Test
-    fun `preHandle redirects authenticated users with a valid unclaimed session passcode to entry page if claiming it fails`() {
+    fun `preHandle redirects authenticated users with a valid unclaimed session passcode to invalid passcode page if claiming it fails`() {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
@@ -167,12 +169,11 @@ class PasscodeInterceptorTests {
 
         assertFalse(callPreHandle())
         verify(mockPasscodeService).claimPasscodeForUser(passcode.passcode, userId)
-        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_DASHBOARD_URL)
-        verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 
     @Test
-    fun `preHandle redirects authenticated users who try to claim already-used passcodes to already used page`() {
+    fun `preHandle redirects authenticated users who try to claim already-used passcodes to invalid passcode page`() {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
@@ -181,6 +182,6 @@ class PasscodeInterceptorTests {
         whenever(mockPasscodeService.findPasscode(passcode.passcode)).thenReturn(passcode)
 
         assertFalse(callPreHandle())
-        verify(mockResponse).sendRedirect(PASSCODE_ALREADY_USED_ROUTE)
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 }

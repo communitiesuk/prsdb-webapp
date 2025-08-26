@@ -1,8 +1,0 @@
-<!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{passcodeAlreadyUsed.title}, ~{::main}, false)}">
-    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
-        <h1 class="govuk-heading-l" th:text="#{passcodeAlreadyUsed.heading}">passcodeAlreadyUsed.heading</h1>
-        <p class="govuk-body" th:text="#{passcodeAlreadyUsed.body}">passcodeAlreadyUsed.body</p>
-        <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${passcodeEntryUrl}, #{passcodeAlreadyUsed.cta})}">passcodeAlreadyUsed.cta</button>
-    </main>
-</html>
