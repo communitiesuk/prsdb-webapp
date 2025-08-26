@@ -48,7 +48,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
@@ -222,31 +223,25 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
 
-            val expectedResults: List<RegisteredPropertyViewModel> =
+            val expectedResults: List<RegisteredPropertyLandlordViewModel> =
                 listOf(
-                    RegisteredPropertyViewModel(
+                    RegisteredPropertyLandlordViewModel(
                         address = propertyOwnership1.property.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(propertyOwnership1.registrationNumber)
                                 .toString(),
-                        localAuthorityName = localAuthority.name,
-                        licenseTypeMessageKey = expectedPropertyLicence,
-                        isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
                             PropertyDetailsController
                                 .getPropertyDetailsPath(propertyOwnership1.id)
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
-                    RegisteredPropertyViewModel(
+                    RegisteredPropertyLandlordViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(propertyOwnership2.registrationNumber)
                                 .toString(),
-                        localAuthorityName = localAuthority.name,
-                        licenseTypeMessageKey = expectedPropertyLicence,
-                        isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
                             PropertyDetailsController
                                 .getPropertyDetailsPath(propertyOwnership2.id)
@@ -271,9 +266,9 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(expectedCurrentUrlKey)
 
-            val expectedResults: List<RegisteredPropertyViewModel> =
+            val expectedResults: List<RegisteredPropertyLocalCouncilViewModel> =
                 listOf(
-                    RegisteredPropertyViewModel(
+                    RegisteredPropertyLocalCouncilViewModel(
                         address = propertyOwnership1.property.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
@@ -287,7 +282,7 @@ class PropertyOwnershipServiceTests {
                                 .getPropertyDetailsPath(propertyOwnership1.id, isLaView = true)
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
-                    RegisteredPropertyViewModel(
+                    RegisteredPropertyLocalCouncilViewModel(
                         address = propertyOwnership2.property.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
