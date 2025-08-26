@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
@@ -80,7 +80,7 @@ class LandlordController(
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
         )
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-        model.addAttribute("addComplianceUrl", ADD_COMPLIANCE_URL)
+        model.addAttribute("addComplianceUrl", COMPLIANCE_ACTIONS_URL)
 
         model.addAttribute("updatesToPilotUrl", "#")
         model.addAttribute("policyUpdatesUrl", "#")
@@ -154,8 +154,8 @@ class LandlordController(
         return "redirect:$INCOMPLETE_PROPERTIES_URL"
     }
 
-    @GetMapping("/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT")
-    fun addComplianceInformation(
+    @GetMapping("/$COMPLIANCE_ACTIONS_PATH_SEGMENT")
+    fun getComplianceActions(
         model: Model,
         principal: Principal,
     ): String {
@@ -212,7 +212,7 @@ class LandlordController(
         const val LANDLORD_DASHBOARD_URL = "/$LANDLORD_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
         const val LANDLORD_BASE_URL = "/$LANDLORD_PATH_SEGMENT"
         const val INCOMPLETE_PROPERTIES_URL = "/$LANDLORD_PATH_SEGMENT/$INCOMPLETE_PROPERTIES_PATH_SEGMENT"
-        const val ADD_COMPLIANCE_URL = "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT"
+        const val COMPLIANCE_ACTIONS_URL = "/$LANDLORD_PATH_SEGMENT/$COMPLIANCE_ACTIONS_PATH_SEGMENT"
 
         private const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT?$CONTEXT_ID_URL_PARAMETER={contextId}"
