@@ -8,12 +8,11 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
+import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController.Companion.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
 @PrsdbControllerAdvice
@@ -42,8 +41,7 @@ class GlobalModelAttributes(
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)
-        model.addAttribute("landlordPrivacyUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
-        model.addAttribute("localCouncilPrivacyUrl", LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
+        model.addAttribute("privacyUrl", "/$PRIVACY_NOTICE_PATH_SEGMENT")
         model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
         model.addAttribute("mhclgUrl", MHCLG_URL)
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
