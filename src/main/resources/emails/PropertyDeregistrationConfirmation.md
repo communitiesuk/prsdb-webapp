@@ -2,8 +2,6 @@
 
 ## You deleted:
 
-Property registration number:
-
 ^ ((property address))
 
 The Property Registration Number is:
