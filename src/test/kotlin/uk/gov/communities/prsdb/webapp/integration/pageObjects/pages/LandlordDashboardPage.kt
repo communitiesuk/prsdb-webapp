@@ -19,11 +19,11 @@ class LandlordDashboardPage(
     val viewIncompletePropertiesButton = Button.byText(page, "View incomplete properties")
     val viewPropertyRecordsButton = Button.byText(page, "View your property records")
     val viewLandlordRecordButton = Button.byText(page, "View your landlord record")
-    val addComplianceInformationButton = Button.byText(page, "Add compliance information")
+    val addComplianceInformationButton = Button.byText(page, "Compliance actions")
     val notificationBanner = DashboardNotificationBanner(page)
 
     val rentersRightsBillLink = Link.byText(page, "Renters' Rights Bill")
-    val privacyNoticeLink = Link.byText(page, "How your information is used")
+    val privacyNoticeLink = Link.byText(page, "Privacy notice")
 
     class DashboardNotificationBanner(
         page: Page,
@@ -31,13 +31,13 @@ class LandlordDashboardPage(
         val incompletePropertiesLink =
             Link.byText(
                 page,
-                "View incomplete properties",
+                "View incomplete property details",
                 selectorOrLocator = ".govuk-notification-banner__link",
             )
         val addComplianceInformationLink =
             Link.byText(
                 page,
-                "Add compliance information",
+                "Compliance actions",
                 selectorOrLocator = ".govuk-notification-banner__link",
             )
     }

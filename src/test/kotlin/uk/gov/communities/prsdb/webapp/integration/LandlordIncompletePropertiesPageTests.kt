@@ -24,10 +24,10 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         @Test
         fun `the page loads with heading and subheading`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
-            assertThat(incompletePropertiesPage.heading).containsText("Your incomplete properties")
+            assertThat(incompletePropertiesPage.heading).containsText("Incomplete property details")
             assertThat(
                 incompletePropertiesPage.subHeading,
-            ).containsText("You have 28 days to complete a property registration or the property will be deleted from the database")
+            ).containsText("Complete the missing details for these properties. After 28 days, incomplete properties are deleted.")
         }
 
         @Test
@@ -47,14 +47,10 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
 
             assertThat(incompletePropertiesPage.firstSummaryCard.summaryList.propertyAddressRow).containsText("4, Example Road, EG")
             assertThat(
-                incompletePropertiesPage.firstSummaryCard.summaryList.localAuthorityRow,
-            ).containsText("SOUTH GLOUCESTERSHIRE COUNCIL")
-            assertThat(
                 incompletePropertiesPage.firstSummaryCard.summaryList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
 
             assertThat(incompletePropertiesPage.secondSummaryCard.summaryList.propertyAddressRow).containsText("5, Example Road, EG")
-            assertThat(incompletePropertiesPage.secondSummaryCard.summaryList.localAuthorityRow).containsText("NORTH SOMERSET COUNCIL")
             assertThat(
                 incompletePropertiesPage.secondSummaryCard.summaryList.completeByRow,
             ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
@@ -83,8 +79,8 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         @Test
         fun `the page loads with heading and page text`() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
-            assertThat(incompletePropertiesPage.heading).containsText("Your incomplete properties")
-            assertThat(incompletePropertiesPage.subHeading).containsText("You have no incomplete properties.")
+            assertThat(incompletePropertiesPage.heading).containsText("Incomplete property details")
+            assertThat(incompletePropertiesPage.subHeading).containsText("You have no properties with missing or incomplete details.")
             assertThat(incompletePropertiesPage.text).containsText("You can either view registered properties or register a new property.")
         }
 
