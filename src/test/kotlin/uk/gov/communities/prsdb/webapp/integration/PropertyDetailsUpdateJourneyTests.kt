@@ -241,7 +241,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Update number of households
             val newNumberOfHouseholds = 1
-            assertThat(updateNumberOfHouseholdsPage.form.fieldsetLegend).containsText("How many households live in your property?")
+            assertThat(updateNumberOfHouseholdsPage.form.fieldsetLegend).containsText("How many households are in your property?")
             updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
             val updateNumberOfPeoplePage =
                 assertPageIs(page, OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
