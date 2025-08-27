@@ -5,8 +5,9 @@ import com.microsoft.playwright.Page
 
 open class SummaryList(
     parentLocator: Locator,
-) : BaseComponent(parentLocator.locator(".govuk-summary-list")) {
-    constructor(page: Page) : this(page.locator("html"))
+    index: Int = 0,
+) : BaseComponent(parentLocator.locator(".govuk-summary-list").nth(index)) {
+    constructor(page: Page, index: Int = 0) : this(page.locator("html"), index)
 
     protected fun getRow(key: String) = SummaryListRow.byKey(locator, key)
 
