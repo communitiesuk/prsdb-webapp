@@ -30,7 +30,7 @@
                 <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localAuthorityPrivacyNotice.section.three.paragraph.two.boldText},#{localAuthorityPrivacyNotice.section.three.paragraph.two.normalText}, null)}"></li>
                 <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localAuthorityPrivacyNotice.section.three.paragraph.three.boldText},#{localAuthorityPrivacyNotice.section.three.paragraph.three.normalText}, null)}"></li>
                 <li id="section3bullet3" th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localAuthorityPrivacyNotice.section.three.paragraph.four.boldText},#{localAuthorityPrivacyNotice.section.three.paragraph.four.normalText}, ~{::#section3bullet3/content()})}">
-                    <ul>
+                    <ul class="govuk-list govuk-list--bullet">
                         <li class="govuk-!-font-weight-bold" th:text="#{localAuthorityPrivacyNotice.section.three.paragraph.five}">localAuthorityPrivacyNotice.section.three.paragraph.five</li>
                     </ul>
                 </li>
@@ -47,13 +47,13 @@
             <p class="govuk-body" th:text="#{localAuthorityPrivacyNotice.section.four.paragraph.one}">localAuthorityPrivacyNotice.section.four.paragraph.one</p>
             <ul class="govuk-list govuk-list--bullet ">
                 <li id="section4bullet1" th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localAuthorityPrivacyNotice.section.four.subheading.one},#{localAuthorityPrivacyNotice.section.four.paragraph.two},~{::#section4bullet1/content()})}">
-                    <ul>
+                    <ul class="govuk-list govuk-list--bullet">
                         <li th:text="#{localAuthorityPrivacyNotice.section.four.paragraph.three}">localAuthorityPrivacyNotice.section.four.paragraph.three</li>
                         <li th:text="#{localAuthorityPrivacyNotice.section.four.paragraph.four}">localAuthorityPrivacyNotice.section.four.paragraph.four</li>
                     </ul>
                 </li>
                 <li id="section4bullet2" th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localAuthorityPrivacyNotice.section.four.subheading.two},'',~{::#section4bullet2/content()})}">
-                    <ul>
+                    <ul class="govuk-list govuk-list--bullet">
                         <li th:text="#{localAuthorityPrivacyNotice.section.four.paragraph.five}">localAuthorityPrivacyNotice.section.four.paragraph.five</li>
                     </ul>
                 </li>
