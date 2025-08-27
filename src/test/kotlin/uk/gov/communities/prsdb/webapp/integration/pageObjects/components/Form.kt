@@ -21,6 +21,10 @@ open class Form(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator(".govuk-fieldset__heading"))
 
+    class FieldsetLegend(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator.locator(".govuk-fieldset__legend"))
+
     class SubmitButton(
         parentLocator: Locator,
     ) : Button(parentLocator.locator("button[type='submit']"))
