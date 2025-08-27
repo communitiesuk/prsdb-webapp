@@ -84,14 +84,12 @@ class PropertyComplianceUpdateJourney(
 
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
-    private val isCheckingAnswers = checkingAnswersForStep != null
-
     private val stepFactory
         get() =
             PropertyComplianceSharedStepFactory(
                 defaultSaveAfterSubmit = false,
                 isUpdateJourney = true,
-                isCheckingAnswers = isCheckingAnswers,
+                checkingAnswersFor = checkingAnswersFor,
                 journeyDataService = journeyDataService,
                 epcCertificateUrlProvider = epcCertificateUrlProvider,
                 certificateUploadService = certificateUploadService,

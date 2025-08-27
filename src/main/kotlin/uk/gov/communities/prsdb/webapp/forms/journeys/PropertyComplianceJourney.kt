@@ -112,7 +112,6 @@ class PropertyComplianceJourney(
         }
     }
 
-    private val isCheckingAnswers = checkingAnswersForStep != null
     private val checkingAnswersFor = PropertyComplianceStepId.entries.find { it.urlPathSegment == checkingAnswersForStep }
 
     override val stepRouter = GroupedStepRouter(this)
@@ -122,7 +121,7 @@ class PropertyComplianceJourney(
         PropertyComplianceSharedStepFactory(
             defaultSaveAfterSubmit = true,
             isUpdateJourney = false,
-            isCheckingAnswers = isCheckingAnswers,
+            checkingAnswersFor = checkingAnswersFor,
             journeyDataService = journeyDataService,
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             certificateUploadService = certificateUploadService,

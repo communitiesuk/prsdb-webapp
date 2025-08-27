@@ -67,7 +67,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyComplianceSharedStepFactory(
     private val defaultSaveAfterSubmit: Boolean,
-    private val isCheckingAnswers: Boolean,
+    private val checkingAnswersFor: PropertyComplianceStepId?,
     private val isUpdateJourney: Boolean,
     private val journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
@@ -76,6 +76,7 @@ class PropertyComplianceSharedStepFactory(
     stepName: String,
 ) {
     private val stepGroupId = PropertyComplianceStepId.fromPathSegment(stepName)?.groupIdentifier
+    private val isCheckingAnswers = checkingAnswersFor != null
 
     val epcNotAutomatchedStepId = getEpcNotAutomatchedStepIdFor(stepGroupId)
     val checkAutoMatchedEpcStepId = getCheckAutoMatchedEpcStepIdFor(stepGroupId)
@@ -191,20 +192,18 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
                             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            "alreadyUploaded" to (journeyDataService.getJourneyDataFromSession().getGasSafetyCertUploadId() != null),
+                            "nextStepUrl" to gasSafetyUploadNextStepUrl(checkingAnswersFor),
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
-            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
+            handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
                     FileCategory.GasSafetyCert,
                 )
-                Step.generateUrl(
-                    PropertyComplianceStepId.GasSafetyUploadConfirmation,
-                    null,
-                    checking,
-                )
+                gasSafetyUploadNextStepUrl(checkingFor)
             },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
@@ -406,20 +405,18 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
                             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            "alreadyUploaded" to (journeyDataService.getJourneyDataFromSession().getEicrUploadId() != null),
+                            "nextStepUrl" to eicrUploadNextStepUrl(checkingAnswersFor),
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
-            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
+            handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
                     FileCategory.Eirc,
                 )
-                Step.generateUrl(
-                    PropertyComplianceStepId.EicrUploadConfirmation,
-                    null,
-                    checking,
-                )
+                eicrUploadNextStepUrl(checkingFor)
             },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
@@ -1008,6 +1005,9 @@ class PropertyComplianceSharedStepFactory(
             Pair(PropertyComplianceStepId.GasSafetyEngineerNum, null)
         }
 
+    private fun gasSafetyUploadNextStepUrl(checkingAnswersFor: PropertyComplianceStepId?) =
+        Step.generateUrl(PropertyComplianceStepId.GasSafetyUploadConfirmation, null, checkingAnswersFor)
+
     private fun gasSafetyExemptionStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasGasSafetyCertExemption()!!) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
@@ -1037,6 +1037,9 @@ class PropertyComplianceSharedStepFactory(
         } else {
             Pair(PropertyComplianceStepId.EicrUpload, null)
         }
+
+    private fun eicrUploadNextStepUrl(checkingAnswersFor: PropertyComplianceStepId?) =
+        Step.generateUrl(PropertyComplianceStepId.EicrUploadConfirmation, null, checkingAnswersFor)
 
     private fun eicrExemptionStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasEicrExemption()!!) {
