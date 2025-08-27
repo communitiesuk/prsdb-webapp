@@ -28,7 +28,9 @@ class CheckLicensingAnswersPage(
             .apply {
                 val licensingType = filteredJourneyData.getLicensingTypeUpdateIfPresent()!!
                 add(licensingTypeRow(licensingType))
-                if (licensingType != LicensingType.NO_LICENSING) add(licensingNumberRow(filteredJourneyData))
+                if (licensingType != LicensingType.NO_LICENSING) {
+                    add(licensingNumberRow(filteredJourneyData.getLicenceNumberUpdateIfPresent()!!, licensingType))
+                }
             }
 
     override fun addExtraContentToModel(
@@ -45,12 +47,18 @@ class CheckLicensingAnswersPage(
             UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment,
         )
 
-    private fun licensingNumberRow(filteredJourneyData: JourneyData) =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.propertyDetails.licensingNumber",
-            filteredJourneyData.getLicenceNumberUpdateIfPresent()!!,
-            null,
-        )
+    private fun licensingNumberRow(
+        licensingNumber: String,
+        licensingType: LicensingType,
+    ) = SummaryListRowViewModel.forCheckYourAnswersPage(
+        "forms.checkPropertyAnswers.propertyDetails.licensingNumber",
+        licensingNumber,
+        when (licensingType) {
+            LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
+            LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
+            else -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
+        },
+    )
 
     private fun getSummaryName(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getLicensingTypeUpdateIfPresent()!! == LicensingType.NO_LICENSING) {
