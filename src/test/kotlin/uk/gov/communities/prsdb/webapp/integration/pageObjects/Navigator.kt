@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
+import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
@@ -68,6 +69,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
@@ -1310,6 +1313,16 @@ class Navigator(
     fun goToCookiesPage(): CookiesPage {
         navigate(COOKIES_ROUTE)
         return createValidPage(page, CookiesPage::class)
+    }
+
+    fun goToLandlordBetaFeedbackPage(): LandlordBetaFeedbackPage {
+        navigate(BetaFeedbackController.LANDLORD_FEEDBACK_URL)
+        return createValidPage(page, LandlordBetaFeedbackPage::class)
+    }
+
+    fun goToLocalCouncilBetaFeedbackPage(): LocalCouncilBetaFeedbackPage {
+        navigate(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL)
+        return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
