@@ -1,12 +1,15 @@
 package uk.gov.communities.prsdb.webapp.forms.steps.factories
 
+import uk.gov.communities.prsdb.webapp.constants.CHECK_GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HSE_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
@@ -174,7 +177,7 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.gasSafeEngineerNum.fieldSetHeading",
                             "fieldSetHint" to "forms.gasSafeEngineerNum.fieldSetHint",
-                            "gasSafeRegisterURL" to GAS_SAFE_REGISTER,
+                            "gasSafeRegisterURL" to CHECK_GAS_SAFE_REGISTER_URL,
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUpload, null) },
@@ -239,6 +242,9 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "gasSafeRegisterUrl" to GAS_SAFE_REGISTER_URL,
+                            "hseUrl" to HSE_URL,
+                            "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
@@ -364,6 +370,9 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "gasSafeRegisterUrl" to GAS_SAFE_REGISTER_URL,
+                            "hseUrl" to HSE_URL,
+                            "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",

@@ -259,7 +259,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyCompliance::class, urlArguments)
 
         // Gas Safety Outdated page
-        assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
+        assertThat(gasSafetyOutdatedPage.heading).containsText("This property’s gas safety certificate has expired")
         gasSafetyOutdatedPage.saveAndContinueToEicrButton.clickAndWait()
         val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
 
