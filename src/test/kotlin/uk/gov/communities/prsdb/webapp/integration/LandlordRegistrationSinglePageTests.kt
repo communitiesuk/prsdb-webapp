@@ -77,7 +77,9 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting without agreeing to privacy notice returns an error`() {
             val privacyNoticePage = navigator.goToLandlordRegistrationPrivacyNoticePage()
             privacyNoticePage.submitWithoutAgreeing()
-            assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must agree to the privacy notice to continue")
+            assertThat(
+                privacyNoticePage.form.getErrorMessage(),
+            ).containsText("You must confirm you have read the privacy notice to continue")
         }
     }
 
