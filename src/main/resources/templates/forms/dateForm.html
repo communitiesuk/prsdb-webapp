@@ -10,7 +10,7 @@
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset-content" th:replace="~{fragments/forms/dateInput :: dateInput('date', 'day', 'month', 'year', #{${fieldSetHeading}}, #{${fieldSetHint}})}"></th:block>
     <th:block th:if="${showWarning}">
-        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
