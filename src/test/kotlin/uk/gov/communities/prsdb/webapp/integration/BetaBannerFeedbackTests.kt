@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.BetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackSuccessPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackSuccessPage
 import kotlin.test.Test
 
 class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -81,5 +82,50 @@ class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql
             assertPageIs(page, LandlordBetaFeedbackSuccessPage::class)
         }
     }
+
+    @Nested
+    inner class LocalCouncilBetaFeedbackPage {
+        @Test
+        fun `submitting with an empty feedback field gives a validation error`(page: Page) {
+            val feedbackPage = navigator.goToLocalCouncilBetaFeedbackPage()
+            feedbackPage.form.submit()
+            assertThat(feedbackPage.form.getErrorMessage("feedback"))
+                .containsText("Enter your feedback about the service")
+        }
+
+        @Test
+        fun `submitting with too much text in the feedback field gives a validation error`(page: Page) {
+            val feedbackPage = navigator.goToLocalCouncilBetaFeedbackPage()
+            feedbackPage.form.feedbackInput.fill("This will be too long".repeat(120))
+            feedbackPage.form.submit()
+            assertThat(feedbackPage.form.getErrorMessage("feedback"))
+                .containsText("Your feedback must be 1,200 characters or fewer")
+        }
+
+        @Test
+        fun `submitting an invalid gives a validation error`(page: Page) {
+            val feedbackPage = navigator.goToLocalCouncilBetaFeedbackPage()
+            feedbackPage.form.emailInput.fill("not-an-email")
+            feedbackPage.form.submit()
+            assertThat(feedbackPage.form.getErrorMessage("email"))
+                .containsText("Enter a valid email address")
+        }
+
+        @Test
+        fun `submitting with feedback but no email address redirects to the success page`(page: Page) {
+            val feedbackPage = navigator.goToLocalCouncilBetaFeedbackPage()
+            feedbackPage.form.feedbackInput.fill("This is my feedback")
+            feedbackPage.form.submit()
+            assertPageIs(page, LocalCouncilBetaFeedbackSuccessPage::class)
+        }
+
+        @Test
+        fun `submitting with feedback and a email address redirects to the success page`(page: Page) {
+            val feedbackPage = navigator.goToLocalCouncilBetaFeedbackPage()
+            feedbackPage.form.feedbackInput.fill("This is my feedback")
+            feedbackPage.form.emailInput.fill("email.address@example.com")
+            feedbackPage.form.submit()
+            assertPageIs(page, LocalCouncilBetaFeedbackSuccessPage::class)
+        }
+    }
 }
-//
