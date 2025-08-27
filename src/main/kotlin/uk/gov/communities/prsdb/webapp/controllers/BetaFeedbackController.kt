@@ -29,7 +29,7 @@ class BetaFeedbackController(
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
-    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL, FEEDBACK_SUCCESS_URL)
+    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL)
     fun landlordFeedbackSuccess(
         model: Model,
         request: HttpServletRequest,
