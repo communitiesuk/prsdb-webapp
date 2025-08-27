@@ -2,13 +2,11 @@
 
 ## You deleted:
 
-### Property 1
+^ ((property address))
 
-Property registration number:
+The Property Registration Number is:
 
-^ ((prn number))
-
-Address: ((property address))
+((prn number))
 
 ---
 This is an automated email - do not reply.
