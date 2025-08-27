@@ -197,7 +197,7 @@ class LandlordDetailsUpdateJourney(
                         mapOf(
                             "title" to "landlordDetails.update.title",
                             "fieldSetHeading" to "forms.update.lookupAddress.fieldSetHeading",
-                            "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                            "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "postcodeHint" to "forms.lookupAddress.postcode.hint",
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
