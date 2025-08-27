@@ -39,6 +39,8 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
                     <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}"></dl>
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h2>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingInformation})}"></dl>
                 </div>
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">

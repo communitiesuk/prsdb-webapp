@@ -27,13 +27,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOf
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -141,7 +141,7 @@ class LandlordRegistrationJourney(
             id = LandlordRegistrationStepId.PrivacyNotice,
             page =
                 Page(
-                    formModel = PrivacyNoticeFormModel::class,
+                    formModel = LandlordPrivacyNoticeFormModel::class,
                     templateName = "forms/landlordPrivacyNoticeForm",
                     content =
                         mapOf(
@@ -156,7 +156,7 @@ class LandlordRegistrationJourney(
                                         labelMsgKey = "registerAsALandlord.privacyNotice.checkBox.label",
                                     ),
                                 ),
-                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE,
+                            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
@@ -341,7 +341,7 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                            "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "postcodeHint" to "forms.lookupAddress.postcode.hint",
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
@@ -418,9 +418,9 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.manualAddress.fieldSetHint",
-                            "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
-                            "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+                            "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
+                            "addressLineOneLabel" to "forms.manualAddress.landlordRegistration.addressLineOne.label",
+                            "addressLineTwoLabel" to "forms.manualAddress.landlordRegistration.addressLineTwo.label",
                             "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
                             "countyLabel" to "forms.manualAddress.county.label",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",

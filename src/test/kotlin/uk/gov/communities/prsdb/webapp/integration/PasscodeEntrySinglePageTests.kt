@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.StartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 
 @ActiveProfiles("require-passcode")
@@ -29,8 +29,8 @@ class PasscodeEntrySinglePageTests : IntegrationTestWithImmutableData("data-mock
             val passcodeEntryPage = navigator.goToPasscodeEntryPage()
             passcodeEntryPage.submitPasscode(validPasscode)
 
-            // Should redirect to landlord registration start page
-            assertPageIs(page, StartPageLandlordRegistration::class)
+            // Should redirect to landlord registration start service information page
+            assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
         }
 
         @Test

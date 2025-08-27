@@ -109,6 +109,10 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/LandlordUpdateConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    GiveFeedbackLaterEmail(),
+                    "/emails/GiveFeedbackLater.md",
+                ),
             )
 
         private fun createLocalAuthority(

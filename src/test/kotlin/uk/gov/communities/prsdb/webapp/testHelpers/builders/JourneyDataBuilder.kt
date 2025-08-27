@@ -154,7 +154,11 @@ class JourneyDataBuilder(
         fun forLaUser(
             name: String,
             email: String,
-        ) = JourneyDataBuilder().withLandingPageReached().withName(name).withEmailAddress(email)
+        ) = JourneyDataBuilder()
+            .withLandingPageReached()
+            .withPrivacyNoticeConfirmed()
+            .withName(name)
+            .withEmailAddress(email)
     }
 
     fun withLookupAddress(
@@ -968,6 +972,12 @@ class JourneyDataBuilder(
 
     fun withLandingPageReached(): JourneyDataBuilder {
         journeyData[RegisterLaUserStepId.LandingPage.urlPathSegment] = emptyMap<String, Any?>()
+        return this
+    }
+
+    fun withPrivacyNoticeConfirmed(): JourneyDataBuilder {
+        journeyData[RegisterLaUserStepId.PrivacyNotice.urlPathSegment] =
+            mapOf<String, Any?>(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true)
         return this
     }
 

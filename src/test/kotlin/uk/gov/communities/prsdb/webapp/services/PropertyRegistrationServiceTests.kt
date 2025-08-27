@@ -574,21 +574,17 @@ class PropertyRegistrationServiceTests {
                         formContextCreatedToday.id,
                         createdTodayCompleteByDate,
                         address,
-                        localAuthority.name,
                     ),
                     IncompletePropertiesDataModel(
                         formContextCreatedYesterday.id,
                         createdYesterdayCompleteByDate,
                         address,
-                        localAuthority.name,
                     ),
                 )
 
             whenever(
                 mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
             ).thenReturn(incompleteProperties)
-
-            whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(any())).thenReturn(localAuthority)
 
             val incompletePropertiesList =
                 propertyRegistrationService.getIncompletePropertiesForLandlord(

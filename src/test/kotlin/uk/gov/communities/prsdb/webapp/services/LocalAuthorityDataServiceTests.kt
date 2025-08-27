@@ -409,6 +409,7 @@ class LocalAuthorityDataServiceTests {
                 newLocalAuthorityUser.name,
                 newLocalAuthorityUser.email,
                 newLocalAuthorityUser.isManager,
+                hasAcceptedPrivacyNotice = true,
             )
 
         // Assert

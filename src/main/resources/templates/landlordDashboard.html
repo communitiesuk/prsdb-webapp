@@ -27,16 +27,6 @@
             </div>
         </section>
         <section class="prsd-dashboard__section">
-            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.complianceInformation.heading}">landlord.dashboard.complianceInformation.heading</h2>
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
-                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addComplianceUrl}, #{landlord.dashboard.addComplianceInformation.button})}">
-                        landlord.dashboard.addComplianceInformation.button
-                    </a>
-                </div>
-            </div>
-        </section>
-        <section class="prsd-dashboard__section">
             <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.viewAndUpdateRecords.heading}">landlord.dashboard.viewAndUpdateRecords.heading</h2>
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
@@ -49,40 +39,16 @@
                         landlord.dashboard.viewLandlordRecord.button
                     </a>
                 </div>
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addComplianceUrl}, #{landlord.dashboard.complianceActions.button})}">
+                        landlord.dashboard.addComplianceInformation.button
+                    </a>
+                </div>
             </div>
         </section>
         <section class="prsd-dashboard__section">
             <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.aboutTheDatabase.heading}">landlord.dashboard.aboutTheDatabase.heading</h2>
             <div class="govuk-grid-row">
-                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                    'landlord.dashboard.action.updatesToPilot.linkText',
-                    ${updatesToPilotUrl},
-                    'landlord.dashboard.action.updatesToPilot.descriptionText')}">
-                        Updates to Pilot content link
-                </div>
-                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                    'landlord.dashboard.action.policyUpdates.linkText',
-                    ${policyUpdatesUrl},
-                    'landlord.dashboard.action.policyUpdates.descriptionText')}">
-                        Policy updates content link
-                </div>
-                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                    'landlord.dashboard.action.privacyNotice.linkText',
-                    ${privacyNoticeUrl},
-                    'landlord.dashboard.action.privacyNotice.descriptionText')}">
-                    Privacy notice content link
-                </div>
-            </div>
-        </section>
-        <section class="prsd-dashboard__section">
-            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.guidance.heading}">landlord.dashboard.guidance.heading</h2>
-            <div class="govuk-grid-row">
-                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                    'landlord.dashboard.action.howToLet.linkText',
-                    ${howToLetUrl},
-                    'landlord.dashboard.action.howToLet.descriptionText')}">
-                    How to let content link
-                </div>
                 <div th:replace="~{fragments/dashboardAction :: dashboardAction(
                     'landlord.dashboard.action.rentersRightsBill.linkText',
                     ${rentersRightsBillUrl},
@@ -90,14 +56,19 @@
                     Renters' rights bill content link
                 </div>
                 <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                    'landlord.dashboard.action.keepingPropertyCompliant.linkText',
-                    ${keepingPropertyCompliantUrl},
-                    'landlord.dashboard.action.keepingPropertyCompliant.descriptionText')}">
-                    Keeping properties compliant content link
+                    'landlord.dashboard.action.privacyNotice.linkText',
+                    ${privacyNoticeUrl},
+                    'landlord.dashboard.action.privacyNotice.descriptionText')}">
+                    Privacy notice content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.understandThisPrivateBeta.linkText',
+                    ${registerLandlordUrl},
+                    'landlord.dashboard.action.understandThisPrivateBeta.descriptionText')}">
+                    Renters' rights bill content link
                 </div>
             </div>
         </section>
-
     </div>
 </main>
 </html>

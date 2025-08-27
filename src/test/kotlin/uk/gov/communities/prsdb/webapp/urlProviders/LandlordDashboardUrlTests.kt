@@ -92,7 +92,7 @@ class LandlordDashboardUrlTests(
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
-    @Mock
+    @MockitoBean
     lateinit var mockEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean

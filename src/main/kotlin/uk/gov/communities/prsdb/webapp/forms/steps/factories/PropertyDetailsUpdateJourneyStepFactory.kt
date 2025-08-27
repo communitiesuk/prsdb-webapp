@@ -66,6 +66,7 @@ class PropertyDetailsUpdateJourneyStepFactory(
                         mapOf(
                             "title" to "propertyDetails.update.title",
                             "fieldSetHeading" to getOccupancyStepFieldSetHeading(),
+                            "fieldSetHint" to "forms.occupancy.fieldSetHint",
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(

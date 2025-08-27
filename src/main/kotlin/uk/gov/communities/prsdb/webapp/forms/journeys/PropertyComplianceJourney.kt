@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
@@ -84,7 +85,7 @@ class PropertyComplianceJourney(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
-    private val certificateUploadService: CertificateUploadService,
+    certificateUploadService: CertificateUploadService,
     private val uploadService: UploadService,
     checkingAnswersForStep: String?,
     stepName: String,
@@ -142,7 +143,11 @@ class PropertyComplianceJourney(
                 "landlord-responsibilities",
             ),
             JourneySection.withOneTask(
-                JourneyTask.withOneStep(checkAndSubmitStep, "propertyCompliance.taskList.checkAndSubmit.check"),
+                JourneyTask.withOneStep(
+                    checkAndSubmitStep,
+                    "propertyCompliance.taskList.checkAndSubmit.check",
+                    "propertyCompliance.taskList.checkAndSubmit.check.hint",
+                ),
                 "propertyCompliance.taskList.checkAndSubmit.heading",
                 "check-and-submit",
             ),
@@ -557,7 +562,11 @@ class PropertyComplianceJourney(
 
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
-        return FEEDBACK_PATH_SEGMENT
+        return if (propertyCompliance.propertyOwnership.primaryLandlord.shouldSeeFeedback) {
+            FEEDBACK_PATH_SEGMENT
+        } else {
+            CONFIRMATION_PATH_SEGMENT
+        }
     }
 
     private fun getPropertyAddress() =

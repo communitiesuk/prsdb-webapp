@@ -136,6 +136,7 @@ class LocalAuthorityDataService(
         name: String,
         email: String,
         invitedAsAdmin: Boolean,
+        hasAcceptedPrivacyNotice: Boolean,
     ): Long {
         val localAuthorityUser =
             localAuthorityUserRepository.save(
@@ -145,6 +146,7 @@ class LocalAuthorityDataService(
                     localAuthority = localAuthority,
                     name = name,
                     email = email,
+                    hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice,
                 ),
             )
 

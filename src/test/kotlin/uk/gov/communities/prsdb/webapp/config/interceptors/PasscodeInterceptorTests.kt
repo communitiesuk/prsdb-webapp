@@ -1,209 +1,187 @@
 package uk.gov.communities.prsdb.webapp.config.interceptors
 
-import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.mock
+import org.mockito.InjectMocks
+import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.security.Principal
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@ExtendWith(MockitoExtension::class)
 class PasscodeInterceptorTests {
-    private lateinit var passcodeService: PasscodeService
+    private val userId = "userId"
+
+    private val mockRequest = MockHttpServletRequest()
+
+    @Mock
+    private lateinit var mockSession: HttpSession
+
+    @Mock
+    private lateinit var mockResponse: HttpServletResponse
+
+    @Mock
+    private lateinit var mockPasscodeService: PasscodeService
+
+    @InjectMocks
     private lateinit var passcodeInterceptor: PasscodeInterceptor
-    private lateinit var request: HttpServletRequest
-    private lateinit var response: HttpServletResponse
-    private lateinit var session: HttpSession
-    private lateinit var principal: Principal
-    private val handler = Any()
 
     @BeforeEach
     fun setup() {
-        passcodeService = mock(PasscodeService::class.java)
-        passcodeInterceptor = PasscodeInterceptor(passcodeService)
-        request = mock(HttpServletRequest::class.java)
-        response = mock(HttpServletResponse::class.java)
-        session = mock(HttpSession::class.java)
-        principal = mock(Principal::class.java)
+        mockRequest.setSession(mockSession)
+    }
 
-        whenever(request.session).thenReturn(session)
+    private fun callPreHandle() = passcodeInterceptor.preHandle(mockRequest, mockResponse, handler = Any())
+
+    @Test
+    fun `preHandle allows authenticated users with a claimed passcode who aren't trying to access passcode routes`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.setUserPrincipal { userId }
+        whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(true)
+
+        assertTrue(callPreHandle())
+        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
+        verify(mockResponse, never()).sendRedirect(anyString())
+    }
+
+    @Test
+    fun `preHandle redirects authenticated users with a claimed passcode who are trying to access passcode routes`() {
+        mockRequest.requestURI = PASSCODE_ENTRY_ROUTE
+        mockRequest.setUserPrincipal { userId }
+        whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(true)
+
+        assertFalse(callPreHandle())
+        verify(mockResponse).sendRedirect(LANDLORD_DASHBOARD_URL)
     }
 
     @Test
     fun `preHandle allows non-landlord paths`() {
-        whenever(request.requestURI).thenReturn(LOCAL_AUTHORITY_DASHBOARD_URL)
+        mockRequest.requestURI = LOCAL_AUTHORITY_DASHBOARD_URL
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(response, never()).sendRedirect(anyString())
+        assertTrue(callPreHandle())
+        verify(mockResponse, never()).sendRedirect(anyString())
     }
 
     @Test
-    fun `preHandle allows passcode entry route`() {
-        whenever(request.requestURI).thenReturn(PASSCODE_ENTRY_ROUTE)
+    fun `preHandle allows passcode entry route when user has not claimed a passcode`() {
+        mockRequest.requestURI = PASSCODE_ENTRY_ROUTE
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(response, never()).sendRedirect(anyString())
+        assertTrue(callPreHandle())
+        verify(mockResponse, never()).sendRedirect(anyString())
     }
 
     @Test
-    fun `preHandle allows passcode already used route`() {
-        whenever(request.requestURI).thenReturn(PASSCODE_ALREADY_USED_ROUTE)
+    fun `preHandle allows invalid passcode route when user has not claimed a passcode`() {
+        mockRequest.requestURI = INVALID_PASSCODE_ROUTE
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(response, never()).sendRedirect(anyString())
+        assertTrue(callPreHandle())
+        verify(mockResponse, never()).sendRedirect(anyString())
     }
 
     @Test
-    fun `preHandle redirects unauthenticated user without passcode to entry page`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.queryString).thenReturn("param=value")
-        whenever(request.userPrincipal).thenReturn(null)
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
+    fun `preHandle redirects unauthenticated users without a session passcode to entry page`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.queryString = "param=value"
+        mockRequest.userPrincipal = null
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertFalse(result)
-        verify(session).setAttribute(PASSCODE_REDIRECT_URL, "$LANDLORD_DASHBOARD_URL?param=value")
-        verify(response).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        assertFalse(callPreHandle())
+        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, "$LANDLORD_DASHBOARD_URL?param=value")
+        verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
     }
 
     @Test
-    fun `preHandle allows unauthenticated user with valid passcode in session`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(null)
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+    fun `preHandle allows unauthenticated users with a session passcode`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.userPrincipal = null
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(response, never()).sendRedirect(anyString())
+        assertTrue(callPreHandle())
+        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
+        verify(mockResponse, never()).sendRedirect(anyString())
     }
 
     @Test
-    fun `preHandle allows authenticated user who has claimed a passcode`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
-        whenever(passcodeService.hasUserClaimedPasscode("userID")).thenReturn(true)
+    fun `preHandle redirects authenticated users without a claimed or session passcode to entry page`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.setUserPrincipal { userId }
+        whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(response, never()).sendRedirect(anyString())
+        assertFalse(callPreHandle())
+        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_DASHBOARD_URL)
+        verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
     }
 
     @Test
-    fun `preHandle redirects authenticated user without claimed passcode to entry page`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
-        whenever(passcodeService.hasUserClaimedPasscode("userID")).thenReturn(false)
+    fun `preHandle redirects authenticated users without a claimed or valid session passcode to invalid passcode page`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.setUserPrincipal { userId }
+        whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
+        val sessionPasscode = "INVALID"
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(sessionPasscode)
+        whenever(mockPasscodeService.findPasscode(sessionPasscode)).thenReturn(null)
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertFalse(result)
-        verify(response).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        assertFalse(callPreHandle())
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 
     @Test
-    fun `preHandle allows authenticated user with valid passcode claimed by same user`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
-        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createOneLoginUser("userID"))
-        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
-        whenever(passcodeService.isPasscodeClaimedByUser("ABCDEF", "userID")).thenReturn(true)
-
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(response, never()).sendRedirect(anyString())
-    }
-
-    @Test
-    fun `preHandle redirects to already used page when passcode claimed by different user`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
-        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createOneLoginUser("otherUserID"))
-        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
-        whenever(passcodeService.isPasscodeClaimedByUser("ABCDEF", "userID")).thenReturn(false)
-
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertFalse(result)
-        verify(response).sendRedirect(PASSCODE_ALREADY_USED_ROUTE)
-    }
-
-    @Test
-    fun `preHandle claims unclaimed passcode for authenticated user`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+    fun `preHandle allows authenticated users with a valid unclaimed session passcode to claim it`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.setUserPrincipal { userId }
         val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = null)
-        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
-        whenever(passcodeService.claimPasscodeForUser("ABCDEF", "userID")).thenReturn(true)
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(passcode.passcode)
+        whenever(mockPasscodeService.findPasscode(passcode.passcode)).thenReturn(passcode)
+        whenever(mockPasscodeService.claimPasscodeForUser(passcode.passcode, userId)).thenReturn(true)
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertTrue(result)
-        verify(passcodeService).claimPasscodeForUser("ABCDEF", "userID")
-        verify(response, never()).sendRedirect(anyString())
+        assertTrue(callPreHandle())
+        verify(mockPasscodeService).claimPasscodeForUser(passcode.passcode, userId)
+        verify(mockSession).removeAttribute(PASSCODE_REDIRECT_URL)
+        verify(mockResponse, never()).sendRedirect(anyString())
     }
 
     @Test
-    fun `preHandle redirects to entry page if claiming an unclaimed passcode for authenticated user fails`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
+    fun `preHandle redirects authenticated users with a valid unclaimed session passcode to invalid passcode page if claiming it fails`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.setUserPrincipal { userId }
+        whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
         val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = null)
-        whenever(passcodeService.findPasscode("ABCDEF")).thenReturn(passcode)
-        whenever(passcodeService.claimPasscodeForUser("ABCDEF", "userID")).thenReturn(false)
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(passcode.passcode)
+        whenever(mockPasscodeService.findPasscode(passcode.passcode)).thenReturn(passcode)
+        whenever(mockPasscodeService.claimPasscodeForUser(passcode.passcode, userId)).thenReturn(false)
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertFalse(result)
-        verify(passcodeService).claimPasscodeForUser("ABCDEF", "userID")
-        verify(response).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        assertFalse(callPreHandle())
+        verify(mockPasscodeService).claimPasscodeForUser(passcode.passcode, userId)
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 
     @Test
-    fun `preHandle redirects to entry page when passcode not found`() {
-        whenever(request.requestURI).thenReturn(LANDLORD_DASHBOARD_URL)
-        whenever(request.userPrincipal).thenReturn(principal)
-        whenever(principal.name).thenReturn("userID")
-        whenever(session.getAttribute(SUBMITTED_PASSCODE)).thenReturn("INVALID")
-        whenever(passcodeService.findPasscode("INVALID")).thenReturn(null)
+    fun `preHandle redirects authenticated users who try to claim already-used passcodes to invalid passcode page`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.setUserPrincipal { userId }
+        whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
+        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createOneLoginUser())
+        whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(passcode.passcode)
+        whenever(mockPasscodeService.findPasscode(passcode.passcode)).thenReturn(passcode)
 
-        val result = passcodeInterceptor.preHandle(request, response, handler)
-
-        assertFalse(result)
-        verify(response).sendRedirect(PASSCODE_ENTRY_ROUTE)
+        assertFalse(callPreHandle())
+        verify(mockResponse).sendRedirect(INVALID_PASSCODE_ROUTE)
     }
 }

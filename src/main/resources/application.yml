@@ -39,6 +39,8 @@ spring:
 
   thymeleaf:
     render-hidden-markers-before-checkboxes: true
+    servlet:
+      produce-partial-output-while-processing: false
 
   servlet:
     multipart:
