@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 
 @PrsdbController
-@RequestMapping(LANDLORD_PRIVACY_NOTICE_ROUTE)
+@RequestMapping(LANDLORD_PRIVACY_NOTICE_ROUTE, "/$PRIVACY_NOTICE_PATH_SEGMENT")
 class LandlordPrivacyNoticeController {
     @GetMapping
     fun getPrivacyNoticePage(model: Model): String {

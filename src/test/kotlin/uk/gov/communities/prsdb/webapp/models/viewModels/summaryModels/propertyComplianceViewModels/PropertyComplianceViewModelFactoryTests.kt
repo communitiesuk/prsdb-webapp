@@ -2,14 +2,16 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.mock
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PropertyComplianceViewModelFactoryTests {
-    val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock())
-    val eicrViewModelFactory = EicrViewModelFactory(mock())
-    val propertyComplianceViewModelFactory = PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, eicrViewModelFactory)
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock())
+    private val eicrViewModelFactory = EicrViewModelFactory(mock())
+    private val propertyComplianceViewModelFactory = PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, eicrViewModelFactory)
 
     @Test
     fun `notificationMessages returns correctly populated list when property is compliant`() {
@@ -55,7 +57,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -63,7 +68,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -71,7 +79,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -92,7 +103,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -100,7 +114,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -121,7 +138,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -129,7 +149,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -150,7 +173,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -158,7 +184,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -179,7 +208,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -200,7 +232,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -221,7 +256,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -242,7 +280,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -250,7 +291,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -258,7 +302,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -279,7 +326,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -287,7 +337,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -308,7 +361,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -316,7 +372,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -337,7 +396,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -345,7 +407,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -366,7 +431,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-gas-safety-certificate",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateGasSafety,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -387,7 +455,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-eicr",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEICR,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -408,7 +479,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         ),
@@ -429,7 +503,10 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            "/landlord/provide-compliance-certificates/1/update/update-epc",
+                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                propertyCompliance.propertyOwnership.id,
+                                PropertyComplianceStepId.UpdateEpc,
+                            ),
                             "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
                             "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
                             "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",

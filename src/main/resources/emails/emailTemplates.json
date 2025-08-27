@@ -35,8 +35,8 @@
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
-    "test_id": "96a2f7a8-26b2-4377-944c-6f68c96d7ebe",
-    "prod_id": "464eb0a4-20b8-4ae8-874d-32ad06997329",
+    "test_id": "273c20c3-1739-47e1-9a51-c2d186ee0c67",
+    "prod_id": "2de6d47a-5227-4966-bf2c-475af5390000",
     "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
     "subject": "GOV.UK - You have deleted a property from the PRS database",
     "bodyLocation": "/emails/PropertyDeregistrationConfirmation.md"
@@ -96,5 +96,12 @@
     "enumName": "GIVE_FEEDBACK_LATER",
     "subject": "GOV.UK - Give feedback on the PRS database",
     "bodyLocation": "/emails/GiveFeedbackLater.md"
+  },
+  {
+    "test_id": "a3187b99-e677-47b8-8c70-94cbc0e21c20",
+    "prod_id": null,
+    "enumName": "BETA_FEEDBACK_EMAIL",
+    "subject": "Beta feedback submission",
+    "bodyLocation": "/emails/BetaFeedbackEmail.md"
   }
 ]

@@ -17,7 +17,7 @@ class PropertyDetailsPageLandlordView(
             isLaView = false,
         ),
     ) {
-    val deleteButton = Button.byText(page, "Delete property record")
+    val deleteButton = Button.byText(page, "Delete property")
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
 

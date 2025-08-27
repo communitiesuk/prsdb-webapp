@@ -12,7 +12,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.ADD_COMPLIANCE_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -142,9 +142,9 @@ class LandlordControllerTests(
     }
 
     @Test
-    fun `addComplianceInformation returns a redirect for unauthenticated user`() {
+    fun `getComplianceActions returns a redirect for unauthenticated user`() {
         mvc
-            .get(ADD_COMPLIANCE_URL)
+            .get(COMPLIANCE_ACTIONS_URL)
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -152,9 +152,9 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `addComplianceInformation returns 403 for unauthorized user`() {
+    fun `getComplianceActions returns 403 for unauthorized user`() {
         mvc
-            .get(ADD_COMPLIANCE_URL)
+            .get(COMPLIANCE_ACTIONS_URL)
             .andExpect {
                 status { isForbidden() }
             }
@@ -162,7 +162,7 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `addComplianceInformation returns 200 for authorised landlord user`() {
+    fun `getComplianceActions returns 200 for authorised landlord user`() {
         // Arrange
         val incompleteComplianceDataModel =
             ComplianceStatusDataModel(
@@ -196,7 +196,7 @@ class LandlordControllerTests(
             )
 
         mvc
-            .get(ADD_COMPLIANCE_URL)
+            .get(COMPLIANCE_ACTIONS_URL)
             .andExpect {
                 status { isOk() }
                 model {

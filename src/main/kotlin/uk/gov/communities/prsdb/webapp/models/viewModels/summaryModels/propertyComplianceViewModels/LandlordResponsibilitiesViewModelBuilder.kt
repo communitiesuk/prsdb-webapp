@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
@@ -17,7 +16,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                 .apply {
                     addRow(
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
-                        value = MessageKeyConverter.convert(propertyCompliance.hasFireSafetyDeclaration),
+                        value = "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                         actionText = "forms.links.view",
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
@@ -28,7 +27,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                     )
                     addRow(
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
-                        value = MessageKeyConverter.convert(propertyCompliance.hasKeepPropertySafeDeclaration),
+                        value = "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                         actionText = "forms.links.view",
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
@@ -39,7 +38,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                     )
                     addRow(
                         key = "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
-                        value = MessageKeyConverter.convert(propertyCompliance.hasResponsibilityToTenantsDeclaration),
+                        value = "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                         actionText = "forms.links.view",
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(

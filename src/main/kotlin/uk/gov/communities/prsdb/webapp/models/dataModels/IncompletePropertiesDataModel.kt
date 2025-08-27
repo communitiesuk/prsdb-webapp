@@ -6,5 +6,4 @@ data class IncompletePropertiesDataModel(
     val contextId: Long,
     val completeByDate: LocalDate,
     val singleLineAddress: String,
-    val localAuthorityName: String,
 )

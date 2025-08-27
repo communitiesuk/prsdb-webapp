@@ -16,14 +16,8 @@
     <details id="details-content" th:replace="~{fragments/details :: details(#{${detailSummary}},~{::#details-content/content()})}">
         <div class="govuk-details__text">
             <!--/* Iff there is no additional content we should th:remove the div tag to avoid nesting divs, and we don't need the govuk-body class */-->
-            <div th:text="#{${detailMainText}}" class="govuk-body" th:remove="${detailAdditionalContent} ? none : tag">detailsMainText</div>
-            <th:block th:if="${detailAdditionalContent}">
-                <ul class="govuk-list govuk-list--bullet" >
-                    <li th:text="#{${detailAdditionalContent.bulletOne}}">forms.licenceNumber.detail.bullet.one</li>
-                    <li th:text="#{${detailAdditionalContent.bulletTwo}}">forms.licenceNumber.detail.bullet.two</li>
-                </ul>
-                <div class="govuk-body" th:text="#{${detailAdditionalContent.text}}">detailsAdditionalText</div>
-            </th:block>
+            <th:block th:text="#{${detailMainText}}" th:if="${detailMainText != null}">detailsMainText</th:block>
+            <th:block th:replace="~{fragments/hmoDetailContent :: hmoDetailContent(${detailAdditionalContent})}"></th:block>
         </div>
     </details>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{'forms.buttons.saveAndContinue'})}"></button>

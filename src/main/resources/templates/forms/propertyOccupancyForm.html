@@ -7,7 +7,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'occupied', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'occupied', #{${fieldSetHeading}},  #{${fieldSetHint}})}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'occupied',null, ${radioOptions})}"></th:block>
     </th:block>
     <details id="details-content" th:replace="~{fragments/details :: details(#{'forms.occupancy.details.summary.text'},~{::#details-content/content()})}">
