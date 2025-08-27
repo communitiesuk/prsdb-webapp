@@ -8,7 +8,7 @@ class BetaBanner(
 ) : BaseComponent(parentLocator.locator(SELECTOR)) {
     constructor(page: Page) : this(page.locator("html"))
 
-    val giveFeedbackLink = Link.byText(parentLocator, "give your feedback")
+    val giveFeedbackLink = Link.byText(parentLocator, "feedback")
 
     companion object {
         const val SELECTOR = ".govuk-phase-banner"
