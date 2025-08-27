@@ -104,8 +104,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Check licensing answers
             assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("Selective licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText(newLicenceNumber)
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -133,8 +133,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Check licensing answers
             assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("HMO mandatory licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText(newLicenceNumber)
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("HMO mandatory licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -162,8 +162,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Check licensing answers
             assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("HMO additional licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText(newLicenceNumber)
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("HMO additional licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -185,12 +185,52 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Check licensing answers
             assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have removed this property’s licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingRow.value).containsText("None")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("None")
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
             assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+        }
+
+        @Test
+        fun `A property can have its licensing number updated again from the check licensing answers page`(page: Page) {
+            val firstNewLicenceNumber = "SL456"
+            val secondNewLicenceNumber = "SL789"
+
+            // Details page
+            var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Update licence to selective
+            updateLicensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
+            var updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Update licence number
+            updateLicenceNumberPage.submitLicenseNumber(firstNewLicenceNumber)
+            var checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Click change link for Licensing Number
+            checkLicensingAnswersPage.form.summaryList.licensingNumberRow
+                .clickActionLinkAndWait()
+            updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Update licence number
+            updateLicenceNumberPage.submitLicenseNumber(secondNewLicenceNumber)
+            checkLicensingAnswersPage =
+                assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Check licensing answers
+            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(secondNewLicenceNumber)
+            checkLicensingAnswersPage.confirm()
+            propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+
+            // Check changes have occurred
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingNumberRow.value).containsText(secondNewLicenceNumber)
         }
     }
 
