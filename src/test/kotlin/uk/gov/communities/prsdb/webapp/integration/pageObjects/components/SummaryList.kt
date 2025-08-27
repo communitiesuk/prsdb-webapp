@@ -5,9 +5,9 @@ import com.microsoft.playwright.Page
 
 open class SummaryList(
     parentLocator: Locator,
-    index: Int = 0,
-) : BaseComponent(parentLocator.locator(".govuk-summary-list").nth(index)) {
-    constructor(page: Page, index: Int = 0) : this(page.locator("html"), index)
+    index: Int? = null,
+) : BaseComponent(if (index != null) parentLocator.locator(DEFAULT_SELECCTOR).nth(index) else parentLocator.locator(DEFAULT_SELECCTOR)) {
+    constructor(page: Page, index: Int? = null) : this(page.locator("html"), index)
 
     protected fun getRow(key: String) = SummaryListRow.byKey(locator, key)
 
@@ -43,5 +43,9 @@ open class SummaryList(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator(".govuk-summary-list__actions")) {
         val actionLink = Link.default(locator)
+    }
+
+    companion object {
+        private const val DEFAULT_SELECCTOR = ".govuk-summary-list"
     }
 }
