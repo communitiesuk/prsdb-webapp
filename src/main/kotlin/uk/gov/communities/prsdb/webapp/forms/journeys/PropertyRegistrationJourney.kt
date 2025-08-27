@@ -153,7 +153,7 @@ class PropertyRegistrationJourney(
                         mapOf(
                             "title" to "registerProperty.title",
                             "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
-                            "fieldSetHint" to "forms.lookupAddress.fieldSetHint",
+                            "fieldSetHint" to "forms.lookupAddress.propertyRegistration.fieldSetHint",
                             "postcodeLabel" to "forms.lookupAddress.postcode.label",
                             "postcodeHint" to "forms.lookupAddress.postcode.hint",
                             "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
