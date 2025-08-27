@@ -371,6 +371,9 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "gasSafeRegisterUrl" to GAS_SAFE_REGISTER_URL,
+                            "hseUrl" to HSE_URL,
+                            "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",

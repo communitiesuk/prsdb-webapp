@@ -1,0 +1,41 @@
+<th:block th:fragment="invalidGasSafetyCertContent(gasSafeRegisterUrl, hseUrl, landlordGasSafetyUrl)">
+    <section>
+        <h3 class="govuk-heading-s" th:text="#{forms.invalidGasSafety.whatNext.heading}">forms.invalidGasSafety.whatNext.heading</h3>
+        <ol class="govuk-list govuk-list--number">
+            <li>
+                <span th:remove="tag" th:text="#{forms.invalidGasSafety.whatNext.one.beforeLink}">forms.invalidGasSafety.whatNext.one.beforeLink</span>
+                <a class="govuk-link" th:text="#{forms.invalidGasSafety.whatNext.one.link}" th:href="${gasSafeRegisterUrl}" rel="noreferrer noopener" target="_blank">forms.invalidGasSafety.whatNext.one.link</a>
+                <span th:remove="tag" th:text="#{forms.invalidGasSafety.whatNext.one.afterLink}">forms.invalidGasSafety.whatNext.one.afterLink</span>
+            </li>
+            <li th:text="#{forms.invalidGasSafety.whatNext.two}">
+                forms.invalidGasSafety.whatNext.two
+            </li>
+            <li th:text="#{forms.invalidGasSafety.whatNext.three}">
+                forms.invalidGasSafety.whatNext.three
+            </li>
+            <li th:text="#{forms.invalidGasSafety.whatNext.four}">
+                forms.invalidGasSafety.whatNext.four
+            </li>
+        </ol>
+    </section>
+    <section>
+        <h2 class="govuk-heading-m" th:text="#{forms.invalidGasSafety.ifNoCert.heading}">forms.invalidGasSafety.ifNoCert.heading</h2>
+        <p class="govuk-body" th:text="#{forms.invalidGasSafety.ifNoCert.paragraph.one}">forms.invalidGasSafety.ifNoCert.paragraph.one</p>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.invalidGasSafety.ifNoCert.bullet.heading.beforeLink}">forms.invalidGasSafety.ifNoCert.bullet.heading.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.invalidGasSafety.ifNoCert.bullet.heading.link}" th:href="${hseUrl}" rel="noreferrer noopener" target="_blank">forms.invalidGasSafety.ifNoCert.bullet.heading.link</a>
+            <span th:remove="tag" th:text="#{forms.invalidGasSafety.ifNoCert.bullet.heading.afterLink}">forms.invalidGasSafety.ifNoCert.bullet.heading.afterLink</span>
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.invalidGasSafety.ifNoCert.bullet.one}">forms.invalidGasSafety.ifNoCert.bullet.one</li>
+            <li th:text="#{forms.invalidGasSafety.ifNoCert.bullet.two}">forms.invalidGasSafety.ifNoCert.bullet.two</li>
+            <li th:text="#{forms.invalidGasSafety.ifNoCert.bullet.three}">forms.invalidGasSafety.ifNoCert.bullet.three</li>
+        </ul>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.invalidGasSafety.ifNoCert.paragraph.two.beforeLink}">forms.invalidGasSafety.ifNoCert.paragraph.two.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.invalidGasSafety.ifNoCert.paragraph.two.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">forms.invalidGasSafety.ifNoCert.paragraph.two.link</a>
+            <span th:remove="tag" th:text="#{forms.invalidGasSafety.ifNoCert.paragraph.two.afterLink}">forms.invalidGasSafety.ifNoCert.paragraph.two.afterLink</span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.invalidGasSafety.ifNoCert.paragraph.three}">forms.invalidGasSafety.ifNoCert.paragraph.three</p>
+    </section>
+</th:block>

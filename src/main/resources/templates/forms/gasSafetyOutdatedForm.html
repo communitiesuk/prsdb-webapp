@@ -16,44 +16,6 @@
         <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.paragraph.two}">forms.gasSafetyOutdated.paragraph.two</p>
         <p class="govuk-body" th:utext="#{forms.gasSafetyOutdated.paragraph.three}">forms.gasSafetyOutdated.paragraph.three</p>
     </section>
-    <section>
-        <h3 class="govuk-heading-s" th:text="#{forms.gasSafetyOutdated.whatNext.heading}">forms.gasSafetyOutdated.whatNext.heading</h3>
-        <ol class="govuk-list govuk-list--number">
-            <li>
-                <span th:remove="tag" th:text="#{forms.gasSafetyOutdated.whatNext.one.beforeLink}">forms.gasSafetyOutdated.whatNext.one.beforeLink</span>
-                <a class="govuk-link" th:text="#{forms.gasSafetyOutdated.whatNext.one.link}" th:href="${gasSafeRegisterUrl}" rel="noreferrer noopener" target="_blank">forms.gasSafetyOutdated.whatNext.one.link</a>
-                <span th:remove="tag" th:text="#{forms.gasSafetyOutdated.whatNext.one.afterLink}">forms.gasSafetyOutdated.whatNext.one.afterLink</span>
-            </li>
-            <li th:text="#{forms.gasSafetyOutdated.whatNext.two}">
-                forms.gasSafetyOutdated.whatNext.two
-            </li>
-            <li th:text="#{forms.gasSafetyOutdated.whatNext.three}">
-                forms.gasSafetyOutdated.whatNext.three
-            </li>
-            <li th:text="#{forms.gasSafetyOutdated.whatNext.four}">
-                forms.gasSafetyOutdated.whatNext.four
-            </li>
-        </ol>
-    </section>
-    <section>
-        <h2 class="govuk-heading-m" th:text="#{forms.gasSafetyOutdated.ifNoCert.heading}">forms.gasSafetyOutdated.ifNoCert.heading</h2>
-        <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.ifNoCert.paragraph.one}">forms.gasSafetyOutdated.ifNoCert.paragraph.one</p>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.gasSafetyOutdated.ifNoCert.bullet.heading.beforeLink}">forms.gasSafetyOutdated.ifNoCert.bullet.heading.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.gasSafetyOutdated.ifNoCert.bullet.heading.link}" th:href="${hseUrl}" rel="noreferrer noopener" target="_blank">forms.gasSafetyOutdated.ifNoCert.bullet.heading.link</a>
-            <span th:remove="tag" th:text="#{forms.gasSafetyOutdated.ifNoCert.bullet.heading.afterLink}">forms.gasSafetyOutdated.ifNoCert.bullet.heading.afterLink</span>
-        </p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.gasSafetyOutdated.ifNoCert.bullet.one}">forms.gasSafetyOutdated.ifNoCert.bullet.one</li>
-            <li th:text="#{forms.gasSafetyOutdated.ifNoCert.bullet.two}">forms.gasSafetyOutdated.ifNoCert.bullet.two</li>
-            <li th:text="#{forms.gasSafetyOutdated.ifNoCert.bullet.three}">forms.gasSafetyOutdated.ifNoCert.bullet.three</li>
-        </ul>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.gasSafetyOutdated.ifNoCert.paragraph.two.beforeLink}">forms.gasSafetyOutdated.ifNoCert.paragraph.two.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.gasSafetyOutdated.ifNoCert.paragraph.two.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">forms.gasSafetyOutdated.ifNoCert.paragraph.two.link</a>
-            <span th:remove="tag" th:text="#{forms.gasSafetyOutdated.ifNoCert.paragraph.two.afterLink}">forms.gasSafetyOutdated.ifNoCert.paragraph.two.afterLink</span>
-        </p>
-        <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.ifNoCert.paragraph.three}">forms.gasSafetyOutdated.ifNoCert.paragraph.three</p>
-    </section>
+    <section th:replace="~{fragments/content/invalidGasSafetyCertContent :: invalidGasSafetyCertContent(${gasSafeRegisterUrl}, ${hseUrl}, ${landlordGasSafetyUrl})}"></section>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
