@@ -85,7 +85,7 @@ class PropertyComplianceJourney(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val urlProvider: AbsoluteUrlProvider,
-    private val certificateUploadService: CertificateUploadService,
+    certificateUploadService: CertificateUploadService,
     private val uploadService: UploadService,
     checkingAnswersForStep: String?,
     stepName: String,
@@ -143,7 +143,11 @@ class PropertyComplianceJourney(
                 "landlord-responsibilities",
             ),
             JourneySection.withOneTask(
-                JourneyTask.withOneStep(checkAndSubmitStep, "propertyCompliance.taskList.checkAndSubmit.check"),
+                JourneyTask.withOneStep(
+                    checkAndSubmitStep,
+                    "propertyCompliance.taskList.checkAndSubmit.check",
+                    "propertyCompliance.taskList.checkAndSubmit.check.hint",
+                ),
                 "propertyCompliance.taskList.checkAndSubmit.heading",
                 "check-and-submit",
             ),

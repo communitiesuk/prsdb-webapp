@@ -10,7 +10,9 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -61,8 +63,10 @@ class GasSafetyViewModelBuilderTests {
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                "/landlord/provide-compliance-certificates/" +
-                                    "${compliant.propertyOwnership.id}/update/update-gas-safety-certificate",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    compliant.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateGasSafety,
+                                ),
                             ),
                             DOWNLOAD_URL,
                         ),
@@ -119,8 +123,10 @@ class GasSafetyViewModelBuilderTests {
                             "propertyDetails.complianceInformation.expired",
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                "/landlord/provide-compliance-certificates/" +
-                                    "${expiredBeforeUpload.propertyOwnership.id}/update/update-gas-safety-certificate",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    expiredBeforeUpload.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateGasSafety,
+                                ),
                             ),
                         ),
                         SummaryListRowViewModel(
@@ -167,8 +173,10 @@ class GasSafetyViewModelBuilderTests {
                             "propertyDetails.complianceInformation.notAdded",
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                "/landlord/provide-compliance-certificates/" +
-                                    "${missing.propertyOwnership.id}/update/update-gas-safety-certificate",
+                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    missing.propertyOwnership.id,
+                                    PropertyComplianceStepId.UpdateGasSafety,
+                                ),
                             ),
                         ),
                         SummaryListRowViewModel(

@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.ADD_COMPLIANCE_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ComplianceActionsPage(
     page: Page,
-) : BasePage(page, ADD_COMPLIANCE_URL) {
+) : BasePage(page, COMPLIANCE_ACTIONS_URL) {
     val heading = Heading.default(page)
     val hintText = Heading(page.locator("p.govuk-hint"))
     val viewRegisteredPropertiesLink = Link.byText(page, "View your property records")
