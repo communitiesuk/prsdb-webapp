@@ -150,7 +150,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             assertPageIs(page, GasSafetyOutdatedPagePropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Outdated page
-        assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
+        assertThat(gasSafetyOutdatedPage.heading).containsText("This property’s gas safety certificate has expired")
         gasSafetyOutdatedPage.saveAndContinueButton.clickAndWait()
         val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
