@@ -30,7 +30,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `the view incomplete properties button links to the incomplete properties page`(page: Page) {
+    fun `the incomplete property details button links to the incomplete properties page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewIncompletePropertiesButton.clickAndWait()
         assertPageIs(page, LandlordIncompletePropertiesPage::class)
