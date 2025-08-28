@@ -947,6 +947,7 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
