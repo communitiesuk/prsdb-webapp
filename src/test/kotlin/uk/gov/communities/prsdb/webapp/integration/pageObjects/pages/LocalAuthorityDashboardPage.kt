@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BetaBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class LocalAuthorityDashboardPage(
     page: Page,
 ) : BasePage(page, LOCAL_AUTHORITY_DASHBOARD_URL) {
+    val betaBanner = BetaBanner(page)
     val bannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
     val bannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
     val generatePasscodeLink = Link.byText(page, "Generate a passcode", selectorOrLocator = "li.govuk-service-navigation__item")
