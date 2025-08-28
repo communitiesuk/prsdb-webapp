@@ -1,7 +1,7 @@
 <html>
     <div class="govuk-phase-banner" id="banner" th:fragment="betaBanner" th:if="${hideBetaBanner != true}">
         <p class="govuk-phase-banner__content">
-            <strong class="govuk-tag govuk-phase-banner__content__tag">Beta</strong>
+            <strong class="govuk-tag govuk-phase-banner__content__tag" th:text="#{betaBanner.tag}">betaBanner.tag</strong>
             <span class="govuk-phase-banner__text"
                   th:text="#{betaBanner.beforeLink} + '&nbsp;'">betaBanner.beforeLink</span>
             <a class="govuk-link" th:href="${feedbackBannerUrl}" th:text="#{betaBanner.link}" target="_blank">betaBanner.link</a>

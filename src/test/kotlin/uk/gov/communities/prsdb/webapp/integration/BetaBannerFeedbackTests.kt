@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
-    fun `Give your feedback link from a landlord's beta banner goes to the feedback page`(page: Page) {
+    fun `The feedback link from a landlord's beta banner opens a feedback page which includes the referrerHeader`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         val popupPromise =
             page.waitForPopup {
@@ -25,7 +25,7 @@ class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql
     }
 
     @Test
-    fun `Give your feedback link from a lc user's beta banner goes to the feedback page`(page: Page) {
+    fun `The feedback link from a lc user's beta banner opens a feedback page which includes the referrerHeader`(page: Page) {
         val dashboard = navigator.goToLocalAuthorityDashboard()
         val popupPromise =
             page.waitForPopup {
@@ -57,7 +57,7 @@ class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql
         }
 
         @Test
-        fun `submitting an invalid gives a validation error`(page: Page) {
+        fun `submitting an invalid email gives a validation error`(page: Page) {
             val feedbackPage = navigator.goToLandlordBetaFeedbackPage()
             feedbackPage.form.emailInput.fill("not-an-email")
             feedbackPage.form.submit()
@@ -103,7 +103,7 @@ class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql
         }
 
         @Test
-        fun `submitting an invalid gives a validation error`(page: Page) {
+        fun `submitting an invalid email gives a validation error`(page: Page) {
             val feedbackPage = navigator.goToLocalCouncilBetaFeedbackPage()
             feedbackPage.form.emailInput.fill("not-an-email")
             feedbackPage.form.submit()

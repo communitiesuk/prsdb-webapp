@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextArea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
-open class BetaFeedbackBasePage(
+abstract class BetaFeedbackBasePage(
     page: Page,
     url: String,
 ) : BasePage(page, url) {

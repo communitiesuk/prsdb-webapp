@@ -157,6 +157,14 @@ class BetaFeedbackControllerTests(
         }
 
         @Test
+        @WithMockUser
+        fun `localAuthorityFeedbackSuccess returns 403 for unauthorized roles`() {
+            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `localAuthorityFeedbackSuccess returns success for LA_USER role`() {
             mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL).andExpect {
