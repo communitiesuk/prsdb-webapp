@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.forms.steps.factories
 
 import uk.gov.communities.prsdb.webapp.constants.CHECK_GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
@@ -11,10 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.HSE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -461,8 +460,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                            "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                            "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
+                            "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
@@ -521,14 +520,6 @@ class PropertyComplianceSharedStepFactory(
                                         value = GasSafetyExemptionReason.LONG_LEASE,
                                         labelMsgKey = "forms.eicrExemptionReason.radios.longLease.label",
                                         hintMsgKey = "forms.eicrExemptionReason.radios.longLease.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = EicrExemptionReason.STUDENT_ACCOMMODATION,
-                                        labelMsgKey = "forms.eicrExemptionReason.radios.studentAccommodation.label",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = EicrExemptionReason.LIVE_IN_LANDLORD,
-                                        labelMsgKey = "forms.eicrExemptionReason.radios.liveInLandlord.label",
                                     ),
                                     RadiosButtonViewModel(
                                         value = GasSafetyExemptionReason.OTHER,
@@ -592,8 +583,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                            "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                            "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
+                            "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",

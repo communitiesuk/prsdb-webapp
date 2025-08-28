@@ -102,7 +102,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         private fun provideEicrExemptionReasons() =
             arrayOf(
                 Arguments.of(Named.of("other", EicrExemptionReason.OTHER), true),
-                Arguments.of(Named.of("not other", EicrExemptionReason.LIVE_IN_LANDLORD), false),
+                Arguments.of(Named.of("not other", EicrExemptionReason.LONG_LEASE), false),
             )
 
         @JvmStatic
@@ -508,7 +508,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
     @Test
     fun `getEicrExemptionReason returns the exemption reason if the corresponding page is in journeyData`() {
-        val reason = EicrExemptionReason.LIVE_IN_LANDLORD
+        val reason = EicrExemptionReason.LONG_LEASE
         val testJourneyData = journeyDataBuilder.withEicrExemptionReason(reason).build()
 
         val retrievedReason = testJourneyData.getEicrExemptionReason()

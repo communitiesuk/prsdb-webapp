@@ -274,7 +274,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Outdated page
-        assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
+        assertThat(eicrOutdatedPage.heading).containsText("This property’s Electrical Installation Condition Report (EICR) has expired")
         eicrOutdatedPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
@@ -296,12 +296,13 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             assertPageIs(page, EicrExemptionReasonPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Reason page
-        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
+        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LONG_LEASE)
         val eicrExemptionConfirmationPage =
             assertPageIs(page, EicrExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Confirmation page
-        assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
+        assertThat(eicrExemptionConfirmationPage.heading)
+            .containsText("You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)")
         eicrExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
 
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
@@ -309,7 +310,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // EICR Check Your Answers page
         val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
         assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Not required")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("You live in the property with the tenant")
+        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("The current tenancy lease has lasted 7 years or more")
         cyaPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -334,7 +335,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             assertPageIs(page, EicrExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Exemption Confirmation page
-        assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
+        assertThat(eicrExemptionConfirmationPage.heading)
+            .containsText("You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)")
         eicrExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
 
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
