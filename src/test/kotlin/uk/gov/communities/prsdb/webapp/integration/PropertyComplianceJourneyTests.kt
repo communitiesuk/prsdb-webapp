@@ -561,7 +561,8 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrExemptionMissingPage = assertPageIs(page, EicrExemptionMissingPagePropertyCompliance::class, urlArguments)
 
         // EICR Exemption Missing page
-        assertThat(eicrExemptionMissingPage.heading).containsText("You must get a valid EICR for this property")
+        assertThat(eicrExemptionMissingPage.heading)
+            .containsText("You must get a valid Electrical Installation Condition Report (EICR) for this property")
         eicrExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
