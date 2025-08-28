@@ -28,8 +28,8 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "90bf3bc0-5269-4a44-8ed2-147c9308196f",
-    "prod_id": "f7d90928-1f27-492b-a7b4-18fff9cc2e6a",
+    "test_id": "d9250d23-8930-4649-91ab-0c682490da06",
+    "prod_id": "2d48a8e6-9d12-4c2f-8c61-ec0ffb6b7c11",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "GOV.UK - Your registered property on the PRS Database",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
@@ -91,7 +91,7 @@
     "bodyLocation": "/emails/LandlordUpdateConfirmation.md"
   },
   {
-    "test_id": "b8d70337-038b-4647-adbd-cc8e565bc08f",
+    "test_id": "0a2abc02-63d7-46e4-92e9-1de4c15fba4b",
     "prod_id": null,
     "enumName": "GIVE_FEEDBACK_LATER",
     "subject": "GOV.UK - Give feedback on the PRS database",

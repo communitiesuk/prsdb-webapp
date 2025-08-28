@@ -6,6 +6,7 @@ import com.microsoft.playwright.options.FormData
 import com.microsoft.playwright.options.RequestOptions
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FileUpload
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 
 abstract class UploadCertificateFormPage(
@@ -13,6 +14,7 @@ abstract class UploadCertificateFormPage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val form = UploadCertificateForm(page)
+    val continueLink = Link.byText(page, "Continue with existing file")
 
     fun uploadCertificate(fileName: String) {
         val filePath = ResourceUtils.getFile("classpath:data/certificates/$fileName").path

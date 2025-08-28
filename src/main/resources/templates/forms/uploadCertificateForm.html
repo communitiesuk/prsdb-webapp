@@ -4,13 +4,26 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="alreadyUploaded" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="nextStepUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(title=#{${title}}, formModel=${formModel}, formContent=~{::#form-content/content()}, backUrl=${backUrl}, sectionHeaderInfo=${sectionHeaderInfo}, enctype='multipart/form-data', formId='single-file-upload-form')}">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'certificate', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(title=#{${title}}, formModel=${formModel}, formContent=~{::#form/content()}, backUrl=${backUrl}, sectionHeaderInfo=${sectionHeaderInfo}, enctype='multipart/form-data', formId='single-file-upload-form')}">
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'certificate', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <div th:replace="~{fragments/forms/fileUpload :: fileUpload(#{forms.uploadCertificate.label}, 'certificate', null)}"></div>
     </th:block>
-    <noscript>
-        <div th:replace="~{fragments/warningText :: warningText('You do not have JavaScript enabled.')}">warning</div>
-    </noscript>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <noscript th:insert="~{fragments/warningText :: warningText(#{forms.uploadCertificate.noScript})}"></noscript>
+    <div th:if="${alreadyUploaded}" class="govuk-inset-text" th:text="#{forms.uploadCertificate.insetText}">forms.uploadCertificate.insetText</div>
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.uploadAndContinue})}">forms.buttons.uploadAndContinue</button>
+        <a th:if="${alreadyUploaded}" class="govuk-link" th:text="#{forms.uploadCertificate.continueLink}" th:href="${nextStepUrl}">forms.uploadCertificate.continueLink</a>
+    </div>
+    <div id="details" th:replace="~{fragments/details :: details(#{forms.uploadCertificate.details.heading}, ~{::#details/content()})}">
+        <div class="govuk-details__text">
+            <p th:text="#{forms.uploadCertificate.details.bullet.heading}">forms.uploadCertificate.details.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{forms.uploadCertificate.details.bullet.one}">forms.uploadCertificate.details.bullet.one</li>
+                <li th:text="#{forms.uploadCertificate.details.bullet.two}">forms.uploadCertificate.details.bullet.two</li>
+            </ul>
+        </div>
+    </div>
 </html>

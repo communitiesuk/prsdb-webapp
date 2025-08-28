@@ -11,7 +11,7 @@ This feedback will help us understand what’s working well and what we need to 
 
 The survey should only take a few minutes to complete.
 
-[Start survey (opens in new tab)](https://example.com/survey)
+[Start survey (opens in new tab)](https://forms.cloud.microsoft/e/q1mupnMCMY)
 
 ---
 This is an automated email – do not reply.

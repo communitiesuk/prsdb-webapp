@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{signOut.title}, ~{::#main-content/content()},false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+            <div id="page-content">
+                <section>
+                    <h1 class="govuk-heading-l" th:text="#{signOut.header}">signOut.header</h1>
+                    <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${buttonUrl}, #{signOut.buttonText})}"></button>
+                </section>
+            </div>
+        </div>
+    </main>
+</th:block>
+</html>

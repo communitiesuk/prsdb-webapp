@@ -1,0 +1,38 @@
+<th:block th:fragment="invalidEicrContent(electricalSafetyStandardsInspectionUrl, electricalSafetyStandardsGuideUrl)">
+    <section>
+        <h3 class="govuk-heading-s" th:text="#{forms.invalidEicr.whatNext.heading}">forms.invalidEicr.whatNext.heading</h3>
+        <ol class="govuk-list govuk-list--number">
+            <li>
+                <span th:remove="tag" th:text="#{forms.invalidEicr.whatNext.one.beforeLink}">forms.invalidEicr.whatNext.one.beforeLink</span>
+                <a class="govuk-link" th:text="#{form.invalidEicr.whatNext.one.link}" th:href="${electricalSafetyStandardsInspectionUrl}" rel="noreferrer noopener" target="_blank">form.invalidEicr.whatNext.one.link
+                </a><span th:remove="tag" th:text="#{forms.invalidEicr.whatNext.one.afterLink}">forms.invalidEicr.whatNext.one.afterLink</span>
+            </li>
+            <li th:text="#{forms.invalidEicr.whatNext.two}">
+                forms.invalidEicr.whatNext.two
+            </li>
+            <li th:text="#{forms.invalidEicr.whatNext.three}">
+                forms.invalidEicr.whatNext.three
+            </li>
+            <li th:text="#{forms.invalidEicr.whatNext.four}">
+                forms.invalidEicr.whatNext.four
+            </li>
+        </ol>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.invalidEicr.whatNext.paragraph.beforeLink}">forms.invalidEicr.whatNext.paragraph.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.invalidEicr.whatNext.paragraph.link}" th:href="${electricalSafetyStandardsGuideUrl}" rel="noreferrer noopener" target="_blank">forms.invalidEicr.whatNext.paragraph.link
+            </a><span th:remove="tag" th:text="#{forms.invalidEicr.whatNext.paragraph.afterLink}">forms.invalidEicr.whatNext.paragraph.afterLink</span>
+        </p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-m" th:text="#{forms.invalidEicr.ifNoEicr.heading}">forms.invalidEicr.ifNoEicr.heading</h2>
+        <p class="govuk-body" th:text="#{forms.invalidEicr.ifNoEicr.paragraph.one}">forms.invalidEicr.ifNoEicr.paragraph.one</p>
+        <p class="govuk-body" th:text="#{forms.invalidEicr.ifNoEicr.bullet.heading}">forms.invalidEicr.ifNoEicr.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.invalidEicr.ifNoEicr.bullet.one}">forms.invalidEicr.ifNoEicr.bullet.one</li>
+            <li th:text="#{forms.invalidEicr.ifNoEicr.bullet.two}">forms.invalidEicr.ifNoEicr.bullet.two</li>
+            <li th:text="#{forms.invalidEicr.ifNoEicr.bullet.three}">forms.invalidEicr.ifNoEicr.bullet.three</li>
+        </ul>
+        <p class="govuk-body" th:text="#{forms.invalidEicr.ifNoEicr.paragraph.three}">forms.invalidEicr.ifNoEicr.paragraph.three</p>
+    </section>
+</th:block>
+

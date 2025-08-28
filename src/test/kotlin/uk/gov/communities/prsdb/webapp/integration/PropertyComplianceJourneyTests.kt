@@ -259,7 +259,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyCompliance::class, urlArguments)
 
         // Gas Safety Outdated page
-        assertThat(gasSafetyOutdatedPage.heading).containsText("Your gas safety certificate is out of date")
+        assertThat(gasSafetyOutdatedPage.heading).containsText("This property’s gas safety certificate has expired")
         gasSafetyOutdatedPage.saveAndContinueToEicrButton.clickAndWait()
         val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
 
@@ -272,7 +272,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page
-        assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
+        assertThat(eicrOutdatedPage.heading).containsText("This property’s Electrical Installation Condition Report (EICR) has expired")
         eicrOutdatedPage.saveAndContinueToEpcButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
@@ -451,12 +451,13 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // EICR Exemption Reason page
-        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
+        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LONG_LEASE)
         val eicrExemptionConfirmationPage =
             assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // EICR Exemption Confirmation page
-        assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
+        assertThat(eicrExemptionConfirmationPage.heading)
+            .containsText("You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)")
         eicrExemptionConfirmationPage.saveAndContinueToEpcButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
@@ -560,7 +561,8 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrExemptionMissingPage = assertPageIs(page, EicrExemptionMissingPagePropertyCompliance::class, urlArguments)
 
         // EICR Exemption Missing page
-        assertThat(eicrExemptionMissingPage.heading).containsText("You must get a valid EICR for this property")
+        assertThat(eicrExemptionMissingPage.heading)
+            .containsText("You must get a valid Electrical Installation Condition Report (EICR) for this property")
         eicrExemptionMissingPage.saveAndContinueToEicrButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 
@@ -698,6 +700,74 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // MEES exemption confirmation page
         meesExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
         assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
+    }
+
+    @Test
+    fun `User does not have to re-upload their certs when they re-visit upload pages`(page: Page) {
+        // Prefill journey answers
+        var checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+
+        // Upload initial Gas Safety Cert.
+        checkAndSubmitPage.form.gasSummaryList.statusRow
+            .clickActionLinkAndWait()
+        val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
+        gasSafetyPage.submitHasCert()
+
+        val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
+        gasSafetyIssueDatePage.submitDate(currentDate)
+
+        var gasSafeEngineerNumPage = assertPageIs(page, GasSafeEngineerNumPagePropertyCompliance::class, urlArguments)
+        gasSafeEngineerNumPage.submitEngineerNum("1234567")
+
+        whenever(fileUploader.uploadFile(any(), any())).thenReturn(UploadedFileLocator("validGasSafety", "mockETag", "mockVersionId"))
+        var gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyCompliance::class, urlArguments)
+        BaseComponent.assertThat(gasSafetyUploadPage.continueLink).isHidden()
+        gasSafetyUploadPage.uploadCertificate("validFile.png")
+
+        var gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
+        gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
+        checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // Upload initial EICR
+        checkAndSubmitPage.form.eicrSummaryList.statusRow
+            .clickActionLinkAndWait()
+        val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
+        eicrPage.submitHasCert()
+
+        var eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
+        eicrIssueDatePage.submitDate(currentDate)
+
+        whenever(fileUploader.uploadFile(any(), any())).thenReturn(UploadedFileLocator("validEicr", "mockETag", "mockVersionId"))
+        var eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
+        BaseComponent.assertThat(eicrUploadPage.continueLink).isHidden()
+        eicrUploadPage.uploadCertificate("validFile.png")
+
+        val eicrUploadConfirmationPage = assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)
+        eicrUploadConfirmationPage.saveAndContinueButton.clickAndWait()
+        checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // Revisit Gas Safety Cert. Upload page without re-uploading
+        checkAndSubmitPage.form.gasSummaryList.engineerNumRow
+            .clickActionLinkAndWait()
+        gasSafeEngineerNumPage = assertPageIs(page, GasSafeEngineerNumPagePropertyCompliance::class, urlArguments)
+        gasSafeEngineerNumPage.form.submit()
+
+        gasSafetyUploadPage = assertPageIs(page, GasSafetyUploadPagePropertyCompliance::class, urlArguments)
+        gasSafetyUploadPage.continueLink.clickAndWait()
+
+        gasSafetyUploadConfirmationPage = assertPageIs(page, GasSafetyUploadConfirmationPagePropertyCompliance::class, urlArguments)
+        gasSafetyUploadConfirmationPage.saveAndContinueButton.clickAndWait()
+        checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
+
+        // Revisit EICR Upload page without re-uploading
+        checkAndSubmitPage.form.eicrSummaryList.issueDateRow
+            .clickActionLinkAndWait()
+        eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
+        eicrIssueDatePage.form.submit()
+
+        eicrUploadPage = assertPageIs(page, EicrUploadPagePropertyCompliance::class, urlArguments)
+        eicrUploadPage.continueLink.clickAndWait()
+        assertPageIs(page, EicrUploadConfirmationPagePropertyCompliance::class, urlArguments)
     }
 
     @Test

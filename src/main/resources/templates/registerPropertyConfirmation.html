@@ -18,20 +18,25 @@
                 <p class="govuk-body" th:utext="#{registerProperty.confirmation.whatHappensNext.paragraph.one}">
                     registerProperty.confirmation.whatHappensNext.paragraph.one
                 </p>
-                <p class="govuk-body" th:text="${isOccupied} ? #{registerProperty.confirmation.whatHappensNext.paragraph.two.occupied} : #{registerProperty.confirmation.whatHappensNext.paragraph.two.unoccupied}">
+                <p class="govuk-body" th:if="${isOccupied}" th:text="#{registerProperty.confirmation.common.usePrnInAdverts.paragraph}">
                     registerProperty.confirmation.whatHappensNext.paragraph.two
                 </p>
             </section>
-
-            <div th:if="${isOccupied}" class="govuk-button-group">
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${propertyComplianceUrl}}, #{registerProperty.confirmation.addCompliance})}">
-                    registerProperty.confirmation.addCompliance
-                </a>
-                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
-                    common.confirmationPage.goToDashboard
-                </a>
-            </div>
+            <th:block th:if="${isOccupied}">
+                <section th:replace="~{fragments/content/propertyRegistrationConfirmationOccupiedContent :: propertyRegistrationConfirmationOccupiedContent()}">
+                    fragments/content/propertyRegistrationConfirmationOccupiedContent
+                </section>
+                <div class="govuk-button-group">
+                    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${propertyComplianceUrl}}, #{registerProperty.confirmation.addCompliance})}">
+                        registerProperty.confirmation.addCompliance
+                    </a>
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
+                        common.confirmationPage.goToDashboard
+                    </a>
+                </div>
+            </th:block>
             <th:block th:unless="${isOccupied}">
+                <section th:replace="~{fragments/content/propertyRegistrationConfirmationUnoccupiedContent :: propertyRegistrationConfirmationUnoccupiedContent()}"></section>
                 <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
                     common.confirmationPage.goToDashboard
                 </a>

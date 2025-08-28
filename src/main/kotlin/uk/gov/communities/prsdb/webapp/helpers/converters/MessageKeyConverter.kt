@@ -67,8 +67,6 @@ class MessageKeyConverter {
         private fun convertEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): String =
             when (eicrExemptionReason) {
                 EicrExemptionReason.LONG_LEASE -> "forms.eicrExemptionReason.radios.longLease.label"
-                EicrExemptionReason.STUDENT_ACCOMMODATION -> "forms.eicrExemptionReason.radios.studentAccommodation.label"
-                EicrExemptionReason.LIVE_IN_LANDLORD -> "forms.eicrExemptionReason.radios.liveInLandlord.label"
                 EicrExemptionReason.OTHER -> "commonText.other"
             }
 

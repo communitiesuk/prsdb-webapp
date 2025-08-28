@@ -2,8 +2,8 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="rcpElectricalInfoUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="rcpElectricalRegisterUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="electricalSafetyStandardsInspectionUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="electricalSafetyStandardsGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -11,25 +11,9 @@
         <h1 class="govuk-heading-l" th:text="#{forms.eicrOutdated.heading}">forms.eicrOutdated.heading</h1>
     </header>
     <section>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.eicrOutdated.paragraph.one.beforeLink}">forms.eicrOutdated.paragraph.one.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.eicrOutdated.paragraph.one.link}" th:href="${rcpElectricalInfoUrl}" rel="noreferrer noopener" target="_blank">
-                forms.eicrOutdated.paragraph.one.link
-            </a><span th:remove="tag" th:text="#{forms.eicrOutdated.paragraph.one.afterLink}">
-                forms.eicrOutdated.paragraph.one.afterLink
-            </span>
-        </p>
-        <p class="govuk-body" th:text="#{forms.eicrOutdated.paragraph.two}">forms.eicrOutdated.paragraph.two</p>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.eicrOutdated.paragraph.three.beforeLink}">forms.eicrOutdated.paragraph.three.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.eicrOutdated.paragraph.three.link}" th:href="${rcpElectricalRegisterUrl}" rel="noreferrer noopener" target="_blank">
-                forms.eicrOutdated.paragraph.three.link
-            </a><span th:remove="tag" th:text="#{forms.eicrOutdated.paragraph.three.afterLink}">
-                forms.eicrOutdated.paragraph.three.afterLink
-            </span>
-        </p>
-        <p class="govuk-body" th:text="#{forms.eicrOutdated.paragraph.four}">forms.eicrOutdated.paragraph.four</p>
-        <p class="govuk-body" th:text="#{forms.eicrOutdated.paragraph.five}">forms.eicrOutdated.paragraph.five</p>
+        <p class="govuk-body" th:text="#{forms.eicrOutdated.paragraph.one}">forms.eicrOutdated.paragraph.one</p>
+        <p class="govuk-body" th:utext="#{forms.eicrOutdated.paragraph.two}">forms.eicrOutdated.paragraph.two</p>
     </section>
+    <section th:replace="~{fragments/content/invalidEicrContent :: invalidEicrContent(${electricalSafetyStandardsInspectionUrl}, ${electricalSafetyStandardsGuideUrl})}"></section>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

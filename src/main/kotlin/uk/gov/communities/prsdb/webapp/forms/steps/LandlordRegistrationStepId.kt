@@ -26,7 +26,6 @@ enum class LandlordRegistrationStepId(
     SelectContactAddress("select-contact-address", LandlordRegistrationGroupIdentifier.Address),
     ManualContactAddress("manual-contact-address", LandlordRegistrationGroupIdentifier.Address),
     CheckAnswers("check-answers", LandlordRegistrationGroupIdentifier.CheckYourAnswers),
-    Declaration("declaration", LandlordRegistrationGroupIdentifier.Declaration),
 }
 
 enum class LandlordRegistrationGroupIdentifier {
@@ -38,5 +37,4 @@ enum class LandlordRegistrationGroupIdentifier {
     PhoneNumber,
     Address,
     CheckYourAnswers,
-    Declaration,
 }

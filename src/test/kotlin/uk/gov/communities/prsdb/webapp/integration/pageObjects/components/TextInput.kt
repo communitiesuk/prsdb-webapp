@@ -17,6 +17,11 @@ class TextInput(
             fieldName: String,
         ) = factory(parentLocator, "email", fieldName)
 
+        fun hiddenByFieldName(
+            parentLocator: Locator,
+            fieldName: String,
+        ) = factory(parentLocator, "hidden", fieldName)
+
         private fun factory(
             parentLocator: Locator,
             type: String = "text",

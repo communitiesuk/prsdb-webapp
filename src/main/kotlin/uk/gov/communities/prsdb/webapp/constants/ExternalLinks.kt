@@ -1,15 +1,26 @@
 package uk.gov.communities.prsdb.webapp.constants
 
-const val GAS_SAFE_REGISTER = "https://www.gassaferegister.co.uk/find-an-engineer-or-check-the-register"
+const val GAS_SAFE_REGISTER_URL = "https://www.gassaferegister.co.uk/"
+
+const val CHECK_GAS_SAFE_REGISTER_URL = "https://www.gassaferegister.co.uk/find-an-engineer-or-check-the-register"
 
 const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.uk/safety-guidance/competent-registered-electrician.aspx"
 
 const val RCP_ELECTRICAL_REGISTER_URL = "https://electricalcompetentperson.co.uk"
 
+const val ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL =
+    "https://www.gov.uk/government/publications" +
+        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities"
+
 const val ELECTRICAL_SAFETY_STANDARDS_URL =
     "https://www.gov.uk/government/publications" +
         "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
         "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector"
+
+const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
+    "https://www.gov.uk/government/publications" +
+        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
+        "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector#the-inspection"
 
 const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
 
@@ -86,3 +97,7 @@ const val GOV_LICENCE_URL = "https://www.nationalarchives.gov.uk/doc/open-govern
 const val CROWN_COPYRIGHT_URL =
     "https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information" +
         "/uk-government-licensing-framework/crown-copyright/"
+
+const val HSE_URL = "https://www.hse.gov.uk/"
+
+const val LANDLORD_GAS_SAFETY_URL = "https://www.hse.gov.uk/gas/domestic/faqlandlord.htm"
