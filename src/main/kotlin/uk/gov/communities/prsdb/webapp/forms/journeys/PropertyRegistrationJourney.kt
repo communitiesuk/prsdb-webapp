@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
@@ -40,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectiveLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
@@ -98,9 +96,6 @@ class PropertyRegistrationJourney(
             JourneyTask.withOneStep(
                 checkAnswersStep(),
                 "registerProperty.taskList.checkAndSubmit.checkAnswers",
-            ),
-            JourneyTask.withOneStep(
-                declarationStep(),
             ),
         )
 
@@ -564,32 +559,6 @@ class PropertyRegistrationJourney(
         Step(
             id = RegisterPropertyStepId.CheckAnswers,
             page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService, unreachableStepRedirect),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.Declaration, null) },
-        )
-
-    private fun declarationStep() =
-        Step(
-            id = RegisterPropertyStepId.Declaration,
-            page =
-                Page(
-                    formModel = DeclarationFormModel::class,
-                    templateName = "forms/declarationForm",
-                    content =
-                        mapOf(
-                            "title" to "registerProperty.title",
-                            "bulletOneFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
-                            "bulletTwoFineAmount" to "forms.declaration.fines.propertyRegistrationJourneyAmount",
-                            "options" to
-                                listOf(
-                                    CheckboxViewModel(
-                                        value = "true",
-                                        labelMsgKey = "forms.declaration.checkbox.label",
-                                    ),
-                                ),
-                            "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersSubmitAndRedirect(filteredJourneyData) },
         )
 

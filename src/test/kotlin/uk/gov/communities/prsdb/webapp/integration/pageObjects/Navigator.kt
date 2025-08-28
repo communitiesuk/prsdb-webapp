@@ -132,7 +132,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
@@ -528,15 +527,6 @@ class Navigator(
         )
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationDeclarationPage(): DeclarationFormPagePropertyRegistration {
-        setJourneyDataInSession(
-            PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforePropertyRegistrationDeclaration().build(),
-        )
-        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.Declaration.urlPathSegment}")
-        return createValidPage(page, DeclarationFormPagePropertyRegistration::class)
     }
 
     fun navigateToPropertyRegistrationConfirmationPage() {
