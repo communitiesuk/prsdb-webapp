@@ -11,7 +11,7 @@ spring:
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
-  use-production-notify: true
+  use-production-notify: false
 
 os-places:
   api-key: ${OS_PLACES_API_KEY}
