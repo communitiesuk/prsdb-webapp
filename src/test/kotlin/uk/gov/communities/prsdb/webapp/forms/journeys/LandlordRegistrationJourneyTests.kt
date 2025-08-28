@@ -92,7 +92,7 @@ class LandlordRegistrationJourneyTests {
 
             // Act
             testJourney.completeStep(
-                stepPathSegment = LandlordRegistrationStepId.Declaration.urlPathSegment,
+                stepPathSegment = LandlordRegistrationStepId.CheckAnswers.urlPathSegment,
                 formData = mapOf(),
                 subPageNumber = null,
                 principal = mock(),

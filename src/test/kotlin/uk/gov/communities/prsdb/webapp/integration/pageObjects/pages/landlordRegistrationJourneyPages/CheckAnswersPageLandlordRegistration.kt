@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class CheckAnswersPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
-    fun confirm() = form.submit()
+    fun confirmAndSubmit() = form.submit()
 
     val form = CheckAnswersLandlordRegistration(page)
 
