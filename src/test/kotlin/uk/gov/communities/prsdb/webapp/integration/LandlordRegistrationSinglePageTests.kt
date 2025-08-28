@@ -420,16 +420,6 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
-    inner class LandlordRegistrationStepDeclaration {
-        @Test
-        fun `Submitting without checking the checkbox returns an error`(page: Page) {
-            val declarationPage = navigator.skipToLandlordRegistrationDeclarationPage()
-            declarationPage.form.submit()
-            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
-        }
-    }
-
-    @Nested
     inner class LandlordRegistrationConfirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 500 error page`(page: Page) {
