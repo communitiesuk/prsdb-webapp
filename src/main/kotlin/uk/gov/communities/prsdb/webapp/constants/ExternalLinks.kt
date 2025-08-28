@@ -38,8 +38,6 @@ const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certific
 const val MEES_EXEMPTION_GUIDE_URL =
     "https://www.gov.uk/guidance/domestic-private-rented-property-minimum-energy-efficiency-standard-landlord-guidance"
 
-const val EPC_IMPROVEMENT_GUIDE_URL = "https://energysavingtrust.org.uk/tips-to-improve-the-epc-rating-of-your-home/"
-
 const val REGISTER_PRS_EXEMPTION_URL = "https://prsregister.beis.gov.uk/NdsBeisUi/used-service-before"
 
 const val HOUSES_IN_MULTIPLE_OCCUPATION_URL = "https://www.gov.uk/private-renting/houses-in-multiple-occupation"
