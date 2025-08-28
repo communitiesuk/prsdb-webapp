@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.DATA_PROTECTION_COMMUNITIES_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.DPO_COMMUNITIES_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
@@ -19,6 +20,8 @@ class LandlordPrivacyNoticeController {
         model.addAttribute("complaintsProcedureUrl", COMPLAINTS_PROCEDURE_URL)
         model.addAttribute("dataProtectionEmail", DATA_PROTECTION_COMMUNITIES_EMAILS)
         model.addAttribute("informationCommissionersOfficeUrl", INFORMATION_COMMISSIONERS_OFFICE_URL)
+        model.addAttribute("informationCommissionersOfficeForThePublicUrl", INFORMATION_COMMISSIONERS_OFFICE_URL)
+        model.addAttribute("dpoEmail", DPO_COMMUNITIES_EMAILS)
         return "landlordPrivacyNotice"
     }
 
