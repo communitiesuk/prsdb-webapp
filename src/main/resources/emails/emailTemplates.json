@@ -29,7 +29,7 @@
   },
   {
     "test_id": "d9250d23-8930-4649-91ab-0c682490da06",
-    "prod_id": "f7d90928-1f27-492b-a7b4-18fff9cc2e6a",
+    "prod_id": "2d48a8e6-9d12-4c2f-8c61-ec0ffb6b7c11",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "GOV.UK - Your registered property on the PRS Database",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
