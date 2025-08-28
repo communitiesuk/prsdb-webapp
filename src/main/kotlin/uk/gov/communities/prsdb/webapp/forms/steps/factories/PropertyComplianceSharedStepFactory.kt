@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.forms.steps.factories
 
 import uk.gov.communities.prsdb.webapp.constants.CHECK_GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
@@ -461,8 +463,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                            "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                            "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
+                            "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",

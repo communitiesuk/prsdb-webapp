@@ -8,10 +8,19 @@ const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.u
 
 const val RCP_ELECTRICAL_REGISTER_URL = "https://electricalcompetentperson.co.uk"
 
+const val ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL =
+    "https://www.gov.uk/government/publications" +
+        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities"
+
 const val ELECTRICAL_SAFETY_STANDARDS_URL =
     "https://www.gov.uk/government/publications" +
         "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
         "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector"
+
+const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
+    "https://www.gov.uk/government/publications" +
+        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
+        "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector#the-inspection"
 
 const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
 

@@ -274,7 +274,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyComplianceUpdate::class, urlArguments)
 
         // EICR Outdated page
-        assertThat(eicrOutdatedPage.heading).containsText("This property’s EICR is out of date")
+        assertThat(eicrOutdatedPage.heading).containsText("This property’s Electrical Installation Condition Report (EICR) has expired")
         eicrOutdatedPage.saveAndContinueButton.clickAndWait()
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
