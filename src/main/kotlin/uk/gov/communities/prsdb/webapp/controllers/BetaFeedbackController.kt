@@ -29,7 +29,7 @@ class BetaFeedbackController(
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
-    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL, FEEDBACK_SUCCESS_URL)
+    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL)
     fun landlordFeedbackSuccess(
         model: Model,
         request: HttpServletRequest,
@@ -135,6 +135,5 @@ class BetaFeedbackController(
         const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
         const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
         const val FEEDBACK_URL = "/${FEEDBACK_PATH_SEGMENT}"
-        const val FEEDBACK_SUCCESS_URL = "/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
     }
 }
