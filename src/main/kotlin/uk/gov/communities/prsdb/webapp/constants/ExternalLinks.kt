@@ -86,6 +86,8 @@ const val COMPLAINTS_PROCEDURE_URL =
 
 const val INFORMATION_COMMISSIONERS_OFFICE_URL = "https://ico.org.uk/"
 
+const val INFORMATION_COMMISSIONERS_OFFICE_URL_FOR_THE_PUBLIC = "https://ico.org.uk/for-the-public/?"
+
 const val FEEDBACK_FORM_URL = "https://forms.cloud.microsoft/e/q1mupnMCMY"
 
 const val RENTING_OUT_AN_HMO_URL = "https://www.gov.uk/renting-out-a-property/houses-in-multiple-occupation-hmo"
