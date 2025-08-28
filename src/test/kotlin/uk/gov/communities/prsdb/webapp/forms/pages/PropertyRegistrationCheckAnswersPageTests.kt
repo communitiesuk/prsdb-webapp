@@ -326,7 +326,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             // Assert
             assertEquals(
                 SummaryListRowViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.licensing",
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     LicensingType.NO_LICENSING,
                     SummaryListRowActionViewModel(
                         "forms.links.change",
@@ -351,7 +351,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             // Assert
             assertEquals(
                 SummaryListRowViewModel(
-                    "forms.checkPropertyAnswers.propertyDetails.licensing",
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     LicensingType.HMO_MANDATORY_LICENCE,
                     SummaryListRowActionViewModel(
                         "forms.links.change",
@@ -360,7 +360,7 @@ class PropertyRegistrationCheckAnswersPageTests {
                     ),
                 ),
                 licensingDetails.single {
-                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
+                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensingType"
                 },
             )
             assertEquals(

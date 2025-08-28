@@ -31,6 +31,7 @@ class CheckLicensingAnswersPagePropertyDetailsUpdate(
     class CheckLicensingAnswersPropertyDetailsSummaryList(
         locator: Locator,
     ) : SummaryList(locator) {
-        val licensingRow = getRow("Licensing type")
+        val licensingTypeRow = getRow("Licensing type")
+        val licensingNumberRow = getRow("Licensing number")
     }
 }

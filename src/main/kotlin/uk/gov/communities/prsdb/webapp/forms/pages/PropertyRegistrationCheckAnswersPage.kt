@@ -113,7 +113,7 @@ class PropertyRegistrationCheckAnswersPage(
         val licenceNumber = DataHelper.getLicenseNumber(journeyData)!!
         return listOfNotNull(
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.licensing",
+                "forms.checkPropertyAnswers.propertyDetails.licensingType",
                 licensingType,
                 RegisterPropertyStepId.LicensingType.urlPathSegment,
             ),

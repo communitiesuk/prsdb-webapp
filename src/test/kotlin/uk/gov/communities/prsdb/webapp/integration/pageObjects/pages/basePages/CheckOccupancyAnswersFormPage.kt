@@ -16,14 +16,14 @@ abstract class CheckOccupancyAnswersFormPage(
     class CheckOccupancyAnswersPropertyDetailsUpdateForm(
         page: Page,
     ) : Form(page) {
-        val summaryList = CheckLicensingAnswersPropertyDetailsSummaryList(locator)
+        val summaryList = CheckOccupancyAnswersPropertyDetailsSummaryList(locator)
     }
 
-    class CheckLicensingAnswersPropertyDetailsSummaryList(
+    class CheckOccupancyAnswersPropertyDetailsSummaryList(
         locator: Locator,
     ) : SummaryList(locator) {
         val occupancyRow = getRow("Is your property occupied by tenants?")
-        val numberOfHouseholdsRow = getRow("How many households are in your property?")
+        val numberOfHouseholdsRow = getRow("Households in your property")
         val numberOfPeopleRow = getRow("How many people live in your property?")
     }
 }

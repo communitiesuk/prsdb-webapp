@@ -13,7 +13,7 @@
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${label}}, 'name', null)}"></div>
     </th:block>
     <th:block th:if="${showWarning}">
-        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
