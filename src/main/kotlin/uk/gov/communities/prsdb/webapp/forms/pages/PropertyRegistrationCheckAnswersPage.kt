@@ -20,7 +20,7 @@ class PropertyRegistrationCheckAnswersPage(
         content =
             mapOf(
                 "title" to "registerProperty.title",
-                "submitButtonText" to "forms.buttons.saveAndContinue",
+                "submitButtonText" to "forms.buttons.completeRegistration",
             ),
         journeyDataService = journeyDataService,
         templateName = "forms/propertyRegistrationCheckAnswersForm",
