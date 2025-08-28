@@ -451,12 +451,13 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrExemptionReasonPage = assertPageIs(page, EicrExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // EICR Exemption Reason page
-        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LIVE_IN_LANDLORD)
+        eicrExemptionReasonPage.submitExemptionReason(EicrExemptionReason.LONG_LEASE)
         val eicrExemptionConfirmationPage =
             assertPageIs(page, EicrExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // EICR Exemption Confirmation page
-        assertThat(eicrExemptionConfirmationPage.heading).containsText("You’ve marked this property as exempt from needing an EICR")
+        assertThat(eicrExemptionConfirmationPage.heading)
+            .containsText("You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)")
         eicrExemptionConfirmationPage.saveAndContinueToEpcButton.clickAndWait()
         val epcPage = assertPageIs(page, EpcPagePropertyCompliance::class, urlArguments)
 

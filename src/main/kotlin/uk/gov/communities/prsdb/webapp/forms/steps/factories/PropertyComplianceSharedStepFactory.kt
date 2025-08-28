@@ -523,14 +523,6 @@ class PropertyComplianceSharedStepFactory(
                                         hintMsgKey = "forms.eicrExemptionReason.radios.longLease.hint",
                                     ),
                                     RadiosButtonViewModel(
-                                        value = EicrExemptionReason.STUDENT_ACCOMMODATION,
-                                        labelMsgKey = "forms.eicrExemptionReason.radios.studentAccommodation.label",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = EicrExemptionReason.LIVE_IN_LANDLORD,
-                                        labelMsgKey = "forms.eicrExemptionReason.radios.liveInLandlord.label",
-                                    ),
-                                    RadiosButtonViewModel(
                                         value = GasSafetyExemptionReason.OTHER,
                                         labelMsgKey = "forms.eicrExemptionReason.radios.other.label",
                                         hintMsgKey = "forms.eicrExemptionReason.radios.other.hint",

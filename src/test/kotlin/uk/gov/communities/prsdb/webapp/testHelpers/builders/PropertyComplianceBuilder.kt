@@ -57,7 +57,7 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withEicrExemption(exemption: EicrExemptionReason = EicrExemptionReason.LIVE_IN_LANDLORD): PropertyComplianceBuilder {
+    fun withEicrExemption(exemption: EicrExemptionReason = EicrExemptionReason.LONG_LEASE): PropertyComplianceBuilder {
         propertyCompliance.eicrExemptionReason = exemption
         return this
     }
@@ -205,7 +205,7 @@ class PropertyComplianceBuilder {
 
         fun createWithCertExemptions(
             gasExemption: GasSafetyExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY,
-            eicrExemption: EicrExemptionReason = EicrExemptionReason.LIVE_IN_LANDLORD,
+            eicrExemption: EicrExemptionReason = EicrExemptionReason.LONG_LEASE,
             epcExemption: EpcExemptionReason = EpcExemptionReason.LISTED_BUILDING,
         ) = PropertyComplianceBuilder()
             .withPropertyOwnership()
