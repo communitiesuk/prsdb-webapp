@@ -8,7 +8,7 @@
             <div id="page-content">
                 <section>
                     <h1 class="govuk-heading-l" th:text="#{signOut.header}">signOut.header</h1>
-                    <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink('/', #{signOut.buttonText})}"></button>
+                    <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${buttonUrl}, #{signOut.buttonText})}"></button>
                 </section>
             </div>
         </div>
