@@ -302,7 +302,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // EICR Exemption Confirmation page
         assertThat(eicrExemptionConfirmationPage.heading)
-            .containsText("You must get a valid Electrical Installation Condition Report (EICR) for this property")
+            .containsText("You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)")
         eicrExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
 
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
@@ -336,7 +336,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // EICR Exemption Confirmation page
         assertThat(eicrExemptionConfirmationPage.heading)
-            .containsText("You must get a valid Electrical Installation Condition Report (EICR) for this property")
+            .containsText("You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)")
         eicrExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
 
         assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
