@@ -15,7 +15,7 @@
     <h2 class="govuk-heading-m" th:text="#{${summaryName}}"></h2>
     <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
     <th:block th:if="${showWarning}">
-        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
