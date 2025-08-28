@@ -13,6 +13,7 @@ class SignOutController {
     fun signOut(model: Model): String {
         model.addAttribute("title", "signOut.title")
         model.addAttribute("contentHeader", "signOut.header")
-        return "index"
+        model.addAttribute("buttonUrl", "/")
+        return "signoutPage"
     }
 }

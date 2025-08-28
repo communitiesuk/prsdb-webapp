@@ -1,17 +1,19 @@
 package uk.gov.communities.prsdb.webapp.forms.steps.factories
 
+import uk.gov.communities.prsdb.webapp.constants.CHECK_GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.HSE_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -67,7 +69,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 class PropertyComplianceSharedStepFactory(
     private val defaultSaveAfterSubmit: Boolean,
-    private val isCheckingAnswers: Boolean,
+    private val checkingAnswersFor: PropertyComplianceStepId?,
     private val isUpdateJourney: Boolean,
     private val journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
@@ -76,6 +78,7 @@ class PropertyComplianceSharedStepFactory(
     stepName: String,
 ) {
     private val stepGroupId = PropertyComplianceStepId.fromPathSegment(stepName)?.groupIdentifier
+    private val isCheckingAnswers = checkingAnswersFor != null
 
     val epcNotAutomatchedStepId = getEpcNotAutomatchedStepIdFor(stepGroupId)
     val checkAutoMatchedEpcStepId = getCheckAutoMatchedEpcStepIdFor(stepGroupId)
@@ -173,7 +176,7 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.gasSafeEngineerNum.fieldSetHeading",
                             "fieldSetHint" to "forms.gasSafeEngineerNum.fieldSetHint",
-                            "gasSafeRegisterURL" to GAS_SAFE_REGISTER,
+                            "gasSafeRegisterURL" to CHECK_GAS_SAFE_REGISTER_URL,
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUpload, null) },
@@ -191,20 +194,18 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
                             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            "alreadyUploaded" to (journeyDataService.getJourneyDataFromSession().getGasSafetyCertUploadId() != null),
+                            "nextStepUrl" to gasSafetyUploadNextStepUrl(checkingAnswersFor),
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
-            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
+            handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
                     FileCategory.GasSafetyCert,
                 )
-                Step.generateUrl(
-                    PropertyComplianceStepId.GasSafetyUploadConfirmation,
-                    null,
-                    checking,
-                )
+                gasSafetyUploadNextStepUrl(checkingFor)
             },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
@@ -240,6 +241,9 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "gasSafeRegisterUrl" to GAS_SAFE_REGISTER_URL,
+                            "hseUrl" to HSE_URL,
+                            "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
@@ -365,6 +369,9 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "gasSafeRegisterUrl" to GAS_SAFE_REGISTER_URL,
+                            "hseUrl" to HSE_URL,
+                            "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEICR",
@@ -406,20 +413,18 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
                             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+                            "alreadyUploaded" to (journeyDataService.getJourneyDataFromSession().getEicrUploadId() != null),
+                            "nextStepUrl" to eicrUploadNextStepUrl(checkingAnswersFor),
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
-            handleSubmitAndRedirect = { filteredJourneyData, _, checking ->
+            handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
                     FileCategory.Eirc,
                 )
-                Step.generateUrl(
-                    PropertyComplianceStepId.EicrUploadConfirmation,
-                    null,
-                    checking,
-                )
+                eicrUploadNextStepUrl(checkingFor)
             },
             saveAfterSubmit = defaultSaveAfterSubmit,
         )
@@ -455,8 +460,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                            "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                            "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
+                            "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
@@ -515,14 +520,6 @@ class PropertyComplianceSharedStepFactory(
                                         value = GasSafetyExemptionReason.LONG_LEASE,
                                         labelMsgKey = "forms.eicrExemptionReason.radios.longLease.label",
                                         hintMsgKey = "forms.eicrExemptionReason.radios.longLease.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = EicrExemptionReason.STUDENT_ACCOMMODATION,
-                                        labelMsgKey = "forms.eicrExemptionReason.radios.studentAccommodation.label",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = EicrExemptionReason.LIVE_IN_LANDLORD,
-                                        labelMsgKey = "forms.eicrExemptionReason.radios.liveInLandlord.label",
                                     ),
                                     RadiosButtonViewModel(
                                         value = GasSafetyExemptionReason.OTHER,
@@ -586,8 +583,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "rcpElectricalInfoUrl" to RCP_ELECTRICAL_INFO_URL,
-                            "rcpElectricalRegisterUrl" to RCP_ELECTRICAL_REGISTER_URL,
+                            "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
+                            "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToEPC",
@@ -1008,6 +1005,9 @@ class PropertyComplianceSharedStepFactory(
             Pair(PropertyComplianceStepId.GasSafetyEngineerNum, null)
         }
 
+    private fun gasSafetyUploadNextStepUrl(checkingAnswersFor: PropertyComplianceStepId?) =
+        Step.generateUrl(PropertyComplianceStepId.GasSafetyUploadConfirmation, null, checkingAnswersFor)
+
     private fun gasSafetyExemptionStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasGasSafetyCertExemption()!!) {
             Pair(PropertyComplianceStepId.GasSafetyExemptionReason, null)
@@ -1037,6 +1037,9 @@ class PropertyComplianceSharedStepFactory(
         } else {
             Pair(PropertyComplianceStepId.EicrUpload, null)
         }
+
+    private fun eicrUploadNextStepUrl(checkingAnswersFor: PropertyComplianceStepId?) =
+        Step.generateUrl(PropertyComplianceStepId.EicrUploadConfirmation, null, checkingAnswersFor)
 
     private fun eicrExemptionStepNextAction(filteredJourneyData: JourneyData) =
         if (filteredJourneyData.getHasEicrExemption()!!) {

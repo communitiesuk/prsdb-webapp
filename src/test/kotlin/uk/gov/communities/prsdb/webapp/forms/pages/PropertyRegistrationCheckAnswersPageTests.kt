@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -78,16 +79,6 @@ class PropertyRegistrationCheckAnswersPageTests {
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address"
-            },
-        )
-        assertEquals(
-            SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.uprn",
-                uprn,
-                null,
-            ),
-            propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.uprn"
             },
         )
         assertEquals(
@@ -231,57 +222,6 @@ class PropertyRegistrationCheckAnswersPageTests {
     }
 
     @Test
-    fun `propertyDetails has a simple licensing type summary row when there is no licensing`() {
-        // Arrange
-        val journeyData = journeyDataBuilder.withLicensing(LicensingType.NO_LICENSING).build()
-
-        // Act
-        val propertyDetails = getPropertyDetails(journeyData)
-
-        // Assert
-        assertEquals(
-            SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.licensing",
-                LicensingType.NO_LICENSING,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    RegisterPropertyStepId.LicensingType.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
-                ),
-            ),
-            propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
-            },
-        )
-    }
-
-    @Test
-    fun `propertyDetails has the correct multiline licensing type summary row when there is licensing`() {
-        // Arrange
-        val licenceNumber = "entered licence number"
-        val journeyData = journeyDataBuilder.withLicensing(LicensingType.SELECTIVE_LICENCE, licenceNumber).build()
-
-        // Act
-        val propertyDetails = getPropertyDetails(journeyData)
-
-        // Assert
-        assertEquals(
-            SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.licensing",
-                listOf(LicensingType.SELECTIVE_LICENCE, licenceNumber),
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    RegisterPropertyStepId.LicensingType.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
-                ),
-            ),
-            propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensing"
-            },
-        )
-    }
-
-    @Test
     fun `propertyDetails has a single line occupation summary row when there are no tenants`() {
         // Arrange
         val journeyData = journeyDataBuilder.withNoTenants().build()
@@ -360,5 +300,83 @@ class PropertyRegistrationCheckAnswersPageTests {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.people"
             },
         )
+    }
+
+    @Nested
+    inner class LicensingDetailsTests {
+        private fun getLicensingDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
+            whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
+
+            val bindingResult = page.bindDataToFormModel(validator, pageData)
+            val result =
+                page.getModelAndView(bindingResult, prevStepUrl, journeyData, SectionHeaderViewModel("any-key", 0, 0))
+
+            val licensingDetails = result.model["licensingDetails"] as List<*>
+            return licensingDetails.filterIsInstance<SummaryListRowViewModel>()
+        }
+
+        @Test
+        fun `licensingDetails only has the licensing type summary row when there is no licensing`() {
+            // Arrange
+            val journeyData = journeyDataBuilder.withLicensing(LicensingType.NO_LICENSING).build()
+
+            // Act
+            val licensingDetails = getLicensingDetails(journeyData)
+
+            // Assert
+            assertEquals(
+                SummaryListRowViewModel(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    LicensingType.NO_LICENSING,
+                    SummaryListRowActionViewModel(
+                        "forms.links.change",
+                        RegisterPropertyStepId.LicensingType.urlPathSegment +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
+                    ),
+                ),
+                licensingDetails.singleOrNull(),
+            )
+        }
+
+        @Test
+        fun `licensingDetails has the correct summary rows for HMO mandatory licensing`() {
+            // Arrange
+            val licenceNumber = "123456789012"
+            val journeyData =
+                journeyDataBuilder.withLicensing(LicensingType.HMO_MANDATORY_LICENCE, licenceNumber).build()
+
+            // Act
+            val licensingDetails = getLicensingDetails(journeyData)
+
+            // Assert
+            assertEquals(
+                SummaryListRowViewModel(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    LicensingType.HMO_MANDATORY_LICENCE,
+                    SummaryListRowActionViewModel(
+                        "forms.links.change",
+                        RegisterPropertyStepId.LicensingType.urlPathSegment +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
+                    ),
+                ),
+                licensingDetails.single {
+                    it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.licensingType"
+                },
+            )
+            assertEquals(
+                SummaryListRowViewModel(
+                    "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+                    licenceNumber,
+                    SummaryListRowActionViewModel(
+                        "forms.links.change",
+                        RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}",
+                    ),
+                ),
+                licensingDetails.single {
+                    it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingNumber"
+                },
+            )
+        }
     }
 }

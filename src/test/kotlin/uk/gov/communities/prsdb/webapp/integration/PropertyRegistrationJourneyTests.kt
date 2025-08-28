@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -146,13 +145,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
-        val declarationPage = assertPageIs(page, DeclarationFormPagePropertyRegistration::class)
-
-        // Declaration - render page
-        assertThat(declarationPage.form.fieldsetHeading).containsText("Declaration")
-        assertThat(declarationPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
-        // fill in and submit
-        declarationPage.agreeAndSubmit()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
 
         // Confirmation - render page
@@ -170,6 +162,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 expectedPropertyRegNum.toString(),
                 "1, Example Road, EG1 2AB",
                 absoluteLandlordUrl,
+                true,
             ),
         )
 
@@ -254,13 +247,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
-        val declarationPage = assertPageIs(page, DeclarationFormPagePropertyRegistration::class)
-
-        // Declaration - render page
-        assertThat(declarationPage.form.fieldsetHeading).containsText("Declaration")
-        assertThat(declarationPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
-        // fill in and submit
-        declarationPage.agreeAndSubmit()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
 
         // Confirmation - render page
@@ -278,6 +264,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 expectedPropertyRegNum.toString(),
                 "Test address line 1, Testville, EG1 2AB",
                 absoluteLandlordUrl,
+                false,
             ),
         )
 

@@ -7,15 +7,19 @@
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
         <h1 class="govuk-fieldset__heading" th:text="#{forms.checkAnswers.heading}">forms.checkAnswers.heading</h1>
     </legend>
+    <th:block th:if="${insetText != null}">
+        <p class="govuk-inset-text" th:text="#{${insetText}}">insetText</p>
+    </th:block>
     <h2 class="govuk-heading-m" th:text="#{${summaryName}}"></h2>
     <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
     <th:block th:if="${showWarning}">
-        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>

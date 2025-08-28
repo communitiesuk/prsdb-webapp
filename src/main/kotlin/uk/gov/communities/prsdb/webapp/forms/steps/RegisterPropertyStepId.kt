@@ -21,7 +21,6 @@ enum class RegisterPropertyStepId(
     HmoMandatoryLicence("hmo-mandatory-licence", RegisterPropertyGroupIdentifier.Licensing),
     HmoAdditionalLicence("hmo-additional-licence", RegisterPropertyGroupIdentifier.Licensing),
     CheckAnswers("check-answers", RegisterPropertyGroupIdentifier.CheckYourAnswers),
-    Declaration("declaration", RegisterPropertyGroupIdentifier.Declaration),
 }
 
 enum class RegisterPropertyGroupIdentifier {

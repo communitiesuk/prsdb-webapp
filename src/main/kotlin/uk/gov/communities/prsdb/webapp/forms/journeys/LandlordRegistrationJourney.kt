@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -105,7 +104,6 @@ class LandlordRegistrationJourney(
     private fun checkAndSubmitDetailsTasks(): List<JourneyTask<LandlordRegistrationStepId>> =
         listOf(
             JourneyTask.withOneStep(checkAnswersStep()),
-            JourneyTask.withOneStep(declarationStep()),
         )
 
     private fun identityTask() =
@@ -553,34 +551,7 @@ class LandlordRegistrationJourney(
         Step(
             id = LandlordRegistrationStepId.CheckAnswers,
             page = LandlordRegistrationCheckAnswersPage(journeyDataService, unreachableStepRedirect),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.Declaration, null) },
-            saveAfterSubmit = false,
-        )
-
-    private fun declarationStep() =
-        Step(
-            id = LandlordRegistrationStepId.Declaration,
-            page =
-                Page(
-                    formModel = DeclarationFormModel::class,
-                    templateName = "forms/declarationForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "bulletOneFineAmount" to "forms.declaration.fines.bullet.one.landlordRegistrationJourneyAmount",
-                            "bulletTwoFineAmount" to "forms.declaration.fines.bullet.two.landlordRegistrationJourneyAmount",
-                            "options" to
-                                listOf(
-                                    CheckboxViewModel(
-                                        value = "true",
-                                        labelMsgKey = "forms.declaration.checkbox.label",
-                                    ),
-                                ),
-                            "submitButtonText" to "forms.buttons.confirmAndCompleteRegistration",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> declarationHandleSubmitAndRedirect(filteredJourneyData) },
+            handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
@@ -612,7 +583,7 @@ class LandlordRegistrationJourney(
             Pair(LandlordRegistrationStepId.CheckAnswers, null)
         }
 
-    private fun declarationHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
+    private fun checkAnswersHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         landlordService.createLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             name = LandlordRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,

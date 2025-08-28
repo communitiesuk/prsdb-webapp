@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import kotlin.collections.plus
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
@@ -19,7 +20,7 @@ class PropertyRegistrationCheckAnswersPage(
         content =
             mapOf(
                 "title" to "registerProperty.title",
-                "submitButtonText" to "forms.buttons.saveAndContinue",
+                "submitButtonText" to "forms.buttons.completeRegistration",
             ),
         journeyDataService = journeyDataService,
         templateName = "forms/propertyRegistrationCheckAnswersForm",
@@ -32,7 +33,7 @@ class PropertyRegistrationCheckAnswersPage(
     ) {
         modelAndView.addObject("propertyName", getPropertyName(filteredJourneyData))
         modelAndView.addObject("propertyDetails", getPropertyDetailsSummaryList(filteredJourneyData))
-        modelAndView.addObject("showUprnDetail", !DataHelper.isManualAddressChosen(filteredJourneyData))
+        modelAndView.addObject("licensingDetails", getLicensingDetailsSummaryList(filteredJourneyData))
     }
 
     private fun getPropertyName(filteredJourneyData: JourneyData) = DataHelper.getAddress(filteredJourneyData)!!.singleLineAddress
@@ -41,7 +42,6 @@ class PropertyRegistrationCheckAnswersPage(
         getAddressRows(filteredJourneyData) +
             getPropertyTypeRow(filteredJourneyData) +
             getOwnershipTypeRow(filteredJourneyData) +
-            getLicensingTypeRow(filteredJourneyData) +
             getTenancyRows(filteredJourneyData)
 
     private fun getAddressRows(journeyData: JourneyData): List<SummaryListRowViewModel> {
@@ -59,11 +59,6 @@ class PropertyRegistrationCheckAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 address.singleLineAddress,
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.uprn",
-                address.uprn,
-                null,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
@@ -113,25 +108,34 @@ class PropertyRegistrationCheckAnswersPage(
             RegisterPropertyStepId.OwnershipType.urlPathSegment,
         )
 
-    private fun getLicensingTypeRow(journeyData: JourneyData): SummaryListRowViewModel {
+    private fun getLicensingDetailsSummaryList(journeyData: JourneyData): List<SummaryListRowViewModel> {
         val licensingType = DataHelper.getLicensingType(journeyData)!!
         val licenceNumber = DataHelper.getLicenseNumber(journeyData)!!
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.propertyDetails.licensing",
-            getLicensingSummaryValue(licenceNumber, licensingType),
-            RegisterPropertyStepId.LicensingType.urlPathSegment,
+        return listOfNotNull(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                licensingType,
+                RegisterPropertyStepId.LicensingType.urlPathSegment,
+            ),
+            getLicensingNumberRowOrNull(licenceNumber, licensingType),
         )
     }
 
-    private fun getLicensingSummaryValue(
+    private fun getLicensingNumberRowOrNull(
         licenceNumber: String?,
         licensingType: LicensingType,
-    ): Any =
-        if (licensingType != LicensingType.NO_LICENSING) {
-            listOf(licensingType, licenceNumber)
-        } else {
-            licensingType
-        }
+    ): SummaryListRowViewModel? {
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+            licenceNumber,
+            when (licensingType) {
+                LicensingType.HMO_MANDATORY_LICENCE -> RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment
+                LicensingType.HMO_ADDITIONAL_LICENCE -> RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment
+                LicensingType.SELECTIVE_LICENCE -> RegisterPropertyStepId.SelectiveLicence.urlPathSegment
+                LicensingType.NO_LICENSING -> return null
+            },
+        )
+    }
 
     private fun getTenancyRows(journeyData: JourneyData) =
         mutableListOf<SummaryListRowViewModel>().apply {

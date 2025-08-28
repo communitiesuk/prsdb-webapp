@@ -14,6 +14,7 @@ class LandlordRegistrationCheckAnswersPage(
             mapOf(
                 "title" to "registerAsALandlord.title",
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
+                "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
             ),
         journeyDataService = journeyDataService,

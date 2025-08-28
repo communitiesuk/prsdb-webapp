@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="showUprnDetail" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
@@ -16,34 +16,10 @@
             <span th:text="${propertyName}"></span>
         </h1>
     </legend>
-    <div id="tabs-content" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs-content/content()})}">
-        <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-            <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{forms.checkPropertyAnswers.propertyDetails.heading})}"></li>
-            <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('additional-landlords', #{forms.checkPropertyAnswers.additionalLandlords.heading})}"></li>
-            <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('interested-parties', #{forms.checkPropertyAnswers.interestedParties.heading})}"></li>
-        </ul>
-        <div id="property-details-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel-content/content()})}">
-            <div class="govuk-hint" th:text="#{forms.checkPropertyAnswers.propertyDetails.hint}">
-                forms.checkPropertyAnswers.propertyDetails.hint
-            </div>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-            <th:block th:if="${showUprnDetail}">
-                <details id="details-content"  th:replace="~{fragments/details :: details(#{forms.checkPropertyAnswers.propertyDetails.detail.summary},~{::#details-content/content()})}">
-                    <div class="govuk-details__text" th:text="#{forms.checkPropertyAnswers.propertyDetails.detail.text}">
-                        forms.checkPropertyAnswers.propertyDetails.detail.text
-                    </div>
-                </details>
-            </th:block>
-        </div>
-        <div id="additional-landlords-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('additional-landlords', ~{::#additional-landlords-panel-content/content()})}">
-            <h2 class="govuk-heading-m">TODO: PRSD-584</h2>
-            <p class="govuk-body">This tab will show details of additional landlords, and will be implemented as part of PRSD-584</p>
-        </div>
-        <div id="interested-parties-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('interested-parties', ~{::#interested-parties-panel-content/content()})}">
-            <h2 class="govuk-heading-m">TODO: PRSD-585</h2>
-            <p class="govuk-body">This tab will show details of interested parties, and will be implemented as part of PRSD-585</p>
-        </div>
-    </div>
+    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
+    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
+    <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
+    <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
