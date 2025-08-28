@@ -824,11 +824,11 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
                             "getNewEpcUrl" to GET_NEW_EPC_URL,
                             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
                             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
-                            "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
-                            "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                            "findEpcUrl" to FIND_EPC_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
