@@ -111,6 +111,7 @@ class PropertyRegistrationService(
                 RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                 address.singleLineAddress,
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                propertyOwnership.currentNumTenants > 0,
             ),
         )
 

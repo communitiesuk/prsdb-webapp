@@ -162,6 +162,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 expectedPropertyRegNum.toString(),
                 "1, Example Road, EG1 2AB",
                 absoluteLandlordUrl,
+                true,
             ),
         )
 
@@ -263,6 +264,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 expectedPropertyRegNum.toString(),
                 "Test address line 1, Testville, EG1 2AB",
                 absoluteLandlordUrl,
+                false,
             ),
         )
 

@@ -344,6 +344,7 @@ class PropertyRegistrationServiceTests {
                 email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
                 email.singleLineAddress == expectedPropertyOwnership.property.address.singleLineAddress &&
                     email.prsdUrl == dashboardUri.toString()
+                email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
             },
         )
 
