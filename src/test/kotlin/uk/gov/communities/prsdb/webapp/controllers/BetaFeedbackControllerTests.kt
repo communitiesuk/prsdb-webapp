@@ -22,8 +22,7 @@ class BetaFeedbackControllerTests(
     @MockitoBean
     lateinit var emailNotificationService: NotifyEmailNotificationService<BetaFeedbackEmail>
 
-    // TODO: PRSD-1441 - update to environment variable
-    val feedbackEmailRecipient = "Team-PRSDB@Softwire.com"
+    val feedbackEmailRecipient = "feedback@example.com"
 
     @Nested
     inner class LandlordFeedbackTests {

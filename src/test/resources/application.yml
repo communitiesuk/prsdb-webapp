@@ -32,3 +32,6 @@ plausible:
 google-analytics:
   measurement-id: G-XXXXXXXXXX
   cookie-domain: example.gov.uk
+
+beta-feedback:
+  team-email-address: feedback@example.com

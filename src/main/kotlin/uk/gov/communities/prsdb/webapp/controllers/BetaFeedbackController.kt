@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -23,6 +24,9 @@ import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 class BetaFeedbackController(
     private val emailService: NotifyEmailNotificationService<BetaFeedbackEmail>,
 ) {
+    @Value("\${beta-feedback.team-email-address}")
+    private lateinit var feedbackTeamEmailAddress: String
+
     @GetMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun landlordFeedback(
         model: Model,
@@ -124,8 +128,8 @@ class BetaFeedbackController(
                 email = betaFeedbackModel.email,
                 referrer = betaFeedbackModel.referrerHeader,
             )
-        // TODO: PRSD-1441 - email needs updating with env variable
-        emailService.sendEmail("Team-PRSDB@Softwire.com", feedbackEmail)
+
+        emailService.sendEmail(feedbackTeamEmailAddress, feedbackEmail)
         return "redirect:$redirectPath"
     }
 
