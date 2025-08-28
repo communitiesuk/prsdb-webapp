@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
@@ -25,7 +24,6 @@ class NotifyIdServiceTests {
             )
     }
 
-    @Disabled("Disabled until we can include production IDs")
     @ParameterizedTest
     @EnumSource(EmailTemplate::class)
     fun `getIdValue returns production Notify id values if production is set`(id: EmailTemplate) {
