@@ -791,7 +791,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         meesOnlyUpdate: Boolean,
         epcExemptionReasonStepId: PropertyComplianceStepId,
     ) {
-        val reason = EpcExemptionReason.LISTED_BUILDING
+        val reason = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS
         val testJourneyData = journeyDataBuilder.withEpcExemptionReason(reason, meesOnlyUpdate).build()
 
         val retrievedReason = testJourneyData.getEpcExemptionReason(epcExemptionReasonStepId)

@@ -661,10 +661,6 @@ class PropertyComplianceSharedStepFactory(
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
-                                        value = EpcExemptionReason.LISTED_BUILDING,
-                                        labelMsgKey = "forms.epcExemptionReason.radios.listedBuilding.label",
-                                    ),
-                                    RadiosButtonViewModel(
                                         value = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS,
                                         labelMsgKey = "forms.epcExemptionReason.radios.annualUseLessThan4Months.label",
                                     ),

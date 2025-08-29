@@ -466,7 +466,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // EPC exemption reason page
-        epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.LISTED_BUILDING)
+        epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS)
         val epcExemptionConfirmationPage = assertPageIs(page, EpcExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // EPC Exemption Confirmation page

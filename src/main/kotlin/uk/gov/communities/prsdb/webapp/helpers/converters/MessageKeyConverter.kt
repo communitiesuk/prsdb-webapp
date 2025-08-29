@@ -72,7 +72,6 @@ class MessageKeyConverter {
 
         private fun convertEpcExemptionReason(epcExemptionReason: EpcExemptionReason): String =
             when (epcExemptionReason) {
-                EpcExemptionReason.LISTED_BUILDING -> "forms.epcExemptionReason.radios.listedBuilding.label"
                 EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS -> "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
                 EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT ->
                     "forms.epcExemptionReason.radios.annualEnergyConsumptionLessThan25Percent.label"
