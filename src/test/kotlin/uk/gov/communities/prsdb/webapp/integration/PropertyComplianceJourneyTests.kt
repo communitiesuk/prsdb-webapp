@@ -471,7 +471,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // EPC Exemption Confirmation page
         assertThat(epcExemptionConfirmationPage.heading)
-            .containsText("You’ve marked this property as not needing an EPC")
+            .containsText("You’ve marked this property as not needing an energy performance certificate (EPC)")
         epcExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 

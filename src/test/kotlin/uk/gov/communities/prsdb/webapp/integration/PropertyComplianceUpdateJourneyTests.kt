@@ -454,7 +454,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // EPC Exemption Confirmation page
         assertThat(
             epcExemptionConfirmationPage.heading,
-        ).containsText("You’ve marked this property as not needing an EPC")
+        ).containsText("You’ve marked this property as not needing an energy performance certificate (EPC)")
         epcExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
 
         // Epc Check Your Answers page
