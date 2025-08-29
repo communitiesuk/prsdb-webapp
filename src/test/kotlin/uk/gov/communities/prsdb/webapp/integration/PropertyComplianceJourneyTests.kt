@@ -378,16 +378,12 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
-        assertContains(confirmationPage.heading.getText(), "You need to take action")
-        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have an expired gas safety certificate"))
+        assertContains(confirmationPage.heading.getText(), "You have missing or expired compliance information for this property")
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the gas safety certificate has expired"))
         assertNotNull(
-            confirmationPage.nonCompliantMessages
-                .getElementByTextOrNull("you have an expired Electrical Installation Condition Report (EICR)"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("the Electrical Installation Condition Report (EICR) has expired"),
         )
-        assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have an expired energy performance certificate (EPC)"),
-        )
-        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the energy performance certificate (EPC) has expired"))
 
         // Check confirmation email
         verify(partialComplianceConfirmationEmailService).sendEmail(
@@ -397,9 +393,9 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 EmailBulletPointList(listOf("your landlord responsibilities")),
                 EmailBulletPointList(
                     listOf(
-                        "you have an expired gas safety certificate",
-                        "you have an expired Electrical Installation Condition Report (EICR)",
-                        "you have an expired energy performance certificate (EPC)",
+                        "the gas safety certificate has expired",
+                        "the Electrical Installation Condition Report (EICR) has expired",
+                        "the energy performance certificate (EPC) has expired",
                     ),
                 ),
                 ABSOLUTE_COMPLIANCE_INFO_URL,
@@ -603,15 +599,18 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
-        assertContains(confirmationPage.heading.getText(), "You need to take action")
-        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about gas safety"))
+        assertContains(confirmationPage.heading.getText(), "You have missing or expired compliance information for this property")
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added a gas safety certificate"))
         assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about electrical safety"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull(
+                "you have not added an Electrical Installation Condition Report (EICR)",
+            ),
         )
         assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about energy performance"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull(
+                "you have not added an energy performance certificate (EPC)",
+            ),
         )
-        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
 
         // Check confirmation email
         verify(partialComplianceConfirmationEmailService).sendEmail(
@@ -621,9 +620,9 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 EmailBulletPointList(listOf("your landlord responsibilities")),
                 EmailBulletPointList(
                     listOf(
-                        "you have not added information about gas safety",
-                        "you have not added information about electrical safety",
-                        "you have not added information about energy performance",
+                        "you have not added a gas safety certificate",
+                        "you have not added an Electrical Installation Condition Report (EICR)",
+                        "you have not added an energy performance certificate (EPC)",
                     ),
                 ),
                 ABSOLUTE_COMPLIANCE_INFO_URL,
