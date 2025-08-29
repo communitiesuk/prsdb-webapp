@@ -291,12 +291,12 @@ class PropertyComplianceUpdateJourneyTests {
             ).thenReturn(missingEicrPropertyCompliance)
 
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(
-                JourneyPageDataBuilder.beforePropertyComplianceEicrUpdate(
-                    gasSafetyIssueDate = LocalDate.now(),
-                    gasSafeEngineerNumber = "1234567",
-                    gasCertificatefileUploadId = 2L,
-                )
-                    .withNewEicrStatus(null)
+                JourneyPageDataBuilder
+                    .beforePropertyComplianceEicrUpdate(
+                        gasSafetyIssueDate = LocalDate.now(),
+                        gasSafeEngineerNumber = "1234567",
+                        gasCertificatefileUploadId = 2L,
+                    ).withNewEicrStatus(null)
                     .build(),
             )
 
@@ -359,8 +359,7 @@ class PropertyComplianceUpdateJourneyTests {
                         gasSafetyIssueDate = LocalDate.now(),
                         gasSafeEngineerNumber = "1234567",
                         gasCertificatefileUploadId = 2L,
-                    )
-                    .withNewEicrStatus(true)
+                    ).withNewEicrStatus(true)
                     .withEicrIssueDate(expectedUpdateModel.eicrUpdate.issueDate!!)
                     .withEicrUploadId(expectedUpdateModel.eicrUpdate.fileUploadId!!)
                     .withEicrUploadConfirmation()
@@ -400,8 +399,7 @@ class PropertyComplianceUpdateJourneyTests {
                         gasSafetyIssueDate = LocalDate.now(),
                         gasSafeEngineerNumber = "1234567",
                         gasCertificatefileUploadId = 2L,
-                    )
-                    .withNewEicrStatus(false)
+                    ).withNewEicrStatus(false)
                     .withEicrExemptionReason(expectedUpdateModel.eicrUpdate.exemptionReason!!)
                     .withEicrExemptionOtherReason(expectedUpdateModel.eicrUpdate.exemptionOtherReason!!)
                     .withEicrExemptionConfirmation()
@@ -587,7 +585,7 @@ class PropertyComplianceUpdateJourneyTests {
                     expiryDate = null,
                     tenancyStartedBeforeExpiry = null,
                     energyRating = null,
-                    exemptionReason = EpcExemptionReason.LISTED_BUILDING,
+                    exemptionReason = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS,
                     meesExemptionReason = null,
                 )
 
@@ -713,8 +711,7 @@ class PropertyComplianceUpdateJourneyTests {
                 gasCertificatefileUploadId = 2L,
                 eicrIssueDate = LocalDate.now(),
                 eicrFileUploadId = 1L,
-            )
-            .withNewEpcStatus(false)
+            ).withNewEpcStatus(false)
             .withEpcExemptionReason(epcUpdateModel.exemptionReason!!)
             .withEpcExemptionConfirmationStep()
             .build()
@@ -727,16 +724,14 @@ class PropertyComplianceUpdateJourneyTests {
                 gasCertificatefileUploadId = 2L,
                 eicrIssueDate = LocalDate.now(),
                 eicrFileUploadId = 1L,
-            )
-            .withNewEpcStatus(true)
+            ).withNewEpcStatus(true)
             .withAutoMatchedEpcDetails(
                 epcDetails =
                     MockEpcData.createEpcDataModel(
                         expiryDate = epcUpdateModel.expiryDate!!.toKotlinLocalDate(),
                         energyRating = epcUpdateModel.energyRating!!,
                     ),
-            )
-            .withCheckAutoMatchedEpcResult(true)
+            ).withCheckAutoMatchedEpcResult(true)
             .build()
 
     private fun createJourneyDataForEpcUpdateWithMeesExemption(
@@ -749,16 +744,14 @@ class PropertyComplianceUpdateJourneyTests {
             gasCertificatefileUploadId = 2L,
             eicrIssueDate = LocalDate.now(),
             eicrFileUploadId = 1L,
-        )
-        .withNewEpcStatus(true)
+        ).withNewEpcStatus(true)
         .withAutoMatchedEpcDetails(
             epcDetails =
                 MockEpcData.createEpcDataModel(
                     expiryDate = epcUpdateModel.expiryDate!!.toKotlinLocalDate(),
                     energyRating = epcUpdateModel.energyRating!!,
                 ),
-        )
-        .withCheckAutoMatchedEpcResult(true, meesOnlyUpdate)
+        ).withCheckAutoMatchedEpcResult(true, meesOnlyUpdate)
         .withMeesExemptionCheckStep(true, meesOnlyUpdate)
         .withMeesExemptionReasonStep(epcUpdateModel.meesExemptionReason!!, meesOnlyUpdate)
         .withMeesExemptionConfirmationStep(meesOnlyUpdate)

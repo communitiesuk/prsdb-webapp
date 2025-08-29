@@ -72,7 +72,6 @@ class MessageKeyConverter {
 
         private fun convertEpcExemptionReason(epcExemptionReason: EpcExemptionReason): String =
             when (epcExemptionReason) {
-                EpcExemptionReason.LISTED_BUILDING -> "forms.epcExemptionReason.radios.listedBuilding.label"
                 EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS -> "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
                 EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT ->
                     "forms.epcExemptionReason.radios.annualEnergyConsumptionLessThan25Percent.label"
@@ -83,8 +82,6 @@ class MessageKeyConverter {
 
         private fun convertMeesExemptionReason(meesExemptionReason: MeesExemptionReason): String =
             when (meesExemptionReason) {
-                MeesExemptionReason.LISTED_BUILDING -> "forms.meesExemptionReason.radios.listedBuilding.label"
-                MeesExemptionReason.SMALL_DETACHED_BUILDING -> "forms.meesExemptionReason.radios.smallDetachedBuilding.label"
                 MeesExemptionReason.HIGH_COST -> "forms.meesExemptionReason.radios.highCost.label"
                 MeesExemptionReason.ALL_IMPROVEMENTS_MADE -> "forms.meesExemptionReason.radios.allImprovementsMade.label"
                 MeesExemptionReason.WALL_INSULATION -> "forms.meesExemptionReason.radios.wallInsulation.label"

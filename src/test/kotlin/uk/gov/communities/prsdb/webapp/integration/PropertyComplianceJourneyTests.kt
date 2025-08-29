@@ -12,12 +12,14 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -68,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -94,6 +97,9 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @MockitoBean
     private lateinit var fileUploader: FileUploader
+
+    @Autowired
+    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @BeforeEach
     fun setUp() {
@@ -191,14 +197,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -355,14 +361,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -378,28 +384,26 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
-        assertContains(confirmationPage.heading.getText(), "You need to take action")
-        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have an expired gas safety certificate"))
+        assertContains(confirmationPage.heading.getText(), "You have missing or expired compliance information for this property")
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the gas safety certificate has expired"))
         assertNotNull(
-            confirmationPage.nonCompliantMessages
-                .getElementByTextOrNull("you have an expired Electrical Installation Condition Report (EICR)"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("the Electrical Installation Condition Report (EICR) has expired"),
         )
-        assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have an expired energy performance certificate (EPC)"),
-        )
-        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the energy performance certificate (EPC) has expired"))
+
+        val ownership = propertyOwnershipRepository.findByIdAndIsActiveTrue(PROPERTY_OWNERSHIP_ID)
 
         // Check confirmation email
         verify(partialComplianceConfirmationEmailService).sendEmail(
             LANDLORD_EMAIL,
             PartialPropertyComplianceConfirmationEmail(
                 PROPERTY_ADDRESS,
-                EmailBulletPointList(listOf("your landlord responsibilities")),
+                ownership?.registrationNumber?.let { RegistrationNumberDataModel.fromRegistrationNumber(it) }!!,
                 EmailBulletPointList(
                     listOf(
-                        "you have an expired gas safety certificate",
-                        "you have an expired Electrical Installation Condition Report (EICR)",
-                        "you have an expired energy performance certificate (EPC)",
+                        "the gas safety certificate has expired",
+                        "the Electrical Installation Condition Report (EICR) has expired",
+                        "the energy performance certificate (EPC) has expired",
                     ),
                 ),
                 ABSOLUTE_COMPLIANCE_INFO_URL,
@@ -466,12 +470,12 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // EPC exemption reason page
-        epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.LISTED_BUILDING)
+        epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS)
         val epcExemptionConfirmationPage = assertPageIs(page, EpcExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // EPC Exemption Confirmation page
         assertThat(epcExemptionConfirmationPage.heading)
-            .containsText("You’ve marked this property as not needing an EPC")
+            .containsText("You’ve marked this property as not needing an energy performance certificate (EPC)")
         epcExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
@@ -481,14 +485,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -580,14 +584,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -603,27 +607,32 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
-        assertContains(confirmationPage.heading.getText(), "You need to take action")
-        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about gas safety"))
+        assertContains(confirmationPage.heading.getText(), "You have missing or expired compliance information for this property")
+        assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added a gas safety certificate"))
         assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about electrical safety"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull(
+                "you have not added an Electrical Installation Condition Report (EICR)",
+            ),
         )
         assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added information about energy performance"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull(
+                "you have not added an energy performance certificate (EPC)",
+            ),
         )
-        assertNotNull(confirmationPage.compliantMessages.getElementByTextOrNull("your landlord responsibilities"))
+
+        val ownership = propertyOwnershipRepository.findByIdAndIsActiveTrue(PROPERTY_OWNERSHIP_ID)
 
         // Check confirmation email
         verify(partialComplianceConfirmationEmailService).sendEmail(
             LANDLORD_EMAIL,
             PartialPropertyComplianceConfirmationEmail(
                 PROPERTY_ADDRESS,
-                EmailBulletPointList(listOf("your landlord responsibilities")),
+                ownership?.registrationNumber?.let { RegistrationNumberDataModel.fromRegistrationNumber(it) }!!,
                 EmailBulletPointList(
                     listOf(
-                        "you have not added information about gas safety",
-                        "you have not added information about electrical safety",
-                        "you have not added information about energy performance",
+                        "you have not added a gas safety certificate",
+                        "you have not added an Electrical Installation Condition Report (EICR)",
+                        "you have not added an energy performance certificate (EPC)",
                     ),
                 ),
                 ABSOLUTE_COMPLIANCE_INFO_URL,
@@ -694,7 +703,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption reason page
-        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
+        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
         val meesExemptionConfirmationPage = assertPageIs(page, MeesExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption confirmation page

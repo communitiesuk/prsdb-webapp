@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -50,28 +49,6 @@ class PropertyComplianceCheckAnswersPage(
             stepFactory = stepFactory,
         )
 
-    private val responsibilityData =
-        listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                true,
-                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
-                actionValue = "forms.links.view",
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
-                true,
-                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
-                actionValue = "forms.links.view",
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkComplianceAnswers.responsibilities.responsibilityToTenants",
-                true,
-                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
-                actionValue = "forms.links.view",
-            ),
-        )
-
     override fun addPageContentToModel(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData,
@@ -80,6 +57,5 @@ class PropertyComplianceCheckAnswersPage(
         modelAndView.addObject("gasSafetyData", gasSafetyDataFactory.createRows(filteredJourneyData))
         modelAndView.addObject("eicrData", eicrDataFactory.createRows(filteredJourneyData))
         modelAndView.addObject("epcData", epcDataFactory.createRows(filteredJourneyData))
-        modelAndView.addObject("responsibilityData", responsibilityData)
     }
 }
