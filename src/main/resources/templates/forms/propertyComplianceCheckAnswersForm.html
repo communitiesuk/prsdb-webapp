@@ -23,7 +23,7 @@
     <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.epc.heading}">forms.checkComplianceAnswers.epc.heading</h3>
     <dl th:replace="~{fragments/summaryList :: summaryList(${epcData})}"></dl>
 
-    <div th:replace="~{fragments/warningText :: warningText(#{forms.checkComplianceAnswers.warning})}"></div>
+    <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}"></div>
     <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndSubmitCompliance})}"></button>
 </html>
