@@ -44,8 +44,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_INFO_URL
-import uk.gov.communities.prsdb.webapp.constants.RCP_ELECTRICAL_REGISTER_URL
+import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REVIEW_PATH_SEGMENT
@@ -266,11 +265,11 @@ class PropertyComplianceController(
         model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.property.address.singleLineAddress)
         model.addAttribute("confirmationMessageKeys", confirmationMessageKeys)
         model.addAttribute("gasSafeRegisterUrl", CHECK_GAS_SAFE_REGISTER_URL)
-        model.addAttribute("rcpElectricalInfoUrl", RCP_ELECTRICAL_INFO_URL)
-        model.addAttribute("rcpElectricalRegisterUrl", RCP_ELECTRICAL_REGISTER_URL)
         model.addAttribute("electricalSafetyStandardsUrl", ELECTRICAL_SAFETY_STANDARDS_URL)
         model.addAttribute("getNewEpcUrl", GET_NEW_EPC_URL)
         model.addAttribute("registerMeesExemptionUrl", REGISTER_PRS_EXEMPTION_URL)
+        model.addAttribute("meesUrl", MEES_EXEMPTION_GUIDE_URL)
+        model.addAttribute("findEpcUrl", FIND_EPC_URL)
         model.addAttribute("addComplianceUrl", COMPLIANCE_ACTIONS_URL)
         model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
 

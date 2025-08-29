@@ -4,10 +4,6 @@ const val GAS_SAFE_REGISTER_URL = "https://www.gassaferegister.co.uk/"
 
 const val CHECK_GAS_SAFE_REGISTER_URL = "https://www.gassaferegister.co.uk/find-an-engineer-or-check-the-register"
 
-const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.uk/safety-guidance/competent-registered-electrician.aspx"
-
-const val RCP_ELECTRICAL_REGISTER_URL = "https://electricalcompetentperson.co.uk"
-
 const val ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL =
     "https://www.gov.uk/government/publications" +
         "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities"
