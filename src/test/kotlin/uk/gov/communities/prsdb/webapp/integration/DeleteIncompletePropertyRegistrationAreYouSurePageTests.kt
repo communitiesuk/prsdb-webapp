@@ -25,7 +25,10 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests :
         val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
         areYouSurePage.submitWantsToProceed()
         val incompletePropertiesPage = assertPageIs(page, LandlordIncompletePropertiesPage::class)
-        BaseComponent.assertThat(incompletePropertiesPage.subHeading).containsText("You have no incomplete properties.")
+        BaseComponent
+            .assertThat(
+                incompletePropertiesPage.subHeading,
+            ).containsText("You have no properties with missing or incomplete details.")
     }
 
     @Test

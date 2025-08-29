@@ -91,7 +91,7 @@ class PropertyRegistrationJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            completeStep(RegisterPropertyStepId.Declaration)
+            completeStep(RegisterPropertyStepId.CheckAnswers)
 
             // Assert
             verify(mockPropertyRegistrationService).registerProperty(
@@ -119,7 +119,7 @@ class PropertyRegistrationJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            completeStep(RegisterPropertyStepId.Declaration)
+            completeStep(RegisterPropertyStepId.CheckAnswers)
 
             // Assert
             verify(mockPropertyRegistrationService).registerProperty(
@@ -149,7 +149,7 @@ class PropertyRegistrationJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            completeStep(RegisterPropertyStepId.Declaration)
+            completeStep(RegisterPropertyStepId.CheckAnswers)
 
             // Assert
             verify(mockPropertyRegistrationService).registerProperty(
@@ -177,7 +177,7 @@ class PropertyRegistrationJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
             // Act
-            completeStep(RegisterPropertyStepId.Declaration)
+            completeStep(RegisterPropertyStepId.CheckAnswers)
 
             // Assert
             verify(mockPropertyRegistrationService).registerProperty(

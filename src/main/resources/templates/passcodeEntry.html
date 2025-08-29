@@ -12,7 +12,7 @@
         <p class="govuk-body" th:text="#{passcodeEntry.paragraph.three}">passcodeEntry.paragraph.three</p>
 
         <form th:action="@{''}" id="passcode-form" method="post" th:object="${passcodeRequestModel}" novalidate>
-            <input th:replace="~{fragments/forms/basicTextInput :: textInput(label=#{passcodeEntry.passcodeLabel}, fieldName='passcode', hint=null, labelSize='m')}">
+            <input th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(label=#{passcodeEntry.passcodeLabel}, fieldName='passcode', hint=null, fieldWidth=10, labelSize='m')}">
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
         </form>
     </main>

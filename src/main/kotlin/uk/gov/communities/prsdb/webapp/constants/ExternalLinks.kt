@@ -1,15 +1,26 @@
 package uk.gov.communities.prsdb.webapp.constants
 
-const val GAS_SAFE_REGISTER = "https://www.gassaferegister.co.uk/find-an-engineer-or-check-the-register"
+const val GAS_SAFE_REGISTER_URL = "https://www.gassaferegister.co.uk/"
+
+const val CHECK_GAS_SAFE_REGISTER_URL = "https://www.gassaferegister.co.uk/find-an-engineer-or-check-the-register"
 
 const val RCP_ELECTRICAL_INFO_URL = "https://www.electricalsafetyroundtable.co.uk/safety-guidance/competent-registered-electrician.aspx"
 
 const val RCP_ELECTRICAL_REGISTER_URL = "https://electricalcompetentperson.co.uk"
 
+const val ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL =
+    "https://www.gov.uk/government/publications" +
+        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities"
+
 const val ELECTRICAL_SAFETY_STANDARDS_URL =
     "https://www.gov.uk/government/publications" +
         "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
         "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector"
+
+const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
+    "https://www.gov.uk/government/publications" +
+        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
+        "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector#the-inspection"
 
 const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
 
@@ -49,12 +60,14 @@ const val GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL = "https://www.gov.u
 
 const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/how-to-rent"
 
-const val NRLA_UK_REGULATIONS_URL = "https://www.nrla.org.uk/news/certified-and-compliant-a-landlords-guide-to-meeting-uk-regulations"
+const val LANDLORD_RESPONSIBILITIES_URL = "https://www.gov.uk/renting-out-a-property"
 
 const val ONE_LOGIN_INFO_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
 
 const val ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY =
     "https://www.gov.uk/using-your-gov-uk-one-login/proving-your-identity"
+
+const val RENTERS_RIGHTS_BILL_URL = "https://bills.parliament.uk/bills/3764"
 
 const val RENTERS_RIGHTS_BILL_GUIDE_URL =
     "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
@@ -66,9 +79,25 @@ const val RENTERS_RIGHTS_BILL_PRSD =
 
 const val TENANCY_TYPES_GUIDE_URL = "https://www.gov.uk/private-renting-tenancy-agreements/tenancy-types"
 
+const val MHCLG_URL = "https://www.gov.uk/government/organisations/ministry-of-housing-communities-local-government"
+
 const val COMPLAINTS_PROCEDURE_URL =
     "https://www.gov.uk/government/organisations/ministry-of-housing-communities-local-government/about/complaints-procedure"
 
 const val INFORMATION_COMMISSIONERS_OFFICE_URL = "https://ico.org.uk/"
 
-const val FEEDBACK_FORM_URL = "https://example.com/feedback-form"
+const val INFORMATION_COMMISSIONERS_OFFICE_URL_FOR_THE_PUBLIC = "https://ico.org.uk/for-the-public/?"
+
+const val FEEDBACK_FORM_URL = "https://forms.cloud.microsoft/e/q1mupnMCMY"
+
+const val RENTING_OUT_AN_HMO_URL = "https://www.gov.uk/renting-out-a-property/houses-in-multiple-occupation-hmo"
+
+const val GOV_LICENCE_URL = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+
+const val CROWN_COPYRIGHT_URL =
+    "https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information" +
+        "/uk-government-licensing-framework/crown-copyright/"
+
+const val HSE_URL = "https://www.hse.gov.uk/"
+
+const val LANDLORD_GAS_SAFETY_URL = "https://www.hse.gov.uk/gas/domestic/faqlandlord.htm"

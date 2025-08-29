@@ -30,7 +30,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `the view incomplete properties button links to the incomplete properties page`(page: Page) {
+    fun `the incomplete property details button links to the incomplete properties page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewIncompletePropertiesButton.clickAndWait()
         assertPageIs(page, LandlordIncompletePropertiesPage::class)
@@ -62,7 +62,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     fun `the renters rights bill link goes to an external page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.rentersRightsBillLink.clickAndWait()
-        assertTrue(page.url().contains("https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill"))
+        assertTrue(page.url().contains("https://bills.parliament.uk/bills/3764"))
     }
 
     @Test
@@ -93,7 +93,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.title).containsText("Important")
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 1 incomplete property: View incomplete properties")
+                        .containsText("You have 1 incomplete property: View incomplete property details")
                 }
             }
 
@@ -104,7 +104,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.title).containsText("Important")
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 2 incomplete properties: View incomplete properties")
+                        .containsText("You have 2 incomplete properties: View incomplete property details")
                 }
 
                 @Test
@@ -124,7 +124,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                 fun `the notification banner loads with correct message for one compliance action`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 1 property awaiting compliance information: Add compliance information")
+                        .containsText("You have 1 property awaiting compliance information: View compliance actions")
                 }
             }
 
@@ -134,7 +134,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                 fun `the notification banner loads with correct message for multiple compliance actions`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 3 properties awaiting compliance information: Add compliance information")
+                        .containsText("You have 3 properties awaiting compliance information: View compliance actions")
                 }
 
                 @Test

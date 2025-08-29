@@ -77,19 +77,6 @@ class PropertyDetailsViewModel(
                     withChangeLinks,
                 )
                 addRow(
-                    "propertyDetails.propertyRecord.licensingType",
-                    propertyOwnership.license?.let {
-                        if (it.licenseType == LicensingType.NO_LICENSING) {
-                            MessageKeyConverter.convert(LicensingType.NO_LICENSING)
-                        } else {
-                            listOf(MessageKeyConverter.convert(it.licenseType), it.licenseNumber)
-                        }
-                    } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                    changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
-                    withChangeLinks,
-                )
-                addRow(
                     "propertyDetails.propertyRecord.occupied",
                     isTenantedKey,
                     changeLinkMessageKey,
@@ -110,6 +97,26 @@ class PropertyDetailsViewModel(
                         changeLinkMessageKey,
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
                         withChangeLinks,
+                    )
+                }
+            }.toList()
+
+    val licensingInformation: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    "propertyDetails.propertyRecord.licensingInformation.licensingType",
+                    propertyOwnership.license?.let {
+                        MessageKeyConverter.convert(it.licenseType)
+                    } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
+                    changeLinkMessageKey,
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
+                    withChangeLinks,
+                )
+                if (propertyOwnership.license != null && propertyOwnership.license!!.licenseType != LicensingType.NO_LICENSING) {
+                    addRow(
+                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+                        propertyOwnership.license!!.licenseNumber,
                     )
                 }
             }.toList()

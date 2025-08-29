@@ -48,7 +48,7 @@ class JourneyPageDataBuilder {
 
         fun beforeLandlordRegistrationDeclaration() = beforeLandlordRegistrationCheckAnswers().withCheckedAnswers()
 
-        fun beforeLaUserRegistrationName() = JourneyDataBuilder().withLandingPageReached()
+        fun beforeLaUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
 
         fun beforeLaUserRegistrationEmail() = beforeLaUserRegistrationName().withName()
 

@@ -47,6 +47,6 @@ INSERT INTO property_compliance (id, property_ownership_id, created_date, last_m
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES  (1, 3, '01/01/25', '01/01/25',
          null, null, null, null, null,
-         null, null, 1, null,
+         null, null, 0, null,
          'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'g', null, null,
          true, true, true);

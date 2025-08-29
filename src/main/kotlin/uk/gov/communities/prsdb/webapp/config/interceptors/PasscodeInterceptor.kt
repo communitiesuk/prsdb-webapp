@@ -6,11 +6,11 @@ import org.springframework.web.servlet.HandlerInterceptor
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
-import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ALREADY_USED_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
-import java.security.Principal
 
 class PasscodeInterceptor(
     private val passcodeService: PasscodeService,
@@ -20,75 +20,71 @@ class PasscodeInterceptor(
         response: HttpServletResponse,
         handler: Any,
     ): Boolean {
-        val currentPath = request.requestURI
+        // Don't allow users who have claimed a passcode to access passcode pages
+        val principal = request.userPrincipal
+        if (principal != null && passcodeService.hasUserClaimedAPasscode(principal.name)) {
+            return handleAuthenticatedUserWithClaimedPasscode(request, response)
+        }
 
         // Only apply interceptor to non-passcode landlord routes
-        val passcodeRoutes = listOf(PASSCODE_ENTRY_ROUTE, PASSCODE_ALREADY_USED_ROUTE)
+        val currentPath = request.requestURI
         if (!currentPath.startsWith("/$LANDLORD_PATH_SEGMENT/") || currentPath in passcodeRoutes) {
             return true
         }
 
-        val principal = request.userPrincipal
-        val submittedPasscode = request.session.getAttribute(SUBMITTED_PASSCODE) as? String
-
         return if (principal == null) {
-            handleUnauthenticatedUser(request, response, submittedPasscode)
+            handleUnauthenticatedUser(request, response)
         } else {
-            handleAuthenticatedUser(request, response, principal, submittedPasscode)
+            handleAuthenticatedUserWithoutClaimedPasscode(request, response, principal.name)
         }
     }
+
+    private fun handleAuthenticatedUserWithClaimedPasscode(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): Boolean =
+        if (request.requestURI in passcodeRoutes) {
+            redirectToDashboardAndReturnFalse(response)
+        } else {
+            removePasscodeRedirectAndReturnTrue(request)
+        }
 
     private fun handleUnauthenticatedUser(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        submittedPasscode: String?,
     ): Boolean =
-        if (submittedPasscode != null) {
-            true
+        if (request.session.getAttribute(SUBMITTED_PASSCODE) != null) {
+            removePasscodeRedirectAndReturnTrue(request)
         } else {
             redirectToPasscodeEntryAndReturnFalse(request, response)
         }
 
-    private fun handleAuthenticatedUser(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        principal: Principal,
-        submittedPasscode: String?,
-    ): Boolean {
-        val userId = principal.name
-
-        return if (submittedPasscode == null) {
-            handleUserWithoutSessionPasscode(request, response, userId)
-        } else {
-            handleUserWithSessionPasscode(request, response, userId, submittedPasscode)
-        }
-    }
-
-    private fun handleUserWithoutSessionPasscode(
+    private fun handleAuthenticatedUserWithoutClaimedPasscode(
         request: HttpServletRequest,
         response: HttpServletResponse,
         userId: String,
-    ): Boolean =
-        if (passcodeService.hasUserClaimedPasscode(userId)) {
-            true
+    ): Boolean {
+        val submittedPasscode = request.session.getAttribute(SUBMITTED_PASSCODE) as String?
+
+        return if (submittedPasscode != null) {
+            handleAuthenticatedUserWithSessionPasscode(request, response, userId, submittedPasscode)
         } else {
             redirectToPasscodeEntryAndReturnFalse(request, response)
         }
+    }
 
-    private fun handleUserWithSessionPasscode(
+    private fun handleAuthenticatedUserWithSessionPasscode(
         request: HttpServletRequest,
         response: HttpServletResponse,
         userId: String,
         submittedPasscode: String,
     ): Boolean {
-        val passcode =
-            passcodeService.findPasscode(submittedPasscode)
-                ?: return redirectToPasscodeEntryAndReturnFalse(request, response)
+        val passcode = passcodeService.findPasscode(submittedPasscode) ?: return redirectToInvalidPasscodeAndReturnFalse(response)
 
-        return when {
-            passcode.baseUser == null -> handleUnclaimedPasscode(request, response, userId, submittedPasscode)
-            passcodeService.isPasscodeClaimedByUser(submittedPasscode, userId) -> true
-            else -> redirectToPasscodeAlreadyUsedAndReturnFalse(response)
+        return if (passcode.baseUser == null) {
+            handleUnclaimedPasscode(request, response, userId, submittedPasscode)
+        } else {
+            redirectToInvalidPasscodeAndReturnFalse(response)
         }
     }
 
@@ -99,10 +95,20 @@ class PasscodeInterceptor(
         submittedPasscode: String,
     ): Boolean =
         if (passcodeService.claimPasscodeForUser(submittedPasscode, userId)) {
-            true
+            removePasscodeRedirectAndReturnTrue(request)
         } else {
-            redirectToPasscodeEntryAndReturnFalse(request, response)
+            redirectToInvalidPasscodeAndReturnFalse(response)
         }
+
+    private fun removePasscodeRedirectAndReturnTrue(request: HttpServletRequest): Boolean {
+        request.session.removeAttribute(PASSCODE_REDIRECT_URL)
+        return true
+    }
+
+    private fun redirectToDashboardAndReturnFalse(response: HttpServletResponse): Boolean {
+        response.sendRedirect(LANDLORD_DASHBOARD_URL)
+        return false
+    }
 
     private fun redirectToPasscodeEntryAndReturnFalse(
         request: HttpServletRequest,
@@ -115,8 +121,12 @@ class PasscodeInterceptor(
         return false
     }
 
-    private fun redirectToPasscodeAlreadyUsedAndReturnFalse(response: HttpServletResponse): Boolean {
-        response.sendRedirect(PASSCODE_ALREADY_USED_ROUTE)
+    private fun redirectToInvalidPasscodeAndReturnFalse(response: HttpServletResponse): Boolean {
+        response.sendRedirect(INVALID_PASSCODE_ROUTE)
         return false
+    }
+
+    companion object {
+        private val passcodeRoutes = listOf(PASSCODE_ENTRY_ROUTE, INVALID_PASSCODE_ROUTE)
     }
 }

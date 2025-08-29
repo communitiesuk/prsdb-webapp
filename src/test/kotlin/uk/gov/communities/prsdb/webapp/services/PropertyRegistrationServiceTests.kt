@@ -344,6 +344,7 @@ class PropertyRegistrationServiceTests {
                 email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
                 email.singleLineAddress == expectedPropertyOwnership.property.address.singleLineAddress &&
                     email.prsdUrl == dashboardUri.toString()
+                email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
             },
         )
 
@@ -574,21 +575,17 @@ class PropertyRegistrationServiceTests {
                         formContextCreatedToday.id,
                         createdTodayCompleteByDate,
                         address,
-                        localAuthority.name,
                     ),
                     IncompletePropertiesDataModel(
                         formContextCreatedYesterday.id,
                         createdYesterdayCompleteByDate,
                         address,
-                        localAuthority.name,
                     ),
                 )
 
             whenever(
                 mockFormContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION),
             ).thenReturn(incompleteProperties)
-
-            whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(any())).thenReturn(localAuthority)
 
             val incompletePropertiesList =
                 propertyRegistrationService.getIncompletePropertiesForLandlord(

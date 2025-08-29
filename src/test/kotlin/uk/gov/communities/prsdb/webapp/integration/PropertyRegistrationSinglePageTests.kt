@@ -31,22 +31,22 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationOccupancyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
+            assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
-            assert(taskListPage.taskHasStatus("Select the ownership type", "Complete"))
-            assert(taskListPage.taskHasStatus("Add any property licensing information", "Complete"))
-            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Not started"))
+            assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
+            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add tenancy details for the property", "Not started"))
         }
 
         @Test
         fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assert(taskListPage.taskHasStatus("Add the property address", "Complete"))
+            assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
-            assert(taskListPage.taskHasStatus("Select the ownership type", "Complete"))
-            assert(taskListPage.taskHasStatus("Add any property licensing information", "In progress"))
-            assert(taskListPage.taskHasStatus("Add any tenancy and household information", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
+            assert(taskListPage.taskHasStatus("Add details about any property licensing", "In progress"))
+            assert(taskListPage.taskHasStatus("Add tenancy details for the property", "Cannot start"))
         }
     }
 
@@ -381,16 +381,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 .containsText(
                     "The number of people in the property must be the same as or higher than the number of households in the property",
                 )
-        }
-    }
-
-    @Nested
-    inner class Declaration {
-        @Test
-        fun `Submitting without checking the checkbox returns an error`(page: Page) {
-            val declarationPage = navigator.skipToPropertyRegistrationDeclarationPage()
-            declarationPage.form.submit()
-            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
     }
 

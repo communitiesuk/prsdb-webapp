@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -14,18 +15,25 @@ import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
+import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 
 @PrsdbController
 @RequestMapping
-class BetaFeedbackController {
+class BetaFeedbackController(
+    private val emailService: NotifyEmailNotificationService<BetaFeedbackEmail>,
+) {
+    @Value("\${beta-feedback.team-email-address}")
+    private lateinit var feedbackTeamEmailAddress: String
+
     @GetMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun landlordFeedback(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
-    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL, FEEDBACK_SUCCESS_URL)
+    @GetMapping(LANDLORD_FEEDBACK_SUCCESS_URL)
     fun landlordFeedbackSuccess(
         model: Model,
         request: HttpServletRequest,
@@ -47,7 +55,7 @@ class BetaFeedbackController {
 
     @PostMapping(LANDLORD_FEEDBACK_URL, FEEDBACK_URL)
     fun submitLandlordFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
@@ -63,7 +71,7 @@ class BetaFeedbackController {
     @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
     @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
     fun submitLocalAuthorityFeedback(
-        @Valid @ModelAttribute betaFeedbackModel: BetaFeedbackModel,
+        @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
         request: HttpServletRequest,
@@ -110,6 +118,18 @@ class BetaFeedbackController {
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
+
+        val escapeRegex = Regex("""([\[\]\(\)])""")
+        val escapedFeedback = betaFeedbackModel.feedback.replace(escapeRegex, """\\$1""")
+
+        val feedbackEmail =
+            BetaFeedbackEmail(
+                feedback = escapedFeedback,
+                email = betaFeedbackModel.email,
+                referrer = betaFeedbackModel.referrerHeader,
+            )
+
+        emailService.sendEmail(feedbackTeamEmailAddress, feedbackEmail)
         return "redirect:$redirectPath"
     }
 
@@ -119,6 +139,5 @@ class BetaFeedbackController {
         const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
         const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
         const val FEEDBACK_URL = "/${FEEDBACK_PATH_SEGMENT}"
-        const val FEEDBACK_SUCCESS_URL = "/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
     }
 }

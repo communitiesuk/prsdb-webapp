@@ -42,6 +42,7 @@ class EmailTemplateModelsTests {
                         "P-XXX-YYY",
                         "1 Street Name, Town, Country, AB1 2CD",
                         "www.example.com",
+                        true,
                     ),
                     "/emails/PropertyRegistrationConfirmation.md",
                 ),
@@ -109,6 +110,10 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/LandlordUpdateConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    GiveFeedbackLaterEmail(),
+                    "/emails/GiveFeedbackLater.md",
+                ),
             )
 
         private fun createLocalAuthority(
@@ -151,9 +156,17 @@ class EmailTemplateModelsTests {
         // Assert
         Assertions.assertEquals(parameters.size, modelHashMap.size)
         for (parameter in parameters) {
-            modelHashMap.keys.single { key -> key == parameter }
+            if (isOptionalContentParameter(parameter)) {
+                modelHashMap[extractOptionalContentParameter(parameter)] in listOf("yes", "no")
+            } else {
+                modelHashMap.keys.single { key -> key == parameter }
+            }
         }
     }
+
+    private fun isOptionalContentParameter(parameter: String): Boolean = extractOptionalContentParameter(parameter).isNotEmpty()
+
+    private fun extractOptionalContentParameter(parameter: String): String = parameter.substringBefore("??", "")
 
     private fun extractParameters(body: String): List<String> {
         val parameterRegex = Regex("\\(\\((.*?)\\)\\)")

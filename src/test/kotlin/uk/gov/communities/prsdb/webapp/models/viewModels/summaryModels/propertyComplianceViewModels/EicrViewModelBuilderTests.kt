@@ -43,7 +43,7 @@ class EicrViewModelBuilderTests {
         private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
         private val expiredAfterUpload = PropertyComplianceBuilder.createWithEicrExpiredAfterUpload()
         private val expiredBeforeUpload = PropertyComplianceBuilder.createWithEicrExpiredBeforeUpload()
-        private val exempt = PropertyComplianceBuilder.createWithCertExemptions(eicrExemption = EicrExemptionReason.LIVE_IN_LANDLORD)
+        private val exempt = PropertyComplianceBuilder.createWithCertExemptions(eicrExemption = EicrExemptionReason.LONG_LEASE)
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
 
         private const val DOWNLOAD_URL = "example.com/eicr-download-url"
@@ -145,7 +145,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
-                            MessageKeyConverter.convert(EicrExemptionReason.LIVE_IN_LANDLORD),
+                            MessageKeyConverter.convert(EicrExemptionReason.LONG_LEASE),
                         ),
                     ),
                 ),

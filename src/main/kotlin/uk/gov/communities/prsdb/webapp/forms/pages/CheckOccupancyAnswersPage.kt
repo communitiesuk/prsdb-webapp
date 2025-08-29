@@ -20,6 +20,7 @@ class CheckOccupancyAnswersPage(
                 "summaryName" to "forms.update.checkOccupancy.summaryName",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                "insetText" to "forms.update.checkOccupancy.insetText",
             ),
         journeyDataService = journeyDataService,
         missingAnswersRedirect = missingAnswersRedirect,
@@ -42,7 +43,7 @@ class CheckOccupancyAnswersPage(
     private fun tenancyRows(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.numberOfHouseholds.fieldSetHeading",
+                "forms.update.checkOccupancy.numberOfHouseholds.fieldSetHeading",
                 filteredJourneyData.getNumberOfHouseholdsUpdateIfPresent(stepGroupId)!!,
                 PropertyDetailsUpdateJourneyStepFactory.getNumberOfHouseholdsStepIdFor(stepGroupId).urlPathSegment,
             ),

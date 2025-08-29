@@ -33,19 +33,31 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
 
     @Nested
-    inner class LandlordRegistrationStartPage {
+    inner class LandlordRegistrationServiceInformationStartPage {
         @Test
-        fun `registerAsALandlord page renders`(page: Page) {
-            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
-            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Private Rented Sector (PRS) Database")
+        fun `registerAsALandlord renders`(page: Page) {
+            val landlordRegistrationServiceInformationPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+            BaseComponent
+                .assertThat(
+                    landlordRegistrationServiceInformationPage.heading,
+                ).containsText("Private Rented Sector (PRS) Database")
+        }
+    }
+
+    @Nested
+    inner class LandlordRegistrationWhatYouNeedToRegisterStartPage {
+        @Test
+        fun `the start page renders`(page: Page) {
+            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
+            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("What you need to register as a landlord")
         }
     }
 
     @Nested
     inner class AlreadyRegistered : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
-        fun `the 'Start Now' button directs a registered landlord to the landlord dashboard page`(page: Page) {
-            val startPage = navigator.goToLandlordRegistrationStartPage()
+        fun `the 'Start' button directs a registered landlord to the landlord dashboard page`(page: Page) {
+            val startPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
             startPage.startButton.clickAndWait()
             val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
@@ -65,7 +77,9 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting without agreeing to privacy notice returns an error`() {
             val privacyNoticePage = navigator.goToLandlordRegistrationPrivacyNoticePage()
             privacyNoticePage.submitWithoutAgreeing()
-            assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must agree to the privacy notice to continue")
+            assertThat(
+                privacyNoticePage.form.getErrorMessage(),
+            ).containsText("You must confirm you have read the privacy notice to continue")
         }
     }
 
@@ -402,16 +416,6 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 .containsText("Enter the first line of an address, typically the building and street")
             assertThat(manualContactAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
             assertThat(manualContactAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
-        }
-    }
-
-    @Nested
-    inner class LandlordRegistrationStepDeclaration {
-        @Test
-        fun `Submitting without checking the checkbox returns an error`(page: Page) {
-            val declarationPage = navigator.skipToLandlordRegistrationDeclarationPage()
-            declarationPage.form.submit()
-            assertThat(declarationPage.form.getErrorMessage()).containsText("You must agree to the declaration to continue")
         }
     }
 

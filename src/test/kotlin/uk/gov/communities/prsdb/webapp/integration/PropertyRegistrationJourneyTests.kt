@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.DeclarationFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -70,12 +69,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     ) {
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        assertThat(registerPropertyStartPage.heading).containsText("Enter your property details")
+        assertThat(registerPropertyStartPage.heading).containsText("Register a property")
         registerPropertyStartPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // Task list page (part of the journey to support redirects)
-        taskListPage.clickRegisterTaskWithName("Add the property address")
+        taskListPage.clickRegisterTaskWithName("Enter the property address")
         val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
         // Address lookup - render page
@@ -100,14 +99,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
         // Ownership type selection - render page
-        assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the ownership type for your property")
+        assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
         assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
         val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
         // Licensing type - render page
-        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licensing you have for your property")
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
         assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
@@ -128,8 +127,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
 
         // Number of households - render page
-        assertThat(householdsPage.form.fieldsetHeading).containsText("How many households live in your property?")
-        assertThat(householdsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(householdsPage.form.fieldsetLegend).containsText("How many households are in your property?")
+        assertThat(householdsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         householdsPage.submitNumberOfHouseholds(2)
         val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
@@ -146,13 +145,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
-        val declarationPage = assertPageIs(page, DeclarationFormPagePropertyRegistration::class)
-
-        // Declaration - render page
-        assertThat(declarationPage.form.fieldsetHeading).containsText("Declaration")
-        assertThat(declarationPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
-        // fill in and submit
-        declarationPage.agreeAndSubmit()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
 
         // Confirmation - render page
@@ -170,6 +162,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 expectedPropertyRegNum.toString(),
                 "1, Example Road, EG1 2AB",
                 absoluteLandlordUrl,
+                true,
             ),
         )
 
@@ -185,12 +178,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     ) {
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        assertThat(registerPropertyStartPage.heading).containsText("Enter your property details")
+        assertThat(registerPropertyStartPage.heading).containsText("Register a property")
         registerPropertyStartPage.startButton.clickAndWait()
         val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // Task list page (part of the journey to support redirects)
-        taskListPage.clickRegisterTaskWithName("Add the property address")
+        taskListPage.clickRegisterTaskWithName("Enter the property address")
         val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
         // Address lookup - render page
@@ -229,14 +222,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
         // Ownership type selection - render page
-        assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the ownership type for your property")
+        assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
         assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
         val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
         // Licensing type - render page
-        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licensing you have for your property")
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
         assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
@@ -254,13 +247,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
-        val declarationPage = assertPageIs(page, DeclarationFormPagePropertyRegistration::class)
-
-        // Declaration - render page
-        assertThat(declarationPage.form.fieldsetHeading).containsText("Declaration")
-        assertThat(declarationPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
-        // fill in and submit
-        declarationPage.agreeAndSubmit()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
 
         // Confirmation - render page
@@ -278,6 +264,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 expectedPropertyRegNum.toString(),
                 "Test address line 1, Testville, EG1 2AB",
                 absoluteLandlordUrl,
+                false,
             ),
         )
 

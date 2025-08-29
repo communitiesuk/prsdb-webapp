@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
@@ -70,7 +71,16 @@ class PasscodeService(
         return passcodeRepository.existsByPasscode(normalizedPasscode)
     }
 
-    fun hasUserClaimedPasscode(userId: String) = passcodeRepository.existsByBaseUser_Id(userId)
+    fun hasUserClaimedAPasscode(userId: String): Boolean {
+        val cachedResult = session.getAttribute(HAS_USER_CLAIMED_A_PASSCODE) as Boolean?
+        return if (cachedResult != null) {
+            cachedResult
+        } else {
+            val databaseResult = passcodeRepository.existsByBaseUser_Id(userId)
+            session.setAttribute(HAS_USER_CLAIMED_A_PASSCODE, databaseResult)
+            databaseResult
+        }
+    }
 
     fun findPasscode(passcodeString: String): Passcode? = passcodeRepository.findByPasscode(normalizePasscode(passcodeString))
 
@@ -88,15 +98,8 @@ class PasscodeService(
 
         val user = oneLoginUserService.findOrCreate1LUser(userId)
         passcode.claimByUser(user)
+        session.setAttribute(HAS_USER_CLAIMED_A_PASSCODE, true)
         return true
-    }
-
-    fun isPasscodeClaimedByUser(
-        passcodeString: String,
-        userId: String,
-    ): Boolean {
-        val passcode = findPasscode(passcodeString) ?: return false
-        return passcode.baseUser?.id == userId
     }
 
     private fun generateRandomPasscodeString(): String =

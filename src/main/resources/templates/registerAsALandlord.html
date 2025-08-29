@@ -35,7 +35,7 @@
                         registerAsALandlord.access.paragraph.three.afterLink
                     </span>
                 </p>
-                <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordInitialStep}, #{forms.buttons.startNow})}"></a>
+                <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordStartPageRoute}, #{forms.buttons.startNow})}"></a>
             </section>
             <section>
                 <h2 class="govuk-heading-l" th:text="#{registerAsALandlord.about.heading}">
@@ -158,7 +158,7 @@
                 <p class="govuk-body-m"><span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.beforeLink}">
                     registerAsALandlord.futureRequirements.paragraph.two.beforeLink
                 </span>
-                    <a class="govuk-link" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.link}" th:href="${rentersRightsBillPRSD}">
+                    <a class="govuk-link" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.link}" th:href="${rentersRightsBillPRSD}" rel="noreferrer noopener" target="_blank">
                         registerAsALandlord.futureRequirements.paragraph.two.link
                     </a>
                     <span th:remove="tag" th:text="#{registerAsALandlord.futureRequirements.paragraph.two.afterLink}">

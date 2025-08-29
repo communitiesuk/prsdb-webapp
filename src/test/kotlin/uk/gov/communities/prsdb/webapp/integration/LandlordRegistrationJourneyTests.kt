@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DeclarationFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
@@ -74,7 +73,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             )
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -107,11 +106,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 3 of 3 \u2014 Check and submit registration")
-        checkAnswersPage.confirm()
-
-        val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
-        assertThat(declarationPage.form.sectionHeader).containsText("Section 3 of 3 \u2014 Check and submit registration")
-        declarationPage.agreeAndSubmit()
+        checkAnswersPage.confirmAndSubmit()
 
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
@@ -140,7 +135,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             )
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -173,10 +168,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         )
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        checkAnswersPage.confirm()
-
-        val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
-        declarationPage.agreeAndSubmit()
+        checkAnswersPage.confirmAndSubmit()
 
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
@@ -200,7 +192,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         // Set up no identity data from One login
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -238,10 +230,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         selectContactAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        checkAnswersPage.confirm()
-
-        val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
-        declarationPage.agreeAndSubmit()
+        checkAnswersPage.confirmAndSubmit()
 
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
@@ -265,7 +254,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         // Set up no identity data from One login
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -307,10 +296,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         )
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        checkAnswersPage.confirm()
+        checkAnswersPage.confirmAndSubmit()
 
-        val declarationPage = assertPageIs(page, DeclarationFormPageLandlordRegistration::class)
-        declarationPage.agreeAndSubmit()
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)

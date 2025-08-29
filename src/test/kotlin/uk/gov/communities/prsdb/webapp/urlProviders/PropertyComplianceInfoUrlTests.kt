@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -78,7 +79,7 @@ class PropertyComplianceInfoUrlTests(
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
-    @Mock
+    @MockitoBean
     private lateinit var mockEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean
@@ -86,6 +87,9 @@ class PropertyComplianceInfoUrlTests(
 
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
+
+    @MockitoBean
+    private lateinit var landlordService: LandlordService
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 

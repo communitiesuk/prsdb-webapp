@@ -1,74 +1,52 @@
+<!--/*@thymesVar id="findEpcUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="landlordResponsibilitiesUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="taskListUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="nrlaUkRegulationsUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{propertyCompliance.title}, ~{::main}, false)}">
-    <main class="govuk-main-wrapper" id="main-content">
-        <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-            <header>
-                <h1 class="govuk-heading-l" th:text="#{propertyCompliance.heading}">propertyCompliance.heading</h1>
-                <p class="govuk-body" th:text="#{propertyCompliance.paragraph.one}">propertyCompliance.paragraph.one</p>
-                <p class="govuk-body" th:text="#{propertyCompliance.paragraph.two}">propertyCompliance.paragraph.two</p>
-            </header>
-            <section>
-                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whatToUpload.heading}">
-                    propertyCompliance.whatToUpload.heading
-                </h2>
-                <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.bullet.heading}">
-                    propertyCompliance.whatToUpload.bullet.heading
-                </p>
-                <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{propertyCompliance.whatToUpload.bullet.one}">
-                        propertyCompliance.whatToUpload.bullet.one
-                    </li>
-                    <li th:text="#{propertyCompliance.whatToUpload.bullet.two}">
-                        propertyCompliance.whatToUpload.bullet.two
-                    </li>
-                    <li th:text="#{propertyCompliance.whatToUpload.bullet.three}">
-                        propertyCompliance.whatToUpload.bullet.three
-                    </li>
-                </ul>
-                <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.paragraph.one}">
-                    propertyCompliance.whatToUpload.paragraph.one
-                </p>
-            </section>
-            <section>
-                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whatToKnow.heading}">
-                    propertyCompliance.whatToKnow.heading
-                </h2>
-                <p class="govuk-body">
-                    <span th:text="#{propertyCompliance.whatToKnow.paragraph.one.beforeLink}">propertyCompliance.whatToKnow.paragraph.one.beforeLink</span>
-                    <a class="govuk-link" th:text="#{propertyCompliance.whatToKnow.paragraph.one.linkText}" th:href="${nrlaUkRegulationsUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.whatToKnow.paragraph.one.linkText</a><span
-                        th:remove="tag" th:text="#{propertyCompliance.whatToKnow.paragraph.one.afterLink}">propertyCompliance.whatToKnow.paragraph.one.afterLink</span>
-                </p>
-                <p class="govuk-body" th:text="#{propertyCompliance.whatToKnow.bullet.heading}">
-                    propertyCompliance.whatToKnow.bullet.heading
-                </p>
-                <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{propertyCompliance.whatToKnow.bullet.one}">
-                        propertyCompliance.whatToKnow.bullet.one
-                    </li>
-                    <li th:text="#{propertyCompliance.whatToKnow.bullet.two}">
-                        propertyCompliance.whatToKnow.bullet.two
-                    </li>
-                    <li th:text="#{propertyCompliance.whatToKnow.bullet.three}">
-                        propertyCompliance.whatToKnow.bullet.three
-                    </li>
-                </ul>
-            </section>
-            <section>
-                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whenToUpload.heading}">
-                    propertyCompliance.whenToUpload.heading
-                </h2>
-                <p class="govuk-body" th:text="#{propertyCompliance.whenToUpload.paragraph.one}">
-                    propertyCompliance.whenToUpload.paragraph.one
-                </p>
-                <p class="govuk-body" th:text="#{propertyCompliance.whenToUpload.paragraph.two}">
-                    propertyCompliance.whenToUpload.paragraph.two
-                </p>
-            </section>
-            <section>
-                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${taskListUrl}, #{startButtonText})}"></button>
-            </section>
-        </div>
+    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.heading}">propertyCompliance.heading</h1>
+            <p class="govuk-body" th:text="#{propertyCompliance.paragraph.one}">propertyCompliance.paragraph.one</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.paragraph.two}">propertyCompliance.paragraph.two</p>
+        </header>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whatToUpload.heading}">propertyCompliance.whatToUpload.heading</h2>
+            <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.bullet.heading}">propertyCompliance.whatToUpload.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{propertyCompliance.whatToUpload.bullet.one}">propertyCompliance.whatToUpload.bullet.one</li>
+                <li th:text="#{propertyCompliance.whatToUpload.bullet.two}">propertyCompliance.whatToUpload.bullet.two</li>
+            </ul>
+            <p class="govuk-body">
+                <span th:text="#{propertyCompliance.whatToUpload.paragraph.one.beforeLink}">propertyCompliance.whatToUpload.paragraph.one.beforeLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.whatToUpload.paragraph.one.linkText}" th:href="${findEpcUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.whatToUpload.paragraph.one.linkText</a>
+                <span th:remove="tag" th:text="#{propertyCompliance.whatToUpload.paragraph.one.afterLink}">propertyCompliance.whatToUpload.paragraph.one.afterLink</span>
+            </p>
+            <p class="govuk-body" th:text="#{propertyCompliance.whatToUpload.paragraph.two}">propertyCompliance.whatToUpload.paragraph.two</p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whatToKnow.heading}">propertyCompliance.whatToKnow.heading</h2>
+            <p class="govuk-body">
+                <span th:text="#{propertyCompliance.whatToKnow.paragraph.one.beforeLink}">propertyCompliance.whatToKnow.paragraph.one.beforeLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.whatToKnow.paragraph.one.linkText}" th:href="${landlordResponsibilitiesUrl}">propertyCompliance.whatToKnow.paragraph.one.linkText
+                </a><span th:remove="tag" th:text="#{propertyCompliance.whatToKnow.paragraph.one.afterLink}">propertyCompliance.whatToKnow.paragraph.one.afterLink</span>
+            </p>
+            <p class="govuk-body" th:text="#{propertyCompliance.whatToKnow.bullet.heading}">propertyCompliance.whatToKnow.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{propertyCompliance.whatToKnow.bullet.one}">propertyCompliance.whatToKnow.bullet.one</li>
+                <li th:text="#{propertyCompliance.whatToKnow.bullet.two}">propertyCompliance.whatToKnow.bullet.two</li>
+                <li th:text="#{propertyCompliance.whatToKnow.bullet.three}">propertyCompliance.whatToKnow.bullet.three</li>
+            </ul>
+            <p class="govuk-body" th:text="#{propertyCompliance.whatToKnow.paragraph.two}">propertyCompliance.whatToKnow.paragraph.two</p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.whenToUpload.heading}">propertyCompliance.whenToUpload.heading</h2>
+            <p class="govuk-body" th:text="#{propertyCompliance.whenToUpload.paragraph.one}">propertyCompliance.whenToUpload.paragraph.one</p>
+            <p class="govuk-body" th:utext="#{propertyCompliance.whenToUpload.bullet.heading}">propertyCompliance.whenToUpload.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{propertyCompliance.whenToUpload.bullet.one}">propertyCompliance.whenToUpload.bullet.one</li>
+                <li th:text="#{propertyCompliance.whenToUpload.bullet.two}">propertyCompliance.whenToUpload.bullet.two</li>
+            </ul>
+        </section>
+        <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${taskListUrl}, #{startButtonText})}"></button>
     </main>
 </html>
