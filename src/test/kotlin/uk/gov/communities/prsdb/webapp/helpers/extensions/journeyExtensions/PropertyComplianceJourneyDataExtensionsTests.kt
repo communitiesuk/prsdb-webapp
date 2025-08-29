@@ -791,7 +791,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         meesOnlyUpdate: Boolean,
         epcExemptionReasonStepId: PropertyComplianceStepId,
     ) {
-        val reason = EpcExemptionReason.LISTED_BUILDING
+        val reason = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS
         val testJourneyData = journeyDataBuilder.withEpcExemptionReason(reason, meesOnlyUpdate).build()
 
         val retrievedReason = testJourneyData.getEpcExemptionReason(epcExemptionReasonStepId)
@@ -889,14 +889,14 @@ class PropertyComplianceJourneyDataExtensionsTests {
         // Arrange
         val testJourneyData =
             journeyDataBuilder
-                .withMeesExemptionReasonStep(MeesExemptionReason.LISTED_BUILDING, meesOnlyUpdate)
+                .withMeesExemptionReasonStep(MeesExemptionReason.HIGH_COST, meesOnlyUpdate)
                 .build()
 
         // Act
         val retrievedExemptionReason = testJourneyData.getMeesExemptionReason(meesExemptionReasonStepId)!!
 
         // Act, Assert
-        assertEquals(MeesExemptionReason.LISTED_BUILDING, retrievedExemptionReason)
+        assertEquals(MeesExemptionReason.HIGH_COST, retrievedExemptionReason)
     }
 
     @ParameterizedTest

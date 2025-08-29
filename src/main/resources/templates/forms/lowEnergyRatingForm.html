@@ -2,48 +2,41 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="epcImprovementGuideUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="registerPrsExemptionUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="meesExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registerMeesExemptionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <header>
         <h1 class="govuk-heading-l" th:text="#{forms.lowEnergyRating.heading}">forms.lowEnergyRating.heading</h1>
     </header>
     <section>
-        <p class="govuk-body" th:text="#{forms.lowEnergyRating.paragraph.one}">forms.lowEnergyRating.paragraph.one</p>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.lowEnergyRating.paragraph.one.beforeLink}">forms.lowEnergyRating.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="${meesExemptionGuideUrl}" th:text="#{forms.lowEnergyRating.paragraph.one.link}" rel="noreferrer noopener" target="_blank">forms.lowEnergyRating.paragraph.one.link
+            </a><span th:remove="tag" th:text="#{forms.lowEnergyRating.paragraph.one.afterLink}">forms.lowEnergyRating.paragraph.one.afterLink</span>
+        </p>
         <p class="govuk-body" th:text="#{forms.lowEnergyRating.paragraph.two}">forms.lowEnergyRating.paragraph.two</p>
-        <p class="govuk-body" th:text="#{forms.lowEnergyRating.paragraph.three}">forms.lowEnergyRating.paragraph.three</p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.lowEnergyRating.bullet.one}">forms.lowEnergyRating.bullet.one</li>
-            <li th:text="#{forms.lowEnergyRating.bullet.two}">forms.lowEnergyRating.bullet.two</li>
-        </ul>
     </section>
     <section>
         <h2 class="govuk-heading-s" th:text="#{forms.lowEnergyRating.remedialWork.subheading}">forms.lowEnergyRating.remedialWork.subheading</h2>
         <p class="govuk-body" th:text="#{forms.lowEnergyRating.remedialWork.paragraph.one}">forms.lowEnergyRating.remedialWork.paragraph.one</p>
         <p class="govuk-body" th:text="#{forms.lowEnergyRating.remedialWork.paragraph.two}">forms.lowEnergyRating.remedialWork.paragraph.two</p>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.lowEnergyRating.remedialWork.paragraph.three.beforeLink}">forms.lowEnergyRating.remedialWork.paragraph.three.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.lowEnergyRating.remedialWork.paragraph.three.link}" th:href="${epcImprovementGuideUrl}" rel="noreferrer noopener" target="_blank">
-                forms.lowEnergyRating.remedialWork.paragraph.three.link
-            </a>
-        </p>
+        <p class="govuk-body" th:text="#{forms.lowEnergyRating.remedialWork.paragraph.three}">forms.lowEnergyRating.remedialWork.paragraph.three</p>
     </section>
     <section>
         <h2 class="govuk-heading-s" th:text="#{forms.lowEnergyRating.registerMees.subheading}">forms.lowEnergyRating.registerMees.subheading</h2>
         <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.lowEnergyRating.registerMees.paragraph.one.beforeLink}">forms.lowEnergyRating.registerMees.paragraph.one.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.lowEnergyRating.registerMees.paragraph.one.link}" th:href="${registerPrsExemptionUrl}" rel="noreferrer noopener" target="_blank">forms.lowEnergyRating.registerMees.paragraph.one.link</a>
-            <span th:remove="tag" th:text="#{forms.lowEnergyRating.registerMees.paragraph.one.afterLink}">forms.lowEnergyRating.registerMees.paragraph.one.afterLink</span>
+            <span th:remove="tag" th:text="#{forms.lowEnergyRating.registerMees.bullet.heading.beforeLink}">forms.lowEnergyRating.registerMees.bullet.heading.beforeLink</span>
+            <a class="govuk-link" th:href="${registerMeesExemptionUrl}" th:text="#{forms.lowEnergyRating.registerMees.bullet.heading.link}" rel="noreferrer noopener" target="_blank">forms.lowEnergyRating.registerMees.bullet.heading.link</a>
+            <span th:remove="tag" th:text="#{forms.lowEnergyRating.registerMees.bullet.heading.afterLink}">forms.lowEnergyRating.registerMees.bullet.heading.afterLink</span>
         </p>
-        <p class="govuk-body" th:text="#{forms.lowEnergyRating.registerMees.paragraph.two}">forms.lowEnergyRating.registerMees.paragraph.two</p>
         <ul class="govuk-list govuk-list--bullet">
             <li th:text="#{forms.lowEnergyRating.registerMees.bullet.one}">forms.lowEnergyRating.registerMees.bullet.one</li>
             <li th:text="#{forms.lowEnergyRating.registerMees.bullet.two}">forms.lowEnergyRating.registerMees.bullet.two</li>
             <li th:text="#{forms.lowEnergyRating.registerMees.bullet.three}">forms.lowEnergyRating.registerMees.bullet.three</li>
         </ul>
-        <p class="govuk-body" th:text="#{forms.lowEnergyRating.registerMees.paragraph.three}">forms.lowEnergyRating.registerMees.paragraph.three</p>
+        <p class="govuk-body" th:text="#{forms.lowEnergyRating.registerMees.paragraph.one}">forms.lowEnergyRating.registerMees.paragraph.one</p>
     </section>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

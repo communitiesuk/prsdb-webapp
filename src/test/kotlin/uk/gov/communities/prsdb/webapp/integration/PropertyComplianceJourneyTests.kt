@@ -466,12 +466,12 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val epcExemptionReasonPage = assertPageIs(page, EpcExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // EPC exemption reason page
-        epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.LISTED_BUILDING)
+        epcExemptionReasonPage.submitExemptionReason(EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS)
         val epcExemptionConfirmationPage = assertPageIs(page, EpcExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // EPC Exemption Confirmation page
         assertThat(epcExemptionConfirmationPage.heading)
-            .containsText("You’ve marked this property as not needing an EPC")
+            .containsText("You’ve marked this property as not needing an energy performance certificate (EPC)")
         epcExemptionConfirmationPage.saveAndContinueToLandlordResponsibilitiesButton.clickAndWait()
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
@@ -694,7 +694,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption reason page
-        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
+        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
         val meesExemptionConfirmationPage = assertPageIs(page, MeesExemptionConfirmationPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption confirmation page

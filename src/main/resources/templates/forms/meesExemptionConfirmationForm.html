@@ -2,6 +2,7 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="registerMeesExemptionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -12,7 +13,16 @@
         <p class="govuk-body" th:text="#{forms.meesExemptionConfirmation.paragraph.one}">forms.meesExemptionConfirmation.paragraph.one</p>
         <p class="govuk-body" th:text="#{forms.meesExemptionConfirmation.paragraph.two}">forms.meesExemptionConfirmation.paragraph.two</p>
         <p class="govuk-body" th:text="#{forms.meesExemptionConfirmation.paragraph.three}">forms.meesExemptionConfirmation.paragraph.three</p>
-        <p class="govuk-body" th:text="#{forms.meesExemptionConfirmation.paragraph.four}">forms.meesExemptionConfirmation.paragraph.four</p>
+        <p class="govuk-body" th:text="#{forms.meesExemptionConfirmation.bullet.heading}">forms.meesExemptionConfirmation.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>
+                <span th:remove="tag" th:text="#{forms.meesExemptionConfirmation.bullet.one.beforeLink}">forms.meesExemptionConfirmation.bullet.one.beforeLink</span>
+                <a class="govuk-link" th:href="${registerMeesExemptionUrl}" target="_blank" rel="noopener noreferrer" th:text="#{forms.meesExemptionConfirmation.bullet.one.link}">forms.meesExemptionConfirmation.bullet.one.link</a>
+            </li>
+            <li th:text="#{forms.meesExemptionConfirmation.bullet.two}">
+                forms.meesExemptionConfirmation.bullet.two
+            </li>
+        </ul>
     </section>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

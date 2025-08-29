@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.EPC_IMPROVEMENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER_URL
@@ -662,10 +661,6 @@ class PropertyComplianceSharedStepFactory(
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
-                                        value = EpcExemptionReason.LISTED_BUILDING,
-                                        labelMsgKey = "forms.epcExemptionReason.radios.listedBuilding.label",
-                                    ),
-                                    RadiosButtonViewModel(
                                         value = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS,
                                         labelMsgKey = "forms.epcExemptionReason.radios.annualUseLessThan4Months.label",
                                     ),
@@ -770,8 +765,10 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "findEpcUrl" to FIND_EPC_URL,
                             "getNewEpcUrl" to GET_NEW_EPC_URL,
+                            "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                            "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                            "findEpcUrl" to FIND_EPC_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
@@ -824,11 +821,11 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
                             "getNewEpcUrl" to GET_NEW_EPC_URL,
                             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
                             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
-                            "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
-                            "expiryDateAsJavaLocalDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
+                            "findEpcUrl" to FIND_EPC_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
@@ -892,16 +889,6 @@ class PropertyComplianceSharedStepFactory(
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
-                                        value = MeesExemptionReason.LISTED_BUILDING,
-                                        labelMsgKey = "forms.meesExemptionReason.radios.listedBuilding.label",
-                                        hintMsgKey = "forms.meesExemptionReason.radios.listedBuilding.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = MeesExemptionReason.SMALL_DETACHED_BUILDING,
-                                        labelMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.label",
-                                        hintMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.hint",
-                                    ),
-                                    RadiosButtonViewModel(
                                         value = MeesExemptionReason.HIGH_COST,
                                         labelMsgKey = "forms.meesExemptionReason.radios.highCost.label",
                                         hintMsgKey = "forms.meesExemptionReason.radios.highCost.hint",
@@ -948,6 +935,7 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
+                            "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
@@ -969,8 +957,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "epcImprovementGuideUrl" to EPC_IMPROVEMENT_GUIDE_URL,
-                            "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                            "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                            "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
                                     "forms.buttons.saveAndContinueToLandlordResponsibilities",
