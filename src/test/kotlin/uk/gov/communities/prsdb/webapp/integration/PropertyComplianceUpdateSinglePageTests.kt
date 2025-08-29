@@ -19,7 +19,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         updateGasSafetyPage.form.submit()
         assertThat(
             updateGasSafetyPage.form.getErrorMessage(),
-        ).containsText("Select whether you want to add a new EPC for this property")
+        ).containsText("Select whether you want to add a new certificate or exemption")
     }
 
     @Test

@@ -516,7 +516,11 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         @Test
         fun `Show the low energy version of the epcExpired page when the energy rating is below E`(page: Page) {
             val epcExpiredPage = navigator.skipToPropertyComplianceEpcExpiredPage(PROPERTY_OWNERSHIP_ID, epcRating = "F")
-            assertTrue(epcExpiredPage.page.content().contains("The expired certificate shows an energy rating below E"))
+            assertTrue(
+                epcExpiredPage.page.content().contains(
+                    "The energy performance certificate (EPC) for this property has expired and has a rating below E",
+                ),
+            )
             epcExpiredPage.continueButton.clickAndWait()
             assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }

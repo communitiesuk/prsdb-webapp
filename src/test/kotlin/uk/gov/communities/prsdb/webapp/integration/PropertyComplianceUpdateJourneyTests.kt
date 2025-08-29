@@ -661,7 +661,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             startUpdateMeesTask(
                 page,
                 propertyOwnershipIdWithMeesExemption,
-                "New landlord exemption",
+                "High cost exemption",
             )
         meesExemptionCheckPage.submitDoesNotHaveExemption()
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingPageMeesUpdatePropertyComplianceUpdate::class, urlArguments)
@@ -712,7 +712,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             startUpdateMeesTask(
                 page,
                 propertyOwnershipIdWithMeesExemption,
-                "New landlord exemption",
+                "High cost exemption",
             )
 
         // Back link returns to propertyDetailsPage
