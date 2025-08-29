@@ -56,17 +56,17 @@
     "bodyLocation": "/emails/LandlordWithPropertiesDeregistrationConfirmation.md"
   },
   {
-    "test_id": "2782faf2-6123-4352-9d36-03df1bb45a3d",
-    "prod_id": "a15f099e-47f0-4c47-ad11-c88c6fe9d78f",
+    "test_id": "60b9741e-c593-4635-9b05-f8bc8ee60deb",
+    "prod_id": "a2f1e823-9f4b-4acf-ae91-598e7b6c477c",
     "enumName": "FULL_PROPERTY_COMPLIANCE_CONFIRMATION",
     "subject": "GOV.UK – You have added compliance information for a property",
     "bodyLocation": "/emails/FullPropertyComplianceConfirmation.md"
   },
   {
-    "test_id": "2b686d25-1a07-4b4b-bf5d-52455c9392ad",
-    "prod_id": "98382708-1636-4457-8efa-0a154c68775f",
+    "test_id": "9e2c2a05-9557-4907-8a21-4d3c38b0e0a7",
+    "prod_id": "2d4eec5a-19da-4699-a884-f095ec73287a",
     "enumName": "PARTIAL_PROPERTY_COMPLIANCE_CONFIRMATION",
-    "subject": "GOV.UK – You need to take action to provide compliance for a property",
+    "subject": "GOV.UK – You have missing or expired compliance information for a property",
     "bodyLocation": "/emails/PartialPropertyComplianceConfirmation.md"
   },
   {

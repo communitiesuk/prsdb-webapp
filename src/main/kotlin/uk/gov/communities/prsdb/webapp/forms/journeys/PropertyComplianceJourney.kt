@@ -49,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
@@ -591,7 +592,7 @@ class PropertyComplianceJourney(
                 landlordEmail,
                 PartialPropertyComplianceConfirmationEmail(
                     propertyAddress,
-                    EmailBulletPointList(compliantMsgs),
+                    RegistrationNumberDataModel.fromRegistrationNumber(propertyCompliance.propertyOwnership.registrationNumber),
                     EmailBulletPointList(nonCompliantMsgs),
                     urlProvider.buildComplianceInformationUri(propertyOwnershipId).toString(),
                 ),

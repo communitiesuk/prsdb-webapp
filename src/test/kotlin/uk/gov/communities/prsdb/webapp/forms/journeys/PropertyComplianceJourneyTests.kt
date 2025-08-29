@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -909,13 +910,12 @@ class PropertyComplianceJourneyTests {
             setUpMocks(nonCompliantPropertyCompliance, isPropertyCompliant = false)
 
             val expectedMessageKeys = PropertyComplianceConfirmationMessageKeys(nonCompliantPropertyCompliance)
-            val expectedCompliantMessages = expectedMessageKeys.compliantMsgKeys.map { MockMessageSource.getMockMessage(it) }
             val expectedNonCompliantMessages = expectedMessageKeys.nonCompliantMsgKeys.map { MockMessageSource.getMockMessage(it) }
 
             val expectedEmailModel =
                 PartialPropertyComplianceConfirmationEmail(
                     nonCompliantPropertyCompliance.propertyOwnership.property.address.singleLineAddress,
-                    EmailBulletPointList(expectedCompliantMessages),
+                    RegistrationNumberDataModel.fromRegistrationNumber(nonCompliantPropertyCompliance.propertyOwnership.registrationNumber),
                     EmailBulletPointList(expectedNonCompliantMessages),
                     expectedComplianceInfoUri.toString(),
                 )

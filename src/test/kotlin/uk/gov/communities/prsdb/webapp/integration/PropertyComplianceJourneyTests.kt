@@ -12,12 +12,14 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -68,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -94,6 +97,9 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @MockitoBean
     private lateinit var fileUploader: FileUploader
+
+    @Autowired
+    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @BeforeEach
     fun setUp() {
@@ -385,12 +391,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         )
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the energy performance certificate (EPC) has expired"))
 
+        val ownership = propertyOwnershipRepository.findByIdAndIsActiveTrue(PROPERTY_OWNERSHIP_ID)
+
         // Check confirmation email
         verify(partialComplianceConfirmationEmailService).sendEmail(
             LANDLORD_EMAIL,
             PartialPropertyComplianceConfirmationEmail(
                 PROPERTY_ADDRESS,
-                EmailBulletPointList(listOf("your landlord responsibilities")),
+                ownership?.registrationNumber?.let { RegistrationNumberDataModel.fromRegistrationNumber(it) }!!,
                 EmailBulletPointList(
                     listOf(
                         "the gas safety certificate has expired",
@@ -612,12 +620,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             ),
         )
 
+        val ownership = propertyOwnershipRepository.findByIdAndIsActiveTrue(PROPERTY_OWNERSHIP_ID)
+
         // Check confirmation email
         verify(partialComplianceConfirmationEmailService).sendEmail(
             LANDLORD_EMAIL,
             PartialPropertyComplianceConfirmationEmail(
                 PROPERTY_ADDRESS,
-                EmailBulletPointList(listOf("your landlord responsibilities")),
+                ownership?.registrationNumber?.let { RegistrationNumberDataModel.fromRegistrationNumber(it) }!!,
                 EmailBulletPointList(
                     listOf(
                         "you have not added a gas safety certificate",
