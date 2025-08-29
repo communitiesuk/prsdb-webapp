@@ -37,7 +37,7 @@
             </th:block>
             <th:block th:unless="${isOccupied}">
                 <section th:replace="~{fragments/content/propertyRegistrationConfirmationUnoccupiedContent :: propertyRegistrationConfirmationUnoccupiedContent()}"></section>
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.returnToDashboard})}">
                     common.confirmationPage.goToDashboard
                 </a>
             </th:block>

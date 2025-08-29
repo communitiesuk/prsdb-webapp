@@ -1,0 +1,53 @@
+<th:block th:fragment="whatNextContent(getNewEpcUrl, meesExemptionGuideUrl, registerMeesExemptionUrl, findEpcUrl)">
+    <section>
+        <h3 class="govuk-heading-s" th:text="#{forms.invalidEpc.whatNext.heading}">forms.invalidEpc.whatNext.heading</h3>
+        <ol class="govuk-list govuk-list--number">
+            <li>
+                <span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.one.beforeLink}">forms.invalidEpc.whatNext.one.beforeLink</span>
+                <a class="govuk-link" th:text="#{forms.invalidEpc.whatNext.one.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">forms.invalidEpc.whatNext.one.link
+                </a><span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.one.afterLink}">forms.invalidEpc.whatNext.one.afterLink</span>
+            </li>
+            <li th:text="#{forms.invalidEpc.whatNext.two}">
+                forms.invalidEpc.whatNext.two
+            </li>
+            <li>
+                <span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.three.beforeLink}">forms.invalidEpc.whatNext.three.beforeLink</span>
+                <a class="govuk-link" th:text="#{forms.invalidEpc.whatNext.three.link}" th:href="${meesExemptionGuideUrl}" rel="noreferrer noopener" target="_blank">forms.invalidEpc.whatNext.three.link
+                </a><span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.three.afterLink}">forms.invalidEpc.whatNext.three.afterLink</span>
+            </li>
+            <li>
+                <span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.four.beforeLink}">forms.invalidEpc.whatNext.four.beforeLink</span>
+                <a class="govuk-link" th:text="#{forms.invalidEpc.whatNext.four.link}" th:href="${registerMeesExemptionUrl}" rel="noreferrer noopener" target="_blank">forms.invalidEpc.whatNext.four.link
+                </a><span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.four.afterLink}">forms.invalidEpc.whatNext.four.afterLink</span>
+            </li>
+            <li>
+                <span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.five.beforeLink}">forms.invalidEpc.whatNext.five.beforeLink</span>
+                <a class="govuk-link" th:text="#{forms.invalidEpc.whatNext.five.link}" th:href="${findEpcUrl}" rel="noreferrer noopener" target="_blank">forms.invalidEpc.whatNext.five.link
+                </a><span th:remove="tag" th:text="#{forms.invalidEpc.whatNext.five.afterLink}">forms.invalidEpc.whatNext.five.afterLink</span>
+            </li>
+        </ol>
+    </section>
+</th:block>
+
+<th:block th:fragment="ifNoEpcContent(meesExemptionGuideUrl)">
+    <section>
+        <h2 class="govuk-heading-m" th:text="#{forms.invalidEpc.ifNoEpc.heading}">forms.invalidEpc.ifNoEpc.heading</h2>
+        <p class="govuk-body" th:text="#{forms.invalidEpc.ifNoEpc.conditions.bullet.heading}">forms.invalidEpc.ifNoEpc.conditions.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.invalidEpc.ifNoEpc.conditions.bullet.one}">forms.invalidEpc.ifNoEpc.conditions.bullet.one</li>
+            <li th:text="#{forms.invalidEpc.ifNoEpc.conditions.bullet.two}">forms.invalidEpc.ifNoEpc.conditions.bullet.two</li>
+        </ul>
+        <p class="govuk-body" th:text="#{forms.invalidEpc.ifNoEpc.actions.bullet.heading}">forms.invalidEpc.ifNoEpc.actions.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.invalidEpc.ifNoEpc.actions.bullet.one}">forms.invalidEpc.ifNoEpc.actions.bullet.one</li>
+            <li th:text="#{forms.invalidEpc.ifNoEpc.actions.bullet.two}">forms.invalidEpc.ifNoEpc.actions.bullet.two</li>
+        </ul>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.invalidEpc.ifNoEpc.paragraph.one.beforeLink}">forms.invalidEpc.ifNoEpc.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.invalidEpc.ifNoEpc.paragraph.one.link}" th:href="${meesExemptionGuideUrl}" rel="noreferrer noopener" target="_blank">forms.invalidEpc.ifNoEpc.paragraph.one.link
+            </a><span th:remove="tag" th:text="#{forms.invalidEpc.ifNoEpc.paragraph.one.afterLink}">forms.invalidEpc.ifNoEpc.paragraph.one.afterLink</span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.invalidEpc.ifNoEpc.paragraph.two}">forms.invalidEpc.ifNoEpc.paragraph.two</p>
+    </section>
+</th:block>
+

@@ -185,27 +185,6 @@ class PropertyComplianceCheckAnswersPageTests {
                     null,
                 ),
             )
-        val expectedResponsibilityData =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.fireSafety",
-                    true,
-                    PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.keepPropertySafe",
-                    true,
-                    PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkComplianceAnswers.responsibilities.responsibilityToTenants",
-                    true,
-                    PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
-                    actionValue = "forms.links.view",
-                ),
-            )
 
         whenever(mockStepFactory.checkAutoMatchedEpcStepId).thenReturn(PropertyComplianceStepId.CheckAutoMatchedEpc)
         whenever(mockStepFactory.epcExpiryCheckStepId).thenReturn(PropertyComplianceStepId.EpcExpiryCheck)
@@ -215,13 +194,11 @@ class PropertyComplianceCheckAnswersPageTests {
         val returnedGasSafetyData = summaryData["gasSafetyData"] as List<SummaryListRowViewModel>
         val returnedEicrData = summaryData["eicrData"] as List<SummaryListRowViewModel>
         val returnedEpcData = summaryData["epcData"] as List<SummaryListRowViewModel>
-        val returnedResponsibilityData = summaryData["responsibilityData"] as List<SummaryListRowViewModel>
 
         // Assert
         assertIterableEquals(expectedGasSafetyData, returnedGasSafetyData)
         assertIterableEquals(expectedEicrData, returnedEicrData)
         assertIterableEquals(expectedEpcData, returnedEpcData)
-        assertIterableEquals(expectedResponsibilityData, returnedResponsibilityData)
     }
 
     @Test

@@ -23,14 +23,7 @@
     <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.epc.heading}">forms.checkComplianceAnswers.epc.heading</h3>
     <dl th:replace="~{fragments/summaryList :: summaryList(${epcData})}"></dl>
 
-    <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.responsibilities.heading}">forms.checkComplianceAnswers.responsibilities.heading</h3>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${responsibilityData})}"></dl>
-
-    <div id="warningText-content" th:replace="~{fragments/warningText :: warningText(content=~{::#warningText-content/content()}, isContentHtml=true)}">
-        <span th:text="#{forms.checkComplianceAnswers.warning.one}" th:remove="tag">forms.checkComplianceAnswers.warning.one</span>
-        <br><br>
-        <span th:text="#{forms.checkComplianceAnswers.warning.two}" th:remove="tag">forms.checkComplianceAnswers.warning.two</span>
-    </div>
+    <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}"></div>
     <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndSubmitCompliance})}"></button>
 </html>

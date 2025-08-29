@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+
 data class PartialPropertyComplianceConfirmationEmail(
     private val propertyAddress: String,
-    private val compliantBulletPoints: EmailBulletPointList,
+    private val registrationNumber: RegistrationNumberDataModel,
     private val nonCompliantBulletPoints: EmailBulletPointList,
     val updateComplianceUrl: String,
 ) : EmailTemplateModel {
@@ -11,7 +13,7 @@ data class PartialPropertyComplianceConfirmationEmail(
     override fun toHashMap() =
         hashMapOf(
             "property address" to propertyAddress,
-            "compliant bullets" to compliantBulletPoints.toString(),
+            "property registration number" to registrationNumber.toString(),
             "non-compliant bullets" to nonCompliantBulletPoints.toString(),
             "update compliance URL" to updateComplianceUrl,
         )

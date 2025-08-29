@@ -76,7 +76,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     PartialPropertyComplianceConfirmationEmail(
                         "1 Street Name, Town, Country, AB1 2CD",
-                        EmailBulletPointList("certificate 1", "certificate 2"),
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 12345L),
                         EmailBulletPointList("certificate 3", "certificate 4"),
                         "https://emample.com",
                     ),

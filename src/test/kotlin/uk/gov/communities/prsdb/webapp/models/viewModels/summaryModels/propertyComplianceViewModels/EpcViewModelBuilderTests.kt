@@ -35,7 +35,7 @@ class EpcViewModelBuilderTests {
     companion object {
         private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
         private val expired = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
-        private val exempt = PropertyComplianceBuilder.createWithCertExemptions(epcExemption = EpcExemptionReason.LISTED_BUILDING)
+        private val exempt = PropertyComplianceBuilder.createWithCertExemptions(epcExemption = EpcExemptionReason.DUE_FOR_DEMOLITION)
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
         private val meesCompliant = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason()
         private val meesMissingExemptionReason = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
@@ -115,7 +115,7 @@ class EpcViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
-                            MessageKeyConverter.convert(EpcExemptionReason.LISTED_BUILDING),
+                            MessageKeyConverter.convert(EpcExemptionReason.DUE_FOR_DEMOLITION),
                         ),
                     ),
                 ),

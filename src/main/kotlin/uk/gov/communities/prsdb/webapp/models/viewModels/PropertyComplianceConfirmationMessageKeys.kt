@@ -10,7 +10,7 @@ class PropertyComplianceConfirmationMessageKeys(
     val compliantMsgKeys =
         listOfNotNull(compliantGasSafetyMsgKey, compliantEicrMsgKey, compliantEpcMsgKey, compliantLandlordResponsibilitiesMsgKey)
 
-    private val nonCompliantGasSafetyMsgKey get() =
+    val nonCompliantGasSafetyMsgKey get() =
         when {
             propertyCompliance.isGasSafetyCertExpired == true -> "propertyCompliance.confirmation.nonCompliant.bullet.gasSafety.expired"
             propertyCompliance.isGasSafetyCertMissing -> "propertyCompliance.confirmation.nonCompliant.bullet.gasSafety.missing"
@@ -24,7 +24,7 @@ class PropertyComplianceConfirmationMessageKeys(
             null
         }
 
-    private val nonCompliantEicrMsgKey get() =
+    val nonCompliantEicrMsgKey get() =
         when {
             propertyCompliance.isEicrExpired == true -> "propertyCompliance.confirmation.nonCompliant.bullet.eicr.expired"
             propertyCompliance.isEicrMissing -> "propertyCompliance.confirmation.nonCompliant.bullet.eicr.missing"
@@ -38,7 +38,7 @@ class PropertyComplianceConfirmationMessageKeys(
             null
         }
 
-    private val nonCompliantEpcMsgKey get() =
+    val nonCompliantEpcMsgKey get() =
         when {
             propertyCompliance.isEpcExpiredAndLowRated() -> "propertyCompliance.confirmation.nonCompliant.bullet.epc.expiredAndLowRating"
             propertyCompliance.isEpcExpired == true -> "propertyCompliance.confirmation.nonCompliant.bullet.epc.expired"

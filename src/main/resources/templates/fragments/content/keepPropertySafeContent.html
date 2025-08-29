@@ -1,41 +1,49 @@
-<th:block th:fragment="keepPropertySafeContent(homesAct2018Url, housingHealthAndSafetyRatingSystemUrl)">
-    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.one}">forms.landlordResponsibilities.keepPropertySafe.paragraph.one</p>
-    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.two}">forms.landlordResponsibilities.keepPropertySafe.paragraph.two</p>
+<th:block th:fragment="keepPropertySafeContent(housingHealthAndSafetyRatingSystemUrl, homesAct2018Url)">
     <section>
-        <h2 class="govuk-heading-s" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.three}">forms.landlordResponsibilities.keepPropertySafe.paragraph.three</h2>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.four.beforeLink}">forms.landlordResponsibilities.keepPropertySafe.paragraph.four.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.four.linkText}" th:href="${housingHealthAndSafetyRatingSystemUrl}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.keepPropertySafe.paragraph.four.linkText</a>
-            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.four.afterLink}">forms.landlordResponsibilities.keepPropertySafe.paragraph.four.afterLink</span>
-        </p>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.five.beforeBullets}">forms.landlordResponsibilities.keepPropertySafe.paragraph.five.beforeBullets</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.one}">forms.landlordResponsibilities.keepPropertySafe.paragraph.one</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.bullet.heading}">forms.landlordResponsibilities.keepPropertySafe.bullet.heading</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.one</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.two</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.three}">forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.three</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.four}">forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.four</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.five}">forms.landlordResponsibilities.keepPropertySafe.paragraph.five.bullet.five</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.bullet.one</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.bullet.two</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.bullet.three}">forms.landlordResponsibilities.keepPropertySafe.bullet.three</li>
         </ul>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.six.beforeBullets}">forms.landlordResponsibilities.keepPropertySafe.paragraph.six.beforeBullets</p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.six.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.paragraph.six.bullet.one</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.six.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.paragraph.six.bullet.two</li>
-        </ul>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.seven}">forms.landlordResponsibilities.keepPropertySafe.paragraph.seven</p>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.eight}">forms.landlordResponsibilities.keepPropertySafe.paragraph.eight</p>
     </section>
     <section>
-        <h2 class="govuk-heading-s"  th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.nine}">forms.landlordResponsibilities.keepPropertySafe.paragraph.nine</h2>
+        <h2 class="govuk-heading-s" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.heading}">forms.landlordResponsibilities.keepPropertySafe.assessment.heading</h2>
         <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.ten.beforeLink}">forms.landlordResponsibilities.keepPropertySafe.paragraph.ten.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.ten.linkText}" th:href="${homesAct2018Url}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.keepPropertySafe.paragraph.ten.linkText</a><span
-                th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.ten.afterLink}">forms.landlordResponsibilities.keepPropertySafe.paragraph.ten.afterLink</span>
+            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.one.beforeLink}">forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="${housingHealthAndSafetyRatingSystemUrl}" rel="noreferrer noopener" target="_blank" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.one.link}">forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.one.link</a>
+            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.one.afterLink}">forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.one.afterLink</span>
         </p>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.beforeBullets}">forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.beforeBullets</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.heading}">forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.heading</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.bullet.one</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.bullet.two</li>
-            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.bullet.three}">forms.landlordResponsibilities.keepPropertySafe.paragraph.eleven.bullet.three</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.one</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.two</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.three}">forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.three</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.four}">forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.four</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.five}">forms.landlordResponsibilities.keepPropertySafe.assessment.hazard.bullet.five</li>
+        </ul>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.heading}">forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.one</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.two</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.three}">forms.landlordResponsibilities.keepPropertySafe.assessment.action.bullet.three</li>
+        </ul>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.two}">forms.landlordResponsibilities.keepPropertySafe.assessment.paragraph.two</p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-s" th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.heading}">forms.landlordResponsibilities.keepPropertySafe.legalAction.heading</h2>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.one.beforeLink}">forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="${homesAct2018Url}" rel="noreferrer noopener" target="_blank"
+               th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.one.link}">forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.one.link
+            </a><span th:remove="tag" th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.one.afterLink}">forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.one.afterLink</span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.two}">forms.landlordResponsibilities.keepPropertySafe.legalAction.paragraph.two</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.bullet.heading}">forms.landlordResponsibilities.keepPropertySafe.legalAction.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.bullet.one}">forms.landlordResponsibilities.keepPropertySafe.legalAction.bullet.one</li>
+            <li th:text="#{forms.landlordResponsibilities.keepPropertySafe.legalAction.bullet.two}">forms.landlordResponsibilities.keepPropertySafe.legalAction.bullet.two</li>
         </ul>
     </section>
 </th:block>

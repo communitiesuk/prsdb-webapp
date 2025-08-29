@@ -1,20 +1,21 @@
-# You need to take action to provide compliance for a property
+# You have missing or expired compliance information for a property
 
-## You have some missing or expired compliance information for ((property address))
+## You have some missing or expired compliance information for:
+^ ((property address))
 
-You have added information about:
+Property Registration Number:
 
-((compliant bullets))
+((property registration number))
 
-You need to take action on the following:
+You must address these issues:
 
 ((non-compliant bullets))
 
-You must complete compliance information on the database within 28 days of registering this property.
+You have 28 days to add new certificates on the database, which starts from either:
+* the date a certificate expires
+* the date you registered the property as occupied on the database if you have not added a certificate yet
 
-During the pilot, you are not required to add compliance information to the database. But it will likely be a legal requirement in the future.
-
-[Add missing compliance information](((update compliance URL)))
+[Sign in to the database](((update compliance URL))) to update compliance information for this property.
 
 ---
 This is an automated email - do not reply.
