@@ -2,21 +2,15 @@
 
 ## You have added compliance information for ((property address))
 
-You have added information about:
+You have successfully added information about:
 
 ((compliant bullets))
 
+If any certificates expire, you have 28 days to add new ones to the database.
+
 You are required to keep compliance information accurate and up to date on the database.
 
-You must update this information if:
-
-* a certificate is about to expire (you must upload a new one before the expiration date)
-* there are any changes to the property
-* a new tenancy begins
-
-During the pilot, you are not required to add compliance information to the database. But it will likely be a legal requirement in the future.
-
-[Sign into your account on the database](((dashboard URL)))
+[Sign in to your account on the database](((dashboard URL)))
 
 ---
 This is an automated email - do not reply.
