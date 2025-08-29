@@ -13,7 +13,13 @@
         <section>
             <h2 class="govuk-heading-m" th:text="#{localAuthorityPrivacyNotice.section.one.heading}">localAuthorityPrivacyNotice.section.one.heading</h2>
             <p class="govuk-body" th:text="#{localAuthorityPrivacyNotice.section.one.paragraph.one}">localAuthorityPrivacyNotice.section.one.paragraph.one</p>
-            <p class="govuk-body" th:text="#{localAuthorityPrivacyNotice.section.one.paragraph.two}">localAuthorityPrivacyNotice.section.one.paragraph.two</p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{localAuthorityPrivacyNotice.section.one.paragraph.two.beforeEmailLink}">localAuthorityPrivacyNotice.section.one.paragraph.two.beforeEmailLink</span>
+                <a class="govuk-link" th:href="'mailto:' + ${dataProtectionOfficerEmail}" th:text="#{localAuthorityPrivacyNotice.section.one.paragraph.two.emailLinkText}">
+                    localAuthorityPrivacyNotice.section.ten.paragraph.three.emailLinkText
+                </a>
+                <span th:remove="tag" th:text="#{localAuthorityPrivacyNotice.section.one.paragraph.two.afterEmailLink}">localAuthorityPrivacyNotice.section.one.paragraph.two.afterEmailLink</span>
+            </p>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{localAuthorityPrivacyNotice.section.two.heading}">localAuthorityPrivacyNotice.section.two.heading</h2>
@@ -111,10 +117,10 @@
             </p>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{localAuthorityPrivacyNotice.section.ten.paragraph.three.beforeEmailLink}">localAuthorityPrivacyNotice.section.ten.paragraph.three.beforeEmailLink</span>
-                <a class="govuk-link" th:href="'mailto:' + #{localAuthorityPrivacyNotice.section.ten.paragraph.three.emailLinkText}" th:text="#{localAuthorityPrivacyNotice.section.ten.paragraph.three.emailLinkText}">
+                <a class="govuk-link" th:href="'mailto:' + ${dataProtectionCommunitiesEmails}" th:text="#{localAuthorityPrivacyNotice.section.ten.paragraph.three.emailLinkText}">
                     localAuthorityPrivacyNotice.section.ten.paragraph.three.emailLinkText
-                </a><span
-                    th:remove="tag" th:text="#{localAuthorityPrivacyNotice.section.ten.paragraph.three.afterEmailLink}">localAuthorityPrivacyNotice.section.ten.paragraph.three.afterEmailLink</span>
+                </a>
+                <span th:remove="tag" th:text="#{localAuthorityPrivacyNotice.section.ten.paragraph.three.afterEmailLink}">localAuthorityPrivacyNotice.section.ten.paragraph.three.afterEmailLink</span>
             </p>
             <p class="govuk-body" th:text="#{localAuthorityPrivacyNotice.section.ten.paragraph.four}">localAuthorityPrivacyNotice.section.ten.paragraph.four</p>
             <p class="govuk-body">
