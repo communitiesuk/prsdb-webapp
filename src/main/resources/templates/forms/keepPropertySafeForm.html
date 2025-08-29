@@ -1,14 +1,14 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="housingHealthAndSafetyRatingSystemUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="homesAct2018Url" type="java.lang.String"*/-->
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
-<!--/*@thymesVar id="homesAct2018Url" type="java.lang.String"*/-->
-<!--/*@thymesVar id="housingHealthAndSafetyRatingSystemUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, null)}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', #{forms.landlordResponsibilities.keepPropertySafe.heading}, null)}">
-        <div th:replace="~{fragments/content/keepPropertySafeContent :: keepPropertySafeContent(${homesAct2018Url}, ${housingHealthAndSafetyRatingSystemUrl})}"></div>
+        <div th:replace="~{fragments/content/keepPropertySafeContent :: keepPropertySafeContent(${housingHealthAndSafetyRatingSystemUrl}, ${homesAct2018Url})}"></div>
         <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>

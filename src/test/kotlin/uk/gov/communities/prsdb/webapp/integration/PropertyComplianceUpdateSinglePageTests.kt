@@ -35,7 +35,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
         updateEpcPage.form.submit()
         assertThat(updateEpcPage.form.getErrorMessage())
-            .containsText("Select whether you want to add a new certificate or exemption")
+            .containsText("Select whether you want to add a new EPC for this property")
     }
 
     @Test
@@ -64,7 +64,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         // Review property safety declaration
         propertyDetailsPage.propertyComplianceSummaryList.propertySafetyRow.clickActionLinkAndWait()
         val reviewPropertySafetyPage = assertPageIs(page, KeepPropertySafePagePropertyComplianceUpdate::class, urlArguments)
-        assertContains(reviewPropertySafetyPage.heading.getText(), "Keeping this property safe")
+        assertContains(reviewPropertySafetyPage.heading.getText(), "Health and safety in rental properties")
 
         // Go back to property record
         reviewPropertySafetyPage.returnToRecordButton.clickAndWait()
@@ -83,7 +83,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         val reviewResponsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyComplianceUpdate::class, urlArguments)
         assertContains(
             reviewResponsibilityToTenantsPage.heading.getText(),
-            "Make sure you follow your legal responsibilities to your tenants",
+            "Your responsibilities to your tenants",
         )
 
         // Go back to property record

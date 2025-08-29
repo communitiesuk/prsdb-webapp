@@ -516,7 +516,11 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         @Test
         fun `Show the low energy version of the epcExpired page when the energy rating is below E`(page: Page) {
             val epcExpiredPage = navigator.skipToPropertyComplianceEpcExpiredPage(PROPERTY_OWNERSHIP_ID, epcRating = "F")
-            assertTrue(epcExpiredPage.page.content().contains("The expired certificate shows an energy rating below E"))
+            assertTrue(
+                epcExpiredPage.page.content().contains(
+                    "The energy performance certificate (EPC) for this property has expired and has a rating below E",
+                ),
+            )
             epcExpiredPage.continueButton.clickAndWait()
             assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
         }
@@ -568,7 +572,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
-                .containsText("You must agree to your responsibilities to continue")
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
@@ -578,7 +582,8 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         fun `Submitting without the checkbox ticked returns an error`() {
             val keepPropertySafePage = navigator.skipToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
             keepPropertySafePage.form.submit()
-            assertThat(keepPropertySafePage.form.getErrorMessage()).containsText("You must agree to your responsibilities to continue")
+            assertThat(keepPropertySafePage.form.getErrorMessage())
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
@@ -589,7 +594,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val responsibilityToTenantsPage = navigator.skipToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
             responsibilityToTenantsPage.form.submit()
             assertThat(responsibilityToTenantsPage.form.getErrorMessage())
-                .containsText("You must agree to follow these responsibilities to continue")
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 

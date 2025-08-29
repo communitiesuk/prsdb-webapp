@@ -12,8 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -427,11 +426,8 @@ class PropertyComplianceJourney(
                         content =
                             mapOf(
                                 "title" to "propertyCompliance.title",
-                                "privateRentingGuideUrl" to
-                                    PRIVATE_RENTING_GUIDE_URL,
-                                "rightToRentChecksUrl" to RIGHT_TO_RENT_CHECKS_URL,
-                                "governmentApprovedDepositProtectionSchemeUrl" to
-                                    GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL,
+                                "landlordResponsibilitiesUrl" to LANDLORD_RESPONSIBILITIES_URL,
+                                "governmentApprovedDepositProtectionSchemeUrl" to GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL,
                                 "howToRentGuideUrl" to HOW_TO_RENT_GUIDE_URL,
                                 "options" to
                                     listOf(

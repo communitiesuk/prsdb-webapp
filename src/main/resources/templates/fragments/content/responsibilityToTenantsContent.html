@@ -1,30 +1,44 @@
-<th:block th:fragment="responsibilityToTenantsContent(privateRentingGuideUrl, rightToRentChecksUrl, governmentApprovedDepositProtectionSchemeUrl, howToRentGuideUrl)">
-    <p class="govuk-body">
-        <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.beforeLink</span>
-        <a class="govuk-link" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.linkText}" th:href="${privateRentingGuideUrl}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.linkText</a><span
-            th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.afterLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.afterLink</span>
-    </p>
-    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.beforeBullets}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.beforeBullets</p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>
-            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.one.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.one.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.one.linkText}" th:href="${rightToRentChecksUrl}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.one.linkText</a>
-        </li>
-        <li>
-            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.two.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.two.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.two.linkText}" th:href="${governmentApprovedDepositProtectionSchemeUrl}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.two.linkText</a>
-        </li>
-        <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.three}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.three</li>
-    </ul>
-    <p class="govuk-body" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.beforeBullets}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.beforeBullets</p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>
-            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.one.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.one.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.one.linkText}" th:href="${howToRentGuideUrl}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.responsibilityToTenants.paragraph.two.bullet.three.linkText</a>
-        </li>
-        <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.two}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.two</li>
-        <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.three}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.three</li>
-        <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.four}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.four</li>
-        <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.five}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.three.bullet.five</li>
-    </ul>
+<th:block th:fragment="responsibilityToTenantsContent(landlordResponsibilitiesUrl, governmentApprovedDepositProtectionSchemeUrl, howToRentGuideUrl)">
+    <section>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="${landlordResponsibilitiesUrl}" rel="noreferrer noopener" target="_blank" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.linkText}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.linkText
+            </a><span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.afterLink}">forms.landlordResponsibilities.responsibilityToTenants.paragraph.one.afterLink</span>
+        </p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-s" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.deposit.heading}">forms.landlordResponsibilities.responsibilityToTenants.deposit.heading</h2>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.one.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="${governmentApprovedDepositProtectionSchemeUrl}" rel="noreferrer noopener" target="_blank" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.one.linkText}">forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.one.linkText
+            </a><span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.one.afterLink}">forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.one.afterLink</span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.two}">forms.landlordResponsibilities.responsibilityToTenants.deposit.paragraph.two</p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-s" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.heading}">forms.landlordResponsibilities.responsibilityToTenants.documents.heading</h2>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.paragraph.one}">forms.landlordResponsibilities.responsibilityToTenants.documents.paragraph.one</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.heading}">forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>
+                <span th:remove="tag" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.one.beforeLink}">forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.one.beforeLink</span>
+                <a class="govuk-link" th:href="${howToRentGuideUrl}" rel="noreferrer noopener" target="_blank" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.one.link}">forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.one.link</a>
+            </li>
+            <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.two}">
+                forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.two
+            </li>
+            <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.three}">
+                forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.three
+            </li>
+            <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.four}">
+                forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.four
+            </li>
+            <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.five}">
+                forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.five
+            </li>
+            <li th:text="#{forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.six}">
+                forms.landlordResponsibilities.responsibilityToTenants.documents.bullet.six
+            </li>
+        </ul>
+    </section>
 </th:block>

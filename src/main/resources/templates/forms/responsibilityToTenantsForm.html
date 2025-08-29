@@ -1,15 +1,14 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="privateRentingGuideUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="rightToRentChecksUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="landlordResponsibilitiesUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="governmentApprovedDepositProtectionSchemeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="howToRentGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, null)}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', #{forms.landlordResponsibilities.responsibilityToTenants.heading}, null)}">
-        <th:block th:replace="~{fragments/content/responsibilityToTenantsContent :: responsibilityToTenantsContent(${privateRentingGuideUrl}, ${rightToRentChecksUrl}, ${governmentApprovedDepositProtectionSchemeUrl}, ${howToRentGuideUrl})}"></th:block>
+        <th:block th:replace="~{fragments/content/responsibilityToTenantsContent :: responsibilityToTenantsContent(${landlordResponsibilitiesUrl}, ${governmentApprovedDepositProtectionSchemeUrl}, ${howToRentGuideUrl})}"></th:block>
         <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndContinue})}"></button>

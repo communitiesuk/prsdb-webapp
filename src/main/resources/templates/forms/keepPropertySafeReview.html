@@ -1,6 +1,6 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="homesAct2018Url" type="java.lang.String"*/-->
 <!--/*@thymesVar id="housingHealthAndSafetyRatingSystemUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="homesAct2018Url" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyComplianceUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="page" th:replace="~{fragments/layout :: layout(#{propertyCompliance.title}, ~{::#page/content()}, false)}">
@@ -8,7 +8,7 @@
     <main class="govuk-main-wrapper" id="main-content">
         <div id="main" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#main/content()})}">
             <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.keepPropertySafe.heading}">forms.landlordResponsibilities.keepPropertySafe.heading</h1>
-            <th:block th:replace="~{fragments/content/keepPropertySafeContent :: keepPropertySafeContent(${homesAct2018Url}, ${housingHealthAndSafetyRatingSystemUrl})}"></th:block>
+            <th:block th:replace="~{fragments/content/keepPropertySafeContent :: keepPropertySafeContent(${housingHealthAndSafetyRatingSystemUrl}, ${homesAct2018Url})}"></th:block>
             <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${propertyComplianceUrl}, #{forms.buttons.returnToPropertyRecord})}">forms.buttons.returnToPropertyRecord</button>
         </div>
     </main>
