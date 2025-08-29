@@ -2,7 +2,7 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="meesExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="prsExemptionGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="registerMeesExemptionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
     <section>
         <p class="govuk-body">
             <span th:remove="tag" th:text="#{forms.lowEnergyRating.paragraph.one.beforeLink}">forms.lowEnergyRating.paragraph.one.beforeLink</span>
-            <a class="govuk-link" th:href="${meesExemptionGuideUrl}" th:text="#{forms.lowEnergyRating.paragraph.one.link}" rel="noreferrer noopener" target="_blank">forms.lowEnergyRating.paragraph.one.link
+            <a class="govuk-link" th:href="${prsExemptionGuideUrl}" th:text="#{forms.lowEnergyRating.paragraph.one.link}" rel="noreferrer noopener" target="_blank">forms.lowEnergyRating.paragraph.one.link
             </a><span th:remove="tag" th:text="#{forms.lowEnergyRating.paragraph.one.afterLink}">forms.lowEnergyRating.paragraph.one.afterLink</span>
         </p>
         <p class="govuk-body" th:text="#{forms.lowEnergyRating.paragraph.two}">forms.lowEnergyRating.paragraph.two</p>

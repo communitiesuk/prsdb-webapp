@@ -34,6 +34,10 @@ const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certific
 const val MEES_EXEMPTION_GUIDE_URL =
     "https://www.gov.uk/guidance/domestic-private-rented-property-minimum-energy-efficiency-standard-landlord-guidance"
 
+const val PRS_EXEMPTION_GUIDE_URL =
+    "https://www.gov.uk/government/publications/private-rented-sector-minimum-energy-efficiency-standard-exemptions" +
+        "/guidance-on-prs-exemptions-and-exemptions-register-evidence-requirements"
+
 const val REGISTER_PRS_EXEMPTION_URL = "https://prsregister.beis.gov.uk/NdsBeisUi/used-service-before"
 
 const val HOUSES_IN_MULTIPLE_OCCUPATION_URL = "https://www.gov.uk/private-renting/houses-in-multiple-occupation"
@@ -45,10 +49,6 @@ const val HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL =
 const val HOMES_ACT_2018_URL =
     "https://www.gov.uk/government/publications/homes-fitness-for-human-habitation-act-2018/" +
         "guide-for-landlords-homes-fitness-for-human-habitation-act-2018"
-
-const val PRIVATE_RENTING_GUIDE_URL = "https://www.gov.uk/private-renting"
-
-const val RIGHT_TO_RENT_CHECKS_URL = "https://www.gov.uk/check-tenant-right-to-rent-documents"
 
 const val GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL = "https://www.gov.uk/deposit-protection-schemes-and-landlords"
 
