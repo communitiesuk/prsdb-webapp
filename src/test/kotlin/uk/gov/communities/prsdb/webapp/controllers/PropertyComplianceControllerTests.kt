@@ -42,8 +42,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.PRIVATE_RENTING_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.RIGHT_TO_RENT_CHECKS_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -1188,8 +1187,7 @@ class PropertyComplianceControllerTests(
                 view { name("forms/responsibilityToTenantsReview") }
                 model {
                     attribute("backUrl", expectedPropertyComplianceUrl)
-                    attribute("privateRentingGuideUrl", PRIVATE_RENTING_GUIDE_URL)
-                    attribute("rightToRentChecksUrl", RIGHT_TO_RENT_CHECKS_URL)
+                    attribute("landlordResponsibilitiesUrl", LANDLORD_RESPONSIBILITIES_URL)
                     attribute("governmentApprovedDepositProtectionSchemeUrl", GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL)
                     attribute("howToRentGuideUrl", HOW_TO_RENT_GUIDE_URL)
                     attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)

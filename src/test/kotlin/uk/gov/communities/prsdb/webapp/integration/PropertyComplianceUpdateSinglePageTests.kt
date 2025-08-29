@@ -64,7 +64,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         // Review property safety declaration
         propertyDetailsPage.propertyComplianceSummaryList.propertySafetyRow.clickActionLinkAndWait()
         val reviewPropertySafetyPage = assertPageIs(page, KeepPropertySafePagePropertyComplianceUpdate::class, urlArguments)
-        assertContains(reviewPropertySafetyPage.heading.getText(), "Keeping this property safe")
+        assertContains(reviewPropertySafetyPage.heading.getText(), "Health and safety in rental properties")
 
         // Go back to property record
         reviewPropertySafetyPage.returnToRecordButton.clickAndWait()
@@ -83,7 +83,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         val reviewResponsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyComplianceUpdate::class, urlArguments)
         assertContains(
             reviewResponsibilityToTenantsPage.heading.getText(),
-            "Make sure you follow your legal responsibilities to your tenants",
+            "Your responsibilities to your tenants",
         )
 
         // Go back to property record

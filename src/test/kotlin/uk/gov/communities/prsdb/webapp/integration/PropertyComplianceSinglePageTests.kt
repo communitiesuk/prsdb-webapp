@@ -568,7 +568,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
-                .containsText("You must agree to your responsibilities to continue")
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
@@ -578,7 +578,8 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         fun `Submitting without the checkbox ticked returns an error`() {
             val keepPropertySafePage = navigator.skipToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
             keepPropertySafePage.form.submit()
-            assertThat(keepPropertySafePage.form.getErrorMessage()).containsText("You must agree to your responsibilities to continue")
+            assertThat(keepPropertySafePage.form.getErrorMessage())
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
@@ -589,7 +590,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val responsibilityToTenantsPage = navigator.skipToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
             responsibilityToTenantsPage.form.submit()
             assertThat(responsibilityToTenantsPage.form.getErrorMessage())
-                .containsText("You must agree to follow these responsibilities to continue")
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 

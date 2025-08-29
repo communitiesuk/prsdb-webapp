@@ -191,14 +191,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -355,14 +355,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -481,14 +481,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -580,14 +580,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Keeping this property safe")
+        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
