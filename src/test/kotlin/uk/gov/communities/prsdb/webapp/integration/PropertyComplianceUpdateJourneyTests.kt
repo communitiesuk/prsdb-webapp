@@ -385,7 +385,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             )
 
         // MEES exemption reason page
-        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
+        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
         val meesExemptionConfirmationPage = assertPageIs(page, MeesExemptionConfirmationPagePropertyComplianceUpdate::class, urlArguments)
 
         // MEES exemption confirmation page
@@ -395,7 +395,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
         assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
         assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("F")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.meesExemptionRow.value).containsText("Listed building exemption")
+        assertThat(checkYourEpcAnswersPage.form.summaryList.meesExemptionRow.value).containsText("High cost exemption")
 
         checkYourEpcAnswersPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -637,7 +637,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
             assertPageIs(page, MeesExemptionReasonPageMeesUpdatePropertyComplianceUpdate::class, urlArguments)
 
         // MEES exemption reason page
-        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.LISTED_BUILDING)
+        meesExemptionReasonPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
         val meesExemptionConfirmationPage =
             assertPageIs(page, MeesExemptionConfirmationPageMeesUpdatePropertyComplianceUpdate::class, urlArguments)
 
@@ -645,7 +645,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         meesExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         val cyaPage = assertPageIs(page, UpdateMeesCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
         assertThat(cyaPage.form.summaryList.energyRatingRow.value).containsText("G")
-        assertThat(cyaPage.form.summaryList.meesExemptionRow.value).containsText("Listed building exemption")
+        assertThat(cyaPage.form.summaryList.meesExemptionRow.value).containsText("High cost exemption")
 
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)

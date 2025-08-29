@@ -83,8 +83,6 @@ class MessageKeyConverter {
 
         private fun convertMeesExemptionReason(meesExemptionReason: MeesExemptionReason): String =
             when (meesExemptionReason) {
-                MeesExemptionReason.LISTED_BUILDING -> "forms.meesExemptionReason.radios.listedBuilding.label"
-                MeesExemptionReason.SMALL_DETACHED_BUILDING -> "forms.meesExemptionReason.radios.smallDetachedBuilding.label"
                 MeesExemptionReason.HIGH_COST -> "forms.meesExemptionReason.radios.highCost.label"
                 MeesExemptionReason.ALL_IMPROVEMENTS_MADE -> "forms.meesExemptionReason.radios.allImprovementsMade.label"
                 MeesExemptionReason.WALL_INSULATION -> "forms.meesExemptionReason.radios.wallInsulation.label"

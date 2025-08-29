@@ -893,16 +893,6 @@ class PropertyComplianceSharedStepFactory(
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
-                                        value = MeesExemptionReason.LISTED_BUILDING,
-                                        labelMsgKey = "forms.meesExemptionReason.radios.listedBuilding.label",
-                                        hintMsgKey = "forms.meesExemptionReason.radios.listedBuilding.hint",
-                                    ),
-                                    RadiosButtonViewModel(
-                                        value = MeesExemptionReason.SMALL_DETACHED_BUILDING,
-                                        labelMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.label",
-                                        hintMsgKey = "forms.meesExemptionReason.radios.smallDetachedBuilding.hint",
-                                    ),
-                                    RadiosButtonViewModel(
                                         value = MeesExemptionReason.HIGH_COST,
                                         labelMsgKey = "forms.meesExemptionReason.radios.highCost.label",
                                         hintMsgKey = "forms.meesExemptionReason.radios.highCost.hint",

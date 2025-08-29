@@ -889,14 +889,14 @@ class PropertyComplianceJourneyDataExtensionsTests {
         // Arrange
         val testJourneyData =
             journeyDataBuilder
-                .withMeesExemptionReasonStep(MeesExemptionReason.LISTED_BUILDING, meesOnlyUpdate)
+                .withMeesExemptionReasonStep(MeesExemptionReason.HIGH_COST, meesOnlyUpdate)
                 .build()
 
         // Act
         val retrievedExemptionReason = testJourneyData.getMeesExemptionReason(meesExemptionReasonStepId)!!
 
         // Act, Assert
-        assertEquals(MeesExemptionReason.LISTED_BUILDING, retrievedExemptionReason)
+        assertEquals(MeesExemptionReason.HIGH_COST, retrievedExemptionReason)
     }
 
     @ParameterizedTest
