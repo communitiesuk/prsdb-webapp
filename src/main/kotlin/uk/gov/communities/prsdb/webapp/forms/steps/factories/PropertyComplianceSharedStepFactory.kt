@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.HSE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.PRS_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
@@ -957,7 +958,7 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
+                            "prsExemptionGuideUrl" to PRS_EXEMPTION_GUIDE_URL,
                             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
                             "submitButtonText" to
                                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
