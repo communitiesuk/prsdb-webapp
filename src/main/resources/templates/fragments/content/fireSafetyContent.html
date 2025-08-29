@@ -1,25 +1,28 @@
 <th:block th:fragment="fireSafetyContent(housesInMultipleOccupationUrl)">
     <section>
         <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.paragraph.one}">forms.landlordResponsibilities.fireSafety.paragraph.one</p>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.paragraph.two}">forms.landlordResponsibilities.fireSafety.paragraph.two</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.bullet.heading}">forms.landlordResponsibilities.fireSafety.paragraph.two</p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.one}">
-                forms.landlordResponsibilities.fireSafety.bullet.one
-            </li>
-            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.two}">
-                forms.landlordResponsibilities.fireSafety.bullet.two
-            </li>
-            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.three}">
-                forms.landlordResponsibilities.fireSafety.bullet.three
-            </li>
-            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.four}">
-                forms.landlordResponsibilities.fireSafety.bullet.four
-            </li>
-            <li>
-                <span th:text="#{forms.landlordResponsibilities.fireSafety.bullet.five.beforeLink}">forms.landlordResponsibilities.fireSafety.bullet.five.beforeLink</span>
-                <a class="govuk-link" th:text="#{forms.landlordResponsibilities.fireSafety.bullet.five.linkText}" th:href="${housesInMultipleOccupationUrl}" rel="noreferrer noopener" target="_blank">forms.landlordResponsibilities.fireSafety.bullet.five.linkText</a>
-            </li>
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.one}">forms.landlordResponsibilities.fireSafety.bullet.one</li>
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.two}">forms.landlordResponsibilities.fireSafety.bullet.two</li>
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.three}">forms.landlordResponsibilities.fireSafety.bullet.three</li>
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.four}">forms.landlordResponsibilities.fireSafety.bullet.four</li>
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.bullet.five}">forms.landlordResponsibilities.fireSafety.bullet.five</li>
         </ul>
-        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.paragraph.three}">forms.landlordResponsibilities.fireSafety.paragraph.three</p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.paragraph.two}">forms.landlordResponsibilities.fireSafety.paragraph.two</p>
+    </section>
+    <section>
+        <h2 class="govuk-heading-s" th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.heading}">forms.landlordResponsibilities.fireSafety.largeHmos.heading</h2>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.one.beforeLink}">forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.one.beforeLink</span>
+            <a class="govuk-link" th:href="${housesInMultipleOccupationUrl}" rel="noreferrer noopener" target="_blank" th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.one.link}">forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.one.link
+            </a><span th:remove="tag" th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.one.afterLink}">forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.one.afterLink</span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.bullet.heading}">forms.landlordResponsibilities.fireSafety.largeHmos.bullet.heading</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.bullet.one}">forms.landlordResponsibilities.fireSafety.largeHmos.bullet.one</li>
+            <li th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.bullet.two}">forms.landlordResponsibilities.fireSafety.largeHmos.bullet.two</li>
+        </ul>
+        <p class="govuk-body" th:text="#{forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.two}">forms.landlordResponsibilities.fireSafety.largeHmos.paragraph.two</p>
     </section>
 </th:block>

@@ -568,7 +568,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
-                .containsText("You must agree to your responsibilities to continue")
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
