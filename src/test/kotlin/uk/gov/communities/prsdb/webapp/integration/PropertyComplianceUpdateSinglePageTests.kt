@@ -83,7 +83,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         val reviewResponsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyComplianceUpdate::class, urlArguments)
         assertContains(
             reviewResponsibilityToTenantsPage.heading.getText(),
-            "Make sure you follow your legal responsibilities to your tenants",
+            "Your responsibilities to your tenants",
         )
 
         // Go back to property record

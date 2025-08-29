@@ -198,7 +198,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -362,7 +362,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -488,7 +488,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
@@ -587,7 +587,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // Responsibility To Tenants page
         BaseComponent
             .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
-            .containsText("Make sure you follow your legal responsibilities to your tenants")
+            .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 

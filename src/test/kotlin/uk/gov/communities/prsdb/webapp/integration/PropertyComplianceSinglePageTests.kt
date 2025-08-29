@@ -590,7 +590,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val responsibilityToTenantsPage = navigator.skipToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
             responsibilityToTenantsPage.form.submit()
             assertThat(responsibilityToTenantsPage.form.getErrorMessage())
-                .containsText("You must agree to follow these responsibilities to continue")
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
