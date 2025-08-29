@@ -578,7 +578,8 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         fun `Submitting without the checkbox ticked returns an error`() {
             val keepPropertySafePage = navigator.skipToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
             keepPropertySafePage.form.submit()
-            assertThat(keepPropertySafePage.form.getErrorMessage()).containsText("You must agree to your responsibilities to continue")
+            assertThat(keepPropertySafePage.form.getErrorMessage())
+                .containsText("You must confirm that you have read and understood your responsibilities")
         }
     }
 
