@@ -19,7 +19,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         updateGasSafetyPage.form.submit()
         assertThat(
             updateGasSafetyPage.form.getErrorMessage(),
-        ).containsText("Select whether you want to add a new certificate or exemption")
+        ).containsText("Select whether you want to add a new EPC for this property")
     }
 
     @Test
@@ -35,7 +35,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
         val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
         updateEpcPage.form.submit()
         assertThat(updateEpcPage.form.getErrorMessage())
-            .containsText("Select whether you want to add a new certificate or exemption")
+            .containsText("Select whether you want to add a new EPC for this property")
     }
 
     @Test
