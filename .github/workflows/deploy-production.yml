@@ -1,0 +1,14 @@
+name: Deploy - Production
+on: workflow_dispatch
+
+jobs:
+  build-and-deploy-production:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: "production"
+      build-and-deploy-role: "arn:aws:iam::879161327637:role/production-push-image"
+      update-ecs-role: "arn:aws:iam::879161327637:role/github-actions-terraform-admin"
+      ecr-repository: "production-webapp"
+      account-id: "879161327637"
+      branch: "production"
+    secrets: inherit
