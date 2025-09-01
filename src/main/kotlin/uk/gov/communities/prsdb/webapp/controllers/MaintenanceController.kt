@@ -10,4 +10,8 @@ import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
 class MaintenanceController {
     @GetMapping(MAINTENANCE_PATH_SEGMENT)
     fun index(): String = "maintenancePage"
+
+    companion object {
+        const val MAINTENANCE_ROUTE = "/$MAINTENANCE_PATH_SEGMENT"
+    }
 }
