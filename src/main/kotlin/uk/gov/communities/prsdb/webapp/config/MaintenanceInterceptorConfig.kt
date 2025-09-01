@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.interceptors.MaintenanceInterceptor
 
 @PrsdbWebConfiguration
-@Profile("maintenance")
+@Profile("maintenance-mode")
 class MaintenanceInterceptorConfig : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(MaintenanceInterceptor())
