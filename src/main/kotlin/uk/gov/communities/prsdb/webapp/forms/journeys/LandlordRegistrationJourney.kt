@@ -372,6 +372,7 @@ class LandlordRegistrationJourney(
                     shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.ManualAddress, null) },
+            saveAfterSubmit = false,
         )
 
     private fun getHouseNameOrNumberAndPostcode(lookupAddressStepId: LandlordRegistrationStepId) =
@@ -497,6 +498,7 @@ class LandlordRegistrationJourney(
                     shouldDisplaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(LandlordRegistrationStepId.ManualContactAddress, null) },
+            saveAfterSubmit = false,
         )
 
     private fun selectContactAddressStep() =
