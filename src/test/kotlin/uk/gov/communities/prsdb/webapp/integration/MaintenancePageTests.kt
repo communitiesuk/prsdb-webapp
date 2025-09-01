@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 
 abstract class MaintenancePageTests : IntegrationTestWithImmutableData("data-local.sql")
 
-// The ActiveProfiles annotation is not picked up for inner classes, so we need to create separate classes for each profile
+// The ActiveProfiles annotation is not picked up for inner classes, so we need to create separate classes with and without the maintenance-mode profile
 @ActiveProfiles("maintenance-mode")
 class MaintenanceModeTests : MaintenancePageTests() {
     @Test

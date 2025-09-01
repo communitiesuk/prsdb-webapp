@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.MaintenanceController.Companion.MAINTENANCE_ROUTE
 
-// The ActiveProfiles annotation is not picked up for inner classes, so we need to create separate classes for each profile
+// The ActiveProfiles annotation is not picked up for inner classes, so we need to create separate classes with and without the maintenance-mode profile
 @WebMvcTest(MaintenanceController::class)
 @ActiveProfiles("maintenance-mode")
 class MaintenanceControllerTests(
