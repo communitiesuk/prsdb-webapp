@@ -13,6 +13,9 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
+import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
+import uk.gov.communities.prsdb.webapp.database.entity.FormContext
+import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -34,31 +37,43 @@ class LandlordDeregistrationServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
+    @Mock
+    private lateinit var mockFormContextService: FormContextService
+
+    @Mock
+    private lateinit var mockFormContextRepository: FormContextRepository
+
     @InjectMocks
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
     @Test
     fun `deregisterLandlordAndTheirProperties deletes the user from the landlord table`() {
         val baseUserId = "one-login-user"
+        whenever(
+            mockFormContextRepository.findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(emptyList())
 
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
+        verify(mockFormContextRepository).findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION)
         verify(mockLandlordRepository).deleteByBaseUser_Id(baseUserId)
     }
 
     @Test
     fun `deregisterLandlordAndTheirProperties deletes the user from the one-login table if they are not a different type of user`() {
-        // At time of writing, we only have landlord and local authority users, so this only checks the local authority user table
         val baseUserId = "one-login-user"
+        whenever(
+            mockFormContextRepository.findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(emptyList())
 
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
+        verify(mockFormContextRepository).findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION)
         verify(mockOneLoginUserRepository).deleteIfNotLocalAuthorityUser(baseUserId)
     }
 
     @Test
     fun `deregisterLandlordAndTheirProperties deletes landlord properties and returns the deleted propertyOwnerships`() {
-        // Arrange
         val landlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createOneLoginUser(id = "one-login-user"))
         val landlordProperties =
             listOf(
@@ -66,11 +81,13 @@ class LandlordDeregistrationServiceTests {
                 MockLandlordData.createPropertyOwnership(primaryLandlord = landlord),
             )
         whenever(mockPropertyOwnershipService.retrieveAllPropertiesForLandlord("one-login-user")).thenReturn(landlordProperties)
+        whenever(
+            mockFormContextRepository.findAllByUser_IdAndJourneyType("one-login-user", JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(emptyList())
 
-        // Act
         val deletedPropertyOwnerships = landlordDeregistrationService.deregisterLandlordAndTheirProperties("one-login-user")
 
-        // Assert
+        verify(mockFormContextRepository).findAllByUser_IdAndJourneyType("one-login-user", JourneyType.PROPERTY_REGISTRATION)
         verify(mockPropertyDeregistrationService).deregisterProperties(landlordProperties)
         assertEquals(landlordProperties, deletedPropertyOwnerships)
     }
@@ -78,9 +95,13 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterLandlordAndTheirProperties does not attempt to delete landlord properties if there are none to delete`() {
         val baseUserId = "one-login-user"
+        whenever(
+            mockFormContextRepository.findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(emptyList())
 
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
+        verify(mockFormContextRepository).findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION)
         verify(mockPropertyDeregistrationService, never()).deregisterProperties(any())
     }
 
@@ -96,5 +117,19 @@ class LandlordDeregistrationServiceTests {
         whenever(mockHttpSession.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES)).thenReturn(true)
 
         assertTrue(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession())
+    }
+
+    @Test
+    fun `deregisterLandlordAndTheirProperties deletes incomplete property registrations if present`() {
+        val baseUserId = "one-login-user"
+        val mockFormContext = org.mockito.Mockito.mock(FormContext::class.java)
+        val incompleteList = listOf(mockFormContext)
+        whenever(
+            mockFormContextRepository.findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION),
+        ).thenReturn(incompleteList)
+
+        landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
+
+        verify(mockFormContextService).deleteFormContexts(incompleteList)
     }
 }
