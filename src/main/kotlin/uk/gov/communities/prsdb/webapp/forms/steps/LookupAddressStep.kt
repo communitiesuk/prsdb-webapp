@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.forms.steps
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.AbstractPage
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getAddressDataPair
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
@@ -68,10 +68,10 @@ class LookupAddressStep<T : StepId>(
                 )!!
             val addressLookupResults = addressLookupService.search(houseNameOrNumber, postcode, restrictToEngland)
 
-            val updatedFilteredJourneyData = filteredJourneyData.withUpdatedLookedUpAddresses(addressLookupResults)
-            journeyDataService.addToJourneyDataIntoSession(updatedFilteredJourneyData)
+            val addressDataPair = getAddressDataPair(addressLookupResults)
+            journeyDataService.addToJourneyDataIntoSession(mapOf(addressDataPair))
 
-            val nextStepId = getNextStep(updatedFilteredJourneyData, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
+            val nextStepId = getNextStep(filteredJourneyData + addressDataPair, nextStepIfAddressesFound, nextStepIfNoAddressesFound)
             return generateUrl(nextStepId, subPageNumber, checkingAnswersFor)
         }
     }
