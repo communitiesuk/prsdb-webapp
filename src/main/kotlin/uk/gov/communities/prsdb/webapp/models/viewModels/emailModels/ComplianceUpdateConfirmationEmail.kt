@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class ComplianceUpdateConfirmationEmail(
@@ -23,9 +26,12 @@ class ComplianceUpdateConfirmationEmail(
 
     override fun toHashMap() =
         hashMapOf(
-            "property address" to propertyAddress,
-            "property registration number" to registrationNumber.toString(),
+            "single line address" to propertyAddress,
+            "registration number" to registrationNumber.toString(),
             "dashboard URL" to dashboardUrl,
+            "mees exemption url" to MEES_EXEMPTION_GUIDE_URL,
+            "epc guide url" to EPC_GUIDE_URL,
+            "register exemption url" to REGISTER_PRS_EXEMPTION_URL,
         )
 
     enum class UpdateType {

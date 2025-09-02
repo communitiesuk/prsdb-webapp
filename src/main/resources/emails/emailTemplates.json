@@ -103,5 +103,68 @@
     "enumName": "BETA_FEEDBACK_EMAIL",
     "subject": "Beta feedback submission",
     "bodyLocation": "/emails/BetaFeedbackEmail.md"
+  },
+  {
+    "test_id": "17db59bc-924a-41a7-8c44-e511cceb40ae",
+    "prod_id": null,
+    "enumName": "UPDATE_GAS_SAFETY_INFORMATION_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have updated a property's gas safety information",
+    "bodyLocation": "/emails/GasSafetyUpdateConfirmation.md"
+  },
+  {
+    "test_id": "f1236ddb-59b5-493b-b57a-f1c1104f3f66",
+    "prod_id": null,
+    "enumName": "UPDATE_GAS_SAFETY_EXPIRED_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have added expired gas safety information for a property",
+    "bodyLocation": "/emails/GasSafetyExpiredUpdateConfirmation.md"
+  },
+  {
+    "test_id":"0a19229f-6bc4-4dee-a988-f606e25b8cd6",
+    "prod_id": null,
+    "enumName": "UPDATE_ELECTRICAL_INFORMATION_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have updated a property's electrical safety information",
+    "bodyLocation": "/emails/ElectricalSafetyUpdateConfirmation.md"
+  },
+  {
+    "test_id": "a788f3ab-84ee-4e7e-a504-2653a08e201b",
+    "prod_id": null,
+    "enumName": "UPDATE_ELECTRICAL_INFORMATION_EXPIRED_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You added expired electrical safety information for a property",
+    "bodyLocation": "/emails/ElectricalSafetyExpiredUpdateConfirmation.md"
+  },
+  {
+    "test_id": "d162143c-c4ea-4e41-b2f6-748b9e5837c6",
+    "prod_id": null,
+    "enumName": "UPDATE_EPC_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have updated a property's energy performance information",
+    "bodyLocation": "/emails/EnergyPerformanceUpdateConfirmation.md"
+  },
+  {
+    "test_id": "42208914-a265-45ef-b603-0479bc387776",
+    "prod_id": null,
+    "enumName": "UPDATE_EPC_LOW_RATING_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You uploaded an EPC with a rating below E",
+    "bodyLocation": "/emails/EnergyPerformanceLowUpdateConfirmation.md"
+  },
+  {
+    "test_id": "c712ee2b-b47d-41c5-ac7a-986325c5eeeb",
+    "prod_id": null,
+    "enumName": "UPDATE_EPC_EXPIRED_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have added an expired EPC for a property",
+    "bodyLocation": "/emails/EnergyPerformanceExpiredUpdateConfirmation.md"
+  },
+  {
+    "test_id": "eb789fa4-66c0-43c6-8c73-9bceb2ff9faa",
+    "prod_id": null,
+    "enumName": "UPDATE_EPC_REMOVED_MEES_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have a property with an energy rating below E",
+    "bodyLocation": "/emails/EnergyPerformanceMeesRemovedUpdateConfirmation.md"
+  },
+  {
+    "test_id": "2f069c56-1d60-47fa-bb29-55aca035e597",
+    "prod_id": null,
+    "enumName": "UPDATE_EPC_NO_EPC_CONFIRMATION_EMAIL",
+    "subject": "GOV.UK - You have updated a property's energy performance information",
+    "bodyLocation": "/emails/EnergyPerformanceRemovedUpdateConfirmation.md"
   }
 ]

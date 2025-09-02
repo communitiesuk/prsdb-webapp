@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.time.LocalDate
@@ -46,6 +47,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockCertificateUploadRepository: CertificateUploadRepository
+
+    @Mock
+    private lateinit var emailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService

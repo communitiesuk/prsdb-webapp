@@ -26,6 +26,8 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginal
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -152,6 +154,7 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var journeyFactory: PropertyComplianceUpdateJourneyFactory
 
     private lateinit var stepFactory: PropertyComplianceSharedStepFactory
+    private lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @BeforeEach
     fun setUp() {
@@ -159,12 +162,14 @@ class PropertyComplianceOriginalJourneyDataTest {
         propertyOwnershipService = mock()
         session = mock()
         certificateUploadRepository = mock()
+        emailNotificationService = mock()
         propertyComplianceService =
             PropertyComplianceService(
                 propertyComplianceRepository = propertyComplianceRepository,
                 propertyOwnershipService = propertyOwnershipService,
                 session = session,
                 certificateUploadRepository = certificateUploadRepository,
+                updateConfirmationEmailNotificationService = emailNotificationService,
             )
 
         journeyDataServiceFactory = mock()
