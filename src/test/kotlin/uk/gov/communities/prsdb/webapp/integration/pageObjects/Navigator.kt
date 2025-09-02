@@ -61,7 +61,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPri
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MaintenancePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -1304,11 +1303,6 @@ class Navigator(
     fun goToLocalCouncilBetaFeedbackPage(): LocalCouncilBetaFeedbackPage {
         navigate(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL)
         return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
-    }
-
-    fun goToPathButExpectRedirectToMaintenancePage(path: String): MaintenancePage {
-        navigate(path)
-        return createValidPage(page, MaintenancePage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
