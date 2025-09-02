@@ -246,7 +246,9 @@ class PropertyComplianceOriginalJourneyDataTest {
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
-        whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
+        whenever(
+            propertyComplianceRepository.findByPropertyOwnership_Id(any()),
+        ).thenReturn(PropertyComplianceBuilder().withPropertyOwnership().build())
         whenever(
             certificateUploadRepository.findByFileUpload_Id(any()),
         ).thenReturn(
