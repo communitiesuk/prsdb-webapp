@@ -486,22 +486,15 @@ class PropertyComplianceUpdateJourney(
 
     fun createEpcUpdateOrNull(journeyData: JourneyData): EpcUpdateModel? =
         journeyData.getHasNewEPC()?.let { data ->
+            val acceptedEpc = journeyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
             EpcUpdateModel(
-                url =
-                    journeyData
-                        .getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
-                        ?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
-                expiryDate =
-                    journeyData
-                        .getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
-                        ?.expiryDate
-                        ?.toJavaLocalDate(),
-                tenancyStartedBeforeExpiry =
-                    journeyData.getDidTenancyStartBeforeEpcExpiry(stepFactory.epcExpiryCheckStepId),
-                energyRating =
-                    journeyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)?.energyRating,
+                url = acceptedEpc?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
+                expiryDate = acceptedEpc?.expiryDate?.toJavaLocalDate(),
+                tenancyStartedBeforeExpiry = journeyData.getDidTenancyStartBeforeEpcExpiry(stepFactory.epcExpiryCheckStepId),
+                energyRating = journeyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)?.energyRating,
                 exemptionReason = journeyData.getEpcExemptionReason(stepFactory.epcExemptionReasonStepId),
                 meesExemptionReason = journeyData.getMeesExemptionReason(stepFactory.meesExemptionReasonStepId),
+                epcDataModel = acceptedEpc,
             )
         }
 

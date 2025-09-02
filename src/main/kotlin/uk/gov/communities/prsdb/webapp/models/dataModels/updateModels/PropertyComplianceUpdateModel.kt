@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.time.LocalDate
 
 data class PropertyComplianceUpdateModel(
@@ -28,6 +29,7 @@ data class EicrUpdateModel(
 )
 
 data class EpcUpdateModel(
+    val epcDataModel: EpcDataModel? = null,
     val url: String? = null,
     val expiryDate: LocalDate? = null,
     val tenancyStartedBeforeExpiry: Boolean? = null,

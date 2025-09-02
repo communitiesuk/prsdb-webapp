@@ -1,0 +1,42 @@
+package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
+
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+
+class ComplianceUpdateConfirmationEmail(
+    private val propertyAddress: String,
+    private val registrationNumber: RegistrationNumberDataModel,
+    private val dashboardUrl: String,
+    complianceUpdateType: UpdateType,
+) : EmailTemplateModel {
+    override val template: EmailTemplate =
+        when (complianceUpdateType) {
+            UpdateType.VALID_GAS_SAFETY_INFORMATION -> EmailTemplate.UPDATE_GAS_SAFETY_INFORMATION_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_GAS_SAFETY_INFORMATION -> EmailTemplate.UPDATE_GAS_SAFETY_EXPIRED_CONFIRMATION_EMAIL
+            UpdateType.VALID_ELECTRICAL_INFORMATION -> EmailTemplate.UPDATE_ELECTRICAL_INFORMATION_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_ELECTRICAL_INFORMATION -> EmailTemplate.UPDATE_ELECTRICAL_INFORMATION_EXPIRED_CONFIRMATION_EMAIL
+            UpdateType.VALID_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_CONFIRMATION_EMAIL
+            UpdateType.LOW_RATED_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_LOW_RATING_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_EXPIRED_CONFIRMATION_EMAIL
+            UpdateType.REMOVED_MEES_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_REMOVED_MEES_CONFIRMATION_EMAIL
+            UpdateType.NO_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_NO_EPC_CONFIRMATION_EMAIL
+        }
+
+    override fun toHashMap() =
+        hashMapOf(
+            "property address" to propertyAddress,
+            "property registration number" to registrationNumber.toString(),
+            "dashboard URL" to dashboardUrl,
+        )
+
+    enum class UpdateType {
+        VALID_GAS_SAFETY_INFORMATION,
+        EXPIRED_GAS_SAFETY_INFORMATION,
+        VALID_ELECTRICAL_INFORMATION,
+        EXPIRED_ELECTRICAL_INFORMATION,
+        VALID_EPC_INFORMATION,
+        LOW_RATED_EPC_INFORMATION,
+        EXPIRED_EPC_INFORMATION,
+        REMOVED_MEES_EPC_INFORMATION,
+        NO_EPC_INFORMATION,
+    }
+}
