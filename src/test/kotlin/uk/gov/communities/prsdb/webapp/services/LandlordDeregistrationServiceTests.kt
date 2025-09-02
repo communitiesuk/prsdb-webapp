@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -122,7 +123,7 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterLandlordAndTheirProperties deletes incomplete property registrations if present`() {
         val baseUserId = "one-login-user"
-        val mockFormContext = org.mockito.Mockito.mock(FormContext::class.java)
+        val mockFormContext: FormContext = mock()
         val incompleteList = listOf(mockFormContext)
         whenever(
             mockFormContextRepository.findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION),
