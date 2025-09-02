@@ -11,4 +11,3 @@ You now have full access to the database.
 1. Search or view property details
 2. Search or view registered landlord details
 ((isAdmin??3. Manage local council users))
-   

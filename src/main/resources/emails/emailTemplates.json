@@ -108,7 +108,7 @@
     "test_id": "9b6898a5-8e20-43d3-96fe-f5c980495d81",
     "prod_id": "",
     "enumName": "LOCAL_COUNCIL_REGISTRATION_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK – You have registered as a local council ((isAdmin??admin ))user on the PRS database",
+    "subject": "GOV.UK - You have registered as a local council ((isAdmin??admin ))user on the PRS database",
     "bodyLocation": "/emails/LocalCouncilRegistrationConfirmation.md"
   }
 ]
