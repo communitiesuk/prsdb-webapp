@@ -28,7 +28,7 @@ class ComplianceUpdateConfirmationEmail(
         hashMapOf(
             "single line address" to propertyAddress,
             "registration number" to registrationNumber.toString(),
-            "dashboard URL" to dashboardUrl,
+            "dashboard url" to dashboardUrl,
             "mees exemption url" to MEES_EXEMPTION_GUIDE_URL,
             "epc guide url" to EPC_GUIDE_URL,
             "register exemption url" to REGISTER_PRS_EXEMPTION_URL,

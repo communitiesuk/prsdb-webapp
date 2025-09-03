@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import java.net.URI
+import kotlin.String
 
 class EmailTemplateModelsTests {
     companion object {
@@ -114,6 +115,96 @@ class EmailTemplateModelsTests {
                     GiveFeedbackLaterEmail(),
                     "/emails/GiveFeedbackLater.md",
                 ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceRemovedUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceMeesRemovedUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceExpiredUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceLowUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/ElectricalSafetyExpiredUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/ElectricalSafetyUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/GasSafetyExpiredUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        "dashboardUrl",
+                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                    ),
+                    "/emails/GasSafetyUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
             )
 
         private fun createLocalAuthority(
@@ -131,6 +222,7 @@ class EmailTemplateModelsTests {
     data class EmailTemplateTestData(
         val model: EmailTemplateModel,
         val markdownLocation: String,
+        val allowExtraKeys: Boolean = false,
     ) {
         override fun toString(): String = model.javaClass.simpleName
     }
@@ -154,7 +246,10 @@ class EmailTemplateModelsTests {
         val modelHashMap = testData.model.toHashMap()
 
         // Assert
-        Assertions.assertEquals(parameters.size, modelHashMap.size)
+        if (!testData.allowExtraKeys) {
+            Assertions.assertEquals(parameters.size, modelHashMap.size)
+        }
+
         for (parameter in parameters) {
             if (isOptionalContentParameter(parameter)) {
                 modelHashMap[extractOptionalContentParameter(parameter)] in listOf("yes", "no")
