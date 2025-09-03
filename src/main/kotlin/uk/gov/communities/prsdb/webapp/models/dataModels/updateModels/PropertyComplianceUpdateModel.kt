@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels.updateModels
 
+import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.time.LocalDate
 
 data class PropertyComplianceUpdateModel(
@@ -28,10 +30,12 @@ data class EicrUpdateModel(
 )
 
 data class EpcUpdateModel(
+    val epcDataModel: EpcDataModel? = null,
     val url: String? = null,
-    val expiryDate: LocalDate? = null,
     val tenancyStartedBeforeExpiry: Boolean? = null,
-    val energyRating: String? = null,
     val exemptionReason: EpcExemptionReason? = null,
     val meesExemptionReason: MeesExemptionReason? = null,
-)
+) {
+    val energyRating: String? = epcDataModel?.energyRating
+    val expiryDate: LocalDate? = epcDataModel?.expiryDate?.toJavaLocalDate()
+}
