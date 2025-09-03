@@ -212,6 +212,7 @@ class PropertyComplianceServiceTests {
 
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
             .thenReturn(propertyCompliance)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/dashboard"))
 
         // Act
         propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
@@ -507,6 +508,8 @@ class PropertyComplianceServiceTests {
 
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
             .thenReturn(propertyCompliance)
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/dashboard"))
 
         // Act
         propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
