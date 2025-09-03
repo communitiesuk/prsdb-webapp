@@ -11,6 +11,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.MaintenanceController
@@ -39,6 +40,13 @@ class MaintenanceInterceptorTests {
     @Test
     fun `preHandle allows requests to the assets endpoint`() {
         mockRequest.requestURI = "/$ASSETS_PATH_SEGMENT/someAsset.css"
+        assertTrue(callPreHandle())
+        verify(mockResponse, never()).sendRedirect(anyString())
+    }
+
+    @Test
+    fun `preHandle allows requests to the healthcheck endpoint`() {
+        mockRequest.requestURI = HealthCheckController.HEALTHCHECK_ROUTE
         assertTrue(callPreHandle())
         verify(mockResponse, never()).sendRedirect(anyString())
     }
