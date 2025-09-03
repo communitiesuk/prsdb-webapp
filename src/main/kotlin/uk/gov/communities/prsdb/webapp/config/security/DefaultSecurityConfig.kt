@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -35,7 +36,7 @@ class DefaultSecurityConfig(
                 requests
                     .requestMatchers("/")
                     .permitAll()
-                    .requestMatchers("/healthcheck")
+                    .requestMatchers(HEALTHCHECK_ROUTE)
                     .permitAll()
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
                     .permitAll()
