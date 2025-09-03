@@ -171,12 +171,15 @@ class PropertyComplianceService(
             epcUpdate.exemptionReason != null -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
             epcUpdate.epcDataModel == null -> ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION
             !epcUpdate.epcDataModel.isEnergyRatingEOrBetter() && epcUpdate.meesExemptionReason == null ->
-                if (didHaveMeesBefore) {
-                    ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION
-                } else {
-                    ComplianceUpdateConfirmationEmail.UpdateType.LOW_RATED_EPC_INFORMATION
-                }
+                getLowPerformanceUpdateType(didHaveMeesBefore)
             else -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+        }
+
+    private fun getLowPerformanceUpdateType(didHaveMeesBefore: Boolean): ComplianceUpdateConfirmationEmail.UpdateType =
+        if (didHaveMeesBefore) {
+            ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION
+        } else {
+            ComplianceUpdateConfirmationEmail.UpdateType.LOW_RATED_EPC_INFORMATION
         }
 
     private fun getElectricalSafetyUpdateType(eicrUpdate: EicrUpdateModel): ComplianceUpdateConfirmationEmail.UpdateType =
