@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.CYA_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -19,5 +20,12 @@ class ErrorPageTests : IntegrationTestWithImmutableData("data-local.sql") {
         navigator.navigate("/error/file-too-large")
         val errorPage = createValidPage(page, ErrorPage::class)
         BaseComponent.assertThat(errorPage.heading).containsText("The file you selected was too large")
+    }
+
+    @Test
+    fun `500 error page renders when CYA error controller path called`(page: Page) {
+        navigator.navigate(CYA_ERROR_ROUTE)
+        val errorPage = createValidPage(page, ErrorPage::class)
+        BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
     }
 }
