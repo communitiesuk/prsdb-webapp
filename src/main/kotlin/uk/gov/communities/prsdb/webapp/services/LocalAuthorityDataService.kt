@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
 
 @PrsdbWebService
 class LocalAuthorityDataService(
@@ -26,6 +27,8 @@ class LocalAuthorityDataService(
     private val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
     private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -149,6 +152,15 @@ class LocalAuthorityDataService(
                     hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice,
                 ),
             )
+
+        registrationConfirmationSender.sendEmail(
+            localAuthorityUser.email,
+            LocalCouncilRegistrationConfirmationEmail(
+                councilName = localAuthority.name,
+                prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+                isAdmin = invitedAsAdmin,
+            ),
+        )
 
         return localAuthorityUser.id
     }
