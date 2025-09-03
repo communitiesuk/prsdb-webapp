@@ -32,11 +32,13 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
+import java.net.URI
 import java.util.Optional
 import kotlin.test.assertEquals
 
@@ -53,6 +55,12 @@ class LocalAuthorityDataServiceTests {
 
     @Mock
     private lateinit var mockHttpSession: HttpSession
+
+    @Mock
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>
 
     @InjectMocks
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -400,6 +408,7 @@ class LocalAuthorityDataServiceTests {
 
         whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
         whenever(localAuthorityUserRepository.save(any())).thenReturn(newLocalAuthorityUser)
+        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
         // Act
         val localAuthorityUserID =
