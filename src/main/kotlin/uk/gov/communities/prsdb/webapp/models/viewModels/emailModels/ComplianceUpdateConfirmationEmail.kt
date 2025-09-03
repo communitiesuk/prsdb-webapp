@@ -4,12 +4,13 @@ import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import java.net.URI
 
-class ComplianceUpdateConfirmationEmail(
+data class ComplianceUpdateConfirmationEmail(
     private val propertyAddress: String,
     private val registrationNumber: RegistrationNumberDataModel,
-    private val dashboardUrl: String,
-    complianceUpdateType: UpdateType,
+    private val dashboardUrl: URI,
+    private val complianceUpdateType: UpdateType,
 ) : EmailTemplateModel {
     override val template: EmailTemplate =
         when (complianceUpdateType) {
@@ -28,7 +29,7 @@ class ComplianceUpdateConfirmationEmail(
         hashMapOf(
             "single line address" to propertyAddress,
             "registration number" to registrationNumber.toString(),
-            "dashboard url" to dashboardUrl,
+            "dashboard url" to dashboardUrl.toString(),
             "mees exemption url" to MEES_EXEMPTION_GUIDE_URL,
             "epc guide url" to EPC_GUIDE_URL,
             "register exemption url" to REGISTER_PRS_EXEMPTION_URL,

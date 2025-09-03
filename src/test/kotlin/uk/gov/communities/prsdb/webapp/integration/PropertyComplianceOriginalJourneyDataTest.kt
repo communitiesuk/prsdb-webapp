@@ -170,6 +170,7 @@ class PropertyComplianceOriginalJourneyDataTest {
                 session = session,
                 certificateUploadRepository = certificateUploadRepository,
                 updateConfirmationEmailNotificationService = emailNotificationService,
+                absoluteUrlProvider = mock(),
             )
 
         journeyDataServiceFactory = mock()

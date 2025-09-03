@@ -701,9 +701,7 @@ class PropertyComplianceUpdateJourneyTests {
                     )
                 },
                 url,
-                expiryDate,
                 tenancyStartedBeforeExpiry,
-                energyRating,
                 exemptionReason,
                 meesExemptionReason,
             ),

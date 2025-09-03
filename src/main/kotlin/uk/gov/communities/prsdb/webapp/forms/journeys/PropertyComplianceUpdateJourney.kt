@@ -489,9 +489,7 @@ class PropertyComplianceUpdateJourney(
             val acceptedEpc = journeyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)
             EpcUpdateModel(
                 url = acceptedEpc?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
-                expiryDate = acceptedEpc?.expiryDate?.toJavaLocalDate(),
                 tenancyStartedBeforeExpiry = journeyData.getDidTenancyStartBeforeEpcExpiry(stepFactory.epcExpiryCheckStepId),
-                energyRating = journeyData.getAcceptedEpcDetails(stepFactory.checkAutoMatchedEpcStepId)?.energyRating,
                 exemptionReason = journeyData.getEpcExemptionReason(stepFactory.epcExemptionReasonStepId),
                 meesExemptionReason = journeyData.getMeesExemptionReason(stepFactory.meesExemptionReasonStepId),
                 epcDataModel = acceptedEpc,

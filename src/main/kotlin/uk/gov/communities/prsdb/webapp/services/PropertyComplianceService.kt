@@ -32,6 +32,7 @@ class PropertyComplianceService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
     fun createPropertyCompliance(
@@ -155,7 +156,7 @@ class PropertyComplianceService(
                 ComplianceUpdateConfirmationEmail(
                     propertyAddress = propertyOwnership.property.address.singleLineAddress,
                     registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                    dashboardUrl = "example.com",
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                     complianceUpdateType = updateType,
                 ),
         )
@@ -179,14 +180,14 @@ class PropertyComplianceService(
         }
 
     private fun getElectricalSafetyUpdateType(eicrUpdate: EicrUpdateModel): ComplianceUpdateConfirmationEmail.UpdateType =
-        if (eicrUpdate.issueDate != null || eicrUpdate.fileUploadId == null) {
+        if (eicrUpdate.issueDate != null && eicrUpdate.fileUploadId == null) {
             ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION
         } else {
             ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION
         }
 
     private fun getGasSafetyUpdateType(gasSafetyCertUpdate: GasSafetyCertUpdateModel): ComplianceUpdateConfirmationEmail.UpdateType =
-        if (gasSafetyCertUpdate.issueDate != null || gasSafetyCertUpdate.fileUploadId == null) {
+        if (gasSafetyCertUpdate.issueDate != null && gasSafetyCertUpdate.fileUploadId == null) {
             ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION
         } else {
             ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION

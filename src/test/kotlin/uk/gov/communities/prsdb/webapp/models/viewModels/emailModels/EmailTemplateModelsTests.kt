@@ -119,7 +119,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/EnergyPerformanceRemovedUpdateConfirmation.md",
@@ -129,7 +129,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/EnergyPerformanceMeesRemovedUpdateConfirmation.md",
@@ -139,7 +139,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/EnergyPerformanceExpiredUpdateConfirmation.md",
@@ -149,7 +149,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/EnergyPerformanceLowUpdateConfirmation.md",
@@ -159,7 +159,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/EnergyPerformanceUpdateConfirmation.md",
@@ -169,7 +169,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/ElectricalSafetyExpiredUpdateConfirmation.md",
@@ -179,7 +179,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/ElectricalSafetyUpdateConfirmation.md",
@@ -189,7 +189,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/GasSafetyExpiredUpdateConfirmation.md",
@@ -199,7 +199,7 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        "dashboardUrl",
+                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
                     ),
                     "/emails/GasSafetyUpdateConfirmation.md",
