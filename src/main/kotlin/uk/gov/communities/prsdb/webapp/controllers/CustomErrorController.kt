@@ -17,6 +17,8 @@ class CustomErrorController : ErrorController {
     @GetMapping("file-too-large")
     fun fileTooLargeErrorPage() = "error/fileTooLarge"
 
+    // We are sending CYA page 'data has changed' errors to this endpoint
+    // so that we can track how often this error is occurring
     @GetMapping("/$CYA_ERROR_PATH_SEGMENT")
     fun cyaErrorPage(): String = "error/500"
 
