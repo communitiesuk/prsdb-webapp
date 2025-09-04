@@ -180,5 +180,12 @@
     "enumName": "LOCAL_AUTHORITY_USER_DELETION_EMAIL",
     "subject": "GOV.UK - Your access to a local council account on the PRS database has been removed",
     "bodyLocation": "/emails/LocalCouncilUserDeletion.md"
+  },
+  {
+    "test_id": "4b2109a1-333e-4b3b-8085-f699edcd562f",
+    "prod_id": "8b55a301-b7e1-42e6-a873-775ac828fa69",
+    "enumName": "LOCAL_AUTHORITY_USER_DELETION_ADMIN_EMAIL",
+    "subject": "GOV.UK - A user has been removed from a local council account that you manage",
+    "bodyLocation": "/emails/LocalCouncilUserDeletionAdminEmail.md"
   }
 ]
