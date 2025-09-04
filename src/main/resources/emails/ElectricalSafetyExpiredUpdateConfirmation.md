@@ -13,7 +13,7 @@ You can either:
 * get a new EICR for this property and add it to the database
 * mark this property as not needing an EICR if you have a valid exemption
 
-[Sign in to the database](((dashboard url))) to view this property’s gas safety information.
+[Sign in to the database](((dashboard url))) to view this property’s electrical safety information.
 
 ---
 This is an automated email – do not reply.
