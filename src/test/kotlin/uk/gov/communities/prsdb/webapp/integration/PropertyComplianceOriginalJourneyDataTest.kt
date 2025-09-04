@@ -26,6 +26,9 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginal
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -33,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import java.net.URI
 
 class PropertyComplianceOriginalJourneyDataTest {
     companion object {
@@ -152,6 +156,9 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var journeyFactory: PropertyComplianceUpdateJourneyFactory
 
     private lateinit var stepFactory: PropertyComplianceSharedStepFactory
+    private lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
+
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @BeforeEach
     fun setUp() {
@@ -159,12 +166,16 @@ class PropertyComplianceOriginalJourneyDataTest {
         propertyOwnershipService = mock()
         session = mock()
         certificateUploadRepository = mock()
+        emailNotificationService = mock()
+        absoluteUrlProvider = mock()
         propertyComplianceService =
             PropertyComplianceService(
                 propertyComplianceRepository = propertyComplianceRepository,
                 propertyOwnershipService = propertyOwnershipService,
                 session = session,
                 certificateUploadRepository = certificateUploadRepository,
+                updateConfirmationEmailNotificationService = emailNotificationService,
+                absoluteUrlProvider = absoluteUrlProvider,
             )
 
         journeyDataServiceFactory = mock()
@@ -241,13 +252,16 @@ class PropertyComplianceOriginalJourneyDataTest {
 
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
         whenever(journeyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
-        whenever(propertyComplianceRepository.findByPropertyOwnership_Id(any())).thenReturn(PropertyComplianceBuilder().build())
+        whenever(
+            propertyComplianceRepository.findByPropertyOwnership_Id(any()),
+        ).thenReturn(PropertyComplianceBuilder().withPropertyOwnership().build())
         whenever(
             certificateUploadRepository.findByFileUpload_Id(any()),
         ).thenReturn(
             originalRecord.gasSafetyFileUpload?.let { CertificateUpload(it, FileCategory.GasSafetyCert, mock()) },
             originalRecord.eicrFileUpload?.let { CertificateUpload(it, FileCategory.Eirc, mock()) },
         )
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com/landlord"))
 
         // Act
         val journey =

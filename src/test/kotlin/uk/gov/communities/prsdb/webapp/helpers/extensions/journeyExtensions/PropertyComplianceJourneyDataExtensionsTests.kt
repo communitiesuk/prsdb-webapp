@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.epcDetailsDataPair
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
@@ -58,7 +59,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
@@ -645,7 +645,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val expectedJourneyData = mutableMapOf(journeyDataKey to Json.encodeToString(lookedUpEpcDetails))
 
         // Act
-        val updatedJourneyData = testJourneyData.withEpcDetails(lookedUpEpcDetails, autoMatched)
+        val updatedJourneyData = testJourneyData + epcDetailsDataPair(lookedUpEpcDetails, autoMatched)
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)
@@ -662,7 +662,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val expectedJourneyData = mutableMapOf(journeyDataKey to null)
 
         // Act
-        val updatedJourneyData = testJourneyData.withEpcDetails(null, autoMatched)
+        val updatedJourneyData = testJourneyData + epcDetailsDataPair(null, autoMatched)
 
         // Assert
         assertEquals(expectedJourneyData, updatedJourneyData)

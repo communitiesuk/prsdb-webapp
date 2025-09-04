@@ -16,7 +16,10 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -33,13 +36,13 @@ class DefaultSecurityConfig(
                 requests
                     .requestMatchers("/")
                     .permitAll()
-                    .requestMatchers("/healthcheck")
+                    .requestMatchers(HEALTHCHECK_ROUTE)
                     .permitAll()
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
                     .permitAll()
                     .requestMatchers("/signout")
                     .permitAll()
-                    .requestMatchers("/assets/**")
+                    .requestMatchers("/$ASSETS_PATH_SEGMENT/**")
                     .permitAll()
                     .requestMatchers("/error/**")
                     .permitAll()
@@ -48,6 +51,8 @@ class DefaultSecurityConfig(
                     .requestMatchers("/local/**")
                     .permitAll()
                     .requestMatchers("$COOKIES_ROUTE/**")
+                    .permitAll()
+                    .requestMatchers("/$MAINTENANCE_PATH_SEGMENT")
                     .permitAll()
                     .anyRequest()
                     .authenticated()

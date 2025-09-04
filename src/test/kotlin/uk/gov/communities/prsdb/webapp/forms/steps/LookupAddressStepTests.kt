@@ -90,7 +90,7 @@ class LookupAddressStepTests {
                 .build()
 
         val expectedUpdatedJourneyData =
-            JourneyDataBuilder(initialJourneyData = originalJourneyData)
+            JourneyDataBuilder()
                 .withEmptyLookedUpAddresses()
                 .build()
 

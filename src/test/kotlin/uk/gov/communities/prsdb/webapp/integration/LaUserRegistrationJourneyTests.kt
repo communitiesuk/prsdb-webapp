@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
@@ -24,8 +25,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.LandingPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.PrivacyNoticePageLaUserRegistration
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import java.net.URI
 
 class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-lauser.sql") {
     @Autowired
@@ -40,6 +43,9 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
     @MockitoSpyBean
     lateinit var invitationRepository: LocalAuthorityInvitationRepository
 
+    @MockitoSpyBean
+    override lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     lateinit var invitation: LocalAuthorityInvitation
 
     @BeforeEach
@@ -51,6 +57,8 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
             )
 
         invitation = invitationService.getInvitationFromToken(token)
+
+        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
     }
 
     @Test

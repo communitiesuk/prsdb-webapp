@@ -11,12 +11,19 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EpcUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import java.time.LocalDate
+import kotlin.String
 
 @PrsdbWebService
 class PropertyComplianceService(
@@ -24,6 +31,8 @@ class PropertyComplianceService(
     private val certificateUploadRepository: CertificateUploadRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
+    private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
     fun createPropertyCompliance(
@@ -93,6 +102,8 @@ class PropertyComplianceService(
         checkUpdateIsValid()
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
 
+        val didHaveMeesBefore = propertyCompliance.epcMeesExemptionReason != null
+
         if (update.gasSafetyCertUpdate != null) {
             propertyCompliance.gasSafetyFileUpload =
                 update.gasSafetyCertUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
@@ -119,7 +130,71 @@ class PropertyComplianceService(
         }
 
         propertyComplianceRepository.save(propertyCompliance)
+        sendUpdateConfirmationEmail(
+            propertyOwnership = propertyCompliance.propertyOwnership,
+            update = update,
+            didHaveMeesBefore = didHaveMeesBefore,
+        )
     }
+
+    private fun sendUpdateConfirmationEmail(
+        propertyOwnership: PropertyOwnership,
+        update: PropertyComplianceUpdateModel,
+        didHaveMeesBefore: Boolean,
+    ) {
+        val updateType =
+            when {
+                update.gasSafetyCertUpdate != null -> getGasSafetyUpdateType(update.gasSafetyCertUpdate)
+                update.eicrUpdate != null -> getElectricalSafetyUpdateType(update.eicrUpdate)
+                update.epcUpdate != null -> getEnergyPerformanceUpdateType(update.epcUpdate, didHaveMeesBefore)
+                else -> throw PrsdbWebException("No compliance update type found in update model.")
+            }
+
+        updateConfirmationEmailNotificationService.sendEmail(
+            recipientAddress = propertyOwnership.primaryLandlord.email,
+            email =
+                ComplianceUpdateConfirmationEmail(
+                    propertyAddress = propertyOwnership.property.address.singleLineAddress,
+                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    complianceUpdateType = updateType,
+                ),
+        )
+    }
+
+    private fun getEnergyPerformanceUpdateType(
+        epcUpdate: EpcUpdateModel,
+        didHaveMeesBefore: Boolean,
+    ): ComplianceUpdateConfirmationEmail.UpdateType =
+        when {
+            epcUpdate.tenancyStartedBeforeExpiry == false -> ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
+            epcUpdate.exemptionReason != null -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            epcUpdate.epcDataModel == null -> ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION
+            !epcUpdate.epcDataModel.isEnergyRatingEOrBetter() && epcUpdate.meesExemptionReason == null ->
+                getLowPerformanceUpdateType(didHaveMeesBefore)
+            else -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+        }
+
+    private fun getLowPerformanceUpdateType(didHaveMeesBefore: Boolean): ComplianceUpdateConfirmationEmail.UpdateType =
+        if (didHaveMeesBefore) {
+            ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION
+        } else {
+            ComplianceUpdateConfirmationEmail.UpdateType.LOW_RATED_EPC_INFORMATION
+        }
+
+    private fun getElectricalSafetyUpdateType(eicrUpdate: EicrUpdateModel): ComplianceUpdateConfirmationEmail.UpdateType =
+        if (eicrUpdate.issueDate != null && eicrUpdate.fileUploadId == null) {
+            ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION
+        } else {
+            ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION
+        }
+
+    private fun getGasSafetyUpdateType(gasSafetyCertUpdate: GasSafetyCertUpdateModel): ComplianceUpdateConfirmationEmail.UpdateType =
+        if (gasSafetyCertUpdate.issueDate != null && gasSafetyCertUpdate.fileUploadId == null) {
+            ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION
+        } else {
+            ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION
+        }
 
     fun addToPropertiesWithComplianceAddedThisSession(propertyOwnershipId: Long) {
         val currentSet = getPropertiesWithComplianceAddedThisSession()

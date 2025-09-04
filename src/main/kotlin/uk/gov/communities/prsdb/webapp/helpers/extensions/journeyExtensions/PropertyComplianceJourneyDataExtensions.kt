@@ -201,16 +201,16 @@ class PropertyComplianceJourneyDataExtensions : JourneyDataExtensions() {
             return Json.decodeFromString<EpcDataModel>(serializedEpcDetails)
         }
 
-        fun JourneyData.withEpcDetails(
+        fun epcDetailsDataPair(
             epcDetails: EpcDataModel?,
             autoMatched: Boolean,
-        ): JourneyData {
+        ): Pair<String, String?> {
             val journeyDataKey = getEpcDetailsJourneyDataKey(autoMatched)
 
             return if (epcDetails == null) {
-                this + (journeyDataKey to null)
+                (journeyDataKey to null)
             } else {
-                this + (journeyDataKey to Json.encodeToString(epcDetails))
+                (journeyDataKey to Json.encodeToString(epcDetails))
             }
         }
 
