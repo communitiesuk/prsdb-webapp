@@ -28,7 +28,7 @@ jobs:
 
       - name: Run npm tests
         env:
-          EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production'
+          EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: github.base_ref == 'main' || github.merge_group.base_ref == 'refs/head/production'
         run: npm test
 
       - name: Run gradle `check` to run linting and tests
