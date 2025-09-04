@@ -36,5 +36,4 @@ jobs:
           ONE_LOGIN_PUBLIC_KEY: |
             ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
-          EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: github.base_ref == 'main' || github.merge_group.base_ref == 'refs/head/main'
         run: ./gradlew clean check --no-daemon

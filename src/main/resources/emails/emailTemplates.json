@@ -35,7 +35,7 @@
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
-    "test_id": "273c20c3-1739-47e1-9a51-c2d186ee0c67",
+    "test_id": "273c20c3-1739-47e1-9a51-c2d186ee0cNN",
     "prod_id": "273c20c3-1739-47e1-9a51-c2d186ee0cNN",
     "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
     "subject": "GOV.UK - You have deleted a property from the PRS database",
