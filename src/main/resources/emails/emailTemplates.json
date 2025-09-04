@@ -173,5 +173,12 @@
     "enumName": "LOCAL_COUNCIL_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "GOV.UK - You have registered as a local council ((isAdmin??admin ))user on the PRS database",
     "bodyLocation": "/emails/LocalCouncilRegistrationConfirmation.md"
+  },
+  {
+    "test_id": "08c3368a-fa91-479e-a81b-6d29758dc730",
+    "prod_id": "6c535878-26cf-4bef-b4c8-c260857ca76b",
+    "enumName": "LOCAL_AUTHORITY_USER_DELETION_EMAIL",
+    "subject": "GOV.UK - Your access to a local council account on the PRS database has been removed",
+    "bodyLocation": "/emails/LocalCouncilUserDeletion.md"
   }
 ]
