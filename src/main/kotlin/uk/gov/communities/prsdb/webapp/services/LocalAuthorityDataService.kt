@@ -130,6 +130,7 @@ class LocalAuthorityDataService(
 
     fun deleteUser(localAuthorityUserId: Long) {
         localAuthorityUserRepository.deleteById(localAuthorityUserId)
+        // TODO: send email.
     }
 
     @Transactional
