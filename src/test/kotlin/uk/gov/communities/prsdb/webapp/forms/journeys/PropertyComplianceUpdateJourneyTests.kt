@@ -694,10 +694,14 @@ class PropertyComplianceUpdateJourneyTests {
             ),
         epcUpdate =
             EpcUpdateModel(
+                energyRating?.let {
+                    MockEpcData.createEpcDataModel(
+                        expiryDate = expiryDate!!.toKotlinLocalDate(),
+                        energyRating = energyRating,
+                    )
+                },
                 url,
-                expiryDate,
                 tenancyStartedBeforeExpiry,
-                energyRating,
                 exemptionReason,
                 meesExemptionReason,
             ),

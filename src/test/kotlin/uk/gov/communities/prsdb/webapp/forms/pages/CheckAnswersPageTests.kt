@@ -11,7 +11,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -54,7 +54,6 @@ class CheckAnswersPageTests {
         assertEquals(journeyData, formModel.storedJourneyData)
     }
 
-    // TODO PRSD-1298: Update 'isSatisfied' tests to match implementation
     @Test
     fun `isSatisfied returns true if the bindingResult doesn't contain errors`() {
         whenever(mockBindingResult.hasErrors()).thenReturn(false)
@@ -67,7 +66,7 @@ class CheckAnswersPageTests {
     fun `isSatisfied removes journey context from session and throws an error if the binding result contains errors`() {
         whenever(mockBindingResult.hasErrors()).thenReturn(true)
 
-        assertThrows<PrsdbWebException> { checkAnswersPage.isSatisfied(mockBindingResult) }
+        assertThrows<CyaDataHasChangedException> { checkAnswersPage.isSatisfied(mockBindingResult) }
         verify(mockJourneyDataService).removeJourneyDataAndContextIdFromSession()
     }
 
