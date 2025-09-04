@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
 
 @PrsdbWebService
@@ -29,6 +30,7 @@ class LocalAuthorityDataService(
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
+    private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -129,8 +131,17 @@ class LocalAuthorityDataService(
     }
 
     fun deleteUser(localAuthorityUserId: Long) {
+        val localAuthorityUser =
+            localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
+
+        deletionConfirmationSender.sendEmail(
+            localAuthorityUser.email,
+            LocalAuthorityUserDeletionEmail(
+                councilName = localAuthorityUser.localAuthority.name,
+            ),
+        )
         localAuthorityUserRepository.deleteById(localAuthorityUserId)
-        // TODO: send email.
     }
 
     @Transactional

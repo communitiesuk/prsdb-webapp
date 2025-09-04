@@ -2,7 +2,7 @@
 
 ## An admin has removed your access for:
 
-^ ((localCouncilName))
+^ ((Council Name))
 
 You no longer have access to this local council account on the PRS database.
 
