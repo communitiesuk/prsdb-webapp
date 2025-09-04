@@ -105,8 +105,8 @@
     "bodyLocation": "/emails/BetaFeedbackEmail.md"
   },
   {
-    "test_id": "17db59bc-924a-41a7-8c44-e511cceb40ae",
-    "prod_id": "4a624fa8-eaca-4904-b9f8-7905f2f0f558",
+    "test_id": "5fc0a41d-0f1b-4b04-9d4d-a31218aadbd7",
+    "prod_id": "c203e73d-e946-400b-84b4-d39e3eb4c3ed",
     "enumName": "UPDATE_GAS_SAFETY_INFORMATION_CONFIRMATION_EMAIL",
     "subject": "GOV.UK - You have updated a property's gas safety information",
     "bodyLocation": "/emails/GasSafetyUpdateConfirmation.md"

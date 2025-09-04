@@ -6,7 +6,7 @@ This property’s registration number is:
 
 ((registration number))
 
-You have added up to date and valid energy performance information for this property.
+You have added up to date and valid gas safety information for this property.
 
 [Sign in to the database](((dashboard url))) to view this property’s gas safety information.
 
