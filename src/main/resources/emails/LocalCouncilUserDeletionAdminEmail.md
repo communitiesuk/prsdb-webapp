@@ -1,6 +1,6 @@
 # ((User Name)) has been removed from a local council that you manage
 
-## ((User Name))) with email ((User Email)) has been removed from the local council account:
+## ((User Name)) with email ((User Email)) has been removed from the local council account:
 
 ^ ((Local Council Name))
 
