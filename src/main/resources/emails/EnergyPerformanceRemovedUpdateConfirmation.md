@@ -2,13 +2,13 @@
 ## You removed the energy performance certificate for:
 ^ ((single line address))
 
-This property’s registration number is:
+Property Registration Number:
 
 ((registration number))
 
 ## You removed this property’s energy performance certificate
 
-You must add a new EPC to the database or [register a MEES exemption (opens in a new tab)](((mees exemption url))).
+You must add a new EPC to the database or [register a MEES exemption](((register exemption url))).
 
 You have 28 days to do this from either:
 * the date the last EPC expired
