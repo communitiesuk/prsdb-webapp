@@ -9,7 +9,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.ArgumentCaptor.captor
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.InjectMocks
@@ -17,6 +16,7 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
@@ -32,6 +32,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionAdminEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
@@ -61,6 +63,12 @@ class LocalAuthorityDataServiceTests {
 
     @Mock
     private lateinit var registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>
+
+    @Mock
+    private lateinit var deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>
+
+    @Mock
+    private lateinit var deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionAdminEmail>
 
     @InjectMocks
     private lateinit var localAuthorityDataService: LocalAuthorityDataService
@@ -377,9 +385,9 @@ class LocalAuthorityDataServiceTests {
         )
 
         // Assert
-        val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
+        val localAuthorityUserCaptor = argumentCaptor<LocalAuthorityUser>()
         verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
-        assertTrue(ReflectionEquals(expectedUpdatedLocalAuthorityUser).matches(localAuthorityUserCaptor.value))
+        assertTrue(ReflectionEquals(expectedUpdatedLocalAuthorityUser).matches(localAuthorityUserCaptor.firstValue))
     }
 
     @Test
@@ -422,9 +430,9 @@ class LocalAuthorityDataServiceTests {
             )
 
         // Assert
-        val localAuthorityUserCaptor = captor<LocalAuthorityUser>()
+        val localAuthorityUserCaptor = argumentCaptor<LocalAuthorityUser>()
         verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
-        assertTrue(ReflectionEquals(newLocalAuthorityUser, "id").matches(localAuthorityUserCaptor.value))
+        assertTrue(ReflectionEquals(newLocalAuthorityUser, "id").matches(localAuthorityUserCaptor.firstValue))
 
         assertEquals(newLocalAuthorityUser.id, localAuthorityUserID)
     }
@@ -465,5 +473,35 @@ class LocalAuthorityDataServiceTests {
         whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
         assertThrows<ResponseStatusException> { localAuthorityDataService.getLocalAuthorityUser(baseUserId) }
+    }
+
+    @Test
+    fun `deleteUser deletes the user if they exist`() {
+        // Arrange
+        val localAuthority = createLocalAuthority()
+        val baseUser = createOneLoginUser()
+        val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
+        whenever(localAuthorityUserRepository.findById(DEFAULT_LA_USER_ID)).thenReturn(Optional.of(localAuthorityUser))
+
+        // Act
+        localAuthorityDataService.deleteUser(DEFAULT_LA_USER_ID)
+
+        // Assert
+        verify(localAuthorityUserRepository).deleteById(DEFAULT_LA_USER_ID)
+    }
+
+    @Test
+    fun `deleteUser throws a NOT_FOUND error if the LA user does not exist`() {
+        // Arrange
+        whenever(localAuthorityUserRepository.findById(anyLong())).thenReturn(Optional.empty())
+
+        // Act and Assert
+        val errorThrown =
+            assertThrows<ResponseStatusException> {
+                localAuthorityDataService.deleteUser(
+                    DEFAULT_LA_USER_ID,
+                )
+            }
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
 }
