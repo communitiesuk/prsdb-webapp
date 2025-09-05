@@ -1,10 +1,9 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="betaFeedbackModel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="feedbackUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="referrerHeader" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{betaBannerFeedback.heading}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, null)}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{betaBannerFeedback.heading}, ${formModel}, ~{::#form-content/content()}, null, null)}">
     <th:block th:replace="~{forms/betaBannerFeedbackForm :: betaBannerFeedbackForm}"></th:block>
     <section>
         <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
