@@ -10,7 +10,7 @@ data class LocalAuthorityUserDeletionAdminEmail(
     private val emailKey = "User Email"
     private val userNameKey = "User Name"
     private val prsdURLKey = "Base URL"
-    override val template = EmailTemplate.LOCAL_AUTHORITY_USER_DELETION_ADMIN_EMAIL
+    override val template = EmailTemplate.LOCAL_AUTHORITY_USER_DELETION_INFORM_ADMIN_EMAIL
 
     override fun toHashMap() =
         hashMapOf(
