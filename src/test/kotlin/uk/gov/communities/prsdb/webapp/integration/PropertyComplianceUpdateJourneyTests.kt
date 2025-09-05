@@ -8,6 +8,7 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -68,6 +69,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.net.URI
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -88,6 +90,11 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
     @MockitoBean
     private lateinit var fileUploader: FileUploader
+
+    @BeforeEach
+    fun setBaseUrls() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://localhost:8080/landlord"))
+    }
 
     @Test
     fun `User can navigate the gas safety update task if pages are filled in correctly (add new in-date certificate)`(page: Page) {

@@ -28,8 +28,8 @@ open class JourneyDataExtensions {
             return updatedJourneyData
         }
 
-        fun JourneyData.withUpdatedLookedUpAddresses(lookedUpAddresses: List<AddressDataModel>): JourneyData =
-            this.withUpdatedLookedUpAddresses(Json.encodeToString(lookedUpAddresses))
+        fun getAddressDataPair(lookedUpAddresses: List<AddressDataModel>): Pair<String, String?> =
+            (NonStepJourneyDataKey.LookedUpAddresses.key to Json.encodeToString(lookedUpAddresses))
 
         @JvmStatic
         protected fun JourneyData.getFieldSetLocalDateValue(urlPathSegment: String): LocalDate? {

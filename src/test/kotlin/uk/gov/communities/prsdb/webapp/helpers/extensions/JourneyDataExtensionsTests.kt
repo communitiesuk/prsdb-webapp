@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getAddressDataPair
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
@@ -115,7 +116,7 @@ class JourneyDataExtensionsTests {
         val journeyData = mapOf("other-key" to "other-value")
         val expectedUpdatedJourneyData = journeyData + (NonStepJourneyDataKey.LookedUpAddresses.key to Json.encodeToString(addresses))
 
-        val updatedJourneyData = journeyData.withUpdatedLookedUpAddresses(addresses)
+        val updatedJourneyData = journeyData + getAddressDataPair(addresses)
 
         assertEquals(expectedUpdatedJourneyData, updatedJourneyData)
     }

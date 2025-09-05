@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 import org.springframework.validation.BindingResult
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -54,8 +54,7 @@ abstract class CheckAnswersPage(
         if (super.isSatisfied(bindingResult)) {
             true
         } else {
-            // TODO PRSD-1298: Show custom error page
             journeyDataService.removeJourneyDataAndContextIdFromSession()
-            throw PrsdbWebException("Filtered journey data has changed since the page loaded.")
+            throw CyaDataHasChangedException("Filtered journey data has changed since the page loaded.")
         }
 }

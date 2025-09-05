@@ -224,8 +224,7 @@ class PropertyComplianceJourneyTests {
                 .thenReturn(originalJourneyData)
 
             val expectedUpdatedJourneyData =
-                JourneyDataBuilder(initialJourneyData = originalJourneyData)
-                    .withEpcStatus(HasEpc.YES)
+                JourneyDataBuilder()
                     .withAutoMatchedEpcDetails(expectedEpcDetails)
                     .build()
 
@@ -335,9 +334,8 @@ class PropertyComplianceJourneyTests {
             val originalJourneyData = JourneyPageDataBuilder.beforePropertyComplianceEpcLookup().build()
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
 
-            val expectedUpdatedJourneyData =
-                JourneyDataBuilder(initialJourneyData = originalJourneyData)
-                    .withEpcLookupCertificateNumber(CURRENT_EPC_CERTIFICATE_NUMBER)
+            val expectedUpdateToJourneyData =
+                JourneyDataBuilder()
                     .withLookedUpEpcDetails(expectedEpcDetails)
                     .build()
 
@@ -349,7 +347,7 @@ class PropertyComplianceJourneyTests {
             )
 
             // Assert
-            verify(mockJourneyDataService).addToJourneyDataIntoSession(expectedUpdatedJourneyData)
+            verify(mockJourneyDataService).addToJourneyDataIntoSession(expectedUpdateToJourneyData)
         }
 
         @Test
@@ -373,10 +371,8 @@ class PropertyComplianceJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
 
             val expectedUpdatedJourneyData =
-                JourneyDataBuilder(initialJourneyData = originalJourneyData)
-                    .withEpcLookupCertificateNumber(SUPERSEDED_EPC_CERTIFICATE_NUMBER)
+                JourneyDataBuilder()
                     .withLookedUpEpcDetails(expectedEpcDetails)
-                    .withResetCheckMatchedEpcResult()
                     .build()
 
             // Act
@@ -441,9 +437,7 @@ class PropertyComplianceJourneyTests {
             whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(originalJourneyData)
 
             val expectedUpdatedJourneyData =
-                JourneyDataBuilder(initialJourneyData = originalJourneyData)
-                    .withResetCheckMatchedEpcResult()
-                    .withEpcLookupCertificateNumber(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
+                JourneyDataBuilder()
                     .withNullLookedUpEpcDetails()
                     .build()
 
@@ -737,8 +731,7 @@ class PropertyComplianceJourneyTests {
                 .thenReturn(latestEpc)
 
             val updatedJourneyData =
-                JourneyDataBuilder(initialJourneyData = originalJourneyData)
-                    .withEpcSuperseded()
+                JourneyDataBuilder()
                     .withLookedUpEpcDetails(latestEpc)
                     .build()
 

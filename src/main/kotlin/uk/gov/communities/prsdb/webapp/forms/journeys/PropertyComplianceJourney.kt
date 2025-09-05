@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceS
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.epcDetailsDataPair
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
@@ -46,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getLatestEpcCertificateNumber
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withEpcDetails
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -639,9 +639,9 @@ class PropertyComplianceJourney(
             epcDetails: EpcDataModel?,
             autoMatchedEpc: Boolean,
         ): JourneyData {
-            val newFilteredJourneyData = filteredJourneyData.withEpcDetails(epcDetails, autoMatchedEpc)
-            journeyDataService.addToJourneyDataIntoSession(newFilteredJourneyData)
-            return newFilteredJourneyData
+            val dataPair = epcDetailsDataPair(epcDetails, autoMatchedEpc)
+            journeyDataService.addToJourneyDataIntoSession(mapOf(dataPair))
+            return filteredJourneyData + dataPair
         }
 
         fun epcLookupStepHandleSubmit(
