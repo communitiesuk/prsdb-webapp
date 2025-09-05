@@ -137,6 +137,18 @@ class LocalAuthorityDataService(
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
 
+        emailToAdmins(localAuthorityUser)
+
+        deletionConfirmationSender.sendEmail(
+            localAuthorityUser.email,
+            LocalAuthorityUserDeletionEmail(
+                councilName = localAuthorityUser.localAuthority.name,
+            ),
+        )
+        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+    }
+
+    private fun emailToAdmins(localAuthorityUser: LocalAuthorityUser) {
         val localAdminsByAuthority =
             localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityUser.localAuthority.id)
 
@@ -151,14 +163,6 @@ class LocalAuthorityDataService(
                 ),
             )
         }
-
-        deletionConfirmationSender.sendEmail(
-            localAuthorityUser.email,
-            LocalAuthorityUserDeletionEmail(
-                councilName = localAuthorityUser.localAuthority.name,
-            ),
-        )
-        localAuthorityUserRepository.deleteById(localAuthorityUserId)
     }
 
     @Transactional
