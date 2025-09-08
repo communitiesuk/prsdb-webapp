@@ -35,7 +35,7 @@
                     </table>
                 </th:block>
 
-                <p th:if="${#lists.isEmpty(registeredPropertiesList)}" class="govuk-body" th:text="#{landlordDetails.registeredProperties.none.beforeLink}">landlordDetails.registeredProperties.none.beforeLink</p>
+                <p th:if="${#lists.isEmpty(registeredPropertiesList)}" class="govuk-body" data-testid="no-registered-properties-msg" th:text="#{landlordDetails.registeredProperties.none.beforeLink}">landlordDetails.registeredProperties.none.beforeLink</p>
             </div>
         </div>
     </main>
