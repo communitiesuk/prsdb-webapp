@@ -26,9 +26,8 @@
     </p>
     <p class="govuk-body">
         <span th:remove="tag" th:text="#{forms.epcNotFound.paragraph.three.beforeLink}">forms.epcNotFound.paragraph.three.beforeLink</span>
-        <a class="govuk-link" th:text="#{forms.epcNotFound.paragraph.three.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">
-            forms.epcMissing.paragraph.three.link
-        </a>
+        <a class="govuk-link" th:text="#{forms.epcNotFound.paragraph.three.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">forms.epcMissing.paragraph.three.link
+        </a><span th:remove="tag" th:text="#{forms.epcNotFound.paragraph.three.afterLink}">forms.epcNotFound.paragraph.three.afterLink</span>
     </p>
     <p class="govuk-body" th:text="#{forms.epcNotFound.paragraph.four}">forms.epcNotFound.paragraph.four</p>
 </section>
