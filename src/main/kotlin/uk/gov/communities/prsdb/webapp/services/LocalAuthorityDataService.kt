@@ -19,8 +19,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
 
 @PrsdbWebService
@@ -32,7 +32,7 @@ class LocalAuthorityDataService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
     private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
-    private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionAdminEmail>,
+    private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -155,7 +155,7 @@ class LocalAuthorityDataService(
         for (admin in localAdminsByAuthority) {
             deletionConfirmationSenderAdmin.sendEmail(
                 admin.email,
-                LocalAuthorityUserDeletionAdminEmail(
+                LocalAuthorityUserDeletionInformAdminEmail(
                     councilName = localAuthorityUser.localAuthority.name,
                     email = localAuthorityUser.email,
                     userName = localAuthorityUser.name,
