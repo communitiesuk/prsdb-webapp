@@ -105,7 +105,7 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
         val laUserCaptor = captor<LocalAuthorityUser>()
         verify(laUserRepository).save(laUserCaptor.capture())
 
-        assertThat(confirmationPage.bannerHeading).containsText("You've registered as a ${laUserCaptor.value.localAuthority.name} user")
+        assertThat(confirmationPage.bannerHeading).containsText("You’ve registered as a ${laUserCaptor.value.localAuthority.name} user")
         assertThat(confirmationPage.bodyHeading).containsText("What happens next")
 
         // Return to dashboard button

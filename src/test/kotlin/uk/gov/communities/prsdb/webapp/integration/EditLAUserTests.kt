@@ -62,7 +62,7 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
         // The success page confirms the user is deleted
         assertThat(
             successPage.confirmationBanner,
-        ).containsText("You've removed Arthur Dent's account from BATH AND NORTH EAST SOMERSET COUNCIL")
+        ).containsText("You’ve removed Arthur Dent’s account from BATH AND NORTH EAST SOMERSET COUNCIL")
         successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 
