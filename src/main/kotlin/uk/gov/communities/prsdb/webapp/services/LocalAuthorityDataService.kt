@@ -137,7 +137,7 @@ class LocalAuthorityDataService(
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
 
-        userDeletionEmailToAdmins(localAuthorityUser)
+        localAuthorityUserRepository.deleteById(localAuthorityUserId)
 
         deletionConfirmationSender.sendEmail(
             localAuthorityUser.email,
@@ -145,7 +145,8 @@ class LocalAuthorityDataService(
                 councilName = localAuthorityUser.localAuthority.name,
             ),
         )
-        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+
+        userDeletionEmailToAdmins(localAuthorityUser)
     }
 
     private fun userDeletionEmailToAdmins(localAuthorityUser: LocalAuthorityUser) {
