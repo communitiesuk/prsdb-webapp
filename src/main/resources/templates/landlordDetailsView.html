@@ -1,30 +1,27 @@
+<!--/*@thymesVar id="registerPropertyUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="main-content" th:replace="~{fragments/layout :: layout(#{landlordDetails.title},~{::#main-content/content()}, false)}">
-    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
-    <main class="govuk-main-wrapper">
-        <div id="page-contents">
-            <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
+<html id="page" th:replace="~{fragments/layout :: layout(#{landlordDetails.title},~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
 
-            <div id="delete-record-button" th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{::#delete-record-button/content()})}">
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteLandlordRecordUrl}, #{landlordDetails.removeRecord})}"></a>
+        <div id="delete-record-button" th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{::#delete-record-button/content()})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteLandlordRecordUrl}, #{landlordDetails.removeRecord})}"></a>
+        </div>
+
+        <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
+            <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
+            </ul>
+
+            <div id="personal-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{::#personal-details-panel/content()})}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
             </div>
 
-            <div id="tabs-content" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs-content/content()})}">
-                <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}"></li>
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
-                </ul>
-
-                <div id="personal-details-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{::#personal-details-panel-content/content()})}">
-                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
-                </div>
-
-                <div id="registered-properties-panel-content" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel-content/content()})}">
-                    <table th:replace="~{fragments/tables/table :: table(
-                        ${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } },
-                        ~{::tbody},
-                        null
-                    )}">
+            <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
+                <th:block th:unless="${#lists.isEmpty(registeredPropertiesList)}">
+                    <table th:replace="~{fragments/tables/table :: table(${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } }, ~{::tbody}, null)}">
                         <tbody class="govuk-table__body">
                             <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
                                 <td class="govuk-table__cell govuk-!-width-one-half">
@@ -34,7 +31,12 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </th:block>
+
+                <p th:if="${#lists.isEmpty(registeredPropertiesList)}" class="govuk-body">
+                    <span th:remove="tag" th:text="#{landlordDetails.registeredProperties.none.beforeLink}">landlordDetails.registeredProperties.none.beforeLink</span>
+                    <a class="govuk-link" th:href="@{${registerPropertyUrl}}" th:text="#{landlordDetails.registeredProperties.none.link}">landlordDetails.registeredProperties.none.link</a>
+                </p>
             </div>
         </div>
     </main>
