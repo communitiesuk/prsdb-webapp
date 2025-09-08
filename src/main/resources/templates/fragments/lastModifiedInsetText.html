@@ -1,11 +1,5 @@
-<th:block th:fragment="lastModifiedInsetText(lastModifiedBy, lastModifiedDate)"
-     th:if="${lastModifiedDate != null}" >
-    <div th:replace="~{fragments/warningInsetText :: warningInsetText(~{:: #last-updated-text})}">
-        <th:block id="last-updated-text">
-            <strong th:text="${lastModifiedBy}">name</strong>
-            <span th:text="' ' + #{lastUpdated.afterName} + ' '">landlordDetails.lastUpdated.afterName</span>
-            <strong th:text="${lastModifiedDate}">lastModifiedDate</strong>
-            <span th:text="#{lastUpdated.afterDate}">landlordDetails.lastUpdated.afterDate</span>
-        </th:block>
+<th:block th:fragment="lastModifiedInsetText(lastModifiedBy, lastModifiedDate)" th:if="${lastModifiedDate != null}">
+    <div id="last-modified-inset-text" th:replace="~{fragments/warningInsetText :: warningInsetText(~{::#last-modified-inset-text/content()})}">
+        <th:block th:utext="#{lastUpdated(${lastModifiedBy}, ${lastModifiedDate})}"></th:block>
     </div>
 </th:block>
