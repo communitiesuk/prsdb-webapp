@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
-import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
@@ -11,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOf
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -134,13 +132,6 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             return getManualAddress(journeyData, manualAddressPathSegment)
         }
 
-        fun getNonEnglandOrWalesAddress(journeyData: JourneyData) =
-            getFieldStringValue(
-                journeyData,
-                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
-                NonEnglandOrWalesAddressFormModel::nonEnglandOrWalesAddress.name,
-            )
-
         fun isIdentityVerified(journeyData: JourneyData) =
             getVerifiedName(journeyData) != null &&
                 getVerifiedDOB(journeyData) != null
@@ -157,8 +148,5 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             isContactAddress: Boolean = false,
         ): Boolean =
             journeyData.getLookedUpAddresses().isEmpty() || getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
-
-        fun getCountryOfResidence(journeyData: JourneyData): String =
-            getNonEnglandOrWalesCountryOfResidence(journeyData) ?: ENGLAND_OR_WALES
     }
 }

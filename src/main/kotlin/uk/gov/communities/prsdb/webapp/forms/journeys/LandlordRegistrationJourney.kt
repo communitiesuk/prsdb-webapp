@@ -4,6 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
@@ -592,10 +593,10 @@ class LandlordRegistrationJourney(
             email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
             phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
             addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
-            countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
+            countryOfResidence = ENGLAND_OR_WALES,
             isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
             hasAcceptedPrivacyNotice = LandlordRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData) ?: false,
-            nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
+            nonEnglandOrWalesAddress = null,
             dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
         )
 
