@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -61,8 +60,8 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     @Test
     fun `the renters rights bill link goes to an external page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
-        dashboard.rentersRightsBillLink.clickAndWait()
-        assertTrue(page.url().contains("https://bills.parliament.uk/bills/3764"))
+        assertThat(dashboard.rentersRightsBillLink)
+            .hasAttribute("href", "https://bills.parliament.uk/bills/3764")
     }
 
     @Test
