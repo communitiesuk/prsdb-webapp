@@ -89,48 +89,23 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 CountryOfResidenceFormModel::livesInEnglandOrWales.name,
             )
 
-        fun getAddress(journeyData: JourneyData): AddressDataModel? {
-            val livesInEnglandOrWales = getLivesInEnglandOrWales(journeyData) ?: return null
-
-            return if (isManualAddressChosen(journeyData, !livesInEnglandOrWales)) {
-                getManualAddress(journeyData, !livesInEnglandOrWales)
+        fun getAddress(journeyData: JourneyData): AddressDataModel? =
+            if (isManualAddressChosen(journeyData)) {
+                getManualAddress(journeyData)
             } else {
-                val selectedAddress = getSelectedAddress(journeyData, !livesInEnglandOrWales) ?: return null
-                journeyData.getLookedUpAddress(selectedAddress)
+                val selectedAddress = getSelectedAddress(journeyData)
+                selectedAddress?.let { journeyData.getLookedUpAddress(it) }
             }
-        }
 
-        private fun getSelectedAddress(
-            journeyData: JourneyData,
-            isContactAddress: Boolean = false,
-        ): String? {
-            val selectAddressPathSegment =
-                if (isContactAddress) {
-                    LandlordRegistrationStepId.SelectContactAddress.urlPathSegment
-                } else {
-                    LandlordRegistrationStepId.SelectAddress.urlPathSegment
-                }
-
-            return getFieldStringValue(
+        private fun getSelectedAddress(journeyData: JourneyData) =
+            getFieldStringValue(
                 journeyData,
-                selectAddressPathSegment,
+                LandlordRegistrationStepId.SelectAddress.urlPathSegment,
                 SelectAddressFormModel::address.name,
             )
-        }
 
-        private fun getManualAddress(
-            journeyData: JourneyData,
-            isContactAddress: Boolean = false,
-        ): AddressDataModel? {
-            val manualAddressPathSegment =
-                if (isContactAddress) {
-                    LandlordRegistrationStepId.ManualContactAddress.urlPathSegment
-                } else {
-                    LandlordRegistrationStepId.ManualAddress.urlPathSegment
-                }
-
-            return getManualAddress(journeyData, manualAddressPathSegment)
-        }
+        private fun getManualAddress(journeyData: JourneyData) =
+            getManualAddress(journeyData, LandlordRegistrationStepId.ManualAddress.urlPathSegment)
 
         fun isIdentityVerified(journeyData: JourneyData) =
             getVerifiedName(journeyData) != null &&
@@ -143,10 +118,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 PrivacyNoticeFormModel::agreesToPrivacyNotice.name,
             )
 
-        fun isManualAddressChosen(
-            journeyData: JourneyData,
-            isContactAddress: Boolean = false,
-        ): Boolean =
-            journeyData.getLookedUpAddresses().isEmpty() || getSelectedAddress(journeyData, isContactAddress) == MANUAL_ADDRESS_CHOSEN
+        fun isManualAddressChosen(journeyData: JourneyData): Boolean =
+            journeyData.getLookedUpAddresses().isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
     }
 }

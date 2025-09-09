@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -63,9 +61,8 @@ class LandlordRegistrationJourneyDataHelperTests {
         assertEquals(expectedManualDOB, manualDOB)
     }
 
-    @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
-    @ValueSource(booleans = [true, false])
-    fun `getAddress returns the corresponding selected address`(isEnglandOrWalesResident: Boolean) {
+    @Test
+    fun `getAddress returns the corresponding selected address`() {
         val selectedAddress = "1 Example Address, EG1 2AB"
         val mockJourneyData =
             journeyDataBuilder
@@ -81,9 +78,8 @@ class LandlordRegistrationJourneyDataHelperTests {
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
 
-    @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
-    @ValueSource(booleans = [true, false])
-    fun `getAddress returns the corresponding manual address`(isEnglandOrWalesResident: Boolean) {
+    @Test
+    fun `getAddress returns the corresponding manual address`() {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
