@@ -5,7 +5,6 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -18,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -31,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
@@ -53,22 +50,7 @@ class LandlordRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    protected class LandlordRegistrationStepRouter(
-        journey: Iterable<StepDetails<LandlordRegistrationStepId>>,
-    ) : GroupedStepRouter<LandlordRegistrationStepId>(journey) {
-        override fun isDestinationAllowedWhenCheckingAnswersFor(
-            destinationStep: LandlordRegistrationStepId?,
-            stepBeingChecked: LandlordRegistrationStepId?,
-        ): Boolean =
-            when (stepBeingChecked) {
-                LandlordRegistrationStepId.NonEnglandOrWalesAddress ->
-                    destinationStep ==
-                        LandlordRegistrationStepId.NonEnglandOrWalesAddress
-                else -> super.isDestinationAllowedWhenCheckingAnswersFor(destinationStep, stepBeingChecked)
-            }
-    }
-
-    override val stepRouter = LandlordRegistrationStepRouter(this)
+    override val stepRouter = GroupedStepRouter(this)
 
     override val checkYourAnswersStepId = LandlordRegistrationStepId.CheckAnswers
 
@@ -433,20 +415,11 @@ class LandlordRegistrationJourney(
             id = LandlordRegistrationStepId.NonEnglandOrWalesAddress,
             page =
                 Page(
-                    formModel = NonEnglandOrWalesAddressFormModel::class,
+                    formModel = NoInputFormModel::class,
                     templateName = "forms/nonEnglandOrWalesAddressForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.nonEnglandOrWalesAddress.fieldSetHeading",
-                            "fieldSetHint" to "forms.nonEnglandOrWalesAddress.fieldSetHint",
-                            "label" to "forms.nonEnglandOrWalesAddress.label",
-                            "limit" to NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH,
-                            "submitButtonText" to "forms.buttons.continue",
-                        ),
+                    content = emptyMap(),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.LookupContactAddress, null) },
             saveAfterSubmit = false,
         )
 
