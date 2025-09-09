@@ -5,7 +5,6 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
 import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
@@ -37,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumb
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -307,7 +305,6 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.countryOfResidence.fieldSetHeading",
-                            "selectOptions" to INTERNATIONAL_PLACE_NAMES.map { SelectViewModel(it.name) },
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -319,7 +316,6 @@ class LandlordRegistrationJourney(
                                         value = false,
                                         valueStr = "no",
                                         labelMsgKey = "forms.radios.option.no.label",
-                                        conditionalFragment = "countryOfResidenceSelect",
                                     ),
                                 ),
                         ),
