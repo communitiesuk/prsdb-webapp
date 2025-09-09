@@ -64,13 +64,8 @@ class LandlordRegistrationJourneyDataHelperTests {
     @Test
     fun `getAddress returns the corresponding selected address`() {
         val selectedAddress = "1 Example Address, EG1 2AB"
-        val mockJourneyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndSelectedContactAddress(
-                    "countryOfResidence",
-                    "test address",
-                    selectedAddress,
-                ).build()
+        val mockJourneyData = journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = null).build()
+
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
 
         val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData)
@@ -83,15 +78,8 @@ class LandlordRegistrationJourneyDataHelperTests {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val mockJourneyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndManualContactAddress(
-                    "countryofResidence",
-                    "test address",
-                    addressLineOne,
-                    townOrCity,
-                    postcode,
-                ).build()
+        val mockJourneyData = journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode).build()
+
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
         val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData)
