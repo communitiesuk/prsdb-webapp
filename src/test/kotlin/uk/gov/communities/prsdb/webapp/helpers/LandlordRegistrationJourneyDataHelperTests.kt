@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -62,37 +61,6 @@ class LandlordRegistrationJourneyDataHelperTests {
         val manualDOB = LandlordRegistrationJourneyDataHelper.getDOB(mockJourneyData)
 
         assertEquals(expectedManualDOB, manualDOB)
-    }
-
-    @Test
-    fun `getNonEnglandOrWalesCountryOfResidence returns the corresponding country`() {
-        val expectedCountryOfResidence = "US"
-        val mockJourneyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndSelectedContactAddress(
-                    expectedCountryOfResidence,
-                    "test address",
-                    "selected address",
-                ).build()
-
-        val getNonEnglandOrWalesCountryOfResidence =
-            LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(
-                mockJourneyData,
-            )
-
-        assertEquals(expectedCountryOfResidence, getNonEnglandOrWalesCountryOfResidence)
-    }
-
-    @Test
-    fun `getNonEnglandOrWalesCountryOfResidence returns null if the user lives in the UK`() {
-        val mockJourneyData = journeyDataBuilder.build()
-
-        val getNonEnglandOrWalesCountryOfResidence =
-            LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(
-                mockJourneyData,
-            )
-
-        assertNull(getNonEnglandOrWalesCountryOfResidence)
     }
 
     @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")

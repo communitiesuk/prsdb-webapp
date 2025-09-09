@@ -91,17 +91,6 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
                 CountryOfResidenceFormModel::livesInEnglandOrWales.name,
             )
 
-        fun getNonEnglandOrWalesCountryOfResidence(journeyData: JourneyData) =
-            if (getLivesInEnglandOrWales(journeyData) == true) {
-                null
-            } else {
-                getFieldStringValue(
-                    journeyData,
-                    LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-                    CountryOfResidenceFormModel::countryOfResidence.name,
-                )
-            }
-
         fun getAddress(journeyData: JourneyData): AddressDataModel? {
             val livesInEnglandOrWales = getLivesInEnglandOrWales(journeyData) ?: return null
 
