@@ -19,9 +19,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -119,14 +122,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales, manual address)`(page: Page) {
-        // Set up mock One Login data
-        val verifiedIdentityMap =
-            mutableMapOf<String, Any?>(
-                VerifiedIdentityModel.NAME_KEY to "name",
-                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
-            )
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+    fun `User can navigate the whole journey if pages are correctly filled in (unverified, England or Wales, manual address)`(page: Page) {
+        // Set up no identity data from One login
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
         val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
@@ -134,8 +132,14 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
         privacyNoticePage.agreeAndSubmit()
 
-        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
-        confirmIdentityPage.confirm()
+        val identityNotVerifiedPage = assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
+        namePage.submitName("landlord name")
+
+        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
+        dateOfBirthPage.submitDate("12", "11", "1990")
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
         emailPage.submitEmail("test@example.com")
