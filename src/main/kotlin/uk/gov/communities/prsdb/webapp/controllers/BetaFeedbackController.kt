@@ -92,7 +92,6 @@ class BetaFeedbackController(
         model.addAttribute("formModel", formModel)
         val referrer = request.getHeader("referer")
         model.addAttribute("referrerHeader", referrer)
-        model.addAttribute("backUrl", referrer)
         return "betaBannerFeedback"
     }
 
@@ -114,7 +113,6 @@ class BetaFeedbackController(
         if (bindingResult.hasErrors()) {
             val referrer = request.getHeader("referer")
             model.addAttribute("referrerHeader", referrer)
-            model.addAttribute("backUrl", referrer)
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
