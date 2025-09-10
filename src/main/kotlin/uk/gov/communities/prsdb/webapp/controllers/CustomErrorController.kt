@@ -39,5 +39,6 @@ class CustomErrorController : ErrorController {
 
     companion object {
         const val CYA_ERROR_ROUTE = "/$ERROR_PATH_SEGMENT/$CYA_ERROR_PATH_SEGMENT"
+        const val FILE_TOO_LARGE_ERROR_ROUTE = "/$ERROR_PATH_SEGMENT/$FILE_TOO_LARGE_PATH_SEGMENT"
     }
 }
