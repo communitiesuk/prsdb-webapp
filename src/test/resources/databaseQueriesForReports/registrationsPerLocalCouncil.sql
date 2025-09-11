@@ -6,8 +6,9 @@ SELECT
     COUNT(*) FILTER (WHERE p.last_modified_date >= NOW() - INTERVAL '14 DAYS') AS newly_claimed_passcodes_last_2_weeks
 FROM
     passcode p
-        JOIN local_authority la ON p.local_authority_id = la.id
-WHERE p.subject_identifier IS NOT NULL
+    JOIN local_authority la ON p.local_authority_id = la.id
+    -- only include passcodes claimed by a currently registered landlord
+    JOIN landlord l ON p.subject_identifier = l.subject_identifier
 GROUP BY
     la.name, p.local_authority_id
 ORDER BY la.name;
@@ -15,7 +16,6 @@ ORDER BY la.name;
 -- Property registrations
 SELECT
     la.name AS local_council_name,
-    la.id AS local_council_id,
     COUNT(*) AS total_property_ownerships,
     COUNT(*) FILTER (WHERE ownerships.po_created_date >= NOW() - INTERVAL '14 DAYS') AS new_property_ownerships_last_2_weeks
 FROM(
