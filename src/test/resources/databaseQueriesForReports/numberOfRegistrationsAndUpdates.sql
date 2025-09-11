@@ -25,8 +25,10 @@ FROM
 
 -- Local council users added / updated
 SELECT
+    is_manager AS is_admin,
     COUNT(*) AS total_lc_users,
     COUNT(*) FILTER (WHERE created_date >= NOW() - INTERVAL '14 DAYS') AS new_lc_users_last_2_weeks,
     COUNT(*) FILTER (WHERE last_modified_date >= NOW() - INTERVAL '14 DAYS') AS updated_lc_users_last_2_weeks
 FROM
-    local_authority_user;
+    local_authority_user
+GROUP BY is_manager;

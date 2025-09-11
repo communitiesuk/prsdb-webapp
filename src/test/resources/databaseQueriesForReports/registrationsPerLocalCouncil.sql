@@ -33,6 +33,7 @@ GROUP BY
 -- Local council user registrations
 -- local_council_id might be useful for correlating with analytics (some page urls include the lc id)
 SELECT
+    lau.is_manager as is_admin,
     la.name AS local_council_name,
     lau.local_authority_id AS local_council_id,
     COUNT(*) AS total_lc_users,
@@ -41,4 +42,5 @@ FROM
     local_authority_user lau
         JOIN local_authority la ON lau.local_authority_id = la.id
 GROUP BY
-    la.name, lau.local_authority_id;
+    la.name, lau.local_authority_id, lau.is_manager
+ORDER BY la.name;
