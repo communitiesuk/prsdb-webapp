@@ -33,3 +33,9 @@ FROM
     local_authority_user
 WHERE local_authority_id != 2
 GROUP BY is_manager;
+
+-- Passcodes generated
+SELECT
+    COUNT(*) FILTER (WHERE created_date >= NOW() - INTERVAL '14 DAYS') AS new_passcodes_last_2_weeks
+FROM
+    passcode;

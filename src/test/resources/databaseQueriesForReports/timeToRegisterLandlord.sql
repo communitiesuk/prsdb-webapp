@@ -6,6 +6,8 @@ SELECT
 FROM (
      SELECT
          p.last_modified_date - l.created_date AS time_to_register_landlord
+     -- To get in minutes instead, use
+     -- EXTRACT(EPOCH FROM (p.last_modified_date - l.created_date)) / 60 AS time_to_register_landlord
      FROM
          landlord l
              JOIN (
