@@ -31,4 +31,5 @@ SELECT
     COUNT(*) FILTER (WHERE last_modified_date >= NOW() - INTERVAL '14 DAYS') AS updated_lc_users_last_2_weeks
 FROM
     local_authority_user
+WHERE local_authority_id != 2
 GROUP BY is_manager;
