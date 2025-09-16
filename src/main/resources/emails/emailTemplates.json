@@ -187,5 +187,12 @@
     "enumName": "LOCAL_AUTHORITY_USER_DELETION_INFORM_ADMIN_EMAIL",
     "subject": "GOV.UK - A user has been removed from a local council account that you manage",
     "bodyLocation": "/emails/LocalCouncilUserDeletionAdminEmail.md"
+  },
+  {
+    "test_id": "eedfdf3b-eabb-4e08-bb3a-32f84af9ea97",
+    "prod_id": "c77f4a18-d68f-4937-918c-30a7a3c2a91b",
+    "enumName": "LOCAL_AUTHORITY_ADMIN_NEW_USER_EMAIL",
+    "subject": "GOV.UK - A user has been invited to register as a local council user on the PRS database",
+    "bodyLocation": "/emails/LocalCouncilAdminNewCouncilUserEmail.md"
   }
 ]
