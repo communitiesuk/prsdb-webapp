@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.FILE_TOO_LARGE_ERROR_ROUTE
 
 @WebMvcTest(CustomErrorController::class)
 class CustomErrorControllerTests(
@@ -39,7 +40,7 @@ class CustomErrorControllerTests(
         @Test
         fun `returns 200 for unauthenticated users`() {
             mvc
-                .get("/error/file-too-large")
+                .get(FILE_TOO_LARGE_ERROR_ROUTE)
                 .andExpect {
                     status { isOk() }
                 }
@@ -49,7 +50,7 @@ class CustomErrorControllerTests(
         @WithMockUser
         fun `returns 200 for authenticated users`() {
             mvc
-                .get("/error/file-too-large")
+                .get(FILE_TOO_LARGE_ERROR_ROUTE)
                 .andExpect {
                     status { isOk() }
                 }

@@ -146,10 +146,10 @@ class LocalAuthorityDataService(
             ),
         )
 
-        userDeletionEmailToAdmins(localAuthorityUser)
+        sendUserDeletedEmailsToAdmins(localAuthorityUser)
     }
 
-    private fun userDeletionEmailToAdmins(localAuthorityUser: LocalAuthorityUser) {
+    private fun sendUserDeletedEmailsToAdmins(localAuthorityUser: LocalAuthorityUser) {
         val localAdminsByAuthority =
             localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityUser.localAuthority.id)
 

@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Select
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class CountryOfResidenceFormPageLandlordRegistration(
@@ -21,12 +20,8 @@ class CountryOfResidenceFormPageLandlordRegistration(
         form.submit()
     }
 
-    fun submitNonUkCountrySelectedByPartialName(
-        countryNamePartial: String,
-        countryNameFull: String,
-    ) {
+    fun submitNonUk() {
         form.selectNonUk()
-        form.countrySelect.fillPartialAndSelectValue(countryNamePartial, countryNameFull)
         form.submit()
     }
 
@@ -34,7 +29,6 @@ class CountryOfResidenceFormPageLandlordRegistration(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val residentInUkRadios = Radios(locator)
-        val countrySelect = Select(locator)
 
         fun selectUk() = residentInUkRadios.selectValue("true")
 

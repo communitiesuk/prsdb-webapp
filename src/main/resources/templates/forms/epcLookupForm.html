@@ -20,15 +20,13 @@
     </p>
     <p class="govuk-body">
         <span th:remove="tag" th:text="#{forms.epcLookup.explanation.paragraph.one.beforeLink}">forms.epcLookup.explanation.paragraph.one.beforeLink</span>
-        <a class="govuk-link" th:text="#{forms.epcLookup.explanation.paragraph.one.link}" th:href="${findEpcUrl}" rel="noreferrer noopener" target="_blank">
-            forms.epcLookup.explanation.paragraph.one.link
-        </a>
+        <a class="govuk-link" th:text="#{forms.epcLookup.explanation.paragraph.one.link}" th:href="${findEpcUrl}" rel="noreferrer noopener" target="_blank">forms.epcLookup.explanation.paragraph.one.link
+        </a><span th:remove="tag" th:text="#{forms.epcLookup.explanation.paragraph.one.afterLink}">forms.epcLookup.explanation.paragraph.one.afterLink</span>
     </p>
     <p class="govuk-body">
         <span th:remove="tag" th:text="#{forms.epcLookup.explanation.paragraph.two.beforeLink}">forms.epcLookup.explanation.paragraph.two.beforeLink</span>
-        <a class="govuk-link" th:text="#{forms.epcLookup.explanation.paragraph.two.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">
-            forms.epcLookup.explanation.paragraph.two.link
-        </a>
+        <a class="govuk-link" th:text="#{forms.epcLookup.explanation.paragraph.two.link}" th:href="${getNewEpcUrl}" rel="noreferrer noopener" target="_blank">forms.epcLookup.explanation.paragraph.two.link
+        </a><span th:remove="tag" th:text="#{forms.epcLookup.explanation.paragraph.two.afterLink}">forms.epcLookup.explanation.paragraph.two.afterLink</span>
     </p>
 </th:block>
 </html>
