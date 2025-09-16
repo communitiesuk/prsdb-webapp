@@ -203,6 +203,7 @@ jobs:
     needs: update-ecs-service
     steps:
       - name: Report pipeline status
+        if: always()
         id: slack
         uses: slackapi/slack-github-action@v1.26.0
         with:
