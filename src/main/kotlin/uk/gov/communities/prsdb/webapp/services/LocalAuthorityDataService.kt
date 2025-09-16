@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
 
 @PrsdbWebService
@@ -31,6 +32,7 @@ class LocalAuthorityDataService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
     private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
+    private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -135,13 +137,33 @@ class LocalAuthorityDataService(
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
 
+        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+
         deletionConfirmationSender.sendEmail(
             localAuthorityUser.email,
             LocalAuthorityUserDeletionEmail(
                 councilName = localAuthorityUser.localAuthority.name,
             ),
         )
-        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+
+        sendUserDeletedEmailsToAdmins(localAuthorityUser)
+    }
+
+    private fun sendUserDeletedEmailsToAdmins(localAuthorityUser: LocalAuthorityUser) {
+        val localAdminsByAuthority =
+            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityUser.localAuthority.id)
+
+        for (admin in localAdminsByAuthority) {
+            deletionConfirmationSenderAdmin.sendEmail(
+                admin.email,
+                LocalAuthorityUserDeletionInformAdminEmail(
+                    councilName = localAuthorityUser.localAuthority.name,
+                    email = localAuthorityUser.email,
+                    userName = localAuthorityUser.name,
+                    prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+                ),
+            )
+        }
     }
 
     @Transactional

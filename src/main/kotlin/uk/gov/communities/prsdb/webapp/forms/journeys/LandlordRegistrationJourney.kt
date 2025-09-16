@@ -4,8 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_PLACE_NAMES
-import uk.gov.communities.prsdb.webapp.constants.NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -18,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.forms.pages.VerifyIdentityPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.forms.steps.StepDetails
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneySection
 import uk.gov.communities.prsdb.webapp.forms.tasks.JourneyTask
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
@@ -31,12 +29,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NonEnglandOrWalesAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -54,22 +50,7 @@ class LandlordRegistrationJourney(
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
-    protected class LandlordRegistrationStepRouter(
-        journey: Iterable<StepDetails<LandlordRegistrationStepId>>,
-    ) : GroupedStepRouter<LandlordRegistrationStepId>(journey) {
-        override fun isDestinationAllowedWhenCheckingAnswersFor(
-            destinationStep: LandlordRegistrationStepId?,
-            stepBeingChecked: LandlordRegistrationStepId?,
-        ): Boolean =
-            when (stepBeingChecked) {
-                LandlordRegistrationStepId.NonEnglandOrWalesAddress ->
-                    destinationStep ==
-                        LandlordRegistrationStepId.NonEnglandOrWalesAddress
-                else -> super.isDestinationAllowedWhenCheckingAnswersFor(destinationStep, stepBeingChecked)
-            }
-    }
-
-    override val stepRouter = LandlordRegistrationStepRouter(this)
+    override val stepRouter = GroupedStepRouter(this)
 
     override val checkYourAnswersStepId = LandlordRegistrationStepId.CheckAnswers
 
@@ -127,10 +108,6 @@ class LandlordRegistrationJourney(
                 selectAddressStep(),
                 manualAddressStep(),
                 nonEnglandOrWalesAddressStep(),
-                lookupContactAddressStep(),
-                noContactAddressFoundStep(),
-                selectContactAddressStep(),
-                manualContactAddressStep(),
             ),
         )
 
@@ -306,7 +283,6 @@ class LandlordRegistrationJourney(
                         mapOf(
                             "title" to "registerAsALandlord.title",
                             "fieldSetHeading" to "forms.countryOfResidence.fieldSetHeading",
-                            "selectOptions" to INTERNATIONAL_PLACE_NAMES.map { SelectViewModel(it.name) },
                             "radioOptions" to
                                 listOf(
                                     RadiosButtonViewModel(
@@ -318,7 +294,6 @@ class LandlordRegistrationJourney(
                                         value = false,
                                         valueStr = "no",
                                         labelMsgKey = "forms.radios.option.no.label",
-                                        conditionalFragment = "countryOfResidenceSelect",
                                     ),
                                 ),
                         ),
@@ -365,8 +340,8 @@ class LandlordRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
-                            "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).second,
-                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupAddress).first,
+                            "postcode" to getHouseNameOrNumberAndPostcode().second,
+                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode().first,
                             "searchAgainUrl" to LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                         ),
                     shouldDisplaySectionHeader = true,
@@ -375,11 +350,11 @@ class LandlordRegistrationJourney(
             saveAfterSubmit = false,
         )
 
-    private fun getHouseNameOrNumberAndPostcode(lookupAddressStepId: LandlordRegistrationStepId) =
+    private fun getHouseNameOrNumberAndPostcode() =
         JourneyDataHelper
             .getLookupAddressHouseNameOrNumberAndPostcode(
                 journeyDataService.getJourneyDataFromSession(),
-                lookupAddressStepId.urlPathSegment,
+                LandlordRegistrationStepId.LookupAddress.urlPathSegment,
             ) ?: Pair("", "")
 
     private fun selectAddressStep() =
@@ -436,116 +411,11 @@ class LandlordRegistrationJourney(
             id = LandlordRegistrationStepId.NonEnglandOrWalesAddress,
             page =
                 Page(
-                    formModel = NonEnglandOrWalesAddressFormModel::class,
-                    templateName = "forms/nonEnglandOrWalesAddressForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.nonEnglandOrWalesAddress.fieldSetHeading",
-                            "fieldSetHint" to "forms.nonEnglandOrWalesAddress.fieldSetHint",
-                            "label" to "forms.nonEnglandOrWalesAddress.label",
-                            "limit" to NON_ENGLAND_OR_WALES_ADDRESS_MAX_LENGTH,
-                            "submitButtonText" to "forms.buttons.continue",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.LookupContactAddress, null) },
-            saveAfterSubmit = false,
-        )
-
-    private fun lookupContactAddressStep() =
-        LookupAddressStep(
-            id = LandlordRegistrationStepId.LookupContactAddress,
-            page =
-                Page(
-                    formModel = LookupAddressFormModel::class,
-                    templateName = "forms/lookupAddressForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.lookupContactAddress.fieldSetHeading",
-                            "postcodeLabel" to "forms.lookupAddress.postcode.label",
-                            "postcodeHint" to "forms.lookupAddress.postcode.hint",
-                            "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
-                            "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
-                            "submitButtonText" to "forms.buttons.continue",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextStepIfAddressesFound = LandlordRegistrationStepId.SelectContactAddress,
-            nextStepIfNoAddressesFound = LandlordRegistrationStepId.NoContactAddressFound,
-            addressLookupService = addressLookupService,
-            journeyDataService = journeyDataService,
-            saveAfterSubmit = false,
-        )
-
-    private fun noContactAddressFoundStep() =
-        Step(
-            id = LandlordRegistrationStepId.NoContactAddressFound,
-            page =
-                Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "forms/noAddressFoundForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "postcode" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupContactAddress).second,
-                            "houseNameOrNumber" to getHouseNameOrNumberAndPostcode(LandlordRegistrationStepId.LookupContactAddress).first,
-                            "searchAgainUrl" to
-                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
-                                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                        ),
+                    templateName = "forms/nonEnglandOrWalesAddressForm",
+                    content = emptyMap(),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.ManualContactAddress, null) },
-            saveAfterSubmit = false,
-        )
-
-    private fun selectContactAddressStep() =
-        Step(
-            id = LandlordRegistrationStepId.SelectContactAddress,
-            page =
-                SelectAddressPage(
-                    formModel = SelectAddressFormModel::class,
-                    templateName = "forms/selectAddressForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
-                            "submitButtonText" to "forms.buttons.continue",
-                            "searchAgainUrl" to
-                                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
-                                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                        ),
-                    lookupAddressPathSegment = LandlordRegistrationStepId.LookupContactAddress.urlPathSegment,
-                    journeyDataService = journeyDataService,
-                    displaySectionHeader = true,
-                ),
-            nextAction = { filteredJourneyData, _ -> selectContactAddressNextAction(filteredJourneyData) },
-            saveAfterSubmit = false,
-        )
-
-    private fun manualContactAddressStep() =
-        Step(
-            id = LandlordRegistrationStepId.ManualContactAddress,
-            page =
-                Page(
-                    formModel = ManualAddressFormModel::class,
-                    templateName = "forms/manualAddressForm",
-                    content =
-                        mapOf(
-                            "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.manualContactAddress.fieldSetHeading",
-                            "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
-                            "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
-                            "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
-                            "countyLabel" to "forms.manualAddress.county.label",
-                            "postcodeLabel" to "forms.lookupAddress.postcode.label",
-                            "submitButtonText" to "forms.buttons.continue",
-                        ),
-                    shouldDisplaySectionHeader = true,
-                ),
-            nextAction = { _, _ -> Pair(LandlordRegistrationStepId.CheckAnswers, null) },
             saveAfterSubmit = false,
         )
 
@@ -578,13 +448,6 @@ class LandlordRegistrationJourney(
             Pair(LandlordRegistrationStepId.CheckAnswers, null)
         }
 
-    private fun selectContactAddressNextAction(filteredJourneyData: JourneyData): Pair<LandlordRegistrationStepId, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData, isContactAddress = true)) {
-            Pair(LandlordRegistrationStepId.ManualContactAddress, null)
-        } else {
-            Pair(LandlordRegistrationStepId.CheckAnswers, null)
-        }
-
     private fun checkAnswersHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         landlordService.createLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
@@ -592,10 +455,10 @@ class LandlordRegistrationJourney(
             email = LandlordRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
             phoneNumber = LandlordRegistrationJourneyDataHelper.getPhoneNumber(filteredJourneyData)!!,
             addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!,
-            countryOfResidence = LandlordRegistrationJourneyDataHelper.getCountryOfResidence(filteredJourneyData),
+            countryOfResidence = ENGLAND_OR_WALES,
             isVerified = LandlordRegistrationJourneyDataHelper.isIdentityVerified(filteredJourneyData),
             hasAcceptedPrivacyNotice = LandlordRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData) ?: false,
-            nonEnglandOrWalesAddress = LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(filteredJourneyData),
+            nonEnglandOrWalesAddress = null,
             dateOfBirth = LandlordRegistrationJourneyDataHelper.getDOB(filteredJourneyData)!!,
         )
 
