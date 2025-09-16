@@ -1,0 +1,13 @@
+name: Slackbot Update Test Integration
+on:
+  push:
+    branches:
+      - feat/PRSD-1531-do-not-merge-testing-slackbot
+
+jobs:
+  slackbot-update-test-integration:
+    uses: ./.github/workflows/slackbot-update-test.yml
+    with:
+      environment: "integration"
+      branch: "main"
+    secrets: inherit
