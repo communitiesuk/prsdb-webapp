@@ -209,6 +209,7 @@ jobs:
         with:
           payload: |
             {
+              "environment": ${{ toJson(inputs.environment) }},
               "commit": ${{ toJson(github.event.head_commit.message) }},
               "result": "${{ (needs.update-ecs-service.result == 'success' || needs.update-ecs-service.result == 'skipped') && 'Success :tick:' || 'Failure :no-cross:' }}",
               "url": "${{ format('https://github.com/communitiesuk/prsdb-webapp/actions/runs/{0}', github.run_id) }}"
