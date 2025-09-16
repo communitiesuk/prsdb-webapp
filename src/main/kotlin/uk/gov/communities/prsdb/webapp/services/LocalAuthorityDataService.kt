@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityNewCouncilUserInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
@@ -33,6 +34,7 @@ class LocalAuthorityDataService(
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
     private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
     private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
+    private val newLocalCouncilUserAdminEmailSender: EmailNotificationService<LocalAuthorityNewCouncilUserInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -147,6 +149,25 @@ class LocalAuthorityDataService(
         )
 
         sendUserDeletedEmailsToAdmins(localAuthorityUser)
+    }
+
+    fun sendNewUserAddedEmailsToAdmins(
+        localAuthority: LocalAuthority,
+        email: String,
+    ) {
+        val localAdminsByAuthority =
+            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)
+
+        for (admin in localAdminsByAuthority) {
+            newLocalCouncilUserAdminEmailSender.sendEmail(
+                admin.email,
+                LocalAuthorityNewCouncilUserInformAdminEmail(
+                    councilName = localAuthority.name,
+                    email = email,
+                    prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+                ),
+            )
+        }
     }
 
     private fun sendUserDeletedEmailsToAdmins(localAuthorityUser: LocalAuthorityUser) {

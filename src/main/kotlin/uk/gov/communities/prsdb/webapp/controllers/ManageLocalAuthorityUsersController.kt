@@ -258,6 +258,10 @@ class ManageLocalAuthorityUsersController(
                     absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
                 ),
             )
+            localAuthorityDataService.sendNewUserAddedEmailsToAdmins(
+                currentAuthority,
+                emailModel.email,
+            )
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)
             return "redirect:$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
