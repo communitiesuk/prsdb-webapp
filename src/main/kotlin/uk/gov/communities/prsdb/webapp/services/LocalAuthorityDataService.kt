@@ -19,10 +19,10 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRep
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityNewCouncilUserInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
 
 @PrsdbWebService
 class LocalAuthorityDataService(
@@ -34,7 +34,7 @@ class LocalAuthorityDataService(
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
     private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
     private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
-    private val newLocalCouncilUserAdminEmailSender: EmailNotificationService<LocalAuthorityNewCouncilUserInformAdminEmail>,
+    private val newLocalCouncilUserAdminEmailSender: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -161,7 +161,7 @@ class LocalAuthorityDataService(
         for (admin in localAdminsByAuthority) {
             newLocalCouncilUserAdminEmailSender.sendEmail(
                 admin.email,
-                LocalAuthorityNewCouncilUserInformAdminEmail(
+                LocalCouncilUserInvitationInformAdminEmail(
                     councilName = localAuthority.name,
                     email = email,
                     prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),

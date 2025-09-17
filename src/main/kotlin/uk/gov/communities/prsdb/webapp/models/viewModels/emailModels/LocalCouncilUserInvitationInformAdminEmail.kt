@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-class LocalAuthorityNewCouncilUserInformAdminEmail(
+class LocalCouncilUserInvitationInformAdminEmail(
     val councilName: String,
     val email: String,
     val prsdURL: String,
@@ -8,7 +8,7 @@ class LocalAuthorityNewCouncilUserInformAdminEmail(
     private val councilNameKey = "Local Council Name"
     private val emailKey = "User Email"
     private val prsdURLKey = "Base URL"
-    override val template = EmailTemplate.LOCAL_AUTHORITY_NEW_COUNCIL_USER_INFORM_ADMIN_EMAIL
+    override val template = EmailTemplate.LOCAL_COUNCIL_USER_INVITATION_INFORM_ADMIN_EMAIL
 
     override fun toHashMap() =
         hashMapOf(
