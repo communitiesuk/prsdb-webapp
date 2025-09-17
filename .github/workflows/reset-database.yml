@@ -92,16 +92,10 @@ jobs:
         if: (success() || failure()) && steps.start-session.outputs.SSM_SESSION_ID != ''
         run: aws ssm terminate-session --session-id ${{ steps.start-session.outputs.SSM_SESSION_ID }}
 
-  restart-ecs:
-    name: Restart ECS
+  update-ecs-service:
+    name: Update ECS service
     needs: clean-and-migrate-database
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.IAM_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Redeploy ECS service
-        run: aws ecs update-service --cluster ${{ inputs.environment }}-app --service ${{ inputs.environment }}-app --task-definition prsdb-webapp-${{ inputs.environment }} --force-new-deployment
+    uses: communitiesuk/prsdb-infra/.github/workflows/update-ecs-service.yml@main
+    with:
+      environment_name: ${{ inputs.environment }}
+      account_id: ${{ inputs.account-id }}

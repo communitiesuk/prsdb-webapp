@@ -181,23 +181,14 @@ jobs:
   update-ecs-service:
     name: Update ECS service
     needs: migrate-database
-    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    env:
-      AWS_REGION: "eu-west-2"
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ inputs.update-ecs-role }}
-          aws-region: ${{ env.AWS_REGION }}
+    uses: communitiesuk/prsdb-infra/.github/workflows/update-ecs-service.yml@main
+    with:
+      environment_name: ${{ inputs.environment }}
+      account_id: ${{ inputs.account-id }}
 
-      - name: Redeploy ECS service
-        run: |
-          aws ecs update-service --cluster ${{ inputs.environment }}-app --service ${{ inputs.environment }}-app --task-definition prsdb-webapp-${{ inputs.environment }} --force-new-deployment
-  
   report-pipeline-status:
     runs-on: ubuntu-latest
     needs: update-ecs-service
