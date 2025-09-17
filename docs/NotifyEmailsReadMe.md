@@ -1,7 +1,8 @@
 # Notify
 Notify is the government email sending service that we use to send all emails.
-We have a Notify-integration account that sends the emails for `integration` and `test`.
-We have a Notify-prod account that sends the emails for `production`.
+We have a Notify-integration account that sends the emails for the `integration` and `test` environments.
+We have a Notify-prod account that sends the emails for the `production` environment.
+You should register for Notify-prod using your MHCLG email address.
 
 Note: When running the app locally we stub the calls to notify by default.
 
@@ -10,8 +11,9 @@ When creating a new email you should do so in a markdown file in `src/main/resou
 You will also need to update `emailTemplates.json` with information about the new emails including the `test_id` and `prod_id` from the notify portal. 
 
 ## Creating templates on notify
-For each email we create in the codebase we also need to create a template on our Notify-integration and Notify-prod.
-Once you have created the templates on notify, also in markdown, you will be able to copy the `template id`
+For each email we create in the codebase we also need to create a template on our Notify-integration and Notify-prod accounts.
+Once you have created the templates on notify, also in markdown, you will be able to copy the `template ids`.
+If you have Notify-integration and Notify-prod on the same account you can copy an email template from one to the other.
 You should add the template ids to `emailTemplates.json` where:
 - Template id from Notify-integration -> `test_id`
 - Template id from Notify-prod -> `prod_id`
@@ -39,11 +41,16 @@ In order to send emails when you're running the app locally you need to use the 
 You need to add the `use-notify` profile to the ‘local’ springboot configuration.
 You can do this by editing the configuration of ‘local’ and adding `use-notify` to the `Active profiles` field.
 
-In your `.env` file you should add the Notify - Integration API Key instead as the `NOTIFY_APIKEY` variable
+In your `.env` file you should add the Notify - Integration API Key instead as the `NOTIFY_APIKEY` variable.
 
 Then when you run the app locally the emails will be sent when they are triggered.
 
 ## Testing
+
+### Unit tests
+We have unit tests for the emails in `EmailTemplateModelsTests`.
+
+### Testing against notify templates
 The testing for emails checks that the templates in notify match the templates in the codebase.
 The test are built into our pipelines so run whenever a PR is made.
 
