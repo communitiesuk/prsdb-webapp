@@ -258,7 +258,7 @@ class ManageLocalAuthorityUsersController(
                     absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
                 ),
             )
-            localAuthorityDataService.sendNewUserAddedEmailsToAdmins(
+            localAuthorityDataService.sendUserInvitedEmailsToAdmins(
                 currentAuthority,
                 emailModel.email,
             )

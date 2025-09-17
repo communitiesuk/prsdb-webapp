@@ -34,7 +34,7 @@ class LocalAuthorityDataService(
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
     private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
     private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
-    private val newLocalCouncilUserAdminEmailSender: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>,
+    private val invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -151,7 +151,7 @@ class LocalAuthorityDataService(
         sendUserDeletedEmailsToAdmins(localAuthorityUser)
     }
 
-    fun sendNewUserAddedEmailsToAdmins(
+    fun sendUserInvitedEmailsToAdmins(
         localAuthority: LocalAuthority,
         invitedEmail: String,
     ) {
@@ -166,7 +166,7 @@ class LocalAuthorityDataService(
             )
 
         for (admin in localAdminsByAuthority) {
-            newLocalCouncilUserAdminEmailSender.sendEmail(
+            invitationConfirmationSenderAdmin.sendEmail(
                 admin.email,
                 emailToAdmins,
             )
