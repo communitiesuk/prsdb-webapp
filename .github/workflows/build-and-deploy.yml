@@ -10,10 +10,6 @@ on:
         description: "Developer role used to deploy the environment"
         required: true
         type: string
-      update-ecs-role:
-        description: "Developer role used to update the ecs task definition"
-        required: true
-        type: string
       migrations-role:
         description: "Developer role used to run the database migration"
         required: true
