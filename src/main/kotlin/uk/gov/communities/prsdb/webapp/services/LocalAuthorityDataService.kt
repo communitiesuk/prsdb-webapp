@@ -158,14 +158,17 @@ class LocalAuthorityDataService(
         val localAdminsByAuthority =
             localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)
 
+        val emailToAdmins =
+            LocalCouncilUserInvitationInformAdminEmail(
+                councilName = localAuthority.name,
+                email = email,
+                prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+            )
+
         for (admin in localAdminsByAuthority) {
             newLocalCouncilUserAdminEmailSender.sendEmail(
                 admin.email,
-                LocalCouncilUserInvitationInformAdminEmail(
-                    councilName = localAuthority.name,
-                    email = email,
-                    prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
-                ),
+                emailToAdmins,
             )
         }
     }
