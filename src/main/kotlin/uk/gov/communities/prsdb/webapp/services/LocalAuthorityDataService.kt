@@ -153,7 +153,7 @@ class LocalAuthorityDataService(
 
     fun sendNewUserAddedEmailsToAdmins(
         localAuthority: LocalAuthority,
-        email: String,
+        invitedEmail: String,
     ) {
         val localAdminsByAuthority =
             localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)
@@ -161,7 +161,7 @@ class LocalAuthorityDataService(
         val emailToAdmins =
             LocalCouncilUserInvitationInformAdminEmail(
                 councilName = localAuthority.name,
-                email = email,
+                email = invitedEmail,
                 prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
             )
 
