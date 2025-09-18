@@ -14,6 +14,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -547,7 +548,7 @@ class LocalAuthorityDataServiceTests {
 
         // Assert
         val emailCaptor = argumentCaptor<LocalCouncilUserInvitationInformAdminEmail>()
-        verify(invitationConfirmationSenderAdmin, org.mockito.kotlin.times(2))
+        verify(invitationConfirmationSenderAdmin, times(2))
             .sendEmail(any(), emailCaptor.capture())
 
         for (captured in emailCaptor.allValues) {
