@@ -26,7 +26,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
@@ -95,12 +94,6 @@ class LocalAuthorityDataServiceTests {
                 deletionConfirmationSenderAdmin,
                 invitationConfirmationSenderAdmin,
             )
-
-        // Ensure the service uses our Mockito mocks for the email senders even if the implementation uses fields or different wiring.
-        ReflectionTestUtils.setField(localAuthorityDataService, "registrationConfirmationSender", registrationConfirmationSender)
-        ReflectionTestUtils.setField(localAuthorityDataService, "deletionConfirmationSender", deletionConfirmationSender)
-        ReflectionTestUtils.setField(localAuthorityDataService, "deletionConfirmationSenderAdmin", deletionConfirmationSenderAdmin)
-        ReflectionTestUtils.setField(localAuthorityDataService, "invitationConfirmationSenderAdmin", invitationConfirmationSenderAdmin)
     }
 
     @Test
