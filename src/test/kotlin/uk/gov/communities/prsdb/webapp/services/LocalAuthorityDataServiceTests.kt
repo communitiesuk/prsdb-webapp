@@ -548,9 +548,12 @@ class LocalAuthorityDataServiceTests {
 
         // Assert
         val emailCaptor = argumentCaptor<LocalCouncilUserInvitationInformAdminEmail>()
+        val addressCaptor = argumentCaptor<String>()
         verify(invitationConfirmationSenderAdmin, times(2))
-            .sendEmail(any(), emailCaptor.capture())
+            .sendEmail(addressCaptor.capture(), emailCaptor.capture())
 
+        val expectedAddresses = listOf(admin1.email, admin2.email)
+        assertEquals(expectedAddresses.sorted(), addressCaptor.allValues.sorted())
         for (captured in emailCaptor.allValues) {
             assertEquals(localAuthority.name, captured.councilName)
             assertEquals(invitedEmail, captured.email)
