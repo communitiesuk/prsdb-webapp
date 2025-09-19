@@ -137,10 +137,6 @@ class GasSafetyViewModelBuilderTests {
                             "propertyDetails.complianceInformation.validUntil",
                             expiredBeforeUpload.gasSafetyCertExpiryDate,
                         ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            expiredBeforeUpload.gasSafetyCertEngineerNum,
-                        ),
                     ),
                 ),
                 arguments(

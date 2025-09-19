@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ConfirmDeleteLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaUserSuccessPage
@@ -10,10 +12,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import java.net.URI
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
+    @BeforeEach
+    fun setupAbsoluteUrlProvider() {
+        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+    }
+
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent
@@ -62,7 +70,7 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
         // The success page confirms the user is deleted
         assertThat(
             successPage.confirmationBanner,
-        ).containsText("You've removed Arthur Dent's account from BATH AND NORTH EAST SOMERSET COUNCIL")
+        ).containsText("You’ve removed Arthur Dent’s account from BATH AND NORTH EAST SOMERSET COUNCIL")
         successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 

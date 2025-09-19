@@ -205,6 +205,15 @@ class EmailTemplateModelsTests {
                     "/emails/GasSafetyUpdateConfirmation.md",
                     allowExtraKeys = true,
                 ),
+                EmailTemplateTestData(
+                    LocalCouncilUserInvitationInformAdminEmail(
+                        "councilName",
+                        "email",
+                        "prsdURL",
+                    ),
+                    "/emails/LocalCouncilUserInvitationInformAdmin.md",
+                    allowExtraKeys = true,
+                ),
             )
 
         private fun createLocalAuthority(

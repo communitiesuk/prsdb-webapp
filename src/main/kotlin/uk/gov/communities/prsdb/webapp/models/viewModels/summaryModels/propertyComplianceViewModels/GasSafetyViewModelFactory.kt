@@ -45,10 +45,12 @@ class GasSafetyViewModelFactory(
                         key = "propertyDetails.complianceInformation.validUntil",
                         value = propertyCompliance.gasSafetyCertExpiryDate,
                     )
-                    addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                        value = propertyCompliance.gasSafetyCertEngineerNum,
-                    )
+                    if (propertyCompliance.gasSafetyCertEngineerNum != null) {
+                        addRow(
+                            key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
+                            value = propertyCompliance.gasSafetyCertEngineerNum,
+                        )
+                    }
                 } else {
                     addRow(
                         key = "propertyDetails.complianceInformation.exemption",

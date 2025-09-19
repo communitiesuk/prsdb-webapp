@@ -5,6 +5,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbControllerAdvice
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
@@ -38,6 +39,9 @@ class GlobalModelAttributes(
 
         // Feedback banner attributes
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
+
+        // Authenticated header attributes
+        model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)

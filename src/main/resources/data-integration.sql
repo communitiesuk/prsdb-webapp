@@ -162,3 +162,13 @@ VALUES (1, 5, '01/01/25', '01/01/25',
         true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+INSERT INTO passcode (passcode, local_authority_id, created_date, last_modified_date, subject_identifier)
+VALUES ('PRSD22', 2, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       ('PRSD23', 2, current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
+       ('PRSD24', 2, current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'),
+       ('PRSD25', 2, current_date, null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'),
+       ('PRSD26', 2, current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'),
+       ('PRSD27', 2, current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'),
+       ('PRSD29', 2, current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'),
+       ('PRSD32', 2, current_date, null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s') ON CONFLICT DO NOTHING;
