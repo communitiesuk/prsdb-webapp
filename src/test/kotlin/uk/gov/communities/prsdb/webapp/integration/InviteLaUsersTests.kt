@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -31,8 +31,8 @@ class InviteLaUsersTests : IntegrationTestWithMutableData("data-local.sql") {
         val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)
         assertThat(successPage.confirmationBanner).containsText("You’ve sent test@example.com an invite to the database")
 
-        verify(invitationConfirmationSenderAdmin).sendEmail(
-            eq("Ford.Prefect@test.com"),
+        verify(invitationConfirmationSenderAdmin, times(5)).sendEmail(
+            any(),
             any(),
         )
 
