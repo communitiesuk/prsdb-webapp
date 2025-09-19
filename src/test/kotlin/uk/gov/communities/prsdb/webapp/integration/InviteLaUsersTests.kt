@@ -18,7 +18,7 @@ import java.net.URI
 
 class InviteLaUsersTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
-    private lateinit var sendUserInvitedEmailsToAdmins: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>
+    private lateinit var invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>
 
     @Test
     fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
@@ -31,7 +31,7 @@ class InviteLaUsersTests : IntegrationTestWithMutableData("data-local.sql") {
         val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)
         assertThat(successPage.confirmationBanner).containsText("You’ve sent test@example.com an invite to the database")
 
-        verify(sendUserInvitedEmailsToAdmins).sendEmail(
+        verify(invitationConfirmationSenderAdmin).sendEmail(
             eq("Ford.Prefect@test.com"),
             any(),
         )
