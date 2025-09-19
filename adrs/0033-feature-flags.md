@@ -7,9 +7,10 @@ Draft
 Date of decision: Pending
 
 ## Context and Problem Statement
+We would like to be able to deploy to production at any point, even if some features are incomplete or otherwise 
+should not be made public - i.e. we would like to enable trunk-based development. 
+We will use feature flags to hide incomplete/unwanted features in production.
 
-We do not want to be preventing from merging main/test into production due to new code existing on lower environments
-that we don’t yet want to run in production. To deal with this, we want to use feature flags.
 Depending on how we implement them, feature flags could also provide a number of other benefits, such as allowing:
  * A/B testing
  * enabling/disabling features for specific users
@@ -28,11 +29,8 @@ What feature flag system should we use?
 * Feature Flags as a Service (FFaaS) product
 
 ## Decision Outcome
-
-Static configuration and a simple implementation via bean selection is preferred.
-This approach ensures that any running instance has fixed, predictable behaviour and leverages our Spring dependency injection system.
-It reduces the risk of misconfiguration and makes feature flag logic easier to maintain and test.
-Currently, we do not need advanced features like A/B testing or gradual rollouts, so using a library is not necessary.
+Beans selected by static configuration, because behaviour is tied to a deployment (making it predictable and 
+repeatable), it is simple to implement, and it meets our (currently simple) needs.
 
 ## Pros and Cons of the Options
 
