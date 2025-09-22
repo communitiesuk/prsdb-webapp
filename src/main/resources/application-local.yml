@@ -151,7 +151,7 @@ spring:
 spring:
   config:
     activate:
-      on-profile: local-mock-os-places
+      on-profile: local-mock-os-api
 
 os:
   api-key: fake-key
