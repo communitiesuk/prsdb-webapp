@@ -8,10 +8,10 @@ import java.net.http.HttpClient
 
 @PrsdbWebConfiguration
 class OSPlacesConfig {
-    @Value("\${os-places.base-url}")
+    @Value("\${os.places.base-url}")
     lateinit var baseURL: String
 
-    @Value("\${os-places.api-key}")
+    @Value("\${os.api-key}")
     lateinit var apiKey: String
 
     val httpClient: HttpClient = HttpClient.newHttpClient()
