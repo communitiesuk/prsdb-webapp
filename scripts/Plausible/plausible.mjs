@@ -1,4 +1,6 @@
 import 'dotenv/config'
+import Papa from 'papaparse'
+import fs from 'fs'
 
 const BASE_URL = process.env.PLAUSIBLE_BASE_URL || 'https://plausible.io'
 const API_KEY = process.env.PLAUSIBLE_API_KEY
@@ -45,7 +47,16 @@ export async function queryPlausible(query) {
 ;( async () => {
     try {
         const data = await queryPlausible(QUERY)
+        const csv = Papa.unparse(data.results)
         console.log(JSON.stringify(data))
+        console.log(csv)
+        fs.writeFile('scripts/Plausible/Outputs/Output.csv', csv, (err) => {
+            if (err) {
+                console.error('Error writing to CSV file:', err);
+            } else {
+                console.log(`CSV data written to Output.csv`);
+            }
+        });
     } catch (e) {
         console.error(e.stack || Sring(e))
         process.exit(1)

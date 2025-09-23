@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rollup --config",
     "test": "node --test src/test/js/**/*.test.js",
-    "plausible": "node scripts/plausible.mjs"
+    "plausible": "node scripts/Plausible/plausible.mjs"
   },
   "babel": {
     "plugins": [
@@ -37,6 +37,7 @@
     "cookie": "^1.0.2",
     "govuk-frontend": "^5.11.0",
     "govuk-one-login-service-header": "github:govuk-one-login/service-header",
-    "jquery": "^3.7.1"
+    "jquery": "^3.7.1",
+    "papaparse": "^5.5.3"
   }
 }
