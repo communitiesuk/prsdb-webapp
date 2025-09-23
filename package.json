@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "rollup --config",
-    "test": "node --test src/test/js/**/*.test.js"
+    "test": "node --test src/test/js/**/*.test.js",
+    "plausible": "node scripts/plausible.mjs"
   },
   "babel": {
     "plugins": [
