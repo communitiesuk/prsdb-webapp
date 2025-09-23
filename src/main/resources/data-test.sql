@@ -105,11 +105,11 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2),
-       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21) ON CONFLICT DO NOTHING;
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2, 'EG1 2AB'),
+       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
