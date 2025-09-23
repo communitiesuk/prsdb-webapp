@@ -18,12 +18,28 @@ if (!SITE_ID) {
   process.exit(1)
 }
 
+// Below are some example queries I am using to test the script and output
+
 const QUERY = {
     site_id: SITE_ID,
-    date_range: '30d',
+    date_range: '5d',
     metrics: ['visitors', 'pageviews', 'bounce_rate'],
     dimensions: ['visit:country_name', 'visit:city_name'],
     filters: [['is_not', 'visit:country_name', ['']]]
+}
+
+const allStatsByPage = {
+    site_id: SITE_ID,
+    date_range: "all",
+    metrics: ["visitors", "pageviews", "bounce_rate", "visit_duration", "events", "time_on_page"],
+    dimensions: ["event:page"]
+}
+
+const oneStatByPage = {
+    site_id: SITE_ID,
+    date_range: "5d",
+    metrics: ["time_on_page"],
+    dimensions: ["event:page"]
 }
 
 export async function queryPlausible(query) {
@@ -44,10 +60,27 @@ export async function queryPlausible(query) {
     }
 }
 
+function mapResultsToNamedFields(data) {
+    const metrics = data.query.metrics || [];
+    const dimensions = data.query.dimensions || [];
+    return data.results.map(row => {
+        const obj = {};
+        metrics.forEach((metric, i) => {
+            obj[metric] = row.metrics[i];
+        });
+        dimensions.forEach((dimension, i) => {
+            obj[dimension] = row.dimensions[i];
+        });
+        return obj;
+    });
+}
+
 ;( async () => {
     try {
-        const data = await queryPlausible(QUERY)
-        const csv = Papa.unparse(data.results)
+        const data = await queryPlausible(oneStatByPage)
+        const mappedData = mapResultsToNamedFields(data)
+        console.log(mappedData)
+        const csv = Papa.unparse(mappedData)
         console.log(JSON.stringify(data))
         console.log(csv)
         fs.writeFile('scripts/Plausible/Outputs/Output.csv', csv, (err) => {
@@ -58,7 +91,7 @@ export async function queryPlausible(query) {
             }
         });
     } catch (e) {
-        console.error(e.stack || Sring(e))
+        console.error(e.stack || String(e))
         process.exit(1)
     }
 })()
