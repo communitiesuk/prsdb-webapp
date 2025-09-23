@@ -32,3 +32,8 @@ google-analytics:
 
 beta-feedback:
   team-email-address: feedback@example.com
+
+os:
+  api-key: ${OS_API_KEY}
+  downloads:
+    base-url: https://api.os.uk/downloads/v1
