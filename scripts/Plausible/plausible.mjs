@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import Papa from 'papaparse'
 import fs from 'fs'
+import path from 'path'
 
 const BASE_URL = process.env.PLAUSIBLE_BASE_URL || 'https://plausible.io'
 const API_KEY = process.env.PLAUSIBLE_API_KEY
@@ -18,31 +19,7 @@ if (!SITE_ID) {
   process.exit(1)
 }
 
-// Below are some example queries I am using to test the script and output
-
-const QUERY = {
-    site_id: SITE_ID,
-    date_range: '5d',
-    metrics: ['visitors', 'pageviews', 'bounce_rate'],
-    dimensions: ['visit:country_name', 'visit:city_name'],
-    filters: [['is_not', 'visit:country_name', ['']]]
-}
-
-const allStatsByPage = {
-    site_id: SITE_ID,
-    date_range: "all",
-    metrics: ["visitors", "pageviews", "bounce_rate", "visit_duration", "events", "time_on_page"],
-    dimensions: ["event:page"]
-}
-
-const oneStatByPage = {
-    site_id: SITE_ID,
-    date_range: "5d",
-    metrics: ["time_on_page"],
-    dimensions: ["event:page"]
-}
-
-export async function queryPlausible(query) {
+async function queryPlausible(query) {
     const res = await fetch (BASE_URL, {
         method: 'POST',
         headers: {
@@ -75,23 +52,40 @@ function mapResultsToNamedFields(data) {
     });
 }
 
-;( async () => {
-    try {
-        const data = await queryPlausible(oneStatByPage)
-        const mappedData = mapResultsToNamedFields(data)
-        console.log(mappedData)
-        const csv = Papa.unparse(mappedData)
-        console.log(JSON.stringify(data))
-        console.log(csv)
-        fs.writeFile('scripts/Plausible/Outputs/Output.csv', csv, (err) => {
-            if (err) {
-                console.error('Error writing to CSV file:', err);
+const INPUT_QUERIES_PATH = path.join('scripts', 'Plausible', 'Inputs', 'inputQueries.json')
+const inputQueries = JSON.parse(fs.readFileSync(INPUT_QUERIES_PATH, 'utf8'))
+
+function replaceSiteId(obj, siteId) {
+    if (Array.isArray(obj)) {
+        return obj.map(item => replaceSiteId(item, siteId));
+    } else if (obj && typeof obj === 'object') {
+        const newObj = {};
+        for (const key in obj) {
+            if (obj[key] === 'SITE_ID') {
+                newObj[key] = siteId;
             } else {
-                console.log(`CSV data written to Output.csv`);
+                newObj[key] = replaceSiteId(obj[key], siteId);
             }
-        });
-    } catch (e) {
-        console.error(e.stack || String(e))
-        process.exit(1)
+        }
+        return newObj;
     }
-})()
+    return obj;
+}
+
+async function runAllQueries() {
+    for (const [queryName, query] of Object.entries(inputQueries)) {
+        try {
+            const queryWithSiteId = replaceSiteId(query, SITE_ID)
+            const data = await queryPlausible(queryWithSiteId)
+            const mappedData = mapResultsToNamedFields(data)
+            const csv = Papa.unparse(mappedData)
+            const outputPath = path.join('scripts', 'Plausible', 'Outputs', `${queryName}.csv`)
+            fs.writeFileSync(outputPath, csv)
+            console.log(`CSV data written to ${outputPath}`)
+        } catch (e) {
+            console.error(`Error running query '${queryName}':`, e.stack || String(e))
+        }
+    }
+}
+
+runAllQueries()

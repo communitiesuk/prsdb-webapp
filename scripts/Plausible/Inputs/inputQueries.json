@@ -1,0 +1,22 @@
+{
+"dwelling_time_per_page": {
+  "site_id": "SITE_ID",
+  "date_range": "5d",
+  "metrics": [
+    "time_on_page"
+  ],
+  "dimensions": [
+    "event:page"
+  ]
+},
+"top_pages": {
+  "site_id": "SITE_ID",
+  "date_range": "5d",
+  "metrics": [
+    "pageviews"
+  ],
+  "dimensions": [
+    "event:page"
+  ]
+}
+}
