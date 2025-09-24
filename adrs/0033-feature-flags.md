@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Accepted
 
-Date of decision: Pending
+Date of decision: 22/09/2025
 
 ## Context and Problem Statement
 We would like to be able to deploy to production at any point, even if some features are incomplete or otherwise 
@@ -21,9 +21,17 @@ Depending on how we implement them, feature flags could also provide a number of
 What feature flag system should we use?
 
 ## Considered Options
+1. Fully hard-coded: `if`s + consts, all baked in. Super simple, no per-env variability.
+2. Hard-coded variability: `if`s + a custom config class with flags as methods, which calc their value based on detected env
+3. Spring config controlled variability: per-env Spring config defines the value of feature flags / which beans are used; that controls behaviour (through whatever combination of `if`s and strategy pattern objects we fancy)
+4. Spring config + a library: as above, but with more options than just release toggles
+5. Self-hosted dynamic flags (via library): DB + UI to control values, `if`s + strategy patterns to implement behaviours
+6. SaaS: as above, but a managed service
 
-* Simple if statements to check property status in functional code
-* Beans selected by static configuration
+* If statements with hard-coded switch values
+* If statements with custom interface
+* Beans selected by per environment Spring configuration
+* 
 * Static configuration with a library selecting beans
 * Library selecting beans with database backing and console
 * Feature Flags as a Service (FFaaS) product
