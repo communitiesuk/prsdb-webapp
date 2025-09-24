@@ -12,10 +12,12 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
+import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
+import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.service.notify.NotificationClient
@@ -68,4 +70,10 @@ class PrsdbWebappApplicationTests {
 
     @MockitoBean
     lateinit var epcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @MockitoBean
+    lateinit var osDownloadsConfig: OsDownloadsConfig
+
+    @MockitoBean
+    lateinit var osDownloadsClient: OsDownloadsClient
 }
