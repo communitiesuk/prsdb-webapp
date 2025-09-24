@@ -3,7 +3,7 @@ import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
 
-const BASE_URL = process.env.PLAUSIBLE_BASE_URL || 'https://plausible.io'
+const BASE_URL = process.env.PLAUSIBLE_BASE_URL
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const SITE_ID = process.env.PLAUSIBLE_SITE_ID
 
@@ -52,7 +52,7 @@ function mapResultsToNamedFields(data) {
     });
 }
 
-const INPUT_QUERIES_PATH = path.join('scripts', 'Plausible', 'Inputs', 'inputQueries.json')
+const INPUT_QUERIES_PATH = path.join('Inputs', 'inputQueries.json')
 const inputQueries = JSON.parse(fs.readFileSync(INPUT_QUERIES_PATH, 'utf8'))
 
 function replaceSiteId(obj, siteId) {
@@ -79,7 +79,7 @@ async function runAllQueries() {
             const data = await queryPlausible(queryWithSiteId)
             const mappedData = mapResultsToNamedFields(data)
             const csv = Papa.unparse(mappedData)
-            const outputPath = path.join('scripts', 'Plausible', 'Outputs', `${queryName}.csv`)
+            const outputPath = path.join('Outputs', `${queryName}.csv`)
             fs.writeFileSync(outputPath, csv)
             console.log(`CSV data written to ${outputPath}`)
         } catch (e) {

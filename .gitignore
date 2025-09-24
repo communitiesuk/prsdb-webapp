@@ -46,6 +46,7 @@ notify-template-tests.run.xml
 
 ### Node ###
 /node_modules
+scripts/Plausible/node_modules
 
 ### Built assets ###
 /dist

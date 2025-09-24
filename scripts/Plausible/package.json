@@ -1,0 +1,16 @@
+{
+  "name": "plausible",
+  "version": "1.0.0",
+  "description": "A simple node app for retrieving stats from Plausible API",
+  "main": "plausible.mjs",
+  "scripts": {
+    "plausible": "node plausible.mjs",
+    "test": "test"
+  },
+  "author": "Bill Haigh",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^17.2.2",
+    "papaparse": "^5.5.3"
+  }
+}
