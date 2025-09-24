@@ -3,10 +3,9 @@ import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
 
-const BASE_URL = process.env.PLAUSIBLE_BASE_URL
 const API_KEY = process.env.PLAUSIBLE_API_KEY
-const SITE_ID = process.env.PLAUSIBLE_SITE_ID
-
+const SITE_ID = "prod.register-home-to-rent.communities.gov.uk"
+const BASE_URL = "https://plausible.io/api/v2/query"
 
 
 if (!API_KEY) {
@@ -55,28 +54,18 @@ function mapResultsToNamedFields(data) {
 const INPUT_QUERIES_PATH = path.join('Inputs', 'inputQueries.json')
 const inputQueries = JSON.parse(fs.readFileSync(INPUT_QUERIES_PATH, 'utf8'))
 
-function replaceSiteId(obj, siteId) {
-    if (Array.isArray(obj)) {
-        return obj.map(item => replaceSiteId(item, siteId));
-    } else if (obj && typeof obj === 'object') {
-        const newObj = {};
-        for (const key in obj) {
-            if (obj[key] === 'SITE_ID') {
-                newObj[key] = siteId;
-            } else {
-                newObj[key] = replaceSiteId(obj[key], siteId);
-            }
-        }
-        return newObj;
-    }
-    return obj;
-}
-
 async function runAllQueries() {
     for (const [queryName, query] of Object.entries(inputQueries)) {
         try {
-            const queryWithSiteId = replaceSiteId(query, SITE_ID)
-            const data = await queryPlausible(queryWithSiteId)
+            if (!query.include) {
+                console.log('Please include total rows in the query. Instructions are in the readme')
+                process.exit(1);
+            }
+            const data = await queryPlausible(query)
+            console.log(data.meta.total_rows)
+            if (data.meta.total_rows > 10000) {
+                console.warn(`Warning: Query '${queryName}' returned ${data.meta.total_rows} rows, which exceeds the 10,000 row limit. Consider refining your query.`);
+            }
             const mappedData = mapResultsToNamedFields(data)
             const csv = Papa.unparse(mappedData)
             const outputPath = path.join('Outputs', `${queryName}.csv`)
