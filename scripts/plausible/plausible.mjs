@@ -51,7 +51,7 @@ function mapResultsToNamedFields(data) {
     });
 }
 
-const INPUT_QUERIES_PATH = path.join('Inputs', 'inputQueries.json')
+const INPUT_QUERIES_PATH = path.join('inputs', 'inputQueries.json')
 const inputQueries = JSON.parse(fs.readFileSync(INPUT_QUERIES_PATH, 'utf8'))
 
 async function runAllQueries() {
@@ -63,12 +63,12 @@ async function runAllQueries() {
             }
             const data = await queryPlausible(query)
             console.log(data.meta.total_rows)
-            if (data.meta.total_rows > 10000) {
-                console.warn(`Warning: Query '${queryName}' returned ${data.meta.total_rows} rows, which exceeds the 10,000 row limit. Consider refining your query.`);
+            if (data.meta.total_rows >= 10000) {
+                console.error(`Warning: Query '${queryName}' returned ${data.meta.total_rows} rows, which exceeds the 10,000 row limit. Consider refining your query.`);
             }
             const mappedData = mapResultsToNamedFields(data)
             const csv = Papa.unparse(mappedData)
-            const outputPath = path.join('Outputs', `${queryName}.csv`)
+            const outputPath = path.join('outputs', `${queryName}.csv`)
             fs.writeFileSync(outputPath, csv)
             console.log(`CSV data written to ${outputPath}`)
         } catch (e) {
