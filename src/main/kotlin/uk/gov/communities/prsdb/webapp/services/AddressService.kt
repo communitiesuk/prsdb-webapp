@@ -25,4 +25,19 @@ class AddressService(
 
         return addressRepository.save(Address(addressDataModel, localAuthority))
     }
+
+    fun getStoredDataPackageVersionId(): String? {
+        val tableComment = addressRepository.findComment() ?: return null
+        val dataPackageVersionId = tableComment.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
+        return dataPackageVersionId.ifEmpty { null }
+    }
+
+    fun setStoredDataPackageVersionId(dataPackageVersionId: String) {
+        val comment = "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$dataPackageVersionId"
+        addressRepository.saveComment(comment)
+    }
+
+    companion object {
+        const val DATA_PACKAGE_VERSION_COMMENT_PREFIX = "dataPackageVersionId="
+    }
 }

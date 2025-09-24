@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.PrsdbRestController
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 
-@Profile("local-mock-os-places")
+@Profile("local-mock-os-api")
 @PrsdbRestController
 @RequestMapping("/local/os-places")
 class OSPlacesAPIStubController {

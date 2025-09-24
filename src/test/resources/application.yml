@@ -13,9 +13,6 @@ notify:
   support-email: support@example.com
   use-production-notify: false
 
-os-places:
-  api-key: ${OS_PLACES_API_KEY}
-
 base-url:
   landlord: example.com
   local-authority: example.com
