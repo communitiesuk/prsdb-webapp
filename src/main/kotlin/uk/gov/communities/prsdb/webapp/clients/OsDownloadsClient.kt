@@ -29,7 +29,7 @@ class OsDownloadsClient(
     ): InputStream {
         val response = getResponse("/dataPackages/$dataPackageId/versions/$versionId/downloads?fileName=$fileName")
         val redirectUri = getRedirectUri(response)
-        return getResponse(redirectUri).body()
+        return getFileDownloadResponse(redirectUri).body()
     }
 
     private fun getResponse(endpoint: String): HttpResponse<String> {
@@ -50,7 +50,7 @@ class OsDownloadsClient(
         }
     }
 
-    private fun getResponse(uri: URI): HttpResponse<InputStream> {
+    private fun getFileDownloadResponse(uri: URI): HttpResponse<InputStream> {
         val request: HttpRequest =
             HttpRequest
                 .newBuilder()
@@ -68,7 +68,7 @@ class OsDownloadsClient(
     private fun getRedirectUri(response: HttpResponse<String>): URI {
         val redirectUriString =
             response.headers().firstValue("location").orElseThrow {
-                HttpException("Error: 307 response from OS Downloads missing 'location' header")
+                HttpException("307 response from OS Downloads missing 'location' header")
             }
         return URI.create(redirectUriString)
     }
