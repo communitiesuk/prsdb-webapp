@@ -16,19 +16,20 @@ GROUP BY
     la.name, p.local_authority_id
 ORDER BY la.name;
 
--- Property registrations
+-- Property registrations by local council that the landlord is associated with (via claimed passcode)
+-- Note this can be different from the local council the property is in
 SELECT
     la.name AS local_council_name,
     COUNT(*) FILTER (WHERE ownerships.po_created_date < :reference_date) AS total_property_ownerships,
     COUNT(*) FILTER (WHERE ownerships.po_created_date >= :reference_date - INTERVAL '14 DAYS' AND ownerships.po_created_date < :reference_date) AS new_property_ownerships_last_2_weeks
 FROM(
         SELECT
-            a.local_authority_id AS local_council_id,
+            p.local_authority_id AS local_council_id,
             po.created_date as po_created_date,
             po.last_modified_date AS po_updated_date
-        FROM property p
-                 JOIN address a ON p.address_id = a.id
-                 JOIN property_ownership po ON p.id = po.property_id
+        FROM property_ownership po
+                JOIN landlord l ON po.primary_landlord_id = l.id
+                JOIN passcode p ON p.subject_identifier = l.subject_identifier
     ) ownerships
         JOIN local_authority la ON ownerships.local_council_id = la.id
 GROUP BY
