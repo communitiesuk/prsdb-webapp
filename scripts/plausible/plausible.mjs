@@ -70,6 +70,7 @@ async function runAllQueries() {
                 const data = await queryPlausible(query)
                 if (data.meta.total_rows >= 10000) {
                     console.error(`Warning: Query '${queryName}' in file '${inputFile}' returned ${data.meta.total_rows} rows, which exceeds the 10,000 row limit. Consider refining your query.`);
+                    process.exit(1);
                 }
                 const mappedData = mapResultsToNamedFields(data)
                 const csv = Papa.unparse(mappedData)
