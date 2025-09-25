@@ -7,7 +7,6 @@ charset = utf-8
 ; end_of_line = lf TODO PRSD-980 uncomment this line when making all line endings lf
 insert_final_newline = true
 trim_trailing_whitespace = false
-continuation_indent_size = 8
 
 [*.scss]
 indent_size = 2
