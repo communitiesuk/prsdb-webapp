@@ -56,6 +56,9 @@ class DefaultSecurityConfig(
                     .permitAll()
                     .requestMatchers("/$MAINTENANCE_PATH_SEGMENT")
                     .permitAll()
+                    // TODO PRSD-1021: Remove this when ExampleOsDownloadsController is removed
+                    .requestMatchers("/example/os-downloads")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login(Customizer.withDefaults())

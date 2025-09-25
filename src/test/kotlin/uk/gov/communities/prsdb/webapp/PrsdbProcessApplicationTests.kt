@@ -14,7 +14,9 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
+import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
@@ -33,8 +35,8 @@ import kotlin.reflect.KClass
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest
 @ActiveProfiles("web-server-deactivated", "local")
-// The EMAILNOTIFICATIONS_APIKEY property is required for the Notify config to load, and even with no value set the beans can be created
-@TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY"])
+// These environment variables are required for the expected beans to be created - values aren't needed
+@TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY", "OS_API_KEY"])
 class PrsdbProcessApplicationTests {
     @Autowired
     private var context: ConfigurableApplicationContext? = null
@@ -44,6 +46,9 @@ class PrsdbProcessApplicationTests {
 
     @MockitoBean
     lateinit var s3client: S3Client
+
+    @MockitoBean
+    lateinit var osDownloadsClient: OsDownloadsClient
 
     @Test
     fun `only necessary PRSDB beans are available in non web mode`() {
@@ -63,6 +68,7 @@ class PrsdbProcessApplicationTests {
                 VirusScanProcessingService::class.java.simpleName,
                 AbsoluteUrlProvider::class.java.simpleName,
                 VirusAlertSender::class.java.simpleName,
+                OsDownloadsConfig::class.java.simpleName,
                 // Beans with scopes use their simple name with the scope prefix as the bean name by default
                 "scopedtarget.${NotifyIdService::class.java.simpleName}",
                 // Beans with explicit names can retrieve their name by reflecting on the annotation using the `getExplicitBeanName` function
@@ -83,12 +89,7 @@ class PrsdbProcessApplicationTests {
                 }.map { it.lowercase() }
                 .toSet()
 
-        assertEquals(expectedBeansByName, beanNames) {
-            buildHelpfulErrorMessage(
-                expectedBeansByName.toList(),
-                beanNames.toList(),
-            )
-        }
+        assertEquals(expectedBeansByName, beanNames) { buildHelpfulErrorMessage(expectedBeansByName.toList(), beanNames.toList()) }
     }
 
     private inline fun <reified TAnnotation : Annotation> getExplicitBeanName(klass: KClass<*>): String =
