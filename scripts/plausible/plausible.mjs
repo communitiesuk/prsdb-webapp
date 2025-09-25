@@ -97,7 +97,7 @@ function getInputFiles() {
     process.exit(1)
 }
 
-async function runAllQueries() {
+async function runPlausibleScript() {
     if (options.clear) {
         clearOutputsDir()
         if (!options.save) {
@@ -134,4 +134,4 @@ async function runAllQueries() {
     }
 }
 
-runAllQueries()
+runPlausibleScript()
