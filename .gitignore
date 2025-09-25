@@ -52,6 +52,7 @@ scripts/plausible/node_modules
 /dist
 /scripts/output
 /scripts/plausible/outputs
+/scripts/plausible/saved
 
 ### Local ###
 .local-uploads

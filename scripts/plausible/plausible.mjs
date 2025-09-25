@@ -2,6 +2,7 @@ import 'dotenv/config'
 import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
+import { Command } from 'commander'
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const SITE_ID = "prod.register-home-to-rent.communities.gov.uk"
@@ -51,13 +52,62 @@ function mapResultsToNamedFields(data) {
     });
 }
 
+const program = new Command();
+program
+  .option('--all', 'Process all input files')
+  .option('--input <filename>', 'Process a specific input file')
+  .option('--clear', 'Clear the outputs directory before running')
+  .option('--save', 'Save processed output in the saved directory (not cleared)')
+  .parse(process.argv);
+
+const options = program.opts();
 const INPUTS_DIR = path.join('inputs')
-const inputFiles = fs.readdirSync(INPUTS_DIR).filter(f => f.endsWith('.json'))
+const OUTPUTS_DIR = options.save ? path.join('saved') : path.join('outputs')
+
+function clearOutputsDir() {
+    // Only clear if not saving to 'saved'
+    if (!options.save && fs.existsSync('outputs')) {
+        for (const entry of fs.readdirSync('outputs')) {
+            const entryPath = path.join('outputs', entry)
+            if (fs.lstatSync(entryPath).isDirectory()) {
+                fs.rmSync(entryPath, { recursive: true, force: true })
+            } else {
+                fs.unlinkSync(entryPath)
+            }
+        }
+    }
+}
+
+function getInputFiles() {
+    if (options.all && options.input) {
+        console.error('Please specify only one of --all or --input.')
+        process.exit(1)
+    }
+    if (options.all) {
+        return fs.readdirSync(INPUTS_DIR).filter(f => f.endsWith('.json'))
+    }
+    if (options.input) {
+        if (!fs.existsSync(path.join(INPUTS_DIR, options.input))) {
+            console.error(`Input file ${options.input} does not exist in ${INPUTS_DIR}`)
+            process.exit(1)
+        }
+        return [options.input]
+    }
+    console.error('Please specify either --all or --input <filename>.')
+    process.exit(1)
+}
 
 async function runAllQueries() {
+    if (options.clear) {
+        clearOutputsDir()
+        if (!options.save) {
+            console.log('Outputs directory cleared.')
+        }
+    }
+    const inputFiles = getInputFiles()
     for (const inputFile of inputFiles) {
         const inputQueries = JSON.parse(fs.readFileSync(path.join(INPUTS_DIR, inputFile), 'utf8'))
-        const outputSubdir = path.join('outputs', path.basename(inputFile, '.json'))
+        const outputSubdir = path.join(OUTPUTS_DIR, path.basename(inputFile, '.json'))
         if (!fs.existsSync(outputSubdir)) {
             fs.mkdirSync(outputSubdir, { recursive: true })
         }
