@@ -51,28 +51,34 @@ function mapResultsToNamedFields(data) {
     });
 }
 
-const INPUT_QUERIES_PATH = path.join('inputs', 'inputQueries.json')
-const inputQueries = JSON.parse(fs.readFileSync(INPUT_QUERIES_PATH, 'utf8'))
+const INPUTS_DIR = path.join('inputs')
+const inputFiles = fs.readdirSync(INPUTS_DIR).filter(f => f.endsWith('.json'))
 
 async function runAllQueries() {
-    for (const [queryName, query] of Object.entries(inputQueries)) {
-        try {
-            if (!query.include) {
-                console.log('Please include total rows in the query. Instructions are in the readme')
-                process.exit(1);
+    for (const inputFile of inputFiles) {
+        const inputQueries = JSON.parse(fs.readFileSync(path.join(INPUTS_DIR, inputFile), 'utf8'))
+        const outputSubdir = path.join('outputs', path.basename(inputFile, '.json'))
+        if (!fs.existsSync(outputSubdir)) {
+            fs.mkdirSync(outputSubdir, { recursive: true })
+        }
+        for (const [queryName, query] of Object.entries(inputQueries)) {
+            try {
+                if (!query.include.total_rows) {
+                    console.log('Please include total rows in the query. Instructions are in the readme')
+                    process.exit(1);
+                }
+                const data = await queryPlausible(query)
+                if (data.meta.total_rows >= 10000) {
+                    console.error(`Warning: Query '${queryName}' in file '${inputFile}' returned ${data.meta.total_rows} rows, which exceeds the 10,000 row limit. Consider refining your query.`);
+                }
+                const mappedData = mapResultsToNamedFields(data)
+                const csv = Papa.unparse(mappedData)
+                const outputPath = path.join(outputSubdir, `${queryName}.csv`)
+                fs.writeFileSync(outputPath, csv)
+                console.log(`CSV data written to ${outputPath}`)
+            } catch (e) {
+                console.error(`Error running query '${queryName}' in file '${inputFile}':`, e.stack || String(e))
             }
-            const data = await queryPlausible(query)
-            console.log(data.meta.total_rows)
-            if (data.meta.total_rows >= 10000) {
-                console.error(`Warning: Query '${queryName}' returned ${data.meta.total_rows} rows, which exceeds the 10,000 row limit. Consider refining your query.`);
-            }
-            const mappedData = mapResultsToNamedFields(data)
-            const csv = Papa.unparse(mappedData)
-            const outputPath = path.join('outputs', `${queryName}.csv`)
-            fs.writeFileSync(outputPath, csv)
-            console.log(`CSV data written to ${outputPath}`)
-        } catch (e) {
-            console.error(`Error running query '${queryName}':`, e.stack || String(e))
         }
     }
 }
