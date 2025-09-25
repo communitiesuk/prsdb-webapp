@@ -79,7 +79,7 @@ class OsDownloadsClientTests {
         val thrownException =
             assertThrows<HttpException> { osDownloadsClient.getDataPackageVersionFile("dataPackageId", "versionId", "fileName") }
 
-        val expectedErrorMessage = "Error: 307 response from OS Downloads missing 'location' header"
+        val expectedErrorMessage = "307 response from OS Downloads missing 'location' header"
         assertEquals(expectedErrorMessage, thrownException.message)
     }
 
