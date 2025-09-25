@@ -5,16 +5,16 @@ SELECT
     percentile_cont(0.99) WITHIN GROUP (ORDER BY time_to_register_landlord) AS p99_time_to_register_landlord
 FROM (
      SELECT
-         p.last_modified_date - l.created_date AS time_to_register_landlord
+         l.created_date - olu.created_date AS time_to_register_landlord
      -- To get in minutes instead, use
      -- EXTRACT(EPOCH FROM (p.last_modified_date - l.created_date)) / 60 AS time_to_register_landlord
      FROM
          landlord l
              JOIN (
              SELECT
-                 subject_identifier,
-                 last_modified_date
+                 id,
+                 created_date
              FROM
-                 passcode
-         ) p ON p.subject_identifier = p.subject_identifier
+                 one_login_user
+         ) olu ON olu.id = l.subject_identifier
  ) t
