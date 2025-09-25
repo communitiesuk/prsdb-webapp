@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import java.net.http.HttpClient
 

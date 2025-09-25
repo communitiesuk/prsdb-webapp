@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.services.AddressLookupService
