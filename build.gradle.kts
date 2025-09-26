@@ -35,6 +35,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -92,6 +93,9 @@ dependencies {
 
     // Streaming upload without storing on local system
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
+
+    // Feature flags
+    implementation("org.ff4j:ff4j-spring-boot-starter-webmvc:2.0.0")
 }
 
 kotlin {

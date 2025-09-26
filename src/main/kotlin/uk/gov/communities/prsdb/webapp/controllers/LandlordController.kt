@@ -1,7 +1,13 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
+import org.ff4j.FF4j
+import org.ff4j.aop.Flip
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.stereotype.Component
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.GetMapping
@@ -45,6 +51,8 @@ class LandlordController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
+    private val ff4j: FF4j,
+    @param:Qualifier("my-default-bean") private val toggler: IToggler,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -54,6 +62,17 @@ class LandlordController(
         model: Model,
         principal: Principal,
     ): String {
+        println("Feature flag is enabled: ${ff4j.check("featureIsFoo")}")
+        if (!toggler.isFeatureEnabled()) {
+            println("Feature flag is disabled")
+        } else {
+            println("Feature flag is enabled")
+        }
+        if (ff4j.check("featureIsFoo")) {
+            ff4j.disable("featureIsFoo")
+        } else {
+            ff4j.enable("featureIsFoo")
+        }
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
@@ -217,4 +236,25 @@ class LandlordController(
         fun deleteIncompletePropertyPath(contextId: Long): String =
             UriTemplate(DELETE_INCOMPLETE_PROPERTY_ROUTE).expand(contextId).toASCIIString()
     }
+}
+
+@Flip(name = "featureIsFoo", alterBean = "smashmouth")
+interface IToggler {
+    fun isFeatureEnabled(): Boolean
+}
+
+@Component("smashmouth")
+class FooToggler : IToggler {
+    override fun isFeatureEnabled(): Boolean = true
+}
+
+@Component("my-default-bean")
+class DefaultToggler : IToggler {
+    override fun isFeatureEnabled(): Boolean = false
+}
+
+@Configuration
+class FF4JConfiguration {
+    @Bean
+    fun getFF4J(): FF4j = FF4j("ff4j-example.xml")
 }
