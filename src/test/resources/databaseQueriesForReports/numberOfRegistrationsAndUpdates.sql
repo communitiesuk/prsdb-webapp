@@ -3,7 +3,7 @@
 -- Total current registrations, and those in the last 2 weeks
 -- Landlord registrations / updates
 SELECT
-    COUNT(*) AS total_landlords,
+    COUNT(*) FILTER (WHERE created_date < :reference_date) AS total_landlords ,
     COUNT(*) FILTER (WHERE created_date >= :reference_date - INTERVAL '14 DAYS' AND created_date < :reference_date) AS new_landlords_last_2_weeks,
     COUNT(*) FILTER (WHERE last_modified_date >= :reference_date - INTERVAL '14 DAYS' AND last_modified_date < :reference_date) AS updated_landlords_last_2_weeks
 FROM
@@ -11,7 +11,7 @@ FROM
 
 -- Property registrations / updates
 SELECT
-    COUNT(*) AS total_property_ownerships,
+    COUNT(*) FILTER (WHERE created_date < :reference_date) AS total_property_ownerships,
     COUNT(*) FILTER (WHERE created_date >= :reference_date - INTERVAL '14 DAYS' AND created_date < :reference_date) AS new_property_ownerships_last_2_weeks,
     COUNT(*) FILTER (WHERE last_modified_date >= :reference_date - INTERVAL '14 DAYS' AND last_modified_date < :reference_date) AS updated_property_ownerships_last_2_weeks
 FROM
@@ -19,7 +19,7 @@ FROM
 
 -- Compliances added / updated
 SELECT
-    COUNT(*) AS total_property_compliances,
+    COUNT(*) FILTER (WHERE created_date < :reference_date) AS total_property_compliances,
     COUNT(*) FILTER (WHERE created_date >= :reference_date - INTERVAL '14 DAYS' AND created_date < :reference_date) AS new_property_compliances_last_2_weeks,
     COUNT(*) FILTER (WHERE last_modified_date >= :reference_date - INTERVAL '14 DAYS' AND last_modified_date < :reference_date) AS updated_property_compliances_last_2_weeks
 FROM
@@ -28,7 +28,7 @@ FROM
 -- Local council users added / updated
 SELECT
     is_manager AS is_admin,
-    COUNT(*) AS total_lc_users,
+    COUNT(*) FILTER (WHERE created_date < :reference_date) AS total_lc_users,
     COUNT(*) FILTER (WHERE created_date >= :reference_date - INTERVAL '14 DAYS' AND created_date < :reference_date) AS new_lc_users_last_2_weeks,
     COUNT(*) FILTER (WHERE last_modified_date >= :reference_date - INTERVAL '14 DAYS' AND last_modified_date < :reference_date) AS updated_lc_users_last_2_weeks
 FROM
