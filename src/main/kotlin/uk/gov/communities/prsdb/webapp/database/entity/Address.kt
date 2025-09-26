@@ -8,10 +8,13 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import org.hibernate.annotations.Comment
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.services.AddressService.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
 
 @Entity
+@Comment(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
 class Address() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +49,7 @@ class Address() : ModifiableAuditableEntity() {
     var townName: String? = null
         private set
 
+    @Column(nullable = false)
     var postcode: String? = null
         private set
 

@@ -68,16 +68,16 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2),
-       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (5, '2025-01-15 00:00:00+00', null, null, '5a, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (6, '2025-01-15 00:00:00+00', null, null, '6, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (7, '2025-01-15 00:00:00+00', null, null, '7, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (8, '2025-01-15 00:00:00+00', null, null, '8, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (9, '2025-07-24 00:00:00+00', null, 100090154806, '19, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21) ON CONFLICT DO NOTHING;
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2, 'WC2R 1LA'),
+       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (5, '2025-01-15 00:00:00+00', null, null, '5a, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (6, '2025-01-15 00:00:00+00', null, null, '6, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (7, '2025-01-15 00:00:00+00', null, null, '7, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (8, '2025-01-15 00:00:00+00', null, null, '8, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (9, '2025-07-24 00:00:00+00', null, 100090154806, '19, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -162,3 +162,13 @@ VALUES (1, 5, '01/01/25', '01/01/25',
         true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+INSERT INTO passcode (passcode, local_authority_id, created_date, last_modified_date, subject_identifier)
+VALUES ('PRSD22', 2, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       ('PRSD23', 2, current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
+       ('PRSD24', 2, current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'),
+       ('PRSD25', 2, current_date, null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'),
+       ('PRSD26', 2, current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'),
+       ('PRSD27', 2, current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'),
+       ('PRSD29', 2, current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'),
+       ('PRSD32', 2, current_date, null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s') ON CONFLICT DO NOTHING;

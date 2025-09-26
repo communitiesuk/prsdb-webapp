@@ -1,13 +1,13 @@
-package uk.gov.communities.prsdb.webapp.annotations
+package uk.gov.communities.prsdb.webapp.annotations.processAnnotations
 
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.annotation.AliasFor
 import org.springframework.stereotype.Service
 
-@Conditional(WebServerOnly::class)
 @Service
-@Retention(AnnotationRetention.RUNTIME)
+@Conditional(ProcessOnly::class)
 @Target(AnnotationTarget.CLASS)
-annotation class PrsdbWebService(
+@Retention(AnnotationRetention.RUNTIME)
+annotation class PrsdbProcessService(
     @get:AliasFor(annotation = Service::class) val value: String = "",
 )

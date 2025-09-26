@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.annotations
+package uk.gov.communities.prsdb.webapp.annotations.webAnnotations
 
 import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
