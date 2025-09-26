@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbControllerAdvice
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControllerAdvice
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
