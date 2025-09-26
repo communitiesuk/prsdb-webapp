@@ -58,6 +58,10 @@ class Address() : ModifiableAuditableEntity() {
     var localAuthority: LocalAuthority? = null
         private set
 
+    @Column(nullable = false)
+    var isActive: Boolean = true
+        private set
+
     constructor(addressDataModel: AddressDataModel, localAuthority: LocalAuthority? = null) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
