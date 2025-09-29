@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.processAnnotations.PrsdbProcessService
 import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
 import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
-@Service
+@PrsdbProcessService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
     private val virusAlertSender: VirusAlertSender,

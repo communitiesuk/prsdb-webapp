@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT

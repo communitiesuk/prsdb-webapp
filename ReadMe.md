@@ -23,8 +23,8 @@ application locally.
 We are using Ktlint for linting, via the [ktlint-gradle plugin](https://github.com/jlleitschuh/ktlint-gradle) and the
 [ktlint Intellij plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) which can be installed from within Intellij.
 
-To ensure that your code meets the linting and formatting rules (as well as checking that the tests pass), we recommend
-installing the pre-commit hook by running the `addKtlintCheckGitPreCommitHook` task from Gradle tab in Intellij.
+To ensure that your code meets the linting and formatting rules install these pre-commit hooks by running the
+`addKtlintCheckGitPreCommitHook` and `addKtlintFormatGitPreCommitHook` tasks from Gradle tab in Intellij.
 
 There are also some local secrets that will need to be set up if you need to test integrations with other services when
 running the project locally. Ask the team lead where these can be found.
