@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
@@ -202,6 +204,12 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         request: HttpServletRequest,
     ): String {
+        if (model.getAttribute("deletedUserName") == null) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "deletedUserName is unavailable, has the user just been deleted?",
+            )
+        }
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
         if (model.getAttribute("currentUserDeletedThemself") == true) {
@@ -278,6 +286,12 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         request: HttpServletRequest,
     ): String {
+        if (model.getAttribute("invitedEmailAddress") == null) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "invitedEmailAddress is unavailable, has the user just been invited?",
+            )
+        }
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
         return "inviteLAUserSuccess"
@@ -331,7 +345,16 @@ class ManageLocalAuthorityUsersController(
     fun cancelInvitationSuccess(
         @PathVariable localAuthorityId: String,
         model: Model,
-    ): String = "cancelLAUserInvitationSuccess"
+    ): String {
+        if (model.getAttribute("deletedEmail") == null || model.getAttribute("localAuthority") == null) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "deletedEmail or localAuthority is unavailable, has the invitation just been deleted?",
+            )
+        }
+
+        return "cancelLAUserInvitationSuccess"
+    }
 
     private fun throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(
         principal: Principal,
