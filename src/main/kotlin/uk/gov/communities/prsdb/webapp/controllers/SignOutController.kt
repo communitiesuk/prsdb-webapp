@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 

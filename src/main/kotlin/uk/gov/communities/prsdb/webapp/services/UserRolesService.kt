@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
