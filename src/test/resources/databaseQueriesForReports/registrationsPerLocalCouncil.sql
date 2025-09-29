@@ -56,7 +56,7 @@ ORDER BY la.name;
 -- Passcodes generated
 SELECT
     la.name AS local_council_name,
-    COUNT(*) FILTER (WHERE p.created_date < :reference_date )AS total_passcodes_generated,
+    COUNT(*) FILTER (WHERE p.created_date < :reference_date) AS total_passcodes_generated,
     COUNT(*) FILTER (WHERE p.created_date >= :reference_date - INTERVAL '14 DAYS' AND p.created_date < :reference_date) AS new_passcodes_last_2_weeks
 FROM
     passcode p

@@ -1,4 +1,4 @@
--- We count the start of landlord registration as the time when the landlord claims a passcode (assumed to be when their passcode was last updated)
+-- We count the start of landlord registration as the time when the landlord's one-login user account was created.'
 SELECT
     percentile_cont(0.50) WITHIN GROUP (ORDER BY time_to_register_landlord) AS p50_time_to_register_landlord,
     percentile_cont(0.95) WITHIN GROUP (ORDER BY time_to_register_landlord) AS p95_time_to_register_landlord,
