@@ -11,14 +11,15 @@ import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.Comment
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressService.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
 
 @Entity
 @Comment(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
 class Address() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long = 0
+    var id: Long = 0
+        private set
 
     @Column(unique = true)
     var uprn: Long? = null
@@ -73,8 +74,34 @@ class Address() : ModifiableAuditableEntity() {
         this.locality = addressDataModel.locality
         this.townName = addressDataModel.townName
         this.postcode = addressDataModel.postcode
-        this.townName = addressDataModel.townName
-        this.postcode = addressDataModel.postcode
+        this.localAuthority = localAuthority
+    }
+
+    constructor(
+        id: Long?,
+        uprn: Long,
+        singleLineAddress: String,
+        organisation: String?,
+        subBuilding: String?,
+        buildingName: String?,
+        buildingNumber: String?,
+        streetName: String,
+        locality: String?,
+        townName: String?,
+        postcode: String,
+        localAuthority: LocalAuthority?,
+    ) : this() {
+        id?.let { this.id = it }
+        this.uprn = uprn
+        this.singleLineAddress = singleLineAddress
+        this.organisation = organisation
+        this.subBuilding = subBuilding
+        this.buildingName = buildingName
+        this.buildingNumber = buildingNumber
+        this.streetName = streetName
+        this.locality = locality
+        this.townName = townName
+        this.postcode = postcode
         this.localAuthority = localAuthority
     }
 
