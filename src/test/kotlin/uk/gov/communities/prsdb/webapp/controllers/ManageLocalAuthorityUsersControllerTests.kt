@@ -27,10 +27,12 @@ import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaEditUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteUserSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
@@ -222,6 +224,16 @@ class ManageLocalAuthorityUsersControllerTests(
     ): String {
         val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
         return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `navigating directly to the invite user success page returns 404`() {
+        mvc
+            .get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID))
+            .andExpect {
+                status { isNotFound() }
+            }
     }
 
     @Test
@@ -508,6 +520,7 @@ class ManageLocalAuthorityUsersControllerTests(
         mvc
             .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID)) {
                 flashAttr("currentUserDeletedThemself", true)
+                flashAttr("deletedUserName", "John Smith")
             }
 
         verify(securityContextService).refreshContext()
@@ -522,6 +535,16 @@ class ManageLocalAuthorityUsersControllerTests(
             .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID))
 
         verify(securityContextService, never()).refreshContext()
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `navigating directly to the delete user success page returns 404`() {
+        mvc
+            .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID))
+            .andExpect {
+                status { isNotFound() }
+            }
     }
 
     @Test
@@ -636,6 +659,14 @@ class ManageLocalAuthorityUsersControllerTests(
 
         verify(emailNotificationService)
             .sendEmail(invitation.invitedEmail, LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LA_ADMIN"])
+    fun `navigating directly to the cancel invite success page returns 404`() {
+        mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, 1L)).andExpect {
+            status { isNotFound() }
+        }
     }
 
     @Test

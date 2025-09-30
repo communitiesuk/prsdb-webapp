@@ -422,7 +422,9 @@ class ManageLocalAuthorityUsersController(
         private const val LA_DELETE_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_ROUTE"
         private const val LA_DELETE_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
         private const val LA_INVITE_NEW_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT"
+        private const val LA_INVITE_NEW_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
         private const val LA_CANCEL_INVITE_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$CANCEL_INVITE_ROUTE"
+        private const val LA_CANCEL_INVITE_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$CANCEL_INVITE_ROUTE/$SUCCESS_PATH_SEGMENT"
 
         fun getLaManageUsersRoute(localAuthorityId: Int): String =
             UriTemplate(LA_MANAGE_USERS_ROUTE).expand(localAuthorityId).toASCIIString()
@@ -440,6 +442,9 @@ class ManageLocalAuthorityUsersController(
         fun getLaDeleteUserSuccessRoute(localAuthorityId: Int): String =
             UriTemplate(LA_DELETE_USER_SUCCESS_ROUTE).expand(localAuthorityId).toASCIIString()
 
+        fun getLaInviteUserSuccessRoute(localAuthorityId: Int): String =
+            UriTemplate(LA_INVITE_NEW_USER_SUCCESS_ROUTE).expand(localAuthorityId).toASCIIString()
+
         fun getLaInviteNewUserRoute(localAuthorityId: Int): String =
             UriTemplate(LA_INVITE_NEW_USER_ROUTE).expand(localAuthorityId).toASCIIString()
 
@@ -447,5 +452,10 @@ class ManageLocalAuthorityUsersController(
             localAuthorityId: Int,
             localAuthorityUserId: Long,
         ): String = UriTemplate(LA_CANCEL_INVITE_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
+
+        fun getLaCancelInviteSuccessRoute(
+            localAuthorityId: Int,
+            invitationId: Long,
+        ): String = UriTemplate(LA_CANCEL_INVITE_SUCCESS_ROUTE).expand(localAuthorityId, invitationId).toASCIIString()
     }
 }
