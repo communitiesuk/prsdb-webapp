@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp
+package uk.gov.communities.prsdb.webapp.applications
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -15,6 +15,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
+import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
@@ -111,6 +112,7 @@ class PrsdbWebappApplicationTests {
                 VirusAlertSender::class.simpleBeanName,
                 // TODO 1021: Uncomment when ExampleOsDownloadsController is removed
                 // OsDownloadsConfig::class.simpleBeanName,
+                // NgdAddressLoader::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
