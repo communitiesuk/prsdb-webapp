@@ -46,7 +46,7 @@
     ```
   - To process a specific input file:
     ```
-    node plausible.mjs --input myfile.json
+    node plausible.mjs --input-file myfile.json
     ```
   - To clear the outputs directory before running:
     ```
