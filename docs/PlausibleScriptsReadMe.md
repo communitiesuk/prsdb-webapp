@@ -14,6 +14,7 @@
 ## Input Queries
 - Store queries in `scripts/plausible/inputs` as a `.json` file.
 - Each query should follow the Plausible API format.
+  - The Plausible API documentation is available [here](https://plausible.io/docs/stats-api).
 - It is mandatory to include `"include": {"total_rows": true}` in your query, the script will error out if it doesn't include it.
 - Example query structure:
   ```json
