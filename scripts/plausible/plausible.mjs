@@ -56,7 +56,13 @@ program
 
 const options = program.opts();
 const INPUTS_DIR = path.join('inputs')
-const OUTPUTS_DIR = options.save ? path.join('saved') : path.join('outputs')
+let OUTPUTS_DIR
+if (options.save) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0]
+    OUTPUTS_DIR = path.join('saved', timestamp)
+} else {
+    OUTPUTS_DIR = path.join('outputs')
+}
 
 function clearOutputsDir() {
     // Only clear if not saving to 'saved'
