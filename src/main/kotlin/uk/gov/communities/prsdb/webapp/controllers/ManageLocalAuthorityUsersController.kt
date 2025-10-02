@@ -154,30 +154,32 @@ class ManageLocalAuthorityUsersController(
     @GetMapping("/$DELETE_USER_ROUTE")
     fun confirmDeleteUser(
         @PathVariable localAuthorityId: Int,
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable idOfUserBeingDeleted: Long,
         model: Model,
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, idOfUserBeingDeleted, request)
 
         val userToDelete =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(idOfUserBeingDeleted, localAuthorityId)
         model.addAttribute("user", userToDelete)
-        model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$localAuthorityUserId")
+        model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$idOfUserBeingDeleted")
         return "deleteLAUser"
     }
 
     @PostMapping("/$DELETE_USER_ROUTE")
     fun deleteUser(
         @PathVariable localAuthorityId: Int,
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable idOfUserBeingDeleted: Long,
         principal: Principal,
         redirectAttributes: RedirectAttributes,
         request: HttpServletRequest,
     ): String {
-        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
-        val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, idOfUserBeingDeleted, request)
+        val userBeingDeleted = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(idOfUserBeingDeleted, localAuthorityId)
+
+        localAuthorityDataService.deleteUser(idOfUserBeingDeleted)
 
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
             (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
@@ -186,37 +188,42 @@ class ManageLocalAuthorityUsersController(
             // If this happens we will need to update their user roles as the Manage LA Users page
             // will throw an error if they have the LA_ADMIN role but are no longer in the local_authority_users table.
             val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
-            if (currentUser.id == user.id) {
-                redirectAttributes.addFlashAttribute("currentUserDeletedThemself", true)
+            if (currentUser.id == userBeingDeleted.id) {
+                securityContextService.refreshContext()
             }
         }
 
-        localAuthorityDataService.deleteUser(localAuthorityUserId)
-
-        redirectAttributes.addFlashAttribute("deletedUserName", user.userName)
-        return "redirect:../$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+        localAuthorityDataService.addDeletedUserToSession(idOfUserBeingDeleted, userBeingDeleted.userName)
+        return "redirect:../$DELETE_USER_SUCCESS_ROUTE"
     }
 
-    @GetMapping("/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+    @GetMapping("/$DELETE_USER_SUCCESS_ROUTE")
     fun deleteUserSuccess(
         @PathVariable localAuthorityId: Int,
+        @PathVariable idOfUserBeingDeleted: Long,
         model: Model,
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        if (model.getAttribute("deletedUserName") == null) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "deletedUserName is unavailable, has the user just been deleted?",
-            )
-        }
+        val deletedUserName =
+            getUserNameIfUserWasDeletedThisSession(idOfUserBeingDeleted)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User with id $idOfUserBeingDeleted was not found in the list of deleted users in the session",
+                )
+        model.addAttribute("deletedUserName", deletedUserName)
+
+        // TODO PRSD-1198: Check database to make sure user has is not still in the user table
+
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
-        if (model.getAttribute("currentUserDeletedThemself") == true) {
-            // This will only update the roles of the current user so is only needed if they have deleted themself.
-            securityContextService.refreshContext()
-        }
         return "deleteLAUserSuccess"
+    }
+
+    private fun getUserNameIfUserWasDeletedThisSession(userId: Long): String? {
+        val usersDeletedThisSession = localAuthorityDataService.getUsersDeletedThisSession()
+        val user = usersDeletedThisSession.find { it.first == userId }
+        return user?.second
     }
 
     @GetMapping("/$INVITE_NEW_USER_PATH_SEGMENT")
@@ -414,13 +421,14 @@ class ManageLocalAuthorityUsersController(
     companion object {
         const val LOCAL_AUTHORITY_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}"
         const val EDIT_USER_ROUTE = "$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}"
-        const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}"
+        const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{idOfUserBeingDeleted}"
+        const val DELETE_USER_SUCCESS_ROUTE = "$DELETE_USER_ROUTE/$SUCCESS_PATH_SEGMENT"
         const val CANCEL_INVITE_ROUTE = "$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}"
 
         private const val LA_MANAGE_USERS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$MANAGE_USERS_PATH_SEGMENT"
         private const val LA_EDIT_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$EDIT_USER_ROUTE"
         private const val LA_DELETE_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_ROUTE"
-        private const val LA_DELETE_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+        private const val LA_DELETE_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_SUCCESS_ROUTE"
         private const val LA_INVITE_NEW_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT"
         private const val LA_INVITE_NEW_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
         private const val LA_CANCEL_INVITE_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$CANCEL_INVITE_ROUTE"
