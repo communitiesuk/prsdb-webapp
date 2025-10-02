@@ -5,17 +5,11 @@ import path from 'path'
 import { Command } from 'commander'
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
-const SITE_ID = "prod.register-home-to-rent.communities.gov.uk"
 const BASE_URL = "https://plausible.io/api/v2/query"
 
 
 if (!API_KEY) {
   console.error('Please provide a Plausible API key in the PLAUSIBLE_API_KEY environment variable.')
-  process.exit(1)
-}
-
-if (!SITE_ID) {
-  console.error('Please provide a Plausible site ID in the PLAUSIBLE_SITE_ID environment variable.')
   process.exit(1)
 }
 
