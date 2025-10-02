@@ -211,9 +211,15 @@ class ManageLocalAuthorityUsersController(
                     HttpStatus.NOT_FOUND,
                     "User with id $idOfUserBeingDeleted was not found in the list of deleted users in the session",
                 )
-        model.addAttribute("deletedUserName", deletedUserName)
 
-        // TODO PRSD-1198: Check database to make sure user has is not still in the user table
+        if (localAuthorityDataService.getLocalAuthorityUserOrNull(idOfUserBeingDeleted) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "User with id $idOfUserBeingDeleted is still in the local_authority_user table",
+            )
+        }
+
+        model.addAttribute("deletedUserName", deletedUserName)
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
