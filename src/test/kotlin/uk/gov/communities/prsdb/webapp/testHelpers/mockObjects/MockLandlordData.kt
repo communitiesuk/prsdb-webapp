@@ -30,7 +30,12 @@ class MockLandlordData {
             singleLineAddress: String = "1 Example Road, EG1 2AB",
             localAuthority: LocalAuthority? = createLocalAuthority(),
             uprn: Long? = null,
-        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
+            id: Long? = null,
+        ): Address {
+            val address = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
+            id?.let { ReflectionTestUtils.setField(address, "id", id) }
+            return address
+        }
 
         fun createOneLoginUser(id: String = "") = OneLoginUser(id)
 
