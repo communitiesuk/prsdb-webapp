@@ -49,7 +49,7 @@ function mapResultsToNamedFields(data) {
 const program = new Command();
 program
   .option('--all', 'Process all input files')
-  .option('--input <filename>', 'Process a specific input file')
+  .option('--input-file <filename>', 'Process a specific input file')
   .option('--clear', 'Clear the outputs directory before running')
   .option('--save', 'Save processed output in the saved directory (not cleared)')
   .parse(process.argv);
@@ -79,21 +79,21 @@ function clearOutputsDir() {
 }
 
 function getInputFiles() {
-    if (options.all && options.input) {
-        console.error('Please specify only one of --all or --input.')
+    if (options.all && options.inputFile) {
+        console.error('Please specify only one of --all or --input-file.')
         process.exit(1)
     }
     if (options.all) {
         return fs.readdirSync(INPUTS_DIR).filter(f => f.endsWith('.json'))
     }
-    if (options.input) {
-        if (!fs.existsSync(path.join(INPUTS_DIR, options.input))) {
-            console.error(`Input file ${options.input} does not exist in ${INPUTS_DIR}`)
+    if (options.inputFile) {
+        if (!fs.existsSync(path.join(INPUTS_DIR, options.inputFile))) {
+            console.error(`Input file ${options.inputFile} does not exist in ${INPUTS_DIR}`)
             process.exit(1)
         }
-        return [options.input]
+        return [options.inputFile]
     }
-    console.error('Please specify either --all or --input <filename>.')
+    console.error('Please specify either --all or --input-file <filename>.')
     process.exit(1)
 }
 
