@@ -74,6 +74,9 @@ jobs:
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
         run: ./gradlew clean check --no-daemon
 
+      - name: Run ktlintFormat
+        run: ./gradlew ktlintFormat --no-daemon
+
       - name: Get latest version tag for minor version
         id: get-latest-tag
         uses: oprypin/find-latest-tag@v1

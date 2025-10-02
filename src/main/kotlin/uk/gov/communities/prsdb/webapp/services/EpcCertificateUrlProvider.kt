@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel.Companion.parseCertificateNumberOrNull
 
 @PrsdbWebService
