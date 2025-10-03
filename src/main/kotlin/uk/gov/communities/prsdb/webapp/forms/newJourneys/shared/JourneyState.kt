@@ -3,8 +3,16 @@ package uk.gov.communities.prsdb.webapp.forms.newJourneys.shared
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.UsableStep
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
 interface JourneyState {
@@ -16,24 +24,29 @@ interface JourneyState {
     ): JourneyState
 }
 
-interface FooJourneyState :
-    OccupiedJourneyState,
-    EpcJourneyState
-
 interface OccupiedJourneyState : JourneyState {
-    fun numberOfHouseholds(householdsStepKey: String = "households"): Int?
+    val occupiedStep: UsableStep<OccupancyFormModel>
+    val householdsStep: UsableStep<NumberOfHouseholdsFormModel>
+    val tenantsStep: UsableStep<NumberOfPeopleFormModel>
 }
 
 interface EpcJourneyState : JourneyState {
     var automatchedEpc: EpcDataModel?
     var searchedEpc: EpcDataModel?
     val propertyId: Long
-    val searchedForEpcNumber: String?
+
+    val epcQuestionStep: UsableStep<EpcFormModel>
+    val checkAutomatchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
+    val searchForEpcStep: UsableStep<EpcLookupFormModel>
+    val epcNotFoundStep: UsableStep<NoInputFormModel>
+    val epcSupersededStep: UsableStep<NoInputFormModel>
+    val checkSearchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
 }
 
-class SimpleJourneyState(
+class FooJourneyState(
     private val journeyDataService: JourneyDataService,
-) : FooJourneyState {
+) : OccupiedJourneyState,
+    EpcJourneyState {
     constructor(journeyDataService: JourneyDataService, propertyInt: Long) : this(journeyDataService) {
         journeyDataService.addToJourneyDataIntoSession(mapOf("propertyId" to propertyInt))
     }
@@ -52,12 +65,6 @@ class SimpleJourneyState(
         journeyDataService.addToJourneyDataIntoSession(mapOf("journeyData" to newJourneyData))
         return this
     }
-
-    override fun numberOfHouseholds(householdsStepKey: String): Int? =
-        objectToStringKeyedMap(journeyData[householdsStepKey])?.get("numberOfHouseholds")?.toString()?.toIntOrNull()
-
-    override val searchedForEpcNumber: String?
-        get() = objectToStringKeyedMap(journeyData["search-for-epc"])?.get("certificateNumber")?.toString()
 
     override var automatchedEpc: EpcDataModel?
         get() =
@@ -78,6 +85,53 @@ class SimpleJourneyState(
             val encodedEpc = value?.let { Json.encodeToString(it) }
             journeyDataService.addToJourneyDataIntoSession(mapOf("searchedEpc" to encodedEpc))
         }
+
     override val propertyId: Long
         get() = innerJourneyData["propertyId"]?.toString()?.toLongOrNull()!!
+
+    override lateinit var epcQuestionStep: UsableStep<EpcFormModel>
+        private set
+    override lateinit var checkAutomatchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
+        private set
+    override lateinit var searchForEpcStep: UsableStep<EpcLookupFormModel>
+        private set
+    override lateinit var epcNotFoundStep: UsableStep<NoInputFormModel>
+        private set
+    override lateinit var epcSupersededStep: UsableStep<NoInputFormModel>
+        private set
+    override lateinit var checkSearchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
+        private set
+    override lateinit var occupiedStep: UsableStep<OccupancyFormModel>
+        private set
+    override lateinit var householdsStep: UsableStep<NumberOfHouseholdsFormModel>
+        private set
+    override lateinit var tenantsStep: UsableStep<NumberOfPeopleFormModel>
+        private set
+
+    companion object {
+        fun withSteps(
+            journeyDataService: JourneyDataService,
+            propertyId: Long,
+            epcQuestionStep: UsableStep<EpcFormModel>,
+            checkAutomatchedEpcStep: UsableStep<CheckMatchedEpcFormModel>,
+            searchForEpcStep: UsableStep<EpcLookupFormModel>,
+            epcNotFoundStep: UsableStep<NoInputFormModel>,
+            epcSupersededStep: UsableStep<NoInputFormModel>,
+            checkSearchedEpcStep: UsableStep<CheckMatchedEpcFormModel>,
+            occupiedStep: UsableStep<OccupancyFormModel>,
+            householdsStep: UsableStep<NumberOfHouseholdsFormModel>,
+            tenantsStep: UsableStep<NumberOfPeopleFormModel>,
+        ): FooJourneyState =
+            FooJourneyState(journeyDataService, propertyId).apply {
+                this.epcQuestionStep = epcQuestionStep
+                this.checkAutomatchedEpcStep = checkAutomatchedEpcStep
+                this.searchForEpcStep = searchForEpcStep
+                this.epcNotFoundStep = epcNotFoundStep
+                this.epcSupersededStep = epcSupersededStep
+                this.checkSearchedEpcStep = checkSearchedEpcStep
+                this.occupiedStep = occupiedStep
+                this.householdsStep = householdsStep
+                this.tenantsStep = tenantsStep
+            }
+    }
 }

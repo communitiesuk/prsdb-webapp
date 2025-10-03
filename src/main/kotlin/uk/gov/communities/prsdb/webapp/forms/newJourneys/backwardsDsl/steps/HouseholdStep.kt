@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 
 @Scope("prototype")
 @PrsdbWebComponent
-class HouseholdStep : BackwardsDslInitialisableStep<Complete, NumberOfHouseholdsFormModel, OccupiedJourneyState>() {
+class HouseholdStep : AbstractStep<Complete, NumberOfHouseholdsFormModel, OccupiedJourneyState>() {
     override val formModelClazz = NumberOfHouseholdsFormModel::class
 
     override fun getStepContent(state: OccupiedJourneyState) =

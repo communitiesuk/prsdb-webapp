@@ -23,11 +23,11 @@ import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.Tena
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.VisitableStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.applyConditionToParent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.hasOutcome
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.SimpleJourneyState
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.FooJourneyState
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
-class BackwardsDslJourneyDelegate(
+class FooExampleJourney(
     private val taskListStepFactory: ObjectFactory<FooTaskListStep>,
     private val occupiedStepFactory: ObjectFactory<OccupiedStep>,
     private val householdsStepFactory: ObjectFactory<HouseholdStep>,
@@ -46,24 +46,40 @@ class BackwardsDslJourneyDelegate(
         val householdsStep: HouseholdStep = householdsStepFactory.getObject()
         val tenantsStep: TenantsStep = tenantsStepFactory.getObject()
         val epcQuestionStep = epcQuestionStepFactory.getObject()
-        val epcSearchEpcStep = epcSearchEpcStepFactory.getObject()
+        val searchForEpcStep = epcSearchEpcStepFactory.getObject()
         val epcNotFoundStep = epcNotFoundStepFactory.getObject()
         val epcSupersededStep = epcSupersededStepFactory.getObject()
         val checkAutomatchedEpcStep = epcStepFactory.getObject()
-        val checkSearchEpcStep = epcStepFactory.getObject()
+        val checkSearchedEpcStep = epcStepFactory.getObject()
         val fooCheckYourAnswersStep = fooCheckYourAnswersStepFactory.getObject()
 
         val journeyDataService = journeyDataServiceFactory.create("BackwardsDsl-$propertyId")
+
+        val state =
+            FooJourneyState.withSteps(
+                journeyDataService,
+                propertyId,
+                epcQuestionStep,
+                checkAutomatchedEpcStep,
+                searchForEpcStep,
+                epcNotFoundStep,
+                epcSupersededStep,
+                checkSearchedEpcStep,
+                occupiedStep,
+                householdsStep,
+                tenantsStep,
+            )
+
         return mapOf(
             taskListStep.step("task-list") {
                 parents { fooCheckYourAnswersStep.applyConditionToParent { true } }
                 reachableWhen { true }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo { null }
             },
             occupiedStep.step("occupied") {
                 reachableWhen { true }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo {
                     when (it) {
                         YesOrNo.YES -> householdsStep
@@ -73,69 +89,78 @@ class BackwardsDslJourneyDelegate(
             },
             householdsStep.step("households") {
                 parents { occupiedStep.hasOutcome(YesOrNo.YES) }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo { tenantsStep }
             },
             tenantsStep.step("tenants") {
                 parents { householdsStep.hasOutcome(Complete.COMPLETE) }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo { fooCheckYourAnswersStep }
             },
             epcQuestionStep.step("has-epc") {
                 reachableWhen { true }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo {
                     when (it) {
                         EpcStatus.AUTOMATCHED -> checkAutomatchedEpcStep
-                        EpcStatus.NOT_AUTOMATCHED -> epcSearchEpcStep
+                        EpcStatus.NOT_AUTOMATCHED -> searchForEpcStep
                         EpcStatus.NO_EPC -> fooCheckYourAnswersStep
                     }
                 }
             },
-            checkAutomatchedEpcStep.step("check-automatched-epc") {
-                parents { epcQuestionStep.hasOutcome(EpcStatus.AUTOMATCHED) }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
-                redirectTo {
-                    when (it) {
-                        YesOrNo.YES -> fooCheckYourAnswersStep
-                        YesOrNo.NO -> epcSearchEpcStep
+            checkAutomatchedEpcStep
+                .usingEpc { automatchedEpc }
+                .step("check-automatched-epc") {
+                    parents { epcQuestionStep.hasOutcome(EpcStatus.AUTOMATCHED) }
+                    state { state }
+                    redirectTo {
+                        when (it) {
+                            YesOrNo.YES -> fooCheckYourAnswersStep
+                            YesOrNo.NO -> searchForEpcStep
+                        }
                     }
-                }
-            },
-            epcSearchEpcStep.step("search-for-epc") {
+                },
+            searchForEpcStep.step("search-for-epc") {
                 parents { OrParents(epcQuestionStep.hasOutcome(EpcStatus.NOT_AUTOMATCHED), checkAutomatchedEpcStep.hasOutcome(YesOrNo.NO)) }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo {
                     when (it) {
-                        EpcSearchResult.FOUND -> checkSearchEpcStep
+                        EpcSearchResult.FOUND -> checkSearchedEpcStep
                         EpcSearchResult.SUPERSEDED -> epcSupersededStep
                         EpcSearchResult.NOT_FOUND -> epcNotFoundStep
                     }
                 }
             },
             epcSupersededStep.step("superseded-epc") {
-                parents { epcSearchEpcStep.hasOutcome(EpcSearchResult.SUPERSEDED) }
-                reachableWhen { epcSearchEpcStep.outcome() == EpcSearchResult.SUPERSEDED }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
-                redirectTo { checkSearchEpcStep }
+                parents { searchForEpcStep.hasOutcome(EpcSearchResult.SUPERSEDED) }
+                reachableWhen { searchForEpcStep.outcome() == EpcSearchResult.SUPERSEDED }
+                state { state }
+                redirectTo { checkSearchedEpcStep }
             },
-            checkSearchEpcStep.step("check-found-epc") {
-                parents { OrParents(epcSearchEpcStep.hasOutcome(EpcSearchResult.FOUND), epcSupersededStep.hasOutcome(Complete.COMPLETE)) }
-                state { SimpleJourneyState(journeyDataService, propertyId) }
-                redirectTo {
-                    when (it) {
-                        YesOrNo.YES -> fooCheckYourAnswersStep
-                        YesOrNo.NO -> epcSearchEpcStep
+            checkSearchedEpcStep
+                .usingEpc { searchedEpc }
+                .step("check-found-epc") {
+                    parents {
+                        OrParents(
+                            searchForEpcStep.hasOutcome(EpcSearchResult.FOUND),
+                            epcSupersededStep.hasOutcome(Complete.COMPLETE),
+                        )
                     }
-                }
-            },
+                    state { state }
+                    redirectTo {
+                        when (it) {
+                            YesOrNo.YES -> fooCheckYourAnswersStep
+                            YesOrNo.NO -> searchForEpcStep
+                        }
+                    }
+                },
             epcNotFoundStep.step("epc-not-found") {
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo { fooCheckYourAnswersStep }
-                parents { epcSearchEpcStep.hasOutcome(EpcSearchResult.NOT_FOUND) }
+                parents { searchForEpcStep.hasOutcome(EpcSearchResult.NOT_FOUND) }
             },
             fooCheckYourAnswersStep.step("check-your-answers") {
-                state { SimpleJourneyState(journeyDataService, propertyId) }
+                state { state }
                 redirectTo { null }
                 parents {
                     AndParents(
@@ -146,7 +171,7 @@ class BackwardsDslJourneyDelegate(
                         OrParents(
                             epcQuestionStep.hasOutcome(EpcStatus.NO_EPC),
                             checkAutomatchedEpcStep.hasOutcome(YesOrNo.YES),
-                            checkSearchEpcStep.hasOutcome(YesOrNo.YES),
+                            checkSearchedEpcStep.hasOutcome(YesOrNo.YES),
                             epcNotFoundStep.hasOutcome(Complete.COMPLETE),
                         ),
                     )

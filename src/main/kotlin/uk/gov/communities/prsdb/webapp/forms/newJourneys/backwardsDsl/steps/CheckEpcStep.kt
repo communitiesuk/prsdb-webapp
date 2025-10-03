@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.YesOrNo
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.EpcJourneyState
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -12,11 +13,18 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @PrsdbWebComponent
 class CheckEpcStep(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : BackwardsDslInitialisableStep<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
+) : AbstractStep<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
     override val formModelClazz = CheckMatchedEpcFormModel::class
 
+    private lateinit var getReleventEpc: (EpcJourneyState) -> EpcDataModel?
+
+    fun usingEpc(getReleventEpc: EpcJourneyState.() -> EpcDataModel?): CheckEpcStep {
+        this.getReleventEpc = getReleventEpc
+        return this
+    }
+
     override fun getStepContent(state: EpcJourneyState) =
-        (state.searchedEpc ?: state.automatchedEpc)?.let { epcDetails ->
+        getReleventEpc(state)?.let { epcDetails ->
             mapOf(
                 "title" to "propertyCompliance.title",
                 "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",

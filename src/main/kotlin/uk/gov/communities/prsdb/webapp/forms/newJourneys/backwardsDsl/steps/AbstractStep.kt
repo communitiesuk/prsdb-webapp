@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-abstract class BackwardsDslInitialisableStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> :
+abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> :
     LifeCycleStep<TFormModel, TState>(),
     StepInitialiser<TEnum, TState>,
     UsableStep<TFormModel> {
@@ -67,7 +67,7 @@ abstract class BackwardsDslInitialisableStep<out TEnum : Enum<out TEnum>, TFormM
             if (bindingResult.hasErrors()) {
                 val content =
                     getStepContent(state) +
-                        mapOf(BACK_URL_ATTR_NAME to backUrlOverride, BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult)
+                        mapOf(BACK_URL_ATTR_NAME to backUrl, BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult)
                 val template = chooseTemplate(state)
 
                 return ModelAndView(template, content)

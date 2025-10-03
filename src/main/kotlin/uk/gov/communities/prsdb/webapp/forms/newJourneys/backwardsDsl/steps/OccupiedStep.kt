@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 
 @Scope("prototype")
 @PrsdbWebComponent
-class OccupiedStep : BackwardsDslInitialisableStep<YesOrNo, OccupancyFormModel, OccupiedJourneyState>() {
+class OccupiedStep : AbstractStep<YesOrNo, OccupancyFormModel, OccupiedJourneyState>() {
     override val formModelClazz = OccupancyFormModel::class
 
     override fun getStepContent(state: OccupiedJourneyState) =
