@@ -15,9 +15,11 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -40,11 +42,11 @@ class DefaultSecurityConfig(
                     .permitAll()
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
                     .permitAll()
-                    .requestMatchers("/signout")
+                    .requestMatchers("/$SIGN_OUT_PATH_SEGMENT")
                     .permitAll()
                     .requestMatchers("/$ASSETS_PATH_SEGMENT/**")
                     .permitAll()
-                    .requestMatchers("/error/**")
+                    .requestMatchers("/$ERROR_PATH_SEGMENT/**")
                     .permitAll()
                     .requestMatchers("/check/**")
                     .permitAll()
@@ -53,6 +55,9 @@ class DefaultSecurityConfig(
                     .requestMatchers("$COOKIES_ROUTE/**")
                     .permitAll()
                     .requestMatchers("/$MAINTENANCE_PATH_SEGMENT")
+                    .permitAll()
+                    // TODO PRSD-1021: Remove this when ExampleOsDownloadsController is removed
+                    .requestMatchers("/example/os-downloads")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
@@ -75,8 +80,8 @@ class DefaultSecurityConfig(
 
     private fun oidcLogoutSuccessHandler(): LogoutSuccessHandler {
         val oidcLogoutSuccessHandler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)
-        oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/signout")
-        oidcLogoutSuccessHandler.setDefaultTargetUrl("/signout")
+        oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/$SIGN_OUT_PATH_SEGMENT")
+        oidcLogoutSuccessHandler.setDefaultTargetUrl("/$SIGN_OUT_PATH_SEGMENT")
         return oidcLogoutSuccessHandler
     }
 }

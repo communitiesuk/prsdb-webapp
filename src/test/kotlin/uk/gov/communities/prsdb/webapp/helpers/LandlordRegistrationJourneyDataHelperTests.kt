@@ -1,12 +1,9 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
@@ -65,47 +62,10 @@ class LandlordRegistrationJourneyDataHelperTests {
     }
 
     @Test
-    fun `getNonEnglandOrWalesCountryOfResidence returns the corresponding country`() {
-        val expectedCountryOfResidence = "US"
-        val mockJourneyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndSelectedContactAddress(
-                    expectedCountryOfResidence,
-                    "test address",
-                    "selected address",
-                ).build()
-
-        val getNonEnglandOrWalesCountryOfResidence =
-            LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(
-                mockJourneyData,
-            )
-
-        assertEquals(expectedCountryOfResidence, getNonEnglandOrWalesCountryOfResidence)
-    }
-
-    @Test
-    fun `getNonEnglandOrWalesCountryOfResidence returns null if the user lives in the UK`() {
-        val mockJourneyData = journeyDataBuilder.build()
-
-        val getNonEnglandOrWalesCountryOfResidence =
-            LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(
-                mockJourneyData,
-            )
-
-        assertNull(getNonEnglandOrWalesCountryOfResidence)
-    }
-
-    @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
-    @ValueSource(booleans = [true, false])
-    fun `getAddress returns the corresponding selected address`(isEnglandOrWalesResident: Boolean) {
+    fun `getAddress returns the corresponding selected address`() {
         val selectedAddress = "1 Example Address, EG1 2AB"
-        val mockJourneyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndSelectedContactAddress(
-                    "countryOfResidence",
-                    "test address",
-                    selectedAddress,
-                ).build()
+        val mockJourneyData = journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = null).build()
+
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
 
         val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData)
@@ -113,21 +73,13 @@ class LandlordRegistrationJourneyDataHelperTests {
         assertEquals(expectedAddressDataModel, addressDataModel)
     }
 
-    @ParameterizedTest(name = "when isEnglandOrWalesResident = {0}")
-    @ValueSource(booleans = [true, false])
-    fun `getAddress returns the corresponding manual address`(isEnglandOrWalesResident: Boolean) {
+    @Test
+    fun `getAddress returns the corresponding manual address`() {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val mockJourneyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndManualContactAddress(
-                    "countryofResidence",
-                    "test address",
-                    addressLineOne,
-                    townOrCity,
-                    postcode,
-                ).build()
+        val mockJourneyData = journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode).build()
+
         val expectedAddressDataModel = AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode)
 
         val addressDataModel = LandlordRegistrationJourneyDataHelper.getAddress(mockJourneyData)

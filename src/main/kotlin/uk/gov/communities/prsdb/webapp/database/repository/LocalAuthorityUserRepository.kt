@@ -7,4 +7,7 @@ interface LocalAuthorityUserRepository : JpaRepository<LocalAuthorityUser, Long>
     // The underscore tells JPA to access fields relating to the referenced table
     @Suppress("ktlint:standard:function-naming")
     fun findByBaseUser_Id(userName: String): LocalAuthorityUser?
+
+    @Suppress("ktlint:standard:function-naming")
+    fun findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityId: Int): List<LocalAuthorityUser>
 }

@@ -11,9 +11,9 @@
     <fieldset id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <p class="govuk-body">
-            <span th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
-            <a class="govuk-link" target="_blank" th:href="${findLocalAuthorityUrl}"
-               th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText</a>
+            <span th:remove="tag" th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
+            <a class="govuk-link" target="_blank" th:href="${findLocalAuthorityUrl}" th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText
+            </a><span th:remove="tag" th:text="#{forms.selectLocalAuthority.paragraph.one.afterLink}">forms.selectLocalAuthority.paragraph.one.afterLink</span>
         </p>
         <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityId',null, ${selectOptions})}"></select>
     </fieldset>

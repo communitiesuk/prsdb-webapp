@@ -5,16 +5,15 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
+import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
+import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
@@ -27,14 +26,16 @@ import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
-import kotlin.jvm.java
-import kotlin.reflect.KClass
+import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.importedBeanName
+import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.scopedBeanName
+import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest
 @ActiveProfiles("web-server-deactivated", "local")
-// The EMAILNOTIFICATIONS_APIKEY property is required for the Notify config to load, and even with no value set the beans can be created
-@TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY"])
+// These environment variables are required for the expected beans to be created - values aren't needed
+@TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY", "OS_API_KEY"])
 class PrsdbProcessApplicationTests {
     @Autowired
     private var context: ConfigurableApplicationContext? = null
@@ -45,63 +46,39 @@ class PrsdbProcessApplicationTests {
     @MockitoBean
     lateinit var s3client: S3Client
 
+    @MockitoBean
+    lateinit var osDownloadsClient: OsDownloadsClient
+
     @Test
     fun `only necessary PRSDB beans are available in non web mode`() {
         val expectedBeansByName =
             listOf(
-                // Beans added by component annotation scanning use their simple name as the bean name by default
-                PrsdbWebappApplication::class.java.simpleName,
-                EmailNotificationStubService::class.java.simpleName,
-                NotifyEmailNotificationService::class.java.simpleName,
-                NotifyConfig::class.java.simpleName,
-                S3Config::class.java.simpleName,
-                AwsS3QuarantinedFileDeleter::class.java.simpleName,
-                LocalQuarantinedFileDeleter::class.java.simpleName,
-                AwsS3DequarantiningFileCopier::class.java.simpleName,
-                LocalDequarantiningFileCopier::class.java.simpleName,
-                UploadDequarantiner::class.java.simpleName,
-                VirusScanProcessingService::class.java.simpleName,
-                AbsoluteUrlProvider::class.java.simpleName,
-                VirusAlertSender::class.java.simpleName,
-                // Beans with scopes use their simple name with the scope prefix as the bean name by default
-                "scopedtarget.${NotifyIdService::class.java.simpleName}",
-                // Beans with explicit names can retrieve their name by reflecting on the annotation using the `getExplicitBeanName` function
-                // e.g. getExplicitBeanName<Component>(YourComponentClassName::class),
-                // Beans added by @Import annotations use their fully qualified class name as the bean name by default
-                TestcontainersConfiguration::class.java.name,
+                PrsdbWebappApplication::class.simpleBeanName,
+                EmailNotificationStubService::class.simpleBeanName,
+                NotifyEmailNotificationService::class.simpleBeanName,
+                NotifyConfig::class.simpleBeanName,
+                S3Config::class.simpleBeanName,
+                AwsS3QuarantinedFileDeleter::class.simpleBeanName,
+                LocalQuarantinedFileDeleter::class.simpleBeanName,
+                AwsS3DequarantiningFileCopier::class.simpleBeanName,
+                LocalDequarantiningFileCopier::class.simpleBeanName,
+                UploadDequarantiner::class.simpleBeanName,
+                VirusScanProcessingService::class.simpleBeanName,
+                AbsoluteUrlProvider::class.simpleBeanName,
+                VirusAlertSender::class.simpleBeanName,
+                OsDownloadsConfig::class.simpleBeanName,
+                NotifyIdService::class.scopedBeanName,
+                TestcontainersConfiguration::class.importedBeanName,
             ).map { it.lowercase() }.toSet()
 
-        val beanNames =
-            context!!
-                .beanDefinitionNames
-                .filter {
-                    context!!
-                        .beanFactory
-                        .getBeanDefinition(it)
-                        .beanClassName
-                        ?.contains("uk.gov.communities.prsdb.webapp") ?: false
-                }.map { it.lowercase() }
-                .toSet()
+        val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
 
-        assertEquals(expectedBeansByName, beanNames) {
-            buildHelpfulErrorMessage(
-                expectedBeansByName.toList(),
-                beanNames.toList(),
-            )
-        }
+        assertEquals(expectedBeansByName, beanNames) { buildHelpfulErrorMessage(expectedBeansByName, beanNames) }
     }
 
-    private inline fun <reified TAnnotation : Annotation> getExplicitBeanName(klass: KClass<*>): String =
-        when (TAnnotation::class) {
-            Component::class -> klass.java.getAnnotation(Component::class.java)?.value
-            Service::class -> klass.java.getAnnotation(Service::class.java)?.value
-            Configuration::class -> klass.java.getAnnotation(Configuration::class.java)?.value
-            else -> throw IllegalArgumentException("Unsupported annotation type: ${TAnnotation::class}")
-        } ?: throw IllegalArgumentException("${TAnnotation::class} present on ${klass.simpleName} but no explicit name provided")
-
     fun buildHelpfulErrorMessage(
-        expectedBeans: List<String>,
-        actualBeans: List<String>,
+        expectedBeans: Set<String>,
+        actualBeans: Set<String>,
     ): String {
         val missingBeans = expectedBeans.filter { !actualBeans.contains(it) }
         val unexpectedBeans = actualBeans.filter { !expectedBeans.contains(it) }
@@ -130,10 +107,7 @@ class PrsdbProcessApplicationTests {
             } else {
                 null
             }
-        return listOfNotNull(
-            combinedMessage,
-            missingBeansMessage,
-            unexpectedBeansMessage,
-        ).joinToString("\n\n")
+
+        return listOfNotNull(combinedMessage, missingBeansMessage, unexpectedBeansMessage).joinToString("\n\n")
     }
 }

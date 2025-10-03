@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 

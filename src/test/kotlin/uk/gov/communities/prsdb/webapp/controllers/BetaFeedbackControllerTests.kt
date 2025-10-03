@@ -27,9 +27,9 @@ class BetaFeedbackControllerTests(
     @Nested
     inner class LandlordFeedbackTests {
         @Test
-        fun `landlordFeedback returns redirect for unauthenticated users`() {
+        fun `landlordFeedback returns success for unauthenticated users`() {
             mvc.get(BetaFeedbackController.LANDLORD_FEEDBACK_URL).andExpect {
-                status { is3xxRedirection() }
+                status { isOk() }
             }
         }
 
@@ -42,9 +42,9 @@ class BetaFeedbackControllerTests(
         }
 
         @Test
-        fun `landlordFeedbackSuccess returns redirect for unauthenticated users`() {
+        fun `landlordFeedbackSuccess returns success for unauthenticated users`() {
             mvc.get(BetaFeedbackController.LANDLORD_FEEDBACK_SUCCESS_URL).andExpect {
-                status { is3xxRedirection() }
+                status { isOk() }
             }
         }
 

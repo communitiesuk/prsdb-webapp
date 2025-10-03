@@ -23,15 +23,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectContactAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -126,14 +122,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales, manual address)`(page: Page) {
-        // Set up mock One Login data
-        val verifiedIdentityMap =
-            mutableMapOf<String, Any?>(
-                VerifiedIdentityModel.NAME_KEY to "name",
-                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
-            )
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+    fun `User can navigate the whole journey if pages are correctly filled in (unverified, England or Wales, manual address)`(page: Page) {
+        // Set up no identity data from One login
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
         val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
@@ -141,8 +132,14 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
         privacyNoticePage.agreeAndSubmit()
 
-        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
-        confirmIdentityPage.confirm()
+        val identityNotVerifiedPage = assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
+        namePage.submitName("landlord name")
+
+        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
+        dateOfBirthPage.submitDate("12", "11", "1990")
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
         emailPage.submitEmail("test@example.com")
@@ -162,134 +159,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val manualAddressPage = assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
         assertThat(manualAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         manualAddressPage.submitAddress(
-            addressLineOne = "1 Example Road",
-            townOrCity = "Townville",
-            postcode = "EG1 2AB",
-        )
-
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        checkAnswersPage.confirmAndSubmit()
-
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
-        val createdLandlordRegNum =
-            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
-
-        verify(confirmationEmailSender).sendEmail(
-            "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
-        )
-
-        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
-        confirmationPage.goToDashboardButton.clickAndWait()
-        assertPageIs(page, LandlordDashboardPage::class)
-    }
-
-    @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, selected address)`(
-        page: Page,
-    ) {
-        // Set up no identity data from One login
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
-
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
-        landlordRegistrationStartPage.startButton.clickAndWait()
-
-        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
-        privacyNoticePage.agreeAndSubmit()
-
-        val identityNotVerifiedPage = assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
-        identityNotVerifiedPage.clickContinue()
-
-        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
-        namePage.submitName("landlord name")
-
-        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
-        assertThat(dateOfBirthPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        dateOfBirthPage.submitDate("12", "11", "1990")
-
-        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
-        emailPage.submitEmail("test@example.com")
-
-        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
-        phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedUkPhoneNumber())
-
-        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
-
-        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
-        assertThat(nonEnglandOrWalesAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        nonEnglandOrWalesAddressPage.submitAddress("Zimbabwe address")
-
-        val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
-        assertThat(lookupContactAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        lookupContactAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
-
-        val selectContactAddressPage = assertPageIs(page, SelectContactAddressFormPageLandlordRegistration::class)
-        assertThat(selectContactAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        selectContactAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
-
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        checkAnswersPage.confirmAndSubmit()
-
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
-        val createdLandlordRegNum =
-            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
-
-        verify(confirmationEmailSender).sendEmail(
-            "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
-        )
-
-        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
-        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
-        confirmationPage.goToDashboardButton.clickAndWait()
-        assertPageIs(page, LandlordDashboardPage::class)
-    }
-
-    @Test
-    fun `User can navigate the whole journey if pages are correctly filled in (unverified, non England or Wales, manual address)`(
-        page: Page,
-    ) {
-        // Set up no identity data from One login
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
-
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
-        landlordRegistrationStartPage.startButton.clickAndWait()
-
-        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
-        privacyNoticePage.agreeAndSubmit()
-
-        val identityNotVerifiedPage = assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
-        identityNotVerifiedPage.clickContinue()
-
-        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
-        namePage.submitName("landlord name")
-
-        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
-        dateOfBirthPage.submitDate("12", "11", "1990")
-
-        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
-        emailPage.submitEmail("test@example.com")
-
-        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
-        phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedUkPhoneNumber())
-
-        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitNonUkCountrySelectedByPartialName("Zi", "Zimbabwe")
-
-        val nonEnglandOrWalesAddressPage = assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
-        nonEnglandOrWalesAddressPage.submitAddress("test address")
-
-        val lookupContactAddressPage = assertPageIs(page, LookupContactAddressFormPageLandlordRegistration::class)
-        lookupContactAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
-
-        val selectContactAddressPage = assertPageIs(page, SelectContactAddressFormPageLandlordRegistration::class)
-        selectContactAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
-
-        val manualContactAddressPage = assertPageIs(page, ManualContactAddressFormPageLandlordRegistration::class)
-        assertThat(manualContactAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        manualContactAddressPage.submitAddress(
             addressLineOne = "1 Example Road",
             townOrCity = "Townville",
             postcode = "EG1 2AB",

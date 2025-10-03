@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -45,10 +45,12 @@ class GasSafetyViewModelFactory(
                         key = "propertyDetails.complianceInformation.validUntil",
                         value = propertyCompliance.gasSafetyCertExpiryDate,
                     )
-                    addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                        value = propertyCompliance.gasSafetyCertEngineerNum,
-                    )
+                    if (propertyCompliance.gasSafetyCertEngineerNum != null) {
+                        addRow(
+                            key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
+                            value = propertyCompliance.gasSafetyCertEngineerNum,
+                        )
+                    }
                 } else {
                     addRow(
                         key = "propertyDetails.complianceInformation.exemption",

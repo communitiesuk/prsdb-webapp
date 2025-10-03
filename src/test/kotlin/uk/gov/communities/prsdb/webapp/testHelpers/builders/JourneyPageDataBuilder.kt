@@ -32,18 +32,6 @@ class JourneyPageDataBuilder {
 
         fun beforeLandlordRegistrationManualAddress() = beforeLandlordRegistrationSelectAddress().withManualAddressSelected()
 
-        fun beforeLandlordRegistrationNonEnglandOrWalesAddress() =
-            beforeLandlordRegistrationCountryOfResidence().withNonEnglandOrWalesAddress(nonEnglandOrWalesAddress = null)
-
-        fun beforeLandlordRegistrationLookupContactAddress() =
-            beforeLandlordRegistrationNonEnglandOrWalesAddress().withNonEnglandOrWalesAddress()
-
-        fun beforeLandlordRegistrationSelectContactAddress() =
-            beforeLandlordRegistrationLookupContactAddress().withLookupAddress(isContactAddress = true).withLookedUpAddresses()
-
-        fun beforeLandlordRegistrationManualContactAddress() =
-            beforeLandlordRegistrationSelectContactAddress().withManualAddressSelected(isContactAddress = true)
-
         fun beforeLandlordRegistrationCheckAnswers() = beforeLandlordRegistrationSelectAddress().withSelectedAddress()
 
         fun beforeLandlordRegistrationDeclaration() = beforeLandlordRegistrationCheckAnswers().withCheckedAnswers()

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
@@ -92,7 +92,6 @@ class BetaFeedbackController(
         model.addAttribute("formModel", formModel)
         val referrer = request.getHeader("referer")
         model.addAttribute("referrerHeader", referrer)
-        model.addAttribute("backUrl", referrer)
         return "betaBannerFeedback"
     }
 
@@ -114,7 +113,6 @@ class BetaFeedbackController(
         if (bindingResult.hasErrors()) {
             val referrer = request.getHeader("referer")
             model.addAttribute("referrerHeader", referrer)
-            model.addAttribute("backUrl", referrer)
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
@@ -15,6 +16,8 @@ abstract class LandlordDetailsBasePage(
     val backLink = BackLink.default(page)
     val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
     val registeredPropertiesTable = Table(page)
+    val noRegisteredPropertiesMessage = Paragraph.byTestId(page, "no-registered-properties-msg")
+    val noRegisteredPropertiesLink = Link.byText(page, "Register a property")
 
     fun getPropertyAddressLink(address: String) = Link.byText(page, address)
 

@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId

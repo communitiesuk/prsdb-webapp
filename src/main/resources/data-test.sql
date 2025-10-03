@@ -105,11 +105,11 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2),
-       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21) ON CONFLICT DO NOTHING;
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2, 'EG1 2AB'),
+       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
+       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -178,3 +178,27 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
        (20,'2025-07-08 13:58:19.927000+00',null,'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
+
+INSERT INTO passcode (passcode, local_authority_id, created_date, last_modified_date, subject_identifier)
+VALUES ('PRSD22', 2, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+       ('PRSD23', 2, current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
+       ('PRSD24', 2, current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'),
+       ('PRSD25', 2, current_date, null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'),
+       ('PRSD26', 2, current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'),
+       ('PRSD27', 2, current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'),
+       ('PRSD29', 2, current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'),
+       ('PRSD32', 2, current_date, null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s'),
+       ('PRSD33', 2, current_date, null, 'urn:fdc:gov.uk:2022:e4eN4Mujv2NMVut4mIPzRlwpyBL3sBE304GgGlxgd-Q'),
+       ('PRSD34', 2, current_date, null, 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI'),
+       ('PRSD35', 2, current_date, null, 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'),
+       ('PRSD36', 2, current_date, null, 'urn:fdc:gov.uk:2022:Fv4k6DizfhFmrw4d17Virjsy3A-XCm_WxR2knMUQ394'),
+       ('PRSD37', 2, current_date, null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'),
+       ('PRSD39', 2, current_date, null, 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'),
+       ('PRSD42', 2, current_date, null, 'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'),
+       ('PRSD43', 2, current_date, null, 'urn:fdc:gov.uk:2022:TSEDw_HXmsLDuNj2bLV5fOLuAvooeSYlupbEykMhWj8'),
+       ('PRSD44', 2, current_date, null, 'urn:fdc:gov.uk:2022:aDESlOYLkXmBVUJXUGd5PAGx55uR068Fe16lRN7VzyY'),
+       ('PRSD45', 2, current_date, null, 'urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE'),
+       ('PRSD46', 2, current_date, null, 'urn:fdc:gov.uk:2022:RR3fauA1ZgHYuLjW9824VtLzegGG9NXfdHJrtg2hIAE'),
+       ('PRSD47', 2, current_date, null, 'urn:fdc:gov.uk:2022:i5RkOLo_ylby2zEQPZRUigPowq3pxJOeIN4a6uJb9hg'),
+       ('PRSD49', 2, current_date, null, 'urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY'),
+       ('PRSD52', 2, current_date, null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI') ON CONFLICT DO NOTHING;
