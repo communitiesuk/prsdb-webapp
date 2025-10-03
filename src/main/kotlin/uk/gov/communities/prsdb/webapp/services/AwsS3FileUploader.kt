@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.beans.factory.annotation.Value
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.transfer.s3.S3TransferManager
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import java.io.InputStream
 

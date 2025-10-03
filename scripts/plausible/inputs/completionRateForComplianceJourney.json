@@ -1,0 +1,20 @@
+{
+  "compliance_confirmation_total": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": ["pageviews"],
+    "filters": [
+      ["matches", "event:page", ["^/landlord/add-compliance-information/\\d+/confirmation$"]]
+    ],
+    "include": {"total_rows": true}
+  },
+  "compliance_all_total": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": ["pageviews"],
+    "filters": [
+      ["matches", "event:page", ["^/landlord/add-compliance-information/\\d+$"]]
+    ],
+    "include": {"total_rows": true}
+  }
+}

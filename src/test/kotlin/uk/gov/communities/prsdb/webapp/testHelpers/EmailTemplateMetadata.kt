@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
 
 @Serializable

@@ -9,7 +9,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -20,7 +20,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
 
 @PrsdbWebService
 class LocalAuthorityDataService(
@@ -31,6 +33,8 @@ class LocalAuthorityDataService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
     private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
+    private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
+    private val invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
@@ -135,13 +139,55 @@ class LocalAuthorityDataService(
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
 
+        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+
         deletionConfirmationSender.sendEmail(
             localAuthorityUser.email,
             LocalAuthorityUserDeletionEmail(
                 councilName = localAuthorityUser.localAuthority.name,
             ),
         )
-        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+
+        sendUserDeletedEmailsToAdmins(localAuthorityUser)
+    }
+
+    fun sendUserInvitedEmailsToAdmins(
+        localAuthority: LocalAuthority,
+        invitedEmail: String,
+    ) {
+        val localAdminsByAuthority =
+            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)
+
+        val emailToAdmins =
+            LocalCouncilUserInvitationInformAdminEmail(
+                councilName = localAuthority.name,
+                email = invitedEmail,
+                prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+            )
+
+        for (admin in localAdminsByAuthority) {
+            invitationConfirmationSenderAdmin.sendEmail(
+                admin.email,
+                emailToAdmins,
+            )
+        }
+    }
+
+    private fun sendUserDeletedEmailsToAdmins(localAuthorityUser: LocalAuthorityUser) {
+        val localAdminsByAuthority =
+            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityUser.localAuthority.id)
+
+        for (admin in localAdminsByAuthority) {
+            deletionConfirmationSenderAdmin.sendEmail(
+                admin.email,
+                LocalAuthorityUserDeletionInformAdminEmail(
+                    councilName = localAuthorityUser.localAuthority.name,
+                    email = localAuthorityUser.email,
+                    userName = localAuthorityUser.name,
+                    prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
+                ),
+            )
+        }
     }
 
     @Transactional

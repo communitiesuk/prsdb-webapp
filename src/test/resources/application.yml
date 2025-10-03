@@ -13,9 +13,6 @@ notify:
   support-email: support@example.com
   use-production-notify: false
 
-os-places:
-  api-key: ${OS_PLACES_API_KEY}
-
 base-url:
   landlord: example.com
   local-authority: example.com
@@ -35,3 +32,8 @@ google-analytics:
 
 beta-feedback:
   team-email-address: feedback@example.com
+
+os:
+  api-key: ${OS_API_KEY}
+  downloads:
+    base-url: https://api.os.uk/downloads/v1

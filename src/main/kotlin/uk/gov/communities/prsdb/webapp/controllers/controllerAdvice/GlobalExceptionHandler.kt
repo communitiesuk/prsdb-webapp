@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
 import org.springframework.web.bind.annotation.ExceptionHandler
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbControllerAdvice
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControllerAdvice
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.CYA_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 

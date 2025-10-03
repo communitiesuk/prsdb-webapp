@@ -1,0 +1,48 @@
+{
+  "page_views": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": [
+      "pageviews"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [
+      ["is", "event:page", ["/landlord/dashboard", "/landlord/register-as-a-landlord/start", "/landlord/register-property", "/local-council/dashboard", "/local-council/register-local-council-user/landing-page", "/local-council/search/property", "/local-council/search/landlord"]]
+    ],
+    "include": {"total_rows": true}
+  },
+  "compliance_views": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": [
+      "pageviews"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [
+      ["matches", "event:page", ["^/landlord/add-compliance-information/\\d+$"]]
+    ],
+    "include": {"total_rows": true}
+  },
+  "all_views": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": [
+      "pageviews"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  },
+  "total_page_views": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": ["pageviews"],
+    "include": {"total_rows": true}
+  }
+}
+

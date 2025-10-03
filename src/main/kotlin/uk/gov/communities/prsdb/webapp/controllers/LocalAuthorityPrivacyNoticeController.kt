@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.DATA_PROTECTION_COMMUNITIES_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.DPO_COMMUNITIES_EMAILS
