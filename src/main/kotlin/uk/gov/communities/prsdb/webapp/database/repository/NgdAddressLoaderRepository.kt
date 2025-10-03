@@ -16,39 +16,6 @@ class NgdAddressLoaderRepository(
         return session.createNativeQuery(query, String::class.java).singleResultOrNull
     }
 
-    // Finds the table columns that have a foreign key reference to the address table's id column
-    @Suppress("UNCHECKED_CAST")
-    fun findAddressReferencingTableAndColumnNames(): List<Pair<String, String>> {
-        val query =
-            """
-                SELECT conrelid::regclass::text AS referencing_table, a.attname AS referencing_column 
-                FROM pg_constraint AS c 
-                JOIN pg_attribute AS a ON a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid 
-                JOIN pg_attribute AS fa ON fa.attnum = ANY(c.confkey) AND fa.attrelid = c.confrelid 
-                WHERE c.contype = 'f' 
-                AND confrelid = 'address'::regclass 
-                AND fa.attname = 'id';
-            """
-        return session.createNativeQuery(query, Pair::class.java).resultList as List<Pair<String, String>>
-    }
-
-    fun countReferencesToAddressInTableColumn(
-        uprn: Long,
-        tableName: String,
-        columnName: String,
-    ): Long {
-        // Table and column names cannot be parameterized
-        val query =
-            """
-                SELECT COUNT(*) 
-                FROM address
-                JOIN $tableName
-                ON address.id = $tableName.$columnName
-                WHERE address.uprn = :uprn;
-            """
-        return session.createNativeQuery(query, Long::class.java).setParameter("uprn", uprn).singleResult
-    }
-
     fun findAddressId(uprn: Long): Long? {
         val query =
             """
@@ -69,12 +36,37 @@ class NgdAddressLoaderRepository(
         session.createNativeMutationQuery(query).setParameter("uprn", uprn).executeUpdate()
     }
 
-    fun deleteAddress(uprn: Long) {
+    fun deleteUnusedInactiveAddresses() {
         val query =
             """
+                -- Function returning every address.id that is referenced by any foreign key
+                CREATE OR REPLACE FUNCTION used_address_ids()
+                RETURNS TABLE(id BIGINT)
+                LANGUAGE plpgsql
+                AS $$
+                DECLARE
+                    r record;
+                    sql text;
+                BEGIN
+                    FOR r IN
+                        SELECT c.conrelid::regclass AS tbl, a.attname AS col
+                        FROM pg_constraint c
+                        JOIN pg_attribute a
+                        ON a.attrelid = c.conrelid
+                        AND a.attnum = ANY(c.conkey)
+                        WHERE c.contype = 'f'
+                        AND c.confrelid = 'address'::regclass
+                    LOOP
+                        sql := format('SELECT DISTINCT %I FROM %s WHERE %I IS NOT NULL', r.col, r.tbl, r.col);
+                        RETURN QUERY EXECUTE sql;
+                    END LOOP;
+                END;
+                $$;
+                
                 DELETE FROM address
-                WHERE uprn = :uprn;
+                WHERE is_active = false
+                AND id NOT IN (SELECT * FROM used_address_ids());
             """
-        session.createNativeMutationQuery(query).setParameter("uprn", uprn).executeUpdate()
+        session.createNativeMutationQuery(query).executeUpdate()
     }
 }

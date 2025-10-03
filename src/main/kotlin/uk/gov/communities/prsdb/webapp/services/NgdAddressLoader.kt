@@ -42,6 +42,8 @@ class NgdAddressLoader(
                     storedDataPackageVersionId = nextDataPackageVersionId
                 }
             } while (nextDataPackageVersionId != null)
+
+            deleteUnusedInactiveAddresses(session)
         }
     }
 
@@ -157,11 +159,7 @@ class NgdAddressLoader(
 
     private fun loadCsvDeleteRecord(csvRecord: CSVRecord) {
         val uprn = csvRecord.get("uprn").toLong()
-        if (isAddressInUse(uprn)) {
-            ngdAddressLoaderRepository.deactivateAddress(uprn)
-        } else {
-            ngdAddressLoaderRepository.deleteAddress(uprn)
-        }
+        ngdAddressLoaderRepository.deactivateAddress(uprn)
     }
 
     private fun loadCsvUpsertRecord(
@@ -206,15 +204,16 @@ class NgdAddressLoader(
         }
     }
 
-    private lateinit var addressReferencingTableAndColumnNames: List<Pair<String, String>>
-
-    private fun isAddressInUse(uprn: Long): Boolean {
-        if (!this::addressReferencingTableAndColumnNames.isInitialized) {
-            addressReferencingTableAndColumnNames = ngdAddressLoaderRepository.findAddressReferencingTableAndColumnNames()
-        }
-
-        return addressReferencingTableAndColumnNames.any { tableAndColumnName ->
-            ngdAddressLoaderRepository.countReferencesToAddressInTableColumn(uprn, tableAndColumnName.first, tableAndColumnName.second) > 0
+    private fun deleteUnusedInactiveAddresses(session: StatelessSession) {
+        val transaction = session.beginTransaction()
+        try {
+            log("Starting to delete unused inactive addresses")
+            ngdAddressLoaderRepository.deleteUnusedInactiveAddresses()
+            transaction.commit()
+            log("Unused inactive addresses deleted")
+        } catch (exception: Exception) {
+            log("Error while deleting unused inactive addresses:")
+            transaction.rollback()
         }
     }
 
