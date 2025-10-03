@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 
 @Scope("prototype")
 @PrsdbWebComponent
-class EpcNotFoundStep : BackwardsDslInitialisableStep<Complete, NoInputFormModel, EpcJourneyState>() {
+class EpcNotFoundStep : AbstractStep<Complete, NoInputFormModel, EpcJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepContent(state: EpcJourneyState) =
@@ -19,7 +19,7 @@ class EpcNotFoundStep : BackwardsDslInitialisableStep<Complete, NoInputFormModel
             "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "searchAgainUrl" to ancestry.filterIsInstance<SearchEpcStep>().singleOrNull()?.routeSegment,
-            "certificateNumber" to state.searchedForEpcNumber,
+            "certificateNumber" to state.searchForEpcStep.formModel?.certificateNumber,
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 

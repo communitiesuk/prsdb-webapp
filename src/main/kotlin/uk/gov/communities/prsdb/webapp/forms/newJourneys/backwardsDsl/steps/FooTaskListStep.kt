@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusVi
 
 @Scope("prototype")
 @PrsdbWebComponent
-class FooTaskListStep : BackwardsDslInitialisableStep<Complete, NoInputFormModel, FooJourneyState>() {
+class FooTaskListStep : AbstractStep<Complete, NoInputFormModel, FooJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepContent(state: FooJourneyState): Map<String, Any> = mapOf("taskListViewModel" to getTaskListViewModel())

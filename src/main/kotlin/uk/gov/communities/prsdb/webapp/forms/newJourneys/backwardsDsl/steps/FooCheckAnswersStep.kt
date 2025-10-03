@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @PrsdbWebComponent
 class FooCheckAnswersStep(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : BackwardsDslInitialisableStep<Complete, NoInputFormModel, FooJourneyState>() {
+) : AbstractStep<Complete, NoInputFormModel, FooJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepContent(state: FooJourneyState) =

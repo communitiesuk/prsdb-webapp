@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfP
 
 @Scope("prototype")
 @PrsdbWebComponent
-class TenantsStep : BackwardsDslInitialisableStep<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>() {
+class TenantsStep : AbstractStep<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>() {
     override val formModelClazz = NumberOfPeopleFormModel::class
 
     override fun getStepContent(state: OccupiedJourneyState) =
@@ -30,6 +30,6 @@ class TenantsStep : BackwardsDslInitialisableStep<Complete, NumberOfPeopleFormMo
     ): PageData {
         super.beforeValidateSubmittedData(state, formData)
 
-        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.numberOfHouseholds())
+        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.householdsStep.formModel?.numberOfHouseholds)
     }
 }

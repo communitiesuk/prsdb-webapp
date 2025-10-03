@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 
 @Scope("prototype")
 @PrsdbWebComponent
-class EpcSupersededStep : BackwardsDslInitialisableStep<Complete, NoInputFormModel, EpcJourneyState>() {
+class EpcSupersededStep : AbstractStep<Complete, NoInputFormModel, EpcJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepContent(state: EpcJourneyState) =
         mapOf(
             "title" to "propertyCompliance.title",
-            "certificateNumber" to state.searchedForEpcNumber,
+            "certificateNumber" to state.searchForEpcStep.formModel?.certificateNumber,
         )
 
     override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcSupersededForm"

@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 @PrsdbWebComponent
 class SearchEpcStep(
     private val epcLookupService: EpcLookupService,
-) : BackwardsDslInitialisableStep<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
+) : AbstractStep<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
     override val formModelClazz = EpcLookupFormModel::class
 
     override fun getStepContent(state: EpcJourneyState) =

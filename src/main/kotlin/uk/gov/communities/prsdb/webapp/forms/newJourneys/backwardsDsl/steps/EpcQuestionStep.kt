@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class EpcQuestionStep(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
-) : BackwardsDslInitialisableStep<EpcStatus, EpcFormModel, EpcJourneyState>() {
+) : AbstractStep<EpcStatus, EpcFormModel, EpcJourneyState>() {
     override val formModelClazz = EpcFormModel::class
 
     override fun getStepContent(state: EpcJourneyState) =
