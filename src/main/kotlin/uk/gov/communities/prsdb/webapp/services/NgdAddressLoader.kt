@@ -23,8 +23,10 @@ import java.util.zip.ZipInputStream
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
-    private val localAuthorityRepository: LocalAuthorityRepository,
+    localAuthorityRepository: LocalAuthorityRepository,
 ) {
+    private val localAuthorityByCustodianCode = localAuthorityRepository.findAll().associateBy { it.custodianCode }
+
     private lateinit var ngdAddressLoaderRepository: NgdAddressLoaderRepository
 
     fun loadNewDataPackageVersions() {
@@ -177,7 +179,7 @@ class NgdAddressLoader(
             if (country != "England" || custodianCode == "7655") {
                 null
             } else {
-                localAuthorityRepository.findByCustodianCode(custodianCode)
+                localAuthorityByCustodianCode[custodianCode]
                     ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
             }
 
