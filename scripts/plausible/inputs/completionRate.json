@@ -1,0 +1,50 @@
+{
+  "LL_registration": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "7d",
+    "metrics": [
+      "visitors"
+    ],
+    "dimensions": [
+      "event:goal"
+    ],
+    "filters": [["is", "event:goal", ["Visit landlord registration start page", "Complete landlord registration"]]],
+    "include": {"total_rows": true}
+  },
+  "Property_registration": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "7d",
+    "metrics": [
+      "visitors"
+    ],
+    "dimensions": [
+      "event:goal"
+    ],
+    "filters": [["is", "event:goal", ["Visit property registration start page", "Complete property registration"]]],
+    "include": {"total_rows": true}
+  },
+  "Add compliance": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "7d",
+    "metrics": [
+      "visitors"
+    ],
+    "dimensions": [
+      "event:goal"
+    ],
+    "filters": [["is", "event:goal", ["Add compliance - gas safety step", "Complete \"Add compliance\" journey"]]],
+    "include": {"total_rows": true}
+  },
+  "LC user registration": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "7d",
+    "metrics": [
+      "visitors"
+    ],
+    "dimensions": [
+      "event:goal"
+    ],
+    "filters": [["is", "event:goal", ["Visit LC user registration start page", "Complete Local Council User registration"]]],
+    "include": {"total_rows": true}
+  }
+}
