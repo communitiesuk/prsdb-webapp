@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.hibernate.StatelessSession
+import java.sql.Connection
+import java.sql.PreparedStatement
 
 class NgdAddressLoaderRepository(
     private val session: StatelessSession,
@@ -16,24 +18,39 @@ class NgdAddressLoaderRepository(
         return session.createNativeQuery(query, String::class.java).singleResultOrNull
     }
 
-    fun findAddressId(uprn: Long): Long? {
+    fun getLoadAddressPreparedStatement(connection: Connection): PreparedStatement {
         val query =
             """
-                SELECT id
-                FROM address
-                WHERE uprn = :uprn;
+                INSERT INTO address (
+                    uprn,
+                    single_line_address,
+                    organisation,
+                    sub_building,
+                    building_name,
+                    building_number,
+                    street_name,
+                    locality,
+                    town_name,
+                    postcode,
+                    local_authority_id,
+                    is_active,
+                    created_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+                ON CONFLICT (uprn) DO UPDATE SET
+                    single_line_address = EXCLUDED.single_line_address,
+                    organisation        = EXCLUDED.organisation,
+                    sub_building        = EXCLUDED.sub_building,
+                    building_name       = EXCLUDED.building_name,
+                    building_number     = EXCLUDED.building_number,
+                    street_name         = EXCLUDED.street_name,
+                    locality            = EXCLUDED.locality,
+                    town_name           = EXCLUDED.town_name,
+                    postcode            = EXCLUDED.postcode,
+                    local_authority_id  = EXCLUDED.local_authority_id,
+                    is_active           = EXCLUDED.is_active,
+                    last_modified_date  = current_timestamp
             """
-        return session.createNativeQuery(query, Long::class.java).setParameter("uprn", uprn).singleResultOrNull
-    }
-
-    fun deactivateAddress(uprn: Long) {
-        val query =
-            """
-                UPDATE address
-                SET is_active = false
-                WHERE uprn = :uprn;
-            """
-        session.createNativeMutationQuery(query).setParameter("uprn", uprn).executeUpdate()
+        return connection.prepareStatement(query)
     }
 
     fun deleteUnusedInactiveAddresses() {

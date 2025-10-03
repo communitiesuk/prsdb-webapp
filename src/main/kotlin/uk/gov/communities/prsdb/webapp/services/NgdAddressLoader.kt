@@ -10,10 +10,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
+import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
+import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.ZipInputStreamExtensions.Companion.goToEntry
+import java.sql.PreparedStatement
 import java.time.Instant
 import java.time.ZoneId
 import java.util.zip.ZipInputStream
@@ -25,9 +27,11 @@ class NgdAddressLoader(
     private val osDownloadsClient: OsDownloadsClient,
     localAuthorityRepository: LocalAuthorityRepository,
 ) {
-    private val localAuthorityByCustodianCode = localAuthorityRepository.findAll().associateBy { it.custodianCode }
-
     private lateinit var ngdAddressLoaderRepository: NgdAddressLoaderRepository
+
+    private val localAuthorityCustodianCodeToId: Map<String, Int> by lazy {
+        localAuthorityRepository.findAll().associate { it.custodianCode to it.id }
+    }
 
     fun loadNewDataPackageVersions() {
         val statelessSession = sessionFactory.openStatelessSession()
@@ -127,9 +131,24 @@ class NgdAddressLoader(
     ) {
         val transaction = session.beginTransaction()
         try {
-            csvParser.forEachIndexed { index, record ->
-                loadCsvRecord(session, record)
-                if ((index + 1) % 1000 == 0) log("Loaded ${index + 1} records")
+            session.doWork { connection ->
+                ngdAddressLoaderRepository.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
+                    var batchRecordCount = 0
+                    csvParser.forEachIndexed { index, record ->
+                        val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
+
+                        if (hasRecordBeenAdded) {
+                            batchRecordCount++
+                            if (batchRecordCount >= BATCH_SIZE) {
+                                preparedStatement.executeBatch()
+                                batchRecordCount = 0
+                            }
+                        }
+
+                        if ((index + 1) % 10000 == 0) log("Loaded ${index + 1} records")
+                    }
+                    if (batchRecordCount > 0) preparedStatement.executeBatch()
+                }
             }
             setStoredDataPackageVersionId(dataPackageVersionId)
             transaction.commit()
@@ -139,69 +158,50 @@ class NgdAddressLoader(
         }
     }
 
-    private fun loadCsvRecord(
-        session: StatelessSession,
+    private fun addCsvRecordToBatch(
+        preparedStatement: PreparedStatement,
         csvRecord: CSVRecord,
-    ) {
+    ): Boolean {
         val changeType = csvRecord.get("changetype")
         val country = csvRecord.get("country")
+        val isAddressActive =
+            if (changeType in deleteChangeTypes || country !in validCountries) {
+                false
+            } else if (changeType in upsertChangeTypes) {
+                true
+            } else if (changeType in noChangeTypes) {
+                // Skip record
+                return false
+            } else {
+                throw IllegalArgumentException("Unknown change type '$changeType'")
+            }
 
-        if (changeType in deleteChangeTypes || country !in validCountries) {
-            loadCsvDeleteRecord(csvRecord)
-        } else if (changeType in upsertChangeTypes) {
-            loadCsvUpsertRecord(session, csvRecord)
-        } else if (changeType in noChangeTypes) {
-            return
-        } else {
-            throw IllegalArgumentException("Unknown change type '$changeType'")
-        }
-    }
-
-    private fun loadCsvDeleteRecord(csvRecord: CSVRecord) {
-        val uprn = csvRecord.get("uprn").toLong()
-        ngdAddressLoaderRepository.deactivateAddress(uprn)
-    }
-
-    private fun loadCsvUpsertRecord(
-        session: StatelessSession,
-        csvRecord: CSVRecord,
-    ) {
-        val uprn = csvRecord.get("uprn").toLong()
-        val addressToUpdateId = ngdAddressLoaderRepository.findAddressId(uprn)
-
-        val country = csvRecord.get("country")
         val custodianCode = csvRecord.get("localcustodiancode")
-        val localAuthority =
+        val localAuthorityId =
             // We only keep English LA records
             // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LA
             if (country != "England" || custodianCode == "7655") {
                 null
             } else {
-                localAuthorityByCustodianCode[custodianCode]
+                localAuthorityCustodianCodeToId[custodianCode]
                     ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
             }
 
-        val upsertAddress =
-            Address(
-                id = addressToUpdateId,
-                uprn = uprn,
-                singleLineAddress = csvRecord.get("fulladdress"),
-                organisation = csvRecord.get("organisationname"),
-                subBuilding = csvRecord.get("subname"),
-                buildingName = csvRecord.get("name"),
-                buildingNumber = csvRecord.get("number"),
-                streetName = csvRecord.get("streetname"),
-                locality = csvRecord.get("locality"),
-                townName = csvRecord.get("townname"),
-                postcode = csvRecord.get("postcode"),
-                localAuthority = localAuthority,
-            )
+        preparedStatement.setLong(1, csvRecord.get("uprn").toLong())
+        preparedStatement.setString(2, csvRecord.get("fulladdress"))
+        preparedStatement.setStringOrNull(3, csvRecord.get("organisationname"))
+        preparedStatement.setStringOrNull(4, csvRecord.get("subname"))
+        preparedStatement.setStringOrNull(5, csvRecord.get("name"))
+        preparedStatement.setStringOrNull(6, csvRecord.get("number"))
+        preparedStatement.setString(7, csvRecord.get("streetname"))
+        preparedStatement.setStringOrNull(8, csvRecord.get("locality"))
+        preparedStatement.setStringOrNull(9, csvRecord.get("townname"))
+        preparedStatement.setString(10, csvRecord.get("postcode"))
+        preparedStatement.setIntOrNull(11, localAuthorityId)
+        preparedStatement.setBoolean(12, isAddressActive)
 
-        if (addressToUpdateId == null) {
-            session.insert(upsertAddress)
-        } else {
-            session.update(upsertAddress)
-        }
+        preparedStatement.addBatch()
+        return true
     }
 
     private fun deleteUnusedInactiveAddresses(session: StatelessSession) {
@@ -226,6 +226,8 @@ class NgdAddressLoader(
 
         const val DATA_PACKAGE_ID = "15298"
         const val DATA_PACKAGE_FILE_NAME = "add_gb_builtaddress"
+
+        const val BATCH_SIZE = 5000
 
         private val deleteChangeTypes =
             listOf("End Of Life", "Moved To A Different Feature Type")
