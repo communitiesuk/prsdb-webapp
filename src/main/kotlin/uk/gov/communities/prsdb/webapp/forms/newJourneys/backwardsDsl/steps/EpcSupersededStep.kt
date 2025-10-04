@@ -14,7 +14,7 @@ class EpcSupersededStep : AbstractStep<Complete, NoInputFormModel, EpcJourneySta
     override fun getStepContent(state: EpcJourneyState) =
         mapOf(
             "title" to "propertyCompliance.title",
-            "certificateNumber" to state.searchForEpcStep.formModel?.certificateNumber,
+            "certificateNumber" to state.searchForEpc?.formModel?.certificateNumber,
         )
 
     override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcSupersededForm"

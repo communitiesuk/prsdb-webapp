@@ -30,6 +30,6 @@ class TenantsStep : AbstractStep<Complete, NumberOfPeopleFormModel, OccupiedJour
     ): PageData {
         super.beforeValidateSubmittedData(state, formData)
 
-        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.householdsStep.formModel?.numberOfHouseholds)
+        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModel?.numberOfHouseholds)
     }
 }

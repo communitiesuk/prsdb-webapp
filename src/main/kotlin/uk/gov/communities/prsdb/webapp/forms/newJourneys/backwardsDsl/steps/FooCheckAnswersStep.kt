@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.Complete
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.FooJourneyState
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -22,15 +23,14 @@ class FooCheckAnswersStep(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to "forms.update.checkOccupancy.insetText",
-            "summaryListData" to occupationRows() + getEpcStatusRow(state),
+            "summaryListData" to occupationRows(state) + getEpcStatusRow(state),
         )
 
-    private fun occupationRows(): List<SummaryListRowViewModel> {
-        val lineage = ancestry
-        val occupiedStep = lineage.find { it is OccupiedStep } as? OccupiedStep
+    private fun occupationRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> {
+        val occupiedStep = state.occupied
         return if (occupiedStep?.formModel?.occupied == true) {
-            val householdsStep = lineage.find { it is HouseholdStep } as? HouseholdStep
-            val tenantsStep = lineage.find { it is TenantsStep } as? TenantsStep
+            val householdsStep = state.households
+            val tenantsStep = state.tenants
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.occupancy.fieldSetHeading",
@@ -77,12 +77,10 @@ class FooCheckAnswersStep(
                 null
             }
 
-        val epcQuestionStep = ancestry.find { it is EpcQuestionStep } as? EpcQuestionStep
-
-        return SummaryListRowViewModel.Companion.forCheckYourAnswersPage(
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.epc.certificate",
             fieldValue,
-            epcQuestionStep?.routeSegment,
+            state.epcQuestion?.routeSegment,
             valueUrl,
             valueUrlOpensNewTab = valueUrl != null,
         )
