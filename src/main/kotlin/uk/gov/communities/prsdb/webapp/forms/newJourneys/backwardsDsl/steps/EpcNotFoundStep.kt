@@ -18,8 +18,8 @@ class EpcNotFoundStep : AbstractStep<Complete, NoInputFormModel, EpcJourneyState
             "title" to "propertyCompliance.title",
             "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
             "getNewEpcUrl" to GET_NEW_EPC_URL,
-            "searchAgainUrl" to ancestry.filterIsInstance<SearchEpcStep>().singleOrNull()?.routeSegment,
-            "certificateNumber" to state.searchForEpcStep.formModel?.certificateNumber,
+            "searchAgainUrl" to state.searchForEpc?.routeSegment,
+            "certificateNumber" to state.searchForEpc?.formModel?.certificateNumber,
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 

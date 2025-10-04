@@ -20,10 +20,19 @@ import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.Occu
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.OrParents
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.UsableStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.VisitableStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.applyConditionToParent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.hasOutcome
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.FooJourneyState
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.PartialEpcJourney
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
@@ -42,9 +51,9 @@ class FooExampleJourney(
 ) {
     fun initialiseJourney(propertyId: Long): Map<String, VisitableStep> {
         val taskListStep = taskListStepFactory.getObject()
-        val occupiedStep: OccupiedStep = occupiedStepFactory.getObject()
-        val householdsStep: HouseholdStep = householdsStepFactory.getObject()
-        val tenantsStep: TenantsStep = tenantsStepFactory.getObject()
+        val occupiedStep = occupiedStepFactory.getObject()
+        val householdsStep = householdsStepFactory.getObject()
+        val tenantsStep = tenantsStepFactory.getObject()
         val epcQuestionStep = epcQuestionStepFactory.getObject()
         val searchForEpcStep = epcSearchEpcStepFactory.getObject()
         val epcNotFoundStep = epcNotFoundStepFactory.getObject()
@@ -56,19 +65,27 @@ class FooExampleJourney(
         val journeyDataService = journeyDataServiceFactory.create("BackwardsDsl-$propertyId")
 
         val state =
-            FooJourneyState.withSteps(
-                journeyDataService,
-                propertyId,
-                epcQuestionStep,
-                checkAutomatchedEpcStep,
-                searchForEpcStep,
-                epcNotFoundStep,
-                epcSupersededStep,
-                checkSearchedEpcStep,
-                occupiedStep,
-                householdsStep,
-                tenantsStep,
-            )
+            object : PartialEpcJourney(journeyDataService, propertyId), FooJourneyState {
+                override val epcQuestion: UsableStep<EpcFormModel>
+                    get() = epcQuestionStep
+                override val checkAutomatchedEpc: UsableStep<CheckMatchedEpcFormModel>
+                    get() = checkAutomatchedEpcStep
+                override val searchForEpc: UsableStep<EpcLookupFormModel>
+                    get() = searchForEpcStep
+                override val epcNotFound: UsableStep<NoInputFormModel>
+                    get() = epcNotFoundStep
+                override val epcSuperseded: UsableStep<NoInputFormModel>
+                    get() = epcSupersededStep
+                override val checkSearchedEpc: UsableStep<CheckMatchedEpcFormModel>
+                    get() = checkSearchedEpcStep
+
+                override val occupied: UsableStep<OccupancyFormModel>
+                    get() = occupiedStep
+                override val households: UsableStep<NumberOfHouseholdsFormModel>
+                    get() = householdsStep
+                override val tenants: UsableStep<NumberOfPeopleFormModel>
+                    get() = tenantsStep
+            }
 
         return mapOf(
             taskListStep.step("task-list") {

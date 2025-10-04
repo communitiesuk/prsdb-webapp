@@ -15,6 +15,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
+interface FooJourneyState :
+    OccupiedJourneyState,
+    EpcJourneyState
+
 interface JourneyState {
     val journeyData: JourneyData
 
@@ -25,9 +29,9 @@ interface JourneyState {
 }
 
 interface OccupiedJourneyState : JourneyState {
-    val occupiedStep: UsableStep<OccupancyFormModel>
-    val householdsStep: UsableStep<NumberOfHouseholdsFormModel>
-    val tenantsStep: UsableStep<NumberOfPeopleFormModel>
+    val occupied: UsableStep<OccupancyFormModel>?
+    val households: UsableStep<NumberOfHouseholdsFormModel>?
+    val tenants: UsableStep<NumberOfPeopleFormModel>?
 }
 
 interface EpcJourneyState : JourneyState {
@@ -35,23 +39,18 @@ interface EpcJourneyState : JourneyState {
     var searchedEpc: EpcDataModel?
     val propertyId: Long
 
-    val epcQuestionStep: UsableStep<EpcFormModel>
-    val checkAutomatchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
-    val searchForEpcStep: UsableStep<EpcLookupFormModel>
-    val epcNotFoundStep: UsableStep<NoInputFormModel>
-    val epcSupersededStep: UsableStep<NoInputFormModel>
-    val checkSearchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
+    val epcQuestion: UsableStep<EpcFormModel>?
+    val checkAutomatchedEpc: UsableStep<CheckMatchedEpcFormModel>?
+    val searchForEpc: UsableStep<EpcLookupFormModel>?
+    val epcNotFound: UsableStep<NoInputFormModel>?
+    val epcSuperseded: UsableStep<NoInputFormModel>?
+    val checkSearchedEpc: UsableStep<CheckMatchedEpcFormModel>?
 }
 
-class FooJourneyState(
-    private val journeyDataService: JourneyDataService,
-) : OccupiedJourneyState,
-    EpcJourneyState {
-    constructor(journeyDataService: JourneyDataService, propertyInt: Long) : this(journeyDataService) {
-        journeyDataService.addToJourneyDataIntoSession(mapOf("propertyId" to propertyInt))
-    }
-
-    val innerJourneyData: Map<String, Any?>
+open class AbstractJourney(
+    protected val journeyDataService: JourneyDataService,
+) : JourneyState {
+    protected val innerJourneyData: Map<String, Any?>
         get() = journeyDataService.getJourneyDataFromSession()
 
     override val journeyData: JourneyData
@@ -64,6 +63,18 @@ class FooJourneyState(
         val newJourneyData = journeyData + (key to value)
         journeyDataService.addToJourneyDataIntoSession(mapOf("journeyData" to newJourneyData))
         return this
+    }
+}
+
+abstract class PartialEpcJourney(
+    journeyDataService: JourneyDataService,
+    propertyId: Long,
+) : AbstractJourney(journeyDataService),
+    EpcJourneyState {
+    init {
+        if (innerJourneyData["propertyId"] == null) {
+            journeyDataService.addToJourneyDataIntoSession(mapOf("propertyId" to propertyId))
+        }
     }
 
     override var automatchedEpc: EpcDataModel?
@@ -88,50 +99,4 @@ class FooJourneyState(
 
     override val propertyId: Long
         get() = innerJourneyData["propertyId"]?.toString()?.toLongOrNull()!!
-
-    override lateinit var epcQuestionStep: UsableStep<EpcFormModel>
-        private set
-    override lateinit var checkAutomatchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
-        private set
-    override lateinit var searchForEpcStep: UsableStep<EpcLookupFormModel>
-        private set
-    override lateinit var epcNotFoundStep: UsableStep<NoInputFormModel>
-        private set
-    override lateinit var epcSupersededStep: UsableStep<NoInputFormModel>
-        private set
-    override lateinit var checkSearchedEpcStep: UsableStep<CheckMatchedEpcFormModel>
-        private set
-    override lateinit var occupiedStep: UsableStep<OccupancyFormModel>
-        private set
-    override lateinit var householdsStep: UsableStep<NumberOfHouseholdsFormModel>
-        private set
-    override lateinit var tenantsStep: UsableStep<NumberOfPeopleFormModel>
-        private set
-
-    companion object {
-        fun withSteps(
-            journeyDataService: JourneyDataService,
-            propertyId: Long,
-            epcQuestionStep: UsableStep<EpcFormModel>,
-            checkAutomatchedEpcStep: UsableStep<CheckMatchedEpcFormModel>,
-            searchForEpcStep: UsableStep<EpcLookupFormModel>,
-            epcNotFoundStep: UsableStep<NoInputFormModel>,
-            epcSupersededStep: UsableStep<NoInputFormModel>,
-            checkSearchedEpcStep: UsableStep<CheckMatchedEpcFormModel>,
-            occupiedStep: UsableStep<OccupancyFormModel>,
-            householdsStep: UsableStep<NumberOfHouseholdsFormModel>,
-            tenantsStep: UsableStep<NumberOfPeopleFormModel>,
-        ): FooJourneyState =
-            FooJourneyState(journeyDataService, propertyId).apply {
-                this.epcQuestionStep = epcQuestionStep
-                this.checkAutomatchedEpcStep = checkAutomatchedEpcStep
-                this.searchForEpcStep = searchForEpcStep
-                this.epcNotFoundStep = epcNotFoundStep
-                this.epcSupersededStep = epcSupersededStep
-                this.checkSearchedEpcStep = checkSearchedEpcStep
-                this.occupiedStep = occupiedStep
-                this.householdsStep = householdsStep
-                this.tenantsStep = tenantsStep
-            }
-    }
 }

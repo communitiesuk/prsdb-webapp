@@ -17,33 +17,11 @@ import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
 abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> :
-    LifeCycleStep<TFormModel, TState>(),
     StepInitialiser<TEnum, TState>,
-    UsableStep<TFormModel> {
+    UsableStep<TFormModel>,
+    VisitableStep {
     final override var isInitialised: Boolean = false
         private set
-
-    private final lateinit var state: TState
-    private final lateinit var redirectTo: (mode: TEnum) -> UsableStep<*>?
-
-    private fun determineRedirect(): String? = mode(state)?.let { redirectTo(it)?.routeSegment }
-
-    private var backUrlOverride: String? = null
-
-    private val backUrl: String?
-        get() {
-            val parentSteps =
-                parent.parentSteps
-                    .mapNotNull { it as? UsableStep<*> }
-            return backUrlOverride ?: parentSteps
-                .singleOrNull()
-                ?.routeSegment
-        }
-    final override lateinit var routeSegment: String
-        private set
-
-    @Autowired
-    private final lateinit var validator: Validator
 
     final override fun getStepModelAndView(): ModelAndView {
         println("Getting step model and view for step $routeSegment")
@@ -81,6 +59,28 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         val unreachableStepRedirect = getUnreachableStepRedirect()
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
+
+    private lateinit var state: TState
+    private lateinit var redirectTo: (mode: TEnum) -> UsableStep<*>?
+
+    @Autowired
+    private lateinit var validator: Validator
+
+    private fun determineRedirect(): String? = mode(state)?.let { redirectTo(it)?.routeSegment }
+
+    private var backUrlOverride: String? = null
+
+    private val backUrl: String?
+        get() {
+            val parentSteps =
+                parent.parentSteps
+                    .mapNotNull { it as? UsableStep<*> }
+            return backUrlOverride ?: parentSteps
+                .singleOrNull()
+                ?.routeSegment
+        }
+    final override lateinit var routeSegment: String
+        private set
 
     override val formModel: TFormModel?
         get() = getFormModelFromState(state)
@@ -123,7 +123,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     override fun step(
         segment: String,
         init: StepInitialiser<TEnum, TState>.() -> Unit,
-    ): Pair<String, UsableStep<TFormModel>> {
+    ): Pair<String, VisitableStep> {
         if (isInitialised) {
             throw IllegalStateException("Step is already initialised")
         }
@@ -169,9 +169,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     override val ancestry: List<StepInitialiser<*, *>>
         get() = (listOf(this) + parent.ancestry).distinct()
-}
 
-abstract class LifeCycleStep<TFormModel : FormModel, in TState : JourneyState> {
     open fun beforeValidateSubmittedData(
         state: TState,
         formData: PageData,
@@ -186,7 +184,7 @@ interface StepInitialiser<out TEnum : Enum<out TEnum>, in TState : JourneyState>
     fun step(
         segment: String,
         init: StepInitialiser<TEnum, TState>.() -> Unit,
-    ): Pair<String, UsableStep<*>>
+    ): Pair<String, VisitableStep>
 
     fun reachableWhen(condition: () -> Boolean): StepInitialiser<TEnum, TState>
 
@@ -205,7 +203,7 @@ interface StepInitialiser<out TEnum : Enum<out TEnum>, in TState : JourneyState>
     val ancestry: List<StepInitialiser<*, *>>
 }
 
-interface UsableStep<TFormModel : FormModel> : VisitableStep {
+interface UsableStep<TFormModel : FormModel> {
     val routeSegment: String
     val formModel: TFormModel?
 }
