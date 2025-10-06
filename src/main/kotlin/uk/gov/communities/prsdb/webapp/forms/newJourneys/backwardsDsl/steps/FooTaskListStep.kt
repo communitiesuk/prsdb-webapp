@@ -16,9 +16,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusVi
 class FooTaskListStep : AbstractStep<Complete, NoInputFormModel, FooJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
-    override fun getStepContent(state: FooJourneyState): Map<String, Any> = mapOf("taskListViewModel" to getTaskListViewModel())
+    override fun getStepContent(state: FooJourneyState): Map<String, Any> = mapOf("taskListViewModel" to getTaskListViewModel(state))
 
-    fun getTaskListViewModel(): TaskListViewModel {
+    fun getTaskListViewModel(state: FooJourneyState): TaskListViewModel {
         val sectionViewModels =
             listOf(
                 TaskSectionViewModel(
@@ -28,14 +28,12 @@ class FooTaskListStep : AbstractStep<Complete, NoInputFormModel, FooJourneyState
                         TaskListItemViewModel(
                             "OccupationTask",
                             TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            // TODO replace with actual step URL
-                            url = "occupied",
+                            url = state.occupied?.routeSegment,
                         ),
                         TaskListItemViewModel(
                             "EpcTask",
                             TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            // TODO replace with actual step URL
-                            url = "has-epc",
+                            url = state.epcQuestion?.routeSegment,
                         ),
                     ),
                 ),
