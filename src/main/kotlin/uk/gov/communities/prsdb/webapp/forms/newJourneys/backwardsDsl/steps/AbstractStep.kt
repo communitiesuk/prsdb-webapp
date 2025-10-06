@@ -73,7 +73,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     private val backUrl: String?
         get() {
             val parentSteps =
-                parent.parentSteps
+                parentage.parentSteps
                     .mapNotNull { it as? UsableStep<*> }
             return backUrlOverride ?: parentSteps
                 .singleOrNull()
@@ -129,8 +129,8 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         }
         routeSegment = segment
         this.init()
-        if (!this::parent.isInitialized) {
-            parent = NoParents()
+        if (!this::parentage.isInitialized) {
+            parentage = NoParents()
         }
         isInitialised = true
         return Pair(segment, this)
@@ -155,20 +155,20 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         backUrlOverride = backUrlProvider()
     }
 
-    override fun parents(currentParents: () -> StepParent): StepInitialiser<TEnum, TState> {
+    override fun parents(currentParentage: () -> Parentage): StepInitialiser<TEnum, TState> {
         if (this::isStepReachable.isInitialized) {
             throw IllegalStateException("Parents must be set before reachableWhen override")
         }
 
-        parent = currentParents()
-        isStepReachable = { parent.allowsChild() }
+        parentage = currentParentage()
+        isStepReachable = { parentage.allowsChild() }
         return this
     }
 
-    private lateinit var parent: StepParent
+    private lateinit var parentage: Parentage
 
     override val ancestry: List<StepInitialiser<*, *>>
-        get() = (listOf(this) + parent.ancestry).distinct()
+        get() = (listOf(this) + parentage.ancestry).distinct()
 
     open fun beforeValidateSubmittedData(
         state: TState,
@@ -188,7 +188,7 @@ interface StepInitialiser<out TEnum : Enum<out TEnum>, in TState : JourneyState>
 
     fun reachableWhen(condition: () -> Boolean): StepInitialiser<TEnum, TState>
 
-    fun parents(currentParents: () -> StepParent): StepInitialiser<TEnum, TState>
+    fun parents(currentParentage: () -> Parentage): StepInitialiser<TEnum, TState>
 
     fun state(stateProvider: () -> TState): StepInitialiser<TEnum, TState>
 

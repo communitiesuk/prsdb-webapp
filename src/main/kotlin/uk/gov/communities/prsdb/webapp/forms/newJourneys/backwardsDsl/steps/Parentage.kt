@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
 
-interface StepParent {
+interface Parentage {
     fun allowsChild(): Boolean
 
     val ancestry: List<StepInitialiser<*, *>>
@@ -8,8 +8,8 @@ interface StepParent {
 }
 
 class AndParents(
-    vararg val parents: StepParent,
-) : StepParent {
+    vararg val parents: Parentage,
+) : Parentage {
     override fun allowsChild(): Boolean = parents.all { it.allowsChild() }
 
     override val ancestry
@@ -20,8 +20,8 @@ class AndParents(
 }
 
 class OrParents(
-    vararg val parents: StepParent,
-) : StepParent {
+    vararg val parents: Parentage,
+) : Parentage {
     override fun allowsChild(): Boolean = parents.any { it.allowsChild() }
 
     override val ancestry
@@ -31,7 +31,7 @@ class OrParents(
         get() = parents.filter { it.allowsChild() }.flatMap { it.parentSteps }
 }
 
-class NoParents : StepParent {
+class NoParents : Parentage {
     override fun allowsChild(): Boolean = true
 
     override val ancestry: List<StepInitialiser<*, *>>
@@ -41,21 +41,20 @@ class NoParents : StepParent {
         get() = listOf()
 }
 
-class ConditionalParent(
-    val parent: StepInitialiser<*, *>? = null,
+class SingleParent(
+    val step: StepInitialiser<*, *>? = null,
     private val condition: () -> Boolean,
-) : StepParent {
+) : Parentage {
     override fun allowsChild(): Boolean = condition()
 
     override val ancestry: List<StepInitialiser<*, *>>
-        get() = parent?.let { listOf(it) + it.ancestry }.orEmpty()
+        get() = step?.let { listOf(it) + it.ancestry }.orEmpty()
 
     override val parentSteps: List<StepInitialiser<*, *>>
-        get() = listOfNotNull(parent)
+        get() = listOfNotNull(step)
 }
 
-fun StepInitialiser<*, *>.applyConditionToParent(condition: StepInitialiser<*, *>.() -> Boolean): StepParent =
-    ConditionalParent { condition() }
+fun StepInitialiser<*, *>.applyConditionToParent(condition: StepInitialiser<*, *>.() -> Boolean): Parentage = SingleParent { condition() }
 
-fun <TEnum : Enum<TEnum>> StepInitialiser<TEnum, *>.hasOutcome(outcomeValue: TEnum): StepParent =
-    ConditionalParent(this) { outcome() == outcomeValue }
+fun <TEnum : Enum<TEnum>> StepInitialiser<TEnum, *>.hasOutcome(outcomeValue: TEnum): Parentage =
+    SingleParent(this) { outcome() == outcomeValue }
