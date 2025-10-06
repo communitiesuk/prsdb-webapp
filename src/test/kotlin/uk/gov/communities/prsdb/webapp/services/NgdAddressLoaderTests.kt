@@ -5,6 +5,7 @@ import org.apache.http.HttpException
 import org.hibernate.SessionFactory
 import org.hibernate.StatelessSession
 import org.hibernate.Transaction
+import org.hibernate.jdbc.Work
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named.named
@@ -13,13 +14,13 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.MockedConstruction
 import org.mockito.Mockito.lenient
 import org.mockito.Mockito.mockConstruction
 import org.mockito.Mockito.verify
-import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -29,16 +30,20 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH_SIZE
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import java.io.FileInputStream
+import java.sql.Connection
+import java.sql.PreparedStatement
 import java.util.zip.ZipException
+import kotlin.math.ceil
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
@@ -61,6 +66,12 @@ class NgdAddressLoaderTests {
     @Mock
     private lateinit var mockTransaction: Transaction
 
+    @Mock
+    private lateinit var mockConnection: Connection
+
+    @Mock
+    private lateinit var mockPreparedStatement: PreparedStatement
+
     private lateinit var ngdAddressLoaderRepositoryMockConstructor: MockedConstruction<NgdAddressLoaderRepository>
 
     private val mockNgdAddressLoaderRepository
@@ -70,11 +81,19 @@ class NgdAddressLoaderTests {
     fun setUp() {
         whenever(mockSessionFactory.openStatelessSession()).thenReturn(mockSession)
         lenient().`when`(mockSession.beginTransaction()).thenReturn(mockTransaction)
+        lenient().`when`(mockSession.doWork(any())).doAnswer { invocation ->
+            val work = invocation.arguments[0] as Work
+            work.execute(mockConnection)
+            null
+        }
     }
 
     private fun setUpMockNgdAddressLoaderRepository(mockInitializer: (mock: NgdAddressLoaderRepository) -> Unit) {
         ngdAddressLoaderRepositoryMockConstructor =
-            mockConstruction(NgdAddressLoaderRepository::class.java) { mock, _ -> mockInitializer(mock) }
+            mockConstruction(NgdAddressLoaderRepository::class.java) { mock, _ ->
+                whenever(mock.getLoadAddressPreparedStatement(any())).thenReturn(mockPreparedStatement)
+                mockInitializer(mock)
+            }
     }
 
     @AfterEach
@@ -158,23 +177,6 @@ class NgdAddressLoaderTests {
         assertThrows<HttpException> { ngdAddressLoader.loadNewDataPackageVersions() }
     }
 
-    @ParameterizedTest(name = "due to {0}")
-    @MethodSource("provideNoNextDataPackageVersionIdResponses")
-    fun `loadNewDataPackageVersions loads no data when there's no next version`(osDownloadsClientResponse: String) {
-        // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
-            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
-        }
-        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
-            .thenReturn(osDownloadsClientResponse)
-
-        // Act
-        ngdAddressLoader.loadNewDataPackageVersions()
-
-        // Assert
-        verify(mockNgdAddressLoaderRepository, never()).saveCommentOnAddressTable(any())
-    }
-
     @Test
     fun `loadNewDataPackageVersions rolls-back current load and doesn't load next versions when error is thrown`() {
         // Arrange
@@ -195,6 +197,42 @@ class NgdAddressLoaderTests {
         verify(mockTransaction).commit() // initial version is commited
         verify(mockTransaction).rollback() // second version is rolled-back
         verify(mockSession, times(2)).beginTransaction() // third version isn't loaded
+    }
+
+    @ParameterizedTest(name = "due to {0}")
+    @MethodSource("provideNoNextDataPackageVersionIdResponses")
+    fun `loadNewDataPackageVersions loads no data when there's no next version`(osDownloadsClientResponse: String) {
+        // Arrange
+        setUpMockNgdAddressLoaderRepository { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
+        }
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
+            .thenReturn(osDownloadsClientResponse)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        verify(mockNgdAddressLoaderRepository, never()).saveCommentOnAddressTable(any())
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions deletes unused inactive addresses after all data packages have been loaded`() {
+        // Arrange
+        setUpMockNgdAddressLoaderRepository { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
+        }
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID))
+            .thenReturn(secondVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        verify(mockNgdAddressLoaderRepository).deleteUnusedInactiveAddresses()
     }
 
     @Test
@@ -228,29 +266,18 @@ class NgdAddressLoaderTests {
     }
 
     @Test
-    fun `loadNewDataPackageVersions handles (deletes, upserts or ignores) each record in a data package version accordingly`() {
+    fun `loadNewDataPackageVersions handles (deactivates, upserts or ignores) each record in a data package version accordingly`() {
         // Arrange
-        val deleteInUseUprn = 10000490106
-        val deleteNotInUseInvalidCountryUprn = 10000067954
-        val insertWelshUprn = 10000001714
-        val updateAddress = MockLandlordData.createAddress(uprn = 10000071648, id = 1)
-
         setUpMockNgdAddressLoaderRepository { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
-
-            whenever(mock.findAddressReferencingTableAndColumnNames()).thenReturn(listOf("property" to "address_id"))
-            whenever(mock.countReferencesToAddressInTableColumn(deleteInUseUprn, "property", "address_id")).thenReturn(1)
-            whenever(mock.countReferencesToAddressInTableColumn(deleteNotInUseInvalidCountryUprn, "property", "address_id")).thenReturn(0)
-
-            whenever(mock.findAddressId(updateAddress.uprn!!)).thenReturn(updateAddress.id)
-            whenever(mock.findAddressId(insertWelshUprn)).thenReturn(null)
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        whenever(mockLocalAuthorityRepository.findByCustodianCode("3")).thenReturn(updateAddress.localAuthority)
+        val localAuthorities = listOf(MockLocalAuthorityData.createLocalAuthority(custodianCode = "1"))
+        whenever(mockLocalAuthorityRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -258,48 +285,58 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        verify(mockNgdAddressLoaderRepository).deactivateAddress(deleteInUseUprn)
-        verify(mockNgdAddressLoaderRepository).deleteAddress(deleteNotInUseInvalidCountryUprn)
+        val uprnCaptor = argumentCaptor<Long>()
+        verify(mockPreparedStatement, times(3)).setLong(eq(1), uprnCaptor.capture())
 
-        val expectedInsertAddress =
-            Address(
-                id = null,
-                uprn = insertWelshUprn,
-                singleLineAddress = "12, PARR ROAD, STANMORE, HA7 1NL",
-                organisation = null,
-                subBuilding = null,
-                buildingName = null,
-                buildingNumber = "12",
-                streetName = "PARR ROAD",
-                locality = null,
-                townName = "STANMORE",
-                postcode = "HA7 1NL",
-                localAuthority = null,
-            )
-        val insertAddressCaptor = argumentCaptor<Address>()
-        verify(mockSession).insert(insertAddressCaptor.capture())
-        assertTrue(ReflectionEquals(expectedInsertAddress).matches(insertAddressCaptor.firstValue))
+        val localAuthorityIndex = 11
 
-        val expectedUpdateAddress =
-            Address(
-                id = updateAddress.id,
-                uprn = updateAddress.uprn!!,
-                singleLineAddress = "FLAT B, CYCLISTS REST, LANGTON ROAD, LANGTON GREEN, TUNBRIDGE WELLS, TN3 0HL",
-                organisation = "COMPLIANCE BUILDING CONTROL LTD",
-                subBuilding = "FLAT B",
-                buildingName = "CYCLISTS REST",
-                buildingNumber = null,
-                streetName = "LANGTON ROAD",
-                locality = "LANGTON GREEN",
-                townName = "TUNBRIDGE WELLS",
-                postcode = "TN3 0HL",
-                localAuthority = updateAddress.localAuthority,
-            )
-        val updateAddressCaptor = argumentCaptor<Address>()
-        verify(mockSession).update(updateAddressCaptor.capture())
-        assertTrue(ReflectionEquals(expectedUpdateAddress).matches(updateAddressCaptor.firstValue))
+        val isActiveCaptor = argumentCaptor<Boolean>()
+        verify(mockPreparedStatement, times(3)).setBoolean(eq(12), isActiveCaptor.capture())
+
+        // 'Delete' change type and OS custodian code - deactivate
+        assertEquals(10000490106, uprnCaptor.firstValue)
+        verify(mockPreparedStatement, times(2)).setNull(localAuthorityIndex, java.sql.Types.INTEGER)
+        assertFalse(isActiveCaptor.firstValue)
+
+        // 'Upsert' change type and invalid country - deactivate
+        assertEquals(10000067954, uprnCaptor.secondValue)
+        verify(mockPreparedStatement, times(2)).setNull(localAuthorityIndex, java.sql.Types.INTEGER)
+        assertFalse(isActiveCaptor.secondValue)
+
+        // 'Upsert' change type - upsert
+        assertEquals(10000071648, uprnCaptor.thirdValue)
+        verify(mockPreparedStatement).setInt(localAuthorityIndex, localAuthorities.first().id)
+        assertTrue(isActiveCaptor.thirdValue)
+
+        // 'No' change type - ignore (fourth record isn't processed)
+        verify(mockPreparedStatement, times(3)).addBatch()
 
         verify(mockNgdAddressLoaderRepository).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID")
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions handles data package version records in batches`() {
+        // Arrange
+        setUpMockNgdAddressLoaderRepository { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
+        }
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+            .thenReturn(getNgdFileInputStream("largeCsv.zip"))
+
+        val localAuthorities = listOf(MockLocalAuthorityData.createLocalAuthority(custodianCode = "1"))
+        whenever(mockLocalAuthorityRepository.findAll()).thenReturn(localAuthorities)
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        val largeCsvLineCount = 10001f
+        val expectedBatchCount = ceil(largeCsvLineCount / BATCH_SIZE).toInt()
+        verify(mockPreparedStatement, times(expectedBatchCount)).executeBatch()
     }
 
     @Test
@@ -323,12 +360,13 @@ class NgdAddressLoaderTests {
         setUpMockNgdAddressLoaderRepository { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
+
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        whenever(mockLocalAuthorityRepository.findByCustodianCode(any())).thenReturn(null)
+        whenever(mockLocalAuthorityRepository.findAll()).thenReturn(emptyList())
 
         // Act & Assert
         assertThrows<EntityNotFoundException> { ngdAddressLoader.loadNewDataPackageVersions() }
@@ -368,31 +406,31 @@ class NgdAddressLoaderTests {
         private val versionHistoryWithoutInitial =
             """
             [
-             {
-               "id": "$SECOND_VERSION_ID",
-               "url": "https://api.os.uk/downloads/v1/dataPackages/0040046952/versions/$SECOND_VERSION_ID",
-               "createdOn": "2021-04-01",
-               "reason": "UPDATE",
-               "supplyType": "FULL",
-               "productVersion": "E37 December 2015 Update",
-               "format": "CSV",
-               "dataPackageUrl": "https://api.os.uk/downloads/v1/dataPackages/0040046952"
-             }
+              {
+                "id": "$SECOND_VERSION_ID",
+                "url": "https://api.os.uk/downloads/v1/dataPackages/0040046952/versions/$SECOND_VERSION_ID",
+                "createdOn": "2021-04-01",
+                "reason": "UPDATE",
+                "supplyType": "FULL",
+                "productVersion": "E37 December 2015 Update",
+                "format": "CSV",
+                "dataPackageUrl": "https://api.os.uk/downloads/v1/dataPackages/0040046952"
+              }
             ]
             """.trimIndent()
 
         private val versionHistoryWithoutId =
             """
             [
-             {
-               "url": "https://api.os.uk/downloads/v1/dataPackages/0040046952/versions/$INITIAL_VERSION_ID",
-               "createdOn": "2021-04-01",
-               "reason": "INITIAL",
-               "supplyType": "FULL",
-               "productVersion": "E37 December 2015 Update",
-               "format": "CSV",
-               "dataPackageUrl": "https://api.os.uk/downloads/v1/dataPackages/0040046952"
-             }
+              {
+                "url": "https://api.os.uk/downloads/v1/dataPackages/0040046952/versions/$INITIAL_VERSION_ID",
+                "createdOn": "2021-04-01",
+                "reason": "INITIAL",
+                "supplyType": "FULL",
+                "productVersion": "E37 December 2015 Update",
+                "format": "CSV",
+                "dataPackageUrl": "https://api.os.uk/downloads/v1/dataPackages/0040046952"
+              }
             ]
             """.trimIndent()
 

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
 import java.sql.PreparedStatement
+import java.sql.Types
 
 class PreparedStatementExtensions {
     companion object {
@@ -9,7 +10,7 @@ class PreparedStatementExtensions {
             value: String?,
         ) {
             if (value == null) {
-                this.setNull(parameterIndex, java.sql.Types.VARCHAR)
+                this.setNull(parameterIndex, Types.VARCHAR)
             } else {
                 this.setString(parameterIndex, value)
             }
@@ -20,7 +21,7 @@ class PreparedStatementExtensions {
             value: Int?,
         ) {
             if (value == null) {
-                this.setNull(parameterIndex, java.sql.Types.INTEGER)
+                this.setNull(parameterIndex, Types.INTEGER)
             } else {
                 this.setInt(parameterIndex, value)
             }
