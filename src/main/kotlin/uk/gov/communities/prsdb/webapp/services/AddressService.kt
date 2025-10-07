@@ -25,4 +25,10 @@ class AddressService(
 
         return addressRepository.save(Address(addressDataModel, localAuthority))
     }
+
+    fun searchForAddresses(
+        houseNameOrNumber: String,
+        postcode: String,
+        restrictToEngland: Boolean = false,
+    ) = addressRepository.search(houseNameOrNumber, postcode, restrictToEngland).map { AddressDataModel.fromAddress(it) }
 }

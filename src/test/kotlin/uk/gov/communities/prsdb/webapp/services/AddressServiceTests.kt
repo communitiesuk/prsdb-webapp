@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
@@ -12,6 +13,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import kotlin.test.assertEquals
 
@@ -85,5 +87,33 @@ class AddressServiceTests {
         val addressCaptor = captor<Address>()
         verify(mockAddressRepository).save(addressCaptor.capture())
         assertEquals(addressDataModel.localAuthorityId, addressCaptor.value.localAuthority!!.id)
+    }
+
+    @Nested
+    inner class SearchForAddressesTests {
+        @Test
+        fun `searchForAddresses calls the address repository search method and returns the results as AddressDataModels`() {
+            // Arrange
+            val houseNameOrNumber = "1"
+            val postcode = "EG1 2AB"
+            val restrictToEngland = true
+            val matchingAddresses =
+                listOf(
+                    MockLandlordData.createAddress(uprn = 1),
+                    MockLandlordData.createAddress(uprn = 2),
+                    MockLandlordData.createAddress(uprn = 3),
+                )
+
+            whenever(mockAddressRepository.search(houseNameOrNumber, postcode, restrictToEngland)).thenReturn(matchingAddresses)
+
+            // Act
+            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, restrictToEngland)
+
+            // Assert
+            verify(mockAddressRepository).search(houseNameOrNumber, postcode, restrictToEngland)
+
+            val expectedResults = matchingAddresses.map { AddressDataModel.fromAddress(it) }
+            assertEquals(expectedResults, results)
+        }
     }
 }
