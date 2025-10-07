@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.Complete
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 

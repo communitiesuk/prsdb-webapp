@@ -30,24 +30,3 @@ class NewJourneyController(
         @RequestParam formData: PageData,
     ): ModelAndView = fooExampleJourney.postStepModelAndView(stepName, formData, propertyId)
 }
-
-enum class Complete {
-    COMPLETE,
-}
-
-enum class YesOrNo {
-    YES,
-    NO,
-}
-
-enum class EpcStatus {
-    AUTOMATCHED,
-    NOT_AUTOMATCHED,
-    NO_EPC,
-}
-
-enum class EpcSearchResult {
-    FOUND,
-    SUPERSEDED,
-    NOT_FOUND,
-}
