@@ -74,6 +74,8 @@ class NgdAddressLoaderRepository(
                         WHERE c.contype = 'f'
                         AND c.confrelid = 'address'::regclass
                     LOOP
+                        -- RETURN QUERY appends zero or more rows to the result set, which is returned at the end of the function
+                        -- (see section 39.6.1.2 of https://www.postgresql.org/docs/9.1/plpgsql-control-structures.html)
                         sql := format('SELECT DISTINCT %I FROM %s WHERE %I IS NOT NULL', r.col, r.tbl, r.col);
                         RETURN QUERY EXECUTE sql;
                     END LOOP;

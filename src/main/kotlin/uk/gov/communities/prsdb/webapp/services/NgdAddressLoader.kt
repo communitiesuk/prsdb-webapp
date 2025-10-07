@@ -47,6 +47,7 @@ class NgdAddressLoader(
                 }
             } while (nextDataPackageVersionId != null)
 
+            // TODO PRSD-1609: Handle inactive addresses that are still in use
             deleteUnusedInactiveAddresses(session)
         }
     }
@@ -136,18 +137,15 @@ class NgdAddressLoader(
                     var batchRecordCount = 0
                     csvParser.forEachIndexed { index, record ->
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
+                        if (hasRecordBeenAdded) batchRecordCount++
 
-                        if (hasRecordBeenAdded) {
-                            batchRecordCount++
-                            if (batchRecordCount >= BATCH_SIZE) {
-                                preparedStatement.executeBatch()
-                                batchRecordCount = 0
-                            }
+                        if (batchRecordCount >= BATCH_SIZE || !csvParser.iterator().hasNext()) {
+                            preparedStatement.executeBatch()
+                            batchRecordCount = 0
                         }
 
                         if ((index + 1) % 10000 == 0) log("Loaded ${index + 1} records")
                     }
-                    if (batchRecordCount > 0) preparedStatement.executeBatch()
                 }
             }
             setStoredDataPackageVersionId(dataPackageVersionId)
