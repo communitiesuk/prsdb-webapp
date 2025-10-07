@@ -17,13 +17,13 @@ import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.FooExample
 class NewJourneyController(
     private val fooExampleJourney: FooExampleJourney,
 ) {
-    @GetMapping("{propertyId}/backwards-dsl/{stepName}")
+    @GetMapping("{propertyId}/{stepName}")
     fun getBackwardsDslJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyId") propertyId: Long,
     ): ModelAndView = fooExampleJourney.getStepModelAndView(stepName, propertyId)
 
-    @PostMapping("{propertyId}/backwards-dsl/{stepName}")
+    @PostMapping("{propertyId}/{stepName}")
     fun postBackwardsDslJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyId") propertyId: Long,
