@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
@@ -13,7 +12,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressService.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import kotlin.test.assertEquals
 
@@ -87,33 +85,5 @@ class AddressServiceTests {
         val addressCaptor = captor<Address>()
         verify(mockAddressRepository).save(addressCaptor.capture())
         assertEquals(addressDataModel.localAuthorityId, addressCaptor.value.localAuthority!!.id)
-    }
-
-    @Test
-    fun `getStoredDataPackageVersionId returns the ID stored in the comment`() {
-        val dataPackageVersionId = "12345"
-        whenever(mockAddressRepository.findComment()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$dataPackageVersionId")
-        assertEquals(dataPackageVersionId, addressService.getStoredDataPackageVersionId())
-    }
-
-    @Test
-    fun `getStoredDataPackageVersionId returns null when comment is null`() {
-        whenever(mockAddressRepository.findComment()).thenReturn(null)
-        assertNull(addressService.getStoredDataPackageVersionId())
-    }
-
-    @Test
-    fun `getStoredDataPackageVersionId returns null when comment doesn't contain an ID`() {
-        whenever(mockAddressRepository.findComment()).thenReturn(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
-        assertNull(addressService.getStoredDataPackageVersionId())
-    }
-
-    @Test
-    fun `setStoredDataPackageVersionId saves the ID in the comment`() {
-        val dataPackageVersionId = "12345"
-        addressService.setStoredDataPackageVersionId(dataPackageVersionId)
-
-        val expectedComment = "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$dataPackageVersionId"
-        verify(mockAddressRepository).saveComment(expectedComment)
     }
 }
