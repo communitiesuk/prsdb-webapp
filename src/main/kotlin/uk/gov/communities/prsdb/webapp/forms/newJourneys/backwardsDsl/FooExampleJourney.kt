@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl
 
-import org.springframework.beans.factory.ObjectFactory
-import org.springframework.web.servlet.ModelAndView
+import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.AndParents
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.CheckEpcStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.Complete
@@ -35,33 +33,23 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
+@Scope("prototype")
 @PrsdbWebService
 class FooExampleJourney(
-    private val taskListStepFactory: ObjectFactory<FooTaskListStep>,
-    private val occupiedStepFactory: ObjectFactory<OccupiedStep>,
-    private val householdsStepFactory: ObjectFactory<HouseholdStep>,
-    private val tenantsStepFactory: ObjectFactory<TenantsStep>,
-    private val epcQuestionStepFactory: ObjectFactory<EpcQuestionStep>,
-    private val epcSearchEpcStepFactory: ObjectFactory<SearchEpcStep>,
-    private val epcNotFoundStepFactory: ObjectFactory<EpcNotFoundStep>,
-    private val epcSupersededStepFactory: ObjectFactory<EpcSupersededStep>,
-    private val epcStepFactory: ObjectFactory<CheckEpcStep>,
-    private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStep>,
+    private val taskListStep: FooTaskListStep,
+    private val occupiedStep: OccupiedStep,
+    private val householdsStep: HouseholdStep,
+    private val tenantsStep: TenantsStep,
+    private val epcQuestionStep: EpcQuestionStep,
+    private val searchForEpcStep: SearchEpcStep,
+    private val epcNotFoundStep: EpcNotFoundStep,
+    private val epcSupersededStep: EpcSupersededStep,
+    private val checkAutomatchedEpcStep: CheckEpcStep,
+    private val checkSearchedEpcStep: CheckEpcStep,
+    private val fooCheckYourAnswersStep: FooCheckAnswersStep,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     fun initialiseJourney(propertyId: Long): Map<String, VisitableStep> {
-        val taskListStep = taskListStepFactory.getObject()
-        val occupiedStep = occupiedStepFactory.getObject()
-        val householdsStep = householdsStepFactory.getObject()
-        val tenantsStep = tenantsStepFactory.getObject()
-        val epcQuestionStep = epcQuestionStepFactory.getObject()
-        val searchForEpcStep = epcSearchEpcStepFactory.getObject()
-        val epcNotFoundStep = epcNotFoundStepFactory.getObject()
-        val epcSupersededStep = epcSupersededStepFactory.getObject()
-        val checkAutomatchedEpcStep = epcStepFactory.getObject()
-        val checkSearchedEpcStep = epcStepFactory.getObject()
-        val fooCheckYourAnswersStep = fooCheckYourAnswersStepFactory.getObject()
-
         val journeyDataService = journeyDataServiceFactory.create("BackwardsDsl-$propertyId")
 
         val state =
@@ -150,7 +138,6 @@ class FooExampleJourney(
             },
             epcSupersededStep.step("superseded-epc") {
                 parents { searchForEpcStep.hasOutcome(EpcSearchResult.SUPERSEDED) }
-                reachableWhen { searchForEpcStep.outcome() == EpcSearchResult.SUPERSEDED }
                 state { state }
                 redirectTo { checkSearchedEpcStep }
             },
@@ -177,7 +164,6 @@ class FooExampleJourney(
                 parents { searchForEpcStep.hasOutcome(EpcSearchResult.NOT_FOUND) }
             },
             fooCheckYourAnswersStep.step("check-your-answers") {
-                state { state }
                 redirectTo { null }
                 parents {
                     AndParents(
@@ -196,19 +182,4 @@ class FooExampleJourney(
             },
         )
     }
-
-    fun getStepModelAndView(
-        stepName: String,
-        propertyId: Long,
-    ): ModelAndView =
-        initialiseJourney(propertyId)[stepName]?.getStepModelAndView()
-            ?: throw IllegalArgumentException("Step $stepName not found")
-
-    fun postStepModelAndView(
-        stepName: String,
-        formData: PageData,
-        propertyId: Long,
-    ): ModelAndView =
-        initialiseJourney(propertyId)[stepName]?.postStepModelAndView(formData)
-            ?: throw IllegalArgumentException("Step $stepName not found")
 }

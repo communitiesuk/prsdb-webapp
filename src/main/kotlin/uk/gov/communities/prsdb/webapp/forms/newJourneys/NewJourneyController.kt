@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.newJourneys
 
+import org.springframework.beans.factory.ObjectFactory
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,18 +16,22 @@ import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.FooExample
 @RequestMapping("new-journey")
 @PrsdbRestController
 class NewJourneyController(
-    private val fooExampleJourney: FooExampleJourney,
+    private val journeyFactory: ObjectFactory<FooExampleJourney>,
 ) {
     @GetMapping("{propertyId}/{stepName}")
     fun getBackwardsDslJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyId") propertyId: Long,
-    ): ModelAndView = fooExampleJourney.getStepModelAndView(stepName, propertyId)
+    ): ModelAndView =
+        journeyFactory.getObject().initialiseJourney(propertyId)[stepName]?.getStepModelAndView()
+            ?: throw IllegalArgumentException("Step $stepName not found")
 
     @PostMapping("{propertyId}/{stepName}")
     fun postBackwardsDslJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyId") propertyId: Long,
         @RequestParam formData: PageData,
-    ): ModelAndView = fooExampleJourney.postStepModelAndView(stepName, formData, propertyId)
+    ): ModelAndView =
+        journeyFactory.getObject().initialiseJourney(propertyId)[stepName]?.postStepModelAndView(formData)
+            ?: throw IllegalArgumentException("Step $stepName not found")
 }
