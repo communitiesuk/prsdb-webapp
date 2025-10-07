@@ -66,18 +66,17 @@ open class AbstractJourney(
     }
 }
 
-abstract class PartialEpcJourney(
+class InnerEpcJourney(
     journeyDataService: JourneyDataService,
     propertyId: Long,
-) : AbstractJourney(journeyDataService),
-    EpcJourneyState {
+) : AbstractJourney(journeyDataService) {
     init {
         if (innerJourneyData["propertyId"] == null) {
             journeyDataService.addToJourneyDataIntoSession(mapOf("propertyId" to propertyId))
         }
     }
 
-    override var automatchedEpc: EpcDataModel?
+    var automatchedEpc: EpcDataModel?
         get() =
             innerJourneyData["automatchedEpc"]?.let {
                 Json.decodeFromString<EpcDataModel>(it.toString())
@@ -87,7 +86,7 @@ abstract class PartialEpcJourney(
             journeyDataService.addToJourneyDataIntoSession(mapOf("automatchedEpc" to encodedEpc))
         }
 
-    override var searchedEpc: EpcDataModel?
+    var searchedEpc: EpcDataModel?
         get() =
             innerJourneyData["searchedEpc"]?.let {
                 Json.decodeFromString<EpcDataModel>(it.toString())
@@ -97,6 +96,6 @@ abstract class PartialEpcJourney(
             journeyDataService.addToJourneyDataIntoSession(mapOf("searchedEpc" to encodedEpc))
         }
 
-    override val propertyId: Long
+    val propertyId: Long
         get() = innerJourneyData["propertyId"]?.toString()?.toLongOrNull()!!
 }
