@@ -1,0 +1,108 @@
+{
+"dwelling_time_per_page_1d": {
+  "site_id": "prod.register-home-to-rent.communities.gov.uk",
+  "date_range": "1d",
+  "metrics": [
+    "time_on_page"
+  ],
+  "dimensions": [
+    "event:page"
+  ],
+  "include": {"total_rows": true}
+},
+  "dwelling_time_per_page_day": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "day",
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_per_page_1st": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-01", "2025-09-10"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [["contains", "event:page", ["/landlord/register-as-a-landlord"]]],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_per_page_2nd": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-11", "2025-09-24"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [["contains", "event:page", ["/landlord/register-as-a-landlord"]]],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_landlord_registration": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-01", "2025-10-03"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [["contains", "event:page", ["/landlord/register-as-a-landlord"]]],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_LC_registration": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-01", "2025-10-03"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [["contains", "event:page", ["/local-council/register-local-council-user"]]],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_property_registration": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-01", "2025-10-03"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [["contains", "event:page", ["/landlord/register-property"]]],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_add_compliance": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-01", "2025-10-03"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "filters": [["contains", "event:page", ["/landlord/add-compliance-information"]]],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_all": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "all",
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  }
+}
+

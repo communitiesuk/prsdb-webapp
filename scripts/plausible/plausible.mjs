@@ -3,6 +3,7 @@ import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
 import { Command } from 'commander'
+import { processDwellTimes } from './dwell_times.mjs';
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const BASE_URL = "https://plausible.io/api/v2/query"
@@ -131,6 +132,10 @@ async function runPlausibleScript() {
                 console.error(`Error running query '${queryName}' in file '${inputFile}':`, e.stack || String(e))
             }
         }
+    }
+    // Automatically run dwell_times.mjs if dwell_times.json exists
+    if (fs.existsSync(path.join(INPUTS_DIR, 'dwell_times.json'))) {
+        await processDwellTimes();
     }
 }
 
