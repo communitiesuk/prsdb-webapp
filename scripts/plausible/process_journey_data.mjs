@@ -26,7 +26,7 @@ export async function processJourneyData(metric, INPUT_DIR) {
 
   fs.readdirSync(INPUT_DIR).filter(f => f.endsWith('.csv')).forEach(inputFile => {
     const inputPath = path.join(INPUT_DIR, inputFile);
-    const outputDir = path.join(OUTPUT_BASE_DIR, path.basename(inputFile, '.csv'));
+    const outputDir = path.join(OUTPUT_BASE_DIR, INPUT_DIR, path.basename(inputFile, '.csv'));
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }

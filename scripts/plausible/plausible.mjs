@@ -133,6 +133,7 @@ async function runPlausibleScript() {
                         await processJourneyData(query.metrics[0], outputSubdir);
                     }
                 }
+                console.log(outputSubdir)
             } catch (e) {
                 console.error(`Error running query '${queryName}' in file '${inputFile}':`, e.stack || String(e))
             }
