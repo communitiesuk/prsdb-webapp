@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
@@ -248,5 +249,17 @@ class LocalAuthorityDataService(
     ) = session.setAttribute(
         LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION,
         getUsersDeletedThisSession().plus(Pair(deletedUserId, deletedUserName)),
+    )
+
+    fun getInvitationsCancelledThisSession(): MutableList<Pair<Long, String>> =
+        session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<Pair<Long, String>>?
+            ?: mutableListOf()
+
+    fun addCancelledInvitationToSession(
+        cancelledInvitationId: Long,
+        cancelledInvitationEmail: String,
+    ) = session.setAttribute(
+        LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
+        getInvitationsCancelledThisSession().plus(Pair(cancelledInvitationId, cancelledInvitationEmail)),
     )
 }

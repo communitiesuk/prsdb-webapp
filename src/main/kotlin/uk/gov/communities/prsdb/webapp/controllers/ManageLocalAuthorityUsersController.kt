@@ -349,24 +349,40 @@ class ManageLocalAuthorityUsersController(
             LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority),
         )
 
-        redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
-        redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)
+        localAuthorityDataService.addCancelledInvitationToSession(
+            invitationId,
+            invitation.invitedEmail,
+        )
+
         return "redirect:../$CANCEL_INVITE_CONFIRMATION_ROUTE"
     }
 
     @GetMapping("/$CANCEL_INVITE_CONFIRMATION_ROUTE")
     fun cancelInvitationSuccess(
         @PathVariable localAuthorityId: String,
+        @PathVariable invitationId: Long,
         model: Model,
     ): String {
-        if (model.getAttribute("deletedEmail") == null || model.getAttribute("localAuthority") == null) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "deletedEmail or localAuthority is unavailable, has the invitation just been deleted?",
-            )
-        }
+        val deletedInvitationEmail =
+            getDeletedEmailIfInvitationWasCancelledThisSession(invitationId)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
+                )
+
+        // TODO PRSD_1198 - check that the invitation has gone from the database
+
+        // TODO PRSD-1198 - can we get the inviting authority from the localAuthorityId path variable / database and add the name as the localAuthority model attribute
+
+        model.addAttribute("deletedEmail", deletedInvitationEmail)
 
         return "cancelLAUserInvitationSuccess"
+    }
+
+    private fun getDeletedEmailIfInvitationWasCancelledThisSession(invitationId: Long): String? {
+        val invitationsCancelled = localAuthorityDataService.getInvitationsCancelledThisSession()
+        val invitation = invitationsCancelled.find { it.first == invitationId }
+        return invitation?.second
     }
 
     private fun throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(
