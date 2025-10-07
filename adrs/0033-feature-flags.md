@@ -28,13 +28,18 @@ What feature flag system should we use?
 * Library selecting beans with self-hosted dynamic flags
 * Feature Flags as a Service (FFaaS) product
 
+### Libraries considered if using a library
+* Using Togglz as the library
+* Using FF4J as the library
+
 ## Decision Outcome
 Library selecting beans by per environment static configuration with additional overrides, because it provides a good balance of simplicity,
 maintainability, and potential for future expansion if needed.
-Beans selected by static configuration, because behaviour is tied to a deployment (making it predictable and
-repeatable), it is simple to implement, and it meets our (currently simple) needs.
 
-## Pros and Cons of the Options
+### Library selected
+FF4J, because it provides native Spring DI integration using Aspect Oriented Programming (AOP) and is a little more actively supported
+
+## Pros and Cons of the overall Options
 
 ### If statements with hard-coded switch values
 
@@ -101,6 +106,27 @@ Use a commercial feature flag service (e.g., LaunchDarkly, Unleash).
 * Bad, because this would not provide implementations of advanced features out of the box, requiring custom integration.
 * Bad, because it is expensive and provides advanced features like management across distributed systems that we do not need.
 * Bad, because it introduces external dependencies and operational overhead.
+
+## Pros and Cons of the library Options
+
+### Togglz
+* Good, because it is simple and lightweight.
+* Neutral, because it can be used with Spring, but does not provide native DI integration.
+* Good, because it pulls in values explicitly from spring configuration.
+* Bad, because it's a fairly small project with infrequent releases.
+* Good because it supports user groups, rollout percentages, and other activation strategies.
+* Bad, because it does not support AOP, so switching a single method on an interface requires changing dependency injection.
+* Bad, because it does not natively support cookie or header-based targeting, which might be a useful feature at some point.
+
+### FF4J
+* Good, because it provides native Spring DI integration using Aspect Oriented Programming.
+* Good, because its AOP allows switching a single method on an interface without changing dependency injection.
+* Good, because it is simple to integrate.
+* Neutral, because it pulls in values from explicit configuration files.
+* Bad, because it's a fairly small project with infrequent releases.
+* Good, because it has more recent updates than Togglz and is being more actively maintained.
+* Good because it supports user groups, rollout percentages, and other activation strategies.
+* Bad, because it does not natively support cookie or header-based targeting, which might be a useful feature at some point.
 
 ## More Information
 
