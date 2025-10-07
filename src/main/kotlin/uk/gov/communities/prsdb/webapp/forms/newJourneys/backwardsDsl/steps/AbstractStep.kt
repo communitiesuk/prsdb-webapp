@@ -20,36 +20,52 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     StepInitialiser<TEnum, TState>,
     UsableStep<TFormModel>,
     VisitableStep {
-    final override var isInitialised: Boolean = false
-        private set
-
     final override fun getStepModelAndView(): ModelAndView {
-        println("Getting step model and view for step $routeSegment")
+        beforeIsStepReachable(state)
         if (isStepReachable()) {
+            afterIsStepReachable(true, state)
+
+            beforeGetStepContent(state)
             val content =
                 getStepContent(state) +
                     mapOf(BACK_URL_ATTR_NAME to backUrl, "formModel" to (getFormModelFromState(state) ?: formModelClazz.createInstance()))
+            afterGetStepContent(state)
+
+            beforeGetTemplate(state)
             val template = chooseTemplate(state)
+            afterGetTemplate(state)
+
             return ModelAndView(template, content)
         }
+        afterIsStepReachable(false, state)
 
         val unreachableStepRedirect = getUnreachableStepRedirect()
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 
     final override fun postStepModelAndView(formData: PageData): ModelAndView {
-        println("Posting step model and view for step $routeSegment with form data $formData")
+        beforeIsStepReachable(state)
         if (isStepReachable()) {
+            afterIsStepReachable(true, state)
+
             val newFormData = beforeValidateSubmittedData(state, formData)
             val bindingResult = validateSubmittedData(newFormData)
+            afterValidateSubmittedData(state, bindingResult)
+
             if (bindingResult.hasErrors()) {
+                beforeGetStepContent(state)
                 val content =
                     getStepContent(state) +
                         mapOf(BACK_URL_ATTR_NAME to backUrl, BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult)
+                afterGetStepContent(state)
+
+                beforeGetTemplate(state)
                 val template = chooseTemplate(state)
+                afterGetTemplate(state)
 
                 return ModelAndView(template, content)
             }
+            afterIsStepReachable(true, state)
 
             updateJourneyState(formData)
             afterUpdateJourneyState(state)
@@ -60,11 +76,41 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 
+    open fun beforeIsStepReachable(state: TState) {}
+
+    open fun afterIsStepReachable(
+        result: Boolean,
+        state: TState,
+    ) {}
+
+    open fun beforeGetStepContent(state: TState) {}
+
+    open fun afterGetStepContent(state: TState) {}
+
+    open fun beforeGetTemplate(state: TState) {}
+
+    open fun afterGetTemplate(state: TState) {}
+
+    open fun beforeValidateSubmittedData(
+        state: TState,
+        formData: PageData,
+    ): PageData = formData
+
+    open fun afterValidateSubmittedData(
+        state: TState,
+        bindingResult: BindingResult,
+    ) {}
+
+    open fun afterUpdateJourneyState(state: TState) {}
+
     private lateinit var state: TState
     private lateinit var redirectTo: (mode: TEnum) -> UsableStep<*>?
 
     @Autowired
     private lateinit var validator: Validator
+
+    final override var isInitialised: Boolean = false
+        private set
 
     private fun determineRedirect(): String? = mode(state)?.let { redirectTo(it)?.routeSegment }
 
@@ -169,13 +215,6 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     override val ancestry: List<StepInitialiser<*, *>>
         get() = (listOf(this) + parentage.ancestry).distinct()
-
-    open fun beforeValidateSubmittedData(
-        state: TState,
-        formData: PageData,
-    ): PageData = formData
-
-    open fun afterUpdateJourneyState(state: TState) {}
 }
 
 interface StepInitialiser<out TEnum : Enum<out TEnum>, in TState : JourneyState> {
