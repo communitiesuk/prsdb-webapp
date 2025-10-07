@@ -22,11 +22,11 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserRoute
@@ -231,7 +231,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
-                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
                     flash { attribute("invitedEmailAddress", "new-user@example.com") }
                 }
         }
@@ -468,7 +468,7 @@ class ManageLocalAuthorityUsersControllerTests(
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl("../$DELETE_USER_PATH_SEGMENT/$ladUserId/$SUCCESS_PATH_SEGMENT")
+                        redirectedUrl("../$DELETE_USER_PATH_SEGMENT/$ladUserId/$CONFIRMATION_PATH_SEGMENT")
                     }
                 }
 
@@ -646,7 +646,7 @@ class ManageLocalAuthorityUsersControllerTests(
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID/$CONFIRMATION_PATH_SEGMENT")
                     }
                 }
 
@@ -666,7 +666,7 @@ class ManageLocalAuthorityUsersControllerTests(
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID/$CONFIRMATION_PATH_SEGMENT")
                     }
                 }
 
@@ -702,7 +702,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
-                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
                 }
 
             verify(localAuthorityDataService)
