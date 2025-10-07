@@ -65,7 +65,7 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent")
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur.Dent@test.com")
         confirmDeletePage.form.submit()
-        val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class)
+        val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class, mapOf("localAuthorityId" to "2", "deleteeId" to "3"))
 
         // The success page confirms the user is deleted
         assertThat(
