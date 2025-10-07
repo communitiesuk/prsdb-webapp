@@ -453,8 +453,10 @@ class ManageLocalAuthorityUsersController(
             localAuthorityUserId: Long,
         ): String = UriTemplate(LA_DELETE_USER_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
 
-        fun getLaDeleteUserSuccessRoute(localAuthorityId: Int): String =
-            UriTemplate(LA_DELETE_USER_SUCCESS_ROUTE).expand(localAuthorityId).toASCIIString()
+        fun getLaDeleteUserSuccessRoute(
+            localAuthorityId: Int,
+            deletedUserId: Long,
+        ): String = UriTemplate(LA_DELETE_USER_SUCCESS_ROUTE).expand(localAuthorityId, deletedUserId).toASCIIString()
 
         fun getLaInviteUserSuccessRoute(localAuthorityId: Int): String =
             UriTemplate(LA_INVITE_NEW_USER_SUCCESS_ROUTE).expand(localAuthorityId).toASCIIString()
