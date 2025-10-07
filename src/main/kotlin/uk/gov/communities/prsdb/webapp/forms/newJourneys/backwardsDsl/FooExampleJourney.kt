@@ -62,6 +62,7 @@ class FooExampleJourney(
             occupied.step("occupied") {
                 reachableWhen { true }
                 state { this@FooExampleJourney }
+                backUrl { "task-list" }
                 redirectTo {
                     when (it) {
                         YesOrNo.YES -> households
@@ -81,6 +82,7 @@ class FooExampleJourney(
             },
             epcQuestion.step("has-epc") {
                 reachableWhen { true }
+                backUrl { "task-list" }
                 state { this@FooExampleJourney }
                 redirectTo {
                     when (it) {
@@ -141,6 +143,7 @@ class FooExampleJourney(
                 parents { searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
             },
             fooCheckYourAnswersStep.step("check-your-answers") {
+                state { this@FooExampleJourney }
                 redirectTo { null }
                 parents {
                     AndParents(
