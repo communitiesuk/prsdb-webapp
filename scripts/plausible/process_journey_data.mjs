@@ -2,9 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 
-export async function processDwellTimes() {
-  const INPUT_DIR = path.join('outputs', 'dwell_times');
-  const OUTPUT_BASE_DIR = path.join('outputs', 'dwell_times_averaged');
+export async function processJourneyData(metric, INPUT_DIR) {
+  const OUTPUT_BASE_DIR = path.join('outputs', 'processed_journey_data');
   if (!fs.existsSync(OUTPUT_BASE_DIR)) {
     fs.mkdirSync(OUTPUT_BASE_DIR, { recursive: true });
   }
@@ -15,6 +14,15 @@ export async function processDwellTimes() {
     { prefix: '/landlord/register-property', file: 'landlord_register_property.csv' },
     { prefix: '/landlord/add-compliance-information', file: 'landlord_add_compliance_information.csv' },
   ];
+
+  const metrics = {
+      "visitors": "sum",
+      "visits": "sum",
+      "pageviews": "sum",
+      "bounce_rate": "average",
+      "visit_duration": "sum",
+      "time_on_page": "average"
+  }
 
   fs.readdirSync(INPUT_DIR).filter(f => f.endsWith('.csv')).forEach(inputFile => {
     const inputPath = path.join(INPUT_DIR, inputFile);
@@ -46,16 +54,27 @@ export async function processDwellTimes() {
         key = `/landlord/add-compliance-information/${last}`;
       }
       if (!groupMap[key]) groupMap[key] = [];
-      groupMap[key].push(Number(row['time_on_page']));
+      groupMap[key].push(Number(row[metric]));
     });
-    const averages = Object.entries(groupMap).map(([eventPage, times]) => ({
-      'event:page': eventPage,
-      'average_time_on_page': (times.reduce((a, b) => a + b, 0) / times.length).toFixed(2)
-    }));
-    averages.sort((a, b) => a['event:page'].localeCompare(b['event:page']));
-    if (averages.length > 0) {
-      const csvOut = Papa.unparse(averages);
-      fs.writeFileSync(path.join(outputDir, 'landlord_add_compliance_information_averages.csv'), csvOut);
+    let results;
+    if (metrics[metric] === 'average') {
+      results = Object.entries(groupMap).map(([eventPage, values]) => ({
+        'event:page': eventPage,
+        [`${metric}_average`]: (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
+      }));
+    } else if (metrics[metric] === 'sum') {
+      results = Object.entries(groupMap).map(([eventPage, values]) => ({
+        'event:page': eventPage,
+        [`${metric}_sum`]: values.reduce((a, b) => a + b, 0)
+      }));
+    } else {
+      results = [];
+    }
+    results.sort((a, b) => a['event:page'].localeCompare(b['event:page']));
+    if (results.length > 0) {
+      const csvOut = Papa.unparse(results);
+      fs.writeFileSync(path.join(outputDir, `landlord_add_compliance_information_${metrics[metric]}.csv`), csvOut);
+      console.log(`Wrote landlord_add_compliance_information_${metrics[metric]}.csv to ${outputDir}`);
     }
   });
     console.log(`Dwell times averaging complete. Outputs saved in ${OUTPUT_BASE_DIR}`);

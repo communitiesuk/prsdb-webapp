@@ -3,7 +3,7 @@ import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
 import { Command } from 'commander'
-import { processDwellTimes } from './dwell_times.mjs';
+import { processJourneyData } from './process_journey_data.mjs';
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const BASE_URL = "https://plausible.io/api/v2/query"
@@ -128,14 +128,15 @@ async function runPlausibleScript() {
                 const outputPath = path.join(outputSubdir, `${queryName}.csv`)
                 fs.writeFileSync(outputPath, csv)
                 console.log(`CSV data written to ${outputPath}`)
+                if (query.dimensions) {
+                    if (query.dimensions[0] === 'event:page') {
+                        await processJourneyData(query.metrics[0], outputSubdir);
+                    }
+                }
             } catch (e) {
                 console.error(`Error running query '${queryName}' in file '${inputFile}':`, e.stack || String(e))
             }
         }
-    }
-    // Automatically run dwell_times.mjs if dwell_times.json exists
-    if (fs.existsSync(path.join(INPUTS_DIR, 'dwell_times.json'))) {
-        await processDwellTimes();
     }
 }
 
