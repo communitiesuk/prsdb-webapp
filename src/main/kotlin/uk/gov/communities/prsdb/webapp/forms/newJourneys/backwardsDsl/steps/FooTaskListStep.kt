@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.Complete
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.FooJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel

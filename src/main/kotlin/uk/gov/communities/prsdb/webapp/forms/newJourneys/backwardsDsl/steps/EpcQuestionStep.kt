@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.EpcStatus
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
