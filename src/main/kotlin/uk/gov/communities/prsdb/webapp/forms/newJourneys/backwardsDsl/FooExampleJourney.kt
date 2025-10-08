@@ -18,15 +18,15 @@ import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.Occu
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.OrParents
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.VisitableStep
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.applyConditionToParent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.hasOutcome
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.FooJourneyState
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.InnerEpcJourney
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.JourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.JourneyState
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.VisitableStep
 
 @Scope("prototype")
 @PrsdbWebService

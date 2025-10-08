@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -46,10 +47,10 @@ class EpcQuestionStep(
                 ),
         )
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/certificateForm"
+    override fun chooseTemplate(): String = "forms/certificateForm"
 
-    override fun afterUpdateJourneyState(state: EpcJourneyState) {
-        super.afterUpdateJourneyState(state)
+    override fun afterUpdateJourneyState() {
+        super.afterUpdateJourneyState()
         val uprn =
             propertyOwnershipService
                 .getPropertyOwnership(state.propertyId)

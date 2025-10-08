@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -16,7 +17,7 @@ class EpcSupersededStep : AbstractStep<Complete, NoInputFormModel, EpcJourneySta
             "certificateNumber" to state.searchForEpc?.formModel?.certificateNumber,
         )
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcSupersededForm"
+    override fun chooseTemplate(): String = "forms/epcSupersededForm"
 
     override fun mode(state: EpcJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }

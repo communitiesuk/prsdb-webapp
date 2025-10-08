@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItem
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusViewModel
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -46,7 +47,7 @@ class FooTaskListStep : AbstractStep<Complete, NoInputFormModel, FooJourneyState
         )
     }
 
-    override fun chooseTemplate(state: FooJourneyState): String = "taskList"
+    override fun chooseTemplate(): String = "taskList"
 
     override fun mode(state: FooJourneyState): Nothing? = null
 }

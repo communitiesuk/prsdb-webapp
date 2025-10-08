@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -17,7 +18,7 @@ class HouseholdStep : AbstractStep<Complete, NumberOfHouseholdsFormModel, Occupi
             "label" to "forms.numberOfHouseholds.label",
         )
 
-    override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfHouseholdsForm"
+    override fun chooseTemplate(): String = "forms/numberOfHouseholdsForm"
 
     override fun mode(state: OccupiedJourneyState) = getFormModelFromState(state)?.numberOfHouseholds?.let { Complete.COMPLETE }
 }

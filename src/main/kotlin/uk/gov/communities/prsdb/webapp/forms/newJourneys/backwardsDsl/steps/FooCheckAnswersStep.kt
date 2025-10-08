@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.OccupiedJourneyS
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -85,7 +86,7 @@ class FooCheckAnswersStep(
         )
     }
 
-    override fun chooseTemplate(state: FooJourneyState): String = "forms/checkAnswersForm"
+    override fun chooseTemplate(): String = "forms/checkAnswersForm"
 
     override fun mode(state: FooJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }

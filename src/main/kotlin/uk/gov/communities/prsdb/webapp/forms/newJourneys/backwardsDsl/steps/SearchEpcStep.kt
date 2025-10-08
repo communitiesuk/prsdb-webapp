@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -24,7 +25,7 @@ class SearchEpcStep(
             "getNewEpcUrl" to GET_NEW_EPC_URL,
         )
 
-    override fun chooseTemplate(state: EpcJourneyState) = "forms/epcLookupForm"
+    override fun chooseTemplate() = "forms/epcLookupForm"
 
     override fun mode(state: EpcJourneyState): EpcSearchResult? {
         val epc = state.searchedEpc
@@ -35,8 +36,8 @@ class SearchEpcStep(
         }
     }
 
-    override fun afterUpdateJourneyState(state: EpcJourneyState) {
-        super.afterUpdateJourneyState(state)
+    override fun afterUpdateJourneyState() {
+        super.afterUpdateJourneyState()
         val formModel = getFormModelFromState(state) ?: return
 
         val epc = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)

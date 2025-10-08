@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
 
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.StepInitialiser
+
 interface Parentage {
     fun allowsChild(): Boolean
 

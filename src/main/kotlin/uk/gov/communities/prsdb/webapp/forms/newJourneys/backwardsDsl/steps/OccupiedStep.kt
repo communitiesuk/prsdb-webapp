@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -31,7 +32,7 @@ class OccupiedStep : AbstractStep<YesOrNo, OccupancyFormModel, OccupiedJourneySt
                 ),
         )
 
-    override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/propertyOccupancyForm"
+    override fun chooseTemplate(): String = "forms/propertyOccupancyForm"
 
     override fun mode(state: OccupiedJourneyState): YesOrNo? =
         getFormModelFromState(state)?.occupied?.let {
