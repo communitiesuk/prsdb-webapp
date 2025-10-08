@@ -3,7 +3,7 @@ import path from 'path';
 import Papa from 'papaparse';
 
 export async function processJourneyData(metric, INPUT_DIR) {
-  const OUTPUT_BASE_DIR = path.join('outputs', 'processed_journey_data');
+  const OUTPUT_BASE_DIR = 'processed_journey_data';
   if (!fs.existsSync(OUTPUT_BASE_DIR)) {
     fs.mkdirSync(OUTPUT_BASE_DIR, { recursive: true });
   }
@@ -67,6 +67,7 @@ export async function processJourneyData(metric, INPUT_DIR) {
         'event:page': eventPage,
         [`${metric}_sum`]: values.reduce((a, b) => a + b, 0)
       }));
+      console.log(INPUT_DIR, inputFile, metric, results);
     } else {
       results = [];
     }
@@ -74,8 +75,6 @@ export async function processJourneyData(metric, INPUT_DIR) {
     if (results.length > 0) {
       const csvOut = Papa.unparse(results);
       fs.writeFileSync(path.join(outputDir, `landlord_add_compliance_information_${metrics[metric]}.csv`), csvOut);
-      console.log(`Wrote landlord_add_compliance_information_${metrics[metric]}.csv to ${outputDir}`);
     }
   });
-    console.log(`Dwell times averaging complete. Outputs saved in ${OUTPUT_BASE_DIR}`);
 }

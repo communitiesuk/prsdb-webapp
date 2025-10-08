@@ -1,20 +1,20 @@
 {
-  "dwelling_time_all": {
+  "unique_visitors_all": {
     "site_id": "prod.register-home-to-rent.communities.gov.uk",
     "date_range": "all",
     "metrics": [
-      "time_on_page"
+      "visitors"
     ],
     "dimensions": [
       "event:page"
     ],
     "include": {"total_rows": true}
   },
-  "dwelling_time_14d": {
+  "unique_visitors_14d": {
     "site_id": "prod.register-home-to-rent.communities.gov.uk",
-    "date_range": "14d",
+    "date_range": "7d",
     "metrics": [
-      "time_on_page"
+      "visitors"
     ],
     "dimensions": [
       "event:page"
@@ -22,4 +22,3 @@
     "include": {"total_rows": true}
   }
 }
-

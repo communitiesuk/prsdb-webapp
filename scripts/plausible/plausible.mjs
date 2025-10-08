@@ -131,9 +131,9 @@ async function runPlausibleScript() {
                 if (query.dimensions) {
                     if (query.dimensions[0] === 'event:page') {
                         await processJourneyData(query.metrics[0], outputSubdir);
+                        console.log(`Processed journey data for query '${queryName}'`);
                     }
                 }
-                console.log(outputSubdir)
             } catch (e) {
                 console.error(`Error running query '${queryName}' in file '${inputFile}':`, e.stack || String(e))
             }

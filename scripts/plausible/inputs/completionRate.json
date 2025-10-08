@@ -35,6 +35,18 @@
     "filters": [["is", "event:goal", ["Add compliance - gas safety step", "Complete \"Add compliance\" journey"]]],
     "include": {"total_rows": true}
   },
+  "Add compliance date": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-30", "2025-10-06"],
+    "metrics": [
+      "visitors"
+    ],
+    "dimensions": [
+      "event:goal"
+    ],
+    "filters": [["is", "event:goal", ["Add compliance - gas safety step", "Complete \"Add compliance\" journey", "Add compliance -eicr step", "Add compliance - epc step", "Add compliance - fire safety step"]]],
+    "include": {"total_rows": true}
+  },
   "LC user registration": {
     "site_id": "prod.register-home-to-rent.communities.gov.uk",
     "date_range": "7d",
