@@ -165,9 +165,9 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 2, 'FA1 1AA',
        (15, '05/02/25', '05/02/25', 1015, '3 PRSDB Square, EG1 2AA', 2, 'EG1 2AA', '3'),
        (16, '05/02/25', '05/02/25', 1016, '4 PRSDB Square, EG1 2AA', 2, 'EG1 2AA', '4'),
        (17, '05/02/25', '05/02/25', 1017, '5 PRSDB Square, EG1 2AA', 2, 'EG1 2AA', '5'),
-       (18, '05/02/25', '05/02/25', 1018, '6 PRSDB Square, EG1 2AF', 2, 'EG1 2AF', '6'),
-       (19, '05/02/25', '05/02/25', 1019, '7 PRSDB Square, EG1 2AG', 2, 'EG1 2AG', '7'),
-       (20, '05/02/25', '05/02/25', 1020, '8 PRSDB Square, EG1 2AH', 2, 'EG1 2AH', '8'),
+       (18, '05/02/25', '05/02/25', 1018, '1 PRSDB Square, EG1 2AF', 2, 'EG1 2AF', '1'),
+       (19, '05/02/25', '05/02/25', 1019, '1 PRSDB Square, EG1 2AG', 2, 'EG1 2AG', '1'),
+       (20, '05/02/25', '05/02/25', 1020, '1 PRSDB Square, EG1 2AH', 2, 'EG1 2AH', '1'),
        (21, '05/02/25', '05/02/25', 1021, '9 PRSDB Square, EG1 2AI', 2, 'EG1 2AI', '9'),
        (22, '05/02/25', '05/02/25', 1022, '10 PRSDB Square, EG1 2AJ', 2, 'EG1 2AJ', '10'),
        (23, '05/02/25', '05/02/25', 1023, '11 PRSDB Square, EG1 2AK', 2, 'EG1 2AK', '11'),
@@ -188,6 +188,13 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 2, 'FA1 1AA',
        (38, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH', '5'),
        (39, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH', '1'),
        (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH', '2');
+
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode, building_name)
+VALUES (41, '09/13/24', '09/13/24', 1038, 'State House, PRSDB Road, EG1 2AA', 2, 'EG1 2AA', 'State House'),
+       (42, '09/13/24', '09/13/24', 1039, 'Stage House, PRSDB Road, EG1 2AA', 2, 'EG1 2AA', 'Stage House'),
+       (43, '09/13/24', '09/13/24', 1040, 'Slate House, PRSDB Square, EG1 2AA', 2, 'EG1 2AA', 'Slate House'),
+       (44, '09/13/24', '09/13/24', 1041, 'Grate House, PRSDB Road, EG1 2AB', 2, 'EG1 2AB', 'Grate House'),
+       (45, '09/13/24', '09/13/24', 1042, 'Slate House, PRSDB Road, EG1 2AB', 2, 'EG1 2AB', 'Slate House');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
