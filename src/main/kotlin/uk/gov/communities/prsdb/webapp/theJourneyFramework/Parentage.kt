@@ -1,12 +1,10 @@
-package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
-
-import uk.gov.communities.prsdb.webapp.theJourneyFramework.StepInitialiser
+package uk.gov.communities.prsdb.webapp.theJourneyFramework
 
 interface Parentage {
     fun allowsChild(): Boolean
 
-    val ancestry: List<StepInitialiser<*, *>>
-    val parentSteps: List<StepInitialiser<*, *>>
+    val ancestry: List<AbstractStep<*, *, *, *>>
+    val parentSteps: List<AbstractStep<*, *, *, *>>
 }
 
 class AndParents(
@@ -36,27 +34,25 @@ class OrParents(
 class NoParents : Parentage {
     override fun allowsChild(): Boolean = true
 
-    override val ancestry: List<StepInitialiser<*, *>>
+    override val ancestry: List<AbstractStep<*, *, *, *>>
         get() = listOf()
 
-    override val parentSteps: List<StepInitialiser<*, *>>
+    override val parentSteps: List<AbstractStep<*, *, *, *>>
         get() = listOf()
 }
 
 class SingleParent(
-    val step: StepInitialiser<*, *>? = null,
+    val step: AbstractStep<*, *, *, *>? = null,
     private val condition: () -> Boolean,
 ) : Parentage {
     override fun allowsChild(): Boolean = condition()
 
-    override val ancestry: List<StepInitialiser<*, *>>
+    override val ancestry
         get() = step?.let { listOf(it) + it.ancestry }.orEmpty()
 
-    override val parentSteps: List<StepInitialiser<*, *>>
+    override val parentSteps
         get() = listOfNotNull(step)
 }
 
-fun StepInitialiser<*, *>.applyConditionToParent(condition: StepInitialiser<*, *>.() -> Boolean): Parentage = SingleParent { condition() }
-
-fun <TEnum : Enum<TEnum>> StepInitialiser<TEnum, *>.hasOutcome(outcomeValue: TEnum): Parentage =
+fun <TEnum : Enum<TEnum>> AbstractStep<TEnum, *, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
     SingleParent(this) { outcome() == outcomeValue }
