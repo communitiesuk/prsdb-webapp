@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps
+package uk.gov.communities.prsdb.webapp.theJourneyFramework
 
 import org.springframework.beans.MutablePropertyValues
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,7 +8,8 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.JourneyState
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.NoParents
+import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.Parentage
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.collections.plus
@@ -16,94 +17,84 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> :
-    StepInitialiser<TEnum, TState>,
-    UsableStep<TFormModel>,
-    VisitableStep {
-    final override fun getStepModelAndView(): ModelAndView {
-        beforeIsStepReachable(state)
-        if (isStepReachable()) {
-            afterIsStepReachable(true, state)
+class StepConductor(
+    val innerStep: AbstractStep<*, *, *>,
+) : VisitableStep {
+    override fun getStepModelAndView(): ModelAndView {
+        innerStep.beforeIsStepReachable()
+        if (innerStep.isStepReachable) {
+            innerStep.afterIsStepReachable(true)
 
-            beforeGetStepContent(state)
-            val content =
-                getStepContent(state) +
-                    mapOf(BACK_URL_ATTR_NAME to backUrl, "formModel" to (getFormModelFromState(state) ?: formModelClazz.createInstance()))
-            afterGetStepContent(state)
+            innerStep.beforeGetStepContent()
+            val content = innerStep.getPageVisitContent()
+            innerStep.afterGetStepContent()
 
-            beforeGetTemplate(state)
-            val template = chooseTemplate(state)
-            afterGetTemplate(state)
+            innerStep.beforeGetTemplate()
+            val template = innerStep.chooseTemplate()
+            innerStep.afterGetTemplate()
 
             return ModelAndView(template, content)
         }
-        afterIsStepReachable(false, state)
+        innerStep.afterIsStepReachable(false)
 
-        val unreachableStepRedirect = getUnreachableStepRedirect()
+        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 
-    final override fun postStepModelAndView(formData: PageData): ModelAndView {
-        beforeIsStepReachable(state)
-        if (isStepReachable()) {
-            afterIsStepReachable(true, state)
+    override fun postStepModelAndView(formData: PageData): ModelAndView {
+        innerStep.beforeIsStepReachable()
+        if (innerStep.isStepReachable) {
+            innerStep.afterIsStepReachable(true)
 
-            val newFormData = beforeValidateSubmittedData(state, formData)
-            val bindingResult = validateSubmittedData(newFormData)
-            afterValidateSubmittedData(state, bindingResult)
+            val newFormData = innerStep.beforeValidateSubmittedData(formData)
+            val bindingResult = innerStep.validateSubmittedData(newFormData)
+            innerStep.afterValidateSubmittedData(bindingResult)
 
             if (bindingResult.hasErrors()) {
-                beforeGetStepContent(state)
-                val content =
-                    getStepContent(state) +
-                        mapOf(BACK_URL_ATTR_NAME to backUrl, BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult)
-                afterGetStepContent(state)
+                innerStep.beforeGetStepContent()
+                val content = innerStep.getInvalidSubmissionContent(bindingResult)
+                innerStep.afterGetStepContent()
 
-                beforeGetTemplate(state)
-                val template = chooseTemplate(state)
-                afterGetTemplate(state)
+                innerStep.beforeGetTemplate()
+                val template = innerStep.chooseTemplate()
+                innerStep.afterGetTemplate()
 
                 return ModelAndView(template, content)
             }
-            afterIsStepReachable(true, state)
+            innerStep.afterIsStepReachable(true)
 
-            updateJourneyState(formData)
-            afterUpdateJourneyState(state)
-            val redirect = determineRedirect()
+            innerStep.updateJourneyState(formData)
+            innerStep.afterUpdateJourneyState()
+            val redirect = innerStep.determineRedirect()
             return ModelAndView("redirect:$redirect")
         }
-        val unreachableStepRedirect = getUnreachableStepRedirect()
+        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
+}
 
-    open fun beforeIsStepReachable(state: TState) {}
+abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, TState : JourneyState> :
+    StepInitialiser<TEnum, TState>,
+    UsableStep<TFormModel> {
+    open fun beforeIsStepReachable() {}
 
-    open fun afterIsStepReachable(
-        result: Boolean,
-        state: TState,
-    ) {}
+    open fun afterIsStepReachable(result: Boolean) {}
 
-    open fun beforeGetStepContent(state: TState) {}
+    open fun beforeGetStepContent() {}
 
-    open fun afterGetStepContent(state: TState) {}
+    open fun afterGetStepContent() {}
 
-    open fun beforeGetTemplate(state: TState) {}
+    open fun beforeGetTemplate() {}
 
-    open fun afterGetTemplate(state: TState) {}
+    open fun afterGetTemplate() {}
 
-    open fun beforeValidateSubmittedData(
-        state: TState,
-        formData: PageData,
-    ): PageData = formData
+    open fun beforeValidateSubmittedData(formData: PageData): PageData = formData
 
-    open fun afterValidateSubmittedData(
-        state: TState,
-        bindingResult: BindingResult,
-    ) {}
+    open fun afterValidateSubmittedData(bindingResult: BindingResult) {}
 
-    open fun afterUpdateJourneyState(state: TState) {}
+    open fun afterUpdateJourneyState() {}
 
-    private lateinit var state: TState
+    lateinit var state: TState
     private lateinit var redirectTo: (mode: TEnum) -> UsableStep<*>?
 
     @Autowired
@@ -112,11 +103,11 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     final override var isInitialised: Boolean = false
         private set
 
-    private fun determineRedirect(): String? = mode(state)?.let { redirectTo(it)?.routeSegment }
+    fun determineRedirect(): String? = mode(state)?.let { redirectTo(it)?.routeSegment }
 
     private var backUrlOverride: String? = null
 
-    private val backUrl: String?
+    val backUrl: String?
         get() {
             val parentSteps =
                 parentage.parentSteps
@@ -140,7 +131,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
             formModelClazz.cast(binder.bindingResult.target)
         }
 
-    private fun validateSubmittedData(formData: PageData): BindingResult =
+    fun validateSubmittedData(formData: PageData): BindingResult =
         formData.let {
             val binder = WebDataBinder(formModelClazz.createInstance())
             binder.validator = validator
@@ -149,22 +140,29 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
             binder.bindingResult
         }
 
-    private fun updateJourneyState(formData: PageData) {
+    fun updateJourneyState(formData: PageData) {
         state.addStepData(routeSegment, formData)
     }
 
-    override fun outcome(): TEnum? = if (isStepReachable()) mode(state) else null
+    val isStepReachable: Boolean
+        get() =
+            if (!this::isStepReachableOverride.isInitialized) {
+                parentage.allowsChild()
+            } else {
+                isStepReachableOverride()
+            }
 
-    private fun getUnreachableStepRedirect(): String = "task-list"
+    override fun outcome(): TEnum? = if (isStepReachable) mode(state) else null
 
-    protected lateinit var isStepReachable: () -> Boolean
-        private set
+    public val getUnreachableStepRedirect: String = "task-list"
+
+    private lateinit var isStepReachableOverride: () -> Boolean
 
     abstract val formModelClazz: KClass<TFormModel>
 
     abstract fun getStepContent(state: TState): Map<String, Any?>
 
-    abstract fun chooseTemplate(state: TState): String
+    abstract fun chooseTemplate(): String
 
     override fun step(
         segment: String,
@@ -179,11 +177,11 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
             parentage = NoParents()
         }
         isInitialised = true
-        return Pair(segment, this)
+        return Pair(segment, StepConductor(this))
     }
 
     override fun reachableWhen(condition: () -> Boolean): StepInitialiser<TEnum, TState> {
-        this.isStepReachable = condition
+        this.isStepReachableOverride = condition
         return this
     }
 
@@ -202,14 +200,23 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     }
 
     override fun parents(currentParentage: () -> Parentage): StepInitialiser<TEnum, TState> {
-        if (this::isStepReachable.isInitialized) {
-            throw IllegalStateException("Parents must be set before reachableWhen override")
-        }
-
         parentage = currentParentage()
-        isStepReachable = { parentage.allowsChild() }
         return this
     }
+
+    fun getPageVisitContent() =
+        getStepContent(state) +
+            mapOf(
+                BACK_URL_ATTR_NAME to backUrl,
+                "formModel" to (formModel ?: formModelClazz.createInstance()),
+            )
+
+    fun getInvalidSubmissionContent(bindingResult: BindingResult) =
+        getStepContent(state) +
+            mapOf(
+                BACK_URL_ATTR_NAME to backUrl,
+                BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult,
+            )
 
     private lateinit var parentage: Parentage
 

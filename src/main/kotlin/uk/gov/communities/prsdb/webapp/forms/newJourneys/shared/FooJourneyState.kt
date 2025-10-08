@@ -2,9 +2,6 @@ package uk.gov.communities.prsdb.webapp.forms.newJourneys.shared
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.newJourneys.backwardsDsl.steps.UsableStep
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
@@ -14,19 +11,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractJourney
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.JourneyState
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.UsableStep
 
 interface FooJourneyState :
     OccupiedJourneyState,
     EpcJourneyState
-
-interface JourneyState {
-    val journeyData: JourneyData
-
-    fun addStepData(
-        key: String,
-        value: Any,
-    ): JourneyState
-}
 
 interface OccupiedJourneyState : JourneyState {
     val occupied: UsableStep<OccupancyFormModel>?
@@ -45,25 +36,6 @@ interface EpcJourneyState : JourneyState {
     val epcNotFound: UsableStep<NoInputFormModel>?
     val epcSuperseded: UsableStep<NoInputFormModel>?
     val checkSearchedEpc: UsableStep<CheckMatchedEpcFormModel>?
-}
-
-open class AbstractJourney(
-    protected val journeyDataService: JourneyDataService,
-) : JourneyState {
-    protected val innerJourneyData: Map<String, Any?>
-        get() = journeyDataService.getJourneyDataFromSession()
-
-    override val journeyData: JourneyData
-        get() = objectToStringKeyedMap(innerJourneyData["journeyData"]) ?: emptyMap()
-
-    override fun addStepData(
-        key: String,
-        value: Any,
-    ): JourneyState {
-        val newJourneyData = journeyData + (key to value)
-        journeyDataService.addToJourneyDataIntoSession(mapOf("journeyData" to newJourneyData))
-        return this
-    }
 }
 
 class InnerEpcJourney(

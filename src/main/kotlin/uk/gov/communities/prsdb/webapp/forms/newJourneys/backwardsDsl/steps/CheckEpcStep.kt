@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -45,7 +46,7 @@ class CheckEpcStep(
             )
         } ?: emptyMap()
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/checkMatchedEpcForm"
+    override fun chooseTemplate(): String = "forms/checkMatchedEpcForm"
 
     override fun mode(state: EpcJourneyState): YesOrNo? =
         getFormModelFromState(state)?.let {

@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.forms.newJourneys.shared.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.theJourneyFramework.AbstractStep
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -22,7 +23,7 @@ class EpcNotFoundStep : AbstractStep<Complete, NoInputFormModel, EpcJourneyState
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcNotFoundForm"
+    override fun chooseTemplate(): String = "forms/epcNotFoundForm"
 
     override fun mode(state: EpcJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }
