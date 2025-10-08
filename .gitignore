@@ -53,6 +53,7 @@ scripts/plausible/node_modules
 /scripts/output
 /scripts/plausible/outputs
 /scripts/plausible/processed_journey_data
+/scripts/plausible/userExperienceMetrics
 /scripts/plausible/saved
 
 ### Local ###

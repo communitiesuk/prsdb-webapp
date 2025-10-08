@@ -67,7 +67,6 @@ export async function processJourneyData(metric, INPUT_DIR) {
         'event:page': eventPage,
         [`${metric}_sum`]: values.reduce((a, b) => a + b, 0)
       }));
-      console.log(INPUT_DIR, inputFile, metric, results);
     } else {
       results = [];
     }
