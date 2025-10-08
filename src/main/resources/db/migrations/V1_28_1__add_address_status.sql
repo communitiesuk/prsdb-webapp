@@ -1,0 +1,2 @@
+ALTER TABLE address
+    ADD is_active BOOLEAN NOT NULL DEFAULT TRUE;

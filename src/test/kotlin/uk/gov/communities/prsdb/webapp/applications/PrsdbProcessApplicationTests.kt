@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp
+package uk.gov.communities.prsdb.webapp.applications
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -11,6 +11,8 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
+import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
+import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
@@ -69,6 +72,7 @@ class PrsdbProcessApplicationTests {
                 OsDownloadsConfig::class.simpleBeanName,
                 NotifyIdService::class.scopedBeanName,
                 TestcontainersConfiguration::class.importedBeanName,
+                NgdAddressLoader::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

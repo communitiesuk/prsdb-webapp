@@ -6,13 +6,15 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import java.util.zip.ZipInputStream
 
-// TODO PRSD-1021: Remove this example once there is another way of using the OsDownloadsClient
+// TODO PRSD-1021: Remove this example once there is another way of using the NgdAddressLoader
 @PrsdbController
 @RequestMapping("/example/os-downloads")
 class ExampleOsDownloadsController(
     private val osDownloadsClient: OsDownloadsClient,
+    private val ngdAddressLoader: NgdAddressLoader,
 ) {
     @GetMapping("/versions")
     @ResponseBody
@@ -44,5 +46,12 @@ class ExampleOsDownloadsController(
             }
         }
         return "Files in $fileName: ${subFileNames.joinToString("<br>","<br>")}"
+    }
+
+    @GetMapping("/load")
+    @ResponseBody
+    fun loadNewDataPackageVersions(): String {
+        Thread { ngdAddressLoader.loadNewDataPackageVersions() }.start()
+        return "Started loading new data package versions."
     }
 }
