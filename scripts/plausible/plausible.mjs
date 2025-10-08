@@ -66,17 +66,25 @@ if (options.save) {
     OUTPUTS_DIR = path.join('outputs')
 }
 
-function clearOutputsDir() {
-    // Only clear if not saving to 'saved'
-    if (!options.save && fs.existsSync('outputs')) {
-        for (const entry of fs.readdirSync('outputs')) {
-            const entryPath = path.join('outputs', entry)
+function clearDir(dirPath) {
+    if (fs.existsSync(dirPath)) {
+        for (const entry of fs.readdirSync(dirPath)) {
+            const entryPath = path.join(dirPath, entry)
             if (fs.lstatSync(entryPath).isDirectory()) {
                 fs.rmSync(entryPath, { recursive: true, force: true })
             } else {
                 fs.unlinkSync(entryPath)
             }
         }
+    }
+}
+
+function clearOutputsDir() {
+    // Only clear if not saving to 'saved'
+    if (!options.save) {
+        clearDir('outputs')
+        clearDir('processed_journey_data')
+        clearDir('userExperienceMetrics')
     }
 }
 

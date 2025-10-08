@@ -15,6 +15,7 @@ function getValueFromCSV(csvData, pagePath) {
     const row = csvData.find(r => r["event:page"] === pagePath || r["page"] === pagePath);
     if (!row) return null;
     if (row["pageviews"] !== undefined) return row["pageviews"];
+    if (row["pageviews_sum"] !== undefined) return row["pageviews_sum"];
     if (row["Total"] !== undefined) return row["Total"];
     return null;
 }
