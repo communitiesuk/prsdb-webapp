@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { Command } from 'commander'
 import { processJourneyData } from './process_journey_data.mjs';
-import { createUserExperienceMetricsCSV } from './createMetricCSV.mjs';
+import {createCompletionRateCSV, createUserExperienceMetricsCSV} from './createMetricCSV.mjs';
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const BASE_URL = "https://plausible.io/api/v2/query"
@@ -141,6 +141,7 @@ async function runPlausibleScript() {
         }
     }
     createUserExperienceMetricsCSV();
+    createCompletionRateCSV()
 }
 
 runPlausibleScript();
