@@ -88,10 +88,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
     // CSV Data Loading
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
+    implementation("org.apache.commons:commons-csv:1.8")
 
     // Streaming upload without storing on local system
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
+
+    // Gradle plugin
+    implementation("org.springframework.boot:spring-boot-gradle-plugin:3.5.6")
 }
 
 kotlin {
