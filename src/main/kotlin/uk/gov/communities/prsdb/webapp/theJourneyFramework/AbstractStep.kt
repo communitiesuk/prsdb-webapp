@@ -15,7 +15,7 @@ import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
 @Suppress("ktlint:standard:max-line-length")
-abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState, TSelf : AbstractStep<TEnum, TFormModel, TState, TSelf>> : RedirectableLocation {
+abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState, TSelf : AbstractStep<TEnum, TFormModel, TState, TSelf>> {
     // Extra lifecycle methods
     open fun beforeIsStepReachable() {}
 
@@ -117,22 +117,20 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     private lateinit var redirectToUrl: (mode: TEnum) -> String
 
-    private var backUrlOverride: String? = null
+    private var backUrlOverride: (() -> String?)? = null
 
     val backUrl: String?
         get() {
-            val singleParent =
+            val singleParentUrl =
                 parentage.parentSteps
                     .singleOrNull()
                     ?.routeSegment
-            return backUrlOverride ?: singleParent
+            val backUrlOverrideValue = this.backUrlOverride?.let { it() }
+            return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
 
-    final lateinit var routeSegment: String
+    lateinit var routeSegment: String
         private set
-
-    override val url: String
-        get() = routeSegment
 
     private var isStepReachableOverride: (() -> Boolean)? = null
 
@@ -143,7 +141,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     fun initialize(
         segment: String,
         state: TState,
-        backUrlProvider: (() -> String)?,
+        backUrlProvider: (() -> String?)?,
         redirectToProvider: (mode: TEnum) -> String,
         parentageProvider: () -> Parentage,
     ) {
@@ -152,7 +150,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         }
         this.routeSegment = segment
         this.state = state
-        this.backUrlOverride = backUrlProvider?.invoke()
+        this.backUrlOverride = backUrlProvider
         this.redirectToUrl = redirectToProvider
         this.parentage = parentageProvider()
         initialisationStage = StepInitialisationStage.FULLY_INITIALISED
