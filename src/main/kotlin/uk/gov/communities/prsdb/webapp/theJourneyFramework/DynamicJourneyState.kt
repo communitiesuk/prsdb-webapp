@@ -4,18 +4,18 @@ import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
-interface JourneyState {
+interface DynamicJourneyState {
     val journeyData: JourneyData
 
     fun addStepData(
         key: String,
         value: Any,
-    ): JourneyState
+    ): DynamicJourneyState
 }
 
 open class AbstractJourney(
     protected val journeyDataService: JourneyDataService,
-) : JourneyState {
+) : DynamicJourneyState {
     protected val innerJourneyData: Map<String, Any?>
         get() = journeyDataService.getJourneyDataFromSession()
 
@@ -25,7 +25,7 @@ open class AbstractJourney(
     override fun addStepData(
         key: String,
         value: Any,
-    ): JourneyState {
+    ): DynamicJourneyState {
         val newJourneyData = journeyData + (key to value)
         journeyDataService.addToJourneyDataIntoSession(mapOf("journeyData" to newJourneyData))
         return this
