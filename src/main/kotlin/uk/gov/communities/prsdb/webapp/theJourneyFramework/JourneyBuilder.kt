@@ -33,7 +33,7 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : Dynami
     private val segment: String,
     private val step: TStep,
 ) {
-    private var backUrlOverride: (() -> String)? = null
+    private var backUrlOverride: (() -> String?)? = null
     private var redirectToUrl: ((mode: TMode) -> String)? = null
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
@@ -70,7 +70,7 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : Dynami
         return this
     }
 
-    fun backUrl(backUrlProvider: () -> String): StepBuilder<TStep, TState, TMode> {
+    fun backUrl(backUrlProvider: () -> String?): StepBuilder<TStep, TState, TMode> {
         if (backUrlOverride != null) {
             throw Exception("Step $segment already has an explicit backUrl defined")
         }
