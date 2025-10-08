@@ -64,6 +64,10 @@
 
 ## Output
 - Find generated CSV files in `scripts/plausible/outputs` by default.
+- If your dimension is `event:page`, then `process_journey_data.mjs` will be run and the output will be in `scripts/plausible/processed_journey_data`.
+  - This script will separate the data into separate journey files, this will aggregate the data for compliance journeys.
+- The `createMetricCSV.mjs` script will auto-run to generate CSV files for the metric data that we currently use.
+  - These can be found in `scripts/plausible/userExperienceMetrics`.
 - If you use `--save`, output will be in `scripts/plausible/saved` and will not be cleared.
 - Each file matches a query and contains results with correct headers.
 
