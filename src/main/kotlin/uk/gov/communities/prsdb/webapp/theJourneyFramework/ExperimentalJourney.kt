@@ -71,22 +71,22 @@ class ExperimentalJourney(
     fun initialize(): Map<String, StepConductor> =
         journey(this) {
             step("one", step1) {
-                redirectTo { step2 }
+                redirectToStep { step2 }
             }
             step("two", step2) {
                 parents { step1.hasOutcome(Complete.COMPLETE) }
-                redirectTo { step3 }
+                redirectToStep { step3 }
             }
             step("three", step3) {
                 parents { step2.hasOutcome(Complete.COMPLETE) }
-                redirectTo { step4 }
+                redirectToStep { step4 }
                 stepSpecificInitialisation {
                     getReleventEpc = { journeyData.count().toString() }
                 }
             }
             step("four", step4) {
                 parents { step3.hasOutcome(Complete.COMPLETE) }
-                redirectTo { null }
+                redirectToUrl { ".." }
             }
         }
 }
