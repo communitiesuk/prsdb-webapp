@@ -92,9 +92,6 @@ dependencies {
 
     // Streaming upload without storing on local system
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
-
-    // Gradle plugin
-    implementation("org.springframework.boot:spring-boot-gradle-plugin:3.5.6")
 }
 
 kotlin {
