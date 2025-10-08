@@ -5,7 +5,7 @@
 - Run `npm install` in the `scripts/plausible` directory if required.
 
 ## Configuration
-- Add your Plausible API Key to a `.env` file in the `scripts` directory:
+- Add your Plausible API Key to a `.env` file in the `scripts/plausible` directory:
   ```
   PLAUSIBLE_API_KEY=your_api_key
   ```
