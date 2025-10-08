@@ -1,20 +1,25 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
+import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -28,65 +33,53 @@ class AddressServiceTests {
     @InjectMocks
     private lateinit var addressService: AddressService
 
-    private val mockAddress = Address()
+    @Nested
+    inner class FindOrCreateAddressTests {
+        @Test
+        fun `findOrCreateAddress returns the corresponding address when given an AddressDataModel with a UPRN`() {
+            // Arrange
+            val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = 123456L)
+            val address = Address(addressDataModel)
+            whenever(mockAddressRepository.findByIsActiveTrueAndUprn(addressDataModel.uprn!!)).thenReturn(address)
 
-    @Test
-    fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`() {
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+            // Act
+            val foundAddress = addressService.findOrCreateAddress(addressDataModel)
 
-        whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
+            // Assert
+            assertEquals(address, foundAddress)
+        }
 
-        addressService.findOrCreateAddress(addressDataModel)
+        @Test
+        fun `findOrCreateAddress throws an error when given an AddressDataModel with an invalid UPRN`() {
+            // Arrange
+            val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = 123456L)
+            whenever(mockAddressRepository.findByIsActiveTrueAndUprn(addressDataModel.uprn!!)).thenReturn(null)
 
-        val addressCaptor = captor<Address>()
-        verify(mockAddressRepository).save(addressCaptor.capture())
-        assertEquals(addressDataModel.singleLineAddress, addressCaptor.value.singleLineAddress)
-    }
+            // Act & Assert
+            assertThrows<EntityNotFoundException> { addressService.findOrCreateAddress(addressDataModel) }
+        }
 
-    @Test
-    fun `findOrCreateAddress returns the corresponding address when given an AddressDataModel with an already existing UPRN`() {
-        val uprn = 123456L
-        val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = uprn)
-        val address = Address(addressDataModel)
+        @ParameterizedTest(name = "and {0}")
+        @MethodSource("uk.gov.communities.prsdb.webapp.services.AddressServiceTests#provideAddressDataModels")
+        fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`(addressDataModel: AddressDataModel) {
+            // Arrange
+            addressDataModel.localAuthorityId?.let {
+                whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(it))
+                    .thenReturn(MockLocalAuthorityData.createLocalAuthority(id = it))
+            }
 
-        whenever(mockAddressRepository.findByUprn(uprn)).thenReturn(address)
+            whenever(mockAddressRepository.save(any())).thenReturn(MockLandlordData.createAddress())
 
-        val createdAddress = addressService.findOrCreateAddress(addressDataModel)
+            // Act
+            addressService.findOrCreateAddress(addressDataModel)
 
-        assertEquals(address, createdAddress)
-    }
+            // Assert
+            val addressCaptor = captor<Address>()
+            verify(mockAddressRepository).save(addressCaptor.capture())
 
-    @Test
-    fun `findOrCreateAddress creates an address when given an AddressDataModel with a new UPRN`() {
-        val uprn = 123456L
-        val addressDataModel = AddressDataModel(singleLineAddress = "1 Example Road, EG1 2AB", uprn = uprn)
-
-        whenever(mockAddressRepository.findByUprn(uprn)).thenReturn(null)
-        whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
-
-        addressService.findOrCreateAddress(addressDataModel)
-
-        verify(mockAddressRepository).findByUprn(uprn)
-        val addressCaptor = captor<Address>()
-        verify(mockAddressRepository).save(addressCaptor.capture())
-        assertEquals(addressDataModel.singleLineAddress, addressCaptor.value.singleLineAddress)
-    }
-
-    @Test
-    fun `findOrCreateAddress creates an address with a local authority`() {
-        val localAuthority = createLocalAuthority()
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = localAuthority.id)
-
-        whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(addressDataModel.localAuthorityId!!)).thenReturn(
-            localAuthority,
-        )
-        whenever(mockAddressRepository.save(any(Address::class.java))).thenReturn(mockAddress)
-
-        addressService.findOrCreateAddress(addressDataModel)
-
-        val addressCaptor = captor<Address>()
-        verify(mockAddressRepository).save(addressCaptor.capture())
-        assertEquals(addressDataModel.localAuthorityId, addressCaptor.value.localAuthority!!.id)
+            val createdAddress = AddressDataModel.fromAddress(addressCaptor.value)
+            assertEquals(addressDataModel, createdAddress)
+        }
     }
 
     @Nested
@@ -115,5 +108,14 @@ class AddressServiceTests {
             val expectedResults = matchingAddresses.map { AddressDataModel.fromAddress(it) }
             assertEquals(expectedResults, results)
         }
+    }
+
+    companion object {
+        @JvmStatic
+        private fun provideAddressDataModels() =
+            listOf(
+                named("no local authority", AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = null)),
+                named("a local authority", AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = 1)),
+            )
     }
 }

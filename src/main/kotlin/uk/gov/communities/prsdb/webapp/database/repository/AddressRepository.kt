@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 
 interface AddressRepository : JpaRepository<Address, Long> {
-    fun findByUprn(uprn: Long): Address?
+    fun findByIsActiveTrueAndUprn(uprn: Long): Address?
 
     @Query(
         "SELECT a.* " +
