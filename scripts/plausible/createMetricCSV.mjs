@@ -12,7 +12,7 @@ async function readCSV(filePath) {
 }
 
 function getValueFromCSV(csvData, pagePath) {
-    const row = csvData.find(r => r["event:page"] === pagePath || r["page"] === pagePath);
+    const row = csvData.find(record => record["event:page"] === pagePath);
     if (!row) return null;
     if (row["pageviews"] !== undefined) return row["pageviews"];
     if (row["pageviews_sum"] !== undefined) return row["pageviews_sum"];
@@ -21,13 +21,13 @@ function getValueFromCSV(csvData, pagePath) {
 }
 
 async function getVisitorCount(csvData, pagePath) {
-    const row = csvData.find(r => r["event:page"] === pagePath || r["page"] === pagePath);
+    const row = csvData.find(record => record["event:page"] === pagePath)
     if (!row) return null;
     if (row["visitors"] !== undefined) return Number(row["visitors"]);
     if (row["Total"] !== undefined) return Number(row["Total"]);
     const keys = Object.keys(row);
     for (const key of keys) {
-        if (key !== "event:page" && key !== "page" && !isNaN(Number(row[key]))) {
+        if (key !== "event:page" && !isNaN(Number(row[key]))) {
             return Number(row[key]);
         }
     }
