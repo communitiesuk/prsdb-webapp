@@ -15,7 +15,7 @@ import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
 @Suppress("ktlint:standard:max-line-length")
-abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState, TSelf : AbstractStep<TEnum, TFormModel, TState, TSelf>> {
+abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState> {
     open fun beforeIsStepReachable() {}
 
     open fun afterIsStepReached() {}

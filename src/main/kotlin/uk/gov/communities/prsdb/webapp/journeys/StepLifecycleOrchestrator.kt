@@ -4,7 +4,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.PageData
 
 class StepLifecycleOrchestrator(
-    val innerStep: AbstractStep<*, *, *, *>,
+    val innerStep: AbstractStep<*, *, *>,
 ) {
     fun getStepModelAndView(): ModelAndView {
         innerStep.beforeIsStepReachable()
