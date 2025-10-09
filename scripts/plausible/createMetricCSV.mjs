@@ -35,17 +35,6 @@ async function getVisitorCount(csvData, pagePath) {
 }
 
 export async function createUserExperienceMetricsCSV() {
-    const headings = [
-        "Total",
-        "LL dashboard",
-        "LL registration start page",
-        "Property registration start page",
-        "Add compliance start page",
-        "LC dashboard",
-        "LC user registration start",
-        "Property search",
-        "Landlord search"
-    ];
 
     const totalCSV = await readCSV(path.resolve('outputs/pageViews/total_page_views.csv'));
     const total = totalCSV.length > 0 ? (totalCSV[0]["pageviews"] || Object.values(totalCSV[0])[1]) : '';
@@ -79,18 +68,12 @@ export async function createUserExperienceMetricsCSV() {
     const outDir = path.resolve('userExperienceMetrics');
     await fs.mkdir(outDir, { recursive: true });
 
-    const csv = Papa.unparse(output, { columns: headings });
+    const csv = Papa.unparse(output);
     await fs.writeFile(path.join(outDir, 'pageViews.csv'), csv);
     console.log(`User experience page views metrics CSV created at ${path.join(outDir, 'pageViews.csv')}`);
 }
 
 export async function createCompletionRateCSV() {
-    const headings = [
-        "LL registration",
-        "Property registration",
-        "Add compliance",
-        "LC user registration"
-    ];
 
     const llRegCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_register_as_a_landlord.csv'));
     const llRegStart = await getVisitorCount(llRegCSV, '/landlord/register-as-a-landlord/start');
@@ -112,19 +95,20 @@ export async function createCompletionRateCSV() {
     const lcUserConf = await getVisitorCount(lcUserCSV, '/local-council/register-local-council-user/confirmation');
     const lcUserRate = (lcUserStart && lcUserConf) ? ((lcUserConf / lcUserStart) * 100).toFixed(2) : null;
 
-    const output = [
+    const output =[
         {
             "LL registration": llRegRate,
             "Property registration": propRegRate,
             "Add compliance": complianceRate,
             "LC user registration": lcUserRate
         }
-    ];
+        ]
+    ;
 
     const outDir = path.resolve('userExperienceMetrics');
     await fs.mkdir(outDir, { recursive: true });
 
-    const csv = Papa.unparse(output, { columns: headings });
+    const csv = Papa.unparse(output);
     await fs.writeFile(path.join(outDir, 'completionRate.csv'), csv);
     console.log(`User experience completion rate metrics CSV created at ${path.join(outDir, 'completionRate.csv')}`);
 }
