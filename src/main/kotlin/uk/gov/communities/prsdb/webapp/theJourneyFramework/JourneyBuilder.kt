@@ -9,7 +9,7 @@ class JourneyBuilder<TState : DynamicJourneyState>(
         stepsUnderConstruction.associate { sb ->
             sb.build(state).let {
                 checkForUninitialisedParents(sb)
-                it.routeSegment to StepConductor(it)
+                it.routeSegment to StepLifecycleOrchestrator(it)
             }
         }
 
@@ -35,7 +35,7 @@ class JourneyBuilder<TState : DynamicJourneyState>(
         fun <TState : DynamicJourneyState> journey(
             state: TState,
             init: JourneyBuilder<TState>.() -> Unit,
-        ): Map<String, StepConductor> {
+        ): Map<String, StepLifecycleOrchestrator> {
             val builder = JourneyBuilder(state)
             builder.init()
             return builder.build()
