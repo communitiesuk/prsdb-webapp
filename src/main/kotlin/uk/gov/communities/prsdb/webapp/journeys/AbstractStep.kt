@@ -16,29 +16,79 @@ import kotlin.reflect.full.createInstance
 
 @Suppress("ktlint:standard:max-line-length")
 abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState> {
-    open fun beforeIsStepReachable() {}
+    fun beforeIsStepReachable() {
+        beforeIsStepReachable(state)
+    }
 
-    open fun afterIsStepReached() {}
+    fun afterIsStepReached() {
+        afterIsStepReached(state)
+    }
 
-    open fun beforeValidateSubmittedData(formData: PageData): PageData = formData
+    fun beforeValidateSubmittedData(formData: PageData): PageData = beforeValidateSubmittedData(formData, state)
 
-    open fun afterValidateSubmittedData(bindingResult: BindingResult) {}
+    fun afterValidateSubmittedData(bindingResult: BindingResult) = afterValidateSubmittedData(bindingResult, state)
 
-    open fun beforeGetStepContent() {}
+    fun beforeGetStepContent() {
+        beforeGetStepContent(state)
+    }
 
-    open fun afterGetStepContent() {}
+    fun afterGetStepContent() {
+        afterGetStepContent(state)
+    }
 
-    open fun beforeGetTemplate() {}
+    fun beforeGetTemplate() {
+        beforeGetTemplate(state)
+    }
 
-    open fun afterGetTemplate() {}
+    fun afterGetTemplate() {
+        afterGetTemplate(state)
+    }
 
-    open fun beforeSubmitFormData() {}
+    fun beforeSubmitFormData() {
+        beforeSubmitFormData(state)
+    }
 
-    open fun afterSubmitFormData() {}
+    fun afterSubmitFormData() {
+        afterSubmitFormData(state)
+    }
 
-    open fun beforeDetermineRedirect() {}
+    fun beforeDetermineRedirect() {
+        beforeDetermineRedirect(state)
+    }
 
-    open fun afterDetermineRedirect() {}
+    fun afterDetermineRedirect() {
+        afterDetermineRedirect(state)
+    }
+
+    open fun beforeIsStepReachable(state: TState) {}
+
+    open fun afterIsStepReached(state: TState) {}
+
+    open fun beforeValidateSubmittedData(
+        formData: PageData,
+        state: TState,
+    ): PageData = formData
+
+    open fun afterValidateSubmittedData(
+        bindingResult: BindingResult,
+        state: TState,
+    ) {}
+
+    open fun beforeGetStepContent(state: TState) {}
+
+    open fun afterGetStepContent(state: TState) {}
+
+    open fun beforeGetTemplate(state: TState) {}
+
+    open fun afterGetTemplate(state: TState) {}
+
+    open fun beforeSubmitFormData(state: TState) {}
+
+    open fun afterSubmitFormData(state: TState) {}
+
+    open fun beforeDetermineRedirect(state: TState) {}
+
+    open fun afterDetermineRedirect(state: TState) {}
 
     val isStepReachable: Boolean
         get() {
