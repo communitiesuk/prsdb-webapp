@@ -18,7 +18,7 @@ class JourneyBuilder<TState : DynamicJourneyState>(
             }
         }
 
-    fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TState, TStep>> step(
+    fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TState>> step(
         segment: String,
         uninitialisedStep: TStep,
         init: StepBuilder<TStep, TState, *>.() -> Unit,

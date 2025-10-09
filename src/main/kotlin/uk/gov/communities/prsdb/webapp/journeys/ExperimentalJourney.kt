@@ -35,7 +35,7 @@ class JourneyTestController(
 
 @Component
 @Scope("prototype")
-class FooStep : AbstractStep<Complete, NoInputFormModel, DynamicJourneyState, FooStep>() {
+class FooStep : AbstractStep<Complete, NoInputFormModel, DynamicJourneyState>() {
     override fun getStepSpecificContent(state: DynamicJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyCompliance.title",

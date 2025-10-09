@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
-class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
+class StepBuilder<TStep : AbstractStep<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
     val segment: String,
     private val step: TStep,
 ) {
@@ -21,7 +21,7 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : Dynami
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
 
-    fun redirectToStep(nextStepProvider: (mode: TMode) -> AbstractStep<*, *, TState, *>): StepBuilder<TStep, TState, TMode> {
+    fun redirectToStep(nextStepProvider: (mode: TMode) -> AbstractStep<*, *, TState>): StepBuilder<TStep, TState, TMode> {
         if (redirectToUrl != null) {
             throw Exception("Step $segment already has a redirectTo defined")
         }
@@ -75,7 +75,7 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : Dynami
         return step
     }
 
-    val structuralParents: List<AbstractStep<*, *, *, *>>
+    val structuralParents: List<AbstractStep<*, *, *>>
         get() {
             if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
                 throw Exception("Step $segment has not been initialised yet")
