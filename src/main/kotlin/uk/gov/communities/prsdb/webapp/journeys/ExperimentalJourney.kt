@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.theJourneyFramework
+package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
-import uk.gov.communities.prsdb.webapp.theJourneyFramework.JourneyBuilder.Companion.journey
 
 @Controller
 @RequestMapping("new-journey")
