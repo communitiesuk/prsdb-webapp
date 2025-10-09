@@ -5,7 +5,13 @@ class JourneyBuilder<TState : DynamicJourneyState>(
 ) {
     val stepsUnderConstruction: MutableList<StepBuilder<*, TState, *>> = mutableListOf()
 
-    fun build() = stepsUnderConstruction.associate { sb -> sb.build(state).let { it.routeSegment to StepConductor(it) } }
+    fun build() =
+        stepsUnderConstruction.associate { sb ->
+            sb.build(state).let {
+                checkForUninitialisedParents(sb)
+                it.routeSegment to StepConductor(it)
+            }
+        }
 
     fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TState, TStep>> step(
         segment: String,
@@ -15,6 +21,14 @@ class JourneyBuilder<TState : DynamicJourneyState>(
         val stepBuilder = StepBuilder(segment, uninitialisedStep)
         stepBuilder.init()
         stepsUnderConstruction.add(stepBuilder)
+    }
+
+    private fun checkForUninitialisedParents(stepBuilder: StepBuilder<*, *, *>) {
+        val uninitialisedParents = stepBuilder.structuralParents.filter { it.initialisationStage == StepInitialisationStage.UNINITIALISED }
+        if (uninitialisedParents.any()) {
+            val parentNames = uninitialisedParents.joinToString(", ")
+            throw Exception("Step ${stepBuilder.segment} has uninitialised structural parents: $parentNames")
+        }
     }
 
     companion object {
@@ -30,9 +44,15 @@ class JourneyBuilder<TState : DynamicJourneyState>(
 }
 
 class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
-    private val segment: String,
+    val segment: String,
     private val step: TStep,
 ) {
+    init {
+        if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
+            throw Exception("Step $segment has already been initialised")
+        }
+    }
+
     private var backUrlOverride: (() -> String?)? = null
     private var redirectToUrl: ((mode: TMode) -> String)? = null
     private var parentage: (() -> Parentage)? = null
@@ -82,7 +102,22 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState, TStep>, TState : Dynami
         val castedRedirectTo = redirectToUrl ?: throw Exception("Step $segment has no redirectTo defined")
         val castedParentage = parentage ?: { NoParents() }
         step.initialize(segment, state, backUrlOverride, castedRedirectTo, castedParentage)
+        if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
+            throw Exception("Step $segment base class has not been initialised correctly")
+        }
         additionalConfig?.let { configure -> step.configure() }
+        if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {
+            throw Exception("Custom configuration for Step $segment has not fully initialised the step")
+        }
         return step
     }
+
+    val structuralParents: List<AbstractStep<*, *, *, *>>
+        get() {
+            if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
+                throw Exception("Step $segment has not been initialised yet")
+            }
+
+            return step.parentage.potentialParents
+        }
 }

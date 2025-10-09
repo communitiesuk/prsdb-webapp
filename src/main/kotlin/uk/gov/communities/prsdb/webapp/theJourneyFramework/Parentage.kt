@@ -4,7 +4,9 @@ interface Parentage {
     fun allowsChild(): Boolean
 
     val ancestry: List<AbstractStep<*, *, *, *>>
-    val parentSteps: List<AbstractStep<*, *, *, *>>
+    val allowingParentSteps: List<AbstractStep<*, *, *, *>>
+
+    val potentialParents: List<AbstractStep<*, *, *, *>>
 }
 
 class AndParents(
@@ -15,8 +17,11 @@ class AndParents(
     override val ancestry
         get() = parents.filter { it.allowsChild() }.flatMap { it.ancestry }
 
-    override val parentSteps
-        get() = parents.filter { it.allowsChild() }.flatMap { it.parentSteps }
+    override val allowingParentSteps
+        get() = parents.filter { it.allowsChild() }.flatMap { it.allowingParentSteps }
+
+    override val potentialParents
+        get() = parents.flatMap { it.potentialParents }
 }
 
 class OrParents(
@@ -27,8 +32,11 @@ class OrParents(
     override val ancestry
         get() = parents.filter { it.allowsChild() }.flatMap { it.ancestry }
 
-    override val parentSteps
-        get() = parents.filter { it.allowsChild() }.flatMap { it.parentSteps }
+    override val allowingParentSteps
+        get() = parents.filter { it.allowsChild() }.flatMap { it.allowingParentSteps }
+
+    override val potentialParents
+        get() = parents.flatMap { it.potentialParents }
 }
 
 class NoParents : Parentage {
@@ -37,21 +45,27 @@ class NoParents : Parentage {
     override val ancestry: List<AbstractStep<*, *, *, *>>
         get() = listOf()
 
-    override val parentSteps: List<AbstractStep<*, *, *, *>>
+    override val allowingParentSteps: List<AbstractStep<*, *, *, *>>
+        get() = listOf()
+
+    override val potentialParents: List<AbstractStep<*, *, *, *>>
         get() = listOf()
 }
 
 class SingleParent(
-    val step: AbstractStep<*, *, *, *>? = null,
+    val step: AbstractStep<*, *, *, *>,
     private val condition: () -> Boolean,
 ) : Parentage {
     override fun allowsChild(): Boolean = condition()
 
     override val ancestry
-        get() = step?.let { listOf(it) + it.ancestry }.orEmpty()
+        get() = listOf(step) + step.parentage.ancestry
 
-    override val parentSteps
-        get() = listOfNotNull(step)
+    override val allowingParentSteps
+        get() = if (condition()) listOf(step) else listOf()
+
+    override val potentialParents
+        get() = listOf(step)
 }
 
 fun <TEnum : Enum<TEnum>> AbstractStep<TEnum, *, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =

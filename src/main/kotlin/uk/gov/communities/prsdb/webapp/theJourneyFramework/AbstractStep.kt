@@ -16,7 +16,6 @@ import kotlin.reflect.full.createInstance
 
 @Suppress("ktlint:standard:max-line-length")
 abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState, TSelf : AbstractStep<TEnum, TFormModel, TState, TSelf>> {
-    // Extra lifecycle methods
     open fun beforeIsStepReachable() {}
 
     open fun afterIsStepReached() {}
@@ -41,7 +40,6 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     open fun afterDetermineRedirect() {}
 
-    // Main lifecycle methods
     val isStepReachable: Boolean
         get() {
             val override = isStepReachableOverride
@@ -87,7 +85,6 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     val getUnreachableStepRedirect: String = "task-list"
 
-    // Validation and the form model
     @Autowired
     private lateinit var validator: Validator
     abstract val formModelClazz: KClass<TFormModel>
@@ -104,10 +101,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
             formModelClazz.cast(binder.bindingResult.target)
         }
 
-    private lateinit var parentage: Parentage
-
-    val ancestry: List<AbstractStep<*, *, *, *>>
-        get() = (listOf(this) + parentage.ancestry).distinct()
+    lateinit var parentage: Parentage
 
     private lateinit var state: TState
 
@@ -122,7 +116,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     val backUrl: String?
         get() {
             val singleParentUrl =
-                parentage.parentSteps
+                parentage.allowingParentSteps
                     .singleOrNull()
                     ?.routeSegment
             val backUrlOverrideValue = this.backUrlOverride?.let { it() }
@@ -134,9 +128,18 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     private var isStepReachableOverride: (() -> Boolean)? = null
 
-    // Initialisation and building
-    var initialisationStage: StepInitialisationStage = StepInitialisationStage.UNINITIALISED
-        private set
+    val initialisationStage: StepInitialisationStage
+        get() =
+            when {
+                !isBaseClassInitialised -> StepInitialisationStage.UNINITIALISED
+                isBaseClassInitialised && !isSubClassInitialised -> StepInitialisationStage.PARTIALLY_INITIALISED
+                isBaseClassInitialised && isSubClassInitialised -> StepInitialisationStage.FULLY_INITIALISED
+                else -> throw Exception("Impossible state for step $this")
+            }
+    private val isBaseClassInitialised: Boolean
+        get() = ::routeSegment.isInitialized && ::state.isInitialized && ::redirectToUrl.isInitialized && ::parentage.isInitialized
+
+    protected abstract val isSubClassInitialised: Boolean
 
     fun initialize(
         segment: String,
@@ -153,17 +156,11 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         this.backUrlOverride = backUrlProvider
         this.redirectToUrl = redirectToProvider
         this.parentage = parentageProvider()
-        initialisationStage = StepInitialisationStage.FULLY_INITIALISED
     }
-    // End of class
 }
 
 enum class StepInitialisationStage {
     UNINITIALISED,
-    AWAITING_STATE,
+    PARTIALLY_INITIALISED,
     FULLY_INITIALISED,
-}
-
-interface RedirectableLocation {
-    val url: String
 }
