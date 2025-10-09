@@ -78,22 +78,22 @@ export async function createCompletionRateCSV() {
     const llRegCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_register_as_a_landlord.csv'));
     const llRegStart = await getVisitorCount(llRegCSV, '/landlord/register-as-a-landlord/start');
     const llRegConf = await getVisitorCount(llRegCSV, '/landlord/register-as-a-landlord/confirmation');
-    const llRegRate = (llRegStart && llRegConf) ? ((llRegConf / llRegStart) * 100).toFixed(2) : null;
+    const llRegRate = (llRegConf === 0) ? 0 : ((llRegStart && llRegConf) ? ((llRegConf / llRegStart) * 100).toFixed(2) : null);
 
     const propRegCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_register_property.csv'));
     const propRegStart = await getVisitorCount(propRegCSV, '/landlord/register-property');
     const propRegConf = await getVisitorCount(propRegCSV, '/landlord/register-property/confirmation');
-    const propRegRate = (propRegStart && propRegConf) ? ((propRegConf / propRegStart) * 100).toFixed(2) : null;
+    const propRegRate = (propRegConf === 0) ? 0 : ((propRegStart && propRegConf) ? ((propRegConf / propRegStart) * 100).toFixed(2) : null);
 
     const complianceCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_add_compliance_information_sum.csv'));
     const complianceStart = await getVisitorCount(complianceCSV, '/landlord/add-compliance-information');
     const complianceConf = await getVisitorCount(complianceCSV, '/landlord/add-compliance-information/confirmation');
-    const complianceRate = (complianceStart && complianceConf) ? ((complianceConf / complianceStart) * 100).toFixed(2) : null;
+    const complianceRate = (complianceConf === 0) ? 0 : ((complianceStart && complianceConf) ? ((complianceConf / complianceStart) * 100).toFixed(2) : null);
 
     const lcUserCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/local_council_register_local_council_user.csv'));
     const lcUserStart = await getVisitorCount(lcUserCSV, '/local-council/register-local-council-user/landing-page');
     const lcUserConf = await getVisitorCount(lcUserCSV, '/local-council/register-local-council-user/confirmation');
-    const lcUserRate = (lcUserStart && lcUserConf) ? ((lcUserConf / lcUserStart) * 100).toFixed(2) : null;
+    const lcUserRate = (lcUserConf === 0) ? 0 : ((lcUserStart && lcUserConf) ? ((lcUserConf / lcUserStart) * 100).toFixed(2) : null);
 
     const output =[
         {

@@ -24,7 +24,7 @@ export async function processJourneyData(metric, INPUT_DIR) {
       "time_on_page": "average"
   }
 
-  fs.readdirSync(INPUT_DIR).filter(f => f.endsWith('.csv')).forEach(inputFile => {
+  fs.readdirSync(INPUT_DIR).filter(file => file.endsWith('.csv')).forEach(inputFile => {
     const inputPath = path.join(INPUT_DIR, inputFile);
     const outputDir = path.join(OUTPUT_BASE_DIR, INPUT_DIR, path.basename(inputFile, '.csv'));
     if (!fs.existsSync(outputDir)) {
