@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
@@ -131,25 +130,16 @@ class LandlordService(
         val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
-        val landlordPage =
+        val landlordWithListedPropertyCountPage =
             if (lrn == null) {
-                landlordRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
+                landlordWithListedPropertyCountRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
             } else {
-                landlordRepository.searchMatchingLRN(lrn.number, laBaseUserId, restrictToLA, pageRequest)
+                landlordWithListedPropertyCountRepository.searchMatchingLRN(lrn.number, laBaseUserId, restrictToLA, pageRequest)
             }
 
-        return PageImpl(
-            landlordWithListedPropertyCountRepository
-                .findByLandlordIdIn(landlordPage.content.map { it.id })
-                .map {
-                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
-                        it,
-                        backLinkService.storeCurrentUrlReturningKey(),
-                    )
-                },
-            pageRequest,
-            landlordPage.totalElements,
-        )
+        return landlordWithListedPropertyCountPage.map {
+            LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, backLinkService.storeCurrentUrlReturningKey())
+        }
     }
 
     fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean {

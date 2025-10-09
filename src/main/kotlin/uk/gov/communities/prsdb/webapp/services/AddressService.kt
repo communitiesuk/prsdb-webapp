@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -12,17 +13,18 @@ class AddressService(
     private val localAuthorityService: LocalAuthorityService,
 ) {
     @Transactional
-    fun findOrCreateAddress(addressDataModel: AddressDataModel): Address {
+    fun findOrCreateAddress(addressDataModel: AddressDataModel) =
         if (addressDataModel.uprn != null) {
-            val alreadyExistingAddress = addressRepository.findByUprn(addressDataModel.uprn)
-            if (alreadyExistingAddress != null) return alreadyExistingAddress
+            addressRepository.findByIsActiveTrueAndUprn(addressDataModel.uprn)
+                ?: throw EntityNotFoundException("No active address found with UPRN ${addressDataModel.uprn}")
+        } else {
+            val localAuthority = addressDataModel.localAuthorityId?.let { localAuthorityService.retrieveLocalAuthorityById(it) }
+            addressRepository.save(Address(addressDataModel, localAuthority))
         }
 
-        val localAuthority =
-            addressDataModel.localAuthorityId?.let {
-                localAuthorityService.retrieveLocalAuthorityById(it)
-            }
-
-        return addressRepository.save(Address(addressDataModel, localAuthority))
-    }
+    fun searchForAddresses(
+        houseNameOrNumber: String,
+        postcode: String,
+        restrictToEngland: Boolean = false,
+    ) = addressRepository.search(houseNameOrNumber, postcode, restrictToEngland).map { AddressDataModel.fromAddress(it) }
 }

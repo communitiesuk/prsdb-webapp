@@ -17,11 +17,9 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
-import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
@@ -63,12 +61,6 @@ class PrsdbWebappApplicationTests {
 
     @MockitoBean
     lateinit var notificationClient: NotificationClient
-
-    @MockitoBean
-    lateinit var osPlacesConfig: OSPlacesConfig
-
-    @MockitoBean
-    lateinit var osPlacesClient: OSPlacesClient
 
     @MockitoBean
     lateinit var identityService: OneLoginIdentityService
