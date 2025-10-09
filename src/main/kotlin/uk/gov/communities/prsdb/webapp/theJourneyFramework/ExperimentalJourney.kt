@@ -39,7 +39,7 @@ class FooStep : AbstractStep<Complete, NoInputFormModel, DynamicJourneyState, Fo
     override fun getStepSpecificContent(state: DynamicJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyCompliance.title",
-            "certificateNumber" to if (::getReleventEpc.isInitialized) getReleventEpc(state) else "CERTIFICATE NOT INITIALISED",
+            "certificateNumber" to getReleventEpc(state),
         )
 
     override fun chooseTemplate() = "forms/epcSupersededForm"
@@ -47,6 +47,8 @@ class FooStep : AbstractStep<Complete, NoInputFormModel, DynamicJourneyState, Fo
     override val formModelClazz = NoInputFormModel::class
 
     override fun mode(state: DynamicJourneyState) = formModel?.let { Complete.COMPLETE }
+
+    override val isSubClassInitialised: Boolean get() = ::getReleventEpc.isInitialized
 
     lateinit var getReleventEpc: (DynamicJourneyState) -> String?
 }
@@ -72,21 +74,30 @@ class ExperimentalJourney(
         journey(this) {
             step("one", step1) {
                 redirectToStep { step2 }
+                stepSpecificInitialisation {
+                    getReleventEpc = { journeyData.toString() }
+                }
             }
             step("two", step2) {
                 parents { step1.hasOutcome(Complete.COMPLETE) }
                 redirectToStep { step3 }
+                stepSpecificInitialisation {
+                    getReleventEpc = { journeyData["one"]?.toString() }
+                }
             }
             step("three", step3) {
                 parents { step2.hasOutcome(Complete.COMPLETE) }
                 redirectToStep { step4 }
                 stepSpecificInitialisation {
-                    getReleventEpc = { journeyData.count().toString() }
+                    getReleventEpc = { journeyData.size.toString() }
                 }
             }
             step("four", step4) {
                 parents { step3.hasOutcome(Complete.COMPLETE) }
-                redirectToUrl { ".." }
+                redirectToUrl { "." }
+                stepSpecificInitialisation {
+                    getReleventEpc = { journeyData.keys.toString() }
+                }
             }
         }
 }
