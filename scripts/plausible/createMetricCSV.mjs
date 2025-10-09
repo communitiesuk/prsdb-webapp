@@ -34,7 +34,7 @@ async function getVisitorCount(csvData, pagePath) {
     return null;
 }
 
-export async function createUserExperienceMetricsCSV() {
+export async function createPageViewCSV() {
 
     const totalCSV = await readCSV(path.resolve('outputs/pageViews/total_page_views.csv'));
     const total = totalCSV.length > 0 ? (totalCSV[0]["pageviews"] || Object.values(totalCSV[0])[1]) : '';
