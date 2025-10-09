@@ -70,7 +70,7 @@ class ExperimentalJourney(
         fun JourneyDataServiceFactory.dataService(): JourneyDataService = this.create("key")
     }
 
-    fun initialize(): Map<String, StepConductor> =
+    fun initialize(): Map<String, StepLifecycleOrchestrator> =
         journey(this) {
             step("one", step1) {
                 redirectToStep { step2 }
