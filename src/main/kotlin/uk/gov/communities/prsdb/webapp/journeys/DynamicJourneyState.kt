@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.theJourneyFramework
+package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap

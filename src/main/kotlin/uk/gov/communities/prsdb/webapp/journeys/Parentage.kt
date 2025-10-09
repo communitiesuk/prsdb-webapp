@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.theJourneyFramework
+package uk.gov.communities.prsdb.webapp.journeys
 
 interface Parentage {
     fun allowsChild(): Boolean
