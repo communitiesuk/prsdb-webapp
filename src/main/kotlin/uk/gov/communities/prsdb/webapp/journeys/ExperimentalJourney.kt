@@ -67,7 +67,7 @@ class ExperimentalJourney(
     override val step2: FooStep,
     override val step3: FooStep,
     override val step4: FooStep,
-) : AbstractJourney(journeyDataServiceFactory.dataService()),
+) : AbstractJourney(JourneyStateService(journeyDataServiceFactory.dataService())),
     EpcJourneyState {
     companion object {
         fun JourneyDataServiceFactory.dataService(): JourneyDataService = this.create("key")
@@ -78,28 +78,28 @@ class ExperimentalJourney(
             step("one", step1) {
                 redirectToStep { step2 }
                 stepSpecificInitialisation {
-                    getReleventEpc = { journeyData.toString() }
+                    getReleventEpc = { automatchedEpc?.certificateNumber }
                 }
             }
             step("two", step2) {
                 parents { step1.hasOutcome(Complete.COMPLETE) }
                 redirectToStep { step3 }
                 stepSpecificInitialisation {
-                    getReleventEpc = { journeyData["one"]?.toString() }
+                    getReleventEpc = { automatchedEpc?.certificateNumber }
                 }
             }
             step("three", step3) {
                 parents { step2.hasOutcome(Complete.COMPLETE) }
                 redirectToStep { step4 }
                 stepSpecificInitialisation {
-                    getReleventEpc = { journeyData.size.toString() }
+                    getReleventEpc = { searchedEpc?.certificateNumber }
                 }
             }
             step("four", step4) {
                 parents { step3.hasOutcome(Complete.COMPLETE) }
                 redirectToUrl { "." }
                 stepSpecificInitialisation {
-                    getReleventEpc = { journeyData.keys.toString() }
+                    getReleventEpc = { automatchedEpc?.certificateNumber }
                 }
             }
         }
