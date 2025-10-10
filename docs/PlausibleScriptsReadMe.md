@@ -9,7 +9,7 @@
   ```
   PLAUSIBLE_API_KEY=your_api_key
   ```
-  - You can get the API key from Keeper or create your own in Plausible under  `Settings > API`.
+  - You can get the API key from Keeper or create your own in Plausible under  `Account Settings > API`.
 
 ## Input Queries
 - Store queries in `scripts/plausible/inputs` as a `.json` file.
