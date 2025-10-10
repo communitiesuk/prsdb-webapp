@@ -21,7 +21,7 @@ class JourneyBuilder<TState : DynamicJourneyState>(
     fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TState>> step(
         segment: String,
         uninitialisedStep: TStep,
-        init: StepBuilder<TStep, TState, *>.() -> Unit,
+        init: StepBuilder<TStep, TState, TMode>.() -> Unit,
     ) {
         val stepBuilder = StepBuilder(segment, uninitialisedStep)
         stepBuilder.init()

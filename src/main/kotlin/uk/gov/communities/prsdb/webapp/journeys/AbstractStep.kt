@@ -181,14 +181,14 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         get() =
             when {
                 !isBaseClassInitialised -> StepInitialisationStage.UNINITIALISED
-                isBaseClassInitialised && !isSubClassInitialised -> StepInitialisationStage.PARTIALLY_INITIALISED
-                isBaseClassInitialised && isSubClassInitialised -> StepInitialisationStage.FULLY_INITIALISED
+                isBaseClassInitialised && !isSubClassInitialised() -> StepInitialisationStage.PARTIALLY_INITIALISED
+                isBaseClassInitialised && isSubClassInitialised() -> StepInitialisationStage.FULLY_INITIALISED
                 else -> throw Exception("Impossible state for step $this")
             }
     private val isBaseClassInitialised: Boolean
         get() = ::routeSegment.isInitialized && ::state.isInitialized && ::redirectToUrl.isInitialized && ::parentage.isInitialized
 
-    protected abstract val isSubClassInitialised: Boolean
+    protected abstract fun isSubClassInitialised(): Boolean
 
     fun initialize(
         segment: String,
@@ -206,6 +206,11 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         this.redirectToUrl = redirectToProvider
         this.parentage = parentageProvider()
     }
+}
+
+abstract class AbstractGenericStep<TEnum : Enum<TEnum>, TModel : FormModel, TState : DynamicJourneyState> :
+    AbstractStep<TEnum, TModel, TState>() {
+    override fun isSubClassInitialised(): Boolean = true
 }
 
 enum class StepInitialisationStage {

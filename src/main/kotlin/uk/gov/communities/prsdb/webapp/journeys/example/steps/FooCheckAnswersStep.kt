@@ -1,0 +1,92 @@
+package uk.gov.communities.prsdb.webapp.journeys.example.steps
+
+import org.springframework.context.annotation.Scope
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStep
+import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+
+@Scope("prototype")
+@PrsdbWebComponent
+class FooCheckAnswersStep(
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+) : AbstractGenericStep<Complete, NoInputFormModel, FooJourneyState>() {
+    override val formModelClazz = NoInputFormModel::class
+
+    override fun getStepSpecificContent(state: FooJourneyState) =
+        mapOf(
+            "title" to "propertyDetails.update.title",
+            "summaryName" to "forms.update.checkOccupancy.summaryName",
+            "showWarning" to true,
+            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+            "insetText" to "forms.update.checkOccupancy.insetText",
+            "summaryListData" to occupationRows(state) + getEpcStatusRow(state),
+        )
+
+    private fun occupationRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> {
+        val occupiedStep = state.occupied
+        return if (occupiedStep?.formModel?.occupied == true) {
+            val householdsStep = state.households
+            val tenantsStep = state.tenants
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.occupancy.fieldSetHeading",
+                    true,
+                    occupiedStep.routeSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.numberOfHouseholds.fieldSetHeading",
+                    householdsStep?.formModel?.numberOfHouseholds,
+                    householdsStep?.routeSegment,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.numberOfPeople.fieldSetHeading",
+                    tenantsStep?.formModel?.numberOfPeople,
+                    tenantsStep?.routeSegment,
+                ),
+            )
+        } else {
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.occupancy.fieldSetHeading",
+                    false,
+                    occupiedStep?.routeSegment,
+                ),
+            )
+        }
+    }
+
+    private fun getEpcStatusRow(state: FooJourneyState): SummaryListRowViewModel {
+        val epc = state.searchedEpc ?: state.automatchedEpc
+
+        val fieldValue =
+            if (epc == null) {
+                "forms.checkComplianceAnswers.certificate.notAdded"
+            } else {
+                "forms.checkComplianceAnswers.epc.view"
+            }
+
+        val certificateNumber = epc?.certificateNumber
+        val valueUrl =
+            if (certificateNumber != null) {
+                epcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)
+            } else {
+                null
+            }
+
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkComplianceAnswers.epc.certificate",
+            fieldValue,
+            state.epcQuestion?.routeSegment,
+            valueUrl,
+            valueUrlOpensNewTab = valueUrl != null,
+        )
+    }
+
+    override fun chooseTemplate(): String = "forms/checkAnswersForm"
+
+    override fun mode(state: FooJourneyState): Complete? = formModel?.let { Complete.COMPLETE }
+}
