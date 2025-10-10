@@ -70,3 +70,5 @@ class SingleParent(
 
 fun <TEnum : Enum<TEnum>> AbstractStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
     SingleParent(this) { outcome() == outcomeValue }
+
+fun AbstractStep<*, *, *>.always(): Parentage = SingleParent(this) { true }

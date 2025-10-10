@@ -75,7 +75,7 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState>, TState : DynamicJourne
         return step
     }
 
-    val structuralParents: List<AbstractStep<*, *, *>>
+    val potentialParents: List<AbstractStep<*, *, *>>
         get() {
             if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
                 throw Exception("Step $segment has not been initialised yet")

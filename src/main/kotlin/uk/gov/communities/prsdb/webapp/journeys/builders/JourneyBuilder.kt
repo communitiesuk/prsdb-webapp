@@ -21,7 +21,7 @@ class JourneyBuilder<TState : DynamicJourneyState>(
     fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TState>> step(
         segment: String,
         uninitialisedStep: TStep,
-        init: StepBuilder<TStep, TState, *>.() -> Unit,
+        init: StepBuilder<TStep, TState, TMode>.() -> Unit,
     ) {
         val stepBuilder = StepBuilder(segment, uninitialisedStep)
         stepBuilder.init()
@@ -29,10 +29,13 @@ class JourneyBuilder<TState : DynamicJourneyState>(
     }
 
     private fun checkForUninitialisedParents(stepBuilder: StepBuilder<*, *, *>) {
-        val uninitialisedParents = stepBuilder.structuralParents.filter { it.initialisationStage == StepInitialisationStage.UNINITIALISED }
+        val uninitialisedParents = stepBuilder.potentialParents.filter { it.initialisationStage == StepInitialisationStage.UNINITIALISED }
         if (uninitialisedParents.any()) {
-            val parentNames = uninitialisedParents.joinToString(", ")
-            throw Exception("Step ${stepBuilder.segment} has uninitialised structural parents: $parentNames")
+            val parentNames = uninitialisedParents.joinToString { "\n- $it" }
+            throw Exception(
+                "Step ${stepBuilder.segment} has uninitialised potential parents on initialisation: $parentNames\n" +
+                    "This could imply a dependency loop, or that these two steps are declared in the wrong order.",
+            )
         }
     }
 
