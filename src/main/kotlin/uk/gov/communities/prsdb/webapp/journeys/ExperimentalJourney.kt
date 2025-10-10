@@ -15,24 +15,27 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @Controller
 @RequestMapping("new-journey")
 class JourneyTestController(
     val factory: ObjectFactory<ExperimentalJourney>,
 ) {
-    @GetMapping("/{stepName}")
+    @GetMapping("{propertyId}/{stepName}")
     fun getStep(
+        @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
-    ): ModelAndView = factory.getObject().initialize()[stepName]?.getStepModelAndView() ?: throw Exception("Step not found")
+    ): ModelAndView =
+        factory.getObject().buildJourneySteps(propertyId.toString())[stepName]?.getStepModelAndView() ?: throw Exception("Step not found")
 
-    @PostMapping("/{stepName}")
+    @PostMapping("{propertyId}/{stepName}")
     fun postStep(
+        @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
-    ): ModelAndView = factory.getObject().initialize()[stepName]?.postStepModelAndView(formData) ?: throw Exception("Step not found")
+    ): ModelAndView =
+        factory.getObject().buildJourneySteps(propertyId.toString())[stepName]?.postStepModelAndView(formData)
+            ?: throw Exception("Step not found")
 }
 
 @Component
@@ -62,19 +65,16 @@ enum class Complete {
 @Component
 @Scope("prototype")
 class ExperimentalJourney(
-    journeyDataServiceFactory: JourneyDataServiceFactory,
     override val step1: FooStep,
     override val step2: FooStep,
     override val step3: FooStep,
     override val step4: FooStep,
-) : AbstractJourney(JourneyStateService(journeyDataServiceFactory.dataService())),
+    journeyStateService: JourneyStateService,
+) : AbstractJourney(journeyStateService),
     EpcJourneyState {
-    companion object {
-        fun JourneyDataServiceFactory.dataService(): JourneyDataService = this.create("key")
-    }
-
-    fun initialize(): Map<String, StepLifecycleOrchestrator> =
-        journey(this) {
+    override fun buildJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> {
+        initialise("experimental-journey-$journeyId")
+        return journey(this) {
             step("one", step1) {
                 redirectToStep { step2 }
                 stepSpecificInitialisation {
@@ -103,6 +103,7 @@ class ExperimentalJourney(
                 }
             }
         }
+    }
 
     override var automatchedEpc: EpcDataModel? by delegate("automatchedEpc", serializer())
     override var searchedEpc: EpcDataModel? by delegate("searchedEpc", serializer())

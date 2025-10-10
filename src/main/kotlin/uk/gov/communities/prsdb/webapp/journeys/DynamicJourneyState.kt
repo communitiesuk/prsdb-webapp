@@ -29,9 +29,15 @@ interface EpcJourneyState : DynamicJourneyState {
     val step4: AbstractStep<*, NoInputFormModel, EpcJourneyState>?
 }
 
-open class AbstractJourney(
+abstract class AbstractJourney(
     private val journeyStateService: JourneyStateService,
 ) : DynamicJourneyState {
+    abstract fun buildJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator>
+
+    protected fun initialise(journeyId: String) {
+        journeyStateService.initialise(journeyId)
+    }
+
     override fun getStepData(key: String): PageData? = objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
 
     override fun addStepData(
