@@ -48,7 +48,7 @@ class StepLifecycleOrchestrator(
             }
 
             innerStep.beforeSubmitFormData()
-            innerStep.submitFormData(formData)
+            innerStep.submitFormData(bindingResult)
             innerStep.afterSubmitFormData()
 
             innerStep.beforeDetermineRedirect()
