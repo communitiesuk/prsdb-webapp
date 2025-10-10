@@ -7,7 +7,6 @@ import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.collections.plus
 import kotlin.reflect.KClass
@@ -128,7 +127,6 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
     abstract fun chooseTemplate(): String
 
     fun submitFormData(bindingResult: BindingResult) {
-        formModelClazz.cast(bindingResult.target).toPageData()
         state.addStepData(routeSegment, formModelClazz.cast(bindingResult.target).toPageData())
     }
 
@@ -144,7 +142,7 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
         get() = getFormModelFromState(state)
 
     private fun getFormModelFromState(state: TState): TFormModel? =
-        objectToStringKeyedMap(state.journeyData[routeSegment])?.let {
+        state.getStepData(routeSegment)?.let {
             val binder = WebDataBinder(formModelClazz.createInstance())
             binder.validator = validator
             binder.bind(MutablePropertyValues(it))
