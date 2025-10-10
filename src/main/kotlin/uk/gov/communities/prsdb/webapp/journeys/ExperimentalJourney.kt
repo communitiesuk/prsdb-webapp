@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
@@ -61,11 +63,12 @@ enum class Complete {
 @Scope("prototype")
 class ExperimentalJourney(
     journeyDataServiceFactory: JourneyDataServiceFactory,
-    val step1: FooStep,
-    val step2: FooStep,
-    val step3: FooStep,
-    val step4: FooStep,
-) : AbstractJourney(journeyDataServiceFactory.dataService()) {
+    override val step1: FooStep,
+    override val step2: FooStep,
+    override val step3: FooStep,
+    override val step4: FooStep,
+) : AbstractJourney(journeyDataServiceFactory.dataService()),
+    EpcJourneyState {
     companion object {
         fun JourneyDataServiceFactory.dataService(): JourneyDataService = this.create("key")
     }
@@ -100,4 +103,8 @@ class ExperimentalJourney(
                 }
             }
         }
+
+    override var automatchedEpc: EpcDataModel? by delegate("automatchedEpc", serializer())
+    override var searchedEpc: EpcDataModel? by delegate("searchedEpc", serializer())
+    override val propertyId: Long by compulsoryDelegate("propertyId", serializer())
 }

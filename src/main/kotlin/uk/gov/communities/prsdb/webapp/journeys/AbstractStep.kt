@@ -127,8 +127,9 @@ abstract class AbstractStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel,
 
     abstract fun chooseTemplate(): String
 
-    fun submitFormData(formData: PageData) {
-        state.addStepData(routeSegment, formData)
+    fun submitFormData(bindingResult: BindingResult) {
+        formModelClazz.cast(bindingResult.target).toPageData()
+        state.addStepData(routeSegment, formModelClazz.cast(bindingResult.target).toPageData())
     }
 
     fun determineRedirect(): String = mode(state)?.let { redirectToUrl(it) } ?: routeSegment
