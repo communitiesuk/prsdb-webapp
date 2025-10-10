@@ -1,9 +1,9 @@
 {
-  "top_pages": {
+  "visitors": {
     "site_id": "prod.register-home-to-rent.communities.gov.uk",
-    "date_range": "5d",
+    "date_range": "14d",
     "metrics": [
-      "pageviews"
+      "visitors"
     ],
     "dimensions": [
       "event:page"
