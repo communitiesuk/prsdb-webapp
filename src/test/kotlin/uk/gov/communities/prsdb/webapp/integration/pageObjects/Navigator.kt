@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -179,7 +178,7 @@ class Navigator(
     }
 
     fun goToPasscodeEntryPage(): PasscodeEntryPage {
-        navigate(PasscodeEntryController.PASSCODE_ENTRY_ROUTE)
+        navigate(PASSCODE_ENTRY_ROUTE)
         return createValidPage(page, PasscodeEntryPage::class)
     }
 
