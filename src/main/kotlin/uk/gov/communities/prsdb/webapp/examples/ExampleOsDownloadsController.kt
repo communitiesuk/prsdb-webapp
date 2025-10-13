@@ -15,7 +15,7 @@ import java.util.zip.ZipInputStream
 // TODO PRSD-1021: Remove this example once there is another way of using the NgdAddressLoader
 @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
 @PrsdbController
-@RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT/example/os-downloads")
+@RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT/os-downloads")
 class ExampleOsDownloadsController(
     private val osDownloadsClient: OsDownloadsClient,
     private val ngdAddressLoader: NgdAddressLoader,
