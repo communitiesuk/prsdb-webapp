@@ -843,7 +843,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         private const val PROPERTY_OWNERSHIP_ID = 1L
         private const val OTHER_PROPERTY_OWNERSHIP_ID = 4L
         private const val LANDLORD_EMAIL = "alex.surname@example.com"
-        private const val PROPERTY_ADDRESS = "1, Example Road, EG"
+        private const val PROPERTY_ADDRESS = "1, Example Road, EG1 1AA"
 
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
 

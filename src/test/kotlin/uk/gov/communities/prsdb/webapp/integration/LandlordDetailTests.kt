@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.assertEquals
 
 class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -22,7 +23,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `loading the landlord details page and selecting properties shows the registered properties table`(page: Page) {
+        fun `the registered properties tab contains the registered properties table when the landlord has properties`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
 
             detailsPage.tabs.goToRegisteredProperties()
@@ -30,6 +31,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
+            assertThat(detailsPage.noRegisteredPropertiesMessage).isHidden()
         }
 
         @Test
@@ -50,6 +52,23 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             propertyDetailsView.backLink.clickAndWait()
             assertPageIs(page, LandlordDetailsPage::class)
         }
+
+        @Nested
+        inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-unverified-landlord.sql") {
+            @Test
+            fun `the registered properties table doesn't appear if the landlord has no properties`(page: Page) {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                detailsPage.tabs.goToRegisteredProperties()
+
+                assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
+                assertThat(detailsPage.registeredPropertiesTable).isHidden()
+                assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
+
+                detailsPage.noRegisteredPropertiesLink.clickAndWait()
+                assertPageIs(page, RegisterPropertyStartPage::class)
+            }
+        }
     }
 
     @Nested
@@ -62,7 +81,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `loading the landlord details page and selecting properties shows landlord's registered properties table`(page: Page) {
+        fun `the registered properties tab shows the landlord's registered properties table if they have properties`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
 
             detailsPage.tabs.goToRegisteredProperties()
@@ -73,6 +92,19 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Local council")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Licensing type")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(4)).containsText("Tenanted")
+            assertThat(detailsPage.noRegisteredPropertiesMessage).isHidden()
+        }
+
+        @Test
+        fun `the registered properties table doesn't appear if the landlord has no properties`(page: Page) {
+            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(3)
+
+            detailsPage.tabs.goToRegisteredProperties()
+
+            assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
+            assertThat(detailsPage.registeredPropertiesTable).isHidden()
+            assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
+            assertThat(detailsPage.noRegisteredPropertiesLink).isHidden()
         }
 
         @Test

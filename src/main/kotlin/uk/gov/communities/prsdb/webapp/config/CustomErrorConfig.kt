@@ -9,8 +9,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 
 @PrsdbWebConfiguration
 class CustomErrorConfig {

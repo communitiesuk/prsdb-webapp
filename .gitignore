@@ -46,10 +46,13 @@ notify-template-tests.run.xml
 
 ### Node ###
 /node_modules
+scripts/plausible/node_modules
 
 ### Built assets ###
 /dist
 /scripts/output
+/scripts/plausible/outputs
+/scripts/plausible/saved
 
 ### Local ###
 .local-uploads
