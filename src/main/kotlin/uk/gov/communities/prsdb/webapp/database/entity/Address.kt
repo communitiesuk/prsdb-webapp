@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.Comment
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AddressService.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
 
 @Entity
 @Comment(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
@@ -58,6 +58,10 @@ class Address() : ModifiableAuditableEntity() {
     var localAuthority: LocalAuthority? = null
         private set
 
+    @Column(nullable = false)
+    var isActive: Boolean = true
+        private set
+
     constructor(addressDataModel: AddressDataModel, localAuthority: LocalAuthority? = null) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
@@ -67,8 +71,6 @@ class Address() : ModifiableAuditableEntity() {
         this.buildingNumber = addressDataModel.buildingNumber
         this.streetName = addressDataModel.streetName
         this.locality = addressDataModel.locality
-        this.townName = addressDataModel.townName
-        this.postcode = addressDataModel.postcode
         this.townName = addressDataModel.townName
         this.postcode = addressDataModel.postcode
         this.localAuthority = localAuthority
