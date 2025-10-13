@@ -188,12 +188,19 @@ class LocalAuthorityInvitationServiceTests {
     }
 
     @Test
-    fun `getInvitationById returns an invitation if the id is in the database`() {
+    fun `getInvitationByIdOrNull returns an invitation if the id is in the database`() {
         val testId = 123.toLong()
         val invitationFromDatabase = MockLocalAuthorityData.createLocalAuthorityInvitation(id = testId)
 
         whenever(mockLaInviteRepository.getReferenceById(testId)).thenReturn(invitationFromDatabase)
 
-        assertEquals(invitationFromDatabase, inviteService.getInvitationById(testId))
+        assertEquals(invitationFromDatabase, inviteService.getInvitationByIdOrNull(testId))
+    }
+
+    @Test
+    fun `getInvitationByIdOrNull returns null if the id is no in the database`() {
+        val testId = 123.toLong()
+
+        assertNull(inviteService.getInvitationByIdOrNull(testId))
     }
 }

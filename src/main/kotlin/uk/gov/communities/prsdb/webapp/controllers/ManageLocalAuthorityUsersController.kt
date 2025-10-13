@@ -322,7 +322,7 @@ class ManageLocalAuthorityUsersController(
         request: HttpServletRequest,
     ): String {
         val invitation =
-            invitationService.getInvitationById(invitationId) ?: throw ResponseStatusException(
+            invitationService.getInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Invitation with id $invitationId was not found in the local_authority_invitations table",
             )
@@ -349,7 +349,7 @@ class ManageLocalAuthorityUsersController(
         redirectAttributes: RedirectAttributes,
     ): String {
         val invitation =
-            invitationService.getInvitationById(invitationId) ?: throw ResponseStatusException(
+            invitationService.getInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Invitation with id $invitationId was not found in the local_authority_invitations table",
             )
@@ -384,7 +384,7 @@ class ManageLocalAuthorityUsersController(
                     "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
                 )
 
-        if (invitationService.getInvitationById(invitationId) != null) {
+        if (invitationService.getInvitationByIdOrNull(invitationId) != null) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Invitation with id $invitationId is still in the local_authority_invitations table",

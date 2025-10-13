@@ -675,7 +675,7 @@ class ManageLocalAuthorityUsersControllerTests(
             setupDefaultLocalAuthorityForLaAdmin()
 
             val invitation = createLocalAuthorityInvitation()
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -691,7 +691,7 @@ class ManageLocalAuthorityUsersControllerTests(
             setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
             val invitation = createLocalAuthorityInvitation(invitingAuthority = createLocalAuthority(id = NON_ADMIN_LA_ID))
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(NON_ADMIN_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -708,7 +708,7 @@ class ManageLocalAuthorityUsersControllerTests(
                 .thenThrow(AccessDeniedException(""))
 
             val invitation = createLocalAuthorityInvitation()
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -723,7 +723,7 @@ class ManageLocalAuthorityUsersControllerTests(
             setupDefaultLocalAuthorityForLaAdmin()
 
             val invitation = createLocalAuthorityInvitation(invitingAuthority = createLocalAuthority(id = 789))
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -735,7 +735,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation returns 404 if the invitation is not in the database`() {
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
 
             mvc
                 .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
@@ -760,7 +760,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
         private fun setupInvitationPostToCancelInvitationAndAssertSuccess() {
             val invitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
@@ -782,7 +782,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation emails a cancellation notification to the invited email address`() {
             val invitation = createLocalAuthorityInvitation()
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
@@ -802,7 +802,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation returns 404 if the invite is not in the database`() {
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
                 .andExpect { status { isNotFound() } }
@@ -841,7 +841,7 @@ class ManageLocalAuthorityUsersControllerTests(
             whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
                 .thenReturn(mutableListOf(Pair(deletedInvitation.id, deletedInvitation.invitedEmail)))
 
-            whenever(localAuthorityInvitationService.getInvitationById(DEFAULT_LA_INVITATION_ID))
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID))
                 .thenReturn(deletedInvitation)
 
             mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
