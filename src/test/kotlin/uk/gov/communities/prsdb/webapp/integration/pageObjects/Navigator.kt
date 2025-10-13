@@ -14,13 +14,13 @@ import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.C
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
-import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
@@ -1237,7 +1237,7 @@ class Navigator(
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE)
+        navigate(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }
 

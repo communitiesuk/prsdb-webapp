@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.InviteLocalAuthorityAdminController.Companion.INVITE_LA_ADMIN_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.requestModels.InviteLocalAuthorityAdminModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
@@ -29,14 +29,14 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 
 @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
 @PrsdbController
-@RequestMapping(INVITE_LA_ADMIN_ROUTE)
-class InviteLocalAuthorityAdminController(
+@RequestMapping(SYSTEM_OPERATOR_ROUTE)
+class ManageLocalAuthorityAdminsController(
     private val localAuthorityService: LocalAuthorityService,
     private val invitationEmailSender: EmailNotificationService<LocalAuthorityAdminInvitationEmail>,
     private val invitationService: LocalAuthorityInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    @GetMapping
+    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT")
     fun inviteLocalAuthorityAdmin(model: Model): String {
         addSelectOptionsToModel(model)
         model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalAuthorityAdminModel())
@@ -44,7 +44,7 @@ class InviteLocalAuthorityAdminController(
         return "inviteLocalAuthorityAdminUser"
     }
 
-    @PostMapping("", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @PostMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendInvitation(
         model: Model,
         @Valid
@@ -93,7 +93,7 @@ class InviteLocalAuthorityAdminController(
         model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
     }
 
-    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
     fun confirmation(model: Model): String {
         if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localAuthorityName") == null) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing attributes, has the user navigated directly to this page?")
@@ -107,7 +107,8 @@ class InviteLocalAuthorityAdminController(
     }
 
     companion object {
-        const val INVITE_LA_ADMIN_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT/$INVITE_LA_ADMIN_PATH_SEGMENT"
+        const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"
+        const val INVITE_LA_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LA_ADMIN_PATH_SEGMENT"
 
         const val INVITE_LA_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LA_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }
