@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -22,24 +20,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 import java.net.URI
 
 class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
-    val addressFound = "Entirely new test address"
 
     @BeforeEach
     fun setup() {
-        val addresses =
-            listOf(
-                AddressDataModel(addressFound),
-                AddressDataModel("2, Example Road, EG1 2AB"),
-                AddressDataModel("3, Example Road, EG1 2AB"),
-            )
-        whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(MockOSPlacesAPIResponses.createResponse(addresses))
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com"))
     }
 
@@ -137,11 +126,11 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
 
             // Lookup Address page
-            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "5")
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
             val selectAddressPage = assertPageIs(page, SelectAddressFormPageUpdateLandlordDetails::class)
 
             // Select Address page
-            val newSelectedAddress = addressFound
+            val newSelectedAddress = "1 PRSDB Square, EG1 2AA"
             selectAddressPage.selectAddressAndSubmit(newSelectedAddress)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
