@@ -284,7 +284,8 @@ class ManageLocalAuthorityUsersController(
                 emailModel.email,
             )
 
-            redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)
+            localAuthorityDataService.addInvitedLocalAuthorityUserToSession(localAuthorityId, emailModel.email)
+
             return "redirect:$INVITE_USER_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
@@ -293,20 +294,22 @@ class ManageLocalAuthorityUsersController(
     }
 
     @GetMapping("/$INVITE_USER_CONFIRMATION_ROUTE")
-    fun successInvitedNewUser(
+    fun inviteNewUserConfirmation(
         @PathVariable localAuthorityId: Int,
         principal: Principal,
         model: Model,
         request: HttpServletRequest,
     ): String {
-        if (model.getAttribute("invitedEmailAddress") == null) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "invitedEmailAddress is unavailable, has the user just been invited?",
-            )
-        }
+        val invitedEmail =
+            localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(localAuthorityId)?.second
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No email address found in the session for a user invited to local authority with id $localAuthorityId",
+                )
+
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+        model.addAttribute("invitedEmailAddress", invitedEmail)
         return "inviteLAUserSuccess"
     }
 

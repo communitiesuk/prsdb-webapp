@@ -18,7 +18,8 @@ class MockLocalAuthorityData {
         fun createLocalAuthority(
             id: Int = DEFAULT_LA_ID,
             custodianCode: String = "custodian code",
-        ): LocalAuthority = LocalAuthority(id, "name", custodianCode)
+            name: String = "name",
+        ): LocalAuthority = LocalAuthority(id, name, custodianCode)
 
         const val DEFAULT_LA_USER_ID = 456L
 

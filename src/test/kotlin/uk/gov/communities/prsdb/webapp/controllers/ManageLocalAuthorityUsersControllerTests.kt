@@ -41,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataM
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -186,81 +187,162 @@ class ManageLocalAuthorityUsersControllerTests(
     inner class InviteNewUser {
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
-        fun `inviting new user as an la admin with valid form redirects to confirmation page`() {
-            val loggedInUserModel = createdLoggedInUserModel()
-            val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-                .thenReturn(Pair(loggedInUserModel, localAuthority))
-            whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
-                .thenReturn("test-token")
-            whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
-                .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
+        fun `sendInvitation as an la admin creates an invitation token`() {
+            val invitedEmail = "new-user@example.com"
 
-            postToSendInvitationAndAssertSuccess(DEFAULT_LA_ID)
-        }
+            val localAuthority = setupSuccessfulPostToSendInvitationAndReturnLocalCouncil()
 
-        @Test
-        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `inviting new user as a system operator with valid form redirects to confirmation page`() {
-            setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
-            whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
-                .thenReturn("test-token")
-            whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
-                .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
+            postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
 
-            postToSendInvitationAndAssertSuccess(NON_ADMIN_LA_ID)
+            verify(localAuthorityInvitationService).createInvitationToken(invitedEmail, localAuthority, false)
         }
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
-        fun `navigating directly to the invite user success page returns 404`() {
-            mvc
-                .get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID))
-                .andExpect {
-                    status { isNotFound() }
-                }
+        fun `sendInvitation emails the invited user`() {
+            val invitationUrl = "https://test-service.gov.uk/sign-up-la-user"
+            val dashboardUrl = "https://test-service.gov.uk"
+            val localAuthority =
+                setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
+                    invitationUrl = invitationUrl,
+                    dashboardUrl = dashboardUrl,
+                )
+
+            val invitedEmail = "new-user@example.com"
+
+            postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
+
+            verify(emailNotificationService)
+                .sendEmail(
+                    invitedEmail,
+                    LocalAuthorityInvitationEmail(
+                        localAuthority,
+                        URI(invitationUrl),
+                        dashboardUrl,
+                    ),
+                )
         }
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `sendInvitation emails admins when a new user is invited`() {
-            val loggedInUserModel = createdLoggedInUserModel()
-            val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-                .thenReturn(Pair(loggedInUserModel, localAuthority))
+            val localAuthority = setupSuccessfulPostToSendInvitationAndReturnLocalCouncil()
+
+            val invitedEmail = "new-user@example.com"
+
+            postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
+
+            verify(localAuthorityDataService)
+                .sendUserInvitedEmailsToAdmins(localAuthority, invitedEmail)
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `sendInvitation adds the invited user to the session`() {
+            val localAuthority = setupSuccessfulPostToSendInvitationAndReturnLocalCouncil()
+
+            val invitedEmail = "new-user@example.com"
+
+            postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
+
+            verify(localAuthorityDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `sendInvitation as an la admin with valid form redirects to confirmation page`() {
+            val invitedEmail = "new-user@example.com"
+
+            setupSuccessfulPostToSendInvitationAndReturnLocalCouncil()
+
+            postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `sendInvitation as a system operator with valid form creates the tokens, sends emails and redirects as for an LA admin`() {
+            val invitationUrl = "https://test-service.gov.uk/sign-up-la-user"
+            val dashboardUrl = "https://test-service.gov.uk"
+            val localAuthority =
+                setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
+                    userIsSystemOperator = true,
+                    invitationUrl = invitationUrl,
+                    dashboardUrl = dashboardUrl,
+                )
+
+            val invitedEmail = "new-user@example.com"
+
+            postToSendInvitationAndAssertRedirectionToConfirmation(NON_ADMIN_LA_ID, invitedEmail)
+
+            verify(localAuthorityInvitationService).createInvitationToken(invitedEmail, localAuthority, false)
+
+            verify(emailNotificationService)
+                .sendEmail(
+                    invitedEmail,
+                    LocalAuthorityInvitationEmail(
+                        localAuthority,
+                        URI(invitationUrl),
+                        dashboardUrl,
+                    ),
+                )
+            verify(localAuthorityDataService)
+                .sendUserInvitedEmailsToAdmins(localAuthority, invitedEmail)
+            verify(localAuthorityDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
+        }
+
+        private fun setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
+            userIsSystemOperator: Boolean = false,
+            invitationUrl: String = "https://test-service.gov.uk/sign-up-la-user",
+            dashboardUrl: String = "https://test-service.gov.uk",
+        ): LocalAuthority {
             whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
                 .thenReturn("test-token")
             whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
-                .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
+                .thenReturn(URI(invitationUrl))
+            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI(dashboardUrl))
 
-            mvc
-                .post(getLaInviteNewUserRoute(DEFAULT_LA_ID)) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
-                    with(csrf())
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
-                }
-
-            verify(localAuthorityDataService)
-                .sendUserInvitedEmailsToAdmins(localAuthority, "new-user@example.com")
+            return if (userIsSystemOperator) {
+                setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
+            } else {
+                setupDefaultLocalAuthorityForLaAdmin()
+            }
         }
 
-        private fun postToSendInvitationAndAssertSuccess(laId: Int = DEFAULT_LA_ID) {
+        private fun postToSendInvitationAndAssertRedirectionToConfirmation(
+            laId: Int = DEFAULT_LA_ID,
+            invitedEmail: String,
+        ) {
             mvc
                 .post(getLaInviteNewUserRoute(laId)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
+                    content = urlEncodedConfirmedEmailDataModel(invitedEmail)
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
-                    flash { attribute("invitedEmailAddress", "new-user@example.com") }
                 }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `inviteNewUserConfirmation returns 200 if a user was invited to the requested local authority this session`() {
+            setupDefaultLocalAuthorityForLaAdmin()
+            whenever((localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(DEFAULT_LA_ID)))
+                .thenReturn(Pair(DEFAULT_LA_ID, "invited.email@example.com"))
+
+            mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
+                status { isOk() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `inviteNewUserConfirmation returns 404 if no user was invited to the requested local authority this session`() {
+            whenever((localAuthorityDataService.getLastUserIdRegisteredThisSession())).thenReturn(null)
+
+            mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
+                status { isNotFound() }
+            }
         }
     }
 

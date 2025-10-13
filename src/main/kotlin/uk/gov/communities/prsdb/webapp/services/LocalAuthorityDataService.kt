@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.LA_USERS_INVITED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
@@ -261,5 +262,20 @@ class LocalAuthorityDataService(
     ) = session.setAttribute(
         LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
         getInvitationsCancelledThisSession().plus(Pair(cancelledInvitationId, cancelledInvitationEmail)),
+    )
+
+    fun getLastLocalAuthorityUserInvitedThisSession(localAuthorityId: Int): Pair<Int, String>? =
+        getLocalAuthorityUsersInvitedThisSession().last { it.first == localAuthorityId }
+
+    fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
+        session.getAttribute("laUsersInvitedThisSession") as MutableList<Pair<Int, String>>?
+            ?: mutableListOf()
+
+    fun addInvitedLocalAuthorityUserToSession(
+        localAuthorityId: Int,
+        invitedEmail: String,
+    ) = session.setAttribute(
+        LA_USERS_INVITED_THIS_SESSION,
+        getLocalAuthorityUsersInvitedThisSession().plus(Pair(localAuthorityId, invitedEmail)),
     )
 }
