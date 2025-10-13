@@ -318,7 +318,11 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         request: HttpServletRequest,
     ): String {
-        val invitation = invitationService.getInvitationById(invitationId)
+        val invitation =
+            invitationService.getInvitationById(invitationId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+            )
 
         val authority = getLocalAuthority(principal, localAuthorityId, request)
 
@@ -341,7 +345,12 @@ class ManageLocalAuthorityUsersController(
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val invitation = invitationService.getInvitationById(invitationId)
+        val invitation =
+            invitationService.getInvitationById(invitationId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+            )
+
         invitationService.deleteInvitation(invitationId)
 
         cancellationEmailSender.sendEmail(
@@ -359,9 +368,11 @@ class ManageLocalAuthorityUsersController(
 
     @GetMapping("/$CANCEL_INVITE_CONFIRMATION_ROUTE")
     fun cancelInvitationSuccess(
-        @PathVariable localAuthorityId: String,
+        @PathVariable localAuthorityId: Int,
         @PathVariable invitationId: Long,
         model: Model,
+        principal: Principal,
+        request: HttpServletRequest,
     ): String {
         val deletedInvitationEmail =
             getDeletedEmailIfInvitationWasCancelledThisSession(invitationId)
@@ -370,11 +381,16 @@ class ManageLocalAuthorityUsersController(
                     "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
                 )
 
-        // TODO PRSD_1198 - check that the invitation has gone from the database
-
-        // TODO PRSD-1198 - can we get the inviting authority from the localAuthorityId path variable / database and add the name as the localAuthority model attribute
+        if (invitationService.getInvitationById(invitationId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Invitation with id $invitationId is still in the local_authority_invitations table",
+            )
+        }
 
         model.addAttribute("deletedEmail", deletedInvitationEmail)
+
+        model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
         return "cancelLAUserInvitationSuccess"
     }

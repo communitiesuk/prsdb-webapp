@@ -74,7 +74,7 @@ class LocalAuthorityInvitationService(
         session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
 
-    fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getReferenceById(id)
+    fun getInvitationById(id: Long): LocalAuthorityInvitation? = invitationRepository.getReferenceById(id)
 
     fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
         val expiresAtInstant =
