@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
-<body th:replace="~{fragments/layout :: layout(#{manageLAUsers.title}, ~{::body/content()}, false)}">
+<body th:replace="~{fragments/layout :: layout(#{manageLAAdminUsers.title}, ~{::body/content()}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
-            <h1 class="govuk-heading-l" th:text="#{manageLAUsers.contentHeader(${localAuthority.name})}">
-                manageLAUsers.contentHeader
+            <h1 class="govuk-heading-l" th:text="#{manageLAAdminUsers.header}">
+                manageLAAdminUsers.header
             </h1>
         </header>
         <section>
             <table th:replace="~{fragments/tables/table :: table(
-                            ${ { 'common.manageLAUsers.table.heading.username', 'manageLAUsers.table.accessLevelHeading', 'common.manageLAUsers.table.heading.accountStatus', '' } },
+                            ${ { 'common.manageLAUsers.table.heading.username', 'manageLAAdminUsers.table.heading.localCouncil', 'common.manageLAUsers.table.heading.accountStatus', '' } },
                             ~{::tbody},
                             null
                         )}
@@ -19,9 +19,7 @@
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row" th:each="user: ${userList}">
                     <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
-                    <td class="govuk-table__cell"
-                        th:text="${user.manager} ? #{manageLAUsers.table.admin} : #{manageLAUsers.table.basic}">
-                    </td>
+                    <td class="govuk-table__cell" th:text="${user.localCouncilName}"></td>
                     <td class="govuk-table__cell">
                                 <span class="govuk-tag"
                                       th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
@@ -43,13 +41,10 @@
             <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
 
             <div th:if="${userList.content.size() == 0}">
-                <h2 class="govuk-heading-m" th:text="#{manageLAUsers.noUsersText}"></h2>
+                <h2 class="govuk-heading-m" th:text="#{manageLAAdminUsers.noAdminsText}"></h2>
             </div>
             <div class="govuk-button-group" id="action-buttons">
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-council/{id}/invite-new-user(id=${localAuthority.id})}, #{manageLAUsers.inviteAnotherUserButtonText})}">
-                    manageLAUsers.inviteAnotherUserButtonText
-                </a>
-                <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}},#{manageLAUsers.returnToDashboardButton})}"></button>
+                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAdminsUrl}},#{manageLAAdminUsers.button.inviteAnotherAdminUser})}"></button>
             </div>
         </section>
     </th:block>
