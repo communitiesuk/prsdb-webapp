@@ -344,13 +344,13 @@ class ManageLocalAuthorityUsersControllerTests(
                 status { isNotFound() }
             }
         }
-    }
 
-    private fun urlEncodedConfirmedEmailDataModel(
-        @Suppress("SameParameterValue") testEmail: String,
-    ): String {
-        val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
-        return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
+        private fun urlEncodedConfirmedEmailDataModel(
+            @Suppress("SameParameterValue") testEmail: String,
+        ): String {
+            val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
+            return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
+        }
     }
 
     @Nested
