@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_ADMIN_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -104,6 +105,11 @@ class ManageLocalAuthorityAdminsController(
         model.addAttribute("dashboardUrl", "#")
 
         return "inviteLocalAuthorityAdminConfirmation"
+    }
+
+    @GetMapping("/$MANAGE_ADMIN_USERS_PATH_SEGMENT")
+    fun manageAdminUsers(): String {
+        return ""
     }
 
     companion object {
