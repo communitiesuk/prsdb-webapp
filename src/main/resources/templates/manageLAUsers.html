@@ -11,7 +11,7 @@
         </header>
         <section>
             <table th:replace="~{fragments/tables/table :: table(
-                            ${ { 'manageLAUsers.table.usernameHeading', 'manageLAUsers.table.accessLevelHeading', 'manageLAUsers.table.accountStatusHeading', '' } },
+                            ${ { 'common.manageLAUsers.table.heading.username', 'common.manageLAUsers.table.heading.accessLevel', 'common.manageLAUsers.table.heading.accountStatus', '' } },
                             ~{::tbody},
                             null
                         )}
@@ -20,18 +20,18 @@
                 <tr class="govuk_table__row" th:each="user: ${userList}">
                     <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
                     <td class="govuk-table__cell"
-                        th:text="${user.manager} ? #{manageLAUsers.table.admin} : #{manageLAUsers.table.basic}">
+                        th:text="${user.manager} ? #{common.manageLAUsers.accessLevel.admin} : #{common.manageLAUsers.accessLevel.basic}">
                     </td>
                     <td class="govuk-table__cell">
                                 <span class="govuk-tag"
                                       th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
-                                    <strong th:text="${user.pending} ? #{manageLAUsers.table.pending} : #{manageLAUsers.table.active}"></strong>
+                                    <strong th:text="${user.pending} ? #{common.manageLAUsers.accountStatus.pending} : #{common.manageLAUsers.accountStatus.active}"></strong>
                                 </span>
                     </td>
                     <td class="govuk-table__cell">
                         <a th:href="@{${user.pending ? 'cancel-invitation/' + user.id : 'edit-user/' + user.id}}"
                            class="govuk-link"
-                           th:text="#{manageLAUsers.table.change}"
+                           th:text="#{forms.links.change}"
                            th:if="(${currentUserId} != ${user.id}) or ${user.pending} or ${userCanEditTheirOwnAccount}"
                         >
                             manageLAUsers.table.change
