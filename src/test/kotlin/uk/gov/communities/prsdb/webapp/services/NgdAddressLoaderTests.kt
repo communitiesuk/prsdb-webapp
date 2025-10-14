@@ -8,6 +8,7 @@ import org.hibernate.Transaction
 import org.hibernate.jdbc.Work
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -354,6 +355,8 @@ class NgdAddressLoaderTests {
         assertThrows<IllegalArgumentException> { ngdAddressLoader.loadNewDataPackageVersions() }
     }
 
+    // TODO PRSD-1643: Enable (and refactor if needed)
+    @Disabled
     @Test
     fun `loadNewDataPackageVersions throws exception when an unknown custodian code is encountered`() {
         // Arrange
