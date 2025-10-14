@@ -20,7 +20,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         fun `an la user invitation can be cancelled`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 2
-            var manageUsersPage = navigator.goToManageLaUsers(2)
+            var manageUsersPage = navigator.goToManageLaUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(
                 manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX),
@@ -53,7 +53,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 3
-            var manageUsersPage = navigator.goToManageLaUsers(2)
+            var manageUsersPage = navigator.goToManageLaUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX)).containsText("x.adminuser@example.com")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")
