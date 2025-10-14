@@ -27,6 +27,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.LA_USERS_INVITED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
@@ -566,5 +569,150 @@ class LocalAuthorityDataServiceTests {
 
         // Assert
         verify(invitationConfirmationSenderAdmin, org.mockito.kotlin.times(0)).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `getUsersDeletedThisSession returns a list of userId, userName pairs from the session`() {
+        // Arrange
+        val deletedUsers = listOf(Pair(1L, "User 1"), Pair(2L, "User 2"))
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION))
+            .thenReturn(deletedUsers)
+
+        // Act
+        val returnedDeletedUsers = localAuthorityDataService.getUsersDeletedThisSession()
+
+        // Assert
+        Assertions.assertEquals(deletedUsers, returnedDeletedUsers)
+    }
+
+    @Test
+    fun `getUsersDeletedThisSession returns an empty list if there are no deleted users stored in the session`() {
+        // Act
+        val returnedDeletedUsers = localAuthorityDataService.getUsersDeletedThisSession()
+
+        // Assert
+        Assertions.assertEquals(emptyList<Pair<Long, String>>(), returnedDeletedUsers)
+    }
+
+    @Test
+    fun `addDeletedUserToSession adds a userId, userName pair to the list of deleted users in the session`() {
+        // Arrange
+        val existingDeletedUsers = listOf(Pair(1L, "User 1"))
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION))
+            .thenReturn(existingDeletedUsers)
+
+        // Act
+        localAuthorityDataService.addDeletedUserToSession(2L, "User 2")
+
+        // Assert
+        verify(mockHttpSession).setAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION, listOf(Pair(1L, "User 1"), Pair(2L, "User 2")))
+    }
+
+    @Test
+    fun `getInvitationsCancelledThisSession returns a list of invitationId, email pairs from the session`() {
+        // Arrange
+        val cancelledInvitations = listOf(Pair(1L, "user.1@example.com"), Pair(2L, "user.2@example.com"))
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION))
+            .thenReturn(cancelledInvitations)
+
+        // Act
+        val returnedCancelledInvitations = localAuthorityDataService.getInvitationsCancelledThisSession()
+
+        // Assert
+        Assertions.assertEquals(cancelledInvitations, returnedCancelledInvitations)
+    }
+
+    @Test
+    fun `getInvitationsCancelledThisSession returns an empty list if there are no cancelled invitations stored in the session`() {
+        // Act
+        val returnedCancelledInvitations = localAuthorityDataService.getInvitationsCancelledThisSession()
+
+        // Assert
+        Assertions.assertEquals(emptyList<Pair<Long, String>>(), returnedCancelledInvitations)
+    }
+
+    @Test
+    fun `addCancelledInvitationToSession adds an invitationId, email pair to the list of cancelled invitations in the session`() {
+        // Arrange
+        val existingCancelledInvitations = listOf(Pair(1L, "existing.invite@example.com"))
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION))
+            .thenReturn(existingCancelledInvitations)
+
+        // Act
+        localAuthorityDataService.addCancelledInvitationToSession(2L, "new.invite@example.com")
+
+        // Assert
+        val expectedCancelledInvitations = listOf(Pair(1L, "existing.invite@example.com"), Pair(2L, "new.invite@example.com"))
+        verify(mockHttpSession)
+            .setAttribute(
+                LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
+                listOf(Pair(1L, "existing.invite@example.com"), Pair(2L, "new.invite@example.com")),
+            )
+    }
+
+    @Test
+    fun `getLocalAuthorityUsersInvitedThisSession returns a list of localAuthorityId, email pairs from the session`() {
+        // Arrange
+        val invitedUsers = listOf(Pair(1, "user.1@example.com"), Pair(1, "user.2@example.com"))
+        whenever(mockHttpSession.getAttribute(LA_USERS_INVITED_THIS_SESSION))
+            .thenReturn(invitedUsers)
+
+        // Act
+        val returnedInvitedUsers = localAuthorityDataService.getLocalAuthorityUsersInvitedThisSession()
+
+        // Assert
+        Assertions.assertEquals(invitedUsers, returnedInvitedUsers)
+    }
+
+    @Test
+    fun `getLocalAuthorityUsersInvitedThisSession returns an empty list if there are no invited users stored in the session`() {
+        // Act
+        val returnedInvitedUsers = localAuthorityDataService.getLocalAuthorityUsersInvitedThisSession()
+
+        // Assert
+        Assertions.assertEquals(emptyList<Pair<Int, String>>(), returnedInvitedUsers)
+    }
+
+    @Test
+    fun `getLastLocalAuthorityUserInvitedThisSession returns the most recently added details for that LA from the session`() {
+        // Arrange
+        val invitedUsers = listOf(Pair(1, "user.1@example.com"), Pair(1, "user.2@example.com"), Pair(2, "user.2@example.com"))
+        whenever(mockHttpSession.getAttribute(LA_USERS_INVITED_THIS_SESSION))
+            .thenReturn(invitedUsers)
+
+        // Act
+        val returnedLastInvitedUser = localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(1)
+
+        // Assert
+        Assertions.assertEquals(Pair(1, "user.2@example.com"), returnedLastInvitedUser)
+    }
+
+    @Test
+    fun `getLastLocalAuthorityUserInvitedThisSession returns null if there are no invites for that local authority in the session`() {
+        val invitedUsers = listOf(Pair(2, "user.1@example.com"))
+        whenever(mockHttpSession.getAttribute(LA_USERS_INVITED_THIS_SESSION))
+            .thenReturn(invitedUsers)
+
+        // Act
+        val returnedLastInvitedUser = localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(1)
+
+        // Assert
+        Assertions.assertNull(returnedLastInvitedUser)
+    }
+
+    @Test
+    fun `addLocalAuthorityUserInvitedToSession adds a localAuthorityId, email pair to the list of invited users in the session`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(LA_USERS_INVITED_THIS_SESSION))
+            .thenReturn(listOf(Pair(1, "existing.invite@example.com")))
+
+        // Act
+        localAuthorityDataService.addInvitedLocalAuthorityUserToSession(1, "new.invite@example.com")
+
+        // Assert
+        verify(mockHttpSession).setAttribute(
+            LA_USERS_INVITED_THIS_SESSION,
+            listOf(Pair(1, "existing.invite@example.com"), Pair(1, "new.invite@example.com")),
+        )
     }
 }

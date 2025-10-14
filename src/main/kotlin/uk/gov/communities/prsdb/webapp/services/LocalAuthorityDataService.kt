@@ -265,7 +265,7 @@ class LocalAuthorityDataService(
     )
 
     fun getLastLocalAuthorityUserInvitedThisSession(localAuthorityId: Int): Pair<Int, String>? =
-        getLocalAuthorityUsersInvitedThisSession().last { it.first == localAuthorityId }
+        getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }
 
     fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
         session.getAttribute("laUsersInvitedThisSession") as MutableList<Pair<Int, String>>?
