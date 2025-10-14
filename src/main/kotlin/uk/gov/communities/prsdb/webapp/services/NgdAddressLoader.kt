@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityNotFoundException
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
@@ -182,7 +181,8 @@ class NgdAddressLoader(
                 null
             } else {
                 localAuthorityCustodianCodeToId[custodianCode]
-                    ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
+                // TODO PRSD-1643: Handle addresses in England with non-English custodian codes
+                // ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
             }
 
         preparedStatement.setLong(1, csvRecord.get("uprn").toLong())
