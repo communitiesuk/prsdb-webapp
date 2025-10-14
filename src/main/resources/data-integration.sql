@@ -68,19 +68,6 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2, 'WC2R 1LA'),
-       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (5, '2025-01-15 00:00:00+00', null, null, '5a, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (6, '2025-01-15 00:00:00+00', null, null, '6, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (7, '2025-01-15 00:00:00+00', null, null, '7, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (8, '2025-01-15 00:00:00+00', null, null, '8, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (9, '2025-07-24 00:00:00+00', null, 100090154806, '19, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH') ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
-
 INSERT INTO landlord (id, registration_number_id, address_id, created_date, email, non_england_or_wales_address, is_active, last_modified_date, name, phone_number, subject_identifier, date_of_birth, country_of_residence, is_verified, has_accepted_privacy_notice)
 VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,true,'2025-02-25 16:17:18.075473+00','PRSD Landlord','+447123456789','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo','1950-05-13','England or Wales',false, true),
       (2,2,1,'2025-02-19 08:23:57.279777+00','travis.woodward@communities.gov.uk',null,true,null,'LISA S C LOOSELEY','07777777777','urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk','1973-03-14','England or Wales',false, true),
