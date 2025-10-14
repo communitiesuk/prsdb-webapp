@@ -219,6 +219,33 @@ class ManageLocalAuthorityUsersControllerTests(
             }
         }
 
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `sendInvitation emails admins when a new user is invited`() {
+            val loggedInUserModel = createdLoggedInUserModel()
+            val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
+            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+                .thenReturn(Pair(loggedInUserModel, localAuthority))
+            whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
+                .thenReturn("test-token")
+            whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
+                .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
+            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
+
+            mvc
+                .post(getLaInviteNewUserRoute(DEFAULT_LA_ID)) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
+                    with(csrf())
+                }.andExpect {
+                    status { is3xxRedirection() }
+                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+                }
+
+            verify(localAuthorityDataService)
+                .sendUserInvitedEmailsToAdmins(localAuthority, "new-user@example.com")
+        }
+
         private fun postToSendInvitationAndAssertSuccess(
             laId: Int = DEFAULT_LA_ID,
             invitedEmail: String,
@@ -234,13 +261,13 @@ class ManageLocalAuthorityUsersControllerTests(
                     flash { attribute("invitedEmailAddress", invitedEmail) }
                 }
         }
-    }
 
-    private fun urlEncodedConfirmedEmailDataModel(
-        @Suppress("SameParameterValue") testEmail: String,
-    ): String {
-        val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
-        return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
+        private fun urlEncodedConfirmedEmailDataModel(
+            @Suppress("SameParameterValue") testEmail: String,
+        ): String {
+            val encodedTestEmail = URLEncoder.encode(testEmail, "UTF-8")
+            return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
+        }
     }
 
     @Nested
@@ -664,33 +691,6 @@ class ManageLocalAuthorityUsersControllerTests(
             verify(emailNotificationService)
                 .sendEmail(invitation.invitedEmail, LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority))
         }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
-    fun `sendInvitation emails admins when a new user is invited`() {
-        val loggedInUserModel = createdLoggedInUserModel()
-        val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodian code")
-        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-            .thenReturn(Pair(loggedInUserModel, localAuthority))
-        whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
-            .thenReturn("test-token")
-        whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
-            .thenReturn(URI("https://test-service.gov.uk/sign-up-la-user"))
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https://test-service.gov.uk"))
-
-        mvc
-            .post(getLaInviteNewUserRoute(DEFAULT_LA_ID)) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = urlEncodedConfirmedEmailDataModel("new-user@example.com")
-                with(csrf())
-            }.andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
-            }
-
-        verify(localAuthorityDataService)
-            .sendUserInvitedEmailsToAdmins(localAuthority, "new-user@example.com")
     }
 
     private fun setupLocalAuthorityForSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
