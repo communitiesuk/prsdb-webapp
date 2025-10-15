@@ -5,9 +5,6 @@ on:
       environment:
         required: true
         type: string
-      branch:
-        required: true
-        type: string
       aws-account-id:
         required: true
         type: string
@@ -17,21 +14,21 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: eu-west-2
+  AWS_REGION: "eu-west-2"
 
 jobs:
   validate-target-environment:
-    name: Validate Target Environment
+    name: Validate target environment
     runs-on: ubuntu-latest
     steps:
-      - name: Throw Invalid Target Environment Error
+      - name: Throw invalid target environment error
         if: inputs.environment != 'integration' && inputs.environment != 'test'
         run: |
           echo "::error ::Invalid Target Environment: ${{ inputs.environment }}. This action can only target integration and test environments."
           exit 1
 
   clean-and-migrate-database:
-    name: Clean and Migrate Database
+    name: Clean and migrate database
     needs: validate-target-environment
     runs-on: ubuntu-latest
     env:
@@ -40,7 +37,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ inputs.environment == 'integration' && 'main' || inputs.environment }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -99,5 +96,5 @@ jobs:
     needs: clean-and-migrate-database
     uses: communitiesuk/prsdb-infra/.github/workflows/update-ecs-service.yml@main
     with:
-      environment_name: ${{ inputs.environment }}
-      account_id: ${{ inputs.account-id }}
+      environment: ${{ inputs.environment }}
+      aws-account-id: ${{ inputs.aws-account-id }}

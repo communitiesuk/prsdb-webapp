@@ -1,4 +1,4 @@
-name: Build and Deploy Test
+name: Build and Deploy - Test
 on:
   push:
     branches:
@@ -9,9 +9,5 @@ jobs:
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: "test"
-      build-and-deploy-role: "arn:aws:iam::869935096717:role/test-push-image"
-      migrations-role: "arn:aws:iam::869935096717:role/test-rds-access"
-      ecr-repository: "test-webapp"
-      account-id: "869935096717"
-      branch: "test"
+      aws-account-id: "869935096717"
     secrets: inherit
