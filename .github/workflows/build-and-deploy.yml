@@ -89,10 +89,10 @@ jobs:
           IMAGE_TAG: "${{ steps.get-latest-tag.outputs.tag }}-${{ github.sha }}"
         run: |
           ./gradlew bootBuildImage
-          IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker tag prsdb-webapp:latest $IMAGE
-          docker push $IMAGE
-          echo "image_uri=$IMAGE" >> $GITHUB_OUTPUT
+          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag prsdb-webapp:latest $IMAGE_URI
+          docker push $IMAGE_URI
+          echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
 
   update-task-definition:
     name: Update task definition
