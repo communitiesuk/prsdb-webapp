@@ -90,8 +90,8 @@ jobs:
         run: |
           ./gradlew bootBuildImage
           IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker tag prsdb-webapp:latest $IMAGE
-          docker push $IMAGE
+          docker tag prsdb-webapp:latest $IMAGE_URI
+          docker push $IMAGE_URI
           echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
 
   update-task-definition:
