@@ -70,22 +70,22 @@ export async function createCompletionRateCSV() {
     const llRegCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_register_as_a_landlord.csv'));
     const llRegStart = await getValueFromCSV(llRegCSV, '/landlord/register-as-a-landlord/start', metric);
     const llRegConf = await getValueFromCSV(llRegCSV, '/landlord/register-as-a-landlord/confirmation', metric);
-    const llRegRate = (llRegConf === 0) ? 0 : ((llRegStart && llRegConf) ? ((llRegConf / llRegStart) * 100).toFixed(2) : null);
+    const llRegRate = (llRegStart === 0 || llRegStart === null) ? null : (llRegConf === 0 || llRegConf === null) ? 0 : ((llRegStart && llRegConf) ? ((llRegConf / llRegStart) * 100).toFixed(2) : null);
 
     const propRegCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_register_property.csv'));
     const propRegStart = await getValueFromCSV(propRegCSV, '/landlord/register-property', metric);
     const propRegConf = await getValueFromCSV(propRegCSV, '/landlord/register-property/confirmation', metric);
-    const propRegRate = (propRegConf === 0) ? 0 : ((propRegStart && propRegConf) ? ((propRegConf / propRegStart) * 100).toFixed(2) : null);
+    const propRegRate = (propRegStart === 0 || propRegStart === null) ? null : (propRegConf === 0 || propRegConf === null) ? 0 : ((propRegStart && propRegConf) ? ((propRegConf / propRegStart) * 100).toFixed(2) : null);
 
     const complianceCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_add_compliance_information_sum.csv'));
     const complianceStart = await getValueFromCSV(complianceCSV, '/landlord/add-compliance-information', metric);
     const complianceConf = await getValueFromCSV(complianceCSV, '/landlord/add-compliance-information/confirmation', metric);
-    const complianceRate = (complianceConf === 0) ? 0 : ((complianceStart && complianceConf) ? ((complianceConf / complianceStart) * 100).toFixed(2) : null);
+    const complianceRate = (complianceStart === 0 || complianceStart === null) ? null : (complianceConf === 0 || complianceConf === null) ? 0 : ((complianceStart && complianceConf) ? ((complianceConf / complianceStart) * 100).toFixed(2) : null);
 
     const lcUserCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/local_council_register_local_council_user.csv'));
     const lcUserStart = await getValueFromCSV(lcUserCSV, '/local-council/register-local-council-user/landing-page', metric);
     const lcUserConf = await getValueFromCSV(lcUserCSV, '/local-council/register-local-council-user/confirmation', metric);
-    const lcUserRate = (lcUserConf === 0) ? 0 : ((lcUserStart && lcUserConf) ? ((lcUserConf / lcUserStart) * 100).toFixed(2) : null);
+    const lcUserRate = (lcUserStart === 0 || lcUserStart === null) ? null : (lcUserConf === 0 || lcUserConf === null) ? 0 : ((lcUserStart && lcUserConf) ? ((lcUserConf / lcUserStart) * 100).toFixed(2) : null);
 
     const output =[
         {
