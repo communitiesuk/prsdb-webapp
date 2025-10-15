@@ -21,12 +21,11 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getCancelInviteConfirmationRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getDeleteUserConfirmationRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserRoute
@@ -290,6 +289,28 @@ class ManageLocalAuthorityUsersControllerTests(
             verify(localAuthorityDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
         }
 
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `inviteNewUserConfirmation returns 200 if a user was invited to the requested local authority this session`() {
+            setupDefaultLocalAuthorityForLaAdmin()
+            whenever((localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(DEFAULT_LA_ID)))
+                .thenReturn("invited.email@example.com")
+
+            mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
+                status { isOk() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `inviteNewUserConfirmation returns 404 if no user was invited to the requested local authority this session`() {
+            whenever((localAuthorityDataService.getLastUserIdRegisteredThisSession())).thenReturn(null)
+
+            mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
+                status { isNotFound() }
+            }
+        }
+
         private fun setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
             userIsSystemOperator: Boolean = false,
             invitationUrl: String = "https://test-service.gov.uk/sign-up-la-user",
@@ -319,30 +340,8 @@ class ManageLocalAuthorityUsersControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
-                    redirectedUrl("$INVITE_NEW_USER_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
+                    redirectedUrl(INVITE_USER_CONFIRMATION_ROUTE)
                 }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `inviteNewUserConfirmation returns 200 if a user was invited to the requested local authority this session`() {
-            setupDefaultLocalAuthorityForLaAdmin()
-            whenever((localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(DEFAULT_LA_ID)))
-                .thenReturn("invited.email@example.com")
-
-            mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
-                status { isOk() }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `inviteNewUserConfirmation returns 404 if no user was invited to the requested local authority this session`() {
-            whenever((localAuthorityDataService.getLastUserIdRegisteredThisSession())).thenReturn(null)
-
-            mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
-                status { isNotFound() }
-            }
         }
 
         private fun urlEncodedConfirmedEmailDataModel(
@@ -567,29 +566,6 @@ class ManageLocalAuthorityUsersControllerTests(
             verify(localAuthorityDataService).addDeletedUserToSession(user)
         }
 
-        private fun postDeleteUserAndAssertSuccess(
-            laId: Int = DEFAULT_LA_ID,
-            userBeingDeleted: LocalAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID),
-        ): LocalAuthorityUser {
-            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(userBeingDeleted.id, laId))
-                .thenReturn(userBeingDeleted)
-
-            mvc
-                .post(getLaDeleteUserRoute(laId, userBeingDeleted.id)) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    with(csrf())
-                }.andExpect {
-                    status {
-                        is3xxRedirection()
-                        redirectedUrl("../$DELETE_USER_PATH_SEGMENT/${userBeingDeleted.id}/$CONFIRMATION_PATH_SEGMENT")
-                    }
-                }
-
-            verify(localAuthorityDataService).deleteUser(userBeingDeleted)
-
-            return userBeingDeleted
-        }
-
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `deleteUser returns 403 if a user who is not a system operator attempts to delete themself`() {
@@ -621,7 +597,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR", "LA_ADMIN"])
-        fun `deleteUser does not refreshes user roles if the logged in user was not deleted`() {
+        fun `deleteUser does not refresh user roles if the logged in user was not deleted`() {
             val localAuthority = setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
             val user = setupLocalAuthorityUserToEdit(localAuthority, DEFAULT_LA_USER_ID)
             val loggedInUser = createLocalAuthorityUser(id = DEFAULT_LOGGED_IN_LA_USER_ID)
@@ -649,7 +625,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
-        fun `navigating directly to the delete user success page returns 404`() {
+        fun `deleteUserSuccess returns 404 if the user was not deleted in this session`() {
             mvc
                 .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
                 .andExpect {
@@ -670,6 +646,29 @@ class ManageLocalAuthorityUsersControllerTests(
                 .andExpect {
                     status { is5xxServerError() }
                 }
+        }
+
+        private fun postDeleteUserAndAssertSuccess(
+            laId: Int = DEFAULT_LA_ID,
+            userBeingDeleted: LocalAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID),
+        ): LocalAuthorityUser {
+            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(userBeingDeleted.id, laId))
+                .thenReturn(userBeingDeleted)
+
+            mvc
+                .post(getLaDeleteUserRoute(laId, userBeingDeleted.id)) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    with(csrf())
+                }.andExpect {
+                    status {
+                        is3xxRedirection()
+                        redirectedUrl("../${getDeleteUserConfirmationRoute(userBeingDeleted.id)}")
+                    }
+                }
+
+            verify(localAuthorityDataService).deleteUser(userBeingDeleted)
+
+            return userBeingDeleted
         }
     }
 
@@ -764,26 +763,6 @@ class ManageLocalAuthorityUsersControllerTests(
             setupInvitationPostToCancelInvitationAndAssertSuccess()
         }
 
-        private fun setupInvitationPostToCancelInvitationAndAssertSuccess() {
-            val invitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
-
-            mvc
-                .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    with(csrf())
-                }.andExpect {
-                    status {
-                        is3xxRedirection()
-                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID/$CONFIRMATION_PATH_SEGMENT")
-                    }
-                }
-
-            verify(localAuthorityInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
-
-            verify(localAuthorityDataService).addCancelledInvitationToSession(invitation)
-        }
-
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation emails a cancellation notification to the invited email address`() {
@@ -797,7 +776,7 @@ class ManageLocalAuthorityUsersControllerTests(
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/$DEFAULT_LA_INVITATION_ID/$CONFIRMATION_PATH_SEGMENT")
+                        redirectedUrl("../${getCancelInviteConfirmationRoute(DEFAULT_LA_INVITATION_ID)}")
                     }
                 }
 
@@ -853,6 +832,26 @@ class ManageLocalAuthorityUsersControllerTests(
             mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
                 status { isInternalServerError() }
             }
+        }
+
+        private fun setupInvitationPostToCancelInvitationAndAssertSuccess() {
+            val invitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
+            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+
+            mvc
+                .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    with(csrf())
+                }.andExpect {
+                    status {
+                        is3xxRedirection()
+                        redirectedUrl("../${getCancelInviteConfirmationRoute(DEFAULT_LA_INVITATION_ID)}")
+                    }
+                }
+
+            verify(localAuthorityInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
+
+            verify(localAuthorityDataService).addCancelledInvitationToSession(invitation)
         }
     }
 

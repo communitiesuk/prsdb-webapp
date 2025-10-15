@@ -256,7 +256,7 @@ class LocalAuthorityDataService(
         getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }?.second
 
     private fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
-        session.getAttribute("laUsersInvitedThisSession") as MutableList<Pair<Int, String>>?
+        session.getAttribute(LA_USERS_INVITED_THIS_SESSION) as MutableList<Pair<Int, String>>?
             ?: mutableListOf()
 
     fun addInvitedLocalAuthorityUserToSession(
