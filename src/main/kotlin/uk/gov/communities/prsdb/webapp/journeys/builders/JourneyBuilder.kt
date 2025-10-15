@@ -1,7 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
-import uk.gov.communities.prsdb.webapp.journeys.AbstractStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
@@ -18,12 +19,12 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
             }
         }
 
-    fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TJourney>> step(
+    fun <TMode : Enum<TMode>, TStep : AbstractInnerStep<TMode, *, TJourney>> step(
         segment: String,
-        uninitialisedStep: TStep,
+        uninitialisedStep: JourneyStep<TMode, *, TJourney>,
         init: StepBuilder<TStep, TJourney, TMode>.() -> Unit,
     ) {
-        val stepBuilder = StepBuilder(segment, uninitialisedStep)
+        val stepBuilder = StepBuilder<TStep, TJourney, TMode>(segment, uninitialisedStep)
         stepBuilder.init()
         stepsUnderConstruction.add(stepBuilder)
     }

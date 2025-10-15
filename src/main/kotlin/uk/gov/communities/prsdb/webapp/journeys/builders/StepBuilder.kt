@@ -1,14 +1,15 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
-import uk.gov.communities.prsdb.webapp.journeys.AbstractStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
-class StepBuilder<TStep : AbstractStep<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
+class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
     val segment: String,
-    private val step: TStep,
+    private val step: JourneyStep<TMode, *, TState>,
 ) {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
@@ -21,7 +22,7 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState>, TState : DynamicJourne
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
 
-    fun redirectToStep(nextStepProvider: (mode: TMode) -> AbstractStep<*, *, TState>): StepBuilder<TStep, TState, TMode> {
+    fun redirectToStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepBuilder<TStep, TState, TMode> {
         if (redirectToUrl != null) {
             throw Exception("Step $segment already has a redirectTo defined")
         }
@@ -61,21 +62,21 @@ class StepBuilder<TStep : AbstractStep<TMode, *, TState>, TState : DynamicJourne
         return this
     }
 
-    fun build(state: TState): TStep {
+    fun build(state: TState): JourneyStep<TMode, *, TState> {
         val castedRedirectTo = redirectToUrl ?: throw Exception("Step $segment has no redirectTo defined")
         val castedParentage = parentage ?: { NoParents() }
         step.initialize(segment, state, backUrlOverride, castedRedirectTo, castedParentage)
         if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
             throw Exception("Step $segment base class has not been initialised correctly")
         }
-        additionalConfig?.let { configure -> step.configure() }
+        additionalConfig?.let { configure -> (step.innerStep as? TStep)?.configure() }
         if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {
             throw Exception("Custom configuration for Step $segment has not fully initialised the step")
         }
         return step
     }
 
-    val potentialParents: List<AbstractStep<*, *, *>>
+    val potentialParents: List<JourneyStep<*, *, *>>
         get() {
             if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
                 throw Exception("Step $segment has not been initialised yet")

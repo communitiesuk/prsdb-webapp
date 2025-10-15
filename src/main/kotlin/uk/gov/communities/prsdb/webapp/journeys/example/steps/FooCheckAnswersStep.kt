@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourney
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @PrsdbWebComponent
 class FooCheckAnswersStep(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractGenericStep<Complete, NoInputFormModel, FooJourney>() {
+) : AbstractGenericInnerStep<Complete, NoInputFormModel, FooJourney>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: FooJourney) =
@@ -88,5 +88,5 @@ class FooCheckAnswersStep(
 
     override fun chooseTemplate(): String = "forms/checkAnswersForm"
 
-    override fun mode(state: FooJourney): Complete? = formModel?.let { Complete.COMPLETE }
+    override fun mode(state: FooJourney): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }

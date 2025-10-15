@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
@@ -27,6 +28,13 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
@@ -76,7 +84,7 @@ class FooExampleJourneyFactory(
                     }
                 }
             }
-            step("check-automatched-epc", journey.checkAutomatchedEpc) {
+            step<YesOrNo, CheckEpcStep>("check-automatched-epc", journey.checkAutomatchedEpc) {
                 parents { journey.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
                 redirectToStep { mode ->
                     when (mode) {
@@ -107,7 +115,7 @@ class FooExampleJourneyFactory(
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
                 redirectToStep { journey.checkSearchedEpc }
             }
-            step("check-found-epc", journey.checkSearchedEpc) {
+            step<YesOrNo, CheckEpcStep>("check-found-epc", journey.checkSearchedEpc) {
                 parents {
                     OrParents(
                         journey.searchForEpc.hasOutcome(EpcSearchResult.FOUND),
@@ -149,17 +157,17 @@ class FooExampleJourneyFactory(
 
     private fun createDynamicState(journeyId: String) =
         FooJourney(
-            taskListStepFactory.getObject(),
-            occupiedFactory.getObject(),
-            householdsFactory.getObject(),
-            tenantsFactory.getObject(),
-            epcQuestionFactory.getObject(),
-            searchForEpcFactory.getObject(),
-            epcNotFoundFactory.getObject(),
-            epcSupersededFactory.getObject(),
-            checkAutomatchedEpcFactory.getObject(),
-            checkSearchedEpcFactory.getObject(),
-            fooCheckYourAnswersStepFactory.getObject(),
+            JourneyStep(taskListStepFactory.getObject()),
+            JourneyStep(occupiedFactory.getObject()),
+            JourneyStep(householdsFactory.getObject()),
+            JourneyStep(tenantsFactory.getObject()),
+            JourneyStep(epcQuestionFactory.getObject()),
+            JourneyStep(checkAutomatchedEpcFactory.getObject()),
+            JourneyStep(searchForEpcFactory.getObject()),
+            JourneyStep(epcNotFoundFactory.getObject()),
+            JourneyStep(epcSupersededFactory.getObject()),
+            JourneyStep(checkSearchedEpcFactory.getObject()),
+            JourneyStep(fooCheckYourAnswersStepFactory.getObject()),
             JourneyStateService(journeyDataServiceFactory.create(journeyId)),
         )
 
@@ -174,17 +182,17 @@ class FooExampleJourneyFactory(
 }
 
 class FooJourney(
-    val taskListStep: FooTaskListStep,
-    override val occupied: OccupiedStep,
-    override val households: HouseholdStep,
-    override val tenants: TenantsStep,
-    override val epcQuestion: EpcQuestionStep,
-    override val searchForEpc: SearchEpcStep,
-    override val epcNotFound: EpcNotFoundStep,
-    override val epcSuperseded: EpcSupersededStep,
-    override val checkAutomatchedEpc: CheckEpcStep,
-    override val checkSearchedEpc: CheckEpcStep,
-    val fooCheckYourAnswersStep: FooCheckAnswersStep,
+    val taskListStep: JourneyStep<Complete, NoInputFormModel, FooJourney>,
+    override val occupied: JourneyStep<YesOrNo, OccupancyFormModel, FooJourney>,
+    override val households: JourneyStep<Complete, NumberOfHouseholdsFormModel, FooJourney>,
+    override val tenants: JourneyStep<Complete, NumberOfPeopleFormModel, FooJourney>,
+    override val epcQuestion: JourneyStep<EpcStatus, EpcFormModel, FooJourney>,
+    override val checkAutomatchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourney>,
+    override val searchForEpc: JourneyStep<EpcSearchResult, EpcLookupFormModel, FooJourney>,
+    override val epcNotFound: JourneyStep<Complete, NoInputFormModel, FooJourney>,
+    override val epcSuperseded: JourneyStep<Complete, NoInputFormModel, FooJourney>,
+    override val checkSearchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourney>,
+    val fooCheckYourAnswersStep: JourneyStep<Complete, NoInputFormModel, FooJourney>,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     OccupiedJourneyState,

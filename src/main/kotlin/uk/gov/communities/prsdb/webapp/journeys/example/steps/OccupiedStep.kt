@@ -2,14 +2,14 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @Scope("prototype")
 @PrsdbWebComponent
-class OccupiedStep : AbstractGenericStep<YesOrNo, OccupancyFormModel, OccupiedJourneyState>() {
+class OccupiedStep : AbstractGenericInnerStep<YesOrNo, OccupancyFormModel, OccupiedJourneyState>() {
     override val formModelClazz = OccupancyFormModel::class
 
     override fun getStepSpecificContent(state: OccupiedJourneyState) =
@@ -35,7 +35,7 @@ class OccupiedStep : AbstractGenericStep<YesOrNo, OccupancyFormModel, OccupiedJo
     override fun chooseTemplate(): String = "forms/propertyOccupancyForm"
 
     override fun mode(state: OccupiedJourneyState): YesOrNo? =
-        formModel?.occupied?.let {
+        getFormModelFromState(state)?.occupied?.let {
             when (it) {
                 true -> YesOrNo.YES
                 false -> YesOrNo.NO

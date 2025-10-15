@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class EpcQuestionStep(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
-) : AbstractGenericStep<EpcStatus, EpcFormModel, EpcJourneyState>() {
+) : AbstractGenericInnerStep<EpcStatus, EpcFormModel, EpcJourneyState>() {
     override val formModelClazz = EpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =
@@ -62,7 +62,7 @@ class EpcQuestionStep(
     }
 
     override fun mode(state: EpcJourneyState) =
-        formModel?.hasCert?.let {
+        getFormModelFromState(state)?.hasCert?.let {
             when (it) {
                 HasEpc.YES -> if (state.automatchedEpc != null) EpcStatus.AUTOMATCHED else EpcStatus.NOT_AUTOMATCHED
                 HasEpc.NO, HasEpc.NOT_REQUIRED -> EpcStatus.NO_EPC

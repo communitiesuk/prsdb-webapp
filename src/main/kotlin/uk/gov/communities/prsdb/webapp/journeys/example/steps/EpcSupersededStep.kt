@@ -2,13 +2,13 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @Scope("prototype")
 @PrsdbWebComponent
-class EpcSupersededStep : AbstractGenericStep<Complete, NoInputFormModel, EpcJourneyState>() {
+class EpcSupersededStep : AbstractGenericInnerStep<Complete, NoInputFormModel, EpcJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =
@@ -19,5 +19,5 @@ class EpcSupersededStep : AbstractGenericStep<Complete, NoInputFormModel, EpcJou
 
     override fun chooseTemplate(): String = "forms/epcSupersededForm"
 
-    override fun mode(state: EpcJourneyState): Complete? = formModel?.let { Complete.COMPLETE }
+    override fun mode(state: EpcJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }

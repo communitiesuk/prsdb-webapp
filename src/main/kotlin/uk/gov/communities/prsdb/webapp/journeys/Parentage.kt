@@ -3,10 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys
 interface Parentage {
     fun allowsChild(): Boolean
 
-    val ancestry: List<AbstractStep<*, *, *>>
-    val allowingParentSteps: List<AbstractStep<*, *, *>>
+    val ancestry: List<JourneyStep<*, *, *>>
+    val allowingParentSteps: List<JourneyStep<*, *, *>>
 
-    val potentialParents: List<AbstractStep<*, *, *>>
+    val potentialParents: List<JourneyStep<*, *, *>>
 }
 
 class AndParents(
@@ -42,18 +42,18 @@ class OrParents(
 class NoParents : Parentage {
     override fun allowsChild(): Boolean = true
 
-    override val ancestry: List<AbstractStep<*, *, *>>
+    override val ancestry: List<JourneyStep<*, *, *>>
         get() = listOf()
 
-    override val allowingParentSteps: List<AbstractStep<*, *, *>>
+    override val allowingParentSteps: List<JourneyStep<*, *, *>>
         get() = listOf()
 
-    override val potentialParents: List<AbstractStep<*, *, *>>
+    override val potentialParents: List<JourneyStep<*, *, *>>
         get() = listOf()
 }
 
 class SingleParent(
-    val step: AbstractStep<*, *, *>,
+    val step: JourneyStep<*, *, *>,
     private val condition: () -> Boolean,
 ) : Parentage {
     override fun allowsChild(): Boolean = condition()
@@ -68,7 +68,7 @@ class SingleParent(
         get() = listOf(step)
 }
 
-fun <TEnum : Enum<TEnum>> AbstractStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
+fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
     SingleParent(this) { outcome() == outcomeValue }
 
-fun AbstractStep<*, *, *>.always(): Parentage = SingleParent(this) { true }
+fun JourneyStep<*, *, *>.always(): Parentage = SingleParent(this) { true }
