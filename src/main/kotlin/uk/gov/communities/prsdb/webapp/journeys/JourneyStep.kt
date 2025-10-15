@@ -96,9 +96,11 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         state.addStepData(innerStep.routeSegment, innerStep.formModelClazz.cast(bindingResult.target).toPageData())
     }
 
-    fun determineRedirect(): String = innerStep.mode(state)?.let { redirectToUrl(it) } ?: innerStep.routeSegment
+    fun determineRedirect(): String = innerStep.mode(state)?.let { redirectToUrl(it) } ?: routeSegment
 
-    val getUnreachableStepRedirect: String = "task-list"
+    private lateinit var unreachableStepRedirect: () -> String
+
+    fun getUnreachableStepRedirect() = unreachableStepRedirect()
 
     val formModel: TFormModel?
         get() = innerStep.getFormModelFromState(state)
@@ -145,6 +147,7 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         backUrlProvider: (() -> String?)?,
         redirectToProvider: (mode: TEnum) -> String,
         parentageProvider: () -> Parentage,
+        unreachableStepRedirectProvider: () -> String,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw Exception("Step $this has already been initialised")
@@ -154,6 +157,7 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         this.backUrlOverride = backUrlProvider
         this.redirectToUrl = redirectToProvider
         this.parentage = parentageProvider()
+        this.unreachableStepRedirect = unreachableStepRedirectProvider
     }
 }
 

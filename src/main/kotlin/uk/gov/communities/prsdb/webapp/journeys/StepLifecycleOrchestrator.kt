@@ -22,7 +22,7 @@ class StepLifecycleOrchestrator(
             return ModelAndView(template, content)
         }
 
-        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect
+        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect()
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 
@@ -58,7 +58,7 @@ class StepLifecycleOrchestrator(
             return ModelAndView("redirect:$redirect")
         }
 
-        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect
+        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect()
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 }

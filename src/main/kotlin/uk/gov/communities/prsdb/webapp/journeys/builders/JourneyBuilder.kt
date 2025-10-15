@@ -10,10 +10,11 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
     val journey: TJourney,
 ) {
     val stepsUnderConstruction: MutableList<StepBuilder<*, TJourney, *>> = mutableListOf()
+    var unreachableStepRedirect: (() -> String)? = null
 
-    fun build() =
+    fun build(): Map<String, StepLifecycleOrchestrator> =
         stepsUnderConstruction.associate { sb ->
-            sb.build(journey).let {
+            sb.build(journey, unreachableStepRedirect).let {
                 checkForUninitialisedParents(sb)
                 it.routeSegment to StepLifecycleOrchestrator(it)
             }
@@ -27,6 +28,13 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
         val stepBuilder = StepBuilder<TStep, TJourney, TMode>(segment, uninitialisedStep)
         stepBuilder.init()
         stepsUnderConstruction.add(stepBuilder)
+    }
+
+    fun unreachableStepRedirect(getRedirect: () -> String) {
+        if (unreachableStepRedirect != null) {
+            throw Exception("unreachableStepRedirect has already been set")
+        }
+        unreachableStepRedirect = getRedirect
     }
 
     private fun checkForUninitialisedParents(stepBuilder: StepBuilder<*, *, *>) {

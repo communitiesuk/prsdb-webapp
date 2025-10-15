@@ -54,6 +54,7 @@ class FooExampleJourneyFactory(
 ) {
     final fun createJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> =
         journey(createDynamicState(journeyId)) {
+            unreachableStepRedirect { "task-list" }
             step("task-list", journey.taskListStep) {
                 redirectToUrl { "task-list" }
             }

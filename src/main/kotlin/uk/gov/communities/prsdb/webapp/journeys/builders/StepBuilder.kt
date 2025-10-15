@@ -21,6 +21,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
     private var redirectToUrl: ((mode: TMode) -> String)? = null
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
+    private var stepUnreachableStepRedirect: (() -> String)? = null
 
     fun redirectToStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepBuilder<TStep, TState, TMode> {
         if (redirectToUrl != null) {
@@ -62,13 +63,32 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
         return this
     }
 
-    fun build(state: TState): JourneyStep<TMode, *, TState> {
+    fun unreachableStepRedirect(getRedirect: () -> String): StepBuilder<TStep, TState, TMode> {
+        if (stepUnreachableStepRedirect != null) {
+            throw Exception("Step $segment already has an unreachableStepRedirect defined")
+        }
+        stepUnreachableStepRedirect = getRedirect
+        return this
+    }
+
+    fun build(
+        state: TState,
+        defaultUnreachableStepRedirect: (() -> String)?,
+    ): JourneyStep<TMode, *, TState> {
         val castedRedirectTo = redirectToUrl ?: throw Exception("Step $segment has no redirectTo defined")
         val castedParentage = parentage ?: { NoParents() }
-        step.initialize(segment, state, backUrlOverride, castedRedirectTo, castedParentage)
+        val unreachableStepRedirect =
+            stepUnreachableStepRedirect
+                ?: defaultUnreachableStepRedirect
+                ?: throw Exception(
+                    "Step $segment has no unreachableStepRedirect defined, and there is no default set at the journey level either",
+                )
+
+        step.initialize(segment, state, backUrlOverride, castedRedirectTo, castedParentage, unreachableStepRedirect)
         if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
             throw Exception("Step $segment base class has not been initialised correctly")
         }
+        // TODO PRSD-1546: Fix generic typing so this cast is not required
         additionalConfig?.let { configure -> (step.innerStep as? TStep)?.configure() }
         if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {
             throw Exception("Custom configuration for Step $segment has not fully initialised the step")
