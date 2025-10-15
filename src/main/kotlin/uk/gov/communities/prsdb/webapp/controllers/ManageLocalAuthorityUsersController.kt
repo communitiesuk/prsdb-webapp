@@ -193,7 +193,7 @@ class ManageLocalAuthorityUsersController(
             }
         }
 
-        localAuthorityDataService.addDeletedUserToSession(deleteeId, userBeingDeleted.name)
+        localAuthorityDataService.addDeletedUserToSession(userBeingDeleted)
         return "redirect:../$DELETE_USER_CONFIRMATION_ROUTE"
     }
 
@@ -207,7 +207,7 @@ class ManageLocalAuthorityUsersController(
     ): String {
         val usersDeletedThisSession = localAuthorityDataService.getUsersDeletedThisSession()
         val deletedUser =
-            usersDeletedThisSession.find { it.first == deleteeId }
+            usersDeletedThisSession.find { it.id == deleteeId }
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "User with id $deleteeId was not found in the list of deleted users in the session",
@@ -220,7 +220,7 @@ class ManageLocalAuthorityUsersController(
             )
         }
 
-        model.addAttribute("deletedUserName", deletedUser.second)
+        model.addAttribute("deletedUserName", deletedUser.name)
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
@@ -296,7 +296,7 @@ class ManageLocalAuthorityUsersController(
         request: HttpServletRequest,
     ): String {
         val invitedEmail =
-            localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(localAuthorityId)?.second
+            localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(localAuthorityId)
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No email address found in the session for a user invited to local authority with id $localAuthorityId",
@@ -357,8 +357,7 @@ class ManageLocalAuthorityUsersController(
         )
 
         localAuthorityDataService.addCancelledInvitationToSession(
-            invitationId,
-            invitation.invitedEmail,
+            invitation,
         )
 
         return "redirect:../$CANCEL_INVITE_CONFIRMATION_ROUTE"
@@ -374,7 +373,7 @@ class ManageLocalAuthorityUsersController(
     ): String {
         val invitationsCancelledThisSession = localAuthorityDataService.getInvitationsCancelledThisSession()
         val invitationIfDeleted =
-            invitationsCancelledThisSession.find { it.first == invitationId }
+            invitationsCancelledThisSession.find { it.id == invitationId }
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
@@ -386,7 +385,7 @@ class ManageLocalAuthorityUsersController(
             )
         }
 
-        model.addAttribute("deletedEmail", invitationIfDeleted.second)
+        model.addAttribute("deletedEmail", invitationIfDeleted.invitedEmail)
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 

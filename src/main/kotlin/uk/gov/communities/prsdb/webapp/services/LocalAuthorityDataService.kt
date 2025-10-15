@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCE
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
@@ -231,34 +232,30 @@ class LocalAuthorityDataService(
 
     fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
 
-    fun getUsersDeletedThisSession(): MutableList<Pair<Long, String>> =
-        session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<Pair<Long, String>>?
+    fun getUsersDeletedThisSession(): MutableList<LocalAuthorityUser> =
+        session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalAuthorityUser>?
             ?: mutableListOf()
 
-    fun addDeletedUserToSession(
-        deletedUserId: Long,
-        deletedUserName: String,
-    ) = session.setAttribute(
-        LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION,
-        getUsersDeletedThisSession().plus(Pair(deletedUserId, deletedUserName)),
-    )
+    fun addDeletedUserToSession(deletedUser: LocalAuthorityUser) =
+        session.setAttribute(
+            LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION,
+            getUsersDeletedThisSession().plus(deletedUser),
+        )
 
-    fun getInvitationsCancelledThisSession(): MutableList<Pair<Long, String>> =
-        session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<Pair<Long, String>>?
+    fun getInvitationsCancelledThisSession(): MutableList<LocalAuthorityInvitation> =
+        session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<LocalAuthorityInvitation>?
             ?: mutableListOf()
 
-    fun addCancelledInvitationToSession(
-        cancelledInvitationId: Long,
-        cancelledInvitationEmail: String,
-    ) = session.setAttribute(
-        LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
-        getInvitationsCancelledThisSession().plus(Pair(cancelledInvitationId, cancelledInvitationEmail)),
-    )
+    fun addCancelledInvitationToSession(invitation: LocalAuthorityInvitation) =
+        session.setAttribute(
+            LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
+            getInvitationsCancelledThisSession().plus(invitation),
+        )
 
-    fun getLastLocalAuthorityUserInvitedThisSession(localAuthorityId: Int): Pair<Int, String>? =
-        getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }
+    fun getLastLocalAuthorityUserInvitedThisSession(localAuthorityId: Int): String? =
+        getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }?.second
 
-    fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
+    private fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
         session.getAttribute("laUsersInvitedThisSession") as MutableList<Pair<Int, String>>?
             ?: mutableListOf()
 

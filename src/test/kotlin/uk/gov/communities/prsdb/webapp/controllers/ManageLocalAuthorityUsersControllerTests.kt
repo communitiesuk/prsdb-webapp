@@ -328,7 +328,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `inviteNewUserConfirmation returns 200 if a user was invited to the requested local authority this session`() {
             setupDefaultLocalAuthorityForLaAdmin()
             whenever((localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(DEFAULT_LA_ID)))
-                .thenReturn(Pair(DEFAULT_LA_ID, "invited.email@example.com"))
+                .thenReturn("invited.email@example.com")
 
             mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
                 status { isOk() }
@@ -550,9 +550,9 @@ class ManageLocalAuthorityUsersControllerTests(
 
             val user = setupLocalAuthorityUserToEdit(localAuthority)
 
-            postDeleteUserAndAssertSuccess(DEFAULT_LA_ID)
+            postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user)
 
-            verify(localAuthorityDataService).addDeletedUserToSession(user.id, user.name)
+            verify(localAuthorityDataService).addDeletedUserToSession(user)
         }
 
         @Test
@@ -562,31 +562,32 @@ class ManageLocalAuthorityUsersControllerTests(
 
             val user = setupLocalAuthorityUserToEdit(localAuthority)
 
-            postDeleteUserAndAssertSuccess(NON_ADMIN_LA_ID)
+            postDeleteUserAndAssertSuccess(NON_ADMIN_LA_ID, user)
 
-            verify(localAuthorityDataService).addDeletedUserToSession(user.id, user.name)
+            verify(localAuthorityDataService).addDeletedUserToSession(user)
         }
 
         private fun postDeleteUserAndAssertSuccess(
             laId: Int = DEFAULT_LA_ID,
-            ladUserId: Long = DEFAULT_LA_USER_ID,
-        ) {
-            val userBeingDeleted = createLocalAuthorityUser(id = ladUserId, localAuthority = createLocalAuthority(laId))
-            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(ladUserId, laId))
+            userBeingDeleted: LocalAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID),
+        ): LocalAuthorityUser {
+            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(userBeingDeleted.id, laId))
                 .thenReturn(userBeingDeleted)
 
             mvc
-                .post(getLaDeleteUserRoute(laId, ladUserId)) {
+                .post(getLaDeleteUserRoute(laId, userBeingDeleted.id)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl("../$DELETE_USER_PATH_SEGMENT/$ladUserId/$CONFIRMATION_PATH_SEGMENT")
+                        redirectedUrl("../$DELETE_USER_PATH_SEGMENT/${userBeingDeleted.id}/$CONFIRMATION_PATH_SEGMENT")
                     }
                 }
 
             verify(localAuthorityDataService).deleteUser(userBeingDeleted)
+
+            return userBeingDeleted
         }
 
         @Test
@@ -613,7 +614,7 @@ class ManageLocalAuthorityUsersControllerTests(
             val user = setupLocalAuthorityUserToEdit(localAuthority, DEFAULT_LOGGED_IN_LA_USER_ID)
             whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(user)
 
-            postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user.id)
+            postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user)
 
             verify(securityContextService).refreshContext()
         }
@@ -626,7 +627,7 @@ class ManageLocalAuthorityUsersControllerTests(
             val loggedInUser = createLocalAuthorityUser(id = DEFAULT_LOGGED_IN_LA_USER_ID)
             whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(loggedInUser)
 
-            postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user.id)
+            postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user)
 
             verify(securityContextService, never()).refreshContext()
         }
@@ -636,7 +637,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `deleteUserSuccess returns 200 if the user was deleted this session`() {
             setupDefaultLocalAuthorityForLaAdmin()
             whenever(localAuthorityDataService.getUsersDeletedThisSession())
-                .thenReturn(mutableListOf(Pair(DEFAULT_LA_USER_ID, "Deleted User Name")))
+                .thenReturn(mutableListOf(createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)))
             whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(DEFAULT_LA_USER_ID)).thenReturn(null)
 
             mvc
@@ -661,7 +662,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `delete user success page returns 500 if the user is still in the database`() {
             val userBeingDeleted = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)
             whenever(localAuthorityDataService.getUsersDeletedThisSession())
-                .thenReturn(mutableListOf(Pair(DEFAULT_LA_USER_ID, "name")))
+                .thenReturn(mutableListOf(userBeingDeleted))
             whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(userBeingDeleted.id)).thenReturn(userBeingDeleted)
 
             mvc
@@ -780,7 +781,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
             verify(localAuthorityInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
 
-            verify(localAuthorityDataService).addCancelledInvitationToSession(DEFAULT_LA_INVITATION_ID, invitation.invitedEmail)
+            verify(localAuthorityDataService).addCancelledInvitationToSession(invitation)
         }
 
         @Test
@@ -819,7 +820,7 @@ class ManageLocalAuthorityUsersControllerTests(
             val deletedInvitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
 
             whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
-                .thenReturn(mutableListOf(Pair(deletedInvitation.id, deletedInvitation.invitedEmail)))
+                .thenReturn(mutableListOf(deletedInvitation))
 
             setupDefaultLocalAuthorityForLaAdmin()
 
@@ -832,7 +833,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitationSuccess returns 404 if the invite is not found in the session`() {
             whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
-                .thenReturn(mutableListOf(Pair(DEFAULT_LA_INVITATION_ID + 1, "")))
+                .thenReturn(mutableListOf(createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID + 1)))
 
             mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
                 status { isNotFound() }
@@ -844,7 +845,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `cancelInvitationSuccess returns 500 if the invitation is still in the database`() {
             val deletedInvitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
             whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
-                .thenReturn(mutableListOf(Pair(deletedInvitation.id, deletedInvitation.invitedEmail)))
+                .thenReturn(mutableListOf(deletedInvitation))
 
             whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID))
                 .thenReturn(deletedInvitation)
