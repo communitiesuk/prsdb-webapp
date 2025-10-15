@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MANAGE_ADMIN_USERS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_LA_ADMINS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -114,8 +114,8 @@ class ManageLocalAuthorityAdminsController(
         return "inviteLocalAuthorityAdminConfirmation"
     }
 
-    @GetMapping("/$MANAGE_ADMIN_USERS_PATH_SEGMENT")
-    fun manageAdminUsers(
+    @GetMapping("/$MANAGE_LA_ADMINS_PATH_SEGMENT")
+    fun manageAdmins(
         model: Model,
         principal: Principal,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
@@ -134,13 +134,13 @@ class ManageLocalAuthorityAdminsController(
             PaginationViewModel(page, pagedUserList.totalPages, request),
         )
         model.addAttribute("inviteAdminsUrl", INVITE_LA_ADMIN_ROUTE)
-        return "manageLocalAuthorityAdminUsers"
+        return "manageLocalAuthorityAdmins"
     }
 
     companion object {
         const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"
         const val INVITE_LA_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LA_ADMIN_PATH_SEGMENT"
-        const val MANAGE_LA_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_ADMIN_USERS_PATH_SEGMENT"
+        const val MANAGE_LA_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_LA_ADMINS_PATH_SEGMENT"
 
         const val INVITE_LA_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LA_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }

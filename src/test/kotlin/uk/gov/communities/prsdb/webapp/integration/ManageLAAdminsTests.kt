@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage
@@ -92,5 +93,14 @@ class ManageLAAdminsTests : IntegrationTestWithImmutableData("data-la-admin-user
         assertThat(manageAdminPage.table.getCell(7, USERNAME_COL_INDEX)).containsText("F@example.com")
         assertThat(manageAdminPage.table.getCell(8, USERNAME_COL_INDEX)).containsText("H@example.com")
         assertThat(manageAdminPage.table.getCell(9, USERNAME_COL_INDEX)).containsText("I@example.com")
+    }
+
+    @Nested
+    inner class NoAdminUsersOrInvites : NestedIntegrationTestWithImmutableData("data-mock-user-system-operator.sql") {
+        @Test
+        fun `renders correct message when their are no admin users or invites`(page: Page) {
+            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            assertThat(manageAdminPage.subHeading).containsText("No local council admins were found.")
+        }
     }
 }
