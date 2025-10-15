@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityAdminUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -394,6 +395,38 @@ class LocalAuthorityDataServiceTests {
 
         // Assert
         assertEquals(3, userList.content.size)
+    }
+
+    @Test
+    fun `getPaginatedAdminUsersAndInvitations returns LocalAuthorityAdminUserOrInvitationDataModels from the repository`() {
+        // Arrange
+        val localAuthority = createLocalAuthority()
+        val pageRequest =
+            PageRequest.of(
+                1,
+                10,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localAuthority.name"), Sort.Order.asc("name")),
+            )
+        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", true, localAuthority)
+        val invitation =
+            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", true, localAuthority)
+
+        whenever(localAuthorityUserOrInvitationRepository.findAllByIsManagerTrue(pageRequest))
+            .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
+
+        val expectedAdminUsersAndInvitationList =
+            listOf(
+                LocalAuthorityAdminUserOrInvitationDataModel(1, "User 1", localAuthority.name, false),
+                LocalAuthorityAdminUserOrInvitationDataModel(2, "User 2", localAuthority.name, false),
+                LocalAuthorityAdminUserOrInvitationDataModel(3, "invite@test.com", localAuthority.name, true),
+            )
+
+        // Act
+        val adminUsersAndInvitationList = localAuthorityDataService.getPaginatedAdminUsersAndInvitations(1)
+
+        // Assert
+        Assertions.assertIterableEquals(expectedAdminUsersAndInvitationList, adminUsersAndInvitationList)
     }
 
     @Test
