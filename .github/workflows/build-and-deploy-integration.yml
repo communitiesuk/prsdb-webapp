@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-and-deploy-integration:
+    name: Build and Deploy
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: "integration"
