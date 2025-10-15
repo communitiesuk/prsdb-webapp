@@ -24,7 +24,8 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:EeoMrsw0n0qpf_djwIRYUQ7vXLm1z1v62psIb53RiVE', '2025-04-09 14:23:39.070368+00'), -- paul.denman@communities.gov.uk
        ('urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY', '2025-04-17 09:49:19.826514+00'), -- andrea.dunne@communities.gov.uk
        ('urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '2025-04-22 10:55:55.704192+00'), -- sandra.lila@communities.gov.uk
-       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00') ON CONFLICT DO NOTHING; -- Team-PRSDB+systemoperator@softwire.com
+       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00'), -- Team-PRSDB+systemoperator@softwire.com
+       ('urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', '2025-10-09 12:44:47.460558+00') ON CONFLICT DO NOTHING; -- chris.lightfoot@communities.gov.uk
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
 VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
@@ -57,7 +58,8 @@ VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022
        (19,'2025-04-17 09:49:19.826514+00','2025-04-17 09:49:48.968326+00','urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY',true,2,'andrea.dunne@communities.gov.uk','Andrea Dunne', true),
        (20,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI',true,2,'sandra.lila@communities.gov.uk','Sandra Lila', true),
        (21,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI',true,2,'geetika.kejriwal@communities.gov.uk','Geetika Kejriwal', true),
-       (22,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA',true,2,'catherine.graham2@communities.gov.uk','Catherine Graham', true) ON CONFLICT DO NOTHING;
+       (22,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA',true,2,'catherine.graham2@communities.gov.uk','Catherine Graham', true),
+       (23,'2025-10-09 12:44:47.460558+00','2025-10-09 12:44:47.460558+00','urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE',true,2,'chris.lightfoot@communities.gov.uk','Hello Name', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
 
@@ -101,17 +103,10 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (23,'2025-04-11 13:24:52.72555+00',9022534873,1),
        (24, '2025-01-15 00:00:00+00', 83811499802, 0),
        (25, '2025-01-15 00:00:00+00', 40666195053, 0),
-       (26, '2025-01-15 00:00:00+00', 150242309330, 0) ON CONFLICT DO NOTHING;
+       (26, '2025-01-15 00:00:00+00', 150242309330, 0),
+       (27, '2025-10-09 12:44:47.460558+00', 111650250431, 1) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
-
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
-VALUES (1, '10/15/24', '10/15/24', 2, '1 Fictional Road', 2, 'EG1 2AB'),
-       (2, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (3, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH'),
-       (4, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21, 'CB25 9QH') ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, registration_number_id, address_id, created_date, email, non_england_or_wales_address, is_active, last_modified_date, name, phone_number, subject_identifier, date_of_birth, country_of_residence, is_verified, has_accepted_privacy_notice)
 VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,true,'2025-02-25 16:17:18.075473+00','PRSD Landlord','+447123456789','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo','1950-05-13','England or Wales',false, true),
@@ -135,7 +130,8 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
       (19,20,1,'2025-04-10 11:50:09.671945+00','niamh.rafferty@communities.gov.uk',null,true,null,'LISA S C LOOSELEY','07777777777','urn:fdc:gov.uk:2022:RR3fauA1ZgHYuLjW9824VtLzegGG9NXfdHJrtg2hIAE','1973-03-14','England or Wales',true, true),
       (20,21,1,'2025-04-11 13:24:52.729483+00','Samuel.Hinkinson@communities.gov.uk',null,true,null,'Samuel Hinkinson','07777777777','urn:fdc:gov.uk:2022:i5RkOLo_ylby2zEQPZRUigPowq3pxJOeIN4a6uJb9hg','1965-07-08','England or Wales',false, true),
       (21,22,1,'2025-04-17 09:44:26.018921+00','Andrea.Dunne@communities.gov.uk',null,true,null,'LISA S C LOOSELEY','07777777777','urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY','1973-03-14','England or Wales',true, true),
-      (22,23,1,'2025-04-22 10:52:32.910331+00','sandra.lila@communities.gov.uk',null,true,null,'LISA S C LOOSELEY','07777777777','urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI','1973-03-14','England or Wales',true, true) ON CONFLICT DO NOTHING;
+      (22,23,1,'2025-04-22 10:52:32.910331+00','sandra.lila@communities.gov.uk',null,true,null,'LISA S C LOOSELEY','07777777777','urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI','1973-03-14','England or Wales',true, true),
+      (23,27,1,'2025-10-09 12:44:47.460558+00','chris.lightfoot@communities.gov.uk',null,true,null,'Hello Name','07777777777','urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE','2001-01-01','England or Wales',false, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -175,7 +171,8 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
        (17,'2025-04-17 09:49:19.826514+00',null,'urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY'),
        (18,'2025-04-22 10:55:55.704192+00',null,'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'),
        (19,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'),
-       (20,'2025-07-08 13:58:19.927000+00',null,'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA') ON CONFLICT DO NOTHING;
+       (20,'2025-07-08 13:58:19.927000+00',null,'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'),
+       (21,'2025-10-09 12:44:47.460558+00',null,'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
@@ -201,4 +198,5 @@ VALUES ('PRSD22', 2, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lV
        ('PRSD46', 2, current_date, null, 'urn:fdc:gov.uk:2022:RR3fauA1ZgHYuLjW9824VtLzegGG9NXfdHJrtg2hIAE'),
        ('PRSD47', 2, current_date, null, 'urn:fdc:gov.uk:2022:i5RkOLo_ylby2zEQPZRUigPowq3pxJOeIN4a6uJb9hg'),
        ('PRSD49', 2, current_date, null, 'urn:fdc:gov.uk:2022:L7hY9vy-Lo9uLDUUqYGK7o0ruguFKG2V17iOKIGpspY'),
-       ('PRSD52', 2, current_date, null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI') ON CONFLICT DO NOTHING;
+       ('PRSD52', 2, current_date, null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'),
+       ('PRSD53', 2, current_date, null, 'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE') ON CONFLICT DO NOTHING;

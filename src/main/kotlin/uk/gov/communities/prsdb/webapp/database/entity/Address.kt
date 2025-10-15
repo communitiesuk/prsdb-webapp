@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -24,13 +23,14 @@ class Address() : ModifiableAuditableEntity() {
     var uprn: Long? = null
         private set
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     lateinit var singleLineAddress: String
         private set
 
     var organisation: String? = null
         private set
 
+    @Column(length = 500)
     var subBuilding: String? = null
         private set
 
@@ -54,7 +54,7 @@ class Address() : ModifiableAuditableEntity() {
         private set
 
     @ManyToOne
-    @JoinColumn(name = "local_authority_id", foreignKey = ForeignKey(name = "FK_ADDRESS_LA"))
+    @JoinColumn(name = "local_authority_id")
     var localAuthority: LocalAuthority? = null
         private set
 

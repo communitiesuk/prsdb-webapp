@@ -25,8 +25,8 @@ import java.net.URI
 import java.net.URLEncoder
 import kotlin.test.Test
 
-@WebMvcTest(InviteLocalAuthorityAdminController::class)
-class InviteLocalAuthorityAdminControllerTests(
+@WebMvcTest(ManageLocalAuthorityAdminsController::class)
+class ManageLocalAuthorityAdminsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
@@ -43,7 +43,7 @@ class InviteLocalAuthorityAdminControllerTests(
 
     @Test
     fun `inviteLocalAuthorityAdmin redirects unauthenticated users`() {
-        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE).andExpect {
+        mvc.get(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -51,7 +51,7 @@ class InviteLocalAuthorityAdminControllerTests(
     @Test
     @WithMockUser
     fun `inviteLocalAuthorityAdmin returns 403 for unauthorized users`() {
-        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE).andExpect {
+        mvc.get(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE).andExpect {
             status { isForbidden() }
         }
     }
@@ -64,7 +64,7 @@ class InviteLocalAuthorityAdminControllerTests(
             localAuthorities,
         )
 
-        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE).andExpect {
+        mvc.get(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE).andExpect {
             status { isOk() }
             model { attributeExists("selectOptions", "inviteLocalAuthorityAdminModel") }
         }
@@ -87,13 +87,13 @@ class InviteLocalAuthorityAdminControllerTests(
             .thenReturn(localAuthority)
 
         mvc
-            .post(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE) {
+            .post(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = urlEncodedModel
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl("${InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                redirectedUrl("${ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                 flash { attribute("invitedEmailAddress", testEmail) }
                 flash { attribute("localAuthorityName", localAuthority.name) }
             }
@@ -104,7 +104,7 @@ class InviteLocalAuthorityAdminControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `navigating straight to the confirmation page returns 400`() {
-        mvc.get(InviteLocalAuthorityAdminController.INVITE_LA_ADMIN_CONFIRMATION_ROUTE).andExpect {
+        mvc.get(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_CONFIRMATION_ROUTE).andExpect {
             status { isBadRequest() }
         }
     }

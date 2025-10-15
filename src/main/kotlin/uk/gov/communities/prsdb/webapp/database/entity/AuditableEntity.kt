@@ -15,7 +15,7 @@ import java.time.Instant
 abstract class AuditableEntity : Serializable {
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(updatable = false)
+    @Column(nullable = false, updatable = false)
     lateinit var createdDate: Instant
         private set
 }
