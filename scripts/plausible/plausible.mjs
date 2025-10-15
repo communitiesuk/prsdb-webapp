@@ -140,8 +140,9 @@ async function runPlausibleScript() {
                 fs.writeFileSync(outputPath, csv)
                 console.log(`CSV data written to ${outputPath}`)
                 if (query.dimensions) {
-                    if (query.dimensions[0] === 'event:page') {
-                        await processJourneyData(query.metrics[0], outputSubdir);
+                    if (query.dimensions.includes('event:page')) {
+
+                        await processJourneyData(query.metrics, outputSubdir);
                         console.log(`Processed journey data for query '${queryName}'`);
                     }
                 }

@@ -14,7 +14,7 @@
     "site_id": "prod.register-home-to-rent.communities.gov.uk",
     "date_range": "14d",
     "metrics": [
-      "time_on_page"
+      "time_on_page", "pageviews"
     ],
     "dimensions": [
       "event:page"

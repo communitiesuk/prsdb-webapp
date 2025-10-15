@@ -30,7 +30,7 @@ export async function createPageViewCSV() {
     const totalCSV = await readCSV(path.resolve('outputs/pageViews/total_page_views.csv'));
     const total = totalCSV.length > 0 ? (totalCSV[0]["pageviews"]) : '';
 
-    const complianceCSV = await readCSV(path.resolve('processed_journey_data/outputs/pageViews/page_views/landlord_add_compliance_information_sum.csv'));
+    const complianceCSV = await readCSV(path.resolve('processed_journey_data/outputs/pageViews/page_views/landlord_add_compliance_information_pageviews_sum.csv'));
     const addCompliance = await getValueFromCSV(complianceCSV, '/landlord/add-compliance-information', metric);
 
     const pageViewsCSV = await readCSV(path.resolve('outputs/pageViews/page_views.csv'));
@@ -77,7 +77,7 @@ export async function createCompletionRateCSV() {
     const propRegConf = await getValueFromCSV(propRegCSV, '/landlord/register-property/confirmation', metric);
     const propRegRate = (propRegStart === 0 || propRegStart === null) ? null : (propRegConf === 0 || propRegConf === null) ? 0 : ((propRegStart && propRegConf) ? ((propRegConf / propRegStart) * 100).toFixed(2) : null);
 
-    const complianceCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_add_compliance_information_sum.csv'));
+    const complianceCSV = await readCSV(path.resolve('processed_journey_data/outputs/visitors/visitors/landlord_add_compliance_information_visitors_sum.csv'));
     const complianceStart = await getValueFromCSV(complianceCSV, '/landlord/add-compliance-information', metric);
     const complianceConf = await getValueFromCSV(complianceCSV, '/landlord/add-compliance-information/confirmation', metric);
     const complianceRate = (complianceStart === 0 || complianceStart === null) ? null : (complianceConf === 0 || complianceConf === null) ? 0 : ((complianceStart && complianceConf) ? ((complianceConf / complianceStart) * 100).toFixed(2) : null);
