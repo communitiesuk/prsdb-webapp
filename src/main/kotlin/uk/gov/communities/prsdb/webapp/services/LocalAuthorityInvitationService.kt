@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toKotlinInstant
-import org.springframework.orm.jpa.JpaObjectRetrievalFailureException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
@@ -75,12 +74,7 @@ class LocalAuthorityInvitationService(
         session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
 
-    fun getInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? =
-        try {
-            invitationRepository.getReferenceById(id)
-        } catch (e: JpaObjectRetrievalFailureException) {
-            null
-        }
+    fun getInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? = invitationRepository.findById(id).orElse(null)
 
     fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
         val expiresAtInstant =
