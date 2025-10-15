@@ -25,7 +25,7 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent
-        var manageUsersPage = navigator.goToManageLaUsers(2)
+        var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
         assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Basic")
 
@@ -54,7 +54,7 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `a user can be deleted`(page: Page) {
         // Edit Arthur Dent
-        var manageUsersPage = navigator.goToManageLaUsers(2)
+        var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         val editUserPage = assertPageIs(page, EditLaUserPage::class)
