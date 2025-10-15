@@ -67,7 +67,7 @@ class LocalAuthorityDataService(
     fun getLocalAuthorityUserIfAuthorizedLA(
         localAuthorityUserId: Long,
         localAuthorityId: Int,
-    ): LocalAuthorityUserDataModel {
+    ): LocalAuthorityUser {
         val localAuthorityUser =
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId not found")
@@ -76,13 +76,7 @@ class LocalAuthorityDataService(
             throw AccessDeniedException("Local authority user $localAuthorityUserId does not belong to LA $localAuthorityId")
         }
 
-        return LocalAuthorityUserDataModel(
-            localAuthorityUserId,
-            localAuthorityUser.name,
-            localAuthorityUser.localAuthority.name,
-            localAuthorityUser.isManager,
-            localAuthorityUser.email,
-        )
+        return localAuthorityUser
     }
 
     fun getPaginatedUsersAndInvitations(
@@ -112,6 +106,7 @@ class LocalAuthorityDataService(
                     )
                 }
         }
+
         return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest).map {
             LocalAuthorityUserOrInvitationDataModel(
                 id = it.id,
@@ -137,12 +132,8 @@ class LocalAuthorityDataService(
         localAuthorityUserRepository.save(localAuthorityUser)
     }
 
-    fun deleteUser(localAuthorityUserId: Long) {
-        val localAuthorityUser =
-            localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
-
-        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+    fun deleteUser(localAuthorityUser: LocalAuthorityUser) {
+        localAuthorityUserRepository.deleteById(localAuthorityUser.id)
 
         deletionConfirmationSender.sendEmail(
             localAuthorityUser.email,

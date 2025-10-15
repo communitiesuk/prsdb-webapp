@@ -168,14 +168,6 @@ class LocalAuthorityDataServiceTests {
         val localAuthority = createLocalAuthority()
         val baseUser = createOneLoginUser()
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
-        val expectedLocalAuthorityUserDataModel =
-            LocalAuthorityUserDataModel(
-                DEFAULT_LA_USER_ID,
-                localAuthorityUser.name,
-                localAuthority.name,
-                localAuthorityUser.isManager,
-                localAuthorityUser.email,
-            )
         whenever(localAuthorityUserRepository.findById(DEFAULT_LA_USER_ID)).thenReturn(Optional.of(localAuthorityUser))
 
         // Act
@@ -183,7 +175,7 @@ class LocalAuthorityDataServiceTests {
             localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID)
 
         // Assert
-        Assertions.assertEquals(expectedLocalAuthorityUserDataModel, returnedLocalAuthorityUser)
+        Assertions.assertEquals(localAuthorityUser, returnedLocalAuthorityUser)
     }
 
     @Test
@@ -502,25 +494,13 @@ class LocalAuthorityDataServiceTests {
     @Test
     fun `deleteUser deletes the user if they exist`() {
         // Arrange
-        val localAuthority = createLocalAuthority()
-        val baseUser = createOneLoginUser()
-        val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority)
-        whenever(localAuthorityUserRepository.findById(DEFAULT_LA_USER_ID)).thenReturn(Optional.of(localAuthorityUser))
+        val localAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)
 
         // Act
-        localAuthorityDataService.deleteUser(DEFAULT_LA_USER_ID)
+        localAuthorityDataService.deleteUser(localAuthorityUser)
 
         // Assert
         verify(localAuthorityUserRepository).deleteById(DEFAULT_LA_USER_ID)
-    }
-
-    @Test
-    fun `deleteUser throws a NOT_FOUND error if the LA user does not exist`() {
-        // Arrange
-        whenever(localAuthorityUserRepository.findById(anyLong())).thenReturn(Optional.empty())
-
-        val errorThrown = assertThrows<ResponseStatusException> { localAuthorityDataService.deleteUser(DEFAULT_LA_USER_ID) }
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
 
     @Test

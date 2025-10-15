@@ -179,7 +179,7 @@ class ManageLocalAuthorityUsersController(
         throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, deleteeId, request)
         val userBeingDeleted = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
 
-        localAuthorityDataService.deleteUser(deleteeId)
+        localAuthorityDataService.deleteUser(userBeingDeleted)
 
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
             (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
@@ -193,7 +193,7 @@ class ManageLocalAuthorityUsersController(
             }
         }
 
-        localAuthorityDataService.addDeletedUserToSession(deleteeId, userBeingDeleted.userName)
+        localAuthorityDataService.addDeletedUserToSession(deleteeId, userBeingDeleted.name)
         return "redirect:../$DELETE_USER_CONFIRMATION_ROUTE"
     }
 

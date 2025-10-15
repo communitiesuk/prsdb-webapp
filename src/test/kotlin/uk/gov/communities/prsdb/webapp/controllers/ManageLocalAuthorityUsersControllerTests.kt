@@ -396,12 +396,13 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
-            val loggedInUserModel = createdLoggedInUserModel()
+            val loggedInUser = createLocalAuthorityUser(name = "Logged In User")
+            val loggedInUserModel = LocalAuthorityUserDataModel.fromLocalAuthorityUser(loggedInUser)
             val localAuthority = createLocalAuthority()
             whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenReturn(Pair(loggedInUserModel, localAuthority))
             whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
-                .thenReturn(loggedInUserModel)
+                .thenReturn(loggedInUser)
 
             mvc
                 .get(getLaEditUserRoute(DEFAULT_LA_ID, loggedInUserModel.id))
@@ -570,6 +571,10 @@ class ManageLocalAuthorityUsersControllerTests(
             laId: Int = DEFAULT_LA_ID,
             ladUserId: Long = DEFAULT_LA_USER_ID,
         ) {
+            val userBeingDeleted = createLocalAuthorityUser(id = ladUserId, localAuthority = createLocalAuthority(laId))
+            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(ladUserId, laId))
+                .thenReturn(userBeingDeleted)
+
             mvc
                 .post(getLaDeleteUserRoute(laId, ladUserId)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -581,7 +586,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     }
                 }
 
-            verify(localAuthorityDataService).deleteUser(ladUserId)
+            verify(localAuthorityDataService).deleteUser(userBeingDeleted)
         }
 
         @Test
@@ -875,13 +880,7 @@ class ManageLocalAuthorityUsersControllerTests(
         val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, laUserId)
         whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(laUserId, localAuthority.id))
             .thenReturn(
-                LocalAuthorityUserDataModel(
-                    laUserId,
-                    localAuthorityUser.name,
-                    localAuthority.name,
-                    localAuthorityUser.isManager,
-                    localAuthorityUser.email,
-                ),
+                localAuthorityUser,
             )
 
         return localAuthorityUser
