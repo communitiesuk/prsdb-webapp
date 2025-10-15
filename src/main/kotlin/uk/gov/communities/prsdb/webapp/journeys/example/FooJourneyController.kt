@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
-import org.springframework.beans.factory.ObjectFactory
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -13,16 +12,16 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 @Controller
 @RequestMapping("new-journey")
 class FooJourneyController(
-    val factory: ObjectFactory<FooExampleJourney>,
+    val journeyFactory: FooExampleJourneyFactory,
 ) {
     @GetMapping("{propertyId}/{stepName}")
     fun getStep(
         @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView {
-        val journey = factory.getObject()
-        journey.journeyStateInitialisation(propertyId)
-        return journey.buildJourneySteps(propertyId.toString())[stepName]?.getStepModelAndView() ?: throw Exception("Step not found")
+        journeyFactory.journeyStateInitialisation(propertyId.toString(), propertyId)
+        return journeyFactory.createJourneySteps(propertyId.toString())[stepName]?.getStepModelAndView()
+            ?: throw Exception("Step not found")
     }
 
     @PostMapping("{propertyId}/{stepName}")
@@ -31,6 +30,6 @@ class FooJourneyController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView =
-        factory.getObject().buildJourneySteps(propertyId.toString())[stepName]?.postStepModelAndView(formData)
+        journeyFactory.createJourneySteps(propertyId.toString())[stepName]?.postStepModelAndView(formData)
             ?: throw Exception("Step not found")
 }

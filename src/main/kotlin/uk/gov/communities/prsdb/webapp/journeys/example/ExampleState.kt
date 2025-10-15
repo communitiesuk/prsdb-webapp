@@ -11,10 +11,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 
-interface FooJourneyState :
-    OccupiedJourneyState,
-    EpcJourneyState
-
 interface OccupiedJourneyState : DynamicJourneyState {
     val occupied: AbstractStep<*, OccupancyFormModel, *>?
     val households: AbstractStep<*, NumberOfHouseholdsFormModel, *>?

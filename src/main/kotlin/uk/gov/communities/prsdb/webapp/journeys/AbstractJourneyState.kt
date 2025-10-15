@@ -7,15 +7,9 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import kotlin.reflect.KProperty
 
-abstract class AbstractJourney(
+abstract class AbstractJourneyState(
     private val journeyStateService: JourneyStateService,
 ) : DynamicJourneyState {
-    abstract fun buildJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator>
-
-    protected fun initialise(journeyId: String) {
-        journeyStateService.initialise(journeyId)
-    }
-
     override fun getStepData(key: String): PageData? = objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
 
     override fun addStepData(
@@ -23,12 +17,12 @@ abstract class AbstractJourney(
         value: PageData,
     ) = journeyStateService.addSingleStepData(key, value)
 
-    fun <TJourney : AbstractJourney, TProperty : Any> delegate(
+    fun <TJourney : AbstractJourneyState, TProperty : Any> delegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
     ) = JourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
 
-    fun <TJourney : AbstractJourney, TProperty : Any> compulsoryDelegate(
+    fun <TJourney : AbstractJourneyState, TProperty : Any> compulsoryDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
     ) = CompulsoryJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)

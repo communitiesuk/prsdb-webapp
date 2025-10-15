@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStep
-import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.example.FooJourney
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
@@ -13,13 +13,12 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusVi
 
 @Scope("prototype")
 @PrsdbWebComponent
-class FooTaskListStep : AbstractGenericStep<Complete, NoInputFormModel, FooJourneyState>() {
+class FooTaskListStep : AbstractGenericStep<Complete, NoInputFormModel, FooJourney>() {
     override val formModelClazz = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: FooJourneyState): Map<String, Any> =
-        mapOf("taskListViewModel" to getTaskListViewModel(state))
+    override fun getStepSpecificContent(state: FooJourney): Map<String, Any> = mapOf("taskListViewModel" to getTaskListViewModel(state))
 
-    fun getTaskListViewModel(state: FooJourneyState): TaskListViewModel {
+    fun getTaskListViewModel(state: FooJourney): TaskListViewModel {
         val sectionViewModels =
             listOf(
                 TaskSectionViewModel(
@@ -50,5 +49,5 @@ class FooTaskListStep : AbstractGenericStep<Complete, NoInputFormModel, FooJourn
 
     override fun chooseTemplate(): String = "taskList"
 
-    override fun mode(state: FooJourneyState): Nothing? = null
+    override fun mode(state: FooJourney): Nothing? = null
 }

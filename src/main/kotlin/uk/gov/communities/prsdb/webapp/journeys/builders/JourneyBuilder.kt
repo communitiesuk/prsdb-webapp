@@ -5,23 +5,23 @@ import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
-class JourneyBuilder<TState : DynamicJourneyState>(
-    private val state: TState,
+class JourneyBuilder<TJourney : DynamicJourneyState>(
+    val journey: TJourney,
 ) {
-    val stepsUnderConstruction: MutableList<StepBuilder<*, TState, *>> = mutableListOf()
+    val stepsUnderConstruction: MutableList<StepBuilder<*, TJourney, *>> = mutableListOf()
 
     fun build() =
         stepsUnderConstruction.associate { sb ->
-            sb.build(state).let {
+            sb.build(journey).let {
                 checkForUninitialisedParents(sb)
                 it.routeSegment to StepLifecycleOrchestrator(it)
             }
         }
 
-    fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TState>> step(
+    fun <TMode : Enum<TMode>, TStep : AbstractStep<TMode, *, TJourney>> step(
         segment: String,
         uninitialisedStep: TStep,
-        init: StepBuilder<TStep, TState, TMode>.() -> Unit,
+        init: StepBuilder<TStep, TJourney, TMode>.() -> Unit,
     ) {
         val stepBuilder = StepBuilder(segment, uninitialisedStep)
         stepBuilder.init()
