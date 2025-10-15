@@ -31,7 +31,12 @@ class CancelLaUserInvitationTests : IntegrationTest() {
             // Cancel invitation
             assertThat(cancelInvitationPage.userDetailsSection).containsText("invited.user@example.com")
             cancelInvitationPage.form.submit()
-            val successPage = assertPageIs(page, CancelLaUserInvitationSuccessPage::class)
+            val successPage =
+                assertPageIs(
+                    page,
+                    CancelLaUserInvitationSuccessPage::class,
+                    mapOf("localAuthorityId" to "1", "invitationId" to "1"),
+                )
 
             // The success page confirms the user is deleted
             assertThat(
@@ -63,7 +68,12 @@ class CancelLaUserInvitationTests : IntegrationTest() {
             // Cancel invitation
             assertThat(cancelInvitationPage.userDetailsSection).containsText("x.adminuser@example.com")
             cancelInvitationPage.form.submit()
-            val successPage = assertPageIs(page, CancelLaUserInvitationSuccessPage::class)
+            val successPage =
+                assertPageIs(
+                    page,
+                    CancelLaUserInvitationSuccessPage::class,
+                    mapOf("localAuthorityId" to "1", "invitationId" to "4"),
+                )
 
             // The success page confirms the user is deleted
             assertThat(
