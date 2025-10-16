@@ -27,7 +27,7 @@
                                 </span>
                     </td>
                     <td class="govuk-table__cell">
-                        <a th:href="@{${user.pending ? ${cancelInvitationPathSegment} + '/' + user.id : ${editUserPathSegment} + '/' + user.id}}"
+                        <a th:href="@{${user.pending ? ${cancelInvitationPathSegment} + user.id : ${editUserPathSegment} + user.id}}"
                            class="govuk-link"
                            th:text="#{forms.links.change}"
                         >

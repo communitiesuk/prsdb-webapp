@@ -135,8 +135,8 @@ class ManageLocalAuthorityAdminsController(
             "paginationViewModel",
             PaginationViewModel(page, pagedUserList.totalPages, request),
         )
-        model.addAttribute("cancelInvitationPathSegment", CANCEL_INVITATION_PATH_SEGMENT)
-        model.addAttribute("editUserPathSegment", EDIT_USER_PATH_SEGMENT)
+        model.addAttribute("cancelInvitationPathSegment", "$CANCEL_INVITATION_PATH_SEGMENT/")
+        model.addAttribute("editUserPathSegment", "$EDIT_USER_PATH_SEGMENT/")
         model.addAttribute("inviteAdminsUrl", INVITE_LA_ADMIN_ROUTE)
         return "manageLocalAuthorityAdmins"
     }
