@@ -60,15 +60,15 @@ class FooCheckAnswersStep(
     }
 
     private fun getEpcStatusRow(state: FooJourney): SummaryListRowViewModel {
-        val epc = state.searchedEpc ?: state.automatchedEpc
-
         val fieldValue =
-            if (epc == null) {
-                "forms.checkComplianceAnswers.certificate.notAdded"
-            } else {
-                "forms.checkComplianceAnswers.epc.view"
+            when (state.epcQuestion.outcome()) {
+                EpcStatus.AUTOMATCHED -> "forms.checkComplianceAnswers.epc.view"
+                EpcStatus.NOT_AUTOMATCHED -> "forms.checkComplianceAnswers.epc.view"
+                EpcStatus.NO_EPC -> "forms.checkComplianceAnswers.certificate.notAdded"
+                null -> throw IllegalStateException("EPC status should be set if we are on the check your answers page")
             }
 
+        val epc = state.searchedEpc ?: state.automatchedEpc
         val certificateNumber = epc?.certificateNumber
         val valueUrl =
             if (certificateNumber != null) {
@@ -80,7 +80,7 @@ class FooCheckAnswersStep(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.epc.certificate",
             fieldValue,
-            state.epcQuestion?.routeSegment,
+            state.epcQuestion.routeSegment,
             valueUrl,
             valueUrlOpensNewTab = valueUrl != null,
         )
