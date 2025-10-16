@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractUninitialisableInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 @PrsdbWebComponent
 class SearchEpcStep(
     private val epcLookupService: EpcLookupService,
-) : AbstractGenericInnerStep<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
+) : AbstractUninitialisableInnerStep<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
     override val formModelClazz = EpcLookupFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =

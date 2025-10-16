@@ -4,13 +4,13 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractUninitialisableInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @Scope("prototype")
 @PrsdbWebComponent
-class EpcNotFoundStep : AbstractGenericInnerStep<Complete, NoInputFormModel, EpcJourneyState>() {
+class EpcNotFoundStep : AbstractUninitialisableInnerStep<Complete, NoInputFormModel, EpcJourneyState>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =

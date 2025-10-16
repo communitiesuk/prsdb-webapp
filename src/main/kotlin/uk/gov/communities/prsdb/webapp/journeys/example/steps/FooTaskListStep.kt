@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericInnerStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractUninitialisableInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourney
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusVi
 
 @Scope("prototype")
 @PrsdbWebComponent
-class FooTaskListStep : AbstractGenericInnerStep<Complete, NoInputFormModel, FooJourney>() {
+class FooTaskListStep : AbstractUninitialisableInnerStep<Complete, NoInputFormModel, FooJourney>() {
     override val formModelClazz = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: FooJourney): Map<String, Any> = mapOf("taskListViewModel" to getTaskListViewModel(state))

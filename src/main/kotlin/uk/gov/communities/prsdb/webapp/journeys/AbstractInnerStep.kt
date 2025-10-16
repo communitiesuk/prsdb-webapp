@@ -69,7 +69,7 @@ abstract class AbstractInnerStep<out TEnum : Enum<out TEnum>, TFormModel : FormM
     lateinit var validator: Validator
 }
 
-abstract class AbstractGenericInnerStep<TEnum : Enum<TEnum>, TModel : FormModel, TState : DynamicJourneyState> :
+abstract class AbstractUninitialisableInnerStep<TEnum : Enum<TEnum>, TModel : FormModel, TState : DynamicJourneyState> :
     AbstractInnerStep<TEnum, TModel, TState>() {
     override fun isSubClassInitialised(): Boolean = true
 }
