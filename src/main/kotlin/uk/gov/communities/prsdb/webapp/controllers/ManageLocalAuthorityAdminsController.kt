@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANAGE_LA_ADMINS_PATH_SEGMENT
@@ -133,6 +135,8 @@ class ManageLocalAuthorityAdminsController(
             "paginationViewModel",
             PaginationViewModel(page, pagedUserList.totalPages, request),
         )
+        model.addAttribute("cancelInvitationPathSegment", CANCEL_INVITATION_PATH_SEGMENT)
+        model.addAttribute("editUserPathSegment", EDIT_USER_PATH_SEGMENT)
         model.addAttribute("inviteAdminsUrl", INVITE_LA_ADMIN_ROUTE)
         return "manageLocalAuthorityAdmins"
     }
