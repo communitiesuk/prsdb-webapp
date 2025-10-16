@@ -149,11 +149,11 @@ class LandlordController(
 
         if (formModel.wantsToProceed == true) {
             propertyRegistrationService.deleteIncompleteProperty(contextId, principal.name)
+            propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId)
+            return "redirect:${getDeleteIncompletePropertyConfirmationPath(contextId)}"
         }
 
-        propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId)
-
-        return "redirect:${deleteIncompletePropertyConfirmationPath(contextId)}"
+        return "redirect:$INCOMPLETE_PROPERTIES_URL"
     }
 
     @GetMapping("/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
@@ -168,7 +168,14 @@ class LandlordController(
             )
         }
 
-        return "deleteIncompletePropertyRegistrationConfirmation"
+        if (propertyRegistrationService.getFormContextByIdOrNull(contextId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Incomplete property registration with id $contextId is still in the database",
+            )
+        }
+
+        return "deleteIncompletePropertyConfirmation"
     }
 
     @GetMapping("/$COMPLIANCE_ACTIONS_PATH_SEGMENT")
@@ -238,10 +245,10 @@ class LandlordController(
             "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT/" +
                 "$CONFIRMATION_PATH_SEGMENT?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
-        fun deleteIncompletePropertyPath(contextId: Long): String =
+        fun getDeleteIncompletePropertyPath(contextId: Long): String =
             UriTemplate(DELETE_INCOMPLETE_PROPERTY_ROUTE).expand(contextId).toASCIIString()
 
-        fun deleteIncompletePropertyConfirmationPath(contextId: Long): String =
+        fun getDeleteIncompletePropertyConfirmationPath(contextId: Long): String =
             UriTemplate(DELETE_INCOMPLETE_PROPERTY_CONFIRMATION_ROUTE).expand(contextId).toASCIIString()
     }
 }

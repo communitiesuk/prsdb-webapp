@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
@@ -21,14 +22,16 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests :
     }
 
     @Test
-    fun `the property is deleted and the page redirects to the incomplete properties page if the user selects Yes`(page: Page) {
+    fun `the property is deleted and the page redirects to the confirmation page if the user selects Yes`(page: Page) {
         val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
         areYouSurePage.submitWantsToProceed()
-        val incompletePropertiesPage = assertPageIs(page, LandlordIncompletePropertiesPage::class)
-        BaseComponent
+        assertPageIs(page, DeleteIncompletePropertyRegistrationConfirmationPage::class, mapOf("contextId" to contextId))
+        // TODO PRSD-902 - Do we want to make this a journey type test? Including the top two here and clicking the confirmation page button?
+
+        /*BaseComponent
             .assertThat(
                 incompletePropertiesPage.subHeading,
-            ).containsText("You have no properties with missing or incomplete details.")
+            ).containsText("You have no properties with missing or incomplete details.")*/
     }
 
     @Test
