@@ -4,61 +4,61 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.PageData
 
 class StepLifecycleOrchestrator(
-    val innerStep: JourneyStep<*, *, *>,
+    val journeyStep: JourneyStep<*, *, *>,
 ) {
     fun getStepModelAndView(): ModelAndView {
-        innerStep.beforeIsStepReachable()
-        if (innerStep.isStepReachable) {
-            innerStep.afterIsStepReached()
+        journeyStep.beforeIsStepReachable()
+        if (journeyStep.isStepReachable) {
+            journeyStep.afterIsStepReached()
 
-            innerStep.beforeGetStepContent()
-            val content = innerStep.getPageVisitContent()
-            innerStep.afterGetStepContent()
+            journeyStep.beforeGetStepContent()
+            val content = journeyStep.getPageVisitContent()
+            journeyStep.afterGetStepContent()
 
-            innerStep.beforeGetTemplate()
-            val template = innerStep.chooseTemplate()
-            innerStep.afterGetTemplate()
+            journeyStep.beforeGetTemplate()
+            val template = journeyStep.chooseTemplate()
+            journeyStep.afterGetTemplate()
 
             return ModelAndView(template, content)
         }
 
-        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect()
+        val unreachableStepRedirect = journeyStep.getUnreachableStepRedirect()
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 
     fun postStepModelAndView(formData: PageData): ModelAndView {
-        innerStep.beforeIsStepReachable()
-        if (innerStep.isStepReachable) {
-            innerStep.afterIsStepReached()
+        journeyStep.beforeIsStepReachable()
+        if (journeyStep.isStepReachable) {
+            journeyStep.afterIsStepReached()
 
-            val newFormData = innerStep.beforeValidateSubmittedData(formData)
-            val bindingResult = innerStep.validateSubmittedData(newFormData)
-            innerStep.afterValidateSubmittedData(bindingResult)
+            val newFormData = journeyStep.beforeValidateSubmittedData(formData)
+            val bindingResult = journeyStep.validateSubmittedData(newFormData)
+            journeyStep.afterValidateSubmittedData(bindingResult)
 
             if (bindingResult.hasErrors()) {
-                innerStep.beforeGetStepContent()
-                val content = innerStep.getInvalidSubmissionContent(bindingResult)
-                innerStep.afterGetStepContent()
+                journeyStep.beforeGetStepContent()
+                val content = journeyStep.getInvalidSubmissionContent(bindingResult)
+                journeyStep.afterGetStepContent()
 
-                innerStep.beforeGetTemplate()
-                val template = innerStep.chooseTemplate()
-                innerStep.afterGetTemplate()
+                journeyStep.beforeGetTemplate()
+                val template = journeyStep.chooseTemplate()
+                journeyStep.afterGetTemplate()
 
                 return ModelAndView(template, content)
             }
 
-            innerStep.beforeSubmitFormData()
-            innerStep.submitFormData(bindingResult)
-            innerStep.afterSubmitFormData()
+            journeyStep.beforeSubmitFormData()
+            journeyStep.submitFormData(bindingResult)
+            journeyStep.afterSubmitFormData()
 
-            innerStep.beforeDetermineRedirect()
-            val redirect = innerStep.determineRedirect()
-            innerStep.afterDetermineRedirect()
+            journeyStep.beforeDetermineRedirect()
+            val redirect = journeyStep.determineRedirect()
+            journeyStep.afterDetermineRedirect()
 
             return ModelAndView("redirect:$redirect")
         }
 
-        val unreachableStepRedirect = innerStep.getUnreachableStepRedirect()
+        val unreachableStepRedirect = journeyStep.getUnreachableStepRedirect()
         return ModelAndView("redirect:$unreachableStepRedirect")
     }
 }
