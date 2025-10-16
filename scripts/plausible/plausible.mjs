@@ -3,6 +3,9 @@ import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
 import { Command } from 'commander'
+import { processJourneyData } from './process_journey_data.mjs';
+import {createCompletionRateCSV, createPageViewCSV} from './createMetricCSV.mjs';
+import readline from 'readline';
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
 const BASE_URL = "https://plausible.io/api/v2/query"
@@ -52,6 +55,7 @@ program
   .option('--input-file <filename>', 'Process a specific input file')
   .option('--clear', 'Clear the outputs directory before running')
   .option('--save', 'Save processed output in the saved directory (not cleared)')
+  .option('--force', 'Force run even if it is not Thursday (skip prompt)')
   .parse(process.argv);
 
 const options = program.opts();
@@ -64,17 +68,25 @@ if (options.save) {
     OUTPUTS_DIR = path.join('outputs')
 }
 
-function clearOutputsDir() {
-    // Only clear if not saving to 'saved'
-    if (!options.save && fs.existsSync('outputs')) {
-        for (const entry of fs.readdirSync('outputs')) {
-            const entryPath = path.join('outputs', entry)
+function clearDir(dirPath) {
+    if (fs.existsSync(dirPath)) {
+        for (const entry of fs.readdirSync(dirPath)) {
+            const entryPath = path.join(dirPath, entry)
             if (fs.lstatSync(entryPath).isDirectory()) {
                 fs.rmSync(entryPath, { recursive: true, force: true })
             } else {
                 fs.unlinkSync(entryPath)
             }
         }
+    }
+}
+
+function clearOutputsDir() {
+    // Only clear if not saving to 'saved'
+    if (!options.save) {
+        clearDir('outputs')
+        clearDir('processed_journey_data')
+        clearDir('userExperienceMetrics')
     }
 }
 
@@ -127,11 +139,48 @@ async function runPlausibleScript() {
                 const outputPath = path.join(outputSubdir, `${queryName}.csv`)
                 fs.writeFileSync(outputPath, csv)
                 console.log(`CSV data written to ${outputPath}`)
+                if (query.dimensions) {
+                    if (query.dimensions.includes('event:page')) {
+
+                        await processJourneyData(query.metrics, outputSubdir);
+                        console.log(`Processed journey data for query '${queryName}'`);
+                    }
+                }
             } catch (e) {
                 console.error(`Error running query '${queryName}' in file '${inputFile}':`, e.stack || String(e))
             }
         }
     }
+    createPageViewCSV();
+    createCompletionRateCSV()
 }
 
-runPlausibleScript()
+async function checkThursdayOrPrompt() {
+    const today = new Date();
+    // getDay() returns 4 for Thursday (0=Sunday, 1=Monday, ...)
+    if (today.getDay() !== 4 && !options.force) {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        const YELLOW = '\x1b[33m';
+        const RESET = '\x1b[0m';
+
+        await new Promise((resolve) => {
+            rl.question(`${YELLOW} It is not thursday! Have you updated your queries for the correct date range? (y/n) ${RESET}`, (answer) => {
+                rl.close();
+                if (answer.trim().toLowerCase() !== 'y') {
+                    console.log('Exiting script.');
+                    process.exit(0);
+                }
+                resolve();
+            });
+        });
+    }
+}
+
+(async () => {
+    await checkThursdayOrPrompt();
+    await runPlausibleScript();
+})();
