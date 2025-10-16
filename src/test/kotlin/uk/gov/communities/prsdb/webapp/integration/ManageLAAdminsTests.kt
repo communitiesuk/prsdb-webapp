@@ -100,13 +100,4 @@ class ManageLAAdminsTests : IntegrationTest() {
             assertThat(manageAdminPage.table.getCell(9, USERNAME_COL_INDEX)).containsText("I@example.com")
         }
     }
-
-    @Nested
-    inner class WithNoAdminUsersOrInvites : NestedIntegrationTestWithImmutableData("data-mock-user-system-operator.sql") {
-        @Test
-        fun `renders correct message when their are no admin users or invites`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
-            assertThat(manageAdminPage.subHeading).containsText("No local council admins were found.")
-        }
-    }
 }

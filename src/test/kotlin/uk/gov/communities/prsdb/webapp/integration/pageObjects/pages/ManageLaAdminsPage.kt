@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.MANAGE_LA_ADMINS_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -13,7 +12,6 @@ class ManageLaAdminsPage(
 ) : BasePage(page, MANAGE_LA_ADMINS_ROUTE) {
     val table = Table(page)
     val inviteAnotherAdminButton = Button.byText(page, "Invite another admin")
-    val subHeading = Heading(page.locator("h2.govuk-body-m"))
 
     companion object {
         const val USERNAME_COL_INDEX: Int = 0
