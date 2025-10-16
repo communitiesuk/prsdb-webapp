@@ -63,7 +63,7 @@ class ManageLAAdminsTests : IntegrationTest() {
             assertThat(manageAdminPage.table.getCell(8, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(manageAdminPage.table.getCell(9, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
 
-            // Local councils in alphabetical order within status#
+            // Local councils in alphabetical order within status
 
             // ACTIVE
             assertThat(manageAdminPage.table.getCell(0, LOCAL_COUNCIL_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")

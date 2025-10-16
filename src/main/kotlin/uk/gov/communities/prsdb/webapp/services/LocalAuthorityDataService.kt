@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
@@ -106,7 +107,7 @@ class LocalAuthorityDataService(
                         userNameOrEmail = it.name,
                         localAuthorityName = localAuthority.name,
                         isManager = it.isManager,
-                        isPending = it.entityType == "local_authority_invitation",
+                        isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
                     )
                 }
         }
@@ -116,7 +117,7 @@ class LocalAuthorityDataService(
                 userNameOrEmail = it.name,
                 localAuthorityName = localAuthority.name,
                 isManager = it.isManager,
-                isPending = it.entityType == "local_authority_invitation",
+                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
         }
     }
@@ -136,7 +137,7 @@ class LocalAuthorityDataService(
                 id = it.id,
                 userNameOrEmail = it.name,
                 localCouncilName = it.localAuthority.name,
-                isPending = it.entityType == "local_authority_invitation",
+                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
         }
     }

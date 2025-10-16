@@ -27,6 +27,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
@@ -228,10 +229,10 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
@@ -260,10 +261,10 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
@@ -284,7 +285,7 @@ class LocalAuthorityDataServiceTests {
             usersFromRepository.add(
                 LocalAuthorityUserOrInvitation(
                     i.toLong(),
-                    "local_authority_user",
+                    LOCAL_AUTHORITY_USER_ENTITY_TYPE,
                     "User $i",
                     false,
                     localAuthority,
@@ -347,12 +348,12 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", false, localAuthority)
+        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
         val adminInvitation =
-            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite.admin@test.com", true, localAuthority)
+            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite.admin@test.com", true, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation, adminInvitation), pageRequest, 4))
@@ -377,10 +378,10 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
+        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
         val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_admin", "User 2", false, localAuthority)
         val nonAdminInvitation =
-            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", false, localAuthority)
+            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthorityNotIncludingAdminInvitations(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, nonAdminInvitation), pageRequest, 3))
@@ -407,10 +408,10 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localAuthority.name"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, "local_authority_user", "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_user", "User 2", true, localAuthority)
+        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", true, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, "local_authority_invitation", "invite@test.com", true, localAuthority)
+            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", true, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findAllByIsManagerTrue(pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
@@ -599,5 +600,9 @@ class LocalAuthorityDataServiceTests {
 
         // Assert
         verify(invitationConfirmationSenderAdmin, org.mockito.kotlin.times(0)).sendEmail(any(), any())
+    }
+
+    companion object {
+        const val LOCAL_AUTHORITY_USER_ENTITY_TYPE: String = "local_authority_user"
     }
 }
