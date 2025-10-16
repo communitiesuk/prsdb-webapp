@@ -60,6 +60,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPri
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -1238,6 +1239,11 @@ class Navigator(
     fun goToInviteLaAdmin(): InviteLaAdminPage {
         navigate(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
+    }
+
+    fun goToManageLaAdminsPage(): ManageLaAdminsPage {
+        navigate(ManageLocalAuthorityAdminsController.MANAGE_LA_ADMINS_ROUTE)
+        return createValidPage(page, ManageLaAdminsPage::class)
     }
 
     fun goToCookiesPage(): CookiesPage {

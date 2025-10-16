@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USERS_INVITED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityAdminUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -103,7 +105,7 @@ class LocalAuthorityDataService(
                         userNameOrEmail = it.name,
                         localAuthorityName = localAuthority.name,
                         isManager = it.isManager,
-                        isPending = it.entityType == "local_authority_invitation",
+                        isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
                     )
                 }
         }
@@ -114,7 +116,27 @@ class LocalAuthorityDataService(
                 userNameOrEmail = it.name,
                 localAuthorityName = localAuthority.name,
                 isManager = it.isManager,
-                isPending = it.entityType == "local_authority_invitation",
+                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
+            )
+        }
+    }
+
+    fun getPaginatedAdminUsersAndInvitations(
+        currentPageNumber: Int,
+        pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
+    ): Page<LocalAuthorityAdminUserOrInvitationDataModel> {
+        val pageRequest =
+            PageRequest.of(
+                currentPageNumber,
+                pageSize,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localAuthority.name"), Sort.Order.asc("name")),
+            )
+        return localAuthorityUserOrInvitationRepository.findAllByIsManagerTrue(pageRequest).map {
+            LocalAuthorityAdminUserOrInvitationDataModel(
+                id = it.id,
+                userNameOrEmail = it.name,
+                localAuthorityName = it.localAuthority.name,
+                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
         }
     }
