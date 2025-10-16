@@ -175,6 +175,8 @@ class LandlordController(
             )
         }
 
+        model.addAttribute("incompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
+
         return "deleteIncompletePropertyConfirmation"
     }
 
