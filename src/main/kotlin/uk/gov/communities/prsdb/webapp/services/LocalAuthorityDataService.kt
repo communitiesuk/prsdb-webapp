@@ -136,7 +136,7 @@ class LocalAuthorityDataService(
             LocalAuthorityAdminUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
-                localCouncilName = it.localAuthority.name,
+                localAuthorityName = it.localAuthority.name,
                 isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
         }

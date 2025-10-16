@@ -19,7 +19,7 @@
                 <tbody class="govuk-table__body">
                 <tr class="govuk_table__row" th:each="user: ${userList}">
                     <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
-                    <td class="govuk-table__cell" th:text="${user.localCouncilName}"></td>
+                    <td class="govuk-table__cell" th:text="${user.localAuthorityName}"></td>
                     <td class="govuk-table__cell">
                                 <span class="govuk-tag"
                                       th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
