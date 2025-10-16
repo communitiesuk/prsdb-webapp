@@ -11,7 +11,7 @@
         </header>
         <section>
             <table th:replace="~{fragments/tables/table :: table(
-                            ${ { 'common.manageLAUsers.table.heading.username', 'manageLAAdminUsers.table.heading.localCouncil', 'common.manageLAUsers.table.heading.accountStatus', '' } },
+                            ${ { 'common.userManagement.username', 'manageLAAdminUsers.table.heading.localCouncil', 'common.userManagement.accountStatus', '' } },
                             ~{::tbody},
                             null
                         )}
@@ -21,10 +21,10 @@
                     <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
                     <td class="govuk-table__cell" th:text="${user.localAuthorityName}"></td>
                     <td class="govuk-table__cell">
-                                <span class="govuk-tag"
-                                      th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
-                                    <strong th:text="${user.pending} ? #{common.manageLAUsers.accountStatus.pending} : #{common.manageLAUsers.accountStatus.active}"></strong>
-                                </span>
+                        <span class="govuk-tag"
+                              th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
+                            <strong th:text="${user.pending} ? #{common.userManagement.accountStatus.pending} : #{common.userManagement.accountStatus.active}"></strong>
+                        </span>
                     </td>
                     <td class="govuk-table__cell">
                         <a th:href="@{${user.pending ? cancelInvitationPathSegment + '/' + user.id : editUserPathSegment + '/' + user.id}}"
