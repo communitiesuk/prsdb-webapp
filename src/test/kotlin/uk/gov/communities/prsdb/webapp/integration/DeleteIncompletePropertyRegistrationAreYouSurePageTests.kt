@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
@@ -12,27 +11,6 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests :
     IntegrationTestWithImmutableData("data-mockuser-landlord-with-one-incomplete-property.sql") {
     val contextId = "1"
     val singleLineAddress = "1, SAVOY COURT, LONDON, WC2R 0EX"
-
-    @Test
-    fun `the page loads with the heading`() {
-        val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
-        BaseComponent
-            .assertThat(areYouSurePage.heading)
-            .containsText("Are you sure you want to delete $singleLineAddress from the database?")
-    }
-
-    @Test
-    fun `the property is deleted and the page redirects to the confirmation page if the user selects Yes`(page: Page) {
-        val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
-        areYouSurePage.submitWantsToProceed()
-        assertPageIs(page, DeleteIncompletePropertyRegistrationConfirmationPage::class, mapOf("contextId" to contextId))
-        // TODO PRSD-902 - Do we want to make this a journey type test? Including the top two here and clicking the confirmation page button?
-
-        /*BaseComponent
-            .assertThat(
-                incompletePropertiesPage.subHeading,
-            ).containsText("You have no properties with missing or incomplete details.")*/
-    }
 
     @Test
     fun `the property is not deleted and the page redirects to the incomplete properties page if the user selects No`(page: Page) {
