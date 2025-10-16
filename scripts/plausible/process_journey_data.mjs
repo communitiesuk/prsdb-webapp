@@ -69,7 +69,17 @@ export async function processJourneyData(metrics_arr, INPUT_DIR) {
           [metric]: values.length ? values.reduce((a, b) => a + b, 0) : null
         }));
       }
-      results.sort((a, b) => (a['event:page'] || '').localeCompare(b['event:page'] || ''));
+      try {
+          results.sort((a, b) => (a['event:page'] || '').localeCompare(b['event:page'] || ''));
+      } catch (e) {
+          if (e instanceof TypeError) {
+              console.log(`TypeError sorting results for metric ${metric}, have you checked that it exists in the metrics?`, metrics);
+              console.error('Error sorting results', e);
+          } else {
+                throw e;
+          }
+      }
+
       const outFile = `landlord_add_compliance_information_${metric}_${metrics[metric]}.csv`;
       fs.writeFileSync(path.join(outputDir, outFile), Papa.unparse(results));
     });
