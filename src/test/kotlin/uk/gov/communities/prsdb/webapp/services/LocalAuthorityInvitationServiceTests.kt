@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import java.util.Optional
 import java.util.UUID
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -188,12 +189,20 @@ class LocalAuthorityInvitationServiceTests {
     }
 
     @Test
-    fun `getInvitationById returns an invitation if the id is in the database`() {
+    fun `getInvitationByIdOrNull returns an invitation if the id is in the database`() {
         val testId = 123.toLong()
         val invitationFromDatabase = MockLocalAuthorityData.createLocalAuthorityInvitation(id = testId)
 
-        whenever(mockLaInviteRepository.getReferenceById(testId)).thenReturn(invitationFromDatabase)
+        whenever(mockLaInviteRepository.findById(testId))
+            .thenReturn(Optional.of(invitationFromDatabase) as Optional<LocalAuthorityInvitation?>)
 
-        assertEquals(invitationFromDatabase, inviteService.getInvitationById(testId))
+        assertEquals(invitationFromDatabase, inviteService.getInvitationByIdOrNull(testId))
+    }
+
+    @Test
+    fun `getInvitationByIdOrNull returns null if the id is no in the database`() {
+        val testId = 123.toLong()
+
+        assertNull(inviteService.getInvitationByIdOrNull(testId))
     }
 }
