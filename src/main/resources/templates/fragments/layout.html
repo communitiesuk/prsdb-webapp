@@ -21,8 +21,8 @@
     <script defer th:attr="data-domain=${plausibleDomainId}" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
     <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
     <script th:inline="javascript">
-        const referrer = [[${referrerHeader}]];
-        const currentUrl = [[${currentUrl}]];
+        const referrer = [[${plausibleEventReferrer}]];
+        const currentUrl = [[${plausibleEventCurrentUrl}]];
         if (window.plausible) {
             plausible('Flow', {
                 props: {
