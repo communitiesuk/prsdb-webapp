@@ -31,3 +31,5 @@ const val LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION = "localCouncilUsersDeletedTh
 const val LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION = "localCouncilInvitationsCancelledThisSession"
 
 const val LA_USERS_INVITED_THIS_SESSION = "laUsersInvitedThisSession"
+
+const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePropertyFormContextsDeletedThisSession"

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -36,6 +37,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -57,8 +59,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDat
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import java.net.URI
+import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -537,7 +539,6 @@ class PropertyRegistrationServiceTests {
         @Test
         fun `getIncompletePropertiesForLandlord returns a list of valid incomplete properties`() {
             val address = "2, Example Road, EG"
-            val localAuthority = MockLocalAuthorityData.createLocalAuthority()
             val context =
                 "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
                     "\"${NonStepJourneyDataKey.LookedUpAddresses.key}\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
@@ -663,6 +664,75 @@ class PropertyRegistrationServiceTests {
                 }
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
             assertEquals(expectedErrorMessage, exception.message)
+        }
+
+        @Test
+        fun `addIncompletePropertyFormContextsDeletedThisSession adds a contextId to the list of cancelled formContexts this session`() {
+            // Arrange
+            whenever(mockSession.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION))
+                .thenReturn(listOf(1L))
+
+            // Act
+            propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(2L)
+
+            // Assert
+            verify(mockSession).setAttribute(
+                INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION,
+                listOf(1L, 2L),
+            )
+        }
+
+        @Test
+        fun `getIncompletePropertyFormContextsDeletedThisSession returns the list of contextIds deleted this session`() {
+            // Arrange
+            val expectedList = listOf(1L, 2L)
+            whenever(mockSession.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION))
+                .thenReturn(expectedList)
+
+            // Act
+            val result = propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession()
+
+            // Assert
+            assertEquals(expectedList, result)
+        }
+
+        @Test
+        fun `getIncompletePropertyFormContextsDeletedThisSession returns an empty list if no contextIds have been deleted this session`() {
+            // Arrange
+            whenever(mockSession.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION))
+                .thenReturn(null)
+
+            // Act
+            val result = propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession()
+
+            // Assert
+            assertEquals(emptyList<Long>(), result)
+        }
+
+        @Test
+        fun `getFormContextByIdOrNull returns the form context when it exists`() {
+            // Arrange
+            val formContextId = 1L
+            val expectedFormContext = MockLandlordData.createPropertyRegistrationFormContext(id = formContextId)
+            whenever(mockFormContextRepository.findById(formContextId))
+                .thenReturn(Optional.of(expectedFormContext))
+
+            // Act
+            val formContext =
+                propertyRegistrationService.getFormContextByIdOrNull(formContextId)
+
+            // Assert
+            assertEquals(expectedFormContext, formContext)
+        }
+
+        @Test
+        fun `getFormContextByIdOrNull returns null when the form context does not exist`() {
+            // Arrange
+            val formContextId = 1L
+            whenever(mockFormContextRepository.findById(formContextId)).thenReturn(Optional.empty())
+
+            // Act, Assert
+            assertNull(propertyRegistrationService.getFormContextByIdOrNull(formContextId))
         }
     }
 }
