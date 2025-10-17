@@ -131,6 +131,7 @@ class ManageLocalAuthorityUsersController(
                 ),
             ),
         )
+        model.addAttribute("deleteUserRoute", "../$DELETE_USER_PATH_SEGMENT/$localAuthorityUserId")
 
         return "editLAUserAccess"
     }

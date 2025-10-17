@@ -250,6 +250,11 @@ class LocalAuthorityDataService(
         return localAuthorityUser
     }
 
+    fun getLocalAuthorityUserById(localAuthorityUserId: Long): LocalAuthorityUser {
+        return localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local authority users with ID $localAuthorityUserId not found")
+    }
+
     fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
 
     fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
