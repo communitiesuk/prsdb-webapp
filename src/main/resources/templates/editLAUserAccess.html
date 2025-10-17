@@ -5,7 +5,7 @@
 <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
     <main class="govuk-main-wrapper">
         <header>
-            <h1 class="govuk-heading-l" th:text="${localAuthorityUser.userName}"></h1>
+            <h1 class="govuk-heading-l" th:text="${localAuthorityUser.name}"></h1>
             <p class="govuk-body">
                 <strong th:text="#{editLAUserAccess.subHeading.beforeEmail}">editLAUserAccess.subHeading.beforeEmail</strong>
                 <span th:remove="tag" th:text="${localAuthorityUser.email}"></span>

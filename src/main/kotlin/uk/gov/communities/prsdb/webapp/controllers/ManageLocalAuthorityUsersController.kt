@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
@@ -26,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
-import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.VOWELS
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.LOCAL_AUTHORITY_ROUTE
@@ -152,30 +154,32 @@ class ManageLocalAuthorityUsersController(
     @GetMapping("/$DELETE_USER_ROUTE")
     fun confirmDeleteUser(
         @PathVariable localAuthorityId: Int,
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable deleteeId: Long,
         model: Model,
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, deleteeId, request)
 
         val userToDelete =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
         model.addAttribute("user", userToDelete)
-        model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$localAuthorityUserId")
+        model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$deleteeId")
         return "deleteLAUser"
     }
 
     @PostMapping("/$DELETE_USER_ROUTE")
     fun deleteUser(
         @PathVariable localAuthorityId: Int,
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable deleteeId: Long,
         principal: Principal,
         redirectAttributes: RedirectAttributes,
         request: HttpServletRequest,
     ): String {
-        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
-        val user = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+        throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, deleteeId, request)
+        val userBeingDeleted = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
+
+        localAuthorityDataService.deleteUser(userBeingDeleted)
 
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
             (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
@@ -184,30 +188,42 @@ class ManageLocalAuthorityUsersController(
             // If this happens we will need to update their user roles as the Manage LA Users page
             // will throw an error if they have the LA_ADMIN role but are no longer in the local_authority_users table.
             val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
-            if (currentUser.id == user.id) {
-                redirectAttributes.addFlashAttribute("currentUserDeletedThemself", true)
+            if (currentUser.id == userBeingDeleted.id) {
+                securityContextService.refreshContext()
             }
         }
 
-        localAuthorityDataService.deleteUser(localAuthorityUserId)
-
-        redirectAttributes.addFlashAttribute("deletedUserName", user.userName)
-        return "redirect:../$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+        localAuthorityDataService.addDeletedUserToSession(userBeingDeleted)
+        return "redirect:../$DELETE_USER_CONFIRMATION_ROUTE"
     }
 
-    @GetMapping("/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+    @GetMapping("/$DELETE_USER_CONFIRMATION_ROUTE")
     fun deleteUserSuccess(
         @PathVariable localAuthorityId: Int,
+        @PathVariable deleteeId: Long,
         model: Model,
         principal: Principal,
         request: HttpServletRequest,
     ): String {
+        val usersDeletedThisSession = localAuthorityDataService.getUsersDeletedThisSession()
+        val deletedUser =
+            usersDeletedThisSession.find { it.id == deleteeId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User with id $deleteeId was not found in the list of deleted users in the session",
+                )
+
+        if (localAuthorityDataService.getLocalAuthorityUserOrNull(deleteeId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "User with id $deleteeId is still in the local_authority_user table",
+            )
+        }
+
+        model.addAttribute("deletedUserName", deletedUser.name)
+
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
-        if (model.getAttribute("currentUserDeletedThemself") == true) {
-            // This will only update the roles of the current user so is only needed if they have deleted themself.
-            securityContextService.refreshContext()
-        }
         return "deleteLAUserSuccess"
     }
 
@@ -263,23 +279,32 @@ class ManageLocalAuthorityUsersController(
                 emailModel.email,
             )
 
-            redirectAttributes.addFlashAttribute("invitedEmailAddress", emailModel.email)
-            return "redirect:$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+            localAuthorityDataService.addInvitedLocalAuthorityUserToSession(localAuthorityId, emailModel.email)
+
+            return "redirect:$INVITE_USER_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
             return "inviteLAUser"
         }
     }
 
-    @GetMapping("/$INVITE_NEW_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
-    fun successInvitedNewUser(
+    @GetMapping("/$INVITE_USER_CONFIRMATION_ROUTE")
+    fun inviteNewUserConfirmation(
         @PathVariable localAuthorityId: Int,
         principal: Principal,
         model: Model,
         request: HttpServletRequest,
     ): String {
+        val invitedEmail =
+            localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(localAuthorityId)
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No email address found in the session for a user invited to local authority with id $localAuthorityId",
+                )
+
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+        model.addAttribute("invitedEmailAddress", invitedEmail)
         return "inviteLAUserSuccess"
     }
 
@@ -291,7 +316,11 @@ class ManageLocalAuthorityUsersController(
         model: Model,
         request: HttpServletRequest,
     ): String {
-        val invitation = invitationService.getInvitationById(invitationId)
+        val invitation =
+            invitationService.getInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+            )
 
         val authority = getLocalAuthority(principal, localAuthorityId, request)
 
@@ -314,7 +343,12 @@ class ManageLocalAuthorityUsersController(
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val invitation = invitationService.getInvitationById(invitationId)
+        val invitation =
+            invitationService.getInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+            )
+
         invitationService.deleteInvitation(invitationId)
 
         cancellationEmailSender.sendEmail(
@@ -322,16 +356,41 @@ class ManageLocalAuthorityUsersController(
             LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority),
         )
 
-        redirectAttributes.addFlashAttribute("deletedEmail", invitation.invitedEmail)
-        redirectAttributes.addFlashAttribute("localAuthority", invitation.invitingAuthority)
-        return "redirect:../$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+        localAuthorityDataService.addCancelledInvitationToSession(
+            invitation,
+        )
+
+        return "redirect:../$CANCEL_INVITE_CONFIRMATION_ROUTE"
     }
 
-    @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT")
+    @GetMapping("/$CANCEL_INVITE_CONFIRMATION_ROUTE")
     fun cancelInvitationSuccess(
-        @PathVariable localAuthorityId: String,
+        @PathVariable localAuthorityId: Int,
+        @PathVariable invitationId: Long,
         model: Model,
-    ): String = "cancelLAUserInvitationSuccess"
+        principal: Principal,
+        request: HttpServletRequest,
+    ): String {
+        val invitationsCancelledThisSession = localAuthorityDataService.getInvitationsCancelledThisSession()
+        val invitationIfDeleted =
+            invitationsCancelledThisSession.find { it.id == invitationId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
+                )
+        if (invitationService.getInvitationByIdOrNull(invitationId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Invitation with id $invitationId is still in the local_authority_invitations table",
+            )
+        }
+
+        model.addAttribute("deletedEmail", invitationIfDeleted.invitedEmail)
+
+        model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
+
+        return "cancelLAUserInvitationSuccess"
+    }
 
     private fun throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(
         principal: Principal,
@@ -391,15 +450,20 @@ class ManageLocalAuthorityUsersController(
     companion object {
         const val LOCAL_AUTHORITY_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}"
         const val EDIT_USER_ROUTE = "$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}"
-        const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{localAuthorityUserId}"
+        const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{deleteeId}"
+        const val DELETE_USER_CONFIRMATION_ROUTE = "$DELETE_USER_ROUTE/$CONFIRMATION_PATH_SEGMENT"
+        const val INVITE_USER_CONFIRMATION_ROUTE = "$INVITE_NEW_USER_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT"
         const val CANCEL_INVITE_ROUTE = "$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}"
+        const val CANCEL_INVITE_CONFIRMATION_ROUTE = "$CANCEL_INVITE_ROUTE/$CONFIRMATION_PATH_SEGMENT"
 
         private const val LA_MANAGE_USERS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$MANAGE_USERS_PATH_SEGMENT"
         private const val LA_EDIT_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$EDIT_USER_ROUTE"
         private const val LA_DELETE_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_ROUTE"
-        private const val LA_DELETE_USER_SUCCESS_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_PATH_SEGMENT/$SUCCESS_PATH_SEGMENT"
+        private const val LA_DELETE_USER_CONFIRMATION_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$DELETE_USER_CONFIRMATION_ROUTE"
         private const val LA_INVITE_NEW_USER_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT"
+        private const val LA_INVITE_NEW_USER_CONFIRMATION_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$INVITE_USER_CONFIRMATION_ROUTE"
         private const val LA_CANCEL_INVITE_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$CANCEL_INVITE_ROUTE"
+        private const val LA_CANCEL_INVITE_CONFIRMATION_ROUTE = "$LOCAL_AUTHORITY_ROUTE/$CANCEL_INVITE_CONFIRMATION_ROUTE"
 
         fun getLaManageUsersRoute(localAuthorityId: Int): String =
             UriTemplate(LA_MANAGE_USERS_ROUTE).expand(localAuthorityId).toASCIIString()
@@ -414,8 +478,16 @@ class ManageLocalAuthorityUsersController(
             localAuthorityUserId: Long,
         ): String = UriTemplate(LA_DELETE_USER_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
 
-        fun getLaDeleteUserSuccessRoute(localAuthorityId: Int): String =
-            UriTemplate(LA_DELETE_USER_SUCCESS_ROUTE).expand(localAuthorityId).toASCIIString()
+        fun getDeleteUserConfirmationRoute(deletedUserId: Long): String =
+            UriTemplate(DELETE_USER_CONFIRMATION_ROUTE).expand(deletedUserId).toASCIIString()
+
+        fun getLaDeleteUserSuccessRoute(
+            localAuthorityId: Int,
+            deletedUserId: Long,
+        ): String = UriTemplate(LA_DELETE_USER_CONFIRMATION_ROUTE).expand(localAuthorityId, deletedUserId).toASCIIString()
+
+        fun getLaInviteUserSuccessRoute(localAuthorityId: Int): String =
+            UriTemplate(LA_INVITE_NEW_USER_CONFIRMATION_ROUTE).expand(localAuthorityId).toASCIIString()
 
         fun getLaInviteNewUserRoute(localAuthorityId: Int): String =
             UriTemplate(LA_INVITE_NEW_USER_ROUTE).expand(localAuthorityId).toASCIIString()
@@ -424,5 +496,13 @@ class ManageLocalAuthorityUsersController(
             localAuthorityId: Int,
             localAuthorityUserId: Long,
         ): String = UriTemplate(LA_CANCEL_INVITE_ROUTE).expand(localAuthorityId, localAuthorityUserId).toASCIIString()
+
+        fun getCancelInviteConfirmationRoute(invitationId: Long): String =
+            UriTemplate(CANCEL_INVITE_CONFIRMATION_ROUTE).expand(invitationId).toASCIIString()
+
+        fun getLaCancelInviteSuccessRoute(
+            localAuthorityId: Int,
+            invitationId: Long,
+        ): String = UriTemplate(LA_CANCEL_INVITE_CONFIRMATION_ROUTE).expand(localAuthorityId, invitationId).toASCIIString()
     }
 }

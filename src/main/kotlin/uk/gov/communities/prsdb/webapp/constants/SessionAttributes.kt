@@ -25,3 +25,9 @@ const val SUBMITTED_PASSCODE = "submittedPasscode"
 const val PASSCODE_REDIRECT_URL = "passcodeRedirectUrl"
 
 const val HAS_USER_CLAIMED_A_PASSCODE = "hasUserClaimedAPasscode"
+
+const val LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION = "localCouncilUsersDeletedThisSession"
+
+const val LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION = "localCouncilInvitationsCancelledThisSession"
+
+const val LA_USERS_INVITED_THIS_SESSION = "laUsersInvitedThisSession"

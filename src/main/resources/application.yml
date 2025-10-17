@@ -59,10 +59,7 @@ notify:
 
 os:
   api-key: ${OS_API_KEY}
-  places:
-    base-url: https://api.os.uk/search/places/v1
-  downloads:
-    base-url: https://api.os.uk/downloads/v1
+  downloads.base-url: https://api.os.uk/downloads/v1
 
 epc:
   base-url: ${EPC_REGISTER_BASE_URL}

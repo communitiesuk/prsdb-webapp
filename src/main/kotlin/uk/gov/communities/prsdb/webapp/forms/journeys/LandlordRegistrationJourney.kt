@@ -33,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumb
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    val addressLookupService: AddressLookupService,
+    private val addressService: AddressService,
     val landlordService: LandlordService,
     val securityContextService: SecurityContextService,
 ) : Journey<LandlordRegistrationStepId>(
@@ -325,7 +325,7 @@ class LandlordRegistrationJourney(
                 ),
             nextStepIfAddressesFound = LandlordRegistrationStepId.SelectAddress,
             nextStepIfNoAddressesFound = LandlordRegistrationStepId.NoAddressFound,
-            addressLookupService = addressLookupService,
+            addressService = addressService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
         )
