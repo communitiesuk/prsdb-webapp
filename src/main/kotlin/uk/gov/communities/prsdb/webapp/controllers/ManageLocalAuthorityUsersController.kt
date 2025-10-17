@@ -225,6 +225,8 @@ class ManageLocalAuthorityUsersController(
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
+        model.addAttribute("returnToManageUsersUrl", getLaManageUsersRoute(localAuthorityId))
+
         return "deleteLAUserSuccess"
     }
 
@@ -389,6 +391,7 @@ class ManageLocalAuthorityUsersController(
         model.addAttribute("deletedEmail", invitationIfDeleted.invitedEmail)
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
+        model.addAttribute("returnToManageUsersUrl", getLaManageUsersRoute(localAuthorityId))
 
         return "cancelLAUserInvitationSuccess"
     }

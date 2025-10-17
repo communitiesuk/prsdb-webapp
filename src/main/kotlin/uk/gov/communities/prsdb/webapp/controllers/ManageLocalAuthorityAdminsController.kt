@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.InviteLocalAuthority
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -51,6 +52,7 @@ class ManageLocalAuthorityAdminsController(
     private val localAuthorityService: LocalAuthorityService,
     private val localAuthorityDataService: LocalAuthorityDataService,
     private val invitationEmailSender: EmailNotificationService<LocalAuthorityAdminInvitationEmail>,
+    private val cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>,
     private val invitationService: LocalAuthorityInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val securityContextService: SecurityContextService,
@@ -244,9 +246,75 @@ class ManageLocalAuthorityAdminsController(
 
         model.addAttribute("deletedUserName", deletedUser.name)
 
-        model.addAttribute("localAuthority", deletedUser.localAuthority.name)
+        model.addAttribute("localAuthority", deletedUser.localAuthority)
+
+        model.addAttribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
 
         return "deleteLAUserSuccess"
+    }
+
+    @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
+    fun cancelAdminInvitation(
+        @PathVariable invitationId: Long,
+        model: Model,
+    ): String {
+        val invitation =
+            invitationService.getInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+            )
+        model.addAttribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+        model.addAttribute("email", invitation.invitedEmail)
+
+        return "cancelLAUserInvitation"
+    }
+
+    @PostMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
+    fun cancelAdminInvitation(
+        @PathVariable invitationId: Long,
+    ): String {
+        val invitation =
+            invitationService.getInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+            )
+        invitationService.deleteInvitation(invitationId)
+
+        cancellationEmailSender.sendEmail(
+            invitation.invitedEmail,
+            LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority),
+        )
+
+        localAuthorityDataService.addCancelledInvitationToSession(
+            invitation,
+        )
+
+        return "redirect:../$CANCEL_INVITATION_PATH_SEGMENT/$invitationId/$CONFIRMATION_PATH_SEGMENT"
+    }
+
+    @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}/$CONFIRMATION_PATH_SEGMENT")
+    fun cancelAdminInvitationConfirmation(
+        @PathVariable invitationId: Long,
+        model: Model,
+    ): String {
+        val invitationsCancelledThisSession = localAuthorityDataService.getInvitationsCancelledThisSession()
+        val invitationIfDeleted =
+            invitationsCancelledThisSession.find { it.id == invitationId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
+                )
+        if (invitationService.getInvitationByIdOrNull(invitationId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Invitation with id $invitationId is still in the local_authority_invitations table",
+            )
+        }
+
+        model.addAttribute("deletedEmail", invitationIfDeleted.invitedEmail)
+        model.addAttribute("localAuthority", invitationIfDeleted.invitingAuthority)
+        model.addAttribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
+        return "cancelLAUserInvitationSuccess"
     }
 
     private fun getIsCurrentUserBeingDeletedAsAdmin(

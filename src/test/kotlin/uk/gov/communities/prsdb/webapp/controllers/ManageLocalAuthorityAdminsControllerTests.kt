@@ -15,11 +15,13 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.net.URI
@@ -40,10 +42,16 @@ class ManageLocalAuthorityAdminsControllerTests(
     lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean
+    lateinit var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>
+
+    @MockitoBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
 
     @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    lateinit var securityContextService: SecurityContextService
 
     @Test
     fun `inviteLocalAuthorityAdmin redirects unauthenticated users`() {
