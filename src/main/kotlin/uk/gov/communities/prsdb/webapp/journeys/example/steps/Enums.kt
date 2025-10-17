@@ -1,9 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
-enum class Complete {
-    COMPLETE,
-}
-
 enum class YesOrNo {
     YES,
     NO,

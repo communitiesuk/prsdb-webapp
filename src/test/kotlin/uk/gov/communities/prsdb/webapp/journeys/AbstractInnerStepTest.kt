@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
 class AbstractInnerStepTest {

@@ -10,12 +10,12 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyBuilderException
+import uk.gov.communities.prsdb.webapp.journeys.Complete
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import kotlin.test.assertEquals
 
 class StepBuilderTest {

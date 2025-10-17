@@ -60,14 +60,7 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
     }
 
     val isStepReachable: Boolean
-        get() {
-            val override = isStepReachableOverride
-            return if (override != null) {
-                override()
-            } else {
-                parentage.allowsChild()
-            }
-        }
+        get() = parentage.allowsChild()
 
     fun validateSubmittedData(formData: PageData): BindingResult =
         formData.let {
@@ -127,8 +120,6 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         }
 
     val routeSegment: String get() = innerStep.routeSegment
-
-    private var isStepReachableOverride: (() -> Boolean)? = null
 
     val initialisationStage: StepInitialisationStage
         get() =
