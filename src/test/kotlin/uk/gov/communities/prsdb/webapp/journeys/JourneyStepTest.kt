@@ -25,7 +25,7 @@ class JourneyStepTest {
     @Test
     fun `step is reachable if its parentage allows it`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(true)
         step.initialize(
@@ -47,7 +47,7 @@ class JourneyStepTest {
     @Test
     fun `step is not reachable if its parentage does not allow it`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(false)
         step.initialize(
@@ -69,7 +69,7 @@ class JourneyStepTest {
     @Test
     fun `validateSubmittedData binds valid data to form model with no errors`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         whenever(step.innerStep.formModelClazz).thenReturn(TestFormModel::class)
         whenever(step.innerStep.validator).thenReturn(AlwaysTrueValidator())
         val formData = mapOf("field" to "value")
@@ -94,7 +94,7 @@ class JourneyStepTest {
     @Test
     fun `validateSubmittedData binds invalid data to form model with errors`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         whenever(step.innerStep.validator).thenReturn(AlwaysFalseValidator())
         whenever(step.innerStep.formModelClazz).thenReturn(TestFormModel::class)
         val formData = mapOf("field" to "value")
@@ -119,7 +119,7 @@ class JourneyStepTest {
     @Test
     fun `getPageVisitContent adds back link and an empty form model to the content when there's no submitted data`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         whenever(step.innerStep.formModelClazz).thenReturn(TestFormModel::class)
         step.initialize(
             "stepId",
@@ -141,7 +141,7 @@ class JourneyStepTest {
     @Test
     fun `getPageVisitContent adds back link and existing form model to the content when there's submitted data`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         val existingFormModel = TestFormModel().apply { field = "existingValue" }
         whenever(step.innerStep.getFormModelFromState(anyOrNull())).thenReturn(existingFormModel)
         step.initialize(
@@ -165,7 +165,7 @@ class JourneyStepTest {
     @Test
     fun `getInvalidSubmissionContent adds back link and submitted form model with errors`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         whenever(step.innerStep.formModelClazz).thenReturn(TestFormModel::class)
         step.initialize(
             "stepId",
@@ -188,7 +188,7 @@ class JourneyStepTest {
     @Test
     fun `submitFormData saves bindingResult target as form data in journey state`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         whenever(step.innerStep.formModelClazz).thenReturn(TestFormModel::class)
         whenever(step.innerStep.routeSegment).thenReturn("stepId")
         val state = mock<DynamicJourneyState>()
@@ -214,8 +214,8 @@ class JourneyStepTest {
     @Test
     fun `if the step is accessible, the outcome is the inner steps mode`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
-        whenever(step.innerStep.mode(any())).thenReturn(Complete.COMPLETE)
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
+        whenever(step.innerStep.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(true)
 
@@ -238,8 +238,8 @@ class JourneyStepTest {
     @Test
     fun `if the step is not accessible, the outcome is null`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
-        whenever(step.innerStep.mode(any())).thenReturn(Complete.COMPLETE)
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
+        whenever(step.innerStep.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(false)
 
@@ -262,8 +262,8 @@ class JourneyStepTest {
     @Test
     fun `determine redirect returns the result of the redirectProvider if the inner step's mode is not null`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
-        whenever(step.innerStep.mode(any())).thenReturn(Complete.COMPLETE)
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
+        whenever(step.innerStep.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
 
         step.initialize(
             "stepId",
@@ -284,7 +284,7 @@ class JourneyStepTest {
     @Test
     fun `determine redirect returns the route segment if the inner step's mode is null`() {
         // Arrange
-        val step = JourneyStep<Complete, TestFormModel, DynamicJourneyState>(mock())
+        val step = JourneyStep<TestEnum, TestFormModel, DynamicJourneyState>(mock())
         whenever(step.innerStep.mode(any())).thenReturn(null)
         whenever(step.innerStep.routeSegment).thenReturn("stepId")
 

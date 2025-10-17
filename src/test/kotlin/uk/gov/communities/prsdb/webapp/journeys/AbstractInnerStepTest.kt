@@ -17,7 +17,7 @@ class AbstractInnerStepTest {
         var otherField: Long? = null
     }
 
-    class TestInnerStep : AbstractInnerStep<Complete, TestFormModel, DynamicJourneyState>() {
+    class TestInnerStep : AbstractInnerStep<TestEnum, TestFormModel, DynamicJourneyState>() {
         override fun getStepSpecificContent(state: DynamicJourneyState): Map<String, Any?> = mapOf()
 
         override fun chooseTemplate(): String = "template"
@@ -26,7 +26,7 @@ class AbstractInnerStepTest {
 
         override fun isSubClassInitialised(): Boolean = true
 
-        override fun mode(state: DynamicJourneyState): Complete = Complete.COMPLETE
+        override fun mode(state: DynamicJourneyState): TestEnum = TestEnum.ENUM_VALUE
     }
 
     @Test

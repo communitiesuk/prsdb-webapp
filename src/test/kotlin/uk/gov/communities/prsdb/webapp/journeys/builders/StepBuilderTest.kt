@@ -10,19 +10,19 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyBuilderException
-import uk.gov.communities.prsdb.webapp.journeys.Complete
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
+import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import kotlin.test.assertEquals
 
 class StepBuilderTest {
     @Test
     fun `a stepBuilder will not accept a step that has already been initialised`() {
         // Arrange
-        val stepMock = mock<JourneyStep<Complete, *, DynamicJourneyState>>()
+        val stepMock = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
         whenever(stepMock.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
 
         // Act & Assert
@@ -121,7 +121,7 @@ class StepBuilderTest {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepBuilder("test", stepMock)
-        val redirectLambda = { _: Complete -> "expectedRedirect" }
+        val redirectLambda = { _: TestEnum -> "expectedRedirect" }
         builder.redirectToUrl(redirectLambda)
 
         // Act
@@ -143,17 +143,17 @@ class StepBuilderTest {
         // Arrange
         val stepMock = mockInitialisableStep()
         val nextStepSegment = "nextStepSegment"
-        val nextStepMock = mock<JourneyStep<Complete, *, DynamicJourneyState>>()
+        val nextStepMock = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
 
         val builder = StepBuilder("test", stepMock)
-        builder.redirectToStep { _: Complete -> nextStepMock }
+        builder.redirectToStep { _: TestEnum -> nextStepMock }
 
         // Act
         builder.build(mock(), mock())
 
         // Assert
-        val lambdaCaptor = argumentCaptor<(Complete) -> String>()
+        val lambdaCaptor = argumentCaptor<(TestEnum) -> String>()
         verify(stepMock).initialize(
             anyOrNull(),
             anyOrNull(),
@@ -162,7 +162,7 @@ class StepBuilderTest {
             anyOrNull(),
             anyOrNull(),
         )
-        val result = lambdaCaptor.firstValue(Complete.COMPLETE)
+        val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
         assertEquals(nextStepSegment, result)
     }
 
@@ -331,7 +331,7 @@ class StepBuilderTest {
     }
 
     private fun mockInitialisableStep() =
-        mock<JourneyStep<Complete, *, DynamicJourneyState>>().apply {
+        mock<JourneyStep<TestEnum, *, DynamicJourneyState>>().apply {
             whenever(
                 this.initialisationStage,
             ).thenReturn(

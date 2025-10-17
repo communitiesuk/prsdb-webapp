@@ -16,3 +16,7 @@ enum class EpcSearchResult {
     SUPERSEDED,
     NOT_FOUND,
 }
+
+enum class Complete {
+    COMPLETE,
+}

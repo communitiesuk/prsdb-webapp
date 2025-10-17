@@ -1,5 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-enum class Complete {
-    COMPLETE,
+enum class TestEnum {
+    ENUM_VALUE,
 }

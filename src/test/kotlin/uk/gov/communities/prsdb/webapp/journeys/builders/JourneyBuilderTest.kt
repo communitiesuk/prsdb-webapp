@@ -16,11 +16,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyBuilderException
-import uk.gov.communities.prsdb.webapp.journeys.Complete
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 
 class JourneyBuilderTest {
@@ -30,7 +30,7 @@ class JourneyBuilderTest {
     fun setup() {
         mockedStepBuilders =
             mockConstruction(StepBuilder::class.java) { mock, context ->
-                val mockedJourneyStep = mock<JourneyStep<Complete, *, DynamicJourneyState>>()
+                val mockedJourneyStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
                 whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                 whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
                 whenever((mock as StepBuilder<*, DynamicJourneyState, *>).build(anyOrNull(), anyOrNull())).thenReturn(mockedJourneyStep)
@@ -106,7 +106,7 @@ class JourneyBuilderTest {
     fun `step method creates and inits a stepBuilder, which is built when the journey is built`() {
         // Arrange 1
         val jb = JourneyBuilder(mock())
-        val uninitialisedStep = mock<JourneyStep<Complete, *, DynamicJourneyState>>()
+        val uninitialisedStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
 
         // Act 1
         jb.step("segment", uninitialisedStep) {
@@ -120,7 +120,7 @@ class JourneyBuilderTest {
         verify(mockStepBuilder).stepSpecificInitialisation(any())
 
         // Arrange 2
-        val builtStep = mock<JourneyStep<Complete, *, DynamicJourneyState>>()
+        val builtStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
         whenever(mockStepBuilder.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
 
         // Act 2
@@ -137,10 +137,10 @@ class JourneyBuilderTest {
     fun `steps must only have potential parents that are initialised before them in the journey dsl`() {
         // Arrange
         val jb = JourneyBuilder(mock())
-        jb.step("A", mock<JourneyStep<Complete, *, DynamicJourneyState>>()) {}
+        jb.step("A", mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()) {}
 
         val stepBuilder = mockedStepBuilders.constructed().last() as StepBuilder<*, DynamicJourneyState, *>
-        val mockJourneyStep = mock<JourneyStep<Complete, *, DynamicJourneyState>>()
+        val mockJourneyStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
         whenever(mockJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.PARTIALLY_INITIALISED)
         whenever(mockJourneyStep.routeSegment).thenReturn("route")
         whenever(stepBuilder.potentialParents).thenReturn(listOf(mockJourneyStep))
