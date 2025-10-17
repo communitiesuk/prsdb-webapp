@@ -21,10 +21,12 @@
     <script defer th:attr="data-domain=${plausibleDomainId}" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
     <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
     <script th:inline="javascript">
+        window.pageLoadCount = (window.pageLoadCount || 0) + 1;
         const referrer = [[${plausibleEventReferrer}]];
         const currentUrl = [[${plausibleEventCurrentUrl}]];
         console.log("Referrer header:", referrer);
         console.log("Current URL:", currentUrl);
+        console.log("Page load count:", window.pageLoadCount);
     </script>
 </head>
 <script>
