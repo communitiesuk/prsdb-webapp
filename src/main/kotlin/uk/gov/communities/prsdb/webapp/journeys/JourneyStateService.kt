@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 
+// TODO: PRSD-1546 - refactor to use session directly over JourneyDataService and write test
 class JourneyStateService(
     private val journeyDataService: JourneyDataService,
 ) {
