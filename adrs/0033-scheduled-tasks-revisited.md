@@ -1,18 +1,17 @@
-TODO: Update ADR number
-
 # ADR-0033: Scheduled tasks revisited
 
 ## Status
 
-Proposed
+Accepted
 
-Date of decision: {yyyy-MM-dd}
+Date of decision: 2025-10-17
 
 ## Context and Problem Statement
 
 We need multiple different jobs that will run periodically, e.g. cleaning up old partial property registrations, sending
 out various different reminders to users etc. We previously decided to run these as ephemeral copies of the WebApp container
-triggered by Eventbridge Scheduler [{ADR-0029}](0029-scheduled-tasks.md). However, this approach has some limitations:
+triggered by Eventbridge Scheduler [ADR-0029](https://github.com/communitiesuk/prsdb-webapp/blob/main/adrs/0029-scheduled-tasks.md).
+However, this approach has some limitations:
 
 * There is a limit of 10 instances of each task definition at once, so if we have a large number of scheduled tasks that all run at the same
   time, some of them may fail to start.
@@ -64,15 +63,13 @@ up when there are tasks to process and scale down to zero when there are no task
 * Good, because it would be easy to trigger asynchronous tasks using either Eventbridge Scheduler or by adding a message to the queue from
   the WebApp.
 * Bad, because it would require some changes to our existing code to poll the queue for messages instead of receiving them via an
-  environment
-  variable.
+  environment variable.
 * Bad, because it would require creating a custom scaling rule for the ECS service, which is more complex than using the built-in scaling
   rules.
 
 ### Switching to Lambda functions
 
-We could split out each scheduled task into a separate Lambda function, which would be triggered by Eventbridge Schedulers. Each Lambda
-function
+We could split out each scheduled task into a separate Lambda function, which would be triggered by Eventbridge Schedulers.
 
 * Good, because we wouldn't need to worry about scaling rules.
 * Good, because we would only be using resources when a task is actually running.
