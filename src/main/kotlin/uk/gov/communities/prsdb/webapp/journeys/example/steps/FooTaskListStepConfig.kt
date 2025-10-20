@@ -28,12 +28,12 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
                         TaskListItemViewModel(
                             "OccupationTask",
                             TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            url = state.occupied?.routeSegment,
+                            url = journeyUrl(state.occupied.routeSegment, state.journeyId),
                         ),
                         TaskListItemViewModel(
                             "EpcTask",
                             TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            url = state.epcQuestion?.routeSegment,
+                            url = journeyUrl(state.epcQuestion.routeSegment, state.journeyId),
                         ),
                     ),
                 ),

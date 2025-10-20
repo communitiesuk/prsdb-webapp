@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateServiceFactory
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -35,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
 class FooExampleJourneyFactory(
@@ -50,7 +50,7 @@ class FooExampleJourneyFactory(
     val checkAutomatchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
     val checkSearchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
     private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStepConfig>,
-    private val journeyDataServiceFactory: JourneyDataServiceFactory,
+    private val journeyStateServiceFactory: JourneyStateServiceFactory,
 ) {
     final fun createJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> =
         journey(createDynamicState(journeyId)) {
@@ -170,16 +170,15 @@ class FooExampleJourneyFactory(
             JourneyStep(epcSupersededFactory.getObject()),
             JourneyStep(checkSearchedEpcFactory.getObject()),
             JourneyStep(fooCheckYourAnswersStepFactory.getObject()),
-            JourneyStateService(journeyDataServiceFactory.create(journeyId)),
+            journeyStateServiceFactory.createForExistingJourney(journeyId),
         )
 
-    final fun journeyStateInitialisation(
-        journeyId: String,
-        propertyId: Long,
-    ) {
-        JourneyStateService(
-            journeyDataServiceFactory.create(journeyId),
-        ).setValue("propertyId", Json.encodeToString(serializer(), propertyId))
+    final fun initializeJourneyState(propertyId: Long): String {
+        val journeyId = propertyId.hashCode().toString()
+        journeyStateServiceFactory
+            .createForNewJourney(journeyId)
+            .setValue("propertyId", Json.encodeToString(serializer(), propertyId))
+        return journeyId
     }
 }
 

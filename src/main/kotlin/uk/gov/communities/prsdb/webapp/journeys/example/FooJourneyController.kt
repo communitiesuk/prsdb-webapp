@@ -18,9 +18,11 @@ class FooJourneyController(
     fun getStep(
         @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
+        @RequestParam("journeyId", required = false) journeyId: String?,
     ): ModelAndView {
-        journeyFactory.journeyStateInitialisation(propertyId.toString(), propertyId)
-        return journeyFactory.createJourneySteps(propertyId.toString())[stepName]?.getStepModelAndView()
+        val journeyId = journeyId ?: journeyFactory.initializeJourneyState(propertyId)
+
+        return journeyFactory.createJourneySteps(journeyId)[stepName]?.getStepModelAndView()
             ?: throw Exception("Step not found")
     }
 
@@ -28,6 +30,7 @@ class FooJourneyController(
     fun postStep(
         @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
+        @RequestParam("journeyId", required = false) journeyId: String?,
         @RequestParam formData: PageData,
     ): ModelAndView =
         journeyFactory.createJourneySteps(propertyId.toString())[stepName]?.postStepModelAndView(formData)

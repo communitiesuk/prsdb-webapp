@@ -1,14 +1,41 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import jakarta.servlet.http.HttpSession
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
+import java.util.UUID
+
+@PrsdbWebService
+class JourneyStateServiceFactory(
+    private val session: HttpSession,
+) {
+    fun createForNewJourney(journeyId: String): JourneyStateService {
+        val journeyStateMetadataMap = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
+        val journeyDataKey = UUID.randomUUID().toString()
+        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, journeyStateMetadataMap + (journeyId to journeyDataKey))
+        return JourneyStateService(session, journeyDataKey, journeyId)
+    }
+
+    fun createForExistingJourney(journeyId: String): JourneyStateService {
+        val journeyStateMetadataMap = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
+        val journeyDataKey = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
+        return JourneyStateService(session, journeyDataKey, journeyId)
+    }
+
+    companion object {
+        const val JOURNEY_STATE_KEY_STORE_KEY = "journeyStateKeyStore"
+    }
+}
 
 // TODO: PRSD-1546 - refactor to use session directly over JourneyDataService and write test
 class JourneyStateService(
-    private val journeyDataService: JourneyDataService,
+    private val session: HttpSession,
+    private val journeyDataKey: String,
+    val journeyId: String,
 ) {
-    fun getValue(key: String): Any? = journeyDataService.getJourneyDataFromSession()[key]
+    fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyDataKey))?.get(key)
 
     fun addSingleStepData(
         key: String,
@@ -24,11 +51,12 @@ class JourneyStateService(
         key: String,
         value: Any?,
     ) {
-        journeyDataService.addToJourneyDataIntoSession(mapOf(key to value))
+        val journeyState = objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
+        session.setAttribute(journeyDataKey, journeyState + (key to value))
     }
 
     fun deleteState() {
-        journeyDataService.deleteJourneyData()
+        session.removeAttribute(journeyDataKey)
     }
 
     companion object {

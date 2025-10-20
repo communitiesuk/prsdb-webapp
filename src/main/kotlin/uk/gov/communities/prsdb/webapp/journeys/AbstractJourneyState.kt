@@ -17,6 +17,9 @@ abstract class AbstractJourneyState(
         value: PageData,
     ) = journeyStateService.addSingleStepData(key, value)
 
+    override val journeyId: String
+        get() = journeyStateService.journeyId
+
     fun <TJourney : AbstractJourneyState, TProperty : Any> mutableDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
