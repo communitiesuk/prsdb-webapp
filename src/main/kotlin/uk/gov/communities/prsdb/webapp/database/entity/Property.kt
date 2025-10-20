@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -28,7 +27,7 @@ class Property(
     lateinit var propertyBuildType: PropertyType
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "address_id", nullable = false, foreignKey = ForeignKey(name = "FK_PROPERTY_ADDRESS"))
+    @JoinColumn(name = "address_id", nullable = false, unique = true)
     lateinit var address: Address
         private set
 

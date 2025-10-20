@@ -7,5 +7,4 @@ jobs:
     uses: ./.github/workflows/reset-database.yml
     with:
       environment: integration
-      branch: main
       aws-account-id: 794038239680

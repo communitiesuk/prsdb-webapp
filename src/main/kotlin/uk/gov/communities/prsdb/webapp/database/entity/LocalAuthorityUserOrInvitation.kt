@@ -39,7 +39,7 @@ class LocalAuthorityUserOrInvitation() {
         private set
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "local_authority_id", referencedColumnName = "id")
+    @JoinColumn(name = "local_authority_id", referencedColumnName = "id", nullable = false)
     lateinit var localAuthority: LocalAuthority
         private set
 
