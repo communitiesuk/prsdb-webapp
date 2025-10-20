@@ -144,7 +144,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         countryOfResidencePage.submitUk()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
         selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
@@ -154,7 +154,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualAddressPage.submitAddress(
             addressLineOne = "1 Example Road",
             townOrCity = "Townville",
-            postcode = "EG1 2AB",
+            postcode = "EG1 2AA",
         )
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
