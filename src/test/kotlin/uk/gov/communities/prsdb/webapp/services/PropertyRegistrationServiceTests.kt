@@ -683,30 +683,31 @@ class PropertyRegistrationServiceTests {
         }
 
         @Test
-        fun `getIncompletePropertyFormContextsDeletedThisSession returns the list of contextIds deleted this session`() {
+        fun `getIncompletePropertyWasDeletedThisSession returns true when the form context was deleted this session`() {
             // Arrange
-            val expectedList = listOf(1L, 2L)
             whenever(mockSession.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION))
-                .thenReturn(expectedList)
+                .thenReturn(listOf(1L, 2L, 3L))
 
             // Act
-            val result = propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession()
+            val wasDeleted =
+                propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(2L)
 
             // Assert
-            assertEquals(expectedList, result)
+            assertTrue(wasDeleted)
         }
 
         @Test
-        fun `getIncompletePropertyFormContextsDeletedThisSession returns an empty list if no contextIds have been deleted this session`() {
+        fun `getIncompletePropertyWasDeletedThisSession returns false when the form context was not deleted this session`() {
             // Arrange
             whenever(mockSession.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION))
-                .thenReturn(null)
+                .thenReturn(listOf(1L, 2L, 3L))
 
             // Act
-            val result = propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession()
+            val wasDeleted =
+                propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(4L)
 
             // Assert
-            assertEquals(emptyList<Long>(), result)
+            assertFalse(wasDeleted)
         }
 
         @Test

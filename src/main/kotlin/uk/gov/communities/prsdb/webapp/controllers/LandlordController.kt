@@ -161,7 +161,7 @@ class LandlordController(
         model: Model,
         @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
     ): String {
-        if (!propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession().contains(contextId)) {
+        if (!propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(contextId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Invitation with id $contextId was not found in the list of cancelled incomplete property registrations in the session",

@@ -262,6 +262,9 @@ class LandlordControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 404 if the requested form context id is not in the session`() {
+            whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
+                .thenReturn(false)
+
             mvc
                 .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))
                 .andExpect {
@@ -272,8 +275,8 @@ class LandlordControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 500 if the requested form context is still in the database`() {
-            whenever(propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession())
-                .thenReturn(mutableListOf(defaultContextId))
+            whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
+                .thenReturn(true)
 
             whenever(propertyRegistrationService.getFormContextByIdOrNull(defaultContextId)).thenReturn(FormContext())
 
@@ -287,8 +290,8 @@ class LandlordControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 200 if the requested form context was deleted in this session`() {
-            whenever(propertyRegistrationService.getIncompletePropertyFormContextsDeletedThisSession())
-                .thenReturn(mutableListOf(defaultContextId))
+            whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
+                .thenReturn(true)
 
             mvc
                 .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))
