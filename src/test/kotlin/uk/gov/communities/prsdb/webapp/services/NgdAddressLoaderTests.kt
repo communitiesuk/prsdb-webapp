@@ -29,6 +29,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
+import org.springframework.core.env.Environment
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
@@ -57,6 +58,9 @@ class NgdAddressLoaderTests {
 
     @Mock
     private lateinit var mockLocalAuthorityRepository: LocalAuthorityRepository
+
+    @Mock
+    private lateinit var mockEnvironment: Environment
 
     @InjectMocks
     private lateinit var ngdAddressLoader: NgdAddressLoader
@@ -87,6 +91,8 @@ class NgdAddressLoaderTests {
             work.execute(mockConnection)
             null
         }
+
+        whenever(mockEnvironment.activeProfiles).thenReturn(arrayOf("local"))
     }
 
     private fun setUpMockNgdAddressLoaderRepository(mockInitializer: (mock: NgdAddressLoaderRepository) -> Unit) {

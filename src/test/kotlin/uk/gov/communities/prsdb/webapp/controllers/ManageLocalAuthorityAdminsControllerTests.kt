@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
@@ -31,6 +32,9 @@ class ManageLocalAuthorityAdminsControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     lateinit var localAuthorityService: LocalAuthorityService
+
+    @MockitoBean
+    lateinit var localAuthorityDataService: LocalAuthorityDataService
 
     @MockitoBean
     lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
