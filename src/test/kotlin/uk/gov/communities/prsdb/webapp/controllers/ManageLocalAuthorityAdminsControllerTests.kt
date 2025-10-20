@@ -15,7 +15,6 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
@@ -40,9 +39,6 @@ class ManageLocalAuthorityAdminsControllerTests(
 
     @MockitoBean
     lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
-
-    @MockitoBean
-    lateinit var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>
 
     @MockitoBean
     lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
