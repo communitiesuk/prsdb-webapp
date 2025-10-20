@@ -76,6 +76,15 @@ class LocalAuthorityInvitationService(
 
     fun getInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? = invitationRepository.findById(id).orElse(null)
 
+    fun getAdminInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? {
+        val invitation = getInvitationByIdOrNull(id)
+        return if (invitation?.invitedAsAdmin == true) {
+            invitation
+        } else {
+            null
+        }
+    }
+
     fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
         val expiresAtInstant =
             invitation.createdDate
