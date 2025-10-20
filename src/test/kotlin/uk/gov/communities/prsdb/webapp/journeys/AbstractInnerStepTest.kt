@@ -20,7 +20,7 @@ class AbstractInnerStepTest {
     class TestInnerStep : AbstractInnerStep<TestEnum, TestFormModel, DynamicJourneyState>() {
         override fun getStepSpecificContent(state: DynamicJourneyState): Map<String, Any?> = mapOf()
 
-        override fun chooseTemplate(): String = "template"
+        override fun chooseTemplate(state: DynamicJourneyState): String = "template"
 
         override val formModelClazz = TestFormModel::class
 

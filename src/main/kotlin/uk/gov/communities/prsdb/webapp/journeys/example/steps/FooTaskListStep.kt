@@ -47,7 +47,7 @@ class FooTaskListStep : AbstractUninitialisableInnerStep<Complete, NoInputFormMo
         )
     }
 
-    override fun chooseTemplate(): String = "taskList"
+    override fun chooseTemplate(state: FooJourney): String = "taskList"
 
     override fun mode(state: FooJourney): Nothing? = null
 }

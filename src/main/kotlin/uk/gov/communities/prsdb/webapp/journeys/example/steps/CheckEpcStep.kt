@@ -39,7 +39,7 @@ class CheckEpcStep(
             )
         } ?: emptyMap()
 
-    override fun chooseTemplate(): String = "forms/checkMatchedEpcForm"
+    override fun chooseTemplate(state: EpcJourneyState): String = "forms/checkMatchedEpcForm"
 
     override fun mode(state: EpcJourneyState): YesOrNo? =
         getFormModelFromState(state)?.let {

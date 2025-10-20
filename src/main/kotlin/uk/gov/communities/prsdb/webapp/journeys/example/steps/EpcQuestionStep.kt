@@ -47,7 +47,7 @@ class EpcQuestionStep(
                 ),
         )
 
-    override fun chooseTemplate(): String = "forms/certificateForm"
+    override fun chooseTemplate(state: EpcJourneyState): String = "forms/certificateForm"
 
     override fun afterSubmitFormData(state: EpcJourneyState) {
         super.afterSubmitFormData(state)

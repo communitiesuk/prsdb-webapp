@@ -86,7 +86,7 @@ class FooCheckAnswersStep(
         )
     }
 
-    override fun chooseTemplate(): String = "forms/checkAnswersForm"
+    override fun chooseTemplate(state: FooJourney): String = "forms/checkAnswersForm"
 
     override fun mode(state: FooJourney): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }

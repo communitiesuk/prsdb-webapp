@@ -32,7 +32,7 @@ class OccupiedStep : AbstractUninitialisableInnerStep<YesOrNo, OccupancyFormMode
                 ),
         )
 
-    override fun chooseTemplate(): String = "forms/propertyOccupancyForm"
+    override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/propertyOccupancyForm"
 
     override fun mode(state: OccupiedJourneyState): YesOrNo? =
         getFormModelFromState(state)?.occupied?.let {

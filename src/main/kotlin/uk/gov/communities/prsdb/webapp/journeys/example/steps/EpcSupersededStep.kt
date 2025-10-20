@@ -17,7 +17,7 @@ class EpcSupersededStep : AbstractUninitialisableInnerStep<Complete, NoInputForm
             "certificateNumber" to state.searchForEpc?.formModel?.certificateNumber,
         )
 
-    override fun chooseTemplate(): String = "forms/epcSupersededForm"
+    override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcSupersededForm"
 
     override fun mode(state: EpcJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }

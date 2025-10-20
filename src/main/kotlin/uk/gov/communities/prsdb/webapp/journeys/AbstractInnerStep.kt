@@ -14,7 +14,7 @@ import kotlin.reflect.full.createInstance
 abstract class AbstractInnerStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState> {
     abstract fun getStepSpecificContent(state: TState): Map<String, Any?>
 
-    abstract fun chooseTemplate(): String
+    abstract fun chooseTemplate(state: TState): String
 
     abstract val formModelClazz: KClass<TFormModel>
 

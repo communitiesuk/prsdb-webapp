@@ -29,7 +29,7 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         innerStep.beforeGetStepContent(state)
     }
 
-    fun chooseTemplate(): String = innerStep.chooseTemplate()
+    fun chooseTemplate(): String = innerStep.chooseTemplate(state)
 
     fun afterGetStepContent() {
         innerStep.afterGetStepContent(state)

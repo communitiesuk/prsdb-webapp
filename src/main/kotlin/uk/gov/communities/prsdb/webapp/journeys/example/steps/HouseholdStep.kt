@@ -18,7 +18,7 @@ class HouseholdStep : AbstractUninitialisableInnerStep<Complete, NumberOfHouseho
             "label" to "forms.numberOfHouseholds.label",
         )
 
-    override fun chooseTemplate(): String = "forms/numberOfHouseholdsForm"
+    override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfHouseholdsForm"
 
     override fun mode(state: OccupiedJourneyState) = getFormModelFromState(state)?.numberOfHouseholds?.let { Complete.COMPLETE }
 }

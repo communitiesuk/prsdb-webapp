@@ -23,7 +23,7 @@ class EpcNotFoundStep : AbstractUninitialisableInnerStep<Complete, NoInputFormMo
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
-    override fun chooseTemplate(): String = "forms/epcNotFoundForm"
+    override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcNotFoundForm"
 
     override fun mode(state: EpcJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
 }
