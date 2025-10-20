@@ -205,4 +205,35 @@ class LocalAuthorityInvitationServiceTests {
 
         assertNull(inviteService.getInvitationByIdOrNull(testId))
     }
+
+    @Test
+    fun `getAdminInvitationByIdOrNull returns an invitation if the id is in the database and it is admin`() {
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(invitedAsAdmin = true)
+
+        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalAuthorityInvitation?>)
+
+        val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
+
+        assertEquals(invitation, result)
+    }
+
+    @Test
+    fun `getAdminInvitationByIdOrNull returns null if the id is not in the database`() {
+        val notExistingInvitationId = 123.toLong()
+
+        val result = inviteService.getAdminInvitationByIdOrNull(notExistingInvitationId)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getAdminInvitationByIdOrNull returns an null if the id is in the database and it is NOT admin`() {
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(invitedAsAdmin = false)
+
+        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalAuthorityInvitation?>)
+
+        val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
+
+        assertNull(result)
+    }
 }

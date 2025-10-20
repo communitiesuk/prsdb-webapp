@@ -116,10 +116,9 @@ class ManageLocalAuthorityAdminsController(
 
     @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
     fun confirmation(model: Model): String {
-        if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localAuthorityName") == null)
-            {
-                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing attributes, has the user navigated directly to this page?")
-            }
+        if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localAuthorityName") == null) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing attributes, has the user navigated directly to this page?")
+        }
 
         model.addAttribute("inviteAnotherUserUrl", INVITE_LA_ADMIN_ROUTE)
         // TODO PRSD-672: Add link to the system operator dashboard

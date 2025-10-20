@@ -47,7 +47,6 @@ class FilterPanelViewModelTests {
     private fun FilterPanelViewModel.getSelectedOptionLabelsForFilter(filterSearchRequestProperty: String) =
         filters.single { it.searchRequestProperty == filterSearchRequestProperty }.selectedOptions.map { it.labelMsgOrVal }
 
-    // TODO PRSD-1351 Use this to mock the request in tests to pass to page
     private lateinit var mockHttpServletRequest: MockHttpServletRequest
     private lateinit var searchRequestModel: TestSearchRequestModel
 
