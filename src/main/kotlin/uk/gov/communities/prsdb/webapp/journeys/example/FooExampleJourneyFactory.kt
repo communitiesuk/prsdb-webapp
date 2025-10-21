@@ -156,6 +156,7 @@ class FooExampleJourneyFactory(
             }
         }
 
+    // TODO PRSD-1546: Reduce boilerplate by relying on dependency injection to extract journey id from request
     private fun createDynamicState(journeyId: String) =
         FooJourney(
             JourneyStep(taskListStepFactory.getObject()),
