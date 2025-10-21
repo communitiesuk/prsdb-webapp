@@ -10,7 +10,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
@@ -22,7 +22,7 @@ class StepInitialiserTests {
     @Test
     fun `a stepBuilder will not accept a step that has already been initialised`() {
         // Arrange
-        val stepMock = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
+        val stepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
         whenever(stepMock.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
 
         // Act & Assert
@@ -143,7 +143,7 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val nextStepSegment = "nextStepSegment"
-        val nextStepMock = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
+        val nextStepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
 
         val builder = StepInitialiser("test", stepMock)
@@ -331,7 +331,7 @@ class StepInitialiserTests {
     }
 
     private fun mockInitialisableStep() =
-        mock<JourneyStep<TestEnum, *, DynamicJourneyState>>().apply {
+        mock<JourneyStep<TestEnum, *, JourneyState>>().apply {
             whenever(
                 this.initialisationStage,
             ).thenReturn(

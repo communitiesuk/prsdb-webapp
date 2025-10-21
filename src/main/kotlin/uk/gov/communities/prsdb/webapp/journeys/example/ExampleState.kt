@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
-import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -11,13 +11,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 
-interface OccupiedJourneyState : DynamicJourneyState {
+interface OccupiedJourneyState : JourneyState {
     val occupied: JourneyStep<*, OccupancyFormModel, *>?
     val households: JourneyStep<*, NumberOfHouseholdsFormModel, *>?
     val tenants: JourneyStep<*, NumberOfPeopleFormModel, *>?
 }
 
-interface EpcJourneyState : DynamicJourneyState {
+interface EpcJourneyState : JourneyState {
     var automatchedEpc: EpcDataModel?
     var searchedEpc: EpcDataModel?
     val propertyId: Long

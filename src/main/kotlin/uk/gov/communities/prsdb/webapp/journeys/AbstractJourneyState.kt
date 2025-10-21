@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty
 
 abstract class AbstractJourneyState(
     private val journeyStateService: JourneyStateService,
-) : DynamicJourneyState {
+) : JourneyState {
     override fun getStepData(key: String): PageData? = objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
 
     override fun addStepData(
@@ -27,7 +27,7 @@ abstract class AbstractJourneyState(
         serializer: KSerializer<TProperty>,
     ) = CompulsoryJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
 
-    class JourneyStateDelegate<TJourney : DynamicJourneyState, TProperty : Any?>(
+    class JourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
         private val innerKey: String,
         private val serializer: KSerializer<TProperty>,
@@ -47,7 +47,7 @@ abstract class AbstractJourneyState(
         }
     }
 
-    class CompulsoryJourneyStateDelegate<TJourney : DynamicJourneyState, TProperty : Any?>(
+    class CompulsoryJourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
         private val innerKey: String,
         private val serializer: KSerializer<TProperty>,

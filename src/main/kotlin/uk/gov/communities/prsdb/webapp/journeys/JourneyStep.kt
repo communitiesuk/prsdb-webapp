@@ -11,7 +11,7 @@ import kotlin.collections.plus
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState>(
+class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
     fun beforeIsStepReachable() {

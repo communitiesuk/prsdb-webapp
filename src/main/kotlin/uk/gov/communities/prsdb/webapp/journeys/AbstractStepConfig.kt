@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState> {
+abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> {
     abstract fun getStepSpecificContent(state: TState): Map<String, Any?>
 
     abstract fun chooseTemplate(state: TState): String
@@ -70,7 +70,7 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 }
 
 // Generic step config should be used where the subclass does not need any additional initialisation
-abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : DynamicJourneyState> :
+abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
     AbstractStepConfig<TEnum, TModel, TState>() {
     override fun isSubClassInitialised(): Boolean = true
 }

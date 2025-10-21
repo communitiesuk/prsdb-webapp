@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
-class JourneyBuilder<TState : DynamicJourneyState>(
+class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
     val journey: TState,
 ) {
@@ -54,7 +54,7 @@ class JourneyBuilder<TState : DynamicJourneyState>(
     }
 
     companion object {
-        fun <TState : DynamicJourneyState> journey(
+        fun <TState : JourneyState> journey(
             state: TState,
             init: JourneyBuilder<TState>.() -> Unit,
         ): Map<String, StepLifecycleOrchestrator> {
