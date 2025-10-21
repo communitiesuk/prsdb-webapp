@@ -4,6 +4,8 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaAdminInvitationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage.Companion.ACCOUNT_STATUS_COL_INDEX
@@ -98,6 +100,31 @@ class ManageLAAdminsTests : IntegrationTest() {
             assertThat(manageAdminPage.table.getCell(7, USERNAME_COL_INDEX)).containsText("F@example.com")
             assertThat(manageAdminPage.table.getCell(8, USERNAME_COL_INDEX)).containsText("H@example.com")
             assertThat(manageAdminPage.table.getCell(9, USERNAME_COL_INDEX)).containsText("I@example.com")
+        }
+
+        @Test
+        fun `Change link for an active user goes to the edit admin page`(page: Page) {
+            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            manageAdminPage.getChangeLink(0).clickAndWait()
+            assertPageIs(page, EditLaAdminPage::class)
+        }
+
+        @Test
+        fun `Change link for a pending invite goes to the cancel admin invite page`(page: Page) {
+            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            manageAdminPage.getChangeLink(5).clickAndWait()
+            assertPageIs(page, CancelLaAdminInvitationPage::class)
+        }
+    }
+
+    @Nested
+    inner class WithoutAdminUsersAndInvites : NestedIntegrationTestWithImmutableData(
+        "data-no-la-admin-users-or-invitations-user-is-system-operator.sql",
+    ) {
+        @Test
+        fun `manage LA admins page shows no entries message when there are no admins or invites`(page: Page) {
+            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            assertThat(manageAdminPage.noAdminsHeader).containsText("No local council admins were found.")
         }
     }
 }
