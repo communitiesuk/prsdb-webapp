@@ -7,10 +7,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
-class JourneyBuilder<TJourney : DynamicJourneyState>(
-    val journey: TJourney,
+class JourneyBuilder<TState : DynamicJourneyState>(
+    // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
+    val journey: TState,
 ) {
-    private val stepsUnderConstruction: MutableList<StepBuilder<*, TJourney, *>> = mutableListOf()
+    private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
     private var unreachableStepRedirect: (() -> String)? = null
 
     fun build(): Map<String, StepLifecycleOrchestrator> =
@@ -21,14 +22,14 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
             }
         }
 
-    fun <TMode : Enum<TMode>, TStep : AbstractInnerStep<TMode, *, TJourney>> step(
+    fun <TMode : Enum<TMode>, TStep : AbstractInnerStep<TMode, *, TState>> step(
         segment: String,
-        uninitialisedStep: JourneyStep<TMode, *, TJourney>,
-        init: StepBuilder<TStep, TJourney, TMode>.() -> Unit,
+        uninitialisedStep: JourneyStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
-        val stepBuilder = StepBuilder<TStep, TJourney, TMode>(segment, uninitialisedStep)
-        stepBuilder.init()
-        stepsUnderConstruction.add(stepBuilder)
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep)
+        stepInitialiser.init()
+        stepsUnderConstruction.add(stepInitialiser)
     }
 
     fun unreachableStepRedirect(getRedirect: () -> String) {
@@ -38,15 +39,15 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
         unreachableStepRedirect = getRedirect
     }
 
-    private fun checkForUninitialisedParents(stepBuilder: StepBuilder<*, *, *>) {
+    private fun checkForUninitialisedParents(stepInitialiser: StepInitialiser<*, *, *>) {
         val uninitialisedParents =
-            stepBuilder.potentialParents.filter {
+            stepInitialiser.potentialParents.filter {
                 it.initialisationStage != StepInitialisationStage.FULLY_INITIALISED
             }
         if (uninitialisedParents.any()) {
             val parentNames = uninitialisedParents.joinToString { "\n- $it" }
             throw JourneyInitialisationException(
-                "Step ${stepBuilder.segment} has uninitialised potential parents on initialisation: $parentNames\n" +
+                "Step ${stepInitialiser.segment} has uninitialised potential parents on initialisation: $parentNames\n" +
                     "This could imply a dependency loop, or that these two steps are declared in the wrong order.",
             )
         }

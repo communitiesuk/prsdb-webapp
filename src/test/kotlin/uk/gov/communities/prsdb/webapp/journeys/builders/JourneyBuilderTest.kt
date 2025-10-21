@@ -24,16 +24,16 @@ import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 
 class JourneyBuilderTest {
-    lateinit var mockedStepBuilders: MockedConstruction<StepBuilder<*, *, *>>
+    lateinit var mockedStepBuilders: MockedConstruction<StepInitialiser<*, *, *>>
 
     @BeforeEach
     fun setup() {
         mockedStepBuilders =
-            mockConstruction(StepBuilder::class.java) { mock, context ->
+            mockConstruction(StepInitialiser::class.java) { mock, context ->
                 val mockedJourneyStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
                 whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                 whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
-                whenever((mock as StepBuilder<*, DynamicJourneyState, *>).build(anyOrNull(), anyOrNull())).thenReturn(mockedJourneyStep)
+                whenever((mock as StepInitialiser<*, DynamicJourneyState, *>).build(anyOrNull(), anyOrNull())).thenReturn(mockedJourneyStep)
             }
     }
 
@@ -86,10 +86,10 @@ class JourneyBuilderTest {
         jb.build()
 
         // Assert
-        val stepBuilder1 = mockedStepBuilders.constructed().first() as StepBuilder<*, DynamicJourneyState, *>
-        val stepBuilder2 = mockedStepBuilders.constructed().last() as StepBuilder<*, DynamicJourneyState, *>
-        verify(stepBuilder1).build(any(), eq(redirectLambda))
-        verify(stepBuilder2).build(any(), eq(redirectLambda))
+        val stepInitialiser1 = mockedStepBuilders.constructed().first() as StepInitialiser<*, DynamicJourneyState, *>
+        val stepInitialiser2 = mockedStepBuilders.constructed().last() as StepInitialiser<*, DynamicJourneyState, *>
+        verify(stepInitialiser1).build(any(), eq(redirectLambda))
+        verify(stepInitialiser2).build(any(), eq(redirectLambda))
     }
 
     @Test
@@ -115,19 +115,19 @@ class JourneyBuilderTest {
         }
 
         // Assert 1
-        val mockStepBuilder = mockedStepBuilders.constructed().first() as StepBuilder<*, DynamicJourneyState, *>
-        verify(mockStepBuilder).backUrl(any())
-        verify(mockStepBuilder).stepSpecificInitialisation(any())
+        val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, DynamicJourneyState, *>
+        verify(mockStepInitialiser).backUrl(any())
+        verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
         // Arrange 2
         val builtStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
-        whenever(mockStepBuilder.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
+        whenever(mockStepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
 
         // Act 2
         val map = jb.build()
 
         // Assert 2
-        verify(mockStepBuilder).build(anyOrNull(), anyOrNull())
+        verify(mockStepInitialiser).build(anyOrNull(), anyOrNull())
         map.entries.single().let {
             assertSame(builtStep, it.value.journeyStep)
         }
@@ -139,11 +139,11 @@ class JourneyBuilderTest {
         val jb = JourneyBuilder(mock())
         jb.step("A", mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()) {}
 
-        val stepBuilder = mockedStepBuilders.constructed().last() as StepBuilder<*, DynamicJourneyState, *>
+        val stepInitialiser = mockedStepBuilders.constructed().last() as StepInitialiser<*, DynamicJourneyState, *>
         val mockJourneyStep = mock<JourneyStep<TestEnum, *, DynamicJourneyState>>()
         whenever(mockJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.PARTIALLY_INITIALISED)
         whenever(mockJourneyStep.routeSegment).thenReturn("route")
-        whenever(stepBuilder.potentialParents).thenReturn(listOf(mockJourneyStep))
+        whenever(stepInitialiser.potentialParents).thenReturn(listOf(mockJourneyStep))
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { jb.build() }

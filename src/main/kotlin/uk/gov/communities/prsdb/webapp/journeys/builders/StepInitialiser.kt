@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
-class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
+class StepInitialiser<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
     val segment: String,
     private val step: JourneyStep<TMode, *, TState>,
 ) {
@@ -24,7 +24,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
     private var additionalConfig: (TStep.() -> Unit)? = null
     private var stepUnreachableStepRedirect: (() -> String)? = null
 
-    fun redirectToStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepBuilder<TStep, TState, TMode> {
+    fun redirectToStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepInitialiser<TStep, TState, TMode> {
         if (redirectToUrl != null) {
             throw JourneyInitialisationException("Step $segment already has a redirectTo defined")
         }
@@ -32,7 +32,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
         return this
     }
 
-    fun redirectToUrl(nextUrlProvider: (mode: TMode) -> String): StepBuilder<TStep, TState, TMode> {
+    fun redirectToUrl(nextUrlProvider: (mode: TMode) -> String): StepInitialiser<TStep, TState, TMode> {
         if (redirectToUrl != null) {
             throw JourneyInitialisationException("Step $segment already has a redirectTo defined")
         }
@@ -40,7 +40,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
         return this
     }
 
-    fun parents(currentParentage: () -> Parentage): StepBuilder<TStep, TState, TMode> {
+    fun parents(currentParentage: () -> Parentage): StepInitialiser<TStep, TState, TMode> {
         if (parentage != null) {
             throw JourneyInitialisationException("Step $segment already has parentage defined")
         }
@@ -48,7 +48,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
         return this
     }
 
-    fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepBuilder<TStep, TState, TMode> {
+    fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {
             throw JourneyInitialisationException("Step $segment already has additional configuration defined")
         }
@@ -56,7 +56,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
         return this
     }
 
-    fun backUrl(backUrlProvider: () -> String?): StepBuilder<TStep, TState, TMode> {
+    fun backUrl(backUrlProvider: () -> String?): StepInitialiser<TStep, TState, TMode> {
         if (backUrlOverride != null) {
             throw JourneyInitialisationException("Step $segment already has an explicit backUrl defined")
         }
@@ -64,7 +64,7 @@ class StepBuilder<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJ
         return this
     }
 
-    fun unreachableStepRedirect(getRedirect: () -> String): StepBuilder<TStep, TState, TMode> {
+    fun unreachableStepRedirect(getRedirect: () -> String): StepInitialiser<TStep, TState, TMode> {
         if (stepUnreachableStepRedirect != null) {
             throw JourneyInitialisationException("Step $segment already has an unreachableStepRedirect defined")
         }
