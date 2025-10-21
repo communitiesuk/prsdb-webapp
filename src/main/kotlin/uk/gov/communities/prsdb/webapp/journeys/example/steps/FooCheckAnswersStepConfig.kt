@@ -23,10 +23,10 @@ class FooCheckAnswersStepConfig(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to "forms.update.checkOccupancy.insetText",
-            "summaryListData" to occupationRows(state) + getEpcStatusRow(state),
+            "summaryListData" to getOccupationRows(state) + getEpcStatusRow(state),
         )
 
-    private fun occupationRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> {
+    private fun getOccupationRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> {
         val occupiedStep = state.occupied
         return if (occupiedStep?.formModel?.occupied == true) {
             val householdsStep = state.households
