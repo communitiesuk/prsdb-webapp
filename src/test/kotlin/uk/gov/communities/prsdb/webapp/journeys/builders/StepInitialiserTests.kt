@@ -191,8 +191,7 @@ class StepInitialiserTests {
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
         val parentage = NoParents()
-        val parentageLambda = { parentage }
-        builder.parents(parentageLambda)
+        builder.parents { parentage }
         builder.redirectToUrl { "next" }
 
         // Act
@@ -204,7 +203,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
-            eq(parentageLambda),
+            eq(parentage),
             anyOrNull(),
         )
     }
@@ -220,7 +219,7 @@ class StepInitialiserTests {
         builder.build(mock(), mock())
 
         // Assert by capturing the lambda and invoking it
-        val parentageCaptor = argumentCaptor<() -> Parentage>()
+        val parentageCaptor = argumentCaptor<Parentage>()
         verify(stepMock).initialize(
             anyOrNull(),
             anyOrNull(),
@@ -229,7 +228,7 @@ class StepInitialiserTests {
             parentageCaptor.capture(),
             anyOrNull(),
         )
-        val result = parentageCaptor.firstValue()
+        val result = parentageCaptor.firstValue
         assertTrue(result is NoParents)
     }
 

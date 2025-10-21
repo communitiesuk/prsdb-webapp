@@ -35,7 +35,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { parentage },
+            parentage,
             { "unreachable" },
         )
 
@@ -57,7 +57,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { parentage },
+            parentage,
             { "unreachable" },
         )
 
@@ -80,7 +80,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
 
@@ -105,7 +105,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
 
@@ -128,7 +128,7 @@ class JourneyStepTest {
             mock(),
             { "backLink" },
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
 
@@ -151,7 +151,7 @@ class JourneyStepTest {
             mock(),
             { "backLink" },
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
 
@@ -174,7 +174,7 @@ class JourneyStepTest {
             mock(),
             { "backLink" },
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
         val bindingResult: BindingResult = mock()
@@ -199,7 +199,7 @@ class JourneyStepTest {
             state,
             mock(),
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
         val formModel = TestFormModel().apply { field = "submittedValue" }
@@ -226,7 +226,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { parentage },
+            parentage,
             { "unreachable" },
         )
 
@@ -250,7 +250,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { parentage },
+            parentage,
             { "unreachable" },
         )
 
@@ -272,7 +272,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
 
@@ -295,7 +295,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
 
@@ -319,7 +319,7 @@ class JourneyStepTest {
             mock(),
             mock(),
             { "redirect" },
-            { mock() },
+            mock(),
             { "unreachable" },
         )
         whenever(innerStep.isRouteSegmentInitialised()).thenReturn(true)
@@ -331,7 +331,7 @@ class JourneyStepTest {
                 mock(),
                 mock(),
                 { "redirect" },
-                { mock() },
+                mock(),
                 { "unreachable" },
             )
         }
