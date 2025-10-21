@@ -52,8 +52,8 @@ class FooExampleJourneyFactory(
     private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStepConfig>,
     private val journeyStateServiceFactory2: ObjectFactory<JourneyStateServiceFactory>,
 ) {
-    final fun createJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> =
-        journey(createDynamicState(journeyId)) {
+    final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> =
+        journey(createDynamicState()) {
             unreachableStepRedirect { "task-list" }
             step("task-list", journey.taskListStep) {
                 redirectToUrl { "task-list" }
@@ -157,7 +157,7 @@ class FooExampleJourneyFactory(
         }
 
     // TODO PRSD-1546: Reduce boilerplate by relying on dependency injection to extract journey id from request
-    private fun createDynamicState(journeyId: String) =
+    private fun createDynamicState() =
         FooJourney(
             JourneyStep(taskListStepFactory.getObject()),
             JourneyStep(occupiedFactory.getObject()),

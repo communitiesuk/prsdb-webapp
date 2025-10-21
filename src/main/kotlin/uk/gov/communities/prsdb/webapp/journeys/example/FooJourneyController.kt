@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 
 @PrsdbController
 @RequestMapping("new-journey")
@@ -18,21 +20,28 @@ class FooJourneyController(
     fun getStep(
         @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam("journeyId", required = false) journeyId: String?,
-    ): ModelAndView {
-        val journeyId = journeyId ?: journeyFactory.initializeJourneyState(propertyId)
-
-        return journeyFactory.createJourneySteps(journeyId)[stepName]?.getStepModelAndView()
-            ?: throw Exception("Step not found")
-    }
+    ): ModelAndView =
+        try {
+            journeyFactory.createJourneySteps()[stepName]?.getStepModelAndView()
+                ?: throw Exception("Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = journeyFactory.initializeJourneyState(propertyId)
+            val redirectUrl = AbstractStepConfig.journeyUrl(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
+        }
 
     @PostMapping("{propertyId}/{stepName}")
     fun postStep(
         @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
-        @RequestParam("journeyId", required = false) journeyId: String?,
         @RequestParam formData: PageData,
     ): ModelAndView =
-        journeyFactory.createJourneySteps(propertyId.toString())[stepName]?.postStepModelAndView(formData)
-            ?: throw Exception("Step not found")
+        try {
+            journeyFactory.createJourneySteps()[stepName]?.postStepModelAndView(formData)
+                ?: throw Exception("Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = journeyFactory.initializeJourneyState(propertyId)
+            val redirectUrl = AbstractStepConfig.journeyUrl(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
+        }
 }
