@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCounci
 class LocalAuthorityDataService(
     private val localAuthorityUserRepository: LocalAuthorityUserRepository,
     private val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
+    private val invitationService: LocalAuthorityInvitationService,
     private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -263,6 +264,28 @@ class LocalAuthorityDataService(
         session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalAuthorityUser>?
             ?: mutableListOf()
 
+    fun getUserDeletedThisSessionById(localAuthorityUserId: Long): LocalAuthorityUser {
+        val deletedUser =
+            getUsersDeletedThisSession().find { it.id == localAuthorityUserId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User with id $localAuthorityUserId was not found in the list of deleted users in the session",
+                )
+
+        throwErrorIfLocalAuthorityUserExists(deletedUser)
+
+        return deletedUser
+    }
+
+    private fun throwErrorIfLocalAuthorityUserExists(localAuthorityUser: LocalAuthorityUser) {
+        if (localAuthorityUserRepository.existsById(localAuthorityUser.id)) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "User with id ${localAuthorityUser.id} is still in the local_authority_user table",
+            )
+        }
+    }
+
     fun addDeletedUserToSession(deletedUser: LocalAuthorityUser) =
         session.setAttribute(
             LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION,
@@ -272,6 +295,19 @@ class LocalAuthorityDataService(
     fun getInvitationsCancelledThisSession(): MutableList<LocalAuthorityInvitation> =
         session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<LocalAuthorityInvitation>?
             ?: mutableListOf()
+
+    fun getInvitationCancelledThisSessionById(invitationId: Long): LocalAuthorityInvitation {
+        val invitation =
+            getInvitationsCancelledThisSession().find { it.id == invitationId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
+                )
+
+        invitationService.throwErrorIfInvitationExists(invitation)
+
+        return invitation
+    }
 
     fun addCancelledInvitationToSession(invitation: LocalAuthorityInvitation) =
         session.setAttribute(

@@ -206,22 +206,9 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        val usersDeletedThisSession = localAuthorityDataService.getUsersDeletedThisSession()
-        val deletedUser =
-            usersDeletedThisSession.find { it.id == deleteeId }
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "User with id $deleteeId was not found in the list of deleted users in the session",
-                )
+        val userDeletedThisSession = localAuthorityDataService.getUserDeletedThisSessionById(deleteeId)
 
-        if (localAuthorityDataService.getLocalAuthorityUserOrNull(deleteeId) != null) {
-            throw ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "User with id $deleteeId is still in the local_authority_user table",
-            )
-        }
-
-        model.addAttribute("deletedUserName", deletedUser.name)
+        model.addAttribute("deletedUserName", userDeletedThisSession.name)
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
 
@@ -374,21 +361,9 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        val invitationsCancelledThisSession = localAuthorityDataService.getInvitationsCancelledThisSession()
-        val invitationIfDeleted =
-            invitationsCancelledThisSession.find { it.id == invitationId }
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
-                )
-        if (invitationService.getInvitationByIdOrNull(invitationId) != null) {
-            throw ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Invitation with id $invitationId is still in the local_authority_invitations table",
-            )
-        }
+        val invitationDeletedThisSession = localAuthorityDataService.getInvitationCancelledThisSessionById(invitationId)
 
-        model.addAttribute("deletedEmail", invitationIfDeleted.invitedEmail)
+        model.addAttribute("deletedEmail", invitationDeletedThisSession.invitedEmail)
 
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("returnToManageUsersUrl", getLaManageUsersRoute(localAuthorityId))

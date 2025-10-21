@@ -14,7 +14,9 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpSession
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
@@ -235,5 +237,31 @@ class LocalAuthorityInvitationServiceTests {
         val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
 
         assertNull(result)
+    }
+
+    @Test
+    fun `throwErrorIfInvitationExists does not throws error if invitation doesn't exist`() {
+        // Arrange
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
+        whenever(mockLaInviteRepository.existsById(invitation.id)).thenReturn(false)
+
+        // Act and Assert
+        org.junit.jupiter.api.assertDoesNotThrow {
+            inviteService.throwErrorIfInvitationExists(invitation)
+        }
+    }
+
+    @Test
+    fun `throwErrorIfInvitationExists throws INTERNAL SERVER ERROR if invitation still exists`() {
+        // Arrange
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
+        whenever(mockLaInviteRepository.existsById(invitation.id)).thenReturn(true)
+
+        // Act and Assert
+        val errorThrown =
+            org.junit.jupiter.api.assertThrows<ResponseStatusException> {
+                inviteService.throwErrorIfInvitationExists(invitation)
+            }
+        kotlin.test.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorThrown.statusCode)
     }
 }
