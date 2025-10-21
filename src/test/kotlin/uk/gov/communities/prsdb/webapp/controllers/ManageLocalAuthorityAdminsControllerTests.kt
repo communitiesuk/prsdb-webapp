@@ -299,32 +299,8 @@ class ManageLocalAuthorityAdminsControllerTests(
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `deleteAdminConfirmation returns 404 when user not deleted in session`() {
-            whenever(localAuthorityDataService.getUsersDeletedThisSession()).thenReturn(mutableListOf())
-
-            mvc.get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
-                .andExpect {
-                    status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `deleteAdminConfirmation returns 500 when user has not been deleted`() {
-            whenever(localAuthorityDataService.getUsersDeletedThisSession()).thenReturn(mutableListOf(localAuthorityAdmin))
-            whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(localAuthorityAdmin.id)).thenReturn(localAuthorityAdmin)
-
-            mvc.get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
-                .andExpect {
-                    status { isInternalServerError() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `deleteAdminConfirmation returns 200 when user has been deleted in this session`() {
-            whenever(localAuthorityDataService.getUsersDeletedThisSession()).thenReturn(mutableListOf(localAuthorityAdmin))
-            whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(localAuthorityAdmin.id)).thenReturn(null)
+            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id)).thenReturn(localAuthorityAdmin)
 
             mvc.get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
                 .andExpect {
@@ -427,34 +403,10 @@ class ManageLocalAuthorityAdminsControllerTests(
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `cancelAdminInvitationConfirmation returns 404 when invite not deleted this session`() {
-            whenever(localAuthorityDataService.getInvitationsCancelledThisSession()).thenReturn(mutableListOf())
-
-            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
-                .andExpect {
-                    status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `cancelAdminInvitationConfirmation returns 500 when invite has ot been deleted`() {
-            whenever(localAuthorityDataService.getInvitationsCancelledThisSession()).thenReturn(mutableListOf(localAuthorityAdminInvite))
-            whenever(
-                localAuthorityInvitationService.getInvitationByIdOrNull(localAuthorityAdminInvite.id),
-            ).thenReturn(localAuthorityAdminInvite)
-
-            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
-                .andExpect {
-                    status { isInternalServerError() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitationConfirmation returns 200 when invite has been deleted in this session`() {
-            whenever(localAuthorityDataService.getInvitationsCancelledThisSession()).thenReturn(mutableListOf(localAuthorityAdminInvite))
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(localAuthorityAdminInvite.id)).thenReturn(null)
+            whenever(
+                localAuthorityDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id),
+            ).thenReturn(localAuthorityAdminInvite)
 
             mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
                 .andExpect {

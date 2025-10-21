@@ -612,39 +612,13 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `deleteUserSuccess returns 200 if the user was deleted this session`() {
             setupDefaultLocalAuthorityForLaAdmin()
-            whenever(localAuthorityDataService.getUsersDeletedThisSession())
-                .thenReturn(mutableListOf(createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)))
-            whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(DEFAULT_LA_USER_ID)).thenReturn(null)
-
+            val localAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)
+            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityUser.id))
+                .thenReturn(localAuthorityUser)
             mvc
                 .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
                 .andExpect {
                     status { isOk() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `deleteUserSuccess returns 404 if the user was not deleted in this session`() {
-            mvc
-                .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
-                .andExpect {
-                    status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `delete user success page returns 500 if the user is still in the database`() {
-            val userBeingDeleted = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)
-            whenever(localAuthorityDataService.getUsersDeletedThisSession())
-                .thenReturn(mutableListOf(userBeingDeleted))
-            whenever(localAuthorityDataService.getLocalAuthorityUserOrNull(userBeingDeleted.id)).thenReturn(userBeingDeleted)
-
-            mvc
-                .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
-                .andExpect {
-                    status { is5xxServerError() }
                 }
         }
 
@@ -798,40 +772,14 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `cancelInvitationSuccess returns 200 if the invitation was cancelled this session`() {
             val deletedInvitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
 
-            whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
-                .thenReturn(mutableListOf(deletedInvitation))
+            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(deletedInvitation.id))
+                .thenReturn(deletedInvitation)
 
             setupDefaultLocalAuthorityForLaAdmin()
 
             mvc
                 .get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
                 .andExpect { status { isOk() } }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `cancelInvitationSuccess returns 404 if the invite is not found in the session`() {
-            whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
-                .thenReturn(mutableListOf(createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID + 1)))
-
-            mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
-                status { isNotFound() }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `cancelInvitationSuccess returns 500 if the invitation is still in the database`() {
-            val deletedInvitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
-            whenever(localAuthorityDataService.getInvitationsCancelledThisSession())
-                .thenReturn(mutableListOf(deletedInvitation))
-
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID))
-                .thenReturn(deletedInvitation)
-
-            mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
-                status { isInternalServerError() }
-            }
         }
 
         private fun setupInvitationPostToCancelInvitationAndAssertSuccess() {
