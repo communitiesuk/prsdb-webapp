@@ -22,7 +22,7 @@ class StepInitialiser<TStep : AbstractInnerStep<TMode, *, TState>, TState : Dyna
     private var redirectToUrl: ((mode: TMode) -> String)? = null
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
-    private var stepUnreachableStepRedirect: (() -> String)? = null
+    private var unreachableStepRedirect: (() -> String)? = null
 
     fun redirectToStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepInitialiser<TStep, TState, TMode> {
         if (redirectToUrl != null) {
@@ -65,10 +65,10 @@ class StepInitialiser<TStep : AbstractInnerStep<TMode, *, TState>, TState : Dyna
     }
 
     fun unreachableStepRedirect(getRedirect: () -> String): StepInitialiser<TStep, TState, TMode> {
-        if (stepUnreachableStepRedirect != null) {
+        if (unreachableStepRedirect != null) {
             throw JourneyInitialisationException("Step $segment already has an unreachableStepRedirect defined")
         }
-        stepUnreachableStepRedirect = getRedirect
+        unreachableStepRedirect = getRedirect
         return this
     }
 
@@ -79,7 +79,7 @@ class StepInitialiser<TStep : AbstractInnerStep<TMode, *, TState>, TState : Dyna
         val castedRedirectTo = redirectToUrl ?: throw JourneyInitialisationException("Step $segment has no redirectTo defined")
         val castedParentage = parentage ?: { NoParents() }
         val unreachableStepRedirect =
-            stepUnreachableStepRedirect
+            unreachableStepRedirect
                 ?: defaultUnreachableStepRedirect
                 ?: throw JourneyInitialisationException(
                     "Step $segment has no unreachableStepRedirect defined, and there is no default set at the journey level either",
