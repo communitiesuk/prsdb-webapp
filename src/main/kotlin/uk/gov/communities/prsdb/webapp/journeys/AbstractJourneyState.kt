@@ -17,17 +17,17 @@ abstract class AbstractJourneyState(
         value: PageData,
     ) = journeyStateService.addSingleStepData(key, value)
 
-    fun <TJourney : AbstractJourneyState, TProperty : Any> delegate(
+    fun <TJourney : AbstractJourneyState, TProperty : Any> mutableDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
-    ) = JourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
+    ) = MutableJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
 
-    fun <TJourney : AbstractJourneyState, TProperty : Any> compulsoryDelegate(
+    fun <TJourney : AbstractJourneyState, TProperty : Any> requiredDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
-    ) = CompulsoryJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
+    ) = RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
 
-    class JourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
+    class MutableJourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
         private val innerKey: String,
         private val serializer: KSerializer<TProperty>,
@@ -47,7 +47,7 @@ abstract class AbstractJourneyState(
         }
     }
 
-    class CompulsoryJourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
+    class RequiredJourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
         private val innerKey: String,
         private val serializer: KSerializer<TProperty>,

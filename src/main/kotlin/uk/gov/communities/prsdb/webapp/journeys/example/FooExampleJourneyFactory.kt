@@ -199,7 +199,7 @@ class FooJourney(
 ) : AbstractJourneyState(journeyStateService),
     OccupiedJourneyState,
     EpcJourneyState {
-    override var automatchedEpc: EpcDataModel? by delegate("automatchedEpc", serializer())
-    override var searchedEpc: EpcDataModel? by delegate("searchedEpc", serializer())
-    override val propertyId: Long by compulsoryDelegate("propertyId", serializer())
+    override var automatchedEpc: EpcDataModel? by mutableDelegate("automatchedEpc", serializer())
+    override var searchedEpc: EpcDataModel? by mutableDelegate("searchedEpc", serializer())
+    override val propertyId: Long by requiredDelegate("propertyId", serializer())
 }

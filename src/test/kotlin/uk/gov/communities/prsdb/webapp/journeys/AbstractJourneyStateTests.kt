@@ -9,7 +9,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-class AbstractJourneyStateTest {
+class AbstractJourneyStateTests {
     @Test
     fun `getStepData returns the corresponding submap of the submitted step data`() {
         // Arrange
@@ -60,12 +60,12 @@ class AbstractJourneyStateTest {
     }
 
     @Test
-    fun `setting a var property implemented by delegate saves the value in the state`() {
+    fun `setting a var property implemented by mutableDelegate saves the value in the state`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val journeyState =
             object : AbstractJourneyState(journeyStateService) {
-                var testProperty: String? by delegate("testProperty", serializer())
+                var testProperty: String? by mutableDelegate("testProperty", serializer())
             }
 
         // Act
@@ -76,13 +76,13 @@ class AbstractJourneyStateTest {
     }
 
     @Test
-    fun `getting a var property implemented by delegate retrieves the value from the state if present`() {
+    fun `getting a var property implemented by mutableDelegate retrieves the value from the state if present`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
         val journeyState =
             object : AbstractJourneyState(journeyStateService) {
-                var testProperty: String? by delegate("testProperty", serializer())
+                var testProperty: String? by mutableDelegate("testProperty", serializer())
             }
 
         // Act
@@ -93,13 +93,13 @@ class AbstractJourneyStateTest {
     }
 
     @Test
-    fun `getting a var property implemented by delegate returns null if value not present in state`() {
+    fun `getting a var property implemented by mutableDelegate returns null if value not present in state`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
         val journeyState =
             object : AbstractJourneyState(journeyStateService) {
-                var testProperty: String? by delegate("testProperty", serializer())
+                var testProperty: String? by mutableDelegate("testProperty", serializer())
             }
 
         // Act
@@ -110,13 +110,13 @@ class AbstractJourneyStateTest {
     }
 
     @Test
-    fun `getting a val property implemented by compulsoryDelegate retrieves the value from the state if present`() {
+    fun `getting a val property implemented by requiredDelegate retrieves the value from the state if present`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
         val journeyState =
             object : AbstractJourneyState(journeyStateService) {
-                val testProperty: String by compulsoryDelegate("testProperty", serializer())
+                val testProperty: String by requiredDelegate("testProperty", serializer())
             }
 
         // Act
@@ -127,13 +127,13 @@ class AbstractJourneyStateTest {
     }
 
     @Test
-    fun `getting a val property implemented by compulsoryDelegate throws and deletes state if value not present in state`() {
+    fun `getting a val property implemented by requiredDelegate throws and deletes state if value not present in state`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
         val journeyState =
             object : AbstractJourneyState(journeyStateService) {
-                val testProperty: String by compulsoryDelegate("testProperty", serializer())
+                val testProperty: String by requiredDelegate("testProperty", serializer())
             }
         // Act & Assert
         assertThrows<IllegalStateException> {
