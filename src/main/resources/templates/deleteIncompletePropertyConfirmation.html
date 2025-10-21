@@ -1,0 +1,21 @@
+<!--/*@thymesVar id="incompletePropertiesUrl" type=""*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.deleteIncompleteProperties.incompleteProperties.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+        th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerProperty.deleteIncompleteProperties.confirmation.banner.heading}, null)}">
+        </div>
+        <p class="govuk-body" th:text="#{registerProperty.deleteIncompleteProperties.confirmation.paragraph.one}">
+            registerProperty.deleteIncompleteProperties.confirmation.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{registerProperty.deleteIncompleteProperties.confirmation.paragraph.two}">
+            registerProperty.deleteIncompleteProperties.confirmation.paragraph.two
+        </p>
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${incompletePropertiesUrl}}, #{registerProperty.deleteIncompleteProperties.confirmation.button.text})}">
+            registerProperty.deleteIncompleteProperties.confirmation.button.text
+        </a>
+    </div>
+</main>
+</html>
