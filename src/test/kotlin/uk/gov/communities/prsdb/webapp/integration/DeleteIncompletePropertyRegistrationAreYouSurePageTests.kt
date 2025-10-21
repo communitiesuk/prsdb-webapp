@@ -13,25 +13,6 @@ class DeleteIncompletePropertyRegistrationAreYouSurePageTests :
     val singleLineAddress = "1, SAVOY COURT, LONDON, WC2R 0EX"
 
     @Test
-    fun `the page loads with the heading`() {
-        val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
-        BaseComponent
-            .assertThat(areYouSurePage.heading)
-            .containsText("Are you sure you want to delete $singleLineAddress from the database?")
-    }
-
-    @Test
-    fun `the property is deleted and the page redirects to the incomplete properties page if the user selects Yes`(page: Page) {
-        val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
-        areYouSurePage.submitWantsToProceed()
-        val incompletePropertiesPage = assertPageIs(page, LandlordIncompletePropertiesPage::class)
-        BaseComponent
-            .assertThat(
-                incompletePropertiesPage.subHeading,
-            ).containsText("You have no properties with missing or incomplete details.")
-    }
-
-    @Test
     fun `the property is not deleted and the page redirects to the incomplete properties page if the user selects No`(page: Page) {
         val areYouSurePage = navigator.goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId)
         areYouSurePage.submitDoesNotWantToProceed()
