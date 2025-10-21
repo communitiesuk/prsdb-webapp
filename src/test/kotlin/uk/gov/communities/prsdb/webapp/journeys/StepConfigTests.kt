@@ -11,7 +11,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
-class AbstractInnerStepTest {
+class StepConfigTests {
     class TestFormModel : FormModel {
         var field: String? = null
         var otherField: Long? = null
@@ -30,7 +30,7 @@ class AbstractInnerStepTest {
     }
 
     @Test
-    fun getFormModelFromState() {
+    fun `getFormModelFromState returns the data stored for that route segment from state as the form model`() {
         val step = TestStepConfig()
         val state: JourneyState = mock()
         val routeSegment = "test-segment"
@@ -51,7 +51,7 @@ class AbstractInnerStepTest {
     }
 
     @Test
-    fun isRouteSegmentInitialised() {
+    fun `isRouteSegmentInitialised returns true if and only if routeSegment has been initialised`() {
         val step = TestStepConfig()
         assertFalse(step.isRouteSegmentInitialised())
         step.routeSegment = "testSegment"

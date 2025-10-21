@@ -214,7 +214,7 @@ class JourneyStepTest {
     }
 
     @Test
-    fun `if the step is accessible, the outcome is the inner steps mode`() {
+    fun `if the step is accessible, the outcome is the step config's mode`() {
         // Arrange
         val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
@@ -262,7 +262,7 @@ class JourneyStepTest {
     }
 
     @Test
-    fun `determine redirect returns the result of the redirectProvider if the inner step's mode is not null`() {
+    fun `determine redirect returns the result of the redirectProvider if the step config's mode is not null`() {
         // Arrange
         val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
@@ -284,7 +284,7 @@ class JourneyStepTest {
     }
 
     @Test
-    fun `determine redirect returns the route segment if the inner step's mode is null`() {
+    fun `determine redirect returns the route segment if the step config's mode is null`() {
         // Arrange
         val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(null)
@@ -309,10 +309,10 @@ class JourneyStepTest {
     @Test
     fun `initialize throws if the journey step has already been initialised`() {
         // Arrange
-        val innerStep: AbstractStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
-        val step = JourneyStep(innerStep)
+        val stepConfig: AbstractStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
+        val step = JourneyStep(stepConfig)
 
-        whenever(innerStep.isRouteSegmentInitialised()).thenReturn(false)
+        whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(false)
 
         step.initialize(
             "stepId",
@@ -322,7 +322,7 @@ class JourneyStepTest {
             mock(),
             { "unreachable" },
         )
-        whenever(innerStep.isRouteSegmentInitialised()).thenReturn(true)
+        whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(true)
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {

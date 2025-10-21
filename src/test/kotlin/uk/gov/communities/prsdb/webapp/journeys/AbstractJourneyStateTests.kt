@@ -42,7 +42,7 @@ class AbstractJourneyStateTests {
     }
 
     @Test
-    fun addStepData() {
+    fun `addStepData adds the step data as a submap to the submitted step data`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val journeyState = object : AbstractJourneyState(journeyStateService) {}
