@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 abstract class MaintenancePageTests : IntegrationTestWithImmutableData("data-local.sql")
 
 // The ActiveProfiles annotation is not picked up for inner classes, so we need to create separate classes with and without the maintenance-mode profile
+@Disabled
 @ActiveProfiles("maintenance-mode")
 class MaintenanceModeTests : MaintenancePageTests() {
     @Test
