@@ -3,7 +3,7 @@ import Papa from 'papaparse'
 import fs from 'fs'
 import path from 'path'
 import { Command } from 'commander'
-import { processJourneyData } from './process_journey_data.mjs';
+import { processJourneyData, processSankeyData } from './process_journey_data.mjs';
 import {createCompletionRateCSV, createPageViewCSV} from './createMetricCSV.mjs';
 import readline from 'readline';
 
@@ -53,13 +53,14 @@ const program = new Command();
 program
   .option('--all', 'Process all input files')
   .option('--input-file <filename>', 'Process a specific input file')
+  .option('--input-dir <dir>', 'Specify input directory (default: inputs)')
   .option('--clear', 'Clear the outputs directory before running')
   .option('--save', 'Save processed output in the saved directory (not cleared)')
   .option('--force', 'Force run even if it is not Thursday (skip prompt)')
   .parse(process.argv);
 
 const options = program.opts();
-const INPUTS_DIR = path.join('inputs')
+const INPUTS_DIR = path.join(options.inputDir || 'inputs')
 let OUTPUTS_DIR
 if (options.save) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0]
@@ -139,9 +140,13 @@ async function runPlausibleScript() {
                 const outputPath = path.join(outputSubdir, `${queryName}.csv`)
                 fs.writeFileSync(outputPath, csv)
                 console.log(`CSV data written to ${outputPath}`)
+                if (queryName === 'sankey') {
+                    const sankeyProcessedPath = path.join(outputSubdir, 'sankey_processed.csv');
+                    processSankeyData(outputPath, sankeyProcessedPath);
+                    console.log(`Sankey processed CSV written to ${sankeyProcessedPath}`);
+                }
                 if (query.dimensions) {
                     if (query.dimensions.includes('event:page')) {
-
                         await processJourneyData(query.metrics, outputSubdir);
                         console.log(`Processed journey data for query '${queryName}'`);
                     }

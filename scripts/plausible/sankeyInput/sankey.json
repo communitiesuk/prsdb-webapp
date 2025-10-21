@@ -1,0 +1,9 @@
+{
+  "sankey": {
+    "site_id": "register-home-to-rent.communities.gov.uk",
+    "date_range": "day",
+    "metrics": ["events"],
+    "dimensions": ["event:props:referrer", "event:props:currentUrl"],
+    "include": {"total_rows": true}
+  }
+}

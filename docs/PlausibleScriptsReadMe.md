@@ -58,9 +58,12 @@
     ```
     or
     ```
-    node plausible.mjs --input myfile.json --save
+    node plausible.mjs --input-file myfile.json --save
     ```
   - You can combine `--save` with other options, but `--clear` only affects the `outputs` directory, not `saved`.
+  - There is now an additional option relating to the data for sankey diagrams.
+    - This is just a prototype, full readme instructions will be made when there is a full implimentation
+    - Use `node plausible.mjs --input-dir sankeyInput --all` to select the input directory for the queries.
 
 ## Output
 - Find generated CSV files in `scripts/plausible/outputs` by default.

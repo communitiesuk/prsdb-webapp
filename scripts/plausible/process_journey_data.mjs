@@ -21,7 +21,8 @@ export async function processJourneyData(metrics_arr, INPUT_DIR) {
       "pageviews": "sum",
       "bounce_rate": "average",
       "visit_duration": "sum",
-      "time_on_page": "average"
+      "time_on_page": "average",
+      "events": "sum"
   }
 
   fs.readdirSync(INPUT_DIR).filter(file => file.endsWith('.csv')).forEach(inputFile => {
@@ -84,4 +85,48 @@ export async function processJourneyData(metrics_arr, INPUT_DIR) {
       fs.writeFileSync(path.join(outputDir, outFile), Papa.unparse(results));
     });
   });
+}
+
+export function processSankeyData(inputCsvPath, outputDir) {
+  const csvData = fs.readFileSync(inputCsvPath, 'utf8');
+  const { data } = Papa.parse(csvData, { header: true });
+
+  const sankeyRows = data.map(row => ({
+    source: row['event:props:referrer'],
+    target: row['event:props:currentUrl'],
+    value: row['events']
+  })).filter(row => row.source && row.target && row.value);
+
+  const categories = [
+    { prefix: '/landlord/register-as-a-landlord', file: 'sankey_landlord_register_as_a_landlord.csv' },
+    { prefix: '/local-council/register-local-council-user', file: 'sankey_local_council_register_local_council_user.csv' },
+    { prefix: '/landlord/register-property', file: 'sankey_landlord_register_property.csv' },
+    { prefix: '/landlord/add-compliance-information', file: 'sankey_landlord_add_compliance_information.csv' },
+  ];
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  categories.forEach(({ prefix, file }) => {
+    const filtered = sankeyRows.filter(row =>
+      row.source.startsWith(prefix) && row.target.startsWith(prefix)
+    ).map(row => {
+      const src = row.source.slice(prefix.length) || '/';
+      const tgt = row.target.slice(prefix.length) || '/';
+      return {
+        source: src,
+        target: tgt,
+        value: row.value
+      };
+    });
+    if (filtered.length > 0) {
+      filtered.sort((a, b) => (a.source || '').localeCompare(b.source || ''));
+      const csvOut = Papa.unparse(filtered);
+      fs.writeFileSync(path.join(outputDir, file), csvOut);
+    }
+  });
+
+  const csvOut = Papa.unparse(sankeyRows);
+  fs.writeFileSync(path.join(outputDir, 'sankey_processed.csv'), csvOut);
 }

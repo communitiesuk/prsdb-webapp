@@ -32,7 +32,6 @@ class PlausibleInterceptor : HandlerInterceptor {
             } else {
                 "external"
             }
-
         modelAndView?.modelMap?.addAttribute("plausibleEventReferrer", plausibleEventReferrer)
         modelAndView?.modelMap?.addAttribute("plausibleEventCurrentUrl", plausibleEventCurrentUrl)
     }
