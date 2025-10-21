@@ -76,19 +76,23 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
         state: TState,
         defaultUnreachableStepRedirect: (() -> String)?,
     ): JourneyStep<TMode, *, TState> {
-        val castedRedirectTo = redirectToUrl ?: throw JourneyInitialisationException("Step $segment has no redirectTo defined")
-        val castedParentage = parentage ?: { NoParents() }
-        val unreachableStepRedirect =
+        step.initialize(
+            segment,
+            state,
+            backUrlOverride,
+            redirectToUrl ?: throw JourneyInitialisationException("Step $segment has no redirectTo defined"),
+            parentage?.invoke() ?: NoParents(),
             unreachableStepRedirect
                 ?: defaultUnreachableStepRedirect
                 ?: throw JourneyInitialisationException(
                     "Step $segment has no unreachableStepRedirect defined, and there is no default set at the journey level either",
-                )
+                ),
+        )
 
-        step.initialize(segment, state, backUrlOverride, castedRedirectTo, castedParentage, unreachableStepRedirect)
         if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $segment base class has not been initialised correctly")
         }
+
         // TODO PRSD-1546: Fix generic typing so this cast is not required
         additionalConfig?.let { configure -> (step.stepConfig as? TStep)?.configure() }
         if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {

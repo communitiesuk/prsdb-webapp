@@ -138,9 +138,9 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
     fun initialize(
         segment: String,
         state: TState,
-        backUrlProvider: (() -> String?)?,
-        redirectToProvider: (mode: TEnum) -> String,
-        parentageProvider: () -> Parentage,
+        backUrlOverride: (() -> String?)?,
+        redirectToUrl: (mode: TEnum) -> String,
+        parentage: Parentage,
         unreachableStepRedirectProvider: () -> String,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
@@ -148,9 +148,9 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         }
         this.stepConfig.routeSegment = segment
         this.state = state
-        this.backUrlOverride = backUrlProvider
-        this.redirectToUrl = redirectToProvider
-        this.parentage = parentageProvider()
+        this.backUrlOverride = backUrlOverride
+        this.redirectToUrl = redirectToUrl
+        this.parentage = parentage
         this.unreachableStepRedirect = unreachableStepRedirectProvider
     }
 }
