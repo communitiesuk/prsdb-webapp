@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysFalseValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -302,5 +304,36 @@ class JourneyStepTest {
 
         // Assert
         assertEquals("stepId", redirectUrl)
+    }
+
+    @Test
+    fun `initialize throws if the journey step has already been initialised`() {
+        // Arrange
+        val innerStep: AbstractInnerStep<TestEnum, TestFormModel, DynamicJourneyState> = mock()
+        val step = JourneyStep(innerStep)
+
+        whenever(innerStep.isRouteSegmentInitialised()).thenReturn(false)
+
+        step.initialize(
+            "stepId",
+            mock(),
+            mock(),
+            { "redirect" },
+            { mock() },
+            { "unreachable" },
+        )
+        whenever(innerStep.isRouteSegmentInitialised()).thenReturn(true)
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            step.initialize(
+                "stepId",
+                mock(),
+                mock(),
+                { "redirect" },
+                { mock() },
+                { "unreachable" },
+            )
+        }
     }
 }

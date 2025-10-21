@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
-import uk.gov.communities.prsdb.webapp.exceptions.JourneyBuilderException
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInnerStep
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -33,7 +33,7 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
 
     fun unreachableStepRedirect(getRedirect: () -> String) {
         if (unreachableStepRedirect != null) {
-            throw JourneyBuilderException("unreachableStepRedirect has already been set")
+            throw JourneyInitialisationException("unreachableStepRedirect has already been set")
         }
         unreachableStepRedirect = getRedirect
     }
@@ -45,7 +45,7 @@ class JourneyBuilder<TJourney : DynamicJourneyState>(
             }
         if (uninitialisedParents.any()) {
             val parentNames = uninitialisedParents.joinToString { "\n- $it" }
-            throw JourneyBuilderException(
+            throw JourneyInitialisationException(
                 "Step ${stepBuilder.segment} has uninitialised potential parents on initialisation: $parentNames\n" +
                     "This could imply a dependency loop, or that these two steps are declared in the wrong order.",
             )

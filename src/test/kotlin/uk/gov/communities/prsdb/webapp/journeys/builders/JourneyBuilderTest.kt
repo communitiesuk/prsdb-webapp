@@ -15,7 +15,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.JourneyBuilderException
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
@@ -99,7 +99,7 @@ class JourneyBuilderTest {
         jb.unreachableStepRedirect { "redirect" }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { jb.unreachableStepRedirect { "newRedirect" } }
+        assertThrows<JourneyInitialisationException> { jb.unreachableStepRedirect { "newRedirect" } }
     }
 
     @Test
@@ -146,6 +146,6 @@ class JourneyBuilderTest {
         whenever(stepBuilder.potentialParents).thenReturn(listOf(mockJourneyStep))
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { jb.build() }
+        assertThrows<JourneyInitialisationException> { jb.build() }
     }
 }

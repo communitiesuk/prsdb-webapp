@@ -9,7 +9,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.JourneyBuilderException
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -26,7 +26,7 @@ class StepBuilderTest {
         whenever(stepMock.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { StepBuilder("test", stepMock) }
+        assertThrows<JourneyInitialisationException> { StepBuilder("test", stepMock) }
     }
 
     @Test
@@ -38,7 +38,7 @@ class StepBuilderTest {
         builder.backUrl { "url1" }
 
         // Assert
-        assertThrows<JourneyBuilderException> { builder.backUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.backUrl { "url2" } }
     }
 
     @Test
@@ -93,7 +93,7 @@ class StepBuilderTest {
         builder.redirectToUrl { "url1" }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.redirectToUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.redirectToUrl { "url2" } }
     }
 
     @Test
@@ -103,7 +103,7 @@ class StepBuilderTest {
         builder.redirectToUrl { "url1" }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.redirectToStep { mock() } }
+        assertThrows<JourneyInitialisationException> { builder.redirectToStep { mock() } }
     }
 
     @Test
@@ -113,7 +113,7 @@ class StepBuilderTest {
         builder.redirectToStep { mock() }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.redirectToUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.redirectToUrl { "url2" } }
     }
 
     @Test
@@ -172,7 +172,7 @@ class StepBuilderTest {
         val builder = StepBuilder("test", mockInitialisableStep())
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.build(mock(), mock()) }
+        assertThrows<JourneyInitialisationException> { builder.build(mock(), mock()) }
     }
 
     @Test
@@ -182,7 +182,7 @@ class StepBuilderTest {
         builder.parents { NoParents() }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.parents { NoParents() } }
+        assertThrows<JourneyInitialisationException> { builder.parents { NoParents() } }
     }
 
     @Test
@@ -240,7 +240,7 @@ class StepBuilderTest {
         builder.stepSpecificInitialisation {}
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.stepSpecificInitialisation {} }
+        assertThrows<JourneyInitialisationException> { builder.stepSpecificInitialisation {} }
     }
 
     @Test
@@ -271,7 +271,7 @@ class StepBuilderTest {
         builder.unreachableStepRedirect { "url1" }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.unreachableStepRedirect { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.unreachableStepRedirect { "url2" } }
     }
 
     @Test
@@ -327,7 +327,7 @@ class StepBuilderTest {
         builder.redirectToUrl { "next" }
 
         // Act & Assert
-        assertThrows<JourneyBuilderException> { builder.build(mock(), null) }
+        assertThrows<JourneyInitialisationException> { builder.build(mock(), null) }
     }
 
     private fun mockInitialisableStep() =

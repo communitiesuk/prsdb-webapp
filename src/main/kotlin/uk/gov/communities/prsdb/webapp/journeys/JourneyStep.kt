@@ -4,6 +4,7 @@ import org.springframework.beans.MutablePropertyValues
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.collections.plus
@@ -126,8 +127,7 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
             when {
                 !isBaseClassInitialised -> StepInitialisationStage.UNINITIALISED
                 isBaseClassInitialised && !innerStep.isSubClassInitialised() -> StepInitialisationStage.PARTIALLY_INITIALISED
-                isBaseClassInitialised && innerStep.isSubClassInitialised() -> StepInitialisationStage.FULLY_INITIALISED
-                else -> throw Exception("Impossible state for step $this")
+                else -> StepInitialisationStage.FULLY_INITIALISED
             }
     private val isBaseClassInitialised: Boolean
         get() = innerStep.isRouteSegmentInitialised() && ::state.isInitialized && ::redirectToUrl.isInitialized && ::parentage.isInitialized
@@ -141,7 +141,7 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         unreachableStepRedirectProvider: () -> String,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
-            throw Exception("Step $this has already been initialised")
+            throw JourneyInitialisationException("Step $this has already been initialised")
         }
         this.innerStep.routeSegment = segment
         this.state = state
