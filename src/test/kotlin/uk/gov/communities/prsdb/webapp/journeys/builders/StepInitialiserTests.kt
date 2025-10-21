@@ -247,11 +247,11 @@ class StepInitialiserTests {
     fun `additional configuration is applied to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        whenever(stepMock.innerStep).thenReturn(mock())
+        whenever(stepMock.stepConfig).thenReturn(mock())
         val builder = StepInitialiser("test", stepMock)
         var additionalConfigApplied = false
         builder.stepSpecificInitialisation {
-            if (this === stepMock.innerStep) {
+            if (this === stepMock.stepConfig) {
                 additionalConfigApplied = true
             }
         }

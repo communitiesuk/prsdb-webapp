@@ -17,12 +17,12 @@ class AbstractInnerStepTest {
         var otherField: Long? = null
     }
 
-    class TestInnerStep : AbstractInnerStep<TestEnum, TestFormModel, DynamicJourneyState>() {
+    class TestStepConfig : AbstractStepConfig<TestEnum, TestFormModel, DynamicJourneyState>() {
         override fun getStepSpecificContent(state: DynamicJourneyState): Map<String, Any?> = mapOf()
 
         override fun chooseTemplate(state: DynamicJourneyState): String = "template"
 
-        override val formModelClazz = TestFormModel::class
+        override val formModelClass = TestFormModel::class
 
         override fun isSubClassInitialised(): Boolean = true
 
@@ -31,7 +31,7 @@ class AbstractInnerStepTest {
 
     @Test
     fun getFormModelFromState() {
-        val step = TestInnerStep()
+        val step = TestStepConfig()
         val state: DynamicJourneyState = mock()
         val routeSegment = "test-segment"
         step.routeSegment = routeSegment
@@ -52,7 +52,7 @@ class AbstractInnerStepTest {
 
     @Test
     fun isRouteSegmentInitialised() {
-        val step = TestInnerStep()
+        val step = TestStepConfig()
         assertFalse(step.isRouteSegmentInitialised())
         step.routeSegment = "testSegment"
         assertTrue(step.isRouteSegmentInitialised())

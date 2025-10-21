@@ -12,19 +12,19 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -39,17 +39,17 @@ import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFact
 
 @PrsdbWebService
 class FooExampleJourneyFactory(
-    private val taskListStepFactory: ObjectFactory<FooTaskListStep>,
-    val occupiedFactory: ObjectFactory<OccupiedStep>,
-    val householdsFactory: ObjectFactory<HouseholdStep>,
-    val tenantsFactory: ObjectFactory<TenantsStep>,
-    val epcQuestionFactory: ObjectFactory<EpcQuestionStep>,
-    val searchForEpcFactory: ObjectFactory<SearchEpcStep>,
-    val epcNotFoundFactory: ObjectFactory<EpcNotFoundStep>,
-    val epcSupersededFactory: ObjectFactory<EpcSupersededStep>,
-    val checkAutomatchedEpcFactory: ObjectFactory<CheckEpcStep>,
-    val checkSearchedEpcFactory: ObjectFactory<CheckEpcStep>,
-    private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStep>,
+    private val taskListStepFactory: ObjectFactory<FooTaskListStepConfig>,
+    val occupiedFactory: ObjectFactory<OccupiedStepConfig>,
+    val householdsFactory: ObjectFactory<HouseholdStepConfig>,
+    val tenantsFactory: ObjectFactory<TenantsStepConfig>,
+    val epcQuestionFactory: ObjectFactory<EpcQuestionStepConfig>,
+    val searchForEpcFactory: ObjectFactory<SearchEpcStepConfig>,
+    val epcNotFoundFactory: ObjectFactory<EpcNotFoundStepConfig>,
+    val epcSupersededFactory: ObjectFactory<EpcSupersededStepConfig>,
+    val checkAutomatchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
+    val checkSearchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
+    private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStepConfig>,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     final fun createJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> =
@@ -85,7 +85,7 @@ class FooExampleJourneyFactory(
                     }
                 }
             }
-            step<YesOrNo, CheckEpcStep>("check-automatched-epc", journey.checkAutomatchedEpc) {
+            step<YesOrNo, CheckEpcStepConfig>("check-automatched-epc", journey.checkAutomatchedEpc) {
                 parents { journey.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
                 redirectToStep { mode ->
                     when (mode) {
@@ -116,7 +116,7 @@ class FooExampleJourneyFactory(
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
                 redirectToStep { journey.checkSearchedEpc }
             }
-            step<YesOrNo, CheckEpcStep>("check-found-epc", journey.checkSearchedEpc) {
+            step<YesOrNo, CheckEpcStepConfig>("check-found-epc", journey.checkSearchedEpc) {
                 parents {
                     OrParents(
                         journey.searchForEpc.hasOutcome(EpcSearchResult.FOUND),

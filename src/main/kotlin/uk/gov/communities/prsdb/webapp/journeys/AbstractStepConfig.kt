@@ -11,12 +11,12 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-abstract class AbstractInnerStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState> {
+abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : DynamicJourneyState> {
     abstract fun getStepSpecificContent(state: TState): Map<String, Any?>
 
     abstract fun chooseTemplate(state: TState): String
 
-    abstract val formModelClazz: KClass<TFormModel>
+    abstract val formModelClass: KClass<TFormModel>
 
     open fun beforeIsStepReachable(state: TState) {}
 
@@ -54,11 +54,11 @@ abstract class AbstractInnerStep<out TEnum : Enum<out TEnum>, TFormModel : FormM
 
     fun getFormModelFromState(state: TState): TFormModel? =
         state.getStepData(routeSegment)?.let {
-            val binder = WebDataBinder(formModelClazz.createInstance())
+            val binder = WebDataBinder(formModelClass.createInstance())
             binder.validator = validator
             binder.bind(MutablePropertyValues(it))
 
-            formModelClazz.cast(binder.bindingResult.target)
+            formModelClass.cast(binder.bindingResult.target)
         }
 
     lateinit var routeSegment: String
@@ -69,7 +69,8 @@ abstract class AbstractInnerStep<out TEnum : Enum<out TEnum>, TFormModel : FormM
     lateinit var validator: Validator
 }
 
-abstract class AbstractUninitialisableInnerStep<TEnum : Enum<TEnum>, TModel : FormModel, TState : DynamicJourneyState> :
-    AbstractInnerStep<TEnum, TModel, TState>() {
+// Generic step config should be used where the subclass does not need any additional initialisation
+abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : DynamicJourneyState> :
+    AbstractStepConfig<TEnum, TModel, TState>() {
     override fun isSubClassInitialised(): Boolean = true
 }

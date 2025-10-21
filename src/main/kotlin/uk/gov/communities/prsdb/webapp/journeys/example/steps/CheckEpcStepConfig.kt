@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractInnerStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -11,10 +11,10 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
 @Scope("prototype")
 @PrsdbWebComponent
-class CheckEpcStep(
+class CheckEpcStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractInnerStep<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
-    override val formModelClazz = CheckMatchedEpcFormModel::class
+) : AbstractStepConfig<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
+    override val formModelClass = CheckMatchedEpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =
         getReleventEpc(state)?.let { epcDetails ->
@@ -54,7 +54,7 @@ class CheckEpcStep(
 
     private lateinit var getReleventEpc: (EpcJourneyState) -> EpcDataModel?
 
-    fun usingEpc(getReleventEpc: EpcJourneyState.() -> EpcDataModel?): CheckEpcStep {
+    fun usingEpc(getReleventEpc: EpcJourneyState.() -> EpcDataModel?): CheckEpcStepConfig {
         this.getReleventEpc = getReleventEpc
         return this
     }

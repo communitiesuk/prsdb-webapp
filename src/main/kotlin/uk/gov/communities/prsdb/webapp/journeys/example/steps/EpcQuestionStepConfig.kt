@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.journeys.AbstractUninitialisableInnerStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -13,11 +13,11 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @Scope("prototype")
 @PrsdbWebComponent
-class EpcQuestionStep(
+class EpcQuestionStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
-) : AbstractUninitialisableInnerStep<EpcStatus, EpcFormModel, EpcJourneyState>() {
-    override val formModelClazz = EpcFormModel::class
+) : AbstractGenericStepConfig<EpcStatus, EpcFormModel, EpcJourneyState>() {
+    override val formModelClass = EpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =
         mapOf(

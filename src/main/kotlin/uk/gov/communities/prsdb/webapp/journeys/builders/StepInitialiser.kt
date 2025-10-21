@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractInnerStep
+import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DynamicJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
-class StepInitialiser<TStep : AbstractInnerStep<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
+class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : DynamicJourneyState, TMode : Enum<TMode>>(
     val segment: String,
     private val step: JourneyStep<TMode, *, TState>,
 ) {
@@ -90,7 +90,7 @@ class StepInitialiser<TStep : AbstractInnerStep<TMode, *, TState>, TState : Dyna
             throw JourneyInitialisationException("Step $segment base class has not been initialised correctly")
         }
         // TODO PRSD-1546: Fix generic typing so this cast is not required
-        additionalConfig?.let { configure -> (step.innerStep as? TStep)?.configure() }
+        additionalConfig?.let { configure -> (step.stepConfig as? TStep)?.configure() }
         if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {
             throw JourneyInitialisationException("Custom configuration for Step $segment has not fully initialised the step")
         }
