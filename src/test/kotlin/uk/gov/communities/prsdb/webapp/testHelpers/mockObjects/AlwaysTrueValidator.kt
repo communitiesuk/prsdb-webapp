@@ -11,3 +11,14 @@ class AlwaysTrueValidator : Validator {
         errors: Errors,
     ) {}
 }
+
+class AlwaysFalseValidator : Validator {
+    override fun supports(clazz: Class<*>): Boolean = true
+
+    override fun validate(
+        target: Any,
+        errors: Errors,
+    ) {
+        errors.reject("alwaysFalse", "This validator always fails.")
+    }
+}
