@@ -50,7 +50,7 @@ class FooExampleJourneyFactory(
     val checkAutomatchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
     val checkSearchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
     private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStepConfig>,
-    private val journeyStateServiceFactory: JourneyStateServiceFactory,
+    private val journeyStateServiceFactory2: ObjectFactory<JourneyStateServiceFactory>,
 ) {
     final fun createJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> =
         journey(createDynamicState(journeyId)) {
@@ -170,13 +170,14 @@ class FooExampleJourneyFactory(
             JourneyStep(epcSupersededFactory.getObject()),
             JourneyStep(checkSearchedEpcFactory.getObject()),
             JourneyStep(fooCheckYourAnswersStepFactory.getObject()),
-            journeyStateServiceFactory.createForExistingJourney(journeyId),
+            journeyStateServiceFactory2.getObject().createForExistingJourney(),
         )
 
     final fun initializeJourneyState(propertyId: Long): String {
         val journeyId = propertyId.hashCode().toString()
-        journeyStateServiceFactory
-            .createForNewJourney(journeyId)
+        journeyStateServiceFactory2
+            .getObject()
+            .createForNewJourney()
             .setValue("propertyId", Json.encodeToString(serializer(), propertyId))
         return journeyId
     }

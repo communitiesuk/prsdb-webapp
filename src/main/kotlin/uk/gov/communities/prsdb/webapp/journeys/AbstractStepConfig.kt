@@ -69,16 +69,18 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
     @Autowired
     lateinit var validator: Validator
 
-    fun journeyUrl(
-        path: String,
-        journeyId: String,
-    ): String =
-        UriComponentsBuilder
-            .newInstance()
-            .path(path)
-            .queryParam("journeyId", journeyId)
-            .build(true)
-            .toUriString()
+    companion object {
+        fun journeyUrl(
+            path: String,
+            journeyId: String,
+        ): String =
+            UriComponentsBuilder
+                .newInstance()
+                .path(path)
+                .queryParam("journeyId", journeyId)
+                .build(true)
+                .toUriString()
+    }
 }
 
 // Generic step config should be used where the subclass does not need any additional initialisation
