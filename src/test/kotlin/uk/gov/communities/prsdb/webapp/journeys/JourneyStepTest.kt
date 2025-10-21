@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
@@ -234,7 +233,7 @@ class JourneyStepTest {
         val outcome = step.outcome()
 
         // Assert
-        assertNotNull(outcome)
+        assertEquals(TestEnum.ENUM_VALUE, outcome)
     }
 
     @Test
