@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -18,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
@@ -210,7 +212,7 @@ class ManageLocalAuthorityAdminsControllerTests(
                         attributeExists("options")
                         attribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
                         attribute("localAuthorityUser", localAuthorityAdmin)
-                        attribute("deleteUserRoute", "../$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
+                        attribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
                     }
                 }
         }
@@ -284,7 +286,6 @@ class ManageLocalAuthorityAdminsControllerTests(
         fun `deleteAdmin POST request returns redirect after deleting admin for system operators`() {
             mvc.post(deleteLocalAuthorityAdminRoute) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = "isManager=false"
                 with(csrf())
             }.andExpect {
                 status {
@@ -295,6 +296,31 @@ class ManageLocalAuthorityAdminsControllerTests(
 
             verify(localAuthorityDataService).deleteUser(localAuthorityAdmin)
             verify(localAuthorityDataService).addDeletedUserToSession(localAuthorityAdmin)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `deleteAdminConfirmation returns 404 if the user was not deleted in this session`() {
+            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            mvc
+                .get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `deleteAdminConfirmation returns 500 if the user is still in the database`() {
+            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id))
+                .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            mvc
+                .get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
+                .andExpect {
+                    status { is5xxServerError() }
+                }
         }
 
         @Test
@@ -399,6 +425,30 @@ class ManageLocalAuthorityAdminsControllerTests(
 
             verify(localAuthorityInvitationService).deleteInvitation(localAuthorityAdminInvite.id)
             verify(localAuthorityDataService).addCancelledInvitationToSession(localAuthorityAdminInvite)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `cancelAdminInvitationConfirmation returns 404 if the invite was not deleted in the session`() {
+            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `cancelAdminInvitationConfirmation returns 500 if the invitation is still in the database`() {
+            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id))
+                .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
+                .andExpect {
+                    status { isInternalServerError() }
+                }
         }
 
         @Test

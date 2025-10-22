@@ -24,8 +24,6 @@ import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANAGE_LA_ADMINS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
@@ -177,7 +175,7 @@ class ManageLocalAuthorityAdminsController(
                 ),
             ),
         )
-        model.addAttribute("deleteUserRoute", "../$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
+        model.addAttribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
         return "editLAUserAccess"
     }
 
@@ -206,12 +204,11 @@ class ManageLocalAuthorityAdminsController(
     fun deleteAdmin(
         @PathVariable localAuthorityUserId: Long,
         principal: Principal,
-        request: HttpServletRequest,
     ): String {
         val userBeingDeleted = localAuthorityDataService.getLocalAuthorityUserById(localAuthorityUserId)
 
         // If the user is deleting their own admin account we will need to update their user roles
-        val refreshSecurityContextAfterDelete = getIsCurrentUserBeingDeletedAsAdmin(principal, request, userBeingDeleted)
+        val refreshSecurityContextAfterDelete = getIsCurrentUserBeingDeletedAsAdmin(principal, userBeingDeleted)
 
         localAuthorityDataService.deleteUser(userBeingDeleted)
 
@@ -294,16 +291,8 @@ class ManageLocalAuthorityAdminsController(
 
     private fun getIsCurrentUserBeingDeletedAsAdmin(
         principal: Principal,
-        request: HttpServletRequest,
         userBeingDeleted: LocalAuthorityUser,
-    ): Boolean {
-        return if (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER)) {
-            val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
-            (currentUser.id == userBeingDeleted.id)
-        } else {
-            false
-        }
-    }
+    ): Boolean = principal.name == userBeingDeleted.baseUser.id
 
     companion object {
         const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"

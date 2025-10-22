@@ -622,6 +622,31 @@ class ManageLocalAuthorityUsersControllerTests(
                 }
         }
 
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `deleteUserSuccess returns 404 if the user was not deleted in this session`() {
+            whenever(localAuthorityDataService.getUserDeletedThisSessionById(DEFAULT_LA_USER_ID))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            mvc
+                .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `delete user success page returns 500 if the user is still in the database`() {
+            whenever(localAuthorityDataService.getUserDeletedThisSessionById(DEFAULT_LA_USER_ID))
+                .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            mvc
+                .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
+                .andExpect {
+                    status { is5xxServerError() }
+                }
+        }
+
         private fun postDeleteUserAndAssertSuccess(
             laId: Int = DEFAULT_LA_ID,
             userBeingDeleted: LocalAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID),
@@ -780,6 +805,28 @@ class ManageLocalAuthorityUsersControllerTests(
             mvc
                 .get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
                 .andExpect { status { isOk() } }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `cancelInvitationSuccess returns 404 if the invite is not found in the session`() {
+            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(DEFAULT_LA_INVITATION_ID))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LA_ADMIN"])
+        fun `cancelInvitationSuccess returns 500 if the invitation is still in the database`() {
+            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(DEFAULT_LA_INVITATION_ID))
+                .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
+
+            mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
+                status { isInternalServerError() }
+            }
         }
 
         private fun setupInvitationPostToCancelInvitationAndAssertSuccess() {
