@@ -39,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.net.URI
 import java.net.URLEncoder
@@ -213,7 +212,7 @@ class ManageLocalAuthorityAdminsControllerTests(
                         attributeExists("options")
                         attribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
                         attribute("localAuthorityUser", localAuthorityAdmin)
-                        attribute("deleteUserRoute", "../$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
+                        attribute("deleteUserUrl", "../$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
                     }
                 }
         }
