@@ -20,6 +20,10 @@ open class EditLaUserBasePage(
         form.isManagerRadios.selectValue("true")
     }
 
+    fun selectNotManagerRadio() {
+        form.isManagerRadios.selectValue("false")
+    }
+
     val isManagerSelected: Boolean
         get() = form.isManagerRadios.selectedValue == "true"
 

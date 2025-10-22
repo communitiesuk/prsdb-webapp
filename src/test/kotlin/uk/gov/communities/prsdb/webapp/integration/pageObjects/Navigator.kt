@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import com.microsoft.playwright.options.RequestOptions
+import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
+import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -49,9 +51,11 @@ import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
@@ -1251,7 +1255,17 @@ class Navigator(
 
     fun goToEditAdminsPage(laAdminId: Long): EditLaAdminPage {
         navigate("$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/$laAdminId")
-        return createValidPage(page, EditLaAdminPage::class)
+        return createValidPage(page, EditLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+    }
+
+    fun goToDeleteLaAdminPage(laAdminId: Long): DeleteLaAdminPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$laAdminId")
+        return createValidPage(page, DeleteLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+    }
+
+    fun goToCancelAdminInvitePage(inviteId: Long): CancelLaAdminInvitationPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$CANCEL_INVITATION_PATH_SEGMENT/$inviteId")
+        return createValidPage(page, CancelLaAdminInvitationPage::class, mapOf("inviteId" to inviteId.toString()))
     }
 
     fun goToCookiesPage(): CookiesPage {

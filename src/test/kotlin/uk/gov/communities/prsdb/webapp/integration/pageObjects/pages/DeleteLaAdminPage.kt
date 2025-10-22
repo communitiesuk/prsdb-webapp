@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EditLaUserBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DeleteLaUserBasePage
 
-class EditLaAdminPage(
+class DeleteLaAdminPage(
     page: Page,
     urlArguments: Map<String, String>,
-) : EditLaUserBasePage(page, "$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/${urlArguments["laAdminId"]}") {
+) : DeleteLaUserBasePage(page, "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${urlArguments["laAdminId"]}") {
     val backLink = BackLink.default(page)
 }

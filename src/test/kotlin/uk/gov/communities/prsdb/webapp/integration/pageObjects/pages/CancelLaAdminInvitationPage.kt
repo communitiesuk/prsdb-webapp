@@ -7,4 +7,5 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.C
 
 class CancelLaAdminInvitationPage(
     page: Page,
-) : CancelLaUserInvitationBasePage(page, "$SYSTEM_OPERATOR_PATH_SEGMENT/$CANCEL_INVITATION_PATH_SEGMENT")
+    urlArguments: Map<String, String>,
+) : CancelLaUserInvitationBasePage(page, "$SYSTEM_OPERATOR_PATH_SEGMENT/$CANCEL_INVITATION_PATH_SEGMENT/${urlArguments["invitationId"]}")
