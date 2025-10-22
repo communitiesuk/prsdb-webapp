@@ -3,16 +3,16 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SubHeading
 
 open class EditLaUserBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val name = Heading.default(page)
-    val email = SubHeading(page)
+    val name = Heading(page.locator("h1.govuk-fieldset__heading"))
+    val email = Paragraph.byText(page, "Email:")
     val form = EditLaUserForm(page)
     val removeAccountButton = Button.byText(page, "Remove this account")
 

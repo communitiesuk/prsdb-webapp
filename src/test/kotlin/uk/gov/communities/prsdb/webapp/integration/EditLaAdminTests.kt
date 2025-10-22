@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaAdminSuccessPage
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaAdmin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import java.net.URI
 import kotlin.test.assertTrue
 
 class EditLaAdminTests : IntegrationTestWithMutableData("data-edit-la-admin-users-and-invitations.sql") {
@@ -70,6 +72,8 @@ class EditLaAdminTests : IntegrationTestWithMutableData("data-edit-la-admin-user
 
         @Test
         fun `user can be deleted`(page: Page) {
+            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+
             // Navigate to the delete page for la admin
             var manageAdminPage = navigator.goToManageLaAdminsPage()
             assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(laAdminName)
