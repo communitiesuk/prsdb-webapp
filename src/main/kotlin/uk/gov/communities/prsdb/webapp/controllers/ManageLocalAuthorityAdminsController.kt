@@ -175,7 +175,7 @@ class ManageLocalAuthorityAdminsController(
                 ),
             ),
         )
-        model.addAttribute("deleteUserRoute", "../$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
+        model.addAttribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
         return "editLAUserAccess"
     }
 
