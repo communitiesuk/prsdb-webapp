@@ -9,12 +9,14 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 
 @PrsdbController
 @RequestMapping("new-journey")
 class FooJourneyController(
     val journeyFactory: FooExampleJourneyFactory,
+    val journeyStateService: JourneyStateService,
 ) {
     @GetMapping("{propertyId}/{stepName}")
     fun getStep(
@@ -22,7 +24,7 @@ class FooJourneyController(
         @PathVariable("stepName") stepName: String,
     ): ModelAndView =
         try {
-            journeyFactory.createJourneySteps()[stepName]?.getStepModelAndView()
+            journeyFactory.createJourneySteps(propertyId)[stepName]?.getStepModelAndView()
                 ?: throw Exception("Step not found")
         } catch (_: NoSuchJourneyException) {
             val journeyId = journeyFactory.initializeJourneyState(propertyId)
@@ -37,7 +39,7 @@ class FooJourneyController(
         @RequestParam formData: PageData,
     ): ModelAndView =
         try {
-            journeyFactory.createJourneySteps()[stepName]?.postStepModelAndView(formData)
+            journeyFactory.createJourneySteps(propertyId)[stepName]?.postStepModelAndView(formData)
                 ?: throw Exception("Step not found")
         } catch (_: NoSuchJourneyException) {
             val journeyId = journeyFactory.initializeJourneyState(propertyId)

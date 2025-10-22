@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.context.annotation.RequestScope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -11,35 +12,24 @@ import java.util.UUID
 
 @PrsdbWebService
 @RequestScope
-class JourneyStateServiceFactory(
-    private val session: HttpSession,
-    request: ServletRequest,
-) {
-    val journeyId: String = request.getParameter("journeyId") ?: UUID.randomUUID().toString()
-
-    fun createForNewJourney(): JourneyStateService {
-        val journeyStateMetadataMap = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
-        val journeyDataKey = UUID.randomUUID().toString()
-        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, journeyStateMetadataMap + (journeyId to journeyDataKey))
-        return JourneyStateService(session, journeyDataKey, journeyId)
-    }
-
-    fun createForExistingJourney(): JourneyStateService {
-        val journeyStateMetadataMap = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
-        val journeyDataKey = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
-        return JourneyStateService(session, journeyDataKey, journeyId)
-    }
-
-    companion object {
-        const val JOURNEY_STATE_KEY_STORE_KEY = "journeyStateKeyStore"
-    }
-}
-
 class JourneyStateService(
     private val session: HttpSession,
-    private val journeyDataKey: String,
-    val journeyId: String,
+    private val journeyIdOrNull: String?,
 ) {
+    val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()
+
+    @Autowired
+    constructor(
+        session: HttpSession,
+        request: ServletRequest,
+    ) : this(
+        session,
+        request.getParameter("journeyId"),
+    )
+
+    val journeyStateMetadataMap get() = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
+    val journeyDataKey get() = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
+
     fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyDataKey))?.get(key)
 
     fun addSingleStepData(
@@ -62,9 +52,21 @@ class JourneyStateService(
 
     fun deleteState() {
         session.removeAttribute(journeyDataKey)
+        // TODO PRSD-1550 - Ensure other metadata keys referencing this journey are also cleaned up
+        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, journeyStateMetadataMap - journeyId)
+    }
+
+    fun initialiseJourneyWithId(
+        newJourneyId: String,
+        stateInitialiser: JourneyStateService.() -> Unit = {},
+    ) {
+        val journeyDataKey = journeyStateMetadataMap[newJourneyId] ?: UUID.randomUUID().toString()
+        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, journeyStateMetadataMap + (newJourneyId to journeyDataKey))
+        JourneyStateService(session, newJourneyId).stateInitialiser()
     }
 
     companion object {
         private const val STEP_DATA_KEY = "journeyData"
+        const val JOURNEY_STATE_KEY_STORE_KEY = "journeyStateKeyStore"
     }
 }
