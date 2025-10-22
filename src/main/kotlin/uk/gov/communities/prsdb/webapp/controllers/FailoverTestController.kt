@@ -10,6 +10,13 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 @PrsdbController
 @RequestMapping(LandlordController.LANDLORD_BASE_URL)
 class FailoverTestController {
+    @GetMapping("/failover-501")
+    fun failover501(response: HttpServletResponse): Unit =
+        throw ResponseStatusException(
+            HttpStatus.NOT_IMPLEMENTED,
+            "501 error",
+        )
+
     @GetMapping("/failover-502")
     fun failover502(response: HttpServletResponse): Unit =
         throw ResponseStatusException(
