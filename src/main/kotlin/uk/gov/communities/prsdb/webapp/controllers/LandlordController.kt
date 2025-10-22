@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -9,10 +10,12 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT
@@ -146,9 +149,35 @@ class LandlordController(
 
         if (formModel.wantsToProceed == true) {
             propertyRegistrationService.deleteIncompleteProperty(contextId, principal.name)
+            propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId)
+            return "redirect:${getDeleteIncompletePropertyConfirmationPath(contextId)}"
         }
 
         return "redirect:$INCOMPLETE_PROPERTIES_URL"
+    }
+
+    @GetMapping("/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
+    fun deleteIncompletePropertyConfirmation(
+        model: Model,
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
+    ): String {
+        if (!propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(contextId)) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Invitation with id $contextId was not found in the list of cancelled incomplete property registrations in the session",
+            )
+        }
+
+        if (propertyRegistrationService.getFormContextByIdOrNull(contextId) != null) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Incomplete property registration with id $contextId is still in the database",
+            )
+        }
+
+        model.addAttribute("incompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
+
+        return "deleteIncompletePropertyConfirmation"
     }
 
     @GetMapping("/$COMPLIANCE_ACTIONS_PATH_SEGMENT")
@@ -214,7 +243,14 @@ class LandlordController(
         private const val DELETE_INCOMPLETE_PROPERTY_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
-        fun deleteIncompletePropertyPath(contextId: Long): String =
+        private const val DELETE_INCOMPLETE_PROPERTY_CONFIRMATION_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$DELETE_INCOMPLETE_PROPERTY_PATH_SEGMENT/" +
+                "$CONFIRMATION_PATH_SEGMENT?$CONTEXT_ID_URL_PARAMETER={contextId}"
+
+        fun getDeleteIncompletePropertyPath(contextId: Long): String =
             UriTemplate(DELETE_INCOMPLETE_PROPERTY_ROUTE).expand(contextId).toASCIIString()
+
+        fun getDeleteIncompletePropertyConfirmationPath(contextId: Long): String =
+            UriTemplate(DELETE_INCOMPLETE_PROPERTY_CONFIRMATION_ROUTE).expand(contextId).toASCIIString()
     }
 }
