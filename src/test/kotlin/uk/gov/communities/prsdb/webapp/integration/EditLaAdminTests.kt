@@ -85,7 +85,9 @@ class EditLaAdminTests : IntegrationTestWithMutableData("data-edit-la-admin-user
 
             // Delete la admin success page
             val deleteAdminSuccessPage = assertPageIs(page, DeleteLaAdminSuccessPage::class, mapOf("laAdminId" to laAdminId.toString()))
-            assertThat(deleteAdminSuccessPage.confirmationBanner).containsText("You’ve removed $laAdminName’s account")
+            assertThat(
+                deleteAdminSuccessPage.confirmationBanner,
+            ).containsText("You’ve removed $laAdminName’s account from BATH AND NORTH EAST SOMERSET COUNCIL")
 
             // Return to manage admins page
             deleteAdminSuccessPage.returnButton.clickAndWait()

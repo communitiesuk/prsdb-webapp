@@ -106,14 +106,14 @@ class ManageLAAdminsTests : IntegrationTest() {
         fun `Change link for an active user goes to the edit admin page`(page: Page) {
             val manageAdminPage = navigator.goToManageLaAdminsPage()
             manageAdminPage.getChangeLink(0).clickAndWait()
-            assertPageIs(page, EditLaAdminPage::class)
+            assertPageIs(page, EditLaAdminPage::class, mapOf("laAdminId" to 5.toString()))
         }
 
         @Test
         fun `Change link for a pending invite goes to the cancel admin invite page`(page: Page) {
             val manageAdminPage = navigator.goToManageLaAdminsPage()
             manageAdminPage.getChangeLink(5).clickAndWait()
-            assertPageIs(page, CancelLaAdminInvitationPage::class)
+            assertPageIs(page, CancelLaAdminInvitationPage::class, mapOf("invitationId" to 4.toString()))
         }
     }
 

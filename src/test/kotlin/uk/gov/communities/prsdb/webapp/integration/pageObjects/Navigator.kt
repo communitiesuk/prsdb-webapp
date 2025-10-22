@@ -1263,9 +1263,9 @@ class Navigator(
         return createValidPage(page, DeleteLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
     }
 
-    fun goToCancelAdminInvitePage(inviteId: Long): CancelLaAdminInvitationPage {
-        navigate("$SYSTEM_OPERATOR_ROUTE/$CANCEL_INVITATION_PATH_SEGMENT/$inviteId")
-        return createValidPage(page, CancelLaAdminInvitationPage::class, mapOf("inviteId" to inviteId.toString()))
+    fun goToCancelAdminInvitePage(invitationId: Long): CancelLaAdminInvitationPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$CANCEL_INVITATION_PATH_SEGMENT/$invitationId")
+        return createValidPage(page, CancelLaAdminInvitationPage::class, mapOf("invitationId" to invitationId.toString()))
     }
 
     fun goToCookiesPage(): CookiesPage {

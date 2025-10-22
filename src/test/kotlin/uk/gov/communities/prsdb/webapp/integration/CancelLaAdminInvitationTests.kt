@@ -1,100 +1,53 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaAdminPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaAdminSuccessPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaAdminInvitationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaAdminInvitationSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import kotlin.test.assertTrue
 
 class CancelLaAdminInvitationTests : IntegrationTestWithMutableData("data-edit-la-admin-users-and-invitations.sql") {
     val invitationId = 1L
     val invitedEmail = "cart@example.com"
 
-    @Nested
-    inner class EditAdmin {
-        @Test
-        fun `back link goes to manage admin users page`(page: Page) {
-            val cancelAdminInvitation = navigator.goToEditAdminsPage(invitationId)
-            editAdminPage.backLink.clickAndWait()
-            assertPageIs(page, ManageLaAdminsPage::class)
-        }
-
-        @Test
-        fun `remove this account button goes to delete admin page`(page: Page) {
-            val editAdminPage = navigator.goToEditAdminsPage(invitationId)
-            editAdminPage.removeAccountButton.clickAndWait()
-            assertPageIs(page, DeleteLaAdminPage::class, mapOf("laAdminId" to invitationId.toString()))
-        }
-
-        @Test
-        fun `an admin access can be changed to basic`(page: Page) {
-            // Click the change link for the la admin to edit
-            var manageAdminPage = navigator.goToManageLaAdminsPage()
-            assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(invitedEmail)
-            manageAdminPage.getChangeLink(0).clickAndWait()
-
-            // Demote the admin to basic user
-            val editAdminPage = assertPageIs(page, EditLaAdminPage::class, mapOf("laAdminId" to invitationId.toString()))
-            assertThat(editAdminPage.name).containsText(invitedEmail)
-            assertThat(editAdminPage.email).containsText(exampleLaAdminEmail)
-            assertTrue(editAdminPage.isManagerSelected)
-
-            // Update the user's access level to basic
-            editAdminPage.selectNotManagerRadio()
-            editAdminPage.form.submit()
-            manageAdminPage = assertPageIs(page, ManageLaAdminsPage::class)
-
-            // Check user is not on manage admins page
-            val numberOfTableRows = manageAdminPage.table.rows.count()
-            for (i in 0 until numberOfTableRows) {
-                assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(invitedEmail)
-            }
-        }
+    @Test
+    fun `back link goes to the edit admin page`(page: Page) {
+        val cancelAdminInvitationPage = navigator.goToCancelAdminInvitePage(invitationId)
+        cancelAdminInvitationPage.backLink.clickAndWait()
+        assertPageIs(page, ManageLaAdminsPage::class)
     }
 
-    @Nested
-    inner class DeleteAdmin {
-        @Test
-        fun `back link goes to edit admin page`(page: Page) {
-            val deleteAdminPage = navigator.goToDeleteLaAdminPage(invitationId)
-            deleteAdminPage.backLink.clickAndWait()
-            assertPageIs(page, EditLaAdminPage::class, mapOf("laAdminId" to invitationId.toString()))
-        }
+    @Test
+    fun `user can be deleted`(page: Page) {
+        // Navigate to the cancel la invitation page
+        var manageAdminPage = navigator.goToManageLaAdminsPage()
+        assertThat(manageAdminPage.table.getCell(2, USERNAME_COL_INDEX)).containsText(invitedEmail)
+        manageAdminPage.getChangeLink(2).clickAndWait()
 
-        @Test
-        fun `user can be deleted`(page: Page) {
-            // Navigate to the delete page for la admin
-            var manageAdminPage = navigator.goToManageLaAdminsPage()
-            assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(invitedEmail)
-            manageAdminPage.getChangeLink(0).clickAndWait()
-            val editAdminPage = assertPageIs(page, EditLaAdminPage::class, mapOf("laAdminId" to invitationId.toString()))
-            editAdminPage.removeAccountButton.clickAndWait()
+        // Cancel invite
+        val cancelAdminInvitationPage =
+            assertPageIs(page, CancelLaAdminInvitationPage::class, mapOf("invitationId" to invitationId.toString()))
+        assertThat(cancelAdminInvitationPage.userDetailsSection).containsText(invitedEmail)
+        cancelAdminInvitationPage.form.submit()
 
-            // Delete la admin
-            val deleteAdminPage = assertPageIs(page, DeleteLaAdminPage::class, mapOf("laAdminId" to invitationId.toString()))
-            assertThat(deleteAdminPage.userDetailsSection).containsText(invitedEmail)
-            assertThat(deleteAdminPage.userDetailsSection).containsText(exampleLaAdminEmail)
-            deleteAdminPage.form.submit()
+        // Cancel la admin invite success page
+        val cancelAdminInvitationSuccessPage =
+            assertPageIs(page, CancelLaAdminInvitationSuccessPage::class, mapOf("invitationId" to invitationId.toString()))
+        assertThat(
+            cancelAdminInvitationSuccessPage.confirmationBanner,
+        ).containsText("You’ve cancelled $invitedEmail’s invitation from BATH AND NORTH EAST SOMERSET COUNCIL")
 
-            // Delete la admin success page
-            val deleteAdminSuccessPage = assertPageIs(page, DeleteLaAdminSuccessPage::class, mapOf("laAdminId" to invitationId.toString()))
-            assertThat(deleteAdminSuccessPage.confirmationBanner).containsText("You’ve removed $invitedEmail’s account")
+        // Return to manage admins page
+        cancelAdminInvitationSuccessPage.returnButton.clickAndWait()
+        manageAdminPage = assertPageIs(page, ManageLaAdminsPage::class)
 
-            // Return to manage admins page
-            deleteAdminSuccessPage.returnButton.clickAndWait()
-            manageAdminPage = assertPageIs(page, ManageLaAdminsPage::class)
-
-            // Check user is not on manage admins page
-            val numberOfTableRows = manageAdminPage.table.rows.count()
-            for (i in 0 until numberOfTableRows) {
-                assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(invitedEmail)
-            }
+        // Check invite is not on manage admins page
+        val numberOfTableRows = manageAdminPage.table.rows.count()
+        for (i in 0 until numberOfTableRows) {
+            assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(invitedEmail)
         }
     }
 }
