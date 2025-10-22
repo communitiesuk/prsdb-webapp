@@ -3,7 +3,7 @@
     <body th:replace="~{fragments/layout :: layout(#{deleteLAUser.title}, ~{::body/content()}, false)}">
         <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
         <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
-        <main class="govuk-main-wrapper">
+        <main class="govuk-main-wrapper" id="main-content">
             <header id="header">
                 <h1 class="govuk-heading-l" th:text="#{deleteLAUser.heading}">deleteLAUser.heading</h1>
             </header>
@@ -16,6 +16,7 @@
                     <span th:text="${user.email}" th:remove="tag">user.email</span>
                 </p>
             </section>
+            <hr class="govuk-section-break govuk-section-break--m">
             <section>
                 <p class="govuk-body" th:text="#{deleteLAUser.para.one}">deleteLAUser.para.one</p>
                 <p class="govuk-body" th:text="#{deleteLAUser.para.two}">deleteLAUser.para.two</p>
