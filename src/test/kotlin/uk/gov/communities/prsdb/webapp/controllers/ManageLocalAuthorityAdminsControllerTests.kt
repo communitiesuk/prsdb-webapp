@@ -212,7 +212,7 @@ class ManageLocalAuthorityAdminsControllerTests(
                         attributeExists("options")
                         attribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
                         attribute("localAuthorityUser", localAuthorityAdmin)
-                        attribute("deleteUserUrl", "../$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
+                        attribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
                     }
                 }
         }
