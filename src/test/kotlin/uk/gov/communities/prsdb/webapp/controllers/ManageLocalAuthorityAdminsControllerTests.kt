@@ -210,7 +210,7 @@ class ManageLocalAuthorityAdminsControllerTests(
                     status { isOk() }
                     model {
                         attributeExists("options")
-                        attribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+                        attribute("backUrl", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
                         attribute("localAuthorityUser", localAuthorityAdmin)
                         attribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
                     }
