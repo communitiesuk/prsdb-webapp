@@ -62,6 +62,9 @@ class LocalAuthorityDataServiceTests {
     private lateinit var localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository
 
     @Mock
+    private lateinit var invitationService: LocalAuthorityInvitationService
+
+    @Mock
     private lateinit var oneLoginUserService: OneLoginUserService
 
     @Mock
@@ -92,6 +95,7 @@ class LocalAuthorityDataServiceTests {
             LocalAuthorityDataService(
                 localAuthorityUserRepository,
                 localAuthorityUserOrInvitationRepository,
+                invitationService,
                 oneLoginUserService,
                 mockHttpSession,
                 absoluteUrlProvider,
@@ -610,6 +614,58 @@ class LocalAuthorityDataServiceTests {
     }
 
     @Test
+    fun `getUserDeletedThisSessionById returns user when deleted this session`() {
+        // Arrange
+        val user = createLocalAuthorityUser(id = 1L)
+        val deletedUsers = listOf(user, createLocalAuthorityUser(id = 2L))
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION))
+            .thenReturn(deletedUsers)
+
+        // Act
+        val deletedUser = localAuthorityDataService.getUserDeletedThisSessionById(user.id)
+
+        // Assert
+        Assertions.assertEquals(user, deletedUser)
+    }
+
+    @Test
+    fun `getUserDeletedThisSessionById throws NOT FOUND error if user was not deleted this session`() {
+        // Arrange
+        val user = createLocalAuthorityUser(id = 1L)
+        val deletedUsers = listOf(createLocalAuthorityUser(id = 2L))
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION))
+            .thenReturn(deletedUsers)
+
+        // Act and Assert
+        val errorThrown =
+            assertThrows<ResponseStatusException> {
+                localAuthorityDataService.getUserDeletedThisSessionById(
+                    user.id,
+                )
+            }
+        assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+    }
+
+    @Test
+    fun `getUserDeletedThisSessionById throws INTERNAL SERVER ERROR if user still exists`() {
+        // Arrange
+        val user = createLocalAuthorityUser(id = 1L)
+        val deletedUsers = listOf(user)
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION))
+            .thenReturn(deletedUsers)
+        whenever(localAuthorityUserRepository.existsById(user.id)).thenReturn(true)
+
+        // Act and Assert
+        val errorThrown =
+            assertThrows<ResponseStatusException> {
+                localAuthorityDataService.getUserDeletedThisSessionById(
+                    user.id,
+                )
+            }
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorThrown.statusCode)
+    }
+
+    @Test
     fun `addDeletedUserToSession adds a LocalAuthorityUser to the list of deleted users in the session`() {
         // Arrange
         val existingDeletedUser = createLocalAuthorityUser(id = 1L)
@@ -646,6 +702,42 @@ class LocalAuthorityDataServiceTests {
 
         // Assert
         Assertions.assertEquals(emptyList<Pair<Long, String>>(), returnedCancelledInvitations)
+    }
+
+    @Test
+    fun `getInvitationCancelledThisSessionById returns the invitation when cancelled this session`() {
+        // Arrange
+        val invitation = createLocalAuthorityInvitation(id = 1L)
+        val cancelledInvitations = listOf(invitation, createLocalAuthorityInvitation(id = 2L))
+
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION))
+            .thenReturn(cancelledInvitations)
+
+        // Act
+        val cancelledInvitation = localAuthorityDataService.getInvitationCancelledThisSessionById(invitation.id)
+
+        // Assert
+        Assertions.assertEquals(invitation, cancelledInvitation)
+        verify(invitationService).throwErrorIfInvitationExists(invitation)
+    }
+
+    @Test
+    fun `getInvitationCancelledThisSessionById throws NOT FOUND error if invitation was not cancelled this session`() {
+        // Arrange
+        val invitation = createLocalAuthorityInvitation(id = 1L)
+        val cancelledInvitations = listOf(createLocalAuthorityInvitation(id = 2L))
+
+        whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION))
+            .thenReturn(cancelledInvitations)
+
+        // Act and Assert
+        val errorThrown =
+            assertThrows<ResponseStatusException> {
+                localAuthorityDataService.getInvitationCancelledThisSessionById(
+                    invitation.id,
+                )
+            }
+        assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
 
     @Test

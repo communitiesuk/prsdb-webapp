@@ -14,7 +14,9 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpSession
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
@@ -204,5 +206,62 @@ class LocalAuthorityInvitationServiceTests {
         val testId = 123.toLong()
 
         assertNull(inviteService.getInvitationByIdOrNull(testId))
+    }
+
+    @Test
+    fun `getAdminInvitationByIdOrNull returns an invitation if the id is in the database and it is admin`() {
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(invitedAsAdmin = true)
+
+        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalAuthorityInvitation?>)
+
+        val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
+
+        assertEquals(invitation, result)
+    }
+
+    @Test
+    fun `getAdminInvitationByIdOrNull returns null if the id is not in the database`() {
+        val notExistingInvitationId = 123.toLong()
+
+        val result = inviteService.getAdminInvitationByIdOrNull(notExistingInvitationId)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getAdminInvitationByIdOrNull returns an null if the id is in the database and it is NOT admin`() {
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(invitedAsAdmin = false)
+
+        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalAuthorityInvitation?>)
+
+        val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `throwErrorIfInvitationExists does not throws error if invitation doesn't exist`() {
+        // Arrange
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
+        whenever(mockLaInviteRepository.existsById(invitation.id)).thenReturn(false)
+
+        // Act and Assert
+        org.junit.jupiter.api.assertDoesNotThrow {
+            inviteService.throwErrorIfInvitationExists(invitation)
+        }
+    }
+
+    @Test
+    fun `throwErrorIfInvitationExists throws INTERNAL SERVER ERROR if invitation still exists`() {
+        // Arrange
+        val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation()
+        whenever(mockLaInviteRepository.existsById(invitation.id)).thenReturn(true)
+
+        // Act and Assert
+        val errorThrown =
+            org.junit.jupiter.api.assertThrows<ResponseStatusException> {
+                inviteService.throwErrorIfInvitationExists(invitation)
+            }
+        kotlin.test.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorThrown.statusCode)
     }
 }
