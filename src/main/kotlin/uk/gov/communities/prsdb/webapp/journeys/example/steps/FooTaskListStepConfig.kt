@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -30,12 +31,12 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
                         TaskListItemViewModel(
                             "OccupationTask",
                             TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            url = journeyUrl(state.occupied.routeSegment, state.journeyId),
+                            url = JourneyStateService.urlWithJourneyState(state.occupied.routeSegment, state.journeyId),
                         ),
                         TaskListItemViewModel(
                             "EpcTask",
                             TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            url = journeyUrl(state.epcQuestion.routeSegment, state.journeyId),
+                            url = JourneyStateService.urlWithJourneyState(state.epcQuestion.routeSegment, state.journeyId),
                         ),
                     ),
                 ),

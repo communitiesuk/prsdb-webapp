@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.KClass
@@ -68,19 +67,6 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     @Autowired
     lateinit var validator: Validator
-
-    companion object {
-        fun journeyUrl(
-            path: String,
-            journeyId: String,
-        ): String =
-            UriComponentsBuilder
-                .newInstance()
-                .path(path)
-                .queryParam("journeyId", journeyId)
-                .build(true)
-                .toUriString()
-    }
 }
 
 // Generic step config should be used where the subclass does not need any additional initialisation

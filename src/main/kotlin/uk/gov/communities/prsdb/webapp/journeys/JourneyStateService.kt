@@ -4,6 +4,7 @@ import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.context.annotation.RequestScope
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
@@ -24,7 +25,7 @@ class JourneyStateService(
         request: ServletRequest,
     ) : this(
         session,
-        request.getParameter("journeyId"),
+        request.getParameter(JOURNEY_ID_PARAM),
     )
 
     val journeyStateMetadataMap get() = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
@@ -67,6 +68,18 @@ class JourneyStateService(
 
     companion object {
         private const val STEP_DATA_KEY = "journeyData"
-        const val JOURNEY_STATE_KEY_STORE_KEY = "journeyStateKeyStore"
+        private const val JOURNEY_STATE_KEY_STORE_KEY = "journeyStateKeyStore"
+        private const val JOURNEY_ID_PARAM = "journeyId"
+
+        fun urlWithJourneyState(
+            path: String,
+            journeyId: String,
+        ): String =
+            UriComponentsBuilder
+                .newInstance()
+                .path(path)
+                .queryParam(JOURNEY_ID_PARAM, journeyId)
+                .build(true)
+                .toUriString()
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 
@@ -30,7 +29,7 @@ class FooJourneyController(
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
             val journeyId = journeyFactory.initializeJourneyState(propertyId)
-            val redirectUrl = AbstractStepConfig.journeyUrl(stepName, journeyId)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
 
@@ -45,7 +44,7 @@ class FooJourneyController(
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
             val journeyId = journeyFactory.initializeJourneyState(propertyId)
-            val redirectUrl = AbstractStepConfig.journeyUrl(stepName, journeyId)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
 }

@@ -154,7 +154,7 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
         this.unreachableStepRedirect = unreachableStepRedirectProvider
     }
 
-    private fun journeyUrl(path: String): String = AbstractStepConfig.journeyUrl(path, state.journeyId)
+    private fun journeyUrl(path: String): String = JourneyStateService.urlWithJourneyState(path, state.journeyId)
 }
 
 enum class StepInitialisationStage {
