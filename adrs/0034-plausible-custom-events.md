@@ -1,4 +1,4 @@
-# ADR-0033: plausible custom events
+# ADR-0034: plausible custom events
 
 ## Status
 
@@ -21,6 +21,9 @@ We want to be able to generate a Sankey diagram for each of our journeys showing
 
 ## Decision Outcome
 
+It is certainly possible to get enough data from plausible to generate Sankey diagrams. This has been tested on the property registration journey, and this quickly became a complicated diagram.
+As such it will need to be considered how best to present the data in a useful way. It is likely that the data collection and manipulation will be automated but the diagrams themselves may need to be manually adjusted for readability.
+
 The chosen option is Front-end events with the referrer header, because it is the least intrusive to users while still providing useful data for generating Sankey diagrams. As part of the research into the options this quickly became the simplest and easiest of the options. It was clear that sending just the referrer header and current url as an event would create sufficient data to generate useful Sankey diagrams. The Front end was chosen as the delivery method as it was the simplest to implement with minimal impact on the existing webapp.
 There is an existing prototype on branch `PRSD-1610/Front-end-referrer-header`, this has allowed me to implement this method and generate some mock data using plausible. I have then used the data to create a Sankey diagram using draxlr.com which has demonstrated that this method will work.
 
@@ -36,12 +39,17 @@ Sending the plausible event from the front end (eg, on page load). The suggested
 
 * Good, because the implementation is straightforward and has minimal impact on the rest of the webapp.
 * Good, because the data is sent on page load, so there is no risk of missing data due to server-side issues.
-* Bad, because it relies on the browser to send the data, which could be blocked by ad blockers or other privacy tools.
+* Bad, because it relies on the browser to send the data, which could be blocked by ad blockers or other privacy tools. However, this could be mitigated by proxying Plausible.
 * Bad, because it relies on JavaScript being enabled in the browser.
 
 #### Back-end custom events
 
 Sending the plausible event from the back end (eg, as part of the journey framework). The suggested method for this is to create a service that will provide the model attributes for the plausible event properties and then these would be sent from the server on page load.
+
+* Good, because it does not rely on the browser to send the data, so it is less likely to be blocked by ad blockers or other privacy tools.
+* Good, because it does not rely on JavaScript being enabled in the browser.
+* Bad, because it requires additional implementation work to integrate with the journey framework.
+* Bad, because it could potentially miss data due to server-side issues.
 
 ### Referrer header VS Session ID
 
@@ -67,8 +75,6 @@ Send a custom event to Plausible on each page load with the following:
 
 * Good, because it would allow us to capture specific user journeys, rather than just page-to-page transitions.
 * Good, because it would allow us to filter out duplicate page views within a session, which would give us a more accurate picture of user flows.
-* Bad, because it would require setting a cookie or using some other method to track the user's session, which could be seen as intrusive.
-* Bad, because it would require additional implementation work to generate and manage the session IDs.
 * Bad, because it could potentially raise privacy concerns, even if the session ID is hashed.
 * Bad, because it would require additional implementation work to hash the session ID and manage the hashing process.
 
