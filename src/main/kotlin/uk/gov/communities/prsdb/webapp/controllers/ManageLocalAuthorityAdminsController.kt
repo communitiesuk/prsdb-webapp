@@ -156,7 +156,7 @@ class ManageLocalAuthorityAdminsController(
         model: Model,
     ): String {
         val localAuthorityUser = localAuthorityDataService.getLocalAuthorityUserById(localAuthorityUserId)
-        model.addAttribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+        model.addAttribute("backUrl", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
         model.addAttribute("localAuthorityUser", localAuthorityUser)
         model.addAttribute(
             "options",
