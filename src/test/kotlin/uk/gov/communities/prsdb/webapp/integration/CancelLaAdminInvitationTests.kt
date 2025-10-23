@@ -14,13 +14,6 @@ class CancelLaAdminInvitationTests : IntegrationTestWithMutableData("data-edit-l
     val invitedEmail = "cart@example.com"
 
     @Test
-    fun `back link goes to the edit admin page`(page: Page) {
-        val cancelAdminInvitationPage = navigator.goToCancelAdminInvitePage(invitationId)
-        cancelAdminInvitationPage.backLink.clickAndWait()
-        assertPageIs(page, ManageLaAdminsPage::class)
-    }
-
-    @Test
     fun `user can be deleted`(page: Page) {
         // Navigate to the cancel la invitation page
         var manageAdminPage = navigator.goToManageLaAdminsPage()

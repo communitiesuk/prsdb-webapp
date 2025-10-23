@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 
 class ManageLAAdminsTests : IntegrationTest() {
     @Nested
-    inner class WithAdminUsersAndInvites : IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
+    inner class WithAdminUsersAndInvites : NestedIntegrationTestWithImmutableData(
         "data-la-admin-users-and-invitations-user-is-system-operator.sql",
     ) {
         @Test

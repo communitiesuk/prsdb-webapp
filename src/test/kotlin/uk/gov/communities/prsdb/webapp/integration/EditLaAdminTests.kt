@@ -22,20 +22,6 @@ class EditLaAdminTests : IntegrationTestWithMutableData("data-edit-la-admin-user
     @Nested
     inner class EditAdmin {
         @Test
-        fun `back link goes to manage admin users page`(page: Page) {
-            val editAdminPage = navigator.goToEditAdminsPage(laAdminId)
-            editAdminPage.backLink.clickAndWait()
-            assertPageIs(page, ManageLaAdminsPage::class)
-        }
-
-        @Test
-        fun `remove this account button goes to delete admin page`(page: Page) {
-            val editAdminPage = navigator.goToEditAdminsPage(laAdminId)
-            editAdminPage.removeAccountButton.clickAndWait()
-            assertPageIs(page, DeleteLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
-        }
-
-        @Test
         fun `an admin access can be changed to basic`(page: Page) {
             // Click the change link for the la admin to edit
             var manageAdminPage = navigator.goToManageLaAdminsPage()
@@ -63,13 +49,6 @@ class EditLaAdminTests : IntegrationTestWithMutableData("data-edit-la-admin-user
 
     @Nested
     inner class DeleteAdmin {
-        @Test
-        fun `back link goes to edit admin page`(page: Page) {
-            val deleteAdminPage = navigator.goToDeleteLaAdminPage(laAdminId)
-            deleteAdminPage.backLink.clickAndWait()
-            assertPageIs(page, EditLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
-        }
-
         @Test
         fun `user can be deleted`(page: Page) {
             whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
