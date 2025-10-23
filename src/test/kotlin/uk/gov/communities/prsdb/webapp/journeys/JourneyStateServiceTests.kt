@@ -254,7 +254,7 @@ class JourneyStateServiceTests {
     @Test
     fun `urlWithJourneyState appends the journeyId parameter to the provided URL`() {
         // Arrange
-        val baseUrl = "https://example.com/page"
+        val baseUrl = "example.com/page"
         val journeyId = "test-journey-id"
 
         // Act
