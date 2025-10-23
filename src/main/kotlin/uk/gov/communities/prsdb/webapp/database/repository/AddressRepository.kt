@@ -11,9 +11,10 @@ interface AddressRepository : JpaRepository<Address, Long> {
         "SELECT a.* " +
             "FROM address a " +
             "WHERE a.is_active " +
-            "AND a.postcode %> :postcode " +
+            "AND a.uprn IS NOT NULL " +
+            "AND replace(a.postcode, ' ', '') = upper(replace(:postcode, ' ', '')) " +
             "AND (a.local_authority_id IS NOT NULL OR NOT :restrictToEngland) " + // We only keep English LA records
-            "ORDER BY (a.postcode <->> :postcode) + (concat(a.building_name, ' ', a.building_number) <->> :houseNameOrNumber) " +
+            "ORDER BY concat_ws(' ', sub_building, building_name, building_number) <->> :houseNameOrNumber " +
             "LIMIT $MAX_SEARCH_RESULTS;",
         nativeQuery = true,
     )

@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -22,21 +22,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
-    @OneToOne
-    @JoinColumn(
-        name = "property_ownership_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_COMPLIANCE_PROPERTY_OWNERSHIP"),
-    )
+    @OneToOne(optional = false)
+    @JoinColumn(name = "property_ownership_id", nullable = false, unique = true)
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
-    @OneToOne
-    @JoinColumn(
-        name = "gas_safety_upload_id",
-        nullable = true,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_COMPLIANCE_GAS_SAFETY_UPLOAD"),
-    )
+    @OneToOne(optional = true)
+    @JoinColumn(name = "gas_safety_upload_id", nullable = true, unique = true)
     var gasSafetyFileUpload: FileUpload? = null
 
     var gasSafetyCertIssueDate: LocalDate? = null
@@ -47,12 +39,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var gasSafetyCertExemptionOtherReason: String? = null
 
-    @OneToOne
-    @JoinColumn(
-        name = "eicr_id",
-        nullable = true,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_COMPLIANCE_EICR_UPLOAD"),
-    )
+    @OneToOne(optional = true)
+    @JoinColumn(name = "eicr_upload_id", nullable = true, unique = true)
     var eicrFileUpload: FileUpload? = null
 
     var eicrIssueDate: LocalDate? = null
@@ -73,10 +61,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var epcMeesExemptionReason: MeesExemptionReason? = null
 
+    @Column(nullable = false)
     val hasFireSafetyDeclaration: Boolean = true
 
+    @Column(nullable = false)
     val hasKeepPropertySafeDeclaration: Boolean = true
 
+    @Column(nullable = false)
     val hasResponsibilityToTenantsDeclaration: Boolean = true
 
     val gasSafetyCertS3Key: String?

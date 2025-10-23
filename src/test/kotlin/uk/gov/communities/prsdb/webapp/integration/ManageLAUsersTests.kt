@@ -15,7 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ManageLAUsersTests : IntegrationTestWithImmutableData("data-local.sql") {
-    val localAuthorityId = 2
+    val localAuthorityId = 1
 
     @Test
     fun `invite button goes to invite new user page`(page: Page) {

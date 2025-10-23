@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded
 
 Date of decision: 2025-04-16
 
