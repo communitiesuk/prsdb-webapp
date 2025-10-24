@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -69,3 +70,9 @@ class EpcQuestionStepConfig(
             }
         }
 }
+
+@Scope("prototype")
+@PrsdbWebComponent
+final class EpcQuestionStep(
+    stepConfig: EpcQuestionStepConfig,
+) : JourneyStep<EpcStatus, EpcFormModel, EpcJourneyState>(stepConfig)

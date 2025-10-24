@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -59,3 +60,9 @@ class CheckEpcStepConfig(
         return this
     }
 }
+
+@Scope("prototype")
+@PrsdbWebComponent
+final class CheckEpcStep(
+    stepConfig: CheckEpcStepConfig,
+) : JourneyStep<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>(stepConfig)
