@@ -266,9 +266,12 @@ class JourneyStepTest {
         val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
 
+        val state: JourneyState = mock()
+        whenever(state.journeyId).thenReturn("jid123")
+
         step.initialize(
             "stepId",
-            mock(),
+            state,
             mock(),
             { "redirect" },
             mock(),
@@ -279,7 +282,7 @@ class JourneyStepTest {
         val redirectUrl = step.determineRedirect()
 
         // Assert
-        assertEquals("redirect", redirectUrl)
+        assertEquals("redirect?journeyId=jid123", redirectUrl)
     }
 
     @Test
@@ -289,9 +292,12 @@ class JourneyStepTest {
         whenever(step.stepConfig.mode(any())).thenReturn(null)
         whenever(step.stepConfig.routeSegment).thenReturn("stepId")
 
+        val state: JourneyState = mock()
+        whenever(state.journeyId).thenReturn("jid123")
+
         step.initialize(
             "stepId",
-            mock(),
+            state,
             mock(),
             { "redirect" },
             mock(),
@@ -302,7 +308,7 @@ class JourneyStepTest {
         val redirectUrl = step.determineRedirect()
 
         // Assert
-        assertEquals("stepId", redirectUrl)
+        assertEquals("stepId?journeyId=jid123", redirectUrl)
     }
 
     @Test
