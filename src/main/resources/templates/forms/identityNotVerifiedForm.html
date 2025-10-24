@@ -3,16 +3,16 @@
 <!--/*@thymesVar id="formData" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}},${formModel}, ~{::#form-content},${backUrl}, ${sectionHeaderInfo})}">
-
-<th:block id="form-content">
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'identityNotVerified', #{${fieldSetHeading}}, null)}">
-        <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.one}">forms.identityNotVerified.paragraph.one</p>
-        <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.two}">forms.identityNotVerified.paragraph.two</p>
-        <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.three}">forms.identityNotVerified.paragraph.three</p>
-    </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-</th:block>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}},${formModel}, ~{::#form-content/content()},${backUrl}, ${sectionHeaderInfo})}">
+<header>
+    <h1 class="govuk-heading-l" th:text="#{forms.identityNotVerified.fieldSetHeading}">forms.identityNotVerified.fieldSetHeading</h1>
+</header>
+<section>
+    <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.one}">forms.identityNotVerified.paragraph.one</p>
+    <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.two}">forms.identityNotVerified.paragraph.two</p>
+    <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.three}">forms.identityNotVerified.paragraph.three</p>
+</section>
+<button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
