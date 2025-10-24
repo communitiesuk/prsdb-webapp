@@ -46,7 +46,7 @@ class IncompletePropertyViewModelBuilder {
                     )
                     addAction(
                         "landlord.incompleteProperties.action.delete",
-                        LandlordController.deleteIncompletePropertyPath(contextId),
+                        LandlordController.getDeleteIncompletePropertyPath(contextId),
                     )
                 }.toList()
     }

@@ -5,11 +5,11 @@
 - Run `npm install` in the `scripts/plausible` directory if required.
 
 ## Configuration
-- Add your Plausible API Key to a `.env` file in the `scripts` directory:
+- Add your Plausible API Key to a `.env` file in the `scripts/plausible` directory:
   ```
   PLAUSIBLE_API_KEY=your_api_key
   ```
-  - You can get the API key from Keeper or create your own in Plausible under  `Settings > API`.
+  - You can get the API key from Keeper or create your own in Plausible under  `Account Settings > API`.
 
 ## Input Queries
 - Store queries in `scripts/plausible/inputs` as a `.json` file.
@@ -64,6 +64,10 @@
 
 ## Output
 - Find generated CSV files in `scripts/plausible/outputs` by default.
+- If your dimension is `event:page`, then `process_journey_data.mjs` will be run and the output will be in `scripts/plausible/processed_journey_data`.
+  - This script will separate the data into separate journey files, this will aggregate the data for compliance journeys.
+- The `createMetricCSV.mjs` script will auto-run to generate CSV files for the metric data that we currently use.
+  - These can be found in `scripts/plausible/userExperienceMetrics`.
 - If you use `--save`, output will be in `scripts/plausible/saved` and will not be cleared.
 - Each file matches a query and contains results with correct headers.
 

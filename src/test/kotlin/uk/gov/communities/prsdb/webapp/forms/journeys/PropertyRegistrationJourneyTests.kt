@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -34,7 +34,7 @@ class PropertyRegistrationJourneyTests {
     lateinit var localAuthorityService: LocalAuthorityService
 
     @Mock
-    lateinit var addressLookupService: AddressLookupService
+    lateinit var addressService: AddressService
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
@@ -43,7 +43,7 @@ class PropertyRegistrationJourneyTests {
         mockJourneyDataService = mock()
         mockPropertyRegistrationService = mock()
         localAuthorityService = mock()
-        addressLookupService = mock()
+        addressService = mock()
     }
 
     @Nested
@@ -71,7 +71,7 @@ class PropertyRegistrationJourneyTests {
                 PropertyRegistrationJourney(
                     validator = alwaysTrueValidator,
                     journeyDataService = mockJourneyDataService,
-                    addressLookupService = addressLookupService,
+                    addressService = addressService,
                     propertyRegistrationService = mockPropertyRegistrationService,
                     localAuthorityService = localAuthorityService,
                 )

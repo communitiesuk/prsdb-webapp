@@ -23,4 +23,6 @@ interface LocalAuthorityUserOrInvitationRepository : JpaRepository<LocalAuthorit
         localAuthority: LocalAuthority,
         pageable: Pageable,
     ): Page<LocalAuthorityUserOrInvitation>
+
+    fun findAllByIsManagerTrue(pageable: Pageable): Page<LocalAuthorityUserOrInvitation>
 }

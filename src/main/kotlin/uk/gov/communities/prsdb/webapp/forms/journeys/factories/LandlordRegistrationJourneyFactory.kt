@@ -4,7 +4,7 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFact
 class LandlordRegistrationJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
-    private val addressLookupService: AddressLookupService,
+    private val addressService: AddressService,
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
 ) {
@@ -21,7 +21,7 @@ class LandlordRegistrationJourneyFactory(
         LandlordRegistrationJourney(
             validator,
             journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
-            addressLookupService,
+            addressService,
             landlordService,
             securityContextService,
         )

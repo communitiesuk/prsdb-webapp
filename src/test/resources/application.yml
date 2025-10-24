@@ -35,5 +35,4 @@ beta-feedback:
 
 os:
   api-key: ${OS_API_KEY}
-  downloads:
-    base-url: https://api.os.uk/downloads/v1
+  downloads.base-url: https://api.os.uk/downloads/v1

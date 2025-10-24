@@ -9,6 +9,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -209,4 +210,19 @@ class PropertyRegistrationService(
         val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
         formContextRepository.delete(formContext)
     }
+
+    fun addIncompletePropertyFormContextsDeletedThisSession(formContextId: Long) {
+        session.setAttribute(
+            INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION,
+            getIncompletePropertyFormContextsDeletedThisSession().plus(formContextId),
+        )
+    }
+
+    fun getIncompletePropertyWasDeletedThisSession(contextId: Long): Boolean =
+        getIncompletePropertyFormContextsDeletedThisSession().contains(contextId)
+
+    private fun getIncompletePropertyFormContextsDeletedThisSession(): MutableList<Long> =
+        session.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION) as MutableList<Long>? ?: mutableListOf()
+
+    fun getFormContextByIdOrNull(contextId: Long): FormContext? = formContextRepository.findById(contextId).orElse(null)
 }

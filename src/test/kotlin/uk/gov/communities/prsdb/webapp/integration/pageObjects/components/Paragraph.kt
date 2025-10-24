@@ -11,5 +11,14 @@ class Paragraph(
             page: Page,
             testId: String,
         ) = Paragraph(page.locator("p[data-testid=\"$testId\"]"))
+
+        fun byText(
+            page: Page,
+            text: String,
+        ) = Paragraph(
+            page
+                .locator("html")
+                .locator("p", Locator.LocatorOptions().setHasText(text)),
+        )
     }
 }

@@ -145,15 +145,3 @@ spring:
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: local-mock-os-api
-
-os:
-  api-key: fake-key
-  places:
-    base-url: http://localhost:8080/local/os-places

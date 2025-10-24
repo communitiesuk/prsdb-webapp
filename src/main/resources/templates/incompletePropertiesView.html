@@ -2,15 +2,17 @@
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{landlord.incompleteProperties.title},~{::#main-content/content()}, false)}">
 <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
 <main class="govuk-main-wrapper">
-    <div id="page-content">
-        <h1 class="govuk-heading-l" th:text="#{landlord.incompleteProperties.heading}">landlord.incompleteProperties.heading</h1>
+    <div class="govuk-grid-row" id="page-content">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-l" th:text="#{landlord.incompleteProperties.heading}">landlord.incompleteProperties.heading</h1>
+            <p th:unless="${#lists.isEmpty(incompleteProperties)}" class="govuk-body-l" th:text="#{landlord.incompleteProperties.text}">landlord.incompleteProperties.text</p><br>
+        </div>
 
-        <th:block th:unless="${#lists.isEmpty(incompleteProperties)}">
-            <p class="govuk-body-l" th:text="#{landlord.incompleteProperties.text}">landlord.incompleteProperties.text</p>
+        <th:div class="govuk-grid-column-full" th:unless="${#lists.isEmpty(incompleteProperties)}">
             <th:block th:each="property: ${incompleteProperties}">
                 <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList})}" ></div>
             </th:block>
-        </th:block>
+        </th:div>
         <th:block th:if="${#lists.isEmpty(incompleteProperties)}">
             <p class="govuk-body-l govuk-hint" th:text="#{landlord.incompleteProperties.none.hintText}">landlord.incompleteProperties.none.hintText</p>
             <p class="govuk-body">
