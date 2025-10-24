@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysFalseValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -33,9 +34,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             parentage,
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -55,9 +56,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             parentage,
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -78,9 +79,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -103,9 +104,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -126,9 +127,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             { "backLink" },
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -149,9 +150,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             { "backLink" },
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -172,9 +173,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             { "backLink" },
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
         val bindingResult: BindingResult = mock()
 
@@ -197,9 +198,9 @@ class JourneyStepTest {
             "stepId",
             state,
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
         val formModel = TestFormModel().apply { field = "submittedValue" }
         val bindingResult: BindingResult = mock()
@@ -224,9 +225,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             parentage,
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -248,9 +249,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             parentage,
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
@@ -273,16 +274,20 @@ class JourneyStepTest {
             "stepId",
             state,
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
-        val redirectUrl = step.determineRedirect()
+        val redirectDestination = step.determineNextDestination()
 
         // Assert
-        assertEquals("redirect?journeyId=jid123", redirectUrl)
+        assertTrue(redirectDestination is Destination.ExternalUrl)
+        with(redirectDestination as Destination.ExternalUrl) {
+            assertEquals("redirect", externalUrl)
+            assertEquals("jid123", params["journeyId"])
+        }
     }
 
     @Test
@@ -299,16 +304,20 @@ class JourneyStepTest {
             "stepId",
             state,
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
 
         // Act
-        val redirectUrl = step.determineRedirect()
+        val redirectDestination = step.determineNextDestination()
 
         // Assert
-        assertEquals("stepId?journeyId=jid123", redirectUrl)
+        assertTrue(redirectDestination is Destination.Step)
+        with(redirectDestination as Destination.Step) {
+            assertEquals("stepId", step.routeSegment)
+            assertEquals("jid123", params["journeyId"])
+        }
     }
 
     @Test
@@ -323,9 +332,9 @@ class JourneyStepTest {
             "stepId",
             mock(),
             mock(),
-            { "redirect" },
+            { Destination.ExternalUrl("redirect") },
             mock(),
-            { "unreachable" },
+            { Destination.ExternalUrl("unreachable") },
         )
         whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(true)
 
@@ -335,9 +344,9 @@ class JourneyStepTest {
                 "stepId",
                 mock(),
                 mock(),
-                { "redirect" },
+                { Destination.ExternalUrl("redirect") },
                 mock(),
-                { "unreachable" },
+                { Destination.ExternalUrl("unreachable") },
             )
         }
     }

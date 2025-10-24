@@ -6,17 +6,18 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
     val journey: TState,
 ) {
     private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
-    private var unreachableStepRedirect: (() -> String)? = null
+    private var unreachableStepDestination: (() -> Destination)? = null
 
     fun build(): Map<String, StepLifecycleOrchestrator> =
         stepsUnderConstruction.associate { sb ->
-            sb.build(journey, unreachableStepRedirect).let {
+            sb.build(journey, unreachableStepDestination).let {
                 checkForUninitialisedParents(sb)
                 it.routeSegment to StepLifecycleOrchestrator(it)
             }
@@ -32,11 +33,18 @@ class JourneyBuilder<TState : JourneyState>(
         stepsUnderConstruction.add(stepInitialiser)
     }
 
-    fun unreachableStepRedirect(getRedirect: () -> String) {
-        if (unreachableStepRedirect != null) {
+    fun unreachableStepUrl(getUrl: () -> String) {
+        if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepRedirect has already been set")
         }
-        unreachableStepRedirect = getRedirect
+        unreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
+    }
+
+    fun unreachableStepStep(getStep: () -> JourneyStep<*, *, *>) {
+        if (unreachableStepDestination != null) {
+            throw JourneyInitialisationException("unreachableStepRedirect has already been set")
+        }
+        unreachableStepDestination = { Destination.Step(getStep()) }
     }
 
     private fun checkForUninitialisedParents(stepInitialiser: StepInitialiser<*, *, *>) {

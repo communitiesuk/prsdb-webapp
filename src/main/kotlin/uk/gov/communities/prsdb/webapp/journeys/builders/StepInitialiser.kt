@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : JourneyState, TMode : Enum<TMode>>(
     val segment: String,
@@ -19,24 +20,32 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
     }
 
     private var backUrlOverride: (() -> String?)? = null
-    private var redirectToUrl: ((mode: TMode) -> String)? = null
+    private var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
-    private var unreachableStepRedirect: (() -> String)? = null
+    private var unreachableStepDestination: (() -> Destination)? = null
 
-    fun redirectToStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepInitialiser<TStep, TState, TMode> {
-        if (redirectToUrl != null) {
-            throw JourneyInitialisationException("Step $segment already has a redirectTo defined")
+    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepInitialiser<TStep, TState, TMode> {
+        if (nextDestinationProvider != null) {
+            throw JourneyInitialisationException("Step $segment already has a next destination defined")
         }
-        redirectToUrl = { mode -> nextStepProvider(mode).routeSegment }
+        nextDestinationProvider = { mode -> Destination.Step(nextStepProvider(mode)) }
         return this
     }
 
-    fun redirectToUrl(nextUrlProvider: (mode: TMode) -> String): StepInitialiser<TStep, TState, TMode> {
-        if (redirectToUrl != null) {
-            throw JourneyInitialisationException("Step $segment already has a redirectTo defined")
+    fun nextUrl(nextUrlProvider: (mode: TMode) -> String): StepInitialiser<TStep, TState, TMode> {
+        if (nextDestinationProvider != null) {
+            throw JourneyInitialisationException("Step $segment already has a next destination defined")
         }
-        redirectToUrl = nextUrlProvider
+        nextDestinationProvider = { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
+        return this
+    }
+
+    fun nextDestination(destinationProvider: (mode: TMode) -> Destination): StepInitialiser<TStep, TState, TMode> {
+        if (nextDestinationProvider != null) {
+            throw JourneyInitialisationException("Step $segment already has a next destination defined")
+        }
+        nextDestinationProvider = destinationProvider
         return this
     }
 
@@ -64,28 +73,28 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
         return this
     }
 
-    fun unreachableStepRedirect(getRedirect: () -> String): StepInitialiser<TStep, TState, TMode> {
-        if (unreachableStepRedirect != null) {
+    fun unreachableStepUrl(getDestination: () -> String): StepInitialiser<TStep, TState, TMode> {
+        if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("Step $segment already has an unreachableStepRedirect defined")
         }
-        unreachableStepRedirect = getRedirect
+        unreachableStepDestination = { Destination.ExternalUrl(getDestination()) }
         return this
     }
 
     fun build(
         state: TState,
-        defaultUnreachableStepRedirect: (() -> String)?,
+        defaultUnreachableStepDestination: (() -> Destination)?,
     ): JourneyStep<TMode, *, TState> {
         step.initialize(
             segment,
             state,
             backUrlOverride,
-            redirectToUrl ?: throw JourneyInitialisationException("Step $segment has no redirectTo defined"),
+            nextDestinationProvider ?: throw JourneyInitialisationException("Step $segment has no redirectTo defined"),
             parentage?.invoke() ?: NoParents(),
-            unreachableStepRedirect
-                ?: defaultUnreachableStepRedirect
+            unreachableStepDestination
+                ?: defaultUnreachableStepDestination
                 ?: throw JourneyInitialisationException(
-                    "Step $segment has no unreachableStepRedirect defined, and there is no default set at the journey level either",
+                    "Step $segment has no unreachableStepDestination defined, and there is no default set at the journey level either",
                 ),
         )
 

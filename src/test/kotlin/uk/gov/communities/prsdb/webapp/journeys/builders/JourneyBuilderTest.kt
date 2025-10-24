@@ -11,7 +11,7 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class JourneyBuilderTest {
     lateinit var mockedStepBuilders: MockedConstruction<StepInitialiser<*, *, *>>
@@ -56,7 +57,7 @@ class JourneyBuilderTest {
             // Act
             val journey =
                 journey(state) {
-                    unreachableStepRedirect { "redirect" }
+                    unreachableStepUrl { "redirect" }
                     step("segment", mock()) {}
                     step("segment2", mock()) {}
                 }
@@ -65,7 +66,7 @@ class JourneyBuilderTest {
             val journeyBuilder = mockedBuilders.constructed().first()
             assertSame(state, journeyBuilder.journey)
 
-            verify(journeyBuilder).unreachableStepRedirect(any())
+            verify(journeyBuilder).unreachableStepUrl(any())
             verify(journeyBuilder, times(2)).step(any(), any(), any())
 
             verify(journeyBuilder).build()
@@ -74,7 +75,7 @@ class JourneyBuilderTest {
     }
 
     @Test
-    fun `an unreachableStepRedirect is passed to all built step builders`() {
+    fun `an unreachableStepUrl is passed to all built step builders`() {
         // Arrange
         val jb = JourneyBuilder(mock())
         val redirectLambda = { "redirect" }
@@ -82,24 +83,33 @@ class JourneyBuilderTest {
         // Act
         jb.step("segment", mock()) {}
         jb.step("segment2", mock()) {}
-        jb.unreachableStepRedirect(redirectLambda)
+        jb.unreachableStepUrl(redirectLambda)
         jb.build()
 
         // Assert
         val stepInitialiser1 = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
         val stepInitialiser2 = mockedStepBuilders.constructed().last() as StepInitialiser<*, JourneyState, *>
-        verify(stepInitialiser1).build(any(), eq(redirectLambda))
-        verify(stepInitialiser2).build(any(), eq(redirectLambda))
+        val captor = argumentCaptor<() -> Destination>()
+        verify(stepInitialiser1).build(any(), captor.capture())
+        verify(stepInitialiser2).build(any(), captor.capture())
+
+        captor.allValues.forEach {
+            val destination = it()
+            assert(destination is Destination.ExternalUrl)
+            with(destination as Destination.ExternalUrl) {
+                assertEquals("redirect", externalUrl)
+            }
+        }
     }
 
     @Test
     fun `unreachableStepRedirect cannot be called twice on the same journey builder`() {
         // Arrange
         val jb = JourneyBuilder(mock())
-        jb.unreachableStepRedirect { "redirect" }
+        jb.unreachableStepUrl { "redirect" }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { jb.unreachableStepRedirect { "newRedirect" } }
+        assertThrows<JourneyInitialisationException> { jb.unreachableStepUrl { "newRedirect" } }
     }
 
     @Test
