@@ -61,6 +61,9 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
             formModelClass.cast(binder.bindingResult.target)
         }
 
+    // TODO PRSD-1550: It is ugly that step config has a value set during JourneyStep initialisation - it is only used to make "getFormModelFromState" work
+    // Perhaps either the routeSegment or formModel should be passed into that method instead (and therefore all the other functions)
+    // Alternatively, steps could reflexively access the form model on the JourneyStep in state without needing the route segment
     lateinit var routeSegment: String
 
     fun isRouteSegmentInitialised(): Boolean = ::routeSegment.isInitialized
