@@ -8,29 +8,33 @@
 <!--/*@thymesVar id="findEpcUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <header>
-        <h1 class="govuk-heading-l" th:text="#{forms.epcMissing.heading}">forms.epcMissing.heading</h1>
-    </header>
-    <section>
-        <p class="govuk-body" th:text="#{forms.epcMissing.paragraph.one}">forms.epcMissing.paragraph.one</p>
-        <p class="govuk-body" th:text="#{forms.epcMissing.paragraph.two}">forms.epcMissing.paragraph.two</p>
-    </section>
-    <section th:replace="~{fragments/content/invalidEpcContent :: whatNextContent(${getNewEpcUrl}, ${meesExemptionGuideUrl}, ${registerMeesExemptionUrl}, ${findEpcUrl})}"></section>
-    <section>
-        <h2 class="govuk-heading-m" th:text="#{forms.epcMissing.ifNoEpc.heading}">forms.epcMissing.ifNoEpc.heading</h2>
-        <p class="govuk-body" th:text="#{forms.epcMissing.ifNoEpc.paragraph.one}">forms.epcMissing.ifNoEpc.paragraph.one</p>
-        <p class="govuk-body" th:text="#{forms.epcMissing.ifNoEpc.bullet.heading}">forms.epcMissing.ifNoEpc.bullet.heading</p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.epcMissing.ifNoEpc.bullet.one}">forms.epcMissing.ifNoEpc.bullet.one</li>
-            <li th:text="#{forms.epcMissing.ifNoEpc.bullet.two}">forms.epcMissing.ifNoEpc.bullet.two</li>
-        </ul>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.epcMissing.ifNoEpc.paragraph.two.beforeLink}">forms.epcMissing.ifNoEpc.paragraph.two.beforeLink</span>
-            <a class="govuk-link" th:href="${meesExemptionGuideUrl}" th:text="#{forms.epcMissing.ifNoEpc.paragraph.two.link}" rel="noreferrer noopener" target="_blank">forms.epcMissing.ifNoEpc.paragraph.two.link
-            </a><span th:remove="tag" th:text="#{forms.epcMissing.ifNoEpc.paragraph.two.afterLink}">forms.epcMissing.ifNoEpc.paragraph.two.afterLink</span>
-        </p>
-        <p class="govuk-body" th:text="#{forms.epcMissing.ifNoEpc.paragraph.three}">forms.epcMissing.ifNoEpc.paragraph.three</p>
-    </section>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{forms.epcMissing.heading}">forms.epcMissing.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{forms.epcMissing.paragraph.one}">forms.epcMissing.paragraph.one</p>
+            <p class="govuk-body" th:text="#{forms.epcMissing.paragraph.two}">forms.epcMissing.paragraph.two</p>
+        </section>
+        <section th:replace="~{fragments/content/invalidEpcContent :: whatNextContent(${getNewEpcUrl}, ${meesExemptionGuideUrl}, ${registerMeesExemptionUrl}, ${findEpcUrl})}"></section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{forms.epcMissing.ifNoEpc.heading}">forms.epcMissing.ifNoEpc.heading</h2>
+            <p class="govuk-body" th:text="#{forms.epcMissing.ifNoEpc.paragraph.one}">forms.epcMissing.ifNoEpc.paragraph.one</p>
+            <p class="govuk-body" th:text="#{forms.epcMissing.ifNoEpc.bullet.heading}">forms.epcMissing.ifNoEpc.bullet.heading</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{forms.epcMissing.ifNoEpc.bullet.one}">forms.epcMissing.ifNoEpc.bullet.one</li>
+                <li th:text="#{forms.epcMissing.ifNoEpc.bullet.two}">forms.epcMissing.ifNoEpc.bullet.two</li>
+            </ul>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{forms.epcMissing.ifNoEpc.paragraph.two.beforeLink}">forms.epcMissing.ifNoEpc.paragraph.two.beforeLink</span>
+                <a class="govuk-link" th:href="${meesExemptionGuideUrl}" th:text="#{forms.epcMissing.ifNoEpc.paragraph.two.link}" rel="noreferrer noopener" target="_blank">forms.epcMissing.ifNoEpc.paragraph.two.link
+                </a><span th:remove="tag" th:text="#{forms.epcMissing.ifNoEpc.paragraph.two.afterLink}">forms.epcMissing.ifNoEpc.paragraph.two.afterLink</span>
+            </p>
+            <p class="govuk-body" th:text="#{forms.epcMissing.ifNoEpc.paragraph.three}">forms.epcMissing.ifNoEpc.paragraph.three</p>
+        </section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>
