@@ -13,7 +13,7 @@
                 <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList})}" ></div>
             </th:block>
         </th:div>
-        <th:block th:if="${#lists.isEmpty(incompleteProperties)}">
+        <th:div class="govuk-grid-column-full" th:if="${#lists.isEmpty(incompleteProperties)}">
             <p class="govuk-body-l govuk-hint" th:text="#{landlord.incompleteProperties.none.hintText}">landlord.incompleteProperties.none.hintText</p>
             <p class="govuk-body">
                 <span th:remove="tag" class="govuk-body" th:text="#{landlord.incompleteProperties.none.text.beforeLinks}">
@@ -31,7 +31,7 @@
                     landlord.incompleteProperties.none.text.afterLinks
                 </span>
             </p>
-        </th:block>
+        </th:div>
     </div>
 </main>
 </html>
