@@ -7,15 +7,19 @@
 <!--/*@thymesVar id="landlordGasSafetyUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <header>
-        <h1 class="govuk-heading-l" th:text="#{forms.gasSafetyOutdated.heading}">forms.gasSafetyOutdated.heading</h1>
-    </header>
-    <section>
-        <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.paragraph.one}">forms.gasSafetyOutdated.paragraph.one</p>
-        <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.paragraph.two}">forms.gasSafetyOutdated.paragraph.two</p>
-        <p class="govuk-body" th:utext="#{forms.gasSafetyOutdated.paragraph.three}">forms.gasSafetyOutdated.paragraph.three</p>
-    </section>
-    <section th:replace="~{fragments/content/invalidGasSafetyCertContent :: invalidGasSafetyCertContent(${gasSafeRegisterUrl}, ${hseUrl}, ${landlordGasSafetyUrl})}"></section>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{forms.gasSafetyOutdated.heading}">forms.gasSafetyOutdated.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.paragraph.one}">forms.gasSafetyOutdated.paragraph.one</p>
+            <p class="govuk-body" th:text="#{forms.gasSafetyOutdated.paragraph.two}">forms.gasSafetyOutdated.paragraph.two</p>
+            <p class="govuk-body" th:utext="#{forms.gasSafetyOutdated.paragraph.three}">forms.gasSafetyOutdated.paragraph.three</p>
+        </section>
+        <section th:replace="~{fragments/content/invalidGasSafetyCertContent :: invalidGasSafetyCertContent(${gasSafeRegisterUrl}, ${hseUrl}, ${landlordGasSafetyUrl})}"></section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>
