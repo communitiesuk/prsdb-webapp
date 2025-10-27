@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.VisitableJourneyElement
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.NotionalStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
@@ -36,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 class FooExampleJourneyFactory(
     private val stateFactory: ObjectFactory<FooJourneyState>,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(propertyId: Long): Map<String, VisitableJourneyElement> {
         val state = stateFactory.getObject()
         state.validateStateMatchesPropertyId(propertyId)
 
@@ -45,12 +46,16 @@ class FooExampleJourneyFactory(
             step("task-list", journey.taskListStep) {
                 nextUrl { "task-list" }
             }
+            notionalStep("occupation-start", journey.occupationStartStep) {
+                parents { journey.taskListStep.always() }
+                nextStep { journey.occupied }
+            }
             step("occupied", journey.occupied) {
                 parents { journey.taskListStep.always() }
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.households
-                        YesOrNo.NO -> journey.fooCheckYourAnswersStep
+                        YesOrNo.NO -> journey.occupationCompleteStep
                     }
                 }
             }
@@ -60,7 +65,20 @@ class FooExampleJourneyFactory(
             }
             step("tenants", journey.tenants) {
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
-                nextStep { journey.fooCheckYourAnswersStep }
+                nextStep { journey.occupationCompleteStep }
+            }
+            notionalStep("occupation-complete", journey.occupationCompleteStep) {
+                parents {
+                    OrParents(
+                        journey.occupied.hasOutcome(YesOrNo.NO),
+                        journey.tenants.hasOutcome(Complete.COMPLETE),
+                    )
+                }
+                nextStep { journey.epcStartStep }
+            }
+            notionalStep("epc-start", journey.epcStartStep) {
+                parents { journey.taskListStep.always() }
+                nextStep { journey.epcQuestion }
             }
             step("has-epc", journey.epcQuestion) {
                 parents { journey.taskListStep.always() }
@@ -124,13 +142,21 @@ class FooExampleJourneyFactory(
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
                 nextStep { journey.fooCheckYourAnswersStep }
             }
+            notionalStep("epc-complete", journey.epcCompleteStep) {
+                parents {
+                    OrParents(
+                        journey.epcQuestion.hasOutcome(EpcStatus.NO_EPC),
+                        journey.checkAutomatchedEpc.hasOutcome(YesOrNo.YES),
+                        journey.checkSearchedEpc.hasOutcome(YesOrNo.YES),
+                        journey.epcNotFound.hasOutcome(Complete.COMPLETE),
+                    )
+                }
+                nextStep { journey.fooCheckYourAnswersStep }
+            }
             step("check-your-answers", journey.fooCheckYourAnswersStep) {
                 parents {
                     AndParents(
-                        OrParents(
-                            journey.occupied.hasOutcome(YesOrNo.NO),
-                            journey.tenants.hasOutcome(Complete.COMPLETE),
-                        ),
+                        journey.occupationCompleteStep.hasOutcome(Complete.COMPLETE),
                         OrParents(
                             journey.epcQuestion.hasOutcome(EpcStatus.NO_EPC),
                             journey.checkAutomatchedEpc.hasOutcome(YesOrNo.YES),
@@ -161,6 +187,10 @@ class FooJourneyState(
     override val epcSuperseded: EpcSupersededStep,
     override val checkSearchedEpc: CheckEpcStep,
     val fooCheckYourAnswersStep: FooCheckAnswersStep,
+    val occupationCompleteStep: NotionalStep,
+    val occupationStartStep: NotionalStep,
+    val epcCompleteStep: NotionalStep,
+    val epcStartStep: NotionalStep,
     private val journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     OccupiedJourneyState,

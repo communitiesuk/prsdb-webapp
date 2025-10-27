@@ -3,10 +3,16 @@ package uk.gov.communities.prsdb.webapp.journeys
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.PageData
 
+interface VisitableJourneyElement {
+    fun getStepModelAndView(): ModelAndView
+
+    fun postStepModelAndView(formData: PageData): ModelAndView
+}
+
 class StepLifecycleOrchestrator(
     val journeyStep: JourneyStep<*, *, *>,
-) {
-    fun getStepModelAndView(): ModelAndView {
+) : VisitableJourneyElement {
+    override fun getStepModelAndView(): ModelAndView {
         journeyStep.beforeIsStepReachable()
         if (journeyStep.isStepReachable) {
             journeyStep.afterIsStepReached()
@@ -26,7 +32,7 @@ class StepLifecycleOrchestrator(
         return unreachableStepDestination.toModelAndView()
     }
 
-    fun postStepModelAndView(formData: PageData): ModelAndView {
+    override fun postStepModelAndView(formData: PageData): ModelAndView {
         journeyStep.beforeIsStepReachable()
         if (journeyStep.isStepReachable) {
             journeyStep.afterIsStepReached()
@@ -61,4 +67,26 @@ class StepLifecycleOrchestrator(
         val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
         return unreachableStepDestination.toModelAndView()
     }
+}
+
+class NotionalStepLifecycleOrchestrator(
+    val journeyStep: JourneyStep<*, *, *>,
+) : VisitableJourneyElement {
+    override fun getStepModelAndView(): ModelAndView {
+        journeyStep.beforeIsStepReachable()
+        if (journeyStep.isStepReachable) {
+            journeyStep.afterIsStepReached()
+
+            journeyStep.beforeDetermineRedirect()
+            val nextDestination = journeyStep.determineNextDestination()
+            journeyStep.afterDetermineRedirect()
+
+            return nextDestination.toModelAndView()
+        }
+
+        val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
+        return unreachableStepDestination.toModelAndView()
+    }
+
+    override fun postStepModelAndView(formData: PageData): ModelAndView = journeyStep.getUnreachableStepDestination().toModelAndView()
 }

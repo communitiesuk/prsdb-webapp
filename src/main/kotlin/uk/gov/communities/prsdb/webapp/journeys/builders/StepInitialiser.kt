@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : JourneyState, TMode : Enum<TMode>>(
     val segment: String,
     private val step: JourneyStep<TMode, *, TState>,
+    val notionalStep: Boolean = false,
 ) {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
