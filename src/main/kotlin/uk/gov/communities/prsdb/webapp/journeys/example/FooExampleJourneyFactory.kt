@@ -9,29 +9,28 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 
 @PrsdbWebService
 class FooExampleJourneyFactory(
@@ -152,15 +151,15 @@ class FooExampleJourneyFactory(
 @Scope("prototype")
 class FooJourneyState(
     val taskListStep: FooTaskListStep,
-    override val occupied: JourneyStep<YesOrNo, OccupancyFormModel, FooJourneyState>,
-    override val households: JourneyStep<Complete, NumberOfHouseholdsFormModel, FooJourneyState>,
-    override val tenants: JourneyStep<Complete, NumberOfPeopleFormModel, FooJourneyState>,
-    override val epcQuestion: JourneyStep<EpcStatus, EpcFormModel, FooJourneyState>,
-    override val checkAutomatchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourneyState>,
-    override val searchForEpc: JourneyStep<EpcSearchResult, EpcLookupFormModel, FooJourneyState>,
+    override val occupied: OccupiedStep,
+    override val households: HouseholdStep,
+    override val tenants: TenantsStep,
+    override val epcQuestion: EpcQuestionStep,
+    override val checkAutomatchedEpc: CheckEpcStep,
+    override val searchForEpc: SearchEpcStep,
     override val epcNotFound: EpcNotFoundStep,
     override val epcSuperseded: EpcSupersededStep,
-    override val checkSearchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourneyState>,
+    override val checkSearchedEpc: CheckEpcStep,
     val fooCheckYourAnswersStep: FooCheckAnswersStep,
     private val journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
