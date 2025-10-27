@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 
@@ -33,3 +34,9 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
         return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModel?.numberOfHouseholds)
     }
 }
+
+@Scope("prototype")
+@PrsdbWebComponent
+final class TenantsStep(
+    stepConfig: TenantsStepConfig,
+) : JourneyStep<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>(stepConfig)

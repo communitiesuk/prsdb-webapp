@@ -157,7 +157,6 @@ class LandlordRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "forms.identityNotVerified.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.continue",
                             BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
                         ),

@@ -3,57 +3,45 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
+import org.springframework.context.annotation.Scope
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
 class FooExampleJourneyFactory(
-    private val taskListStepFactory: ObjectFactory<FooTaskListStepConfig>,
-    val occupiedFactory: ObjectFactory<OccupiedStepConfig>,
-    val householdsFactory: ObjectFactory<HouseholdStepConfig>,
-    val tenantsFactory: ObjectFactory<TenantsStepConfig>,
-    val epcQuestionFactory: ObjectFactory<EpcQuestionStepConfig>,
-    val searchForEpcFactory: ObjectFactory<SearchEpcStepConfig>,
-    val epcNotFoundFactory: ObjectFactory<EpcNotFoundStepConfig>,
-    val epcSupersededFactory: ObjectFactory<EpcSupersededStepConfig>,
-    val checkAutomatchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
-    val checkSearchedEpcFactory: ObjectFactory<CheckEpcStepConfig>,
-    private val fooCheckYourAnswersStepFactory: ObjectFactory<FooCheckAnswersStepConfig>,
-    private val journeyDataServiceFactory: JourneyDataServiceFactory,
+    private val stateFactory: ObjectFactory<FooJourneyState>,
 ) {
-    final fun createJourneySteps(journeyId: String): Map<String, StepLifecycleOrchestrator> =
-        journey(createDynamicState(journeyId)) {
+    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+        val state = stateFactory.getObject()
+        state.validateStateMatchesPropertyId(propertyId)
+
+        return journey(stateFactory.getObject()) {
             unreachableStepRedirect { "task-list" }
             step("task-list", journey.taskListStep) {
                 redirectToUrl { "task-list" }
@@ -155,51 +143,57 @@ class FooExampleJourneyFactory(
                 redirectToUrl { "/" }
             }
         }
-
-    // TODO PRSD-1546: Reduce boilerplate by relying on dependency injection to extract journey id from request
-    private fun createDynamicState(journeyId: String) =
-        FooJourney(
-            JourneyStep(taskListStepFactory.getObject()),
-            JourneyStep(occupiedFactory.getObject()),
-            JourneyStep(householdsFactory.getObject()),
-            JourneyStep(tenantsFactory.getObject()),
-            JourneyStep(epcQuestionFactory.getObject()),
-            JourneyStep(checkAutomatchedEpcFactory.getObject()),
-            JourneyStep(searchForEpcFactory.getObject()),
-            JourneyStep(epcNotFoundFactory.getObject()),
-            JourneyStep(epcSupersededFactory.getObject()),
-            JourneyStep(checkSearchedEpcFactory.getObject()),
-            JourneyStep(fooCheckYourAnswersStepFactory.getObject()),
-            JourneyStateService(journeyDataServiceFactory.create(journeyId)),
-        )
-
-    final fun journeyStateInitialisation(
-        journeyId: String,
-        propertyId: Long,
-    ) {
-        JourneyStateService(
-            journeyDataServiceFactory.create(journeyId),
-        ).setValue("propertyId", Json.encodeToString(serializer(), propertyId))
     }
+
+    fun initializeJourneyState(propertyId: Long): String = stateFactory.getObject().initializeJourneyState(propertyId)
 }
 
-class FooJourney(
-    val taskListStep: JourneyStep<Complete, NoInputFormModel, FooJourney>,
-    override val occupied: JourneyStep<YesOrNo, OccupancyFormModel, FooJourney>,
-    override val households: JourneyStep<Complete, NumberOfHouseholdsFormModel, FooJourney>,
-    override val tenants: JourneyStep<Complete, NumberOfPeopleFormModel, FooJourney>,
-    override val epcQuestion: JourneyStep<EpcStatus, EpcFormModel, FooJourney>,
-    override val checkAutomatchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourney>,
-    override val searchForEpc: JourneyStep<EpcSearchResult, EpcLookupFormModel, FooJourney>,
-    override val epcNotFound: JourneyStep<Complete, NoInputFormModel, FooJourney>,
-    override val epcSuperseded: JourneyStep<Complete, NoInputFormModel, FooJourney>,
-    override val checkSearchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourney>,
-    val fooCheckYourAnswersStep: JourneyStep<Complete, NoInputFormModel, FooJourney>,
-    journeyStateService: JourneyStateService,
+@PrsdbWebComponent
+@Scope("prototype")
+class FooJourneyState(
+    val taskListStep: FooTaskListStep,
+    override val occupied: JourneyStep<YesOrNo, OccupancyFormModel, FooJourneyState>,
+    override val households: JourneyStep<Complete, NumberOfHouseholdsFormModel, FooJourneyState>,
+    override val tenants: JourneyStep<Complete, NumberOfPeopleFormModel, FooJourneyState>,
+    override val epcQuestion: JourneyStep<EpcStatus, EpcFormModel, FooJourneyState>,
+    override val checkAutomatchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourneyState>,
+    override val searchForEpc: JourneyStep<EpcSearchResult, EpcLookupFormModel, FooJourneyState>,
+    override val epcNotFound: EpcNotFoundStep,
+    override val epcSuperseded: EpcSupersededStep,
+    override val checkSearchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourneyState>,
+    val fooCheckYourAnswersStep: FooCheckAnswersStep,
+    private val journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     OccupiedJourneyState,
     EpcJourneyState {
     override var automatchedEpc: EpcDataModel? by mutableDelegate("automatchedEpc", serializer())
     override var searchedEpc: EpcDataModel? by mutableDelegate("searchedEpc", serializer())
     override val propertyId: Long by requiredDelegate("propertyId", serializer())
+
+    // TODO PRSD-1546: Choose where to initialize and validate journey state
+    final fun initializeJourneyState(propertyId: Long): String {
+        val journeyId = generateJourneyId(propertyId)
+
+        journeyStateService
+            .initialiseJourneyWithId(journeyId) {
+                setValue("propertyId", Json.encodeToString(serializer(), propertyId))
+            }
+        return journeyId
+    }
+
+    final fun validateStateMatchesPropertyId(currentPropertyId: Long) {
+        if (currentPropertyId != propertyId) {
+            throw NoSuchJourneyException()
+        }
+    }
+
+    companion object {
+        fun generateJourneyId(propertyId: Long): String =
+            "Foo Example Journey for property $propertyId"
+                .hashCode()
+                .toUInt()
+                .times(111113111U)
+                .and(0x7FFFFFFFu)
+                .toString(36)
+    }
 }

@@ -142,4 +142,19 @@ class AbstractJourneyStateTests {
 
         verify(journeyStateService).deleteState()
     }
+
+    @Test
+    fun `journeyId retrieves the journeyId from the JourneyStateService`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.journeyId).thenReturn("testJourneyId")
+        val journeyState =
+            object : AbstractJourneyState(journeyStateService) {}
+
+        // Act
+        val result = journeyState.journeyId
+
+        // Assert
+        assertEquals("testJourneyId", result)
+    }
 }

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 
@@ -22,3 +23,9 @@ class HouseholdStepConfig : AbstractGenericStepConfig<Complete, NumberOfHousehol
 
     override fun mode(state: OccupiedJourneyState) = getFormModelFromState(state)?.numberOfHouseholds?.let { Complete.COMPLETE }
 }
+
+@Scope("prototype")
+@PrsdbWebComponent
+final class HouseholdStep(
+    stepConfig: HouseholdStepConfig,
+) : JourneyStep<Complete, NumberOfHouseholdsFormModel, OccupiedJourneyState>(stepConfig)

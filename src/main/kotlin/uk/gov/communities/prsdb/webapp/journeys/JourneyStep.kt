@@ -11,7 +11,7 @@ import kotlin.collections.plus
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
@@ -91,11 +91,11 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         state.addStepData(stepConfig.routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
     }
 
-    fun determineRedirect(): String = stepConfig.mode(state)?.let { redirectToUrl(it) } ?: routeSegment
+    fun determineRedirect(): String = journeyUrl(stepConfig.mode(state)?.let { redirectToUrl(it) } ?: routeSegment)
 
     private lateinit var unreachableStepRedirect: () -> String
 
-    fun getUnreachableStepRedirect() = unreachableStepRedirect()
+    fun getUnreachableStepRedirect() = journeyUrl(unreachableStepRedirect())
 
     val formModel: TFormModel?
         get() = stepConfig.getFormModelFromState(state)
@@ -153,6 +153,8 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         this.parentage = parentage
         this.unreachableStepRedirect = unreachableStepRedirectProvider
     }
+
+    private fun journeyUrl(path: String): String = JourneyStateService.urlWithJourneyState(path, state.journeyId)
 }
 
 enum class StepInitialisationStage {
