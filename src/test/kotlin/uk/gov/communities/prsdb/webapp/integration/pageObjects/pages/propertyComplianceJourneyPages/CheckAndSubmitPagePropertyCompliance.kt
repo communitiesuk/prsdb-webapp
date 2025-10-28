@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -15,14 +16,12 @@ class CheckAndSubmitPagePropertyCompliance(
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
     ) {
-    val form = CheckAndSubmitPagePropertyComplianceForm(page)
+    val form = PostForm(page)
 
-    class CheckAndSubmitPagePropertyComplianceForm(
-        page: Page,
-    ) : PostForm(page) {
-        val gasSummaryList = GasSummaryList(page)
-        val eicrSummaryList = EicrSummaryList(page)
-    }
+    val heading = Heading(page.locator("legend h1"))
+
+    val gasSummaryList = GasSummaryList(page)
+    val eicrSummaryList = EicrSummaryList(page)
 
     class GasSummaryList(
         page: Page,

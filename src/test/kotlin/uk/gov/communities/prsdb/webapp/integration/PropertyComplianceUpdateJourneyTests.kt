@@ -376,9 +376,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Check Auto Matched EPC page
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
         BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("F")
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January")
+        assertThat(checkAutoMatchedEpcPage.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.summaryList.energyRatingRow.value).containsText("F")
+        assertThat(checkAutoMatchedEpcPage.summaryList.expiryDateRow.value).containsText("5 January")
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyComplianceUpdate::class, urlArguments)
 
@@ -560,9 +560,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
         val expectedExpiryDate = dateFormat.format(MockEpcData.expiryDateInThePast)
         BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
-        assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
-        assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
-        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        assertThat(checkMatchedEpcPage.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkMatchedEpcPage.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
         checkMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val expiryCheckPage = assertPageIs(page, EpcExpiryCheckPagePropertyComplianceUpdate::class, urlArguments)
 
