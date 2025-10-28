@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
@@ -12,19 +11,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class CheckAnswersPageLaUserRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
-    val form = CheckAnswersLaUserRegistrationForm(page)
+    val form = PostForm(page)
 
     val heading = Heading(page.locator("legend h1"))
 
-    class CheckAnswersLaUserRegistrationForm(
-        page: Page,
-    ) : PostForm(page) {
-        val summaryList = CheckAnswersLaUserRegistrationSummaryList(locator)
-    }
+    val summaryList = CheckAnswersLaUserRegistrationSummaryList(page)
 
     class CheckAnswersLaUserRegistrationSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
+        page: Page,
+    ) : SummaryList(page) {
         val nameRow = getRow("Name")
         val emailRow = getRow("Email address")
     }

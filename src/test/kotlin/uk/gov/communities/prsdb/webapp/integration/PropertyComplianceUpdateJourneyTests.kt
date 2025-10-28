@@ -135,9 +135,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Pending virus scan")
-        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
-        assertThat(cyaPage.form.summaryList.engineerRow.value).containsText("1234567")
+        assertThat(cyaPage.summaryList.gasSafetyRow.value).containsText("Pending virus scan")
+        assertThat(cyaPage.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
+        assertThat(cyaPage.summaryList.engineerRow.value).containsText("1234567")
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -162,8 +162,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Expired")
-        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
+        assertThat(cyaPage.summaryList.gasSafetyRow.value).containsText("Expired")
+        assertThat(cyaPage.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -190,8 +190,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("It does not have a gas supply")
+        assertThat(cyaPage.summaryList.gasSafetyRow.value).containsText("Not required")
+        assertThat(cyaPage.summaryList.exemptionRow.value).containsText("It does not have a gas supply")
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -223,9 +223,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val cyaPage = assertPageIs(page, GasSafetyCheckYourAnswersPropertyComplianceUpdate::class, urlArguments)
 
         // Gas Safety Check Your Answers page
-        assertThat(cyaPage.form.summaryList.gasSafetyRow.value).containsText("Not required")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("Other")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("valid reason")
+        assertThat(cyaPage.summaryList.gasSafetyRow.value).containsText("Not required")
+        assertThat(cyaPage.summaryList.exemptionRow.value).containsText("Other")
+        assertThat(cyaPage.summaryList.exemptionRow.value).containsText("valid reason")
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
@@ -261,8 +261,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // EICR Check Your Answers page
         val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
-        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Pending virus scan")
-        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
+        assertThat(cyaPage.summaryList.eicrRow.value).containsText("Pending virus scan")
+        assertThat(cyaPage.summaryList.issueDateRow.value).containsText(dateFormat.format(currentDate))
         cyaPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -287,8 +287,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // EICR Check Your Answers page
         val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
-        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Expired")
-        assertThat(cyaPage.form.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
+        assertThat(cyaPage.summaryList.eicrRow.value).containsText("Expired")
+        assertThat(cyaPage.summaryList.issueDateRow.value).containsText(dateFormat.format(outdatedIssueDate))
         cyaPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -316,8 +316,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // EICR Check Your Answers page
         val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
-        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Not required")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("The current tenancy lease has lasted 7 years or more")
+        assertThat(cyaPage.summaryList.eicrRow.value).containsText("Not required")
+        assertThat(cyaPage.summaryList.exemptionRow.value).containsText("The current tenancy lease has lasted 7 years or more")
         cyaPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -350,9 +350,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // EICR Check Your Answers page
         val cyaPage = assertPageIs(page, EicrCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
-        assertThat(cyaPage.form.summaryList.eicrRow.value).containsText("Not required")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("Other")
-        assertThat(cyaPage.form.summaryList.exemptionRow.value).containsText("valid reason")
+        assertThat(cyaPage.summaryList.eicrRow.value).containsText("Not required")
+        assertThat(cyaPage.summaryList.exemptionRow.value).containsText("Other")
+        assertThat(cyaPage.summaryList.exemptionRow.value).containsText("valid reason")
         cyaPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -375,7 +375,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
 
         // Check Auto Matched EPC page
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
-        BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
+        BaseComponent.assertThat(checkAutoMatchedEpcPage.heading).containsText(singleLineAddress)
         assertThat(checkAutoMatchedEpcPage.summaryList.addressRow.value).containsText(singleLineAddress)
         assertThat(checkAutoMatchedEpcPage.summaryList.energyRatingRow.value).containsText("F")
         assertThat(checkAutoMatchedEpcPage.summaryList.expiryDateRow.value).containsText("5 January")
@@ -399,10 +399,10 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         meesExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
-        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("F")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.meesExemptionRow.value).containsText("High cost exemption")
+        assertThat(checkYourEpcAnswersPage.summaryList.epcRow.value).containsText("View EPC")
+        assertThat(checkYourEpcAnswersPage.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
+        assertThat(checkYourEpcAnswersPage.summaryList.energyRatingRow.value).containsText("F")
+        assertThat(checkYourEpcAnswersPage.summaryList.meesExemptionRow.value).containsText("High cost exemption")
 
         checkYourEpcAnswersPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -439,9 +439,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Epc Check Your Answers page
         val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
-        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkYourEpcAnswersPage.summaryList.epcRow.value).containsText("View EPC")
+        assertThat(checkYourEpcAnswersPage.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
+        assertThat(checkYourEpcAnswersPage.summaryList.energyRatingRow.value).containsText("C")
 
         checkYourEpcAnswersPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -467,8 +467,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Epc Check Your Answers page
         val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("Not required")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.exemptionReasonRow.value)
+        assertThat(checkYourEpcAnswersPage.summaryList.epcRow.value).containsText("Not required")
+        assertThat(checkYourEpcAnswersPage.summaryList.exemptionReasonRow.value)
             .containsText("You can demonstrate that the building is due to be demolished")
 
         checkYourEpcAnswersPage.form.submit()
@@ -515,8 +515,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Epc Check Your Answers page
         val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("Not added")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.exemptionReasonRow.value).containsText("None")
+        assertThat(checkYourEpcAnswersPage.summaryList.epcRow.value).containsText("Not added")
+        assertThat(checkYourEpcAnswersPage.summaryList.exemptionReasonRow.value).containsText("None")
 
         checkYourEpcAnswersPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -559,7 +559,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Check Matched EPC page
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
         val expectedExpiryDate = dateFormat.format(MockEpcData.expiryDateInThePast)
-        BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
+        BaseComponent.assertThat(checkMatchedEpcPage.heading).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.summaryList.addressRow.value).containsText(singleLineAddress)
         assertThat(checkMatchedEpcPage.summaryList.energyRatingRow.value).containsText("C")
         assertThat(checkMatchedEpcPage.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
@@ -581,9 +581,9 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Epc Check Your Answers page
         val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View expired EPC")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
-        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkYourEpcAnswersPage.summaryList.epcRow.value).containsText("View expired EPC")
+        assertThat(checkYourEpcAnswersPage.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        assertThat(checkYourEpcAnswersPage.summaryList.energyRatingRow.value).containsText("C")
 
         checkYourEpcAnswersPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -623,10 +623,10 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // Epc Check Your Answers page
         val checkYourEpcAnswersPage = assertPageIs(page, UpdateEpcCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
-        assertThat(checkYourEpcAnswersPage.form.summaryList.epcRow.value).containsText("View EPC")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
-        assertThat(checkYourEpcAnswersPage.form.summaryList.energyRatingRow.value).containsText("F")
-        assertThat(checkYourEpcAnswersPage.form.summaryList.meesExemptionRow.value).containsText("None")
+        assertThat(checkYourEpcAnswersPage.summaryList.epcRow.value).containsText("View EPC")
+        assertThat(checkYourEpcAnswersPage.summaryList.expiryDateRow.value).containsText(dateFormat.format(expiryDate))
+        assertThat(checkYourEpcAnswersPage.summaryList.energyRatingRow.value).containsText("F")
+        assertThat(checkYourEpcAnswersPage.summaryList.meesExemptionRow.value).containsText("None")
 
         checkYourEpcAnswersPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -651,8 +651,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         // MEES exemption confirmation page
         meesExemptionConfirmationPage.saveAndContinueButton.clickAndWait()
         val cyaPage = assertPageIs(page, UpdateMeesCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
-        assertThat(cyaPage.form.summaryList.energyRatingRow.value).containsText("G")
-        assertThat(cyaPage.form.summaryList.meesExemptionRow.value).containsText("High cost exemption")
+        assertThat(cyaPage.summaryList.energyRatingRow.value).containsText("G")
+        assertThat(cyaPage.summaryList.meesExemptionRow.value).containsText("High cost exemption")
 
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -678,8 +678,8 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val cyaPage = assertPageIs(page, UpdateMeesCheckYourAnswersPagePropertyComplianceUpdate::class, urlArguments)
 
         // MEES Check Your Answers page
-        assertThat(cyaPage.form.summaryList.energyRatingRow.value).containsText("G")
-        assertThat(cyaPage.form.summaryList.meesExemptionRow.value).containsText("None")
+        assertThat(cyaPage.summaryList.energyRatingRow.value).containsText("G")
+        assertThat(cyaPage.summaryList.meesExemptionRow.value).containsText("None")
 
         cyaPage.form.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)

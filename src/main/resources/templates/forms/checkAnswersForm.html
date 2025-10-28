@@ -17,7 +17,7 @@
     <th:block th:if="${insetText != null}">
         <p class="govuk-inset-text" th:text="#{${insetText}}">insetText</p>
     </th:block>
-    <h2 class="govuk-heading-m" th:text="#{${summaryName}}"></h2>
+    <h2 class="govuk-heading-m" th:text="#{${summaryName}}" id="summary-name"></h2>
     <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>

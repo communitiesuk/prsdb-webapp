@@ -133,8 +133,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
-        assertThat(checkAnswersPage.form.fieldsetHeading).containsText("Check your answers for:")
-        assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
+        assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
@@ -236,8 +236,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
-        assertThat(checkAnswersPage.form.fieldsetHeading).containsText("Check your answers for:")
-        assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
+        assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 \u2014 Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)

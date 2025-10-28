@@ -105,7 +105,7 @@ class LaUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data
         @Test
         fun `Change Name link navigates to the name step`(page: Page) {
             val checkAnswersPage = navigator.skipToLaUserRegistrationCheckAnswersPage(invitation.token)
-            checkAnswersPage.form.summaryList.nameRow
+            checkAnswersPage.summaryList.nameRow
                 .clickActionLinkAndWait()
             BasePage.assertPageIs(page, NameFormPageLaUserRegistration::class)
         }
@@ -113,7 +113,7 @@ class LaUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data
         @Test
         fun `Change Email link navigates to the email step`(page: Page) {
             val checkAnswersPage = navigator.skipToLaUserRegistrationCheckAnswersPage(invitation.token)
-            checkAnswersPage.form.summaryList.emailRow
+            checkAnswersPage.summaryList.emailRow
                 .clickActionLinkAndWait()
             BasePage.assertPageIs(page, EmailFormPageLaUserRegistration::class)
         }

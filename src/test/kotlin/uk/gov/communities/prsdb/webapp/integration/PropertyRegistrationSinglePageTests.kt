@@ -397,14 +397,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `After changing an answer, submitting a full section returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            checkAnswersPage.form.summaryList.ownershipRow.actions.actionLink
+            checkAnswersPage.summaryList.ownershipRow.actions.actionLink
                 .clickAndWait()
             val ownershipPage = BasePage.assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
             ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
             checkAnswersPage = BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.form.summaryList.licensingRow.actions.actionLink
+            checkAnswersPage.summaryList.licensingRow.actions.actionLink
                 .clickAndWait()
             val licensingTypePage = BasePage.assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
