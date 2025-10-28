@@ -13,7 +13,7 @@
 <th:block id="form-content">
     <th:block id="fieldset-content" th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.label}, null)}">
         <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
-        <div th:replace="~{fragments/forms/textArea :: textArea(null, 'feedback', #{betaBannerFeedback.hint}, 1200)}"></div>
+        <div th:replace="~{fragments/forms/textArea :: textArea(label=null, fieldName='feedback',hint= #{betaBannerFeedback.hint}, limit=1200, ariaLabel=#{betaBannerFeedback.label})}"></div>
         <div th:replace="~{fragments/forms/emailInput :: emailInput(#{betaBannerFeedback.emailLabel}, 'email', null)}"></div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{betaBannerFeedback.buttonText})}"></button>
