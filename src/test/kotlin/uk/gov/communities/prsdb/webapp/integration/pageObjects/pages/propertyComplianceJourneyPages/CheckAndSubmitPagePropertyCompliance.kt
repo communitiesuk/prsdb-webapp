@@ -18,7 +18,7 @@ class CheckAndSubmitPagePropertyCompliance(
     ) {
     val form = PostForm(page)
 
-    val heading = Heading(page.locator("legend h1"))
+    val heading = Heading(page.locator("h1"))
 
     val gasSummaryList = GasSummaryList(page)
     val eicrSummaryList = EicrSummaryList(page)

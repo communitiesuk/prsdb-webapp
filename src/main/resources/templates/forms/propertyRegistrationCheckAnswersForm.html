@@ -10,13 +10,11 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h1 class="govuk-fieldset__heading">
-                <span th:text="#{forms.checkPropertyAnswers.headingPrefix}"></span>
-                <br>
-                <span th:text="${propertyName}"></span>
-            </h1>
-        </legend>
+        <h1 class="govuk-heading-l">
+            <span th:text="#{forms.checkPropertyAnswers.headingPrefix}"></span>
+            <br>
+            <span th:text="${propertyName}"></span>
+        </h1>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>

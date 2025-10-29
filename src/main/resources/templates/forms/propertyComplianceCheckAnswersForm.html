@@ -10,11 +10,8 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.title}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h1 class="govuk-fieldset__heading" th:text="#{forms.checkComplianceAnswers.heading(${propertyAddress})}">forms.checkComplianceAnswers.heading</h1>
-        </legend>
+        <h1 class="govuk-heading-l" th:text="#{forms.checkComplianceAnswers.heading(${propertyAddress})}">forms.checkComplianceAnswers.heading</h1>
         <h2 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.summaryName}">forms.checkComplianceAnswers.summaryName</h2>
-
         <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.gasSafety.heading}">forms.checkComplianceAnswers.gasSafety.heading</h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${gasSafetyData})}"></dl>
 

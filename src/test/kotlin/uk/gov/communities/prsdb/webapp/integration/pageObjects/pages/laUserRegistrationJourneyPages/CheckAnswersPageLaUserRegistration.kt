@@ -13,7 +13,7 @@ class CheckAnswersPageLaUserRegistration(
 ) : BasePage(page, "${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
     val form = PostForm(page)
 
-    val heading = Heading(page.locator("legend h1"))
+    val heading = Heading(page.locator("h1"))
 
     val summaryList = CheckAnswersLaUserRegistrationSummaryList(page)
 

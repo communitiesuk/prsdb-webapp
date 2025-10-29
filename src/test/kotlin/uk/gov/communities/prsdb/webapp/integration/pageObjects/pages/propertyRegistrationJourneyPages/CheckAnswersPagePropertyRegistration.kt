@@ -18,7 +18,7 @@ class CheckAnswersPagePropertyRegistration(
 
     val sectionHeader = SectionHeader(page.locator("html"))
 
-    val heading = Heading(page.locator("legend h1"))
+    val heading = Heading(page.locator("h1"))
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
