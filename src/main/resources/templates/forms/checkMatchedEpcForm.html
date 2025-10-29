@@ -2,15 +2,14 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcCertificateUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <h1 class="govuk-heading-l" th:text="#{forms.checkMatchedEpc.fieldSetHeading(${epcDetails.singleLineAddress})}">
-            #{forms.checkMatchedEpc.fieldSetHeading(${epcDetails.singleLineAddress})}
+        <h1 class="govuk-heading-l" th:text="#{forms.checkMatchedEpc.heading(${epcDetails.singleLineAddress})}">
+            #{forms.checkMatchedEpc.heading(${epcDetails.singleLineAddress})}
         </h1>
         <p class="govuk-inset-text">
             <span th:remove="tag" class="govuk-body" th:text="#{forms.checkMatchedEpc.insetText.beforeLink}">forms.checkMatchedEpc.insetText.beforeLink</span>

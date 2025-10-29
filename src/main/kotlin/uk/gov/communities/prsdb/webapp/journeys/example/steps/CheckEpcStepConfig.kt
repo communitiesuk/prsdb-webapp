@@ -21,7 +21,6 @@ class CheckEpcStepConfig(
         getReleventEpc(state)?.let { epcDetails ->
             mapOf(
                 "title" to "propertyCompliance.title",
-                "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
                 "epcDetails" to epcDetails,
                 "epcCertificateUrl" to epcDetails.certificateNumber.let { epcCertificateUrlProvider.getEpcCertificateUrl(it) },
                 "radioOptions" to
