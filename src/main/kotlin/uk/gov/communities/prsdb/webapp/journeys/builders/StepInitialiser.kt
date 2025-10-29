@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
-class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : JourneyState, TMode : Enum<TMode>>(
+class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
     val segment: String,
     private val step: JourneyStep<TMode, *, TState>,
     val notionalStep: Boolean = false,
@@ -22,11 +22,12 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
 
     private var backUrlOverride: (() -> String?)? = null
     private var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
+
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepInitialiser<TStep, TState, TMode> {
+    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): StepInitialiser<TStep, TState, TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("Step $segment already has a next destination defined")
         }

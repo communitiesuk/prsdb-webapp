@@ -16,6 +16,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
@@ -131,14 +132,16 @@ class JourneyBuilderTest {
 
         // Arrange 2
         val builtStep = mock<JourneyStep<TestEnum, *, JourneyState>>()
+        whenever(builtStep.routeSegment).thenReturn("segment")
         whenever(mockStepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
 
         // Act 2
         val map = jb.build()
+        val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
 
         // Assert 2
         verify(mockStepInitialiser).build(anyOrNull(), anyOrNull())
-        map.entries.single().let {
+        typedMap.entries.single().let {
             assertSame(builtStep, it.value.journeyStep)
         }
     }

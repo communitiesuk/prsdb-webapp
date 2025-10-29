@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NotionalStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.VisitableJourneyElement
 import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
@@ -46,6 +47,18 @@ class JourneyBuilder<TState : JourneyState>(
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, true)
         stepInitialiser.init()
         stepsUnderConstruction.add(stepInitialiser)
+    }
+
+    fun <TMode : Enum<TMode>> task(
+        // TODO PRSD-1546 remove the exitRoute parameter when tasks have been migrated to use a Destination
+        exitRoute: String,
+        uninitialisedTask: Task<TMode, TState>,
+        init: TaskInitialiser<TMode, TState>.() -> Unit,
+    ) {
+        val taskInitialiser = TaskInitialiser(uninitialisedTask)
+        taskInitialiser.init()
+        val taskSteps = taskInitialiser.mapToStepInitialisers(exitRoute, journey)
+        stepsUnderConstruction.addAll(taskSteps)
     }
 
     fun unreachableStepUrl(getUrl: () -> String) {
