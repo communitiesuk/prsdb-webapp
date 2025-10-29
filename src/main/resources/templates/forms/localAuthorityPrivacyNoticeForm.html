@@ -8,8 +8,8 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <h1 class="govuk-heading-l" th:text="#{registerLAUser.privacyNotice.fieldSetHeading}">
-            registerLAUser.privacyNotice.fieldSetHeading
+        <h1 class="govuk-heading-l" th:text="#{registerLAUser.privacyNotice.heading}">
+            registerLAUser.privacyNotice.heading
         </h1>
         <p class="govuk-body">
             <span th:remove="tag" th:text="#{registerLAUser.privacyNotice.paragraph.one.beforeLink}">registerLAUser.privacyNotice.paragraph.one.beforeLink</span>
