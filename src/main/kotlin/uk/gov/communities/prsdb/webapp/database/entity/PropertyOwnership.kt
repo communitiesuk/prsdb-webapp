@@ -52,17 +52,19 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var property: Property
         private set
 
-    @OneToOne(optional = true)
+    @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
 
-    @OneToOne(optional = true)
+    @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "incomplete_compliance_form_id", nullable = true, unique = true)
     var incompleteComplianceForm: FormContext? = null
 
+    @OneToOne(mappedBy = "propertyOwnership", optional = true, orphanRemoval = true)
+    private val propertyCompliance: PropertyCompliance? = null
+
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
-    var certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
-        private set
+    private val certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
 
     constructor(
         occupancyType: OccupancyType,
