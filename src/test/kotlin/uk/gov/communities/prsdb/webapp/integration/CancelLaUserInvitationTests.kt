@@ -20,7 +20,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         fun `an la user invitation can be cancelled`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 2
-            var manageUsersPage = navigator.goToManageLaUsers(2)
+            var manageUsersPage = navigator.goToManageLaUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(
                 manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX),
@@ -31,7 +31,12 @@ class CancelLaUserInvitationTests : IntegrationTest() {
             // Cancel invitation
             assertThat(cancelInvitationPage.userDetailsSection).containsText("invited.user@example.com")
             cancelInvitationPage.form.submit()
-            val successPage = assertPageIs(page, CancelLaUserInvitationSuccessPage::class)
+            val successPage =
+                assertPageIs(
+                    page,
+                    CancelLaUserInvitationSuccessPage::class,
+                    mapOf("localAuthorityId" to "1", "invitationId" to "1"),
+                )
 
             // The success page confirms the user is deleted
             assertThat(
@@ -53,7 +58,7 @@ class CancelLaUserInvitationTests : IntegrationTest() {
         fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 3
-            var manageUsersPage = navigator.goToManageLaUsers(2)
+            var manageUsersPage = navigator.goToManageLaUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX)).containsText("x.adminuser@example.com")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")
@@ -63,7 +68,12 @@ class CancelLaUserInvitationTests : IntegrationTest() {
             // Cancel invitation
             assertThat(cancelInvitationPage.userDetailsSection).containsText("x.adminuser@example.com")
             cancelInvitationPage.form.submit()
-            val successPage = assertPageIs(page, CancelLaUserInvitationSuccessPage::class)
+            val successPage =
+                assertPageIs(
+                    page,
+                    CancelLaUserInvitationSuccessPage::class,
+                    mapOf("localAuthorityId" to "1", "invitationId" to "4"),
+                )
 
             // The success page confirms the user is deleted
             assertThat(

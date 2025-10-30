@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
@@ -74,7 +76,25 @@ class LocalAuthorityInvitationService(
         session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
 
-    fun getInvitationById(id: Long): LocalAuthorityInvitation = invitationRepository.getReferenceById(id)
+    fun getInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? = invitationRepository.findById(id).orElse(null)
+
+    fun throwErrorIfInvitationExists(invitation: LocalAuthorityInvitation) {
+        if (invitationRepository.existsById(invitation.id)) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Invitation with id ${invitation.id} is still in the local_authority_invitations table",
+            )
+        }
+    }
+
+    fun getAdminInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? {
+        val invitation = getInvitationByIdOrNull(id)
+        return if (invitation?.invitedAsAdmin == true) {
+            invitation
+        } else {
+            null
+        }
+    }
 
     fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
         val expiresAtInstant =

@@ -23,7 +23,9 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+
       - run: npm ci
+
       - run: npm run build
 
       - name: Run npm tests
@@ -31,12 +33,10 @@ jobs:
 
       - name: Run gradle `check` to run linting and tests
         env:
-          ONE_LOGIN_PRIVATE_KEY: |
-            ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
-          ONE_LOGIN_PUBLIC_KEY: |
-            ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
+          ONE_LOGIN_PRIVATE_KEY: ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
+          ONE_LOGIN_PUBLIC_KEY: ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
-          EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production'
+          EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
         run: ./gradlew clean check --no-daemon
 
       - name: Run ktlintFormat

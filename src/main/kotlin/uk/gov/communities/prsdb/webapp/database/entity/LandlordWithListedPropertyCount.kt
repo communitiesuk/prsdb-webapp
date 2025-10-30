@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
@@ -15,6 +16,7 @@ class LandlordWithListedPropertyCount(
     lateinit var landlord: Landlord
         private set
 
+    @Column(nullable = false)
     var listedPropertyCount: Int = 0
 
     constructor(

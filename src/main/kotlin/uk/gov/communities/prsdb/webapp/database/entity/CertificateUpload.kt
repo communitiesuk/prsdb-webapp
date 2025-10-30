@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -15,15 +16,16 @@ class CertificateUpload() : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
+    @Column(nullable = false)
     lateinit var category: FileCategory
 
-    @ManyToOne
-    @JoinColumn(name = "property_ownership_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "property_ownership_id", nullable = false)
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
-    @OneToOne
-    @JoinColumn(name = "file_upload_id")
+    @OneToOne(optional = false)
+    @JoinColumn(name = "file_upload_id", nullable = false, unique = true)
     lateinit var fileUpload: FileUpload
         private set
 

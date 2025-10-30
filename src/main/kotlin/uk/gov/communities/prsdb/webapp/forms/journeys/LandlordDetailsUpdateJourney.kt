@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import kotlin.reflect.KFunction
@@ -40,7 +40,7 @@ import kotlin.reflect.KFunction
 class LandlordDetailsUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    addressLookupService: AddressLookupService,
+    addressService: AddressService,
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
     stepName: String,
@@ -209,7 +209,7 @@ class LandlordDetailsUpdateJourney(
                 ),
             nextStepIfAddressesFound = LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress,
             nextStepIfNoAddressesFound = LandlordDetailsUpdateStepId.NoAddressFound,
-            addressLookupService = addressLookupService,
+            addressService = addressService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
         )

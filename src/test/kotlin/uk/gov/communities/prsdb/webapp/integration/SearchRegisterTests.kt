@@ -67,14 +67,14 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         }
 
         @Test
-        fun `fuzzy search functionality produces table of matching results`() {
+        fun `fuzzy search functionality produces table of matching results in expected order`() {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("Alex")
             val resultTable = searchLandlordRegisterPage.resultTable
 
             assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith")
             assertThat(resultTable.getCell(1, LANDLORD_COL_INDEX)).containsText("Alexandra Davies")
-            assertThat(resultTable.getCell(2, LANDLORD_COL_INDEX)).containsText("Evan Alexandrescu")
+            assertThat(resultTable.getCell(2, LANDLORD_COL_INDEX)).containsText("Evan Alenandrescu")
         }
 
         @Test

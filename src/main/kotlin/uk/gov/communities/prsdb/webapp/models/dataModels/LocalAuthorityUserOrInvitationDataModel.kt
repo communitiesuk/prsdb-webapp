@@ -1,12 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class LocalAuthorityUserOrInvitationDataModel(
-    val id: Long,
-    val userNameOrEmail: String,
-    val localAuthorityName: String,
+    override val id: Long,
+    override val userNameOrEmail: String,
+    override val localAuthorityName: String,
     val isManager: Boolean,
-    val isPending: Boolean = false,
-)
+    override val isPending: Boolean = false,
+) : LocalAuthorityMemberOrInvitationDataModel

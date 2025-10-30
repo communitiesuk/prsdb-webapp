@@ -5,17 +5,26 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 
 interface AddressRepository : JpaRepository<Address, Long> {
-    fun findByUprn(uprn: Long): Address?
+    fun findByIsActiveTrueAndUprn(uprn: Long): Address?
 
     @Query(
-        "SELECT obj_description('address'::regclass, 'pg_class') AS comment;",
+        "SELECT a.* " +
+            "FROM address a " +
+            "WHERE a.is_active " +
+            "AND a.uprn IS NOT NULL " +
+            "AND replace(a.postcode, ' ', '') = upper(replace(:postcode, ' ', '')) " +
+            "AND (a.local_authority_id IS NOT NULL OR NOT :restrictToEngland) " + // We only keep English LA records
+            "ORDER BY concat_ws(' ', sub_building, building_name, building_number) <->> :houseNameOrNumber " +
+            "LIMIT $MAX_SEARCH_RESULTS;",
         nativeQuery = true,
     )
-    fun findComment(): String?
+    fun search(
+        houseNameOrNumber: String,
+        postcode: String,
+        restrictToEngland: Boolean = false,
+    ): List<Address>
 
-    @Query(
-        "COMMENT ON TABLE address IS :comment;",
-        nativeQuery = true,
-    )
-    fun saveComment(comment: String)
+    companion object {
+        const val MAX_SEARCH_RESULTS = 5
+    }
 }
