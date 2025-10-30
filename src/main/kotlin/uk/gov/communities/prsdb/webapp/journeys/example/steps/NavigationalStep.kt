@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 
 @PrsdbWebComponent
 @Scope("prototype")
-class NotionalStepConfig : AbstractGenericStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class NavigationalStepConfig : AbstractGenericStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override fun chooseTemplate(state: JourneyState): String = ""
 
     override val formModelClass = NoInputFormModel::class
@@ -21,6 +21,6 @@ class NotionalStepConfig : AbstractGenericStepConfig<Complete, NoInputFormModel,
 
 @PrsdbWebComponent
 @Scope("prototype")
-class NotionalStep<in TState : JourneyState>(
-    stepConfig: NotionalStepConfig,
+class NavigationalStep<in TState : JourneyState>(
+    stepConfig: NavigationalStepConfig,
 ) : JourneyStep<Complete, NoInputFormModel, TState>(stepConfig)
