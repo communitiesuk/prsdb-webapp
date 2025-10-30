@@ -92,7 +92,7 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLaUserRegistration::class)
 
         // Check answers page - render
-        assertThat(checkAnswersPage.form.fieldsetHeading).containsText("Check your answers")
+        assertThat(checkAnswersPage.heading).containsText("Check your answers")
         // Submit and go to next page
         checkAnswersPage.form.submit()
         val confirmationPage = assertPageIs(page, ConfirmationPageLaUserRegistration::class)

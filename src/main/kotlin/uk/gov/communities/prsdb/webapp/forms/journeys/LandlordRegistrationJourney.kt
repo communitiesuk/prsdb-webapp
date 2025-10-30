@@ -121,7 +121,6 @@ class LandlordRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerAsALandlord.title",
-                            "fieldSetHeading" to "registerAsALandlord.privacyNotice.fieldSetHeading",
                             "submitButtonText" to "forms.buttons.continue",
                             "landlordPrivacyNoticeUrl" to LANDLORD_PRIVACY_NOTICE_ROUTE,
                             "options" to

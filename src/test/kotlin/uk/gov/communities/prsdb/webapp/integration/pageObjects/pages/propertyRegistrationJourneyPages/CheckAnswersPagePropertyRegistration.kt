@@ -1,10 +1,11 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -13,17 +14,17 @@ class CheckAnswersPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}") {
     fun confirm() = form.submit()
 
-    val form = CheckAnswersPropertyRegistration(page)
+    val form = PostForm(page)
 
-    class CheckAnswersPropertyRegistration(
-        page: Page,
-    ) : FormWithSectionHeader(page) {
-        val summaryList = CheckAnswersPropertyRegistrationSummaryList(locator)
-    }
+    val sectionHeader = SectionHeader(page.locator("html"))
+
+    val heading = Heading(page.locator("h1"))
+
+    val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
     class CheckAnswersPropertyRegistrationSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
+        page: Page,
+    ) : SummaryList(page) {
         val ownershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
     }

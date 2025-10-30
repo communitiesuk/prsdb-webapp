@@ -184,33 +184,33 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Check Auto Matched EPC page - details correct, certificate not expired and high enough rating
         val singleLineAddress = "123 Test Street, Flat 1, Test Town, TT1 1TT"
-        BaseComponent.assertThat(checkAutoMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
-        assertThat(checkAutoMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText("5 January")
+        BaseComponent.assertThat(checkAutoMatchedEpcPage.heading).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkAutoMatchedEpcPage.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkAutoMatchedEpcPage.summaryList.expiryDateRow.value).containsText("5 January")
         checkAutoMatchedEpcPage.submitMatchedEpcDetailsCorrect()
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
         fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
+        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .assertThat(responsibilityToTenantsPage.heading)
             .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Check Answers page
         BaseComponent
-            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .assertThat(checkAndSubmitPage.heading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
@@ -322,10 +322,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 .plus(DatePeriod(years = 5))
                 .toJavaLocalDate()
                 .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-        BaseComponent.assertThat(checkMatchedEpcPage.form.fieldsetHeading).containsText(singleLineAddress)
-        assertThat(checkMatchedEpcPage.form.summaryList.addressRow.value).containsText(singleLineAddress)
-        assertThat(checkMatchedEpcPage.form.summaryList.energyRatingRow.value).containsText("C")
-        assertThat(checkMatchedEpcPage.form.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        BaseComponent.assertThat(checkMatchedEpcPage.heading).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.summaryList.addressRow.value).containsText(singleLineAddress)
+        assertThat(checkMatchedEpcPage.summaryList.energyRatingRow.value).containsText("C")
+        assertThat(checkMatchedEpcPage.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
         checkMatchedEpcPage.submitMatchedEpcDetailsIncorrect()
         epcLookupPage = assertPageIs(page, EpcLookupPagePropertyCompliance::class, urlArguments)
 
@@ -356,25 +356,25 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
         fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
+        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .assertThat(responsibilityToTenantsPage.heading)
             .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Check Answers page
         BaseComponent
-            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .assertThat(checkAndSubmitPage.heading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
@@ -480,25 +480,25 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
         fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
+        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .assertThat(responsibilityToTenantsPage.heading)
             .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Check Answers page
         BaseComponent
-            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .assertThat(checkAndSubmitPage.heading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
@@ -579,25 +579,25 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val fireSafetyDeclarationPage = assertPageIs(page, FireSafetyDeclarationPagePropertyCompliance::class, urlArguments)
 
         // Fire Safety Declaration page
-        BaseComponent.assertThat(fireSafetyDeclarationPage.form.fieldsetHeading).containsText("Fire safety in your property")
+        BaseComponent.assertThat(fireSafetyDeclarationPage.heading).containsText("Fire safety in your property")
         fireSafetyDeclarationPage.agreeAndSubmit()
         val keepPropertySafePage = assertPageIs(page, KeepPropertySafePagePropertyCompliance::class, urlArguments)
 
         // Keep Property Safe page
-        BaseComponent.assertThat(keepPropertySafePage.form.fieldsetHeading).containsText("Health and safety in rental properties")
+        BaseComponent.assertThat(keepPropertySafePage.heading).containsText("Health and safety in rental properties")
         keepPropertySafePage.agreeAndSubmit()
         val responsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyCompliance::class, urlArguments)
 
         // Responsibility To Tenants page
         BaseComponent
-            .assertThat(responsibilityToTenantsPage.form.fieldsetHeading)
+            .assertThat(responsibilityToTenantsPage.heading)
             .containsText("Your responsibilities to your tenants")
         responsibilityToTenantsPage.agreeAndSubmit()
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Check Answers page
         BaseComponent
-            .assertThat(checkAndSubmitPage.form.fieldsetHeading)
+            .assertThat(checkAndSubmitPage.heading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
         checkAndSubmitPage.form.submit()
 
@@ -717,7 +717,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         var checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
 
         // Upload initial Gas Safety Cert.
-        checkAndSubmitPage.form.gasSummaryList.statusRow
+        checkAndSubmitPage.gasSummaryList.statusRow
             .clickActionLinkAndWait()
         val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
         gasSafetyPage.submitHasCert()
@@ -738,7 +738,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Upload initial EICR
-        checkAndSubmitPage.form.eicrSummaryList.statusRow
+        checkAndSubmitPage.eicrSummaryList.statusRow
             .clickActionLinkAndWait()
         val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
         eicrPage.submitHasCert()
@@ -756,7 +756,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Revisit Gas Safety Cert. Upload page without re-uploading
-        checkAndSubmitPage.form.gasSummaryList.engineerNumRow
+        checkAndSubmitPage.gasSummaryList.engineerNumRow
             .clickActionLinkAndWait()
         gasSafeEngineerNumPage = assertPageIs(page, GasSafeEngineerNumPagePropertyCompliance::class, urlArguments)
         gasSafeEngineerNumPage.form.submit()
@@ -769,7 +769,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Revisit EICR Upload page without re-uploading
-        checkAndSubmitPage.form.eicrSummaryList.issueDateRow
+        checkAndSubmitPage.eicrSummaryList.issueDateRow
             .clickActionLinkAndWait()
         eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
         eicrIssueDatePage.form.submit()

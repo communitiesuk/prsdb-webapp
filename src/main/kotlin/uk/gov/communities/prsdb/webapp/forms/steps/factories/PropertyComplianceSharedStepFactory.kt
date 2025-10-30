@@ -1052,7 +1052,6 @@ class PropertyComplianceSharedStepFactory(
             content =
                 mapOf(
                     "title" to "propertyCompliance.title",
-                    "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
                     "epcDetails" to (epcDetails ?: ""),
                     "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
                     "radioOptions" to
