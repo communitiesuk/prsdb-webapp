@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NotionalStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -19,15 +18,16 @@ class JourneyBuilder<TState : JourneyState>(
     private var unreachableStepDestination: (() -> Destination)? = null
 
     fun build(): Map<String, VisitableJourneyElement> =
-        stepsUnderConstruction.associate { sb ->
-            sb.build(journey, unreachableStepDestination).let {
-                checkForUninitialisedParents(sb)
-                when (sb.notionalStep) {
-                    true -> it.routeSegment to NotionalStepLifecycleOrchestrator(it)
-                    false -> it.routeSegment to StepLifecycleOrchestrator(it)
+        stepsUnderConstruction
+            .mapNotNull { sb ->
+                sb.build(journey, unreachableStepDestination).let {
+                    checkForUninitialisedParents(sb)
+                    when (sb.notionalStep) {
+                        true -> null
+                        false -> it
+                    }
                 }
-            }
-        }
+            }.associate { it.routeSegment to StepLifecycleOrchestrator(it) }
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
         segment: String,

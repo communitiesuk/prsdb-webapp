@@ -139,7 +139,7 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
                 ::parentage.isInitialized
 
     fun initialize(
-        segment: String,
+        segment: String?,
         state: TState,
         backUrlOverride: (() -> String?)?,
         redirectDestinationProvider: (mode: TEnum) -> Destination,
@@ -149,7 +149,7 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
         }
-        this.stepConfig.routeSegment = segment
+        segment?.let { this.stepConfig.routeSegment = it }
         this.state = state
         this.backUrlOverride = backUrlOverride
         this.nextDestination = redirectDestinationProvider

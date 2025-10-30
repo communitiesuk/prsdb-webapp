@@ -134,12 +134,13 @@ class JourneyBuilderTest {
         val builtStep = mock<JourneyStep<TestEnum, *, JourneyState>>()
         whenever(builtStep.routeSegment).thenReturn("segment")
         whenever(mockStepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
+        whenever(builtStep.routeSegment).thenReturn("segment")
 
         // Act 2
         val map = jb.build()
-        val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
 
         // Assert 2
+        val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
         verify(mockStepInitialiser).build(anyOrNull(), anyOrNull())
         typedMap.entries.single().let {
             assertSame(builtStep, it.value.journeyStep)

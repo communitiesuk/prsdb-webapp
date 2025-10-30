@@ -69,7 +69,7 @@ class StepLifecycleOrchestrator(
     }
 }
 
-class NotionalStepLifecycleOrchestrator(
+class NavigationalStepLifecycleOrchestrator(
     val journeyStep: JourneyStep<*, *, *>,
 ) : VisitableJourneyElement {
     override fun getStepModelAndView(): ModelAndView {
