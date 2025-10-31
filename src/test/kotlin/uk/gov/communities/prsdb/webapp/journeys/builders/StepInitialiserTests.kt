@@ -151,6 +151,7 @@ class StepInitialiserTests {
         val nextStepSegment = "nextStepSegment"
         val nextStepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
+        whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
         val builder = StepInitialiser("test", stepMock)
         builder.nextStep { _: TestEnum -> nextStepMock }

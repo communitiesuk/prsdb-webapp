@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 sealed class Destination {
     fun toModelAndView(): ModelAndView =
         when (this) {
-            is Step -> ModelAndView("redirect:${step.routeSegment}", params)
+            is Step -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
             is ExternalUrl -> ModelAndView("redirect:$externalUrl", params)
             is Template -> ModelAndView(templateName, content)
         }
@@ -17,19 +17,9 @@ sealed class Destination {
             else -> this
         }
 
-    fun withParam(
-        key: String,
-        value: String,
-    ): Destination =
-        when (this) {
-            is Step -> Step(step, params + (key to value))
-            is ExternalUrl -> ExternalUrl(externalUrl, params + (key to value))
-            is Template -> this
-        }
-
     class Step(
         val step: JourneyStep<*, *, *>,
-        val params: Map<String, String> = mapOf(),
+        val journeyId: String,
     ) : Destination()
 
     class ExternalUrl(
@@ -41,4 +31,8 @@ sealed class Destination {
         val templateName: String,
         val content: Map<String, Any?> = mapOf(),
     ) : Destination()
+
+    companion object {
+        operator fun invoke(step: JourneyStep<*, *, *>): Destination = Step(step, step.currentJourneyId)
+    }
 }

@@ -44,7 +44,7 @@ class JourneyBuilder<TState : JourneyState>(
         if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepRedirect has already been set")
         }
-        unreachableStepDestination = { Destination.Step(getStep()) }
+        unreachableStepDestination = { Destination(getStep()) }
     }
 
     private fun checkForUninitialisedParents(stepInitialiser: StepInitialiser<*, *, *>) {

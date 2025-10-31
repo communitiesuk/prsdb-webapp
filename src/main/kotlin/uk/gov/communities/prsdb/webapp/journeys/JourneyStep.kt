@@ -93,12 +93,12 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
     }
 
     fun determineNextDestination(): Destination =
-        stepConfig.mode(state)?.let { nextDestination(it).withParam("journeyId", state.journeyId) }
-            ?: Destination.Step(this).withParam("journeyId", state.journeyId)
+        stepConfig.mode(state)?.let { nextDestination(it) }
+            ?: Destination(this)
 
     private lateinit var unreachableStepDestination: () -> Destination
 
-    fun getUnreachableStepDestination() = unreachableStepDestination().withParam("journeyId", state.journeyId)
+    fun getUnreachableStepDestination() = unreachableStepDestination()
 
     val formModel: TFormModel?
         get() = stepConfig.getFormModelFromState(state)
@@ -157,7 +157,8 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
         this.unreachableStepDestination = unreachableStepDestinationProvider
     }
 
-    private fun journeyUrl(path: String): String = JourneyStateService.urlWithJourneyState(path, state.journeyId)
+    val currentJourneyId: String
+        get() = state.journeyId
 }
 
 enum class StepInitialisationStage {

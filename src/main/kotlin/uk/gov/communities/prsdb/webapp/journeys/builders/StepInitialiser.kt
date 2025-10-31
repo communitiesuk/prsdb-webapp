@@ -29,7 +29,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("Step $segment already has a next destination defined")
         }
-        nextDestinationProvider = { mode -> Destination.Step(nextStepProvider(mode)) }
+        nextDestinationProvider = { mode -> Destination(nextStepProvider(mode)) }
         return this
     }
 

@@ -286,21 +286,20 @@ class JourneyStepTest {
         assertTrue(redirectDestination is Destination.ExternalUrl)
         with(redirectDestination as Destination.ExternalUrl) {
             assertEquals("redirect", externalUrl)
-            assertEquals("jid123", params["journeyId"])
         }
     }
 
     @Test
     fun `determine redirect returns the route segment if the step config's mode is null`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
-        whenever(step.stepConfig.mode(any())).thenReturn(null)
-        whenever(step.stepConfig.routeSegment).thenReturn("stepId")
+        val journeyStep = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        whenever(journeyStep.stepConfig.mode(any())).thenReturn(null)
+        whenever(journeyStep.stepConfig.routeSegment).thenReturn("stepId")
 
         val state: JourneyState = mock()
         whenever(state.journeyId).thenReturn("jid123")
 
-        step.initialize(
+        journeyStep.initialize(
             "stepId",
             state,
             mock(),
@@ -310,13 +309,13 @@ class JourneyStepTest {
         )
 
         // Act
-        val redirectDestination = step.determineNextDestination()
+        val redirectDestination = journeyStep.determineNextDestination()
 
         // Assert
         assertTrue(redirectDestination is Destination.Step)
         with(redirectDestination as Destination.Step) {
             assertEquals("stepId", step.routeSegment)
-            assertEquals("jid123", params["journeyId"])
+            assertEquals("jid123", journeyId)
         }
     }
 
