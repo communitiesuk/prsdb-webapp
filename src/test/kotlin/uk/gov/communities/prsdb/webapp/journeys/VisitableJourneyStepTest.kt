@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-class JourneyStepTest {
+class VisitableJourneyStepTest {
     class TestFormModel : FormModel {
         var field: String = ""
     }
@@ -27,7 +27,7 @@ class JourneyStepTest {
     @Test
     fun `step is reachable if its parentage allows it`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(true)
         step.initialize(
@@ -49,7 +49,7 @@ class JourneyStepTest {
     @Test
     fun `step is not reachable if its parentage does not allow it`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(false)
         step.initialize(
@@ -71,7 +71,7 @@ class JourneyStepTest {
     @Test
     fun `validateSubmittedData binds valid data to form model with no errors`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(step.stepConfig.validator).thenReturn(AlwaysTrueValidator())
         val formData = mapOf("field" to "value")
@@ -96,7 +96,7 @@ class JourneyStepTest {
     @Test
     fun `validateSubmittedData binds invalid data to form model with errors`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.validator).thenReturn(AlwaysFalseValidator())
         whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
         val formData = mapOf("field" to "value")
@@ -121,7 +121,7 @@ class JourneyStepTest {
     @Test
     fun `getPageVisitContent adds back link and an empty form model to the content when there's no submitted data`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
         step.initialize(
             "stepId",
@@ -143,7 +143,7 @@ class JourneyStepTest {
     @Test
     fun `getPageVisitContent adds back link and existing form model to the content when there's submitted data`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         val existingFormModel = TestFormModel().apply { field = "existingValue" }
         whenever(step.stepConfig.getFormModelFromState(anyOrNull())).thenReturn(existingFormModel)
         step.initialize(
@@ -167,7 +167,7 @@ class JourneyStepTest {
     @Test
     fun `getInvalidSubmissionContent adds back link and submitted form model with errors`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
         step.initialize(
             "stepId",
@@ -190,7 +190,7 @@ class JourneyStepTest {
     @Test
     fun `submitFormData saves bindingResult target as form data in journey state`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(step.stepConfig.routeSegment).thenReturn("stepId")
         val state = mock<JourneyState>()
@@ -216,7 +216,7 @@ class JourneyStepTest {
     @Test
     fun `if the step is accessible, the outcome is the step config's mode`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(true)
@@ -240,7 +240,7 @@ class JourneyStepTest {
     @Test
     fun `if the step is not accessible, the outcome is null`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
         val parentage: Parentage = mock()
         whenever(parentage.allowsChild()).thenReturn(false)
@@ -264,7 +264,7 @@ class JourneyStepTest {
     @Test
     fun `determine redirect returns the result of the redirectProvider if the step config's mode is not null`() {
         // Arrange
-        val step = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val step = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
 
         val state: JourneyState = mock()
@@ -292,7 +292,7 @@ class JourneyStepTest {
     @Test
     fun `determine redirect returns the route segment if the step config's mode is null`() {
         // Arrange
-        val journeyStep = JourneyStep<TestEnum, TestFormModel, JourneyState>(mock())
+        val journeyStep = JourneyStep.VisitableStep<TestEnum, TestFormModel, JourneyState>(mock())
         whenever(journeyStep.stepConfig.mode(any())).thenReturn(null)
         whenever(journeyStep.stepConfig.routeSegment).thenReturn("stepId")
 
@@ -312,8 +312,8 @@ class JourneyStepTest {
         val redirectDestination = journeyStep.determineNextDestination()
 
         // Assert
-        assertTrue(redirectDestination is Destination.Step)
-        with(redirectDestination as Destination.Step) {
+        assertTrue(redirectDestination is Destination.VisitableStep)
+        with(redirectDestination as Destination.VisitableStep) {
             assertEquals("stepId", step.routeSegment)
             assertEquals("jid123", journeyId)
         }
@@ -323,9 +323,7 @@ class JourneyStepTest {
     fun `initialize throws if the journey step has already been initialised`() {
         // Arrange
         val stepConfig: AbstractStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
-        val step = JourneyStep(stepConfig)
-
-        whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(false)
+        val step = JourneyStep.VisitableStep(stepConfig)
 
         step.initialize(
             "stepId",
@@ -335,7 +333,6 @@ class JourneyStepTest {
             mock(),
             { Destination.ExternalUrl("unreachable") },
         )
-        whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(true)
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {

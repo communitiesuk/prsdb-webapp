@@ -42,11 +42,11 @@ class FooExampleJourneyFactory(
             step("task-list", journey.taskListStep) {
                 nextUrl { "task-list" }
             }
-            task("occupation-task", journey.occupationTask) {
+            task(journey.occupationTask) {
                 parents { journey.taskListStep.always() }
                 redirectToStep { journey.fooCheckYourAnswersStep }
             }
-            task("epc-task", journey.epcTask) {
+            task(journey.epcTask) {
                 parents { journey.occupationTask.hasOutcome(Complete.COMPLETE) }
                 redirectToStep { journey.fooCheckYourAnswersStep }
             }

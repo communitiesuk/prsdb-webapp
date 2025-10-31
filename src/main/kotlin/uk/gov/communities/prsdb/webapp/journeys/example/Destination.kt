@@ -8,10 +8,10 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStep
 sealed class Destination {
     fun toModelAndView(): ModelAndView =
         when (this) {
-            is Step -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
+            is VisitableStep -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
             is ExternalUrl -> ModelAndView("redirect:$externalUrl", params)
             is Template -> ModelAndView(templateName, content)
-            is Navigation -> NavigationalStepLifecycleOrchestrator(step).getStepModelAndView()
+            is NavigationalStep -> NavigationalStepLifecycleOrchestrator(step).getStepModelAndView()
         }
 
     fun withModelContent(content: Map<String, Any?>): Destination =
@@ -20,8 +20,8 @@ sealed class Destination {
             else -> this
         }
 
-    class Step(
-        val step: JourneyStep<*, *, *>,
+    class VisitableStep(
+        val step: JourneyStep.VisitableStep<*, *, *>,
         val journeyId: String,
     ) : Destination()
 
@@ -35,16 +35,15 @@ sealed class Destination {
         val content: Map<String, Any?> = mapOf(),
     ) : Destination()
 
-    class Navigation(
-        val step: NavigationalStep<*>,
+    class NavigationalStep(
+        val step: JourneyStep.NotionalStep<*, *, *>,
     ) : Destination()
 
     companion object {
         operator fun invoke(step: JourneyStep<*, *, *>): Destination =
-            if (step is NavigationalStep<*>) {
-                Navigation(step)
-            } else {
-                Step(step, step.currentJourneyId)
+            when (step) {
+                is JourneyStep.VisitableStep -> VisitableStep(step, step.currentJourneyId)
+                is JourneyStep.NotionalStep -> NavigationalStep(step)
             }
     }
 }

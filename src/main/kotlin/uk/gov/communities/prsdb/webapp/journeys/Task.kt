@@ -7,13 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStepCo
 
 abstract class Task<TMode : Enum<TMode>, in TState : JourneyState> {
     fun getTaskSteps(
-        exitRoute: String,
         state: TState,
         entryPoint: Parentage,
         exitInit: StepInitialiser<NavigationalStepConfig, TState, Complete>.() -> Unit,
     ): List<StepInitialiser<*, TState, *>> =
         makeSubJourney(state, entryPoint) +
-            StepInitialiser<NavigationalStepConfig, TState, Complete>(exitRoute, notionalExitStep, true).apply {
+            StepInitialiser<NavigationalStepConfig, TState, Complete>(null, notionalExitStep).apply {
                 this.exitInit()
                 this.parents { taskCompletionParentage(state) }
             }

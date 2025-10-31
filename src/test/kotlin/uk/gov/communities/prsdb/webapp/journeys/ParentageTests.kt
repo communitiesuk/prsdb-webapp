@@ -52,8 +52,8 @@ class ParentageTests {
         val andParents = AndParents(DisallowingParent(), *allowingParents)
 
         // Act
-        val actualAncestryRoutes = andParents.ancestry.map { it.routeSegment }
-        val actualAllowingParentRoutes = andParents.allowingParentSteps.map { it.routeSegment }
+        val actualAncestryRoutes = andParents.ancestry.map { it.getRouteSegmentOrNull() }
+        val actualAllowingParentRoutes = andParents.allowingParentSteps.map { it.getRouteSegmentOrNull() }
 
         // Assert
         assertContentEquals(allowingParentRoutes, actualAncestryRoutes)
@@ -70,7 +70,7 @@ class ParentageTests {
         val andParents = AndParents(*(allowingParents + disallowingParents).toTypedArray())
 
         // Act
-        val actualPotentialParentRoutes = andParents.potentialParents.map { it.routeSegment }
+        val actualPotentialParentRoutes = andParents.potentialParents.map { it.getRouteSegmentOrNull() }
 
         // Assert
         val expectedRoutes = allowingParentRoutes + disallowingParentRoutes
@@ -100,8 +100,8 @@ class ParentageTests {
         val orParents = OrParents(DisallowingParent(), *allowingParents)
 
         // Act
-        val actualAncestryRoutes = orParents.ancestry.map { it.routeSegment }
-        val actualAllowingParentRoutes = orParents.allowingParentSteps.map { it.routeSegment }
+        val actualAncestryRoutes = orParents.ancestry.map { it.getRouteSegmentOrNull() }
+        val actualAllowingParentRoutes = orParents.allowingParentSteps.map { it.getRouteSegmentOrNull() }
 
         // Assert
         assertContentEquals(allowingParentRoutes, actualAncestryRoutes)
@@ -118,7 +118,7 @@ class ParentageTests {
         val orParents = OrParents(*(allowingParents + disallowingParents).toTypedArray())
 
         // Act
-        val actualPotentialParentRoutes = orParents.potentialParents.map { it.routeSegment }
+        val actualPotentialParentRoutes = orParents.potentialParents.map { it.getRouteSegmentOrNull() }
 
         // Assert
         val expectedRoutes = allowingParentRoutes + disallowingParentRoutes
@@ -141,16 +141,16 @@ class ParentageTests {
 
     @Test
     fun `SingleParent allows child based on condition`() {
-        val allowingParent = SingleParent(mock()) { true }
-        val disallowingParent = SingleParent(mock()) { false }
+        val allowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { true }
+        val disallowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { false }
         assertTrue(allowingParent.allowsChild())
         assertFalse(disallowingParent.allowsChild())
     }
 
     @Test
     fun `SingleParent aggregates allowingParentSteps and potentialParents as at most itself`() {
-        val allowingParent = SingleParent(mock()) { true }
-        val disallowingParent = SingleParent(mock()) { false }
+        val allowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { true }
+        val disallowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { false }
 
         assertSame(allowingParent.potentialParents.single(), allowingParent.step)
         assertSame(disallowingParent.potentialParents.single(), disallowingParent.step)
@@ -170,7 +170,7 @@ class ParentageTests {
         val singleParent = SingleParent(parentStep) { true }
 
         // Act
-        val ancestryRoutes = singleParent.ancestry.map { it.routeSegment }
+        val ancestryRoutes = singleParent.ancestry.map { it.getRouteSegmentOrNull() }
 
         // Assert
         assertContentEquals(listOf("parent", "parent-ancestry-step"), ancestryRoutes)
@@ -178,8 +178,8 @@ class ParentageTests {
 
     companion object {
         fun mockStepWithRoute(route: String): JourneyStep<*, *, *> {
-            val step: JourneyStep<*, *, *> = mock()
-            whenever(step.routeSegment).thenReturn(route)
+            val step: JourneyStep<*, *, *> = mock<JourneyStep.VisitableStep<*, *, *>>()
+            whenever(step.getRouteSegmentOrNull()).thenReturn(route)
             return step
         }
     }

@@ -12,9 +12,31 @@ import kotlin.collections.plus
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
+    open class VisitableStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+        val routeSegment: String get() = stepConfig.routeSegment
+    }
+
+    open class NotionalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig)
+
+    fun getRouteSegmentOrNull(): String? =
+        when (this) {
+            is VisitableStep -> stepConfig.routeSegment
+            is NotionalStep -> null
+        }
+
+    fun isRouteSegmentInitialised(): Boolean =
+        when (this) {
+            is VisitableStep -> stepConfig.isRouteSegmentInitialised()
+            is NotionalStep -> true
+        }
+
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
     fun beforeIsStepReachable() {
         stepConfig.beforeIsStepReachable(state)
@@ -89,7 +111,7 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
             )
 
     fun submitFormData(bindingResult: BindingResult) {
-        state.addStepData(stepConfig.routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
+        getRouteSegmentOrNull()?.let { state.addStepData(it, stepConfig.formModelClass.cast(bindingResult.target).toPageData()) }
     }
 
     fun determineNextDestination(): Destination =
@@ -118,13 +140,10 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
             val singleParentUrl =
                 parentage.allowingParentSteps
                     .singleOrNull()
-                    ?.stepConfig
-                    ?.routeSegment
+                    ?.getRouteSegmentOrNull()
             val backUrlOverrideValue = this.backUrlOverride?.let { it() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
-
-    val routeSegment: String get() = stepConfig.routeSegment
 
     val initialisationStage: StepInitialisationStage
         get() =
@@ -133,10 +152,10 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
                 isBaseClassInitialised && !stepConfig.isSubClassInitialised() -> StepInitialisationStage.PARTIALLY_INITIALISED
                 else -> StepInitialisationStage.FULLY_INITIALISED
             }
+
     private val isBaseClassInitialised: Boolean
         get() =
-            stepConfig.isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized &&
-                ::parentage.isInitialized
+            isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized && ::parentage.isInitialized
 
     fun initialize(
         segment: String?,

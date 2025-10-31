@@ -11,9 +11,9 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 
 class DestinationTests {
     @Test
-    fun `Step Destination with just a step returns a redirect for the current step and journey`() {
+    fun `VisitableStep Destination with just a step returns a redirect for the current step and journey`() {
         // Arrange
-        val mockStep = mock<JourneyStep<*, *, *>>()
+        val mockStep = mock<JourneyStep.VisitableStep<*, *, *>>()
         val journeyId = "test-journey-id"
         val routeSegment = "test-segment"
 
@@ -30,16 +30,16 @@ class DestinationTests {
     }
 
     @Test
-    fun `Step Destination with explicit journeyId returns a redirect for the specified step and journey`() {
+    fun `VisitableStep Destination with explicit journeyId returns a redirect for the specified step and journey`() {
         // Arrange
-        val mockStep = mock<JourneyStep<*, *, *>>()
+        val mockStep = mock<JourneyStep.VisitableStep<*, *, *>>()
         val journeyId = "explicit-journey-id"
         val routeSegment = "explicit-segment"
 
         whenever(mockStep.routeSegment).thenReturn(routeSegment)
 
         // Act
-        val destination = Destination.Step(mockStep, journeyId)
+        val destination = Destination.VisitableStep(mockStep, journeyId)
         val modelAndView = destination.toModelAndView()
 
         // Assert
@@ -133,7 +133,7 @@ class DestinationTests {
     @Test
     fun `withModelContent on non-Template Destination returns the same Destination`() {
         // Arrange
-        val mockStep = mock<JourneyStep<*, *, *>>()
+        val mockStep = mock<JourneyStep.VisitableStep<*, *, *>>()
         val journeyId = "test-journey-id"
         val routeSegment = "test-segment"
 

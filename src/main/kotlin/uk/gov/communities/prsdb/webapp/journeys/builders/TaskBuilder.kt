@@ -69,10 +69,7 @@ class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
         return this
     }
 
-    fun mapToStepInitialisers(
-        exitRoute: String,
-        state: TStateInit,
-    ): List<StepInitialiser<*, TStateInit, *>> {
+    fun mapToStepInitialisers(state: TStateInit): List<StepInitialiser<*, TStateInit, *>> {
         if (destinationProvider == null) {
             throw JourneyInitialisationException("Task $name does not have a redirectTo defined")
         }
@@ -81,7 +78,7 @@ class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
         }
 
         with(destinationProvider!!) {
-            return task.getTaskSteps(exitRoute, state, parentage!!.invoke()) {
+            return task.getTaskSteps(state, parentage!!.invoke()) {
                 nextDestination(this@with)
             }
         }

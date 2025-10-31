@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.VisitableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
@@ -59,4 +59,4 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
 @PrsdbWebComponent
 final class FooTaskListStep(
     stepConfig: FooTaskListStepConfig,
-) : JourneyStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)
+) : VisitableStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)

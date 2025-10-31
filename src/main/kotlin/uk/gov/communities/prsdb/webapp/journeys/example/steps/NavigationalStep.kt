@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.NotionalStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @PrsdbWebComponent
@@ -23,4 +23,4 @@ class NavigationalStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMo
 @Scope("prototype")
 class NavigationalStep<in TState : JourneyState>(
     stepConfig: NavigationalStepConfig,
-) : JourneyStep<Complete, NoInputFormModel, TState>(stepConfig)
+) : NotionalStep<Complete, NoInputFormModel, TState>(stepConfig)

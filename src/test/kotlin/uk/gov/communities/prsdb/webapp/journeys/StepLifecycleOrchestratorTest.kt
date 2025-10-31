@@ -14,7 +14,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.VisitableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(false)
@@ -36,7 +36,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when step is reachable, getStepModelAndView calls all step methods in the correct order and returns the content and view`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.VisitableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)
@@ -66,7 +66,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when step is unreachable, postStepModelAndView calls step methods in the correct order and returns redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.VisitableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(false)
@@ -88,7 +88,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when invalid data is posted, postStepModelAndView calls step methods in the correct order and returns error content and view`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.VisitableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)
@@ -126,7 +126,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when valid data is posted, postStepModelAndView calls step methods in the correct order and returns redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.VisitableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)

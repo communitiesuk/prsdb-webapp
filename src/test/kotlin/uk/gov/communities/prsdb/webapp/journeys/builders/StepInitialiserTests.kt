@@ -23,7 +23,7 @@ class StepInitialiserTests {
     @Test
     fun `a stepBuilder will not accept a step that has already been initialised`() {
         // Arrange
-        val stepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
+        val stepMock = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
         whenever(stepMock.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
 
         // Act & Assert
@@ -149,7 +149,7 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val nextStepSegment = "nextStepSegment"
-        val nextStepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
+        val nextStepMock = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
@@ -170,7 +170,7 @@ class StepInitialiserTests {
             anyOrNull(),
         )
         val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
-        with(result as Destination.Step) {
+        with(result as Destination.VisitableStep) {
             assertEquals(nextStepMock, step)
         }
     }
@@ -344,7 +344,7 @@ class StepInitialiserTests {
     }
 
     private fun mockInitialisableStep() =
-        mock<JourneyStep<TestEnum, *, JourneyState>>().apply {
+        mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>().apply {
             whenever(
                 this.initialisationStage,
             ).thenReturn(

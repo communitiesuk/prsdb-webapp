@@ -53,13 +53,15 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
     abstract fun mode(state: TState): TEnum?
 
     fun getFormModelFromState(state: TState): TFormModel? =
-        state.getStepData(routeSegment)?.let {
-            val binder = WebDataBinder(formModelClass.createInstance())
-            binder.validator = validator
-            binder.bind(MutablePropertyValues(it))
+        state
+            .getStepData(routeSegment)
+            ?.let {
+                val binder = WebDataBinder(formModelClass.createInstance())
+                binder.validator = validator
+                binder.bind(MutablePropertyValues(it))
 
-            formModelClass.cast(binder.bindingResult.target)
-        }
+                formModelClass.cast(binder.bindingResult.target)
+            }
 
     // TODO PRSD-1550: It is ugly that step config has a value set during JourneyStep initialisation - it is only used to make "getFormModelFromState" work
     // Perhaps either the routeSegment or formModel should be passed into that method instead (and therefore all the other functions)

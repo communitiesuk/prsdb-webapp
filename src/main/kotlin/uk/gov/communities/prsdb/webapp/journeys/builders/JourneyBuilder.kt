@@ -18,16 +18,15 @@ class JourneyBuilder<TState : JourneyState>(
     private var unreachableStepDestination: (() -> Destination)? = null
 
     fun build(): Map<String, VisitableJourneyElement> =
-        stepsUnderConstruction
-            .mapNotNull { sb ->
-                sb.build(journey, unreachableStepDestination).let {
-                    checkForUninitialisedParents(sb)
-                    when (sb.notionalStep) {
-                        true -> null
-                        false -> it
-                    }
+        buildMap {
+            stepsUnderConstruction.forEach { step ->
+                val journeyStep = step.build(journey, unreachableStepDestination)
+                checkForUninitialisedParents(step)
+                step.segment?.let {
+                    put(it, StepLifecycleOrchestrator(journeyStep))
                 }
-            }.associate { it.routeSegment to StepLifecycleOrchestrator(it) }
+            }
+        }
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
         segment: String,
@@ -44,20 +43,18 @@ class JourneyBuilder<TState : JourneyState>(
         uninitialisedStep: JourneyStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, true)
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep)
         stepInitialiser.init()
         stepsUnderConstruction.add(stepInitialiser)
     }
 
     fun <TMode : Enum<TMode>> task(
-        // TODO PRSD-1546 remove the exitRoute parameter when tasks have been migrated to use a Destination
-        exitRoute: String,
         uninitialisedTask: Task<TMode, TState>,
         init: TaskInitialiser<TMode, TState>.() -> Unit,
     ) {
         val taskInitialiser = TaskInitialiser(uninitialisedTask)
         taskInitialiser.init()
-        val taskSteps = taskInitialiser.mapToStepInitialisers(exitRoute, journey)
+        val taskSteps = taskInitialiser.mapToStepInitialisers(journey)
         stepsUnderConstruction.addAll(taskSteps)
     }
 

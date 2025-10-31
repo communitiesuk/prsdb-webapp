@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.VisitableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
@@ -27,4 +27,4 @@ class EpcSupersededStepConfig : AbstractGenericStepConfig<Complete, NoInputFormM
 @PrsdbWebComponent
 final class EpcSupersededStep(
     stepConfig: EpcSupersededStepConfig,
-) : JourneyStep<Complete, NoInputFormModel, EpcJourneyState>(stepConfig)
+) : VisitableStep<Complete, NoInputFormModel, EpcJourneyState>(stepConfig)

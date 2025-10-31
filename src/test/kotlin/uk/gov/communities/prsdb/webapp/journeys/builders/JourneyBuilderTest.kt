@@ -32,7 +32,7 @@ class JourneyBuilderTest {
     fun setup() {
         mockedStepBuilders =
             mockConstruction(StepInitialiser::class.java) { mock, context ->
-                val mockedJourneyStep = mock<JourneyStep<TestEnum, *, JourneyState>>()
+                val mockedJourneyStep = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
                 whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                 whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
                 whenever((mock as StepInitialiser<*, JourneyState, *>).build(anyOrNull(), anyOrNull())).thenReturn(mockedJourneyStep)
@@ -59,8 +59,8 @@ class JourneyBuilderTest {
             val journey =
                 journey(state) {
                     unreachableStepUrl { "redirect" }
-                    step("segment", mock()) {}
-                    step("segment2", mock()) {}
+                    step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
+                    step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
                 }
 
             // Assert
@@ -82,8 +82,8 @@ class JourneyBuilderTest {
         val redirectLambda = { "redirect" }
 
         // Act
-        jb.step("segment", mock()) {}
-        jb.step("segment2", mock()) {}
+        jb.step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
+        jb.step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
         jb.unreachableStepUrl(redirectLambda)
         jb.build()
 
@@ -117,7 +117,7 @@ class JourneyBuilderTest {
     fun `step method creates and inits a stepBuilder, which is built when the journey is built`() {
         // Arrange 1
         val jb = JourneyBuilder(mock())
-        val uninitialisedStep = mock<JourneyStep<TestEnum, *, JourneyState>>()
+        val uninitialisedStep = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
 
         // Act 1
         jb.step("segment", uninitialisedStep) {
@@ -131,10 +131,9 @@ class JourneyBuilderTest {
         verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
         // Arrange 2
-        val builtStep = mock<JourneyStep<TestEnum, *, JourneyState>>()
-        whenever(builtStep.routeSegment).thenReturn("segment")
+        val builtStep = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(mockStepInitialiser.segment).thenReturn("segment")
         whenever(mockStepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
-        whenever(builtStep.routeSegment).thenReturn("segment")
 
         // Act 2
         val map = jb.build()
@@ -151,12 +150,12 @@ class JourneyBuilderTest {
     fun `steps must only have potential parents that are initialised before them in the journey dsl`() {
         // Arrange
         val jb = JourneyBuilder(mock())
-        jb.step("A", mock<JourneyStep<TestEnum, *, JourneyState>>()) {}
+        jb.step("A", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
 
         val stepInitialiser = mockedStepBuilders.constructed().last() as StepInitialiser<*, JourneyState, *>
-        val mockJourneyStep = mock<JourneyStep<TestEnum, *, JourneyState>>()
+        val mockJourneyStep = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
         whenever(mockJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.PARTIALLY_INITIALISED)
-        whenever(mockJourneyStep.routeSegment).thenReturn("route")
+        whenever(mockJourneyStep.getRouteSegmentOrNull()).thenReturn("route")
         whenever(stepInitialiser.potentialParents).thenReturn(listOf(mockJourneyStep))
 
         // Act & Assert
