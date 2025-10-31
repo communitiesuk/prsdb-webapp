@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 import kotlin.test.assertEquals
 
 class StepInitialiserTests {
@@ -49,7 +50,7 @@ class StepInitialiserTests {
         val builder = StepInitialiser("test", stepMock)
         val backUrlLambda = { expectedBackUrl }
         builder.backUrl(backUrlLambda)
-        builder.redirectToUrl { "next" }
+        builder.nextUrl { "next" }
 
         // Act
         builder.build(mock(), mock())
@@ -70,7 +71,7 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
-        builder.redirectToUrl { "next" }
+        builder.nextUrl { "next" }
 
         // Act
         builder.build(mock(), mock())
@@ -90,30 +91,30 @@ class StepInitialiserTests {
     fun `a redirect destination cannot be set more than once`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
-        builder.redirectToUrl { "url1" }
+        builder.nextUrl { "url1" }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.redirectToUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.nextUrl { "url2" } }
     }
 
     @Test
     fun `a redirectToStep cannot be set if a redirect url has been set`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
-        builder.redirectToUrl { "url1" }
+        builder.nextUrl { "url1" }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.redirectToStep { mock() } }
+        assertThrows<JourneyInitialisationException> { builder.nextStep { mock() } }
     }
 
     @Test
     fun `a redirectToUrl cannot be set if a redirect step has been set`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
-        builder.redirectToStep { mock() }
+        builder.nextStep { mock() }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.redirectToUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.nextUrl { "url2" } }
     }
 
     @Test
@@ -122,38 +123,13 @@ class StepInitialiserTests {
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
         val redirectLambda = { _: TestEnum -> "expectedRedirect" }
-        builder.redirectToUrl(redirectLambda)
+        builder.nextUrl(redirectLambda)
 
         // Act
         builder.build(mock(), mock())
 
         // Assert
-        verify(stepMock).initialize(
-            anyOrNull(),
-            anyOrNull(),
-            anyOrNull(),
-            eq(redirectLambda),
-            anyOrNull(),
-            anyOrNull(),
-        )
-    }
-
-    @Test
-    fun `a redirectToStep is passed to the step when built`() {
-        // Arrange
-        val stepMock = mockInitialisableStep()
-        val nextStepSegment = "nextStepSegment"
-        val nextStepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
-        whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
-
-        val builder = StepInitialiser("test", stepMock)
-        builder.redirectToStep { _: TestEnum -> nextStepMock }
-
-        // Act
-        builder.build(mock(), mock())
-
-        // Assert
-        val lambdaCaptor = argumentCaptor<(TestEnum) -> String>()
+        val lambdaCaptor = argumentCaptor<(TestEnum) -> Destination>()
         verify(stepMock).initialize(
             anyOrNull(),
             anyOrNull(),
@@ -163,7 +139,40 @@ class StepInitialiserTests {
             anyOrNull(),
         )
         val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
-        assertEquals(nextStepSegment, result)
+        with(result as Destination.ExternalUrl) {
+            assertEquals("expectedRedirect", externalUrl)
+        }
+    }
+
+    @Test
+    fun `a redirectToStep is passed to the step when built`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val nextStepSegment = "nextStepSegment"
+        val nextStepMock = mock<JourneyStep<TestEnum, *, JourneyState>>()
+        whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
+        whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
+
+        val builder = StepInitialiser("test", stepMock)
+        builder.nextStep { _: TestEnum -> nextStepMock }
+
+        // Act
+        builder.build(mock(), mock())
+
+        // Assert
+        val lambdaCaptor = argumentCaptor<(TestEnum) -> Destination>()
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            lambdaCaptor.capture(),
+            anyOrNull(),
+            anyOrNull(),
+        )
+        val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
+        with(result as Destination.Step) {
+            assertEquals(nextStepMock, step)
+        }
     }
 
     @Test
@@ -192,7 +201,7 @@ class StepInitialiserTests {
         val builder = StepInitialiser("test", stepMock)
         val parentage = NoParents()
         builder.parents { parentage }
-        builder.redirectToUrl { "next" }
+        builder.nextUrl { "next" }
 
         // Act
         builder.build(mock(), mock())
@@ -213,7 +222,7 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
-        builder.redirectToUrl { "next" }
+        builder.nextUrl { "next" }
 
         // Act
         builder.build(mock(), mock())
@@ -254,7 +263,7 @@ class StepInitialiserTests {
                 additionalConfigApplied = true
             }
         }
-        builder.redirectToUrl { "next" }
+        builder.nextUrl { "next" }
 
         // Act
         builder.build(mock(), mock())
@@ -264,37 +273,42 @@ class StepInitialiserTests {
     }
 
     @Test
-    fun `a step unreachable redirect cannot be set more than once`() {
+    fun `a step unreachable url cannot be set more than once`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
-        builder.unreachableStepRedirect { "url1" }
+        builder.unreachableStepUrl { "url1" }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.unreachableStepRedirect { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.unreachableStepUrl { "url2" } }
     }
 
     @Test
-    fun `a step unreachable redirect is passed to the step when built, even if there is a default set`() {
+    fun `a step unreachable url is passed to the step when built, even if there is a default set`() {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
         val stepUnreachableRedirectLambda = { "expectedRedirect" }
-        builder.unreachableStepRedirect(stepUnreachableRedirectLambda)
-        builder.redirectToUrl { "next" }
-        val defaultUnreachableRedirectLambda = { "defaultRedirect" }
+        builder.unreachableStepUrl(stepUnreachableRedirectLambda)
+        builder.nextUrl { "next" }
+        val defaultUnreachableRedirectLambda = { Destination.ExternalUrl("defaultRedirect") }
 
         // Act
         builder.build(mock(), defaultUnreachableRedirectLambda)
 
         // Assert
+        val captor = argumentCaptor<() -> Destination>()
         verify(stepMock).initialize(
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
-            eq(stepUnreachableRedirectLambda),
+            captor.capture(),
         )
+        val destination = captor.firstValue()
+        with(destination as Destination.ExternalUrl) {
+            assertEquals("expectedRedirect", externalUrl)
+        }
     }
 
     @Test
@@ -302,8 +316,8 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
-        builder.redirectToUrl { "next" }
-        val defaultUnreachableRedirectLambda = { "expectedRedirect" }
+        builder.nextUrl { "next" }
+        val defaultUnreachableRedirectLambda = { Destination.ExternalUrl("expectedRedirect") }
 
         // Act
         builder.build(mock(), defaultUnreachableRedirectLambda)
@@ -323,7 +337,7 @@ class StepInitialiserTests {
     fun `either a step unreachable redirect or a default unreachable step must be set`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
-        builder.redirectToUrl { "next" }
+        builder.nextUrl { "next" }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.build(mock(), null) }

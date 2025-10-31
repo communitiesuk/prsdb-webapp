@@ -16,14 +16,14 @@ class StepLifecycleOrchestrator(
             journeyStep.afterGetStepContent()
 
             journeyStep.beforeGetTemplate()
-            val template = journeyStep.chooseTemplate()
+            val destination = journeyStep.chooseVisitDestination().withContent(content)
             journeyStep.afterGetTemplate()
 
-            return ModelAndView(template, content)
+            return destination.toModelAndView()
         }
 
-        val unreachableStepRedirect = journeyStep.getUnreachableStepRedirect()
-        return ModelAndView("redirect:$unreachableStepRedirect")
+        val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
+        return unreachableStepDestination.toModelAndView()
     }
 
     fun postStepModelAndView(formData: PageData): ModelAndView {
@@ -41,10 +41,10 @@ class StepLifecycleOrchestrator(
                 journeyStep.afterGetStepContent()
 
                 journeyStep.beforeGetTemplate()
-                val template = journeyStep.chooseTemplate()
+                val destination = journeyStep.chooseVisitDestination().withContent(content)
                 journeyStep.afterGetTemplate()
 
-                return ModelAndView(template, content)
+                return destination.toModelAndView()
             }
 
             journeyStep.beforeSubmitFormData()
@@ -52,13 +52,13 @@ class StepLifecycleOrchestrator(
             journeyStep.afterSubmitFormData()
 
             journeyStep.beforeDetermineRedirect()
-            val redirect = journeyStep.determineRedirect()
+            val nextDestination = journeyStep.determineNextDestination()
             journeyStep.afterDetermineRedirect()
 
-            return ModelAndView("redirect:$redirect")
+            return nextDestination.toModelAndView()
         }
 
-        val unreachableStepRedirect = journeyStep.getUnreachableStepRedirect()
-        return ModelAndView("redirect:$unreachableStepRedirect")
+        val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
+        return unreachableStepDestination.toModelAndView()
     }
 }

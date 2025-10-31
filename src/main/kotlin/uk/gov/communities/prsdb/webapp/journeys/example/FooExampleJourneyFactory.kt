@@ -9,29 +9,28 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 
 @PrsdbWebService
 class FooExampleJourneyFactory(
@@ -42,13 +41,13 @@ class FooExampleJourneyFactory(
         state.validateStateMatchesPropertyId(propertyId)
 
         return journey(stateFactory.getObject()) {
-            unreachableStepRedirect { "task-list" }
+            unreachableStepStep { journey.taskListStep }
             step("task-list", journey.taskListStep) {
-                redirectToUrl { "task-list" }
+                nextUrl { "task-list" }
             }
             step("occupied", journey.occupied) {
                 parents { journey.taskListStep.always() }
-                redirectToStep { mode ->
+                nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.households
                         YesOrNo.NO -> journey.fooCheckYourAnswersStep
@@ -57,15 +56,15 @@ class FooExampleJourneyFactory(
             }
             step("households", journey.households) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                redirectToStep { journey.tenants }
+                nextStep { journey.tenants }
             }
             step("tenants", journey.tenants) {
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
-                redirectToStep { journey.fooCheckYourAnswersStep }
+                nextStep { journey.fooCheckYourAnswersStep }
             }
             step("has-epc", journey.epcQuestion) {
                 parents { journey.taskListStep.always() }
-                redirectToStep { mode ->
+                nextStep { mode ->
                     when (mode) {
                         EpcStatus.AUTOMATCHED -> journey.checkAutomatchedEpc
                         EpcStatus.NOT_AUTOMATCHED -> journey.searchForEpc
@@ -75,7 +74,7 @@ class FooExampleJourneyFactory(
             }
             step<YesOrNo, CheckEpcStepConfig>("check-automatched-epc", journey.checkAutomatchedEpc) {
                 parents { journey.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
-                redirectToStep { mode ->
+                nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.fooCheckYourAnswersStep
                         YesOrNo.NO -> journey.searchForEpc
@@ -92,7 +91,7 @@ class FooExampleJourneyFactory(
                         journey.checkAutomatchedEpc.hasOutcome(YesOrNo.NO),
                     )
                 }
-                redirectToStep { mode ->
+                nextStep { mode ->
                     when (mode) {
                         EpcSearchResult.FOUND -> journey.checkSearchedEpc
                         EpcSearchResult.SUPERSEDED -> journey.epcSuperseded
@@ -102,7 +101,7 @@ class FooExampleJourneyFactory(
             }
             step("superseded-epc", journey.epcSuperseded) {
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
-                redirectToStep { journey.checkSearchedEpc }
+                nextStep { journey.checkSearchedEpc }
             }
             step<YesOrNo, CheckEpcStepConfig>("check-found-epc", journey.checkSearchedEpc) {
                 parents {
@@ -111,7 +110,7 @@ class FooExampleJourneyFactory(
                         journey.epcSuperseded.hasOutcome(Complete.COMPLETE),
                     )
                 }
-                redirectToStep { mode ->
+                nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.fooCheckYourAnswersStep
                         YesOrNo.NO -> journey.searchForEpc
@@ -123,7 +122,7 @@ class FooExampleJourneyFactory(
             }
             step("epc-not-found", journey.epcNotFound) {
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
-                redirectToStep { journey.fooCheckYourAnswersStep }
+                nextStep { journey.fooCheckYourAnswersStep }
             }
             step("check-your-answers", journey.fooCheckYourAnswersStep) {
                 parents {
@@ -140,7 +139,7 @@ class FooExampleJourneyFactory(
                         ),
                     )
                 }
-                redirectToUrl { "/" }
+                nextUrl { "/" }
             }
         }
     }
@@ -152,15 +151,15 @@ class FooExampleJourneyFactory(
 @Scope("prototype")
 class FooJourneyState(
     val taskListStep: FooTaskListStep,
-    override val occupied: JourneyStep<YesOrNo, OccupancyFormModel, FooJourneyState>,
-    override val households: JourneyStep<Complete, NumberOfHouseholdsFormModel, FooJourneyState>,
-    override val tenants: JourneyStep<Complete, NumberOfPeopleFormModel, FooJourneyState>,
-    override val epcQuestion: JourneyStep<EpcStatus, EpcFormModel, FooJourneyState>,
-    override val checkAutomatchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourneyState>,
-    override val searchForEpc: JourneyStep<EpcSearchResult, EpcLookupFormModel, FooJourneyState>,
+    override val occupied: OccupiedStep,
+    override val households: HouseholdStep,
+    override val tenants: TenantsStep,
+    override val epcQuestion: EpcQuestionStep,
+    override val checkAutomatchedEpc: CheckEpcStep,
+    override val searchForEpc: SearchEpcStep,
     override val epcNotFound: EpcNotFoundStep,
     override val epcSuperseded: EpcSupersededStep,
-    override val checkSearchedEpc: JourneyStep<YesOrNo, CheckMatchedEpcFormModel, FooJourneyState>,
+    override val checkSearchedEpc: CheckEpcStep,
     val fooCheckYourAnswersStep: FooCheckAnswersStep,
     private val journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),

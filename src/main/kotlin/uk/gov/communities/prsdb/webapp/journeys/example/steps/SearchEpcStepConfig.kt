@@ -26,7 +26,7 @@ class SearchEpcStepConfig(
             "getNewEpcUrl" to GET_NEW_EPC_URL,
         )
 
-    override fun chooseTemplate(state: EpcJourneyState) = "forms/epcLookupForm"
+    override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcLookupForm"
 
     override fun mode(state: EpcJourneyState): EpcSearchResult? {
         val epc = state.searchedEpc
