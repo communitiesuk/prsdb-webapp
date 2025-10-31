@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
@@ -37,6 +38,13 @@ class LocalAuthoritySecurityConfig(
                     redirection.baseUri("/$LOCAL_AUTHORITY_PATH_SEGMENT/login/oauth2/code/one-login")
                 }
             }.csrf { }
+            .headers { headers ->
+                headers
+                    .contentSecurityPolicy { csp ->
+                        csp
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                    }
+            }
 
         return http.build()
     }

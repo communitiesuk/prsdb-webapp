@@ -63,6 +63,12 @@ class DefaultSecurityConfig(
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**")
+            }.headers { headers ->
+                headers
+                    .contentSecurityPolicy { csp ->
+                        csp
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                    }
             }
 
         return http.build()
@@ -80,5 +86,12 @@ class DefaultSecurityConfig(
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/$SIGN_OUT_PATH_SEGMENT")
         oidcLogoutSuccessHandler.setDefaultTargetUrl("/$SIGN_OUT_PATH_SEGMENT")
         return oidcLogoutSuccessHandler
+    }
+
+    companion object {
+        const val CONTENT_SECURITY_POLICY_DIRECTIVES =
+            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com " +
+                "https://plausible.io/js/script.file-downloads.hash.outbound-links.js; " +
+                "connect-src https://region1.google-analytics.com;"
     }
 }
