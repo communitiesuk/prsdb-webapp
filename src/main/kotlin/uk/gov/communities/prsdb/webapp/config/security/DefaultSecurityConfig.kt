@@ -90,7 +90,7 @@ class DefaultSecurityConfig(
 
     companion object {
         const val CONTENT_SECURITY_POLICY_DIRECTIVES =
-            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com " +
+            "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com " +
                 "https://plausible.io/js/script.file-downloads.hash.outbound-links.js; " +
                 "connect-src https://region1.google-analytics.com;"
     }
