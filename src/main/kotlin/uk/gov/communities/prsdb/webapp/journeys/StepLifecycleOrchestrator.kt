@@ -16,7 +16,7 @@ class StepLifecycleOrchestrator(
             journeyStep.afterGetPageVisitContent()
 
             journeyStep.beforeChooseTemplate()
-            val destination = journeyStep.chooseTemplate().withContent(content)
+            val destination = journeyStep.chooseTemplate().withModelContent(content)
             journeyStep.afterChooseTemplate()
 
             return destination.toModelAndView()
@@ -41,7 +41,7 @@ class StepLifecycleOrchestrator(
                 journeyStep.afterGetPageVisitContent()
 
                 journeyStep.beforeChooseTemplate()
-                val destination = journeyStep.chooseTemplate().withContent(content)
+                val destination = journeyStep.chooseTemplate().withModelContent(content)
                 journeyStep.afterChooseTemplate()
 
                 return destination.toModelAndView()

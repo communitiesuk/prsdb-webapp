@@ -108,7 +108,7 @@ class DestinationTests {
     }
 
     @Test
-    fun `Template Destination withContent creates a new Destination with that content`() {
+    fun `Template Destination withContent creates a new Destination with that ModelContent`() {
         // Arrange
         val templateName = "test-template"
         val initialContent = mapOf("key1" to "value1")
@@ -116,7 +116,7 @@ class DestinationTests {
 
         // Act
         val destination = Destination.Template(templateName, initialContent)
-        val updatedDestination = destination.withContent(additionalContent)
+        val updatedDestination = destination.withModelContent(additionalContent)
         val updatedModelAndView = updatedDestination.toModelAndView()
         val oldModelAndView = destination.toModelAndView()
 
@@ -131,7 +131,7 @@ class DestinationTests {
     }
 
     @Test
-    fun `withContent on non-Template Destination returns the same Destination`() {
+    fun `withModelContent on non-Template Destination returns the same Destination`() {
         // Arrange
         val mockStep = mock<JourneyStep<*, *, *>>()
         val journeyId = "test-journey-id"
@@ -145,8 +145,8 @@ class DestinationTests {
         val contentToAdd = mapOf("key" to "value")
 
         // Act
-        val updatedStepDestination = stepDestination.withContent(contentToAdd)
-        val updatedExternalUrlDestination = externalUrlDestination.withContent(contentToAdd)
+        val updatedStepDestination = stepDestination.withModelContent(contentToAdd)
+        val updatedExternalUrlDestination = externalUrlDestination.withModelContent(contentToAdd)
 
         // Assert
         assertSame(stepDestination, updatedStepDestination)

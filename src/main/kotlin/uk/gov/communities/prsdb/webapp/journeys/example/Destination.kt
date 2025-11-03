@@ -11,7 +11,7 @@ sealed class Destination {
             is Template -> ModelAndView(templateName, content)
         }
 
-    fun withContent(content: Map<String, Any?>): Destination =
+    fun withModelContent(content: Map<String, Any?>): Destination =
         when (this) {
             is Template -> Template(templateName, this.content + content)
             else -> this
