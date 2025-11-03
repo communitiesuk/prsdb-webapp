@@ -791,7 +791,6 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "fieldSetHeading" to "forms.epcExpiryCheck.fieldSetHeading",
                             "expiryDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
                             "radioOptions" to
                                 listOf(

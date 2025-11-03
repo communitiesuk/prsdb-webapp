@@ -2,12 +2,11 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}">
+        <h1 class="govuk-heading-l" th:text="#{forms.epcExpiryCheck.heading}">
             fieldSetHeading
         </h1>
         <p class="govuk-body" th:text="#{forms.epcExpiryCheck.paragraph.one}">forms.epcExpiryCheck.paragraph.one</p>
