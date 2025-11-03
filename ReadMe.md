@@ -98,7 +98,7 @@ populate the database with seed data.
 The project uses migrations to populate the `local_authority` table with data from
 `src/main/resources/data/local_authorities/local_authorities.csv`.
 
-If the CSV file is updated, create a copy of it and call it `local_authorities_V<version number>.csv`, 
+If the CSV file is updated, create a copy of it and call it `local_authorities_V<version number>.csv`,
 where `version number` is one more than the latest version in`src/main/resources/db/migrations/data/local_authorities`.
 
 Then run the utility script to generate the sql for some new migrations by:
@@ -110,7 +110,7 @@ Then run the utility script to generate the sql for some new migrations by:
 #### Migration process for updating Local Authority Data
 
 - create a migration using `/scripts/output/draft_upsert_local_authorities_migration.sql` to upsert and new/changed local authorities
-- run the sql statement in `/scripts/output/select_all_local_authorities_to_be_deleted.sql` on your local copy of the database to 
+- run the sql statement in `/scripts/output/select_all_local_authorities_to_be_deleted.sql` on your local copy of the database to
   get a list of the local authorities that will be removed by the delete migration
 - write a custom migration to handle any changes that will need to be made before the delete migration can be run
   - check for local authority users/admins that will need to be deleted/assigned to another local authority
@@ -223,7 +223,7 @@ In most cases this will be all that is required as all features on integration w
 
 There may be an existing draft PR for the release including any extra release instructions (e.g. environment variables that need to be set), so check for this and make sure any actions have been completed.
 
-Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and can be ignored. 
+Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and can be ignored.
 
 In the rare case that there are changes on `main` that we do not want to release to `test`:
 
@@ -244,3 +244,11 @@ releasing to `test` in the normal way). However, if this is needed:
 - Merge the hotfix branch into `test`
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
+
+## Licence
+Unless stated otherwise, the codebase is released under [the MIT License][mit].
+This covers both the codebase and any sample code in the documentation.
+
+Copyright © 2025 Crown Copyright (Ministry of Housing, Communities & Local Government)
+
+[mit]: LICENCE
