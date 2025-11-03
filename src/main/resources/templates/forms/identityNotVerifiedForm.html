@@ -5,14 +5,18 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}},${formModel}, ~{::#form-content/content()},${backUrl}, ${sectionHeaderInfo})}">
-<header>
-    <h1 class="govuk-heading-l" th:text="#{forms.identityNotVerified.fieldSetHeading}">forms.identityNotVerified.fieldSetHeading</h1>
-</header>
-<section>
-    <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.one}">forms.identityNotVerified.paragraph.one</p>
-    <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.two}">forms.identityNotVerified.paragraph.two</p>
-    <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.three}">forms.identityNotVerified.paragraph.three</p>
-</section>
-<button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{forms.identityNotVerified.heading}">forms.identityNotVerified.fieldSetHeading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.one}">forms.identityNotVerified.paragraph.one</p>
+            <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.two}">forms.identityNotVerified.paragraph.two</p>
+            <p class="govuk-body" th:text="#{forms.identityNotVerified.paragraph.three}">forms.identityNotVerified.paragraph.three</p>
+        </section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>

@@ -103,9 +103,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
             // Check licensing answers
-            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("Selective licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
+            assertContains(checkLicensingAnswersPage.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -132,9 +132,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
             // Check licensing answers
-            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("HMO mandatory licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
+            assertContains(checkLicensingAnswersPage.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("HMO mandatory licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -161,9 +161,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
             // Check licensing answers
-            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("HMO additional licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
+            assertContains(checkLicensingAnswersPage.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("HMO additional licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -184,8 +184,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
             // Check licensing answers
-            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have removed this property’s licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("None")
+            assertContains(checkLicensingAnswersPage.summaryName.getText(), "You have removed this property’s licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("None")
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -212,7 +212,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             var checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
             // Click change link for Licensing Number
-            checkLicensingAnswersPage.form.summaryList.licensingNumberRow
+            checkLicensingAnswersPage.summaryList.licensingNumberRow
                 .clickActionLinkAndWait()
             updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
 
@@ -222,9 +222,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
             // Check licensing answers
-            assertContains(checkLicensingAnswersPage.form.summaryName.getText(), "You have updated the property licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingTypeRow.value).containsText("Selective licence")
-            assertThat(checkLicensingAnswersPage.form.summaryList.licensingNumberRow.value).containsText(secondNewLicenceNumber)
+            assertContains(checkLicensingAnswersPage.summaryName.getText(), "You have updated the property licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingNumberRow.value).containsText(secondNewLicenceNumber)
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
@@ -256,9 +256,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Check occupancy answers
-            assertThat(checkOccupancyAnswersPage.form.summaryList.occupancyRow).containsText("No")
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).isHidden()
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).isHidden()
+            assertThat(checkOccupancyAnswersPage.summaryList.occupancyRow).containsText("No")
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).isHidden()
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).isHidden()
             checkOccupancyAnswersPage.confirm()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
@@ -294,9 +294,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Check occupancy answers
-            assertThat(checkOccupancyAnswersPage.form.summaryList.occupancyRow).containsText("Yes")
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.occupancyRow).containsText("Yes")
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
             checkOccupancyAnswersPage.confirm()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
@@ -331,8 +331,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Check occupancy answers
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
             checkOccupancyAnswersPage.confirm()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
@@ -359,7 +359,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Check occupancy answers
-            assertThat(checkOccupancyAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
             checkOccupancyAnswersPage.confirm()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
@@ -387,11 +387,11 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val checkPeopleAnswersPage2 =
                 assertPageIs(page2, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-            assertThat(checkPeopleAnswersPage2.form.summaryList.occupancyRow).containsText("Yes")
-            assertThat(checkPeopleAnswersPage2.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
+            assertThat(checkPeopleAnswersPage2.summaryList.occupancyRow).containsText("Yes")
+            assertThat(checkPeopleAnswersPage2.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
 
             // Finish updating occupancy to vacant on page1
-            assertThat(checkOccupancyAnswersPage1.form.summaryList.occupancyRow).containsText("No")
+            assertThat(checkOccupancyAnswersPage1.summaryList.occupancyRow).containsText("No")
             checkOccupancyAnswersPage1.confirm()
             val propertyDetailsPage1 = assertPageIs(page1, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
@@ -436,8 +436,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Check people answers page - check summary data includes newNumberOfHouseholds then complete update
-            assertThat(checkPeopleAnswersPage.form.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds)
-            assertThat(checkPeopleAnswersPage.form.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
+            assertThat(checkPeopleAnswersPage.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds)
+            assertThat(checkPeopleAnswersPage.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
             checkPeopleAnswersPage.form.submit()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
