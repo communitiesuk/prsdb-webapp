@@ -11,13 +11,13 @@ class StepLifecycleOrchestrator(
         if (journeyStep.isStepReachable) {
             journeyStep.afterIsStepReached()
 
-            journeyStep.beforeGetStepContent()
+            journeyStep.beforeGetPageVisitContent()
             val content = journeyStep.getPageVisitContent()
-            journeyStep.afterGetStepContent()
+            journeyStep.afterGetPageVisitContent()
 
-            journeyStep.beforeGetTemplate()
-            val destination = journeyStep.chooseVisitDestination().withContent(content)
-            journeyStep.afterGetTemplate()
+            journeyStep.beforeChooseTemplate()
+            val destination = journeyStep.chooseTemplate().withContent(content)
+            journeyStep.afterChooseTemplate()
 
             return destination.toModelAndView()
         }
@@ -36,13 +36,13 @@ class StepLifecycleOrchestrator(
             journeyStep.afterValidateSubmittedData(bindingResult)
 
             if (bindingResult.hasErrors()) {
-                journeyStep.beforeGetStepContent()
+                journeyStep.beforeGetPageVisitContent()
                 val content = journeyStep.getInvalidSubmissionContent(bindingResult)
-                journeyStep.afterGetStepContent()
+                journeyStep.afterGetPageVisitContent()
 
-                journeyStep.beforeGetTemplate()
-                val destination = journeyStep.chooseVisitDestination().withContent(content)
-                journeyStep.afterGetTemplate()
+                journeyStep.beforeChooseTemplate()
+                val destination = journeyStep.chooseTemplate().withContent(content)
+                journeyStep.afterChooseTemplate()
 
                 return destination.toModelAndView()
             }

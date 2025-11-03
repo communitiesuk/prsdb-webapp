@@ -28,21 +28,21 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
 
     fun afterValidateSubmittedData(bindingResult: BindingResult) = stepConfig.afterValidateSubmittedData(bindingResult, state)
 
-    fun beforeGetStepContent() {
+    fun beforeGetPageVisitContent() {
         stepConfig.beforeGetStepContent(state)
     }
 
-    fun chooseVisitDestination(): Destination = Destination.Template(stepConfig.chooseTemplate(state))
+    fun chooseTemplate(): Destination = Destination.Template(stepConfig.chooseTemplate(state))
 
-    fun afterGetStepContent() {
+    fun afterGetPageVisitContent() {
         stepConfig.afterGetStepContent(state)
     }
 
-    fun beforeGetTemplate() {
+    fun beforeChooseTemplate() {
         stepConfig.beforeGetTemplate(state)
     }
 
-    fun afterGetTemplate() {
+    fun afterChooseTemplate() {
         stepConfig.afterGetTemplate(state)
     }
 

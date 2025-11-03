@@ -43,7 +43,7 @@ class StepLifecycleOrchestratorTest {
         val contentMap = mapOf("key" to "value")
         val templateName = "templateName"
         whenever(stepConfig.getPageVisitContent()).thenReturn(contentMap)
-        whenever(stepConfig.chooseVisitDestination()).thenReturn(Destination.Template(templateName))
+        whenever(stepConfig.chooseTemplate()).thenReturn(Destination.Template(templateName))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
@@ -52,12 +52,12 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeIsStepReachable()
         myInOrder.verify(stepConfig).isStepReachable
         myInOrder.verify(stepConfig).afterIsStepReached()
-        myInOrder.verify(stepConfig).beforeGetStepContent()
+        myInOrder.verify(stepConfig).beforeGetPageVisitContent()
         myInOrder.verify(stepConfig).getPageVisitContent()
-        myInOrder.verify(stepConfig).afterGetStepContent()
-        myInOrder.verify(stepConfig).beforeGetTemplate()
-        myInOrder.verify(stepConfig).chooseVisitDestination()
-        myInOrder.verify(stepConfig).afterGetTemplate()
+        myInOrder.verify(stepConfig).afterGetPageVisitContent()
+        myInOrder.verify(stepConfig).beforeChooseTemplate()
+        myInOrder.verify(stepConfig).chooseTemplate()
+        myInOrder.verify(stepConfig).afterChooseTemplate()
 
         assertEquals(modelAndView.model, contentMap)
         assertEquals(modelAndView.viewName, templateName)
@@ -100,7 +100,7 @@ class StepLifecycleOrchestratorTest {
         val contentMap = mapOf("key" to "value", "error" to "content")
         val templateName = "templateName"
         whenever(stepConfig.getInvalidSubmissionContent(anyOrNull())).thenReturn(contentMap)
-        whenever(stepConfig.chooseVisitDestination()).thenReturn(Destination.Template(templateName))
+        whenever(stepConfig.chooseTemplate()).thenReturn(Destination.Template(templateName))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
@@ -112,12 +112,12 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeValidateSubmittedData(anyOrNull())
         myInOrder.verify(stepConfig).validateSubmittedData(anyOrNull())
         myInOrder.verify(stepConfig).afterValidateSubmittedData(anyOrNull())
-        myInOrder.verify(stepConfig).beforeGetStepContent()
+        myInOrder.verify(stepConfig).beforeGetPageVisitContent()
         myInOrder.verify(stepConfig).getInvalidSubmissionContent(anyOrNull())
-        myInOrder.verify(stepConfig).afterGetStepContent()
-        myInOrder.verify(stepConfig).beforeGetTemplate()
-        myInOrder.verify(stepConfig).chooseVisitDestination()
-        myInOrder.verify(stepConfig).afterGetTemplate()
+        myInOrder.verify(stepConfig).afterGetPageVisitContent()
+        myInOrder.verify(stepConfig).beforeChooseTemplate()
+        myInOrder.verify(stepConfig).chooseTemplate()
+        myInOrder.verify(stepConfig).afterChooseTemplate()
 
         assertEquals(modelAndView.model, contentMap)
         assertEquals(modelAndView.viewName, templateName)
