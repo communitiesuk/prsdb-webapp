@@ -6,10 +6,17 @@
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, null)}">
-    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', #{forms.landlordResponsibilities.keepPropertySafe.heading}, null)}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.keepPropertySafe.heading}">
+            forms.landlordResponsibilities.keepPropertySafe.heading
+        </h1>
         <div th:replace="~{fragments/content/keepPropertySafeContent :: keepPropertySafeContent(${housingHealthAndSafetyRatingSystemUrl}, ${homesAct2018Url})}"></div>
-        <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <th:block id="form-content">
+        <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', null, null)}">
+            <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
+        </th:block>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    </th:block>
 </html>
