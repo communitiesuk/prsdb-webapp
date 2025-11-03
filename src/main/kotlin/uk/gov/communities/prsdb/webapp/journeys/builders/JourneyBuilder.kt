@@ -35,14 +35,14 @@ class JourneyBuilder<TState : JourneyState>(
 
     fun unreachableStepUrl(getUrl: () -> String) {
         if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("unreachableStepRedirect has already been set")
+            throw JourneyInitialisationException("unreachableStepDestination has already been set")
         }
         unreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
     }
 
     fun unreachableStepStep(getStep: () -> JourneyStep<*, *, *>) {
         if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("unreachableStepRedirect has already been set")
+            throw JourneyInitialisationException("unreachableStepDestination has already been set")
         }
         unreachableStepDestination = { Destination(getStep()) }
     }

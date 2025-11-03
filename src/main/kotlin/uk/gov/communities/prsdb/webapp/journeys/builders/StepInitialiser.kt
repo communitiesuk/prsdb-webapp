@@ -75,7 +75,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
 
     fun unreachableStepUrl(getDestination: () -> String): StepInitialiser<TStep, TState, TMode> {
         if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("Step $segment already has an unreachableStepRedirect defined")
+            throw JourneyInitialisationException("Step $segment already has an unreachableStepDestination defined")
         }
         unreachableStepDestination = { Destination.ExternalUrl(getDestination()) }
         return this
@@ -89,7 +89,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
             segment,
             state,
             backUrlOverride,
-            nextDestinationProvider ?: throw JourneyInitialisationException("Step $segment has no redirectTo defined"),
+            nextDestinationProvider ?: throw JourneyInitialisationException("Step $segment has no nextDestination defined"),
             parentage?.invoke() ?: NoParents(),
             unreachableStepDestination
                 ?: defaultUnreachableStepDestination
