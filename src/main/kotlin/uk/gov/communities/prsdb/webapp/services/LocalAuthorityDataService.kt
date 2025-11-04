@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -208,7 +207,6 @@ class LocalAuthorityDataService(
         }
     }
 
-    @Transactional
     fun registerUserAndReturnID(
         baseUserId: String,
         localAuthority: LocalAuthority,
@@ -251,10 +249,9 @@ class LocalAuthorityDataService(
         return localAuthorityUser
     }
 
-    fun getLocalAuthorityUserById(localAuthorityUserId: Long): LocalAuthorityUser {
-        return localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+    fun getLocalAuthorityUserById(localAuthorityUserId: Long): LocalAuthorityUser =
+        localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local authority users with ID $localAuthorityUserId not found")
-    }
 
     fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
 

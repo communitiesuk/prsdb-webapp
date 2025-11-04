@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
@@ -25,7 +24,6 @@ class PasscodeService(
         private const val MAX_PASSCODES = 1000
     }
 
-    @Transactional
     fun generatePasscode(localAuthorityId: Long): Passcode {
         // Check if passcode limit has been reached
         val currentPasscodeCount = passcodeRepository.count()
@@ -84,7 +82,6 @@ class PasscodeService(
 
     fun findPasscode(passcodeString: String): Passcode? = passcodeRepository.findByPasscode(normalizePasscode(passcodeString))
 
-    @Transactional
     fun claimPasscodeForUser(
         passcodeString: String,
         userId: String,
@@ -98,6 +95,7 @@ class PasscodeService(
 
         val user = oneLoginUserService.findOrCreate1LUser(userId)
         passcode.claimByUser(user)
+        passcodeRepository.save(passcode)
         session.setAttribute(HAS_USER_CLAIMED_A_PASSCODE, true)
         return true
     }

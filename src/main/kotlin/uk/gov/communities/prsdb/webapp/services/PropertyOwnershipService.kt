@@ -39,7 +39,6 @@ class PropertyOwnershipService(
     private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
@@ -200,6 +199,7 @@ class PropertyOwnershipService(
             propertyOwnership.license = updatedLicence
         }
 
+        propertyOwnershipRepository.save(propertyOwnership)
         sendUpdateConfirmationEmail(propertyOwnership, update, wasPropertyOccupied)
     }
 
@@ -266,6 +266,7 @@ class PropertyOwnershipService(
         propertyOwnership.incompleteComplianceForm?.let {
             formContextService.deleteFormContext(it)
             propertyOwnership.incompleteComplianceForm = null
+            propertyOwnershipRepository.save(propertyOwnership)
         }
     }
 

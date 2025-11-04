@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.processAnnotations.PrsdbProcessService
 import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
 import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
@@ -16,7 +15,6 @@ class VirusScanProcessingService(
     private val certificateUploadRepository: CertificateUploadRepository,
     private val fileUploadRepository: FileUploadRepository,
 ) {
-    @Transactional
     fun processScan(
         locator: UploadedFileLocator,
         scanResultStatus: ScanResult,

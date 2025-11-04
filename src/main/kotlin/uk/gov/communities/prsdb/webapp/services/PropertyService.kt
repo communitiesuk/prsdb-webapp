@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
@@ -13,7 +12,6 @@ class PropertyService(
     private val propertyRepository: PropertyRepository,
     private val addressService: AddressService,
 ) {
-    @Transactional
     fun activateOrCreateProperty(
         addressDataModel: AddressDataModel,
         propertyType: PropertyType,
