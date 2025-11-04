@@ -18,7 +18,10 @@ import org.springframework.security.web.context.SecurityContextRepository
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT_DOWNLOADS
+import uk.gov.communities.prsdb.webapp.constants.REGION_1_GOOGLE_ANALYTICS
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
@@ -67,7 +70,7 @@ class DefaultSecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES).reportOnly()
                     }
             }
 
@@ -90,8 +93,7 @@ class DefaultSecurityConfig(
 
     companion object {
         const val CONTENT_SECURITY_POLICY_DIRECTIVES =
-            "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com " +
-                "https://plausible.io/js/script.file-downloads.hash.outbound-links.js; " +
-                "connect-src https://region1.google-analytics.com;"
+            "default-src 'self'; script-src 'self' $GOOGLE_TAG_MANAGER $PLAUSIBLE_SCRIPT_DOWNLOADS; " +
+                "connect-src $REGION_1_GOOGLE_ANALYTICS;"
     }
 }
