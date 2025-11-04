@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.services.interfaces.FeatureFlagTestServiceInterface
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.services.interfaces.FeatureFlagTestService
 
-@PrsdbWebComponent("flag-on")
-class FeatureFlagTestServiceImpFlagOn : FeatureFlagTestServiceInterface {
+@PrsdbWebService("flag-on")
+class FeatureFlagTestServiceImpFlagOn : FeatureFlagTestService {
     override fun getFeatureFlagPageHeading() = "Feature Flag is ON"
 }
