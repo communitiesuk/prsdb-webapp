@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
@@ -68,7 +69,16 @@ class LandlordSecurityConfig(
                 }
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**").csrfTokenRepository(csrfTokenRepository())
-            }.addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
+            }
+            .addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
+            .headers { headers ->
+                headers
+                    .permissionsPolicyHeader {
+                            permissions ->
+                        permissions
+                            .policy(PERMISSIONS_POLICY_DIRECTIVES)
+                    }
+            }
 
         return http.build()
     }
