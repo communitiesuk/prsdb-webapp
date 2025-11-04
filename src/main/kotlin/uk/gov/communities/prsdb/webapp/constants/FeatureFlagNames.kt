@@ -1,3 +1,3 @@
 package uk.gov.communities.prsdb.webapp.constants
 
-const val FIRST_TOY_FEATURE_FLAG = "first-toy-feature-flag"
+const val EXAMPLE_FEATURE_FLAG_ONE = "example-feature-flag-one"
