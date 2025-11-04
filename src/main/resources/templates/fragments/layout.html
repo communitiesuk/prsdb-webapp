@@ -1,6 +1,9 @@
 <!--/*@thymesVar id="plausibleDomainId" type="String"*/-->
 <!--/*@thymesVar id="googleAnalyticsMeasurementId" type="String"*/-->
 <!--/*@thymesVar id="navLinks" type="java.util.List<String>"*/-->
+<!--/*@thymesVar id="plausibleUrl" type="java.util.List<String>"*/-->
+<!--/*@thymesVar id="googleTagManagerUrl" type="java.util.List<String>"*/-->
+<!--/*@thymesVar id="googleAnalyticsUrl" type="java.util.List<String>"*/-->
 <!DOCTYPE html>
 <html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template govuk-template--rebranded">
 <head>
@@ -18,7 +21,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/accessible-autocomplete.min.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/moj-frontend.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/custom.css}">
-    <script defer th:attr="data-domain=${plausibleDomainId}" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.js"></script>
+    <script defer th:attr="data-domain=${plausibleDomainId}" th:src="${plausibleUrl}"></script>
     <!-- TODO inline script alert-->
         <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 </head>
@@ -35,7 +38,7 @@
         'wait_for_update': 500,
     });
 </script>
-<script async th:src="'https://www.googletagmanager.com/gtag/js?id='+${googleAnalyticsMeasurementId}"></script>
+<script async th:src="${googleTagManagerUrl}+'?id='+${googleAnalyticsMeasurementId}"></script>
 <!-- TODO inline script alert-->
 <script th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
     <!-- Google tag (gtag.js) -->
