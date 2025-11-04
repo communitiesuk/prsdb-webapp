@@ -11,19 +11,19 @@ class StepLifecycleOrchestrator(
         if (journeyStep.isStepReachable) {
             journeyStep.afterIsStepReached()
 
-            journeyStep.beforeGetStepContent()
+            journeyStep.beforeGetPageVisitContent()
             val content = journeyStep.getPageVisitContent()
-            journeyStep.afterGetStepContent()
+            journeyStep.afterGetPageVisitContent()
 
-            journeyStep.beforeGetTemplate()
-            val template = journeyStep.chooseTemplate()
-            journeyStep.afterGetTemplate()
+            journeyStep.beforeChooseTemplate()
+            val destination = journeyStep.chooseTemplate().withModelContent(content)
+            journeyStep.afterChooseTemplate()
 
-            return ModelAndView(template, content)
+            return destination.toModelAndView()
         }
 
-        val unreachableStepRedirect = journeyStep.getUnreachableStepRedirect()
-        return ModelAndView("redirect:$unreachableStepRedirect")
+        val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
+        return unreachableStepDestination.toModelAndView()
     }
 
     fun postStepModelAndView(formData: PageData): ModelAndView {
@@ -36,15 +36,15 @@ class StepLifecycleOrchestrator(
             journeyStep.afterValidateSubmittedData(bindingResult)
 
             if (bindingResult.hasErrors()) {
-                journeyStep.beforeGetStepContent()
+                journeyStep.beforeGetPageVisitContent()
                 val content = journeyStep.getInvalidSubmissionContent(bindingResult)
-                journeyStep.afterGetStepContent()
+                journeyStep.afterGetPageVisitContent()
 
-                journeyStep.beforeGetTemplate()
-                val template = journeyStep.chooseTemplate()
-                journeyStep.afterGetTemplate()
+                journeyStep.beforeChooseTemplate()
+                val destination = journeyStep.chooseTemplate().withModelContent(content)
+                journeyStep.afterChooseTemplate()
 
-                return ModelAndView(template, content)
+                return destination.toModelAndView()
             }
 
             journeyStep.beforeSubmitFormData()
@@ -52,13 +52,13 @@ class StepLifecycleOrchestrator(
             journeyStep.afterSubmitFormData()
 
             journeyStep.beforeDetermineRedirect()
-            val redirect = journeyStep.determineRedirect()
+            val nextDestination = journeyStep.determineNextDestination()
             journeyStep.afterDetermineRedirect()
 
-            return ModelAndView("redirect:$redirect")
+            return nextDestination.toModelAndView()
         }
 
-        val unreachableStepRedirect = journeyStep.getUnreachableStepRedirect()
-        return ModelAndView("redirect:$unreachableStepRedirect")
+        val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
+        return unreachableStepDestination.toModelAndView()
     }
 }
