@@ -22,8 +22,9 @@ class JourneyBuilder<TState : JourneyState>(
             stepsUnderConstruction.forEach { step ->
                 val journeyStep = step.build(journey, unreachableStepDestination)
                 checkForUninitialisedParents(step)
-                step.segment?.let {
-                    put(it, StepLifecycleOrchestrator(journeyStep))
+                when (journeyStep) {
+                    is JourneyStep.VisitableStep<*, *, TState> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
+                    is JourneyStep.NotionalStep<*, *, TState> -> {}
                 }
             }
         }
