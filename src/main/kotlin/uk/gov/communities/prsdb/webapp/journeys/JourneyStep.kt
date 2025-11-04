@@ -6,6 +6,7 @@ import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.collections.plus
 import kotlin.reflect.cast
@@ -27,21 +28,21 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
 
     fun afterValidateSubmittedData(bindingResult: BindingResult) = stepConfig.afterValidateSubmittedData(bindingResult, state)
 
-    fun beforeGetStepContent() {
+    fun beforeGetPageVisitContent() {
         stepConfig.beforeGetStepContent(state)
     }
 
-    fun chooseTemplate(): String = stepConfig.chooseTemplate(state)
+    fun chooseTemplate(): Destination = Destination.Template(stepConfig.chooseTemplate(state))
 
-    fun afterGetStepContent() {
+    fun afterGetPageVisitContent() {
         stepConfig.afterGetStepContent(state)
     }
 
-    fun beforeGetTemplate() {
+    fun beforeChooseTemplate() {
         stepConfig.beforeGetTemplate(state)
     }
 
-    fun afterGetTemplate() {
+    fun afterChooseTemplate() {
         stepConfig.afterGetTemplate(state)
     }
 
@@ -91,11 +92,13 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
         state.addStepData(stepConfig.routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
     }
 
-    fun determineRedirect(): String = journeyUrl(stepConfig.mode(state)?.let { redirectToUrl(it) } ?: routeSegment)
+    fun determineNextDestination(): Destination =
+        stepConfig.mode(state)?.let { nextDestination(it) }
+            ?: Destination(this)
 
-    private lateinit var unreachableStepRedirect: () -> String
+    private lateinit var unreachableStepDestination: () -> Destination
 
-    fun getUnreachableStepRedirect() = journeyUrl(unreachableStepRedirect())
+    fun getUnreachableStepDestination() = unreachableStepDestination()
 
     val formModel: TFormModel?
         get() = stepConfig.getFormModelFromState(state)
@@ -106,7 +109,7 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
 
     fun outcome(): TEnum? = if (isStepReachable)stepConfig.mode(state) else null
 
-    private lateinit var redirectToUrl: (mode: TEnum) -> String
+    private lateinit var nextDestination: (mode: TEnum) -> Destination
 
     private var backUrlOverride: (() -> String?)? = null
 
@@ -132,16 +135,16 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
             }
     private val isBaseClassInitialised: Boolean
         get() =
-            stepConfig.isRouteSegmentInitialised() && ::state.isInitialized && ::redirectToUrl.isInitialized &&
+            stepConfig.isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized &&
                 ::parentage.isInitialized
 
     fun initialize(
         segment: String,
         state: TState,
         backUrlOverride: (() -> String?)?,
-        redirectToUrl: (mode: TEnum) -> String,
+        redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
-        unreachableStepRedirectProvider: () -> String,
+        unreachableStepDestinationProvider: () -> Destination,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
@@ -149,12 +152,13 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
         this.stepConfig.routeSegment = segment
         this.state = state
         this.backUrlOverride = backUrlOverride
-        this.redirectToUrl = redirectToUrl
+        this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
-        this.unreachableStepRedirect = unreachableStepRedirectProvider
+        this.unreachableStepDestination = unreachableStepDestinationProvider
     }
 
-    private fun journeyUrl(path: String): String = JourneyStateService.urlWithJourneyState(path, state.journeyId)
+    val currentJourneyId: String
+        get() = state.journeyId
 }
 
 enum class StepInitialisationStage {
