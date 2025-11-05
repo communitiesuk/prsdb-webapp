@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStep
 import kotlin.test.assertContentEquals
 
 class ParentageTests {
@@ -174,6 +176,40 @@ class ParentageTests {
 
         // Assert
         assertContentEquals(listOf("parent", "parent-ancestry-step"), ancestryRoutes)
+    }
+
+    @Test
+    fun `hasOutcome returns a single parent with the condition checking that steps outcome matches`() {
+        // Arrange
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, *>>()
+
+        // Act
+        val parent = step.hasOutcome(TestEnum.ENUM_VALUE)
+
+        // Assert
+        whenever(step.outcome()).thenReturn(TestEnum.ENUM_VALUE)
+        assertTrue(parent.allowsChild())
+
+        whenever(step.outcome()).thenReturn(TestEnum.ALTERNATIVE_VALUE)
+        assertFalse(parent.allowsChild())
+    }
+
+    @Test
+    fun `isComplete returns a single parent with the condition checking that tasks final step is complete`() {
+        // Arrange
+        val task = mock<Task<Complete, *>>()
+        val step = mock<NavigationalStep<*>>()
+        whenever(task.notionalExitStep).thenReturn(step)
+
+        // Act
+        val parent = task.isComplete()
+
+        // Assert
+        whenever(step.outcome()).thenReturn(Complete.COMPLETE)
+        assertTrue(parent.allowsChild())
+
+        whenever(step.outcome()).thenReturn(null)
+        assertFalse(parent.allowsChild())
     }
 
     companion object {

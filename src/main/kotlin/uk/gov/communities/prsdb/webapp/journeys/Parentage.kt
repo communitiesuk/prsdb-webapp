@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+
 interface Parentage {
     fun allowsChild(): Boolean
 
@@ -71,9 +73,9 @@ class SingleParent(
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
     SingleParent(this) { outcome() == outcomeValue }
 
-fun <TEnum : Enum<TEnum>> Task<TEnum, *>.hasOutcome(outcomeValue: TEnum) =
+fun Task<Complete, *>.isComplete() =
     SingleParent(notionalExitStep) {
-        notionalExitStep.outcome() == outcomeValue
+        notionalExitStep.outcome() == Complete.COMPLETE
     }
 
 fun JourneyStep<*, *, *>.always(): Parentage = SingleParent(this) { true }

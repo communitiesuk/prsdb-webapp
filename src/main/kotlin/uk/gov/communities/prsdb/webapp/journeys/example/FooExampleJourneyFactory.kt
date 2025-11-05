@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.VisitableJourneyElement
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
@@ -26,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.example.tasks.OccupationTask
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 @PrsdbWebService
@@ -47,14 +46,14 @@ class FooExampleJourneyFactory(
                 redirectToStep { journey.fooCheckYourAnswersStep }
             }
             task(journey.epcTask) {
-                parents { journey.occupationTask.hasOutcome(Complete.COMPLETE) }
+                parents { journey.occupationTask.isComplete() }
                 redirectToStep { journey.fooCheckYourAnswersStep }
             }
             step("check-your-answers", journey.fooCheckYourAnswersStep) {
                 parents {
                     AndParents(
-                        journey.occupationTask.hasOutcome(Complete.COMPLETE),
-                        journey.epcTask.hasOutcome(Complete.COMPLETE),
+                        journey.occupationTask.isComplete(),
+                        journey.epcTask.isComplete(),
                     )
                 }
                 nextUrl { "/" }
