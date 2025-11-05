@@ -90,13 +90,13 @@ class DefaultSecurityConfig(
 
     companion object {
         const val PERMISSIONS_POLICY_DIRECTIVES =
-            "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), " + // QQ arianotify
+            "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), " +
                 "autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), " +
                 "compute-pressure=(), cross-origin-isolated=(), deferred-fetch=(), deferred-fetch-minimal=(), " +
-                "display-capture=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), " + // QQ encrypted media
+                "display-capture=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), " +
                 "gyroscope=(), hid=(), idle-detection=(), language-detector=(), local-fonts=(), magnetometer=(), " +
                 "microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), picture-in-picture=(), " +
-                "publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), " + // QQ public key ones??
+                "publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), " +
                 "serial=(), speaker-selection=(), translator=(), summarizer=(), usb=(), web-share=(), " +
                 "window-management=(), xr-spatial-tracking=()"
     }
