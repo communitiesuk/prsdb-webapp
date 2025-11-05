@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import kotlin.system.exitProcess
 
 @Component
-@Profile("web-server-deactivated & example-scheduled-task")
+@Profile("web-server-deactivated & scheduled-task & example-scheduled-task")
 class ExampleScheduledTaskApplicationRunner(
     private val context: ApplicationContext,
 ) : ApplicationRunner {

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 import kotlin.system.exitProcess
 
 @Component
-@Profile("web-server-deactivated")
+@Profile("web-server-deactivated & scheduled-task")
 @Order(Ordered.LOWEST_PRECEDENCE)
 class DefaultScheduledTaskApplicationRunner(
     private val context: ApplicationContext,
