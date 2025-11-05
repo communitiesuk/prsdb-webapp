@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
 class DestinationTests {
     @Test
@@ -151,5 +154,43 @@ class DestinationTests {
         // Assert
         assertSame(stepDestination, updatedStepDestination)
         assertSame(externalUrlDestination, updatedExternalUrlDestination)
+    }
+
+    @Test
+    fun `NavigationalStep Destination calls through to a navigation step lifecycle orchestrator for that step`() {
+        // Arrange
+        val modelAndView = ModelAndView()
+        lateinit var capturedStep: JourneyStep.NotionalStep<*, *, *>
+        mockConstruction(StepLifecycleOrchestrator.NavigationalStepLifecycleOrchestrator::class.java) { mock, context ->
+            whenever(mock.getStepModelAndView()).thenReturn(modelAndView)
+            capturedStep = context.arguments()[0] as JourneyStep.NotionalStep<*, *, *>
+        }.use {
+            val mockStep = mock<JourneyStep.NotionalStep<*, *, *>>()
+
+            // Act
+            val destination = Destination.NavigationalStep(mockStep)
+            val result = destination.toModelAndView()
+
+            // Assert
+            assertSame(modelAndView, result)
+            assertSame(mockStep, capturedStep)
+        }
+    }
+
+    @Test
+    fun `Companion invoke returns the correct Destination type based on the JourneyStep provided`() {
+        // Arrange
+        val mockVisitableStep = mock<JourneyStep.VisitableStep<*, *, *>>()
+        whenever(mockVisitableStep.currentJourneyId).thenReturn("journeyId")
+
+        val mockNotionalStep = mock<JourneyStep.NotionalStep<*, *, *>>()
+
+        // Act
+        val visitableDestination = Destination(mockVisitableStep)
+        val notionalDestination = Destination(mockNotionalStep)
+
+        // Assert
+        assertTrue(visitableDestination is Destination.VisitableStep)
+        assertTrue(notionalDestination is Destination.NavigationalStep)
     }
 }
