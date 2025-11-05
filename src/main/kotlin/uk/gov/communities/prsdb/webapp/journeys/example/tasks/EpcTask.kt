@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.tasks
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -92,4 +93,6 @@ class EpcTask : Task<Complete, EpcJourneyState>() {
             state.checkSearchedEpc.hasOutcome(YesOrNo.YES),
             state.epcNotFound.hasOutcome(Complete.COMPLETE),
         )
+
+    override fun firstStepInTask(state: EpcJourneyState): JourneyStep<*, *, EpcJourneyState> = state.epcQuestion
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStep
@@ -24,5 +25,15 @@ abstract class Task<TMode : Enum<TMode>, in TState : JourneyState> {
 
     abstract fun taskCompletionParentage(state: TState): Parentage
 
+    fun taskStatus(state: TState): TaskStatus =
+        when {
+            notionalExitStep.isStepReachable -> TaskStatus.COMPLETED
+            firstStepInTask(state).outcome() != null -> TaskStatus.IN_PROGRESS
+            firstStepInTask(state).isStepReachable -> TaskStatus.NOT_STARTED
+            else -> TaskStatus.CANNOT_START
+        }
+
     val notionalExitStep: NavigationalStep<TState> = NavigationalStep(NavigationalStepConfig())
+
+    abstract fun firstStepInTask(state: TState): JourneyStep<*, *, TState>
 }

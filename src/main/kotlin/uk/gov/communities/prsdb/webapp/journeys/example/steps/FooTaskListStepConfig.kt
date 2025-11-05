@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.VisitableStep
@@ -30,12 +29,12 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
                     listOf(
                         TaskListItemViewModel(
                             "OccupationTask",
-                            TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
+                            TaskStatusViewModel.fromStatus(state.occupationTask.taskStatus(state)),
                             url = JourneyStateService.urlWithJourneyState(state.occupied.routeSegment, state.journeyId),
                         ),
                         TaskListItemViewModel(
                             "EpcTask",
-                            TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
+                            TaskStatusViewModel.fromStatus(state.epcTask.taskStatus(state)),
                             url = JourneyStateService.urlWithJourneyState(state.epcQuestion.routeSegment, state.journeyId),
                         ),
                     ),
