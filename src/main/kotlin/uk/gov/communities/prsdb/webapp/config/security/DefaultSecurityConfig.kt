@@ -92,6 +92,7 @@ class DefaultSecurityConfig(
     }
 
     companion object {
+        // TODO PRSD-1665 remove 'unsafe-inline' before PR
         const val CONTENT_SECURITY_POLICY_DIRECTIVES =
             "default-src 'self'; script-src 'self' $GOOGLE_TAG_MANAGER $PLAUSIBLE_SCRIPT_DOWNLOADS; " +
                 "connect-src $REGION_1_GOOGLE_ANALYTICS;"
