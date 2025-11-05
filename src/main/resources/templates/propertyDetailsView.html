@@ -26,8 +26,7 @@
                     <span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">propertyDetails.complianceInformation.noCompliance.landlordView.mainText</span>
                     <a class="govuk-link" th:href="@{${addComplianceUrl}}" th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.linkText}">
                         propertyDetails.complianceInformation.noCompliance.landlordView.linkText
-                    </a><span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.afterLinkText}">
-                                propertyDetails.complianceInformation.noCompliance.landlordView.afterLinkText</span>
+                    </a>
                 </p>
                 <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText}">
                     propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText</p>
@@ -78,17 +77,18 @@
                        <p class="govuk-hint" th:text="#{${complianceDetails.landlordResponsibilitiesHintText}}">the hint text for landlord responsibilities</p>
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.landlordResponsibilitiesSummaryList})}"></dl>
                    </div>
-                    <th:block th:if="${complianceDetails == null}">
-                        <p th:if="${isLandlordView}" class="govuk-body" >
-                            <span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">propertyDetails.complianceInformation.noCompliance.landlordView.mainText</span>
-                            <a class="govuk-link" th:href="@{${addComplianceUrl}}" th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.linkText}">
-                                propertyDetails.complianceInformation.noCompliance.landlordView.linkText
-                            </a><span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.afterLinkText}">
-                                propertyDetails.complianceInformation.noCompliance.landlordView.afterLinkText</span>
-                        </p>
-                        <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText}">
-                            propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText</p>
-                    </th:block>
+                    <div class="govuk-grid-row" th:if="${complianceDetails == null}">
+                        <div class="govuk-grid-column-two-thirds">
+                            <p th:if="${isLandlordView}" class="govuk-body" >
+                                <span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">propertyDetails.complianceInformation.noCompliance.landlordView.mainText</span>
+                                <a class="govuk-link" th:href="@{${addComplianceUrl}}" th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.linkText}">
+                                    propertyDetails.complianceInformation.noCompliance.landlordView.linkText
+                                </a>
+                            </p>
+                            <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText}">
+                                propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
