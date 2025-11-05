@@ -2,8 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStep
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
 sealed class Destination {
     fun toModelAndView(): ModelAndView =
@@ -11,7 +10,7 @@ sealed class Destination {
             is VisitableStep -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
             is ExternalUrl -> ModelAndView("redirect:$externalUrl", params)
             is Template -> ModelAndView(templateName, content)
-            is NavigationalStep -> NavigationalStepLifecycleOrchestrator(step).getStepModelAndView()
+            is NavigationalStep -> StepLifecycleOrchestrator(step).getStepModelAndView()
         }
 
     fun withModelContent(content: Map<String, Any?>): Destination =

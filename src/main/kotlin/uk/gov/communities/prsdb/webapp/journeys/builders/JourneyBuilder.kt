@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.VisitableJourneyElement
 import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class JourneyBuilder<TState : JourneyState>(
@@ -17,7 +16,7 @@ class JourneyBuilder<TState : JourneyState>(
     private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    fun build(): Map<String, VisitableJourneyElement> =
+    fun build(): Map<String, StepLifecycleOrchestrator> =
         buildMap {
             stepsUnderConstruction.forEach { step ->
                 val journeyStep = step.build(journey, unreachableStepDestination)
@@ -90,7 +89,7 @@ class JourneyBuilder<TState : JourneyState>(
         fun <TState : JourneyState> journey(
             state: TState,
             init: JourneyBuilder<TState>.() -> Unit,
-        ): Map<String, VisitableJourneyElement> {
+        ): Map<String, StepLifecycleOrchestrator> {
             val builder = JourneyBuilder(state)
             builder.init()
             return builder.build()

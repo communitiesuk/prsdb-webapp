@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.VisitableJourneyElement
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 class FooExampleJourneyFactory(
     private val stateFactory: ObjectFactory<FooJourneyState>,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, VisitableJourneyElement> {
+    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
         state.validateStateMatchesPropertyId(propertyId)
 

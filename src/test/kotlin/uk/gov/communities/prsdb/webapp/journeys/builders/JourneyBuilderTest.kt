@@ -47,7 +47,7 @@ class JourneyBuilderTest {
     @Test
     fun `journey DSL method creates, inits and builds a journeyBuilder`() {
         // Arrange
-        val mapToReturn = mapOf<String, StepLifecycleOrchestrator>("key" to mock())
+        val mapToReturn = mapOf("key" to mock<StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator>())
         mockConstruction(JourneyBuilder::class.java) { mock, context ->
             whenever(mock.build()).thenReturn(mapToReturn)
             whenever(mock.journey).thenReturn(context.arguments()[0] as JourneyState)
