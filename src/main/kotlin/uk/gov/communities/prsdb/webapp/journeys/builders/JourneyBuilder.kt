@@ -13,6 +13,8 @@ class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
     val journey: TState,
 ) {
+    fun getStepInitialisers() = stepsUnderConstruction.toList()
+
     private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
     private var unreachableStepDestination: (() -> Destination)? = null
 
@@ -101,7 +103,7 @@ class JourneyBuilder<TState : JourneyState>(
         ): List<StepInitialiser<*, TState, *>> {
             val builder = JourneyBuilder(state)
             builder.init()
-            return builder.stepsUnderConstruction
+            return builder.getStepInitialisers()
         }
     }
 }
