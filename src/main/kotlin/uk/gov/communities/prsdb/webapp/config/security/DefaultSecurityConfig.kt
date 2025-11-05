@@ -70,7 +70,7 @@ class DefaultSecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES).reportOnly()
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
                     }
             }
 
