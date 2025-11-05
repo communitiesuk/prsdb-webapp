@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.builders.TaskBuilder.Companion.subJourney
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.subJourney
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
@@ -21,66 +21,66 @@ class EpcTask : Task<Complete, EpcJourneyState>() {
         state: EpcJourneyState,
         entryPoint: Parentage,
     ) = subJourney(state) {
-        step("has-epc", task.epcQuestion) {
+        step("has-epc", journey.epcQuestion) {
             parents { entryPoint }
             nextStep { mode ->
                 when (mode) {
-                    EpcStatus.AUTOMATCHED -> task.checkAutomatchedEpc
-                    EpcStatus.NOT_AUTOMATCHED -> task.searchForEpc
+                    EpcStatus.AUTOMATCHED -> journey.checkAutomatchedEpc
+                    EpcStatus.NOT_AUTOMATCHED -> journey.searchForEpc
                     EpcStatus.NO_EPC -> notionalExitStep
                 }
             }
         }
-        step<YesOrNo, CheckEpcStepConfig>("check-automatched-epc", task.checkAutomatchedEpc) {
-            parents { task.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
+        step<YesOrNo, CheckEpcStepConfig>("check-automatched-epc", journey.checkAutomatchedEpc) {
+            parents { journey.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
             nextStep { mode ->
                 when (mode) {
                     YesOrNo.YES -> notionalExitStep
-                    YesOrNo.NO -> task.searchForEpc
+                    YesOrNo.NO -> journey.searchForEpc
                 }
             }
             stepSpecificInitialisation {
                 usingEpc { automatchedEpc }
             }
         }
-        step("search-for-epc", task.searchForEpc) {
+        step("search-for-epc", journey.searchForEpc) {
             parents {
                 OrParents(
-                    task.epcQuestion.hasOutcome(EpcStatus.NOT_AUTOMATCHED),
-                    task.checkAutomatchedEpc.hasOutcome(YesOrNo.NO),
+                    journey.epcQuestion.hasOutcome(EpcStatus.NOT_AUTOMATCHED),
+                    journey.checkAutomatchedEpc.hasOutcome(YesOrNo.NO),
                 )
             }
             nextStep { mode ->
                 when (mode) {
-                    EpcSearchResult.FOUND -> task.checkSearchedEpc
-                    EpcSearchResult.SUPERSEDED -> task.epcSuperseded
-                    EpcSearchResult.NOT_FOUND -> task.epcNotFound
+                    EpcSearchResult.FOUND -> journey.checkSearchedEpc
+                    EpcSearchResult.SUPERSEDED -> journey.epcSuperseded
+                    EpcSearchResult.NOT_FOUND -> journey.epcNotFound
                 }
             }
         }
-        step("superseded-epc", task.epcSuperseded) {
-            parents { task.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
-            nextStep { task.checkSearchedEpc }
+        step("superseded-epc", journey.epcSuperseded) {
+            parents { journey.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
+            nextStep { journey.checkSearchedEpc }
         }
-        step<YesOrNo, CheckEpcStepConfig>("check-found-epc", task.checkSearchedEpc) {
+        step<YesOrNo, CheckEpcStepConfig>("check-found-epc", journey.checkSearchedEpc) {
             parents {
                 OrParents(
-                    task.searchForEpc.hasOutcome(EpcSearchResult.FOUND),
-                    task.epcSuperseded.hasOutcome(Complete.COMPLETE),
+                    journey.searchForEpc.hasOutcome(EpcSearchResult.FOUND),
+                    journey.epcSuperseded.hasOutcome(Complete.COMPLETE),
                 )
             }
             nextStep { mode ->
                 when (mode) {
                     YesOrNo.YES -> notionalExitStep
-                    YesOrNo.NO -> task.searchForEpc
+                    YesOrNo.NO -> journey.searchForEpc
                 }
             }
             stepSpecificInitialisation {
                 usingEpc { searchedEpc }
             }
         }
-        step("epc-not-found", task.epcNotFound) {
-            parents { task.searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
+        step("epc-not-found", journey.epcNotFound) {
+            parents { journey.searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
             nextStep { notionalExitStep }
         }
     }

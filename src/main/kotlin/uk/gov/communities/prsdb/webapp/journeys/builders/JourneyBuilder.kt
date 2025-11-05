@@ -31,7 +31,7 @@ class JourneyBuilder<TState : JourneyState>(
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
         segment: String,
-        uninitialisedStep: JourneyStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep.VisitableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep)
@@ -40,11 +40,10 @@ class JourneyBuilder<TState : JourneyState>(
     }
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
-        segment: String,
-        uninitialisedStep: JourneyStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep.NotionalStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep)
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep)
         stepInitialiser.init()
         stepsUnderConstruction.add(stepInitialiser)
     }
@@ -95,6 +94,15 @@ class JourneyBuilder<TState : JourneyState>(
             val builder = JourneyBuilder(state)
             builder.init()
             return builder.build()
+        }
+
+        fun <TState : JourneyState> subJourney(
+            state: TState,
+            init: JourneyBuilder<TState>.() -> Unit = {},
+        ): List<StepInitialiser<*, TState, *>> {
+            val builder = JourneyBuilder(state)
+            builder.init()
+            return builder.stepsUnderConstruction
         }
     }
 }

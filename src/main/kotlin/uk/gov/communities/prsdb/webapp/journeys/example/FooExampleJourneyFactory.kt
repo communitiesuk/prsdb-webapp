@@ -95,7 +95,7 @@ class FooJourneyState(
 
         journeyStateService
             .initialiseJourneyWithId(journeyId) {
-                setValue("propertyId", Json.Default.encodeToString(serializer(), propertyId))
+                setValue("propertyId", Json.encodeToString(serializer(), propertyId))
             }
         return journeyId
     }

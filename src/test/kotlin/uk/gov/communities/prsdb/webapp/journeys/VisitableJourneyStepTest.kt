@@ -334,6 +334,8 @@ class VisitableJourneyStepTest {
             { Destination.ExternalUrl("unreachable") },
         )
 
+        whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(true)
+
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
             step.initialize(

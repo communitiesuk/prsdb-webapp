@@ -134,6 +134,7 @@ class JourneyBuilderTest {
         val builtStep = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
         whenever(mockStepInitialiser.segment).thenReturn("segment")
         whenever(mockStepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtStep)
+        whenever(builtStep.routeSegment).thenReturn("segment")
 
         // Act 2
         val map = jb.build()
