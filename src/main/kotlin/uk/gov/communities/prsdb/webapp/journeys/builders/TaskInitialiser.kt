@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
     private val task: Task<TMode, TStateInit>,
 ) {
-    val name: String
+    private val name: String
         get() = this::class.simpleName!!
 
     private var destinationProvider: ((mode: Complete) -> Destination)? = null
