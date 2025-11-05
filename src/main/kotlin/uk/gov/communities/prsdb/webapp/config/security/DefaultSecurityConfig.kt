@@ -94,10 +94,10 @@ class DefaultSecurityConfig(
                 "autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), " +
                 "compute-pressure=(), cross-origin-isolated=(), deferred-fetch=(), deferred-fetch-minimal=(), " +
                 "display-capture=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), " +
-                "gyroscope=(), hid=(), idle-detection=(), language-detector=(), local-fonts=(), magnetometer=(), " +
-                "microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), picture-in-picture=(), " +
-                "publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), " +
-                "serial=(), speaker-selection=(), translator=(), summarizer=(), usb=(), web-share=(), " +
+                "gyroscope=(), hid=(), identity-credentials-get(), idle-detection=(), language-detector=(), local-fonts=(), " +
+                "magnetometer=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment(), " +
+                "picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), " +
+                "serial=(), speaker-selection=(), storage-access(), summarizer=(), translator=(), usb=(), web-share=(), " +
                 "window-management=(), xr-spatial-tracking=()"
     }
 }
