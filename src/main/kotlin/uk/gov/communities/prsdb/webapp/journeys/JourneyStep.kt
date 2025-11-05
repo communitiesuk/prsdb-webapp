@@ -18,23 +18,23 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val routeSegment: String get() = stepConfig.routeSegment
+
+        override fun getRouteSegmentOrNull(): String? = stepConfig.routeSegment
+
+        override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
     }
 
     open class NotionalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
         stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
-    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig)
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+        override fun getRouteSegmentOrNull(): String? = null
 
-    fun getRouteSegmentOrNull(): String? =
-        when (this) {
-            is VisitableStep -> stepConfig.routeSegment
-            is NotionalStep -> null
-        }
+        override fun isRouteSegmentInitialised(): Boolean = true
+    }
 
-    fun isRouteSegmentInitialised(): Boolean =
-        when (this) {
-            is VisitableStep -> stepConfig.isRouteSegmentInitialised()
-            is NotionalStep -> true
-        }
+    abstract fun getRouteSegmentOrNull(): String?
+
+    abstract fun isRouteSegmentInitialised(): Boolean
 
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
     fun beforeIsStepReachable() {
@@ -115,7 +115,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun determineNextDestination(): Destination =
         stepConfig.mode(state)?.let { nextDestination(it) }
-            ?: Destination(this)
+            ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
 
     private lateinit var unreachableStepDestination: () -> Destination
 
