@@ -8,10 +8,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStepConfig
 
 class TaskTests {
     class TestTask(
@@ -47,7 +44,7 @@ class TaskTests {
             )
         val task = TestTask(stepInitialisers)
 
-        val nextDestinationLambda = { _: Complete -> Destination.ExternalUrl("example.com") }
+        val nextDestinationLambda = { _: NavigationComplete -> Destination.ExternalUrl("example.com") }
         val state = mock<JourneyState>()
 
         // Act
@@ -141,7 +138,7 @@ class TaskTests {
         val step = task.notionalExitStep
 
         // Assert
-        assertTrue { step is NavigationalStep<JourneyState> }
+        assertTrue { step is NavigationalStep }
         assertTrue { step.stepConfig is NavigationalStepConfig }
     }
 

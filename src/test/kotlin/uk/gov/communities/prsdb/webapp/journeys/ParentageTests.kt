@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStep
 import kotlin.test.assertContentEquals
 
 class ParentageTests {
@@ -198,14 +197,14 @@ class ParentageTests {
     fun `isComplete returns a single parent with the condition checking that tasks final step is complete`() {
         // Arrange
         val task = mock<Task<Complete, *>>()
-        val step = mock<NavigationalStep<*>>()
+        val step = mock<NavigationalStep>()
         whenever(task.notionalExitStep).thenReturn(step)
 
         // Act
         val parent = task.isComplete()
 
         // Assert
-        whenever(step.outcome()).thenReturn(Complete.COMPLETE)
+        whenever(step.outcome()).thenReturn(NavigationComplete.COMPLETE)
         assertTrue(parent.allowsChild())
 
         whenever(step.outcome()).thenReturn(null)

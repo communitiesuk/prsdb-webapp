@@ -12,14 +12,15 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
+import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.NavigationalStepConfig
 
 class TaskInitialiserTests {
     @Test
@@ -70,26 +71,26 @@ class TaskInitialiserTests {
 
         val builder = TaskInitialiser(taskMock)
         builder.parents { mock() }
-        builder.redirectToStep { _: Complete -> nextStepMock }
+        builder.redirectToStep { _: NavigationComplete -> nextStepMock }
 
         // Act
         builder.mapToStepInitialisers(mock())
 
         // Assert
-        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, JourneyState, Complete>.() -> Unit>()
+        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, JourneyState, NavigationComplete>.() -> Unit>()
         verify(taskMock).getTaskSteps(
             anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
         )
 
-        val initialiser = mock<StepInitialiser<NavigationalStepConfig, JourneyState, Complete>>()
+        val initialiser = mock<StepInitialiser<NavigationalStepConfig, JourneyState, NavigationComplete>>()
         initCaptor.firstValue.invoke(initialiser)
 
-        val lambdaCaptor = argumentCaptor<(mode: Complete) -> Destination>()
+        val lambdaCaptor = argumentCaptor<(mode: NavigationComplete) -> Destination>()
         verify(initialiser).nextDestination(lambdaCaptor.capture())
 
-        val destination = lambdaCaptor.firstValue.invoke(Complete.COMPLETE)
+        val destination = lambdaCaptor.firstValue.invoke(NavigationComplete.COMPLETE)
         assertTrue(destination is Destination.VisitableStep)
         with(destination as Destination.VisitableStep) {
             assertEquals(nextStepSegment, step.routeSegment)
@@ -107,26 +108,26 @@ class TaskInitialiserTests {
         val builder = TaskInitialiser(taskMock)
         builder.parents { mock() }
         val initiationDestination = Destination.ExternalUrl(nextStepSegment)
-        builder.redirectToDestination { _: Complete -> initiationDestination }
+        builder.redirectToDestination { _: NavigationComplete -> initiationDestination }
 
         // Act
         builder.mapToStepInitialisers(mock())
 
         // Assert
-        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, JourneyState, Complete>.() -> Unit>()
+        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, JourneyState, NavigationComplete>.() -> Unit>()
         verify(taskMock).getTaskSteps(
             anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
         )
 
-        val initialiser = mock<StepInitialiser<NavigationalStepConfig, JourneyState, Complete>>()
+        val initialiser = mock<StepInitialiser<NavigationalStepConfig, JourneyState, NavigationComplete>>()
         initCaptor.firstValue.invoke(initialiser)
 
-        val lambdaCaptor = argumentCaptor<(mode: Complete) -> Destination>()
+        val lambdaCaptor = argumentCaptor<(mode: NavigationComplete) -> Destination>()
         verify(initialiser).nextDestination(lambdaCaptor.capture())
 
-        val finalDestination = lambdaCaptor.firstValue.invoke(Complete.COMPLETE)
+        val finalDestination = lambdaCaptor.firstValue.invoke(NavigationComplete.COMPLETE)
         assertSame(initiationDestination, finalDestination)
     }
 

@@ -9,6 +9,7 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 

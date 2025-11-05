@@ -1,8 +1,6 @@
-package uk.gov.communities.prsdb.webapp.journeys.example
+package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 
 sealed class Destination {
     fun toModelAndView(): ModelAndView =

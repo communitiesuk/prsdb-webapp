@@ -8,7 +8,6 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class StepLifecycleOrchestratorTest {
     @Test
