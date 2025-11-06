@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -41,6 +42,7 @@ class LandlordService(
 
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
+    @Transactional
     fun createLandlord(
         baseUserId: String,
         name: String,
@@ -85,6 +87,7 @@ class LandlordService(
         return landlord
     }
 
+    @Transactional
     fun updateLandlordForBaseUserId(
         baseUserId: String,
         landlordUpdate: LandlordUpdateModel,
@@ -108,7 +111,7 @@ class LandlordService(
             landlordEntity,
             existingEmail,
         )
-        return landlordRepository.save(landlordEntity)
+        return landlordEntity
     }
 
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {

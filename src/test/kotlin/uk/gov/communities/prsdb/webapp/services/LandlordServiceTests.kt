@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -45,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import java.net.URI
 import java.time.LocalDate
+import kotlin.reflect.full.hasAnnotation
 import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
@@ -545,6 +547,11 @@ class LandlordServiceTests {
         assertEquals(originalEmail, landlordEntity.email)
         assertEquals(originalPhoneNumber, landlordEntity.phoneNumber)
         assertEquals(originalDateOfBirth, landlordEntity.dateOfBirth)
+    }
+
+    @Test
+    fun `updateLandlordForBaseUserId is annotated with @Transactional`() {
+        assertTrue(landlordService::updateLandlordForBaseUserId.hasAnnotation<Transactional>())
     }
 
     @Test

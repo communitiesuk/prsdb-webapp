@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
+import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -33,6 +34,7 @@ class PropertyComplianceService(
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
+    @Transactional
     fun createPropertyCompliance(
         propertyOwnershipId: Long,
         gasSafetyCertUploadId: Long? = null,
@@ -91,6 +93,7 @@ class PropertyComplianceService(
         return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.isNonCompliant }
     }
 
+    @Transactional
     fun updatePropertyCompliance(
         propertyOwnershipId: Long,
         update: PropertyComplianceUpdateModel,
