@@ -21,7 +21,7 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
     fun `Skipped occupancy update sub-journey steps can be accessed via CYA page links, and back links when changing answers`(page: Page) {
         // Household occupancy update page
         val checkHouseholdsAnswersPage = navigator.skipToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId)
-        checkHouseholdsAnswersPage.form.summaryList.occupancyRow
+        checkHouseholdsAnswersPage.summaryList.occupancyRow
             .clickActionLinkAndWait()
         val householdOccupancyUpdatePage = assertPageIs(page, HouseholdsOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
         assertEquals("true", householdOccupancyUpdatePage.form.occupancyRadios.selectedValue)
@@ -33,7 +33,7 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
 
         // People occupancy update page
         var checkPeopleAnswersPage = navigator.skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
-        checkPeopleAnswersPage.form.summaryList.occupancyRow
+        checkPeopleAnswersPage.summaryList.occupancyRow
             .clickActionLinkAndWait()
         val peopleOccupancyUpdatePage = assertPageIs(page, PeopleOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
         assertEquals("true", peopleOccupancyUpdatePage.form.occupancyRadios.selectedValue)
@@ -45,7 +45,7 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
 
         // People number of households update page
         checkPeopleAnswersPage = navigator.skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
-        checkPeopleAnswersPage.form.summaryList.numberOfHouseholdsRow
+        checkPeopleAnswersPage.summaryList.numberOfHouseholdsRow
             .clickActionLinkAndWait()
         val peopleNumberOfHouseholdsUpdatePage =
             assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)

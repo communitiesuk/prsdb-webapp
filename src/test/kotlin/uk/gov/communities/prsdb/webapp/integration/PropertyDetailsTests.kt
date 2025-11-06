@@ -159,7 +159,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner.title).containsText("Important")
                 assertThat(
                     detailsPage.notificationBanner.content,
-                ).containsText("This property does not have any compliance information. Add compliance information.")
+                ).containsText("This property does not have any compliance information. Add compliance information")
             }
 
             @Test

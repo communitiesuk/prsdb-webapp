@@ -8,22 +8,23 @@
 <!--/*@thymesVar id="responsibilityData" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html  id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{propertyCompliance.title}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        <h1 class="govuk-fieldset__heading" th:text="#{forms.checkComplianceAnswers.heading(${propertyAddress})}">forms.checkComplianceAnswers.heading</h1>
-    </legend>
-    <h2 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.summaryName}">forms.checkComplianceAnswers.summaryName</h2>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.title}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{forms.checkComplianceAnswers.heading(${propertyAddress})}">forms.checkComplianceAnswers.heading</h1>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.summaryName}">forms.checkComplianceAnswers.summaryName</h2>
+        <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.gasSafety.heading}">forms.checkComplianceAnswers.gasSafety.heading</h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${gasSafetyData})}"></dl>
 
-    <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.gasSafety.heading}">forms.checkComplianceAnswers.gasSafety.heading</h3>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${gasSafetyData})}"></dl>
+        <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.eicr.heading}">forms.checkComplianceAnswers.eicr.heading</h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${eicrData})}"></dl>
 
-    <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.eicr.heading}">forms.checkComplianceAnswers.eicr.heading</h3>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${eicrData})}"></dl>
+        <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.epc.heading}">forms.checkComplianceAnswers.epc.heading</h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${epcData})}"></dl>
 
-    <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.epc.heading}">forms.checkComplianceAnswers.epc.heading</h3>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${epcData})}"></dl>
-
-    <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}"></div>
-    <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndSubmitCompliance})}"></button>
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}"></div>
+    </th:block>
+    <th:block id="form-content">
+        <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndSubmitCompliance})}"></button>
+    </th:block>
 </html>
