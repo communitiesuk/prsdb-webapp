@@ -8,6 +8,7 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
+import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class StepLifecycleOrchestratorTest {
     @Test
@@ -18,7 +19,7 @@ class StepLifecycleOrchestratorTest {
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(false)
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.getUnreachableStepRedirect()).thenReturn(redirectUrl)
+        whenever(stepConfig.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
@@ -26,7 +27,7 @@ class StepLifecycleOrchestratorTest {
         // Assert
         myInOrder.verify(stepConfig).beforeIsStepReachable()
         myInOrder.verify(stepConfig).isStepReachable
-        myInOrder.verify(stepConfig).getUnreachableStepRedirect()
+        myInOrder.verify(stepConfig).getUnreachableStepDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -42,7 +43,7 @@ class StepLifecycleOrchestratorTest {
         val contentMap = mapOf("key" to "value")
         val templateName = "templateName"
         whenever(stepConfig.getPageVisitContent()).thenReturn(contentMap)
-        whenever(stepConfig.chooseTemplate()).thenReturn(templateName)
+        whenever(stepConfig.chooseTemplate()).thenReturn(Destination.Template(templateName))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
@@ -51,12 +52,12 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeIsStepReachable()
         myInOrder.verify(stepConfig).isStepReachable
         myInOrder.verify(stepConfig).afterIsStepReached()
-        myInOrder.verify(stepConfig).beforeGetStepContent()
+        myInOrder.verify(stepConfig).beforeGetPageVisitContent()
         myInOrder.verify(stepConfig).getPageVisitContent()
-        myInOrder.verify(stepConfig).afterGetStepContent()
-        myInOrder.verify(stepConfig).beforeGetTemplate()
+        myInOrder.verify(stepConfig).afterGetPageVisitContent()
+        myInOrder.verify(stepConfig).beforeChooseTemplate()
         myInOrder.verify(stepConfig).chooseTemplate()
-        myInOrder.verify(stepConfig).afterGetTemplate()
+        myInOrder.verify(stepConfig).afterChooseTemplate()
 
         assertEquals(modelAndView.model, contentMap)
         assertEquals(modelAndView.viewName, templateName)
@@ -70,7 +71,7 @@ class StepLifecycleOrchestratorTest {
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(false)
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.getUnreachableStepRedirect()).thenReturn(redirectUrl)
+        whenever(stepConfig.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
@@ -78,7 +79,7 @@ class StepLifecycleOrchestratorTest {
         // Assert
         myInOrder.verify(stepConfig).beforeIsStepReachable()
         myInOrder.verify(stepConfig).isStepReachable
-        myInOrder.verify(stepConfig).getUnreachableStepRedirect()
+        myInOrder.verify(stepConfig).getUnreachableStepDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -99,7 +100,7 @@ class StepLifecycleOrchestratorTest {
         val contentMap = mapOf("key" to "value", "error" to "content")
         val templateName = "templateName"
         whenever(stepConfig.getInvalidSubmissionContent(anyOrNull())).thenReturn(contentMap)
-        whenever(stepConfig.chooseTemplate()).thenReturn(templateName)
+        whenever(stepConfig.chooseTemplate()).thenReturn(Destination.Template(templateName))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
@@ -111,12 +112,12 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeValidateSubmittedData(anyOrNull())
         myInOrder.verify(stepConfig).validateSubmittedData(anyOrNull())
         myInOrder.verify(stepConfig).afterValidateSubmittedData(anyOrNull())
-        myInOrder.verify(stepConfig).beforeGetStepContent()
+        myInOrder.verify(stepConfig).beforeGetPageVisitContent()
         myInOrder.verify(stepConfig).getInvalidSubmissionContent(anyOrNull())
-        myInOrder.verify(stepConfig).afterGetStepContent()
-        myInOrder.verify(stepConfig).beforeGetTemplate()
+        myInOrder.verify(stepConfig).afterGetPageVisitContent()
+        myInOrder.verify(stepConfig).beforeChooseTemplate()
         myInOrder.verify(stepConfig).chooseTemplate()
-        myInOrder.verify(stepConfig).afterGetTemplate()
+        myInOrder.verify(stepConfig).afterChooseTemplate()
 
         assertEquals(modelAndView.model, contentMap)
         assertEquals(modelAndView.viewName, templateName)
@@ -137,7 +138,7 @@ class StepLifecycleOrchestratorTest {
         whenever(stepConfig.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
 
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.determineRedirect()).thenReturn(redirectUrl)
+        whenever(stepConfig.determineNextDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
@@ -153,7 +154,7 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).submitFormData(anyOrNull())
         myInOrder.verify(stepConfig).afterSubmitFormData()
         myInOrder.verify(stepConfig).beforeDetermineRedirect()
-        myInOrder.verify(stepConfig).determineRedirect()
+        myInOrder.verify(stepConfig).determineNextDestination()
         myInOrder.verify(stepConfig).afterDetermineRedirect()
 
         assertTrue(modelAndView.model.isEmpty())
