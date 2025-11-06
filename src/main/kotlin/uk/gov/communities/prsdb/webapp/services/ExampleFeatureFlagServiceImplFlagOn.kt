@@ -4,6 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlaggedService
 
 @PrsdbWebService("example-feature-flag-one-flag-on")
-class ExampleFeatureFlagServiceImpFlagOn : ExampleFeatureFlaggedService {
+class ExampleFeatureFlagServiceImplFlagOn : ExampleFeatureFlaggedService {
     override fun getFeatureFlagPageHeading() = "Using ExampleFeatureFlaggedService - Flag ON"
 }
