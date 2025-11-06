@@ -72,7 +72,7 @@ class PropertyRegistrationCheckAnswersPage(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 address.singleLineAddress,
-                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
