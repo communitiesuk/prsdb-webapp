@@ -220,8 +220,8 @@ class LandlordRegistrationCheckAnswersPageTests {
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.ManualAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
-                        LandlordRegistrationStepId.ManualAddress.urlPathSegment,
+                    "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
+                        LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                 ),
             ),
             summaryListData.single {
