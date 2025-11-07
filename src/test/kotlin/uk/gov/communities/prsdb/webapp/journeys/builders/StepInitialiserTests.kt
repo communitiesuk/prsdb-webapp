@@ -88,33 +88,27 @@ class StepInitialiserTests {
     }
 
     @Test
-    fun `a redirect destination cannot be set more than once`() {
+    fun `no next destination can be set after a next url`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
         builder.nextUrl { "url1" }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.nextUrl { "url2" } }
-    }
-
-    @Test
-    fun `a redirectToStep cannot be set if a redirect url has been set`() {
-        // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep())
-        builder.nextUrl { "url1" }
-
-        // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.nextStep { mock() } }
+        assertThrows<JourneyInitialisationException> { builder.nextDestination { mock() } }
     }
 
     @Test
-    fun `a redirectToUrl cannot be set if a redirect step has been set`() {
+    fun `no next destination can be set after a next step`() {
         // Arrange
         val builder = StepInitialiser("test", mockInitialisableStep())
         builder.nextStep { mock() }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.nextUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.nextStep { mock() } }
+        assertThrows<JourneyInitialisationException> { builder.nextDestination { mock() } }
     }
 
     @Test

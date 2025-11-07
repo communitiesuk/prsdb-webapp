@@ -118,12 +118,12 @@ class JourneyBuilderTest {
         fun `an unreachableStepUrl is passed to all built step builders`() {
             // Arrange
             val jb = JourneyBuilder(mock())
-            val redirectLambda = { "redirect" }
+            val unreachableRedirect = "redirect"
 
             // Act
             jb.step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
             jb.step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
-            jb.unreachableStepUrl(redirectLambda)
+            jb.unreachableStepUrl { unreachableRedirect }
             jb.build()
 
             // Assert
@@ -143,13 +143,54 @@ class JourneyBuilderTest {
         }
 
         @Test
-        fun `unreachableStepRedirect cannot be called twice on the same journey builder`() {
+        fun `an unreachableStepStep is passed to all built step builders`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val unreachableStep = mock<JourneyStep.VisitableStep<*, *, *>>()
+            whenever(unreachableStep.currentJourneyId).thenReturn("a-journey-id")
+
+            // Act
+            jb.step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
+            jb.step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
+            jb.unreachableStepStep { unreachableStep }
+            jb.build()
+
+            // Assert
+            val stepInitialiser1 = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
+            val stepInitialiser2 = mockedStepBuilders.constructed().last() as StepInitialiser<*, JourneyState, *>
+            val captor = argumentCaptor<() -> Destination>()
+            verify(stepInitialiser1).build(any(), captor.capture())
+            verify(stepInitialiser2).build(any(), captor.capture())
+
+            captor.allValues.forEach {
+                val destination = it()
+                assert(destination is Destination.VisitableStep)
+                with(destination as Destination.VisitableStep) {
+                    assertSame(unreachableStep, step)
+                }
+            }
+        }
+
+        @Test
+        fun `unreachableStepDestination cannot be called after unreachableStepUrl on the same journey builder`() {
             // Arrange
             val jb = JourneyBuilder(mock())
             jb.unreachableStepUrl { "redirect" }
 
             // Act & Assert
             assertThrows<JourneyInitialisationException> { jb.unreachableStepUrl { "newRedirect" } }
+            assertThrows<JourneyInitialisationException> { jb.unreachableStepStep { mock<JourneyStep.VisitableStep<*, *, *>>() } }
+        }
+
+        @Test
+        fun `unreachableStepStep cannot be called twice on the same journey builder`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            jb.unreachableStepStep { mock<JourneyStep.VisitableStep<*, *, *>>() }
+
+            // Act & Assert
+            assertThrows<JourneyInitialisationException> { jb.unreachableStepUrl { "newRedirect" } }
+            assertThrows<JourneyInitialisationException> { jb.unreachableStepStep { mock<JourneyStep.VisitableStep<*, *, *>>() } }
         }
 
         @Test
