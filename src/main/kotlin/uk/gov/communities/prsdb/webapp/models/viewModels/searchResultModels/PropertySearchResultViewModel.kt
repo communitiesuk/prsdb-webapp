@@ -20,13 +20,13 @@ data class PropertySearchResultViewModel(
             currentUrlKey: Int? = null,
         ) = PropertySearchResultViewModel(
             id = propertyOwnership.id,
-            address = propertyOwnership.property.address.singleLineAddress,
+            address = propertyOwnership.address.singleLineAddress,
             registrationNumber =
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
             localAuthority =
-                propertyOwnership.property.address.localAuthority
+                propertyOwnership.address.localAuthority
                     ?.name,
             landlord =
                 PropertySearchResultLandlordViewModel(

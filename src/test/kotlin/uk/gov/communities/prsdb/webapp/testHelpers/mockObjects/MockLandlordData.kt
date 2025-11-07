@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -16,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -77,18 +75,6 @@ class MockLandlordData {
             )
         }
 
-        fun createProperty(
-            status: RegistrationStatus = RegistrationStatus.REGISTERED,
-            propertyType: PropertyType = PropertyType.FLAT,
-            address: Address = createAddress(),
-            isActive: Boolean = true,
-        ) = Property(
-            status = status,
-            propertyType = propertyType,
-            address = address,
-            isActive = isActive,
-        )
-
         fun createPropertyOwnership(
             occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
@@ -96,7 +82,8 @@ class MockLandlordData {
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
-            property: Property = createProperty(),
+            propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
+            address: Address = createAddress(),
             license: License? = null,
             incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             id: Long = 1,
@@ -110,7 +97,8 @@ class MockLandlordData {
                     currentNumTenants = currentNumTenants,
                     registrationNumber = registrationNumber,
                     primaryLandlord = primaryLandlord,
-                    property = property,
+                    propertyBuildType = propertyBuildType,
+                    address = address,
                     incompleteComplianceForm = incompleteComplianceForm,
                     license = license,
                 )

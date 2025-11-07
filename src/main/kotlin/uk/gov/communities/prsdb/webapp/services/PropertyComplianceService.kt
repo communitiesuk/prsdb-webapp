@@ -154,7 +154,7 @@ class PropertyComplianceService(
             recipientAddress = propertyOwnership.primaryLandlord.email,
             email =
                 ComplianceUpdateConfirmationEmail(
-                    propertyAddress = propertyOwnership.property.address.singleLineAddress,
+                    propertyAddress = propertyOwnership.address.singleLineAddress,
                     registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                     dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                     complianceUpdateType = updateType,

@@ -75,21 +75,23 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         currentNumTenants: Int,
         registrationNumber: RegistrationNumber,
         primaryLandlord: Landlord,
-        property: Property,
+        propertyBuildType: PropertyType,
+        address: Address,
         license: License?,
         incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
     ) : this() {
-        this.isActive = isActive
         this.occupancyType = occupancyType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
         this.primaryLandlord = primaryLandlord
-        this.property = property
+        this.propertyBuildType = propertyBuildType
+        this.address = address
         this.license = license
         this.incompleteComplianceForm = incompleteComplianceForm
+        this.isActive = isActive
     }
 
     val isOccupied: Boolean

@@ -50,8 +50,7 @@ interface LandlordWithListedPropertyCountRepository : JpaRepository<LandlordWith
             """
              AND (EXISTS (SELECT po.id 
                           FROM property_ownership po 
-                          JOIN property p ON po.property_id = p.id 
-                          JOIN address a ON p.address_id = a.id
+                          JOIN address a ON po.address_id = a.id
                           JOIN local_authority la ON a.local_authority_id = la.id
                           JOIN local_authority_user lau ON la.id = lau.local_authority_id
                           WHERE l.id = po.primary_landlord_id 
