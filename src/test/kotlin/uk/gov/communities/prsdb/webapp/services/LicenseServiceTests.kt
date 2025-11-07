@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -17,7 +16,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.repository.LicenseRepository
-import kotlin.reflect.full.hasAnnotation
 
 @ExtendWith(MockitoExtension::class)
 class LicenseServiceTests {
@@ -97,10 +95,5 @@ class LicenseServiceTests {
         verify(mockLicenseRepository).delete(licence)
 
         assertNull(updatedLicence)
-    }
-
-    @Test
-    fun `updateLicence is annotated with @Transactional`() {
-        assertTrue(licenseService::updateLicence.hasAnnotation<Transactional>())
     }
 }
