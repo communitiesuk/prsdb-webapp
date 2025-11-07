@@ -19,6 +19,7 @@ class CheckUpdateEpcAnswersPage(
                 "summaryName" to "forms.update.epc.checkYourAnswers.summary",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                "insetText" to "forms.update.checkOccupancy.insetText",
             ),
         journeyDataService = journeyDataService,
         missingAnswersRedirect = missingAnswersRedirect,

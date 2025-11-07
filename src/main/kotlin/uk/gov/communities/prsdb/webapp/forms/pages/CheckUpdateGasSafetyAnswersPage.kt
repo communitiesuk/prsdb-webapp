@@ -18,6 +18,7 @@ class CheckUpdateGasSafetyAnswersPage(
                 "summaryName" to "forms.update.checkGasSafety.summary",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                "insetText" to "forms.update.checkOccupancy.insetText",
             ),
         journeyDataService = journeyDataService,
         missingAnswersRedirect = missingAnswersRedirect,

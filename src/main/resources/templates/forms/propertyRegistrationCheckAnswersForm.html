@@ -7,6 +7,7 @@
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
@@ -15,6 +16,9 @@
             <br>
             <span th:text="${propertyName}"></span>
         </h1>
+        <th:block th:if="${insetText != null}">
+            <p class="govuk-inset-text" th:text="#{${insetText}}">insetText</p>
+        </th:block>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
