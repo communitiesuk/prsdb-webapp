@@ -36,7 +36,7 @@ class FooExampleJourneyFactory(
         val state = stateFactory.getObject()
         state.validateStateMatchesPropertyId(propertyId)
 
-        return journey(stateFactory.getObject()) {
+        return journey(state) {
             unreachableStepStep { journey.taskListStep }
             step("task-list", journey.taskListStep) {
                 initialStep()
@@ -46,24 +46,29 @@ class FooExampleJourneyFactory(
                 withHeadingMessageKey("tasks-section-part-1")
                 task(journey.occupationTask) {
                     parents { journey.taskListStep.always() }
-                    redirectToStep { journey.fooCheckYourAnswersStep }
+                    redirectToStep {
+                        when (state.subJourney) {
+                            null -> journey.epcTask.firstStep
+                            else -> journey.fooCheckYourAnswersStep
+                        }
+                    }
                 }
-            }
-            section {
-                withHeadingMessageKey("tasks-section-part-2")
-                task(journey.epcTask) {
-                    parents { journey.occupationTask.isComplete() }
-                    redirectToStep { journey.fooCheckYourAnswersStep }
+                section {
+                    withHeadingMessageKey("tasks-section-part-2")
+                    task(journey.epcTask) {
+                        parents { journey.occupationTask.isComplete() }
+                        redirectToStep { journey.fooCheckYourAnswersStep }
+                    }
                 }
-            }
-            step("check-your-answers", journey.fooCheckYourAnswersStep) {
-                parents {
-                    AndParents(
-                        journey.occupationTask.isComplete(),
-                        journey.epcTask.isComplete(),
-                    )
+                step("check-your-answers", journey.fooCheckYourAnswersStep) {
+                    parents {
+                        AndParents(
+                            journey.occupationTask.isComplete(),
+                            journey.epcTask.isComplete(),
+                        )
+                    }
+                    nextUrl { "/" }
                 }
-                nextUrl { "/" }
             }
         }
     }
@@ -106,6 +111,12 @@ class FooJourneyState(
         return journeyId
     }
 
+    final val subJourney: FooSubJourney?
+        get() =
+            journeyStateService.journeyMetadata.subJourneyName?.let {
+                FooSubJourney.valueOf(it)
+            }
+
     final fun validateStateMatchesPropertyId(currentPropertyId: Long) {
         if (currentPropertyId != propertyId) {
             throw NoSuchJourneyException()
@@ -121,4 +132,9 @@ class FooJourneyState(
                 .and(0x7FFFFFFFu)
                 .toString(36)
     }
+}
+
+enum class FooSubJourney {
+    CHANGE_OCCUPATION_SUB_JOURNEY,
+    CHANGE_EPC_SUB_JOURNEY,
 }

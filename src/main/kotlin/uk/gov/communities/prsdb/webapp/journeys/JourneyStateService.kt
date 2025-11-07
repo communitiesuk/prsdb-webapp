@@ -9,7 +9,18 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
+import java.io.Serializable
 import java.util.UUID
+
+data class JourneyMetadata(
+    val dataKey: String,
+    val baseJourneyId: String? = null,
+    val subJourneyName: String? = null,
+) : Serializable {
+    companion object {
+        fun withNewDataKey(): JourneyMetadata = JourneyMetadata(UUID.randomUUID().toString())
+    }
+}
 
 @PrsdbWebService
 @Scope("request")
@@ -28,10 +39,12 @@ class JourneyStateService(
         request.getParameter(JOURNEY_ID_PARAM),
     )
 
-    val journeyStateMetadataMap get() = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
-    val journeyDataKey get() = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
+    val journeyStateMetadataMap get() =
+        objectToTypedStringKeyedMap<JourneyMetadata>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
 
-    fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyDataKey))?.get(key)
+    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
+
+    fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyMetadata.dataKey))?.get(key)
 
     fun addSingleStepData(
         key: String,
@@ -47,23 +60,47 @@ class JourneyStateService(
         key: String,
         value: Any?,
     ) {
-        val journeyState = objectToStringKeyedMap(session.getAttribute(journeyDataKey)) ?: mapOf()
-        session.setAttribute(journeyDataKey, journeyState + (key to value))
+        val journeyState = objectToStringKeyedMap(session.getAttribute(journeyMetadata.dataKey)) ?: mapOf()
+        session.setAttribute(journeyMetadata.dataKey, journeyState + (key to value))
     }
 
     fun deleteState() {
-        session.removeAttribute(journeyDataKey)
+        session.removeAttribute(journeyMetadata.dataKey)
         // TODO PRSD-1550 - Ensure other metadata keys referencing this journey are also cleaned up
-        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, journeyStateMetadataMap - journeyId)
+        val newMap = journeyStateMetadataMap - journeyId
+        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, newMap)
     }
 
     fun initialiseJourneyWithId(
         newJourneyId: String,
         stateInitialiser: JourneyStateService.() -> Unit = {},
     ) {
-        val journeyDataKey = journeyStateMetadataMap[newJourneyId] ?: UUID.randomUUID().toString()
-        session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, journeyStateMetadataMap + (newJourneyId to journeyDataKey))
+        val existingMetadata = journeyStateMetadataMap[newJourneyId]
+        if (existingMetadata == null) {
+            val newMap = journeyStateMetadataMap + (newJourneyId to JourneyMetadata.withNewDataKey())
+            session.setAttribute(JOURNEY_STATE_KEY_STORE_KEY, newMap)
+        }
         JourneyStateService(session, newJourneyId).stateInitialiser()
+    }
+
+    fun initialiseSubJourney(
+        newJourneyId: String,
+        subJourneyName: String,
+    ) {
+        val existingMetadata = journeyStateMetadataMap[newJourneyId]
+        if (existingMetadata == null) {
+            val metadata =
+                JourneyMetadata(
+                    dataKey = journeyMetadata.dataKey,
+                    baseJourneyId = journeyId,
+                    subJourneyName = subJourneyName,
+                )
+            val newMap = journeyStateMetadataMap + (newJourneyId to metadata)
+            session.setAttribute(
+                JOURNEY_STATE_KEY_STORE_KEY,
+                newMap,
+            )
+        }
     }
 
     companion object {
