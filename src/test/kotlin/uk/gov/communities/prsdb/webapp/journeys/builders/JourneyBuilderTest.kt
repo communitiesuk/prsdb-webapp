@@ -264,45 +264,45 @@ class JourneyBuilderTest {
                 mock<StepInitialiser<*, JourneyState, *>>(),
                 mock<StepInitialiser<*, JourneyState, *>>(),
             )
-        val taskConstruction =
-            mockConstruction(TaskInitialiser::class.java) { mock, context ->
-                whenever((mock as TaskInitialiser<TestEnum, JourneyState>).mapToStepInitialisers(any())).thenReturn(steps)
+        mockConstruction(TaskInitialiser::class.java) { mock, context ->
+            whenever((mock as TaskInitialiser<TestEnum, JourneyState>).mapToStepInitialisers(any())).thenReturn(steps)
+        }.use { taskConstruction ->
+
+            // Act 1
+            jb.task(uninitialisedTask) {
+                parents { NoParents() }
+                redirectToDestination { Destination.NavigationalStep(mock()) }
             }
 
-        // Act 1
-        jb.task(uninitialisedTask) {
-            parents { NoParents() }
-            redirectToDestination { Destination.NavigationalStep(mock()) }
-        }
+            // Assert 1
+            val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<TestEnum, JourneyState>
+            verify(mockTaskInitialiser).parents(any())
+            verify(mockTaskInitialiser).redirectToDestination(any())
 
-        // Assert 1
-        val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<TestEnum, JourneyState>
-        verify(mockTaskInitialiser).parents(any())
-        verify(mockTaskInitialiser).redirectToDestination(any())
+            // Arrange 2
+            val builtSteps =
+                listOf(
+                    mock<JourneyStep.NotionalStep<TestEnum, *, JourneyState>>(),
+                    mock<JourneyStep.NotionalStep<TestEnum, *, JourneyState>>(),
+                    mock<JourneyStep.NotionalStep<TestEnum, *, JourneyState>>(),
+                )
 
-        // Arrange 2
-        val builtSteps =
-            listOf(
-                mock<JourneyStep.NotionalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.NotionalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.NotionalStep<TestEnum, *, JourneyState>>(),
-            )
+            steps.forEachIndexed { index, stepInitialiser ->
+                whenever(stepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtSteps[index])
+            }
 
-        steps.forEachIndexed { index, stepInitialiser ->
-            whenever(stepInitialiser.build(anyOrNull(), anyOrNull())).thenReturn(builtSteps[index])
-        }
+            // Act 2
+            val map = jb.build()
 
-        // Act 2
-        val map = jb.build()
+            // Assert 2
+            val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
+            steps.forEach {
+                verify(it).build(anyOrNull(), anyOrNull())
+            }
 
-        // Assert 2
-        val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
-        steps.forEach {
-            verify(it).build(anyOrNull(), anyOrNull())
-        }
-
-        typedMap.values.forEachIndexed { index, orchestrator ->
-            assertSame(builtSteps[index], orchestrator.journeyStep)
+            typedMap.values.forEachIndexed { index, orchestrator ->
+                assertSame(builtSteps[index], orchestrator.journeyStep)
+            }
         }
     }
 }
