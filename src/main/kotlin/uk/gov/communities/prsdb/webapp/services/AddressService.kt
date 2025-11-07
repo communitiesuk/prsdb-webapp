@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
@@ -11,6 +12,7 @@ class AddressService(
     private val addressRepository: AddressRepository,
     private val localAuthorityService: LocalAuthorityService,
 ) {
+    @Transactional
     fun findOrCreateAddress(addressDataModel: AddressDataModel) =
         if (addressDataModel.uprn != null) {
             addressRepository.findByIsActiveTrueAndUprn(addressDataModel.uprn)
