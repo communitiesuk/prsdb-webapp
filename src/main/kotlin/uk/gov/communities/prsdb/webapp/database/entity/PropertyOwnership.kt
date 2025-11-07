@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import java.time.LocalDate
 
 @Entity
@@ -47,9 +48,12 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var primaryLandlord: Landlord
         private set
 
+    @Column(nullable = false)
+    lateinit var propertyBuildType: PropertyType
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "property_id", nullable = false)
-    lateinit var property: Property
+    @JoinColumn(name = "address_id", nullable = false)
+    lateinit var address: Address
         private set
 
     @OneToOne(optional = true)
