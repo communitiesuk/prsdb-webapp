@@ -14,6 +14,7 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.config.FF4JConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
@@ -73,6 +74,7 @@ class PrsdbProcessApplicationTests {
                 NotifyIdService::class.scopedBeanName,
                 TestcontainersConfiguration::class.importedBeanName,
                 NgdAddressLoader::class.simpleBeanName,
+                FF4JConfig::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

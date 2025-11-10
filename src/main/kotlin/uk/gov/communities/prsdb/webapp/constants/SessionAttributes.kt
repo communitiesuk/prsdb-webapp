@@ -6,7 +6,7 @@ const val LA_USER_ID = "la-user-id"
 
 const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
-const val PROPERTY_DEREGISTRATION_ENTITY_IDS = "propertyDeregistrationEntityIds"
+const val PROPERTIES_DEREGISTERED_THIS_SESSION = "propertiesDeregisteredThisSession"
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 

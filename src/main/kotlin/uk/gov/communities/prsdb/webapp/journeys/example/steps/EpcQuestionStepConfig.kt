@@ -23,10 +23,7 @@ class EpcQuestionStepConfig(
     override fun getStepSpecificContent(state: EpcJourneyState) =
         mapOf(
             "formModel" to EpcFormModel(),
-            "address" to
-                propertyOwnershipService
-                    .getPropertyOwnership(state.propertyId)
-                    .property.address.singleLineAddress,
+            "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.epc.fieldSetHeading",
             "fieldSetHint" to "forms.epc.fieldSetHint",
@@ -52,10 +49,7 @@ class EpcQuestionStepConfig(
 
     override fun afterSubmitFormData(state: EpcJourneyState) {
         super.afterSubmitFormData(state)
-        val uprn =
-            propertyOwnershipService
-                .getPropertyOwnership(state.propertyId)
-                .property.address.uprn
+        val uprn = propertyOwnershipService.getPropertyOwnership(state.propertyId).address.uprn
         if (uprn != null) {
             val epc = epcLookupService.getEpcByUprn(uprn)
             state.automatchedEpc = epc
