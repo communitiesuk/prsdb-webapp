@@ -9,10 +9,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import java.time.LocalDate
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -22,12 +20,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     var isActive: Boolean = false
-
-    var tenancyStartDate: LocalDate? = null
-
-    @Column(nullable = false)
-    lateinit var occupancyType: OccupancyType
-        private set
 
     @Column(nullable = false)
     lateinit var ownershipType: OwnershipType
@@ -69,7 +61,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         private set
 
     constructor(
-        occupancyType: OccupancyType,
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
@@ -81,7 +72,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
     ) : this() {
-        this.occupancyType = occupancyType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
