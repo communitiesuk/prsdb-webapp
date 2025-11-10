@@ -81,7 +81,7 @@ class LandlordDeregistrationServiceTests {
                 MockLandlordData.createPropertyOwnership(primaryLandlord = landlord),
                 MockLandlordData.createPropertyOwnership(primaryLandlord = landlord),
             )
-        whenever(mockPropertyOwnershipService.retrieveAllPropertiesForLandlord("one-login-user")).thenReturn(landlordProperties)
+        whenever(mockPropertyOwnershipService.retrieveAllActivePropertiesForLandlord("one-login-user")).thenReturn(landlordProperties)
         whenever(
             mockFormContextRepository.findAllByUser_IdAndJourneyType("one-login-user", JourneyType.PROPERTY_REGISTRATION),
         ).thenReturn(emptyList())

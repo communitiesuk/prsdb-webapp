@@ -820,7 +820,7 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `retrieveAllPropertiesForLandlord gets a list of property ownerships`() {
+    fun `retrieveAllActivePropertiesForLandlord gets a list of property ownerships`() {
         // Arrange
         val expectedPropertyOwnerships =
             listOf(
@@ -834,7 +834,7 @@ class PropertyOwnershipServiceTests {
         ).thenReturn(expectedPropertyOwnerships)
 
         // Act
-        val propertyOwnerships = propertyOwnershipService.retrieveAllPropertiesForLandlord(baseUserId)
+        val propertyOwnerships = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
 
         // Assert
         assertEquals(expectedPropertyOwnerships, propertyOwnerships)

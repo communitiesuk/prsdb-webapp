@@ -109,7 +109,7 @@ class PropertyOwnershipService(
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
-        retrieveAllPropertiesForLandlord(baseUserId).map { propertyOwnership ->
+        retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
@@ -240,7 +240,7 @@ class PropertyOwnershipService(
         }
     }
 
-    fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+    fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
     fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
@@ -269,7 +269,7 @@ class PropertyOwnershipService(
             )
 
     fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
-        val propertyOwnerships = retrieveAllPropertiesForLandlord(principalName)
+        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
 
         return propertyOwnerships
             .filter { it.isOccupied && it.isComplianceIncomplete }
