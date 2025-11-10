@@ -5,15 +5,19 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
+import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
+import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
-class JourneyBuilder<TState : JourneyState>(
+open class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
     val journey: TState,
 ) {
-    fun getStepInitialisers() = stepsUnderConstruction.toList()
+    protected fun getStepInitialisers() = stepsUnderConstruction.toList()
 
     private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
     private var unreachableStepDestination: (() -> Destination)? = null
@@ -49,9 +53,9 @@ class JourneyBuilder<TState : JourneyState>(
         stepsUnderConstruction.add(stepInitialiser)
     }
 
-    fun <TMode : Enum<TMode>> task(
-        uninitialisedTask: Task<TMode, TState>,
-        init: TaskInitialiser<TMode, TState>.() -> Unit,
+    fun task(
+        uninitialisedTask: Task<TState>,
+        init: TaskInitialiser<TState>.() -> Unit,
     ) {
         val taskInitialiser = TaskInitialiser(uninitialisedTask)
         taskInitialiser.init()
@@ -96,14 +100,67 @@ class JourneyBuilder<TState : JourneyState>(
             builder.init()
             return builder.build()
         }
+    }
+}
 
+class SubJourneyBuilder<TState : JourneyState>(
+    journey: TState,
+) : JourneyBuilder<TState>(journey) {
+    private var exitInitialiser: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>? = null
+    val exitStep = NavigationalStep(NavigationalStepConfig())
+    lateinit var firstStep: JourneyStep<*, *, *>
+        private set
+
+    lateinit var subJourneyParentage: Parentage
+        private set
+
+    fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
+        if (exitInitialiser != null) {
+            throw JourneyInitialisationException("Sub-journey already has an exit step defined")
+        }
+        val stepInitialiser = StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>(null, exitStep)
+        stepInitialiser.init()
+        exitInitialiser = stepInitialiser
+    }
+
+    fun subJourneyParent(parentage: Parentage) {
+        if (::subJourneyParentage.isInitialized) {
+            throw JourneyInitialisationException("Sub-journey exit step parentage has already been defined")
+        }
+        subJourneyParentage = parentage
+    }
+
+    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> startingStep(
+        segment: String,
+        uninitialisedStep: JourneyStep.VisitableStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    ) {
+        firstStep = uninitialisedStep
+        return step<TMode, TStep>(segment, uninitialisedStep) {
+            parents { subJourneyParentage }
+            init()
+        }
+    }
+
+    fun getSteps(
+        exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
+    ): List<StepInitialiser<*, TState, *>> {
+        val exitStepInitialiser = exitInitialiser ?: throw JourneyInitialisationException("Sub-journey must have an exit step defined")
+        if (!::firstStep.isInitialized) throw JourneyInitialisationException("Sub-journey must have a first step defined")
+
+        exitStepInitialiser.exitInit()
+        return getStepInitialisers() + exitStepInitialiser
+    }
+
+    companion object {
         fun <TState : JourneyState> subJourney(
             state: TState,
-            init: JourneyBuilder<TState>.() -> Unit = {},
+            exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
+            init: SubJourneyBuilder<TState>.() -> Unit,
         ): List<StepInitialiser<*, TState, *>> {
-            val builder = JourneyBuilder(state)
+            val builder = SubJourneyBuilder(state)
             builder.init()
-            return builder.getStepInitialisers()
+            return builder.getSteps(exitInit)
         }
     }
 }

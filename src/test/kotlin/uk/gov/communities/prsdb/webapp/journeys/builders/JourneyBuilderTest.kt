@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.subJourney
+import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder.Companion.subJourney
 
 class JourneyBuilderTest {
     @Nested
@@ -86,8 +86,8 @@ class JourneyBuilderTest {
         fun `subJourney DSL method creates, inits but does not build a journeyBuilder`() {
             // Arrange
             val listToReturn = listOf(mock<StepInitialiser<*, JourneyState, *>>())
-            mockConstruction(JourneyBuilder::class.java) { mock, context ->
-                whenever(mock.getStepInitialisers()).thenReturn(listToReturn)
+            mockConstruction(SubJourneyBuilder::class.java) { mock, context ->
+                whenever(mock.getSteps(anyOrNull())).thenReturn(listToReturn)
                 whenever(mock.journey).thenReturn(context.arguments()[0] as JourneyState)
             }.use { mockedBuilders ->
 
@@ -95,7 +95,7 @@ class JourneyBuilderTest {
 
                 // Act
                 val unbuiltJourney =
-                    subJourney(state) {
+                    subJourney(state, mock()) {
                         unreachableStepUrl { "redirect" }
                         step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
                         step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
@@ -298,7 +298,7 @@ class JourneyBuilderTest {
     fun `task method creates and inits a taskInitialiser, all of whom's steps are built when the journey is built`() {
         // Arrange 1
         val jb = JourneyBuilder(mock())
-        val uninitialisedTask = mock<Task<TestEnum, JourneyState>>()
+        val uninitialisedTask = mock<Task<JourneyState>>()
         val steps =
             listOf(
                 mock<StepInitialiser<*, JourneyState, *>>(),
@@ -306,7 +306,7 @@ class JourneyBuilderTest {
                 mock<StepInitialiser<*, JourneyState, *>>(),
             )
         mockConstruction(TaskInitialiser::class.java) { mock, context ->
-            whenever((mock as TaskInitialiser<TestEnum, JourneyState>).mapToStepInitialisers(any())).thenReturn(steps)
+            whenever((mock as TaskInitialiser<JourneyState>).mapToStepInitialisers(any())).thenReturn(steps)
         }.use { taskConstruction ->
 
             // Act 1
@@ -316,7 +316,7 @@ class JourneyBuilderTest {
             }
 
             // Assert 1
-            val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<TestEnum, JourneyState>
+            val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
             verify(mockTaskInitialiser).parents(any())
             verify(mockTaskInitialiser).redirectToDestination(any())
 

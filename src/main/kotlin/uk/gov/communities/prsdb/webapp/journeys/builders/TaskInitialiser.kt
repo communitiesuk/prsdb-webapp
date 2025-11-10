@@ -8,8 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
-class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
-    private val task: Task<TMode, TStateInit>,
+class TaskInitialiser<TStateInit : JourneyState>(
+    private val task: Task<TStateInit>,
 ) {
     private val name: String
         get() = this::class.simpleName!!
@@ -17,7 +17,7 @@ class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
     private var destinationProvider: ((mode: NavigationComplete) -> Destination)? = null
     private var parentage: (() -> Parentage)? = null
 
-    fun redirectToStep(nextStepProvider: (mode: NavigationComplete) -> JourneyStep<*, *, TStateInit>): TaskInitialiser<TMode, TStateInit> {
+    fun redirectToStep(nextStepProvider: (mode: NavigationComplete) -> JourneyStep<*, *, TStateInit>): TaskInitialiser<TStateInit> {
         if (destinationProvider != null) {
             throw JourneyInitialisationException("Task $name already has a redirectTo defined")
         }
@@ -25,7 +25,7 @@ class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
         return this
     }
 
-    fun redirectToDestination(destination: (mode: NavigationComplete) -> Destination): TaskInitialiser<TMode, TStateInit> {
+    fun redirectToDestination(destination: (mode: NavigationComplete) -> Destination): TaskInitialiser<TStateInit> {
         if (destinationProvider != null) {
             throw JourneyInitialisationException("Task $name already has a redirectTo defined")
         }
@@ -33,7 +33,7 @@ class TaskInitialiser<TMode : Enum<TMode>, TStateInit : JourneyState>(
         return this
     }
 
-    fun parents(currentParentage: () -> Parentage): TaskInitialiser<TMode, TStateInit> {
+    fun parents(currentParentage: () -> Parentage): TaskInitialiser<TStateInit> {
         if (parentage != null) {
             throw JourneyInitialisationException("Task $name already has parentage defined")
         }

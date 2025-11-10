@@ -1,80 +1,75 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.MockedConstruction
+import org.mockito.Mockito.mockConstruction
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
+import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 
 class TaskTests {
-    class TestTask(
-        private val subJourney: List<StepInitialiser<*, JourneyState, *>> = listOf(),
-        var taskComplete: Boolean = false,
-        val firstStep: JourneyStep.VisitableStep<*, *, JourneyState> = mock(),
-    ) : Task<Complete, JourneyState>() {
-        override fun makeSubJourney(
-            state: JourneyState,
-            entryPoint: Parentage,
-        ): List<StepInitialiser<*, JourneyState, *>> = subJourney
+    class TestTask : Task<JourneyState>() {
+        override fun makeSubJourney(state: JourneyState): List<StepInitialiser<*, JourneyState, *>> = subJourney(state) { }
+    }
 
-        override fun taskCompletionParentage(state: JourneyState): Parentage =
-            object : Parentage {
-                override fun allowsChild(): Boolean = taskComplete
+    lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
+    private val firstStepMock = mock<JourneyStep.VisitableStep<*, *, JourneyState>>()
+    private val exitStepMock = mock<NavigationalStep>()
+    private val stepsMock = listOf<StepInitialiser<*, JourneyState, *>>()
 
-                override val ancestry: List<JourneyStep<*, *, *>> = listOf()
-                override val allowingParentSteps: List<JourneyStep<*, *, *>> = listOf()
-                override val potentialParents: List<JourneyStep<*, *, *>> = listOf()
+    @BeforeEach
+    fun setup() {
+        // Mock construction of SubJourneyBuilder to capture the init lambda
+        subJourneyConstruction =
+            mockConstruction(SubJourneyBuilder::class.java) { mock, context ->
+                whenever(mock.firstStep).thenReturn(firstStepMock)
+                whenever(mock.exitStep).thenReturn(exitStepMock)
+                whenever(mock.getSteps(anyOrNull())).thenReturn(stepsMock)
             }
+    }
 
-        override fun firstStepInTask(state: JourneyState) = firstStep
+    @AfterEach
+    fun teardown() {
+        subJourneyConstruction.close()
     }
 
     @Test
-    fun `getTaskSteps returns the tasks sub journey with an additional exit step`() {
+    fun `getTaskSteps inits the sub journey builder and returns the steps from it`() {
         // Arrange
-        val stepInitialisers =
-            listOf(
-                mock<StepInitialiser<*, JourneyState, *>>(),
-                mock<StepInitialiser<*, JourneyState, *>>(),
-                mock<StepInitialiser<*, JourneyState, *>>(),
-            )
-        val task = TestTask(stepInitialisers)
+        val task = TestTask()
 
         val nextDestinationLambda = { _: NavigationComplete -> Destination.ExternalUrl("example.com") }
         val state = mock<JourneyState>()
+        val parent = NoParents()
 
         // Act
-        val taskSteps = task.getTaskSteps(state, NoParents()) { nextDestination(nextDestinationLambda) }
+        val taskSteps = task.getTaskSteps(state, parent) { nextDestination(nextDestinationLambda) }
 
         // Assert
-        assertEquals(taskSteps.size, stepInitialisers.size + 1)
-        taskSteps.forEachIndexed { index, step ->
-            val initialiser = stepInitialisers.getOrNull(index)
-            if (initialiser != null) {
-                assertSame(initialiser, step)
-            } else {
-                assertEquals(null, step.segment)
-                val builtStep = step.build(state, { Destination.ExternalUrl("example.com") })
-                assertSame(task.notionalExitStep, builtStep)
-            }
-        }
+        val subJourneyBuilder = subJourneyConstruction.constructed().first()
+        verify(subJourneyBuilder).subJourneyParent(eq(parent))
+        verify(subJourneyBuilder).getSteps(anyOrNull())
     }
 
     @Test
     fun `when the first step of a task is not reachable, the taskStatus is CANNOT_START`() {
         // Arrange
-        val firstStep = mock<JourneyStep.VisitableStep<*, *, JourneyState>>()
-        whenever(firstStep.isStepReachable).thenReturn(false)
+        whenever(firstStepMock.isStepReachable).thenReturn(false)
 
-        val state = mock<JourneyState>()
-        val task = initialisedTask(firstStep, state)
+        val task = initialisedTask()
 
         // Act
-        val status = task.taskStatus(mock())
+        val status = task.taskStatus()
 
         // Assert
         assertEquals(TaskStatus.CANNOT_START, status)
@@ -83,15 +78,13 @@ class TaskTests {
     @Test
     fun `when the first step of a task is reachable and the first step's outcome is null, the taskStatus is NOT_STARTED`() {
         // Arrange
-        val firstStep = mock<JourneyStep.VisitableStep<*, *, JourneyState>>()
-        whenever(firstStep.isStepReachable).thenReturn(true)
-        whenever(firstStep.outcome()).thenReturn(null)
+        whenever(firstStepMock.isStepReachable).thenReturn(true)
+        whenever(firstStepMock.outcome()).thenReturn(null)
 
-        val state = mock<JourneyState>()
-        val task = initialisedTask(firstStep, state)
+        val task = initialisedTask()
 
         // Act
-        val status = task.taskStatus(mock())
+        val status = task.taskStatus()
 
         // Assert
         assertEquals(TaskStatus.NOT_STARTED, status)
@@ -100,15 +93,13 @@ class TaskTests {
     @Test
     fun `when the first step of a task is complete and the task is not complete, the taskStatus is IN_PROGRESS`() {
         // Arrange
-        val firstStep = mock<JourneyStep.VisitableStep<Complete, *, JourneyState>>()
-        whenever(firstStep.isStepReachable).thenReturn(true)
-        whenever(firstStep.outcome()).thenReturn(Complete.COMPLETE)
+        whenever(firstStepMock.isStepReachable).thenReturn(true)
+        whenever(firstStepMock.outcome()).thenReturn(Complete.COMPLETE)
 
-        val state = mock<JourneyState>()
-        val task = initialisedTask(firstStep, state)
+        val task = initialisedTask()
 
         // Act
-        val status = task.taskStatus(mock())
+        val status = task.taskStatus()
 
         // Assert
         assertEquals(TaskStatus.IN_PROGRESS, status)
@@ -117,41 +108,34 @@ class TaskTests {
     @Test
     fun `when the task is complete, the taskStatus is COMPLETED`() {
         // Arrange
-        val firstStep = mock<JourneyStep.VisitableStep<*, *, JourneyState>>()
-
-        val state = mock<JourneyState>()
-        val task = initialisedTask(firstStep, state, true)
+        whenever(exitStepMock.isStepReachable).thenReturn(true)
+        val task = initialisedTask()
 
         // Act
-        val status = task.taskStatus(mock())
+        val status = task.taskStatus()
 
         // Assert
         assertEquals(TaskStatus.COMPLETED, status)
     }
 
     @Test
-    fun `notionalExitStep return a Navigational Step with Navigational Config`() {
+    fun `notionalExitStep return a Navigational Step from the internal task builder`() {
         // Arrange
-        val task = TestTask()
+        val task = initialisedTask()
 
         // Act
         val step = task.notionalExitStep
 
         // Assert
-        assertTrue { step is NavigationalStep }
-        assertTrue { step.stepConfig is NavigationalStepConfig }
+        assertSame(exitStepMock, step)
     }
 
-    private fun initialisedTask(
-        firstStep: JourneyStep.VisitableStep<*, *, JourneyState>,
-        state: JourneyState,
-        taskStatus: Boolean = false,
-    ): TestTask {
-        val task = TestTask(listOf(), taskStatus, firstStep)
+    private fun initialisedTask(): TestTask {
+        val task = TestTask()
         task
-            .getTaskSteps(state, mock()) {
+            .getTaskSteps(mock(), mock()) {
                 nextUrl { "example.com" }
-            }.forEach { it.build(state) { Destination.ExternalUrl("example.com") } }
+            }
         return task
     }
 }

@@ -20,13 +20,12 @@ import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 
 class TaskInitialiserTests {
     @Test
     fun `once a redirectToStep is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mock<Task<TestEnum, JourneyState>>())
+        val builder = TaskInitialiser(mock<Task<JourneyState>>())
         builder.parents { mock() }
 
         // Act
@@ -44,7 +43,7 @@ class TaskInitialiserTests {
     @Test
     fun `once a redirectToDestination is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mock<Task<TestEnum, JourneyState>>())
+        val builder = TaskInitialiser(mock<Task<JourneyState>>())
         builder.parents { mock() }
 
         // Act
@@ -62,7 +61,7 @@ class TaskInitialiserTests {
     @Test
     fun `a redirectToStep is passed to the task's exit when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<Complete, JourneyState>>()
+        val taskMock = mock<Task<JourneyState>>()
 
         val nextStepMock = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
         val nextStepSegment = "nextStepSegment"
@@ -77,7 +76,7 @@ class TaskInitialiserTests {
         builder.mapToStepInitialisers(mock())
 
         // Assert
-        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, JourneyState, NavigationComplete>.() -> Unit>()
+        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
         verify(taskMock).getTaskSteps(
             anyOrNull(),
             anyOrNull(),
@@ -101,7 +100,7 @@ class TaskInitialiserTests {
     @Test
     fun `a redirectToDestination is passed to the task's exit when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<Complete, JourneyState>>()
+        val taskMock = mock<Task<JourneyState>>()
 
         val nextStepSegment = "nextStepSegment"
 
@@ -114,7 +113,7 @@ class TaskInitialiserTests {
         builder.mapToStepInitialisers(mock())
 
         // Assert
-        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, JourneyState, NavigationComplete>.() -> Unit>()
+        val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
         verify(taskMock).getTaskSteps(
             anyOrNull(),
             anyOrNull(),
@@ -134,7 +133,7 @@ class TaskInitialiserTests {
     @Test
     fun `if no destinationProvider is set, an exception is thrown when mapping to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<Complete, JourneyState>>()
+        val taskMock = mock<Task<JourneyState>>()
 
         val builder = TaskInitialiser(taskMock)
         builder.parents { mock() }
@@ -148,7 +147,7 @@ class TaskInitialiserTests {
     @Test
     fun `a parentage cannot be set more than once`() {
         // Arrange
-        val taskMock = mock<Task<Complete, JourneyState>>()
+        val taskMock = mock<Task<JourneyState>>()
         val builder = TaskInitialiser(taskMock)
         builder.parents { NoParents() }
 
@@ -159,7 +158,7 @@ class TaskInitialiserTests {
     @Test
     fun `a parentage is passed to the task when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<Complete, JourneyState>>()
+        val taskMock = mock<Task<JourneyState>>()
         val builder = TaskInitialiser(taskMock)
         val parentage = NoParents()
         builder.redirectToDestination { mock() }
@@ -179,7 +178,7 @@ class TaskInitialiserTests {
     @Test
     fun `if no parentage is set, mapToStepInitialisers throws an exception`() {
         // Arrange
-        val taskMock = mock<Task<Complete, JourneyState>>()
+        val taskMock = mock<Task<JourneyState>>()
         val builder = TaskInitialiser(taskMock)
         builder.redirectToDestination { mock() }
 

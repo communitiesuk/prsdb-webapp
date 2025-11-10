@@ -2,11 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.example.tasks
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.subJourney
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
@@ -15,18 +12,14 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 
 @PrsdbWebComponent
 @Scope("prototype")
-class OccupationTask : Task<Complete, OccupiedJourneyState>() {
-    override fun makeSubJourney(
-        state: OccupiedJourneyState,
-        entryPoint: Parentage,
-    ): List<StepInitialiser<*, OccupiedJourneyState, *>> =
+class OccupationTask : Task<OccupiedJourneyState>() {
+    override fun makeSubJourney(state: OccupiedJourneyState): List<StepInitialiser<*, OccupiedJourneyState, *>> =
         subJourney(state) {
-            step("occupied", journey.occupied) {
-                parents { entryPoint }
+            startingStep("occupied", journey.occupied) {
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.households
-                        YesOrNo.NO -> notionalExitStep
+                        YesOrNo.NO -> exitStep
                     }
                 }
             }
@@ -36,15 +29,15 @@ class OccupationTask : Task<Complete, OccupiedJourneyState>() {
             }
             step("tenants", journey.tenants) {
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
-                nextStep { notionalExitStep }
+                nextStep { exitStep }
+            }
+            exitStep {
+                parents {
+                    OrParents(
+                        journey.tenants.hasOutcome(Complete.COMPLETE),
+                        journey.occupied.hasOutcome(YesOrNo.NO),
+                    )
+                }
             }
         }
-
-    override fun taskCompletionParentage(state: OccupiedJourneyState): Parentage =
-        OrParents(
-            state.tenants.hasOutcome(Complete.COMPLETE),
-            state.occupied.hasOutcome(YesOrNo.NO),
-        )
-
-    override fun firstStepInTask(state: OccupiedJourneyState): JourneyStep<*, *, OccupiedJourneyState> = state.occupied
 }

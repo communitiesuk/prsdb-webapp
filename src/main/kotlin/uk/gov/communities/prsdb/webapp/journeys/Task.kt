@@ -1,36 +1,50 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
+import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-abstract class Task<TMode : Enum<TMode>, in TState : JourneyState> {
+abstract class Task<in TState : JourneyState> {
+    lateinit var subJourneyBuilder: SubJourneyBuilder<*>
+    lateinit var subJourneyParentage: Parentage
+    private lateinit var exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit
+
     fun getTaskSteps(
         state: TState,
         entryPoint: Parentage,
-        exitInit: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit,
-    ): List<StepInitialiser<*, TState, *>> =
-        makeSubJourney(state, entryPoint) +
-            StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>(null, notionalExitStep).apply {
-                this.exitInit()
-                this.parents { taskCompletionParentage(state) }
-            }
+        exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
+    ): List<StepInitialiser<*, TState, *>> {
+        // TODO: PRSDDon't auto contract
+        this.subJourneyParentage = entryPoint
+        this.exitInit = exitInit
+        return makeSubJourney(state)
+    }
 
-    abstract fun makeSubJourney(
-        state: TState,
-        entryPoint: Parentage,
-    ): List<StepInitialiser<*, TState, *>>
+    protected fun <TDslState : TState> subJourney(
+        state: TDslState,
+        init: SubJourneyBuilder<TDslState>.() -> Unit,
+    ): List<StepInitialiser<*, TDslState, *>> {
+        if (::subJourneyBuilder.isInitialized) {
+            throw JourneyInitialisationException("Task sub-journey has already been initialised")
+        }
+        val localSubJourneyBuilder = SubJourneyBuilder(state)
+        subJourneyBuilder = localSubJourneyBuilder
+        localSubJourneyBuilder.subJourneyParent(subJourneyParentage)
+        localSubJourneyBuilder.init()
+        return localSubJourneyBuilder.getSteps(exitInit)
+    }
 
-    abstract fun taskCompletionParentage(state: TState): Parentage
+    abstract fun makeSubJourney(state: TState): List<StepInitialiser<*, TState, *>>
 
-    fun taskStatus(state: TState): TaskStatus =
+    fun taskStatus(): TaskStatus =
         when {
             notionalExitStep.isStepReachable -> TaskStatus.COMPLETED
-            firstStepInTask(state).outcome() != null -> TaskStatus.IN_PROGRESS
-            firstStepInTask(state).isStepReachable -> TaskStatus.NOT_STARTED
+            firstStep.outcome() != null -> TaskStatus.IN_PROGRESS
+            firstStep.isStepReachable -> TaskStatus.NOT_STARTED
             else -> TaskStatus.CANNOT_START
         }
 
-    val notionalExitStep: NavigationalStep = NavigationalStep(NavigationalStepConfig())
-
-    abstract fun firstStepInTask(state: TState): JourneyStep<*, *, TState>
+    val notionalExitStep: NavigationalStep get() = subJourneyBuilder.exitStep
+    val firstStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstStep
 }
