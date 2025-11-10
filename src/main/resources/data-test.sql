@@ -57,24 +57,12 @@ VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022
        (17,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI',true,2,'geetika.kejriwal@communities.gov.uk','Geetika Kejriwal', true),
        (18,'2025-04-22 10:55:55.704192+00','2025-04-22 10:56:23.318524+00','urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA',true,2,'catherine.graham2@communities.gov.uk','Catherine Graham', true),
        (19,'2025-10-09 12:44:47.460558+00','2025-10-09 12:44:47.460558+00','urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE',true,2,'chris.lightfoot@communities.gov.uk','Hello Name', true),
-       (20,'2025-10-23 13:07:12.755421+00','2025-10-23 13:07:32.345208+00','urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg',true,2,'Ned.FrederickCalas-Hathaway@softwire.com','Ned Calas-Hathaway',true)
+       (20,'2025-10-23 13:07:12.755421+00','2025-10-23 13:07:32.345208+00','urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg',true,2,'Ned.FrederickCalas-Hathaway@softwire.com','Ned Calas-Hathaway',true),
+       (21, '2025-10-30 11:21:48.730479+00',null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', true, 2,'dani.swift@communities.gov.uk', 'Dani Swift', true),
+       (22, '2025-11-10 12:13:21.344193+00', null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', true, 2,'rebecca.coll@communities.gov.uk','Rebecca Coll', true)
        ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
-
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, created_date)
-VALUES ('expired.invitation+1@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11111',  '05/05/2025'),
-       ('expired.invitation+2@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11112',  '05/05/2025'),
-       ('expired.invitation+3@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11113', '05/05/2025'),
-       ('expired.invitation+4@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11114',  '05/05/2025'),
-       ('expired.invitation+5@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11115',  '05/05/2025'),
-       ('expired.invitation+6@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11116',  '05/05/2025'),
-       ('expired.invitation+7@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11117',  '05/05/2025'),
-       ('expired.invitation+8@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11118',  '05/05/2025'),
-       ('expired.invitation+9@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11119',  '05/05/2025'),
-       ('expired.invitation+a@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111a',  '05/05/2025') ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('local_authority_invitation', 'id'), (SELECT MAX(id) FROM local_authority_invitation));
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
