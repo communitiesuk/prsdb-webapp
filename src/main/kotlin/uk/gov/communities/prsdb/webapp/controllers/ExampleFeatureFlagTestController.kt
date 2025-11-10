@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlaggedService
 
+// TODO PRSD-1683 - delete example feature flag implementation when no longer needed
 @PrsdbController
 @RequestMapping("/$LANDLORD_PATH_SEGMENT")
 class ExampleFeatureFlagTestController(
@@ -25,6 +26,8 @@ class ExampleFeatureFlagTestController(
             }
         model.addAttribute("ffTestHeading", exampleFeatureFlaggedService.getFeatureFlagPageHeading())
         model.addAttribute("ffConfigFeature", configFlagValue)
+
+        // TODO PRSD-1683 - delete template when no longer needed
         return "featureFlagTest"
     }
 }
