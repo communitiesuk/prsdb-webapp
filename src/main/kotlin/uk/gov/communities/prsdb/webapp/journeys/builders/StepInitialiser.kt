@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
@@ -91,7 +90,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
             state,
             backUrlOverride,
             nextDestinationProvider ?: throw JourneyInitialisationException("Step $segment has no nextDestination defined"),
-            parentage?.invoke() ?: NoParents(),
+            parentage?.invoke() ?: throw JourneyInitialisationException("Step $segment has no parentage defined"),
             unreachableStepDestination
                 ?: defaultUnreachableStepDestination
                 ?: throw JourneyInitialisationException(

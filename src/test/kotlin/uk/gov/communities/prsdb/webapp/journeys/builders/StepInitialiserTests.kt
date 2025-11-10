@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
-import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import kotlin.test.assertEquals
@@ -51,6 +50,7 @@ class StepInitialiserTests {
         val backUrlLambda = { expectedBackUrl }
         builder.backUrl(backUrlLambda)
         builder.nextUrl { "next" }
+        builder.parents { NoParents() }
 
         // Act
         builder.build(mock(), mock())
@@ -72,6 +72,7 @@ class StepInitialiserTests {
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
         builder.nextUrl { "next" }
+        builder.parents { NoParents() }
 
         // Act
         builder.build(mock(), mock())
@@ -118,6 +119,7 @@ class StepInitialiserTests {
         val builder = StepInitialiser("test", stepMock)
         val redirectLambda = { _: TestEnum -> "expectedRedirect" }
         builder.nextUrl(redirectLambda)
+        builder.parents { NoParents() }
 
         // Act
         builder.build(mock(), mock())
@@ -149,6 +151,7 @@ class StepInitialiserTests {
 
         val builder = StepInitialiser("test", stepMock)
         builder.nextStep { _: TestEnum -> nextStepMock }
+        builder.parents { NoParents() }
 
         // Act
         builder.build(mock(), mock())
@@ -212,27 +215,16 @@ class StepInitialiserTests {
     }
 
     @Test
-    fun `if no parentage is set, the step's parentage is NoParents`() {
+    fun `if no parentage is set, building the step throws an exception`() {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock)
         builder.nextUrl { "next" }
 
-        // Act
-        builder.build(mock(), mock())
-
-        // Assert by capturing the lambda and invoking it
-        val parentageCaptor = argumentCaptor<Parentage>()
-        verify(stepMock).initialize(
-            anyOrNull(),
-            anyOrNull(),
-            anyOrNull(),
-            anyOrNull(),
-            parentageCaptor.capture(),
-            anyOrNull(),
-        )
-        val result = parentageCaptor.firstValue
-        assertTrue(result is NoParents)
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            builder.build(mock(), mock())
+        }
     }
 
     @Test
@@ -258,6 +250,7 @@ class StepInitialiserTests {
             }
         }
         builder.nextUrl { "next" }
+        builder.parents { NoParents() }
 
         // Act
         builder.build(mock(), mock())
@@ -284,6 +277,7 @@ class StepInitialiserTests {
         val stepUnreachableRedirectLambda = { "expectedRedirect" }
         builder.unreachableStepUrl(stepUnreachableRedirectLambda)
         builder.nextUrl { "next" }
+        builder.parents { NoParents() }
         val defaultUnreachableRedirectLambda = { Destination.ExternalUrl("defaultRedirect") }
 
         // Act
@@ -312,6 +306,7 @@ class StepInitialiserTests {
         val builder = StepInitialiser("test", stepMock)
         builder.nextUrl { "next" }
         val defaultUnreachableRedirectLambda = { Destination.ExternalUrl("expectedRedirect") }
+        builder.parents { NoParents() }
 
         // Act
         builder.build(mock(), defaultUnreachableRedirectLambda)
