@@ -22,7 +22,10 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '2025-04-22 10:55:55.704192+00'), -- sandra.lila@communities.gov.uk
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00'), -- Team-PRSDB+systemoperator@softwire.com
        ('urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', '2025-10-09 12:44:47.460558+00'), -- chris.lightfoot@communities.gov.uk
-       ('urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg','2025-10-17 14:14:00.484077+00') -- Ned.FrederickCalas-Hathaway@softwire.com
+       ('urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg','2025-10-17 14:14:00.484077+00'), -- Ned.FrederickCalas-Hathaway@softwire.com
+       ('urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss','2025-10-30 10:59:39.724707+00'), -- dani.swift@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI','2025-11-10 12:13:21.344193+00'), -- rebecca.coll@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8','2025-11-10 15:03:08.410190+00') -- shannon.okyemba-tsambou@communities.gov.uk
        ON CONFLICT DO NOTHING;
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
@@ -153,7 +156,9 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
        (15,'2025-05-01 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'),
        (16,'2025-07-08 13:58:19.927000+00',null,'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'),
        (17,'2025-10-09 12:44:47.460558+00',null,'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'),
-       (18,'2025-10-23 13:07:12.755421+00',null,'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg')
+       (18,'2025-10-23 13:07:12.755421+00',null,'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'),
+       (19,'2025-11-10 16:02:36.605000+00',null,'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'),
+         (20,'2025-11-10 16:03:02.159000+00',null,'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI')
        ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
