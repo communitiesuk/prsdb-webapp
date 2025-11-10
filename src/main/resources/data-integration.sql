@@ -80,29 +80,16 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO property (id, status, is_active, property_build_type, address_id, created_date, last_modified_date)
-VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null),
-       (2, 1, true, 1, 2, '2025-01-15 00:00:00+00', null),
-       (3, 1, true, 1, 3, '2025-01-15 00:00:00+00', null),
-       (4, 1, true, 1, 4, '2025-01-15 00:00:00+00', null),
-       (5, 1, true, 1, 5, '2024-10-15 00:00:00+00', null),
-       (6, 1, true, 1, 6, '2024-10-15 00:00:00+00', null),
-       (7, 1, true, 1, 7, '2024-10-15 00:00:00+00', null),
-       (8, 1, true, 1, 8, '2024-10-15 00:00:00+00', null),
-       (9, 1, true, 1, 9, '2025-07-24 00:00:00+00', null) ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2),
-       (2, true, 0, 0, 0, 0, 10, 1, 2,'2025-01-15 00:00:00+00', null, 3),
-       (3, true, 0, 0, 0, 0, 11, 1, 3,'2025-01-15 00:00:00+00', null, 4),
-       (4, true, 0, 0, 0, 0, 12, 1, 4,'2025-01-15 00:00:00+00', null, 5),
-       (5, true, 0, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null),
-       (6, true, 0, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null),
-       (7, true, 0, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null),
-       (8, true, 0, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null),
-       (9, true, 0, 1, 1, 2, 17, 1, 9, '2025-07-24 00:00:00+00', null, null) ON CONFLICT DO NOTHING;
+INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, last_modified_date, incomplete_compliance_form_id, property_build_type)
+VALUES (1, true, 0, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2, 1),
+       (2, true, 0, 0, 0, 0, 10, 1, 2,'2025-01-15 00:00:00+00', null, 3, 1),
+       (3, true, 0, 0, 0, 0, 11, 1, 3,'2025-01-15 00:00:00+00', null, 4, 1),
+       (4, true, 0, 0, 0, 0, 12, 1, 4,'2025-01-15 00:00:00+00', null, 5, 1),
+       (5, true, 0, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null, 1),
+       (6, true, 0, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null, 1),
+       (7, true, 0, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null, 1),
+       (8, true, 0, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null, 1),
+       (9, true, 0, 1, 1, 2, 17, 1, 9, '2025-07-24 00:00:00+00', null, null, 1) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 

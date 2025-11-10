@@ -58,7 +58,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
 
             completedComplianceCard.getAction("Update expired or missing certificates").link.clickAndWait()
             val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
-            assertEquals(propertyDetailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
     }
 
