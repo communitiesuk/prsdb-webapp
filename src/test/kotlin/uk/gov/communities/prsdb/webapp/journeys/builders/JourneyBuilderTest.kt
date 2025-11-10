@@ -23,12 +23,234 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
+import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder.Companion.subJourney
+
+class SubJourneyBuilderTests {
+    @Test
+    fun `subJourney DSL method creates, inits but does not build a journeyBuilder`() {
+        // Arrange
+        val listToReturn = listOf(mock<StepInitialiser<*, JourneyState, *>>())
+        mockConstruction(SubJourneyBuilder::class.java) { mock, context ->
+            whenever(mock.getSteps(anyOrNull())).thenReturn(listToReturn)
+            whenever(mock.journey).thenReturn(context.arguments()[0] as JourneyState)
+        }.use { mockedBuilders ->
+
+            val state = mock<JourneyState>()
+
+            // Act
+            val unbuiltJourney =
+                subJourney(state, mock()) {
+                    unreachableStepUrl { "redirect" }
+                    step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
+                    step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
+                }
+
+            // Assert
+            val journeyBuilder = mockedBuilders.constructed().first()
+            assertSame(state, journeyBuilder.journey)
+
+            verify(journeyBuilder).unreachableStepUrl(any())
+            verify(journeyBuilder, times(2)).step(any(), any(), any())
+
+            // Zero calls to build expected here
+            verify(journeyBuilder, times(0)).build()
+            assertEquals(listToReturn, unbuiltJourney)
+        }
+    }
+
+    @Test
+    fun `If no exitStep is set, then getSteps throws as exception`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+        subJourneyBuilder.subJourneyParent(NoParents())
+        subJourneyBuilder.startingStep(
+            "segment",
+            step,
+        ) {
+            nextUrl { "url" }
+        }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            subJourneyBuilder.getSteps {}
+        }
+    }
+
+    @Test
+    fun `If an exitStep has already been set, then setting it again throws as exception`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        subJourneyBuilder.exitStep {
+            parents { NoParents() }
+        }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            subJourneyBuilder.exitStep {
+                parents { NoParents() }
+            }
+        }
+    }
+
+    @Test
+    fun `The exitStep set is passed to the sub journeys parentage`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val exitStep = subJourneyBuilder.exitStep
+        subJourneyBuilder.subJourneyParent(NoParents())
+
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+        subJourneyBuilder.startingStep("segment", step) { nextUrl { "url" } }
+
+        val parent = NoParents()
+
+        // Act
+        subJourneyBuilder.exitStep {
+            parents { parent }
+        }
+        val exitStepInitialiser =
+            subJourneyBuilder
+                .getSteps {
+                    nextUrl { "url" }
+                    unreachableStepUrl { "url" }
+                }.last()
+        val resultingStep = exitStepInitialiser.build(mock(), null)
+
+        // Assert
+        assertSame(exitStep, resultingStep)
+    }
+
+    @Test
+    fun `If no starting step is set, then getSteps throws as exception`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        subJourneyBuilder.exitStep {
+            parents { NoParents() }
+        }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            subJourneyBuilder.getSteps {}
+        }
+    }
+
+    @Test
+    fun `If a starting step has already been set, then setting it again throws as exception`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+        subJourneyBuilder.subJourneyParent(NoParents())
+        subJourneyBuilder.startingStep(
+            "segment",
+            step,
+        ) {
+            nextUrl { "url" }
+        }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            subJourneyBuilder.startingStep(
+                "segment2",
+                mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>(),
+            ) {
+                nextUrl { "url" }
+            }
+        }
+    }
+
+    @Test
+    fun `startingStep sets the first step of the sub-journey`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+        subJourneyBuilder.subJourneyParent(NoParents())
+
+        // Act
+        subJourneyBuilder.startingStep(
+            "segment",
+            step,
+        ) {
+            nextUrl { "url" }
+        }
+
+        // Assert
+        assertSame(step, subJourneyBuilder.firstStep)
+    }
+
+    @Test
+    fun `subJourneyParent sets the parentage of the sub-journey first step`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val parentage = NoParents()
+
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+
+        mockConstruction(StepInitialiser::class.java) { mock, context ->
+        }.use { constructed ->
+            // Act
+            subJourneyBuilder.subJourneyParent(parentage)
+            subJourneyBuilder.startingStep(
+                "segment",
+                step,
+            ) {
+                nextUrl { "url" }
+            }
+
+            // Assert
+            constructed.constructed().first().let {
+                val captor = argumentCaptor<() -> Parentage>()
+                verify(it).parents(captor.capture())
+                assertSame(parentage, captor.firstValue())
+            }
+        }
+    }
+
+    @Test
+    fun `subJourneyParent cannot be called twice`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        subJourneyBuilder.subJourneyParent(NoParents())
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            subJourneyBuilder.subJourneyParent(NoParents())
+        }
+    }
+
+    @Test
+    fun `If no subJourneyParentage is set, then startingStep throws an exception`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+
+        val step = mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()
+        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+
+        mockConstruction(StepInitialiser::class.java) { mock, context ->
+        }.use { constructed ->
+            // Act & Assert
+            assertThrows<JourneyInitialisationException> {
+                subJourneyBuilder.startingStep(
+                    "segment",
+                    step,
+                ) {
+                    nextUrl { "url" }
+                }
+            }
+        }
+    }
+}
 
 class JourneyBuilderTest {
     @Nested
@@ -79,38 +301,6 @@ class JourneyBuilderTest {
 
                 verify(journeyBuilder).build()
                 assertEquals(mapToReturn, journey)
-            }
-        }
-
-        @Test
-        fun `subJourney DSL method creates, inits but does not build a journeyBuilder`() {
-            // Arrange
-            val listToReturn = listOf(mock<StepInitialiser<*, JourneyState, *>>())
-            mockConstruction(SubJourneyBuilder::class.java) { mock, context ->
-                whenever(mock.getSteps(anyOrNull())).thenReturn(listToReturn)
-                whenever(mock.journey).thenReturn(context.arguments()[0] as JourneyState)
-            }.use { mockedBuilders ->
-
-                val state = mock<JourneyState>()
-
-                // Act
-                val unbuiltJourney =
-                    subJourney(state, mock()) {
-                        unreachableStepUrl { "redirect" }
-                        step("segment", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
-                        step("segment2", mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) {}
-                    }
-
-                // Assert
-                val journeyBuilder = mockedBuilders.constructed().first()
-                assertSame(state, journeyBuilder.journey)
-
-                verify(journeyBuilder).unreachableStepUrl(any())
-                verify(journeyBuilder, times(2)).step(any(), any(), any())
-
-                // Zero calls to build expected here
-                verify(journeyBuilder, times(0)).build()
-                assertEquals(listToReturn, unbuiltJourney)
             }
         }
 
