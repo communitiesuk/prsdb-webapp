@@ -21,19 +21,12 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-
-INSERT INTO property (id, status, is_active, property_build_type, address_id)
-VALUES (1, 1, true, 1, 2),
-       (2, 1, true, 1, 3),
-       (3, 1, true, 1, 4);
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
 INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households,
                                 current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date)
-VALUES (1, true, 0, 1, 1, 2, 2, 1, 1, '3/26/25'),
-       (2, true, 0, 1, 1, 2, 3, 1, 2, '3/26/25'),
-       (3, true, 0, 1, 1, 2, 4, 1, 3, '3/26/25');
+                                registration_number_id, primary_landlord_id, address_id, created_date, property_build_type)
+VALUES (1, true, 0, 1, 1, 2, 2, 1, 2, '3/26/25', 1),
+       (2, true, 0, 1, 1, 2, 3, 1, 3, '3/26/25', 1),
+       (3, true, 0, 1, 1, 2, 4, 1, 4, '3/26/25', 1);
 
 INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
 VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');

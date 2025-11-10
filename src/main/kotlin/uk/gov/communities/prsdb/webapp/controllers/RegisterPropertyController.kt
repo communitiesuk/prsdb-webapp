@@ -126,7 +126,7 @@ class RegisterPropertyController(
                     "No property ownership with registration number $propertyRegistrationNumber was found in the database",
                 )
 
-        model.addAttribute("singleLineAddress", propertyOwnership.property.address.singleLineAddress)
+        model.addAttribute("singleLineAddress", propertyOwnership.address.singleLineAddress)
         model.addAttribute(
             "prn",
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),

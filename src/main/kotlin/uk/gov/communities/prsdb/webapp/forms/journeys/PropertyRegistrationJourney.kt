@@ -597,7 +597,7 @@ class PropertyRegistrationJourney(
             val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             propertyRegistrationService.registerProperty(
-                address = address,
+                addressModel = address,
                 propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(filteredJourneyData)!!,
                 licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!,
                 licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(filteredJourneyData)!!,
