@@ -800,11 +800,11 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `deletePropertyOwnership calls delete on the propertyOwnershipRepository`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val propertyOwnershipId = 1L
 
-        propertyOwnershipService.deletePropertyOwnership(propertyOwnership)
+        propertyOwnershipService.deletePropertyOwnership(propertyOwnershipId)
 
-        verify(mockPropertyOwnershipRepository).delete(propertyOwnership)
+        verify(mockPropertyOwnershipRepository).deleteById(propertyOwnershipId)
     }
 
     @Test

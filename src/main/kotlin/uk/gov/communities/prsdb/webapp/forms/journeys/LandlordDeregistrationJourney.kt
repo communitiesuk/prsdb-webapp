@@ -1,4 +1,5 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys
+
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 class LandlordDeregistrationJourney(
@@ -30,6 +32,7 @@ class LandlordDeregistrationJourney(
     journeyDataService: JourneyDataService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val landlordService: LandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
     private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
@@ -104,7 +107,7 @@ class LandlordDeregistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            handleSubmitAndRedirect = { _, _, _ -> deregisterLandlordAndProperties(userHadActiveProperties = true) },
+            handleSubmitAndRedirect = { _, _, _ -> deregisterLandlordAndRedirectToConfirmationPage() },
             saveAfterSubmit = false,
         )
 
@@ -114,9 +117,7 @@ class LandlordDeregistrationJourney(
     ): String {
         if (filteredJourneyData.getWantsToProceed()!!) {
             if (!filteredJourneyData.getLandlordUserHasRegisteredProperties()!!) {
-                // journeyData.getLandlordUserHasRegisteredProperties() only checked for active, registered properties.
-                // To delete the landlord, we must first delete all their properties including inactive ones.
-                return deregisterLandlordAndProperties(userHadActiveProperties = false)
+                return deregisterLandlordAndRedirectToConfirmationPage()
             }
             val areYouSureStep = steps.single { it.id == DeregisterLandlordStepId.AreYouSure }
             return getRedirectForNextStep(areYouSureStep, filteredJourneyData, subPageNumber)
@@ -124,16 +125,19 @@ class LandlordDeregistrationJourney(
         return LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
     }
 
-    private fun deregisterLandlordAndProperties(userHadActiveProperties: Boolean): String {
+    private fun deregisterLandlordAndRedirectToConfirmationPage(): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val landlordEmailAddress = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email
-        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(userHadActiveProperties)
 
-        val deregisteredProperties = landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
-        if (!userHadActiveProperties) {
+        val landlordProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordProperties.isNotEmpty())
+
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+
+        if (landlordProperties.isEmpty()) {
             confirmationWithNoPropertiesEmailSender.sendEmail(landlordEmailAddress, LandlordNoPropertiesDeregistrationConfirmationEmail())
         } else {
-            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(deregisteredProperties)
+            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(landlordProperties)
 
             confirmationWithPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
