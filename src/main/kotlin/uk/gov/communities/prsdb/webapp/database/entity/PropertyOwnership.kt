@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -10,11 +9,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import java.time.OffsetDateTime
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -22,15 +18,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
-    var isActive: Boolean = false
-
-    @Temporal(TemporalType.TIMESTAMP)
-    lateinit var tenancyStartDate: OffsetDateTime
-        private set
-
     @Column(nullable = false)
-    lateinit var occupancyType: OccupancyType
-        private set
+    var isActive: Boolean = false
 
     @Column(nullable = false)
     lateinit var ownershipType: OwnershipType
@@ -42,42 +31,29 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     var currentNumTenants: Int = 0
 
     @OneToOne(optional = false)
-    @JoinColumn(
-        name = "registration_number_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_REGISTRATION_NUMBER"),
-    )
+    @JoinColumn(name = "registration_number_id", nullable = false, unique = true)
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @ManyToOne
-    @JoinColumn(
-        name = "primary_landlord_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_PRIMARY_LANDLORD"),
-    )
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "primary_landlord_id", nullable = false)
     lateinit var primaryLandlord: Landlord
         private set
 
+    @Column(nullable = false)
+    lateinit var propertyBuildType: PropertyType
+
     @ManyToOne(optional = false)
-    @JoinColumn(
-        name = "property_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_PROPERTY"),
-    )
-    lateinit var property: Property
+    @JoinColumn(name = "address_id", nullable = false)
+    lateinit var address: Address
         private set
 
-    @OneToOne
-    @JoinColumn(name = "license_id", nullable = true, foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_LICENSE"))
+    @OneToOne(optional = true)
+    @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
 
-    @OneToOne
-    @JoinColumn(
-        name = "incomplete_compliance_form_id",
-        nullable = true,
-        foreignKey = ForeignKey(name = "FK_PROPERTY_OWNERSHIP_INCOMPLETE_COMPLIANCE_FORM"),
-    )
+    @OneToOne(optional = true)
+    @JoinColumn(name = "incomplete_compliance_form_id", nullable = true, unique = true)
     var incompleteComplianceForm: FormContext? = null
 
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
@@ -85,27 +61,27 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         private set
 
     constructor(
-        occupancyType: OccupancyType,
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         registrationNumber: RegistrationNumber,
         primaryLandlord: Landlord,
-        property: Property,
+        propertyBuildType: PropertyType,
+        address: Address,
         license: License?,
         incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
     ) : this() {
-        this.isActive = isActive
-        this.occupancyType = occupancyType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
         this.primaryLandlord = primaryLandlord
-        this.property = property
+        this.propertyBuildType = propertyBuildType
+        this.address = address
         this.license = license
         this.incompleteComplianceForm = incompleteComplianceForm
+        this.isActive = isActive
     }
 
     val isOccupied: Boolean

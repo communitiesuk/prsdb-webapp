@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -13,17 +13,15 @@ class CheckAnswersPageLandlordRegistration(
 ) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
     fun confirmAndSubmit() = form.submit()
 
-    val form = CheckAnswersLandlordRegistration(page)
+    val form = PostForm(page)
 
-    class CheckAnswersLandlordRegistration(
-        page: Page,
-    ) : FormWithSectionHeader(page) {
-        val summaryList = CheckAnswersLandlordRegistrationSummaryList(locator)
-    }
+    val sectionHeader = SectionHeader(page.locator("html"))
+
+    val summaryList = CheckAnswersLandlordRegistrationSummaryList(page)
 
     class CheckAnswersLandlordRegistrationSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
+        page: Page,
+    ) : SummaryList(page) {
         val emailRow = getRow("Email address")
     }
 }

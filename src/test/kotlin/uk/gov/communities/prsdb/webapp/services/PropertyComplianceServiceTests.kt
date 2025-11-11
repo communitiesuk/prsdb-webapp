@@ -465,7 +465,7 @@ class PropertyComplianceServiceTests {
         // Assert
         val expectedEmailModel =
             ComplianceUpdateConfirmationEmail(
-                propertyAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                propertyAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel.fromRegistrationNumber(
                         propertyCompliance.propertyOwnership.registrationNumber,

@@ -116,8 +116,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode),
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.ManualAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.ManualAddress.urlPathSegment}",
+                    RegisterPropertyStepId.LookupAddress.urlPathSegment +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LookupAddress.urlPathSegment}",
                 ),
             ),
             propertyDetails.single {

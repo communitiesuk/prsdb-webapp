@@ -21,14 +21,14 @@ data class RegisteredPropertyLocalCouncilViewModel(
             currentUrlKey: Int? = null,
         ): RegisteredPropertyLocalCouncilViewModel =
             RegisteredPropertyLocalCouncilViewModel(
-                address = propertyOwnership.property.address.singleLineAddress,
+                address = propertyOwnership.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(
                             propertyOwnership.registrationNumber,
                         ).toString(),
                 localAuthorityName =
-                    propertyOwnership.property.address.localAuthority!!
+                    propertyOwnership.address.localAuthority!!
                         .name,
                 licenseTypeMessageKey =
                     MessageKeyConverter.convert(
@@ -54,7 +54,7 @@ data class RegisteredPropertyLandlordViewModel(
             currentUrlKey: Int? = null,
         ): RegisteredPropertyLandlordViewModel =
             RegisteredPropertyLandlordViewModel(
-                address = propertyOwnership.property.address.singleLineAddress,
+                address = propertyOwnership.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(

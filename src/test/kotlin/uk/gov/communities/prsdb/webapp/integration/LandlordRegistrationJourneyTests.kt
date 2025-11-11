@@ -5,7 +5,6 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -28,8 +27,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -52,10 +49,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @BeforeEach
     fun setup() {
-        whenever(osPlacesClient.search(any(), any(), eq(false))).thenReturn(
-            MockOSPlacesAPIResponses.createResponse(AddressDataModel("1, Example Road, EG1 2AB")),
-        )
-
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
     }
 
@@ -73,11 +66,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
-        assertThat(privacyNoticePage.form.sectionHeader).containsText("Section 1 of 3 \u2014 Privacy notice")
+        assertThat(privacyNoticePage.sectionHeader).containsText("Section 1 of 3 \u2014 Privacy notice")
         privacyNoticePage.agreeAndSubmit()
 
         val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
-        assertThat(confirmIdentityPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
+        assertThat(confirmIdentityPage.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         confirmIdentityPage.confirm()
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
@@ -94,14 +87,14 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
         assertThat(lookupAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
         assertThat(selectAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
-        selectAddressPage.selectAddressAndSubmit("1, Example Road, EG1 2AB")
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        assertThat(checkAnswersPage.form.sectionHeader).containsText("Section 3 of 3 \u2014 Check and submit registration")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 3 of 3 \u2014 Check and submit registration")
         checkAnswersPage.confirmAndSubmit()
 
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
@@ -151,7 +144,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         countryOfResidencePage.submitUk()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
         selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
@@ -161,7 +154,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualAddressPage.submitAddress(
             addressLineOne = "1 Example Road",
             townOrCity = "Townville",
-            postcode = "EG1 2AB",
+            postcode = "EG1 2AA",
         )
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)

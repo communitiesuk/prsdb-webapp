@@ -1,0 +1,47 @@
+{
+  "dwelling_time_all": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "all",
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_14d": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": [
+      "time_on_page", "pageviews"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_1": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-01","2025-09-10"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  },
+  "dwelling_time_2": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": ["2025-09-11","2025-09-24"],
+    "metrics": [
+      "time_on_page"
+    ],
+    "dimensions": [
+      "event:page"
+    ],
+    "include": {"total_rows": true}
+  }
+}
+

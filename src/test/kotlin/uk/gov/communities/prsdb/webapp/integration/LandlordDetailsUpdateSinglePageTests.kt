@@ -4,14 +4,12 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 
 class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -56,9 +54,8 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         @Test
         fun `A landlord can search again or choose manual address via the No Address Found page if no addresses are found`(page: Page) {
             // Arrange for no addresses to be found
-            val houseNumber = "15"
-            val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode, false)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
+            val houseNumber = "NOT A HOUSE NUMBER"
+            val postcode = "NOT A POSTCODE"
 
             // Lookup Address page
             val lookupAddressPage = navigator.goToUpdateLandlordDetailsUpdateLookupAddressPage()

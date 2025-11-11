@@ -10,12 +10,18 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.LA_USERS_INVITED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityAdminUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
@@ -28,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCounci
 class LocalAuthorityDataService(
     private val localAuthorityUserRepository: LocalAuthorityUserRepository,
     private val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
+    private val invitationService: LocalAuthorityInvitationService,
     private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -64,7 +71,7 @@ class LocalAuthorityDataService(
     fun getLocalAuthorityUserIfAuthorizedLA(
         localAuthorityUserId: Long,
         localAuthorityId: Int,
-    ): LocalAuthorityUserDataModel {
+    ): LocalAuthorityUser {
         val localAuthorityUser =
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId not found")
@@ -73,13 +80,7 @@ class LocalAuthorityDataService(
             throw AccessDeniedException("Local authority user $localAuthorityUserId does not belong to LA $localAuthorityId")
         }
 
-        return LocalAuthorityUserDataModel(
-            localAuthorityUserId,
-            localAuthorityUser.name,
-            localAuthorityUser.localAuthority.name,
-            localAuthorityUser.isManager,
-            localAuthorityUser.email,
-        )
+        return localAuthorityUser
     }
 
     fun getPaginatedUsersAndInvitations(
@@ -105,17 +106,38 @@ class LocalAuthorityDataService(
                         userNameOrEmail = it.name,
                         localAuthorityName = localAuthority.name,
                         isManager = it.isManager,
-                        isPending = it.entityType == "local_authority_invitation",
+                        isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
                     )
                 }
         }
+
         return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest).map {
             LocalAuthorityUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
                 localAuthorityName = localAuthority.name,
                 isManager = it.isManager,
-                isPending = it.entityType == "local_authority_invitation",
+                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
+            )
+        }
+    }
+
+    fun getPaginatedAdminUsersAndInvitations(
+        currentPageNumber: Int,
+        pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
+    ): Page<LocalAuthorityAdminUserOrInvitationDataModel> {
+        val pageRequest =
+            PageRequest.of(
+                currentPageNumber,
+                pageSize,
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localAuthority.name"), Sort.Order.asc("name")),
+            )
+        return localAuthorityUserOrInvitationRepository.findAllByIsManagerTrue(pageRequest).map {
+            LocalAuthorityAdminUserOrInvitationDataModel(
+                id = it.id,
+                userNameOrEmail = it.name,
+                localAuthorityName = it.localAuthority.name,
+                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
         }
     }
@@ -134,12 +156,8 @@ class LocalAuthorityDataService(
         localAuthorityUserRepository.save(localAuthorityUser)
     }
 
-    fun deleteUser(localAuthorityUserId: Long) {
-        val localAuthorityUser =
-            localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
-
-        localAuthorityUserRepository.deleteById(localAuthorityUserId)
+    fun deleteUser(localAuthorityUser: LocalAuthorityUser) {
+        localAuthorityUserRepository.deleteById(localAuthorityUser.id)
 
         deletionConfirmationSender.sendEmail(
             localAuthorityUser.email,
@@ -233,7 +251,81 @@ class LocalAuthorityDataService(
         return localAuthorityUser
     }
 
+    fun getLocalAuthorityUserById(localAuthorityUserId: Long): LocalAuthorityUser =
+        localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local authority users with ID $localAuthorityUserId not found")
+
     fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
 
     fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
+
+    fun getUsersDeletedThisSession(): MutableList<LocalAuthorityUser> =
+        session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalAuthorityUser>?
+            ?: mutableListOf()
+
+    fun getUserDeletedThisSessionById(localAuthorityUserId: Long): LocalAuthorityUser {
+        val deletedUser =
+            getUsersDeletedThisSession().find { it.id == localAuthorityUserId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User with id $localAuthorityUserId was not found in the list of deleted users in the session",
+                )
+
+        throwErrorIfLocalAuthorityUserExists(deletedUser)
+
+        return deletedUser
+    }
+
+    private fun throwErrorIfLocalAuthorityUserExists(localAuthorityUser: LocalAuthorityUser) {
+        if (localAuthorityUserRepository.existsById(localAuthorityUser.id)) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "User with id ${localAuthorityUser.id} is still in the local_authority_user table",
+            )
+        }
+    }
+
+    fun addDeletedUserToSession(deletedUser: LocalAuthorityUser) =
+        session.setAttribute(
+            LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION,
+            getUsersDeletedThisSession().plus(deletedUser),
+        )
+
+    fun getInvitationsCancelledThisSession(): MutableList<LocalAuthorityInvitation> =
+        session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<LocalAuthorityInvitation>?
+            ?: mutableListOf()
+
+    fun getInvitationCancelledThisSessionById(invitationId: Long): LocalAuthorityInvitation {
+        val invitation =
+            getInvitationsCancelledThisSession().find { it.id == invitationId }
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Invitation with id $invitationId was not found in the list of cancelled invitations in the session",
+                )
+
+        invitationService.throwErrorIfInvitationExists(invitation)
+
+        return invitation
+    }
+
+    fun addCancelledInvitationToSession(invitation: LocalAuthorityInvitation) =
+        session.setAttribute(
+            LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
+            getInvitationsCancelledThisSession().plus(invitation),
+        )
+
+    fun getLastLocalAuthorityUserInvitedThisSession(localAuthorityId: Int): String? =
+        getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }?.second
+
+    private fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
+        session.getAttribute(LA_USERS_INVITED_THIS_SESSION) as MutableList<Pair<Int, String>>?
+            ?: mutableListOf()
+
+    fun addInvitedLocalAuthorityUserToSession(
+        localAuthorityId: Int,
+        invitedEmail: String,
+    ) = session.setAttribute(
+        LA_USERS_INVITED_THIS_SESSION,
+        getLocalAuthorityUsersInvitedThisSession().plus(Pair(localAuthorityId, invitedEmail)),
+    )
 }

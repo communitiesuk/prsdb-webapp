@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{manageLAAdminUsers.title}, ~{::body/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <th:block id="page-contents"
+              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{manageLAAdminUsers.header}">
+                manageLAAdminUsers.header
+            </h1>
+        </header>
+        <section>
+            <table th:replace="~{fragments/tables/table :: table(
+                            ${ { 'common.userManagement.username', 'manageLAAdminUsers.table.heading.localCouncil', 'common.userManagement.accountStatus', '' } },
+                            ~{::tbody},
+                            null
+                        )}
+                    ">
+                <tbody class="govuk-table__body">
+                <tr class="govuk_table__row" th:each="user: ${userList}">
+                    <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
+                    <td class="govuk-table__cell" th:text="${user.localAuthorityName}"></td>
+                    <td class="govuk-table__cell">
+                        <span class="govuk-tag"
+                              th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
+                            <strong th:text="${user.pending} ? #{common.userManagement.accountStatus.pending} : #{common.userManagement.accountStatus.active}"></strong>
+                        </span>
+                    </td>
+                    <td class="govuk-table__cell">
+                        <a th:href="@{${user.pending ? cancelInvitationPathSegment + '/' + user.id : editUserPathSegment + '/' + user.id}}"
+                           class="govuk-link"
+                           th:text="#{forms.links.change}"
+                        >
+                            forms.links.change
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+
+            <div th:if="${userList.content.size() == 0}">
+                <h2 class="govuk-heading-m" th:text="#{manageLAAdminUsers.noAdminsText}"></h2>
+            </div>
+            <div class="govuk-button-group" id="action-buttons">
+                <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAdminsUrl}},#{manageLAAdminUsers.button.inviteAnotherAdminUser})}"></button>
+            </div>
+        </section>
+    </th:block>
+</main>
+</body>
+</html>

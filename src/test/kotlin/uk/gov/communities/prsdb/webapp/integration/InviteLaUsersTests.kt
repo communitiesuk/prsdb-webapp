@@ -26,9 +26,9 @@ class InviteLaUsersTests : IntegrationTestWithMutableData("data-local.sql") {
             .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
         whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https:gov.uk"))
 
-        val invitePage = navigator.goToInviteNewLaUser(2)
+        val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.submitMatchingEmail("test@example.com")
-        val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class)
+        val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class, mapOf("localAuthorityId" to "1"))
         assertThat(successPage.confirmationBanner).containsText("You’ve sent test@example.com an invite to the database")
 
         verify(invitationConfirmationSenderAdmin, times(5)).sendEmail(
