@@ -89,6 +89,9 @@ class DefaultSecurityConfig(
     }
 
     companion object {
+        // The permission policy directives are from:
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
+        // This is the list of permissions that we are blocking.
         const val PERMISSIONS_POLICY_DIRECTIVES =
             "accelerometer=(), ambient-light-sensor=(), aria-notify=(), attribution-reporting=(), " +
                 "autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), " +
