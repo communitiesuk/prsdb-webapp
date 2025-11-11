@@ -18,7 +18,10 @@ import org.springframework.security.web.context.SecurityContextRepository
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT
+import uk.gov.communities.prsdb.webapp.constants.REGION_1_GOOGLE_ANALYTICS
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
@@ -63,6 +66,12 @@ class DefaultSecurityConfig(
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**")
+            }.headers { headers ->
+                headers
+                    .contentSecurityPolicy { csp ->
+                        csp
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES).reportOnly()
+                    }
             }
 
         return http.build()
@@ -80,5 +89,11 @@ class DefaultSecurityConfig(
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/$SIGN_OUT_PATH_SEGMENT")
         oidcLogoutSuccessHandler.setDefaultTargetUrl("/$SIGN_OUT_PATH_SEGMENT")
         return oidcLogoutSuccessHandler
+    }
+
+    companion object {
+        const val CONTENT_SECURITY_POLICY_DIRECTIVES =
+            "default-src 'self'; script-src 'self' $GOOGLE_TAG_MANAGER $PLAUSIBLE_SCRIPT; " +
+                "connect-src $REGION_1_GOOGLE_ANALYTICS;"
     }
 }
