@@ -92,7 +92,7 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLaUserRegistration::class)
 
         // Check answers page - render
-        assertThat(checkAnswersPage.form.fieldsetHeading).containsText("Check your answers")
+        assertThat(checkAnswersPage.heading).containsText("Check your answers")
         // Submit and go to next page
         checkAnswersPage.form.submit()
         val confirmationPage = assertPageIs(page, ConfirmationPageLaUserRegistration::class)
@@ -105,7 +105,7 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
         val laUserCaptor = captor<LocalAuthorityUser>()
         verify(laUserRepository).save(laUserCaptor.capture())
 
-        assertThat(confirmationPage.bannerHeading).containsText("You've registered as a ${laUserCaptor.value.localAuthority.name} user")
+        assertThat(confirmationPage.bannerHeading).containsText("You’ve registered as a ${laUserCaptor.value.localAuthority.name} user")
         assertThat(confirmationPage.bodyHeading).containsText("What happens next")
 
         // Return to dashboard button

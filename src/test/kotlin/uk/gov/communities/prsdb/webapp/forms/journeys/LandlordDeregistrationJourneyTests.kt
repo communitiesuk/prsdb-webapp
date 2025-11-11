@@ -145,7 +145,7 @@ class LandlordDeregistrationJourneyTests {
                     PropertyDetailsEmailSection(
                         1,
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnedByLandlord.registrationNumber).toString(),
-                        propertyOwnedByLandlord.property.address.singleLineAddress,
+                        propertyOwnedByLandlord.address.singleLineAddress,
                     ),
                 ),
             )

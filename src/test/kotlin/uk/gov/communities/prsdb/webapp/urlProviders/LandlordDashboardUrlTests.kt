@@ -198,18 +198,16 @@ class LandlordDashboardUrlTests(
         val mockLandlordRepository = mock<LandlordRepository>()
         val propertyRegistrationService =
             PropertyRegistrationService(
-                mock(),
-                mock(),
-                mockLandlordRepository,
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mockPropertyOwnershipService,
-                mock(),
-                absoluteUrlProvider,
-                mockEmailNotificationService,
+                propertyOwnershipRepository = mock(),
+                landlordRepository = mockLandlordRepository,
+                formContextRepository = mock(),
+                registeredAddressCache = mock(),
+                addressService = mock(),
+                licenseService = mock(),
+                propertyOwnershipService = mockPropertyOwnershipService,
+                session = mock(),
+                absoluteUrlProvider = absoluteUrlProvider,
+                confirmationEmailSender = mockEmailNotificationService,
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)
@@ -234,8 +232,8 @@ class LandlordDashboardUrlTests(
 
         // Act
         propertyRegistrationService.registerProperty(
-            address = AddressDataModel.fromAddress(propertyOwnership.property.address),
-            propertyType = propertyOwnership.property.propertyBuildType,
+            addressModel = AddressDataModel.fromAddress(propertyOwnership.address),
+            propertyType = propertyOwnership.propertyBuildType,
             licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
             licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
             ownershipType = propertyOwnership.ownershipType,

@@ -17,7 +17,7 @@ class PropertyDetailsViewModel(
     private val hideNullUprn: Boolean = true,
     landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
 ) {
-    val address: String = propertyOwnership.property.address.singleLineAddress
+    val address: String = propertyOwnership.address.singleLineAddress
 
     private val baseChangeLink = PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnership.id)
 
@@ -51,10 +51,10 @@ class PropertyDetailsViewModel(
                     RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                 )
                 addRow("propertyDetails.propertyRecord.address", address)
-                if (propertyOwnership.property.address.uprn != null) {
+                if (propertyOwnership.address.uprn != null) {
                     addRow(
                         "propertyDetails.propertyRecord.uprn",
-                        propertyOwnership.property.address.uprn
+                        propertyOwnership.address.uprn
                             .toString(),
                     )
                 } else if (!hideNullUprn) {
@@ -62,12 +62,12 @@ class PropertyDetailsViewModel(
                 }
                 addRow(
                     "propertyDetails.propertyRecord.localAuthority",
-                    propertyOwnership.property.address.localAuthority
+                    propertyOwnership.address.localAuthority
                         ?.name,
                 )
                 addRow(
                     "propertyDetails.propertyRecord.propertyType",
-                    MessageKeyConverter.convert(propertyOwnership.property.propertyBuildType),
+                    MessageKeyConverter.convert(propertyOwnership.propertyBuildType),
                 )
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",

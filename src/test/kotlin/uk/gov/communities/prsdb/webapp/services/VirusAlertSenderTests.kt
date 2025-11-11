@@ -56,10 +56,7 @@ class VirusAlertSenderTests {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = MockLandlordData.createLandlord(email = landlordEmail),
-                property =
-                    MockLandlordData.createProperty(
-                        address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
-                    ),
+                address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
             )
 

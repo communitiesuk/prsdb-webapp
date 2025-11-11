@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ConfirmDeleteLaUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaUserSuccessPage
@@ -10,14 +12,20 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import java.net.URI
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
+    @BeforeEach
+    fun setupAbsoluteUrlProvider() {
+        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+    }
+
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent
-        var manageUsersPage = navigator.goToManageLaUsers(2)
+        var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
         assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Basic")
 
@@ -46,7 +54,7 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `a user can be deleted`(page: Page) {
         // Edit Arthur Dent
-        var manageUsersPage = navigator.goToManageLaUsers(2)
+        var manageUsersPage = navigator.goToManageLaUsers(1)
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
         manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
         val editUserPage = assertPageIs(page, EditLaUserPage::class)
@@ -57,12 +65,12 @@ class EditLAUserTests : IntegrationTestWithMutableData("data-local.sql") {
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur Dent")
         assertThat(confirmDeletePage.userDetailsSection).containsText("Arthur.Dent@test.com")
         confirmDeletePage.form.submit()
-        val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class)
+        val successPage = assertPageIs(page, DeleteLaUserSuccessPage::class, mapOf("localAuthorityId" to "1", "deleteeId" to "3"))
 
         // The success page confirms the user is deleted
         assertThat(
             successPage.confirmationBanner,
-        ).containsText("You've removed Arthur Dent's account from BATH AND NORTH EAST SOMERSET COUNCIL")
+        ).containsText("You’ve removed Arthur Dent’s account from BATH AND NORTH EAST SOMERSET COUNCIL")
         successPage.returnButton.clickAndWait()
         manageUsersPage = assertPageIs(page, ManageLaUsersPage::class)
 

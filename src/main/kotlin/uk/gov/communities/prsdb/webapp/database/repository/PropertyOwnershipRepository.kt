@@ -6,40 +6,23 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
+// The underscore tells JPA to access fields relating to the referenced table
+@Suppress("ktlint:standard:function-naming")
 interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
-    // The underscore tells JPA to access fields relating to the referenced table
-    @Suppress("ktlint:standard:function-naming")
-    fun existsByIsActiveTrueAndProperty_Id(id: Long): Boolean
+    fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 
-    @Suppress("ktlint:standard:function-naming", "ktlint:standard:max-line-length")
-    fun countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+    fun countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
         userId: String,
-        status: RegistrationStatus,
         currentNumTenantsIsGreaterThan: Int,
-    ): Long
+    ): Int
 
-    // This returns all active PropertyOwnerships for a given landlord from their baseUser_Id with a particular RegistrationStatus
-    @Suppress("ktlint:standard:function-naming")
-    fun findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
-        userId: String,
-        status: RegistrationStatus,
-    ): List<PropertyOwnership>
+    fun findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
 
-    @Suppress("ktlint:standard:function-naming")
-    fun findAllByPrimaryLandlord_BaseUser_Id(userId: String): List<PropertyOwnership>
+    fun findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 
-    @Suppress("ktlint:standard:function-naming")
     fun findByRegistrationNumber_Number(registrationNumber: Long): PropertyOwnership?
-
-    // This returns all active PropertyOwnerships for a given landlord from their landlord_Id with a particular RegistrationStatus
-    @Suppress("ktlint:standard:function-naming")
-    fun findAllByPrimaryLandlord_IdAndIsActiveTrueAndProperty_Status(
-        landlordId: Long,
-        status: RegistrationStatus,
-    ): List<PropertyOwnership>
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
@@ -62,8 +45,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
-            "JOIN property p ON po.property_id = p.id " +
-            "JOIN address a ON p.address_id = a.id " +
+            "JOIN address a ON po.address_id = a.id " +
             "WHERE po.is_active AND a.uprn = :searchUPRN " +
             FILTERS,
         nativeQuery = true,
@@ -79,8 +61,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
-            "JOIN property p ON po.property_id = p.id " +
-            "JOIN address a ON p.address_id = a.id " +
+            "JOIN address a ON po.address_id = a.id " +
             "WHERE po.is_active AND a.single_line_address %> :searchTerm " +
             FILTERS +
             "ORDER BY a.single_line_address <->> :searchTerm",
@@ -102,9 +83,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         private const val LA_FILTER =
             """
             AND ((SELECT a.local_authority_id 
-                  FROM property p 
-                  JOIN address a ON p.address_id = a.id 
-                  WHERE po.property_id = p.id)
+                  FROM address a 
+                  WHERE po.address_id = a.id)
                  =
                  (SELECT la.id 
                   FROM local_authority la

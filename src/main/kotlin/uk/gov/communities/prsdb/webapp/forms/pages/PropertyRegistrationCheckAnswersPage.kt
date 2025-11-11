@@ -21,6 +21,7 @@ class PropertyRegistrationCheckAnswersPage(
             mapOf(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         templateName = "forms/propertyRegistrationCheckAnswersForm",
@@ -72,7 +73,7 @@ class PropertyRegistrationCheckAnswersPage(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 address.singleLineAddress,
-                RegisterPropertyStepId.ManualAddress.urlPathSegment,
+                RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",

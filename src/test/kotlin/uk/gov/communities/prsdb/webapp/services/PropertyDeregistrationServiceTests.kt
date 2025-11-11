@@ -8,15 +8,13 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class PropertyDeregistrationServiceTests {
-    @Mock
-    private lateinit var mockPropertyService: PropertyService
-
     @Mock
     private lateinit var mockLicenceService: LicenseService
 
@@ -36,7 +34,7 @@ class PropertyDeregistrationServiceTests {
     private lateinit var mockFormContextService: FormContextService
 
     @Test
-    fun `deregisterProperty deletes the property, license, compliance and property ownership`() {
+    fun `deregisterProperty deletes the license, compliance and property ownership`() {
         val licence = License()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(license = licence)
         val propertyOwnershipId = propertyOwnership.id
@@ -46,22 +44,16 @@ class PropertyDeregistrationServiceTests {
 
         verify(mockPropertyComplianceService).deletePropertyComplianceByOwnershipId(propertyOwnership.id)
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnership)
-        verify(mockPropertyService).deleteProperty(propertyOwnership.property)
         verify(mockLicenceService).deleteLicense(licence)
     }
 
     @Test
-    fun `deregisterProperties deletes the property, license, compliance and property ownership for all properties`() {
+    fun `deregisterProperties deletes the license, compliance and property ownership for all properties`() {
         val license = License()
-        val properties =
-            listOf(
-                MockLandlordData.createProperty(),
-                MockLandlordData.createProperty(),
-            )
         val propertyOwnerships =
             listOf(
-                MockLandlordData.createPropertyOwnership(license = license, property = properties[0]),
-                MockLandlordData.createPropertyOwnership(property = properties[1]),
+                MockLandlordData.createPropertyOwnership(license = license),
+                MockLandlordData.createPropertyOwnership(),
             )
 
         val propertyOwnershipIds = propertyOwnerships.map { it.id }
@@ -70,7 +62,6 @@ class PropertyDeregistrationServiceTests {
 
         verify(mockPropertyComplianceService).deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
         verify(mockPropertyOwnershipService).deletePropertyOwnerships(propertyOwnerships)
-        verify(mockPropertyService).deleteProperties(properties)
         verify(mockLicenceService).deleteLicenses(listOf(license))
     }
 
@@ -110,43 +101,41 @@ class PropertyDeregistrationServiceTests {
     }
 
     @Test
-    fun `addDeregisteredPropertyAndOwnershipIdsToSession appends a new pair of entity ids if some are already stored in the session`() {
+    fun `addDeregisteredPropertyAndOwnershipIdsToSession adds a property ownership Id to the ones stored in the session`() {
         // Arrange
         val propertyOwnershipId = 123.toLong()
-        val propertyId = 234.toLong()
-        val existingPropertyEntityIdPairs =
-            mutableListOf(
-                Pair(456.toLong(), 567.toLong()),
-                Pair(789.toLong(), 890.toLong()),
-            )
-        whenever(mockHttpSession.getAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS)).thenReturn(existingPropertyEntityIdPairs)
+        val existingPropertyOwnershipIds = mutableListOf(456, 789)
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(existingPropertyOwnershipIds)
 
         // Act
-        propertyDeregistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyId)
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
 
         // Assert
-        verify(mockHttpSession).setAttribute(
-            PROPERTY_DEREGISTRATION_ENTITY_IDS,
-            mutableListOf(
-                Pair(456.toLong(), 567.toLong()),
-                Pair(789.toLong(), 890.toLong()),
-                Pair(123.toLong(), 234.toLong()),
-            ),
-        )
+        verify(mockHttpSession).setAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION, existingPropertyOwnershipIds + propertyOwnershipId)
     }
 
     @Test
-    fun `addDeregisteredPropertyAndOwnershipIdsToSession stores a list of entity pairs in the session`() {
+    fun `getDeregisteredPropertyOwnershipIdsFromSession returns a list of property ownership Ids in the session`() {
         // Arrange
-        val propertyOwnershipId = 123.toLong()
-        val propertyId = 234.toLong()
-        whenever(mockHttpSession.getAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS))
-            .thenReturn(mutableListOf<Pair<Long, Long>>())
+        val deregisteredPropertyOwnershipIds = mutableListOf(456L, 789L)
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(deregisteredPropertyOwnershipIds)
 
         // Act
-        propertyDeregistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyId)
+        val results = propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()
 
         // Assert
-        verify(mockHttpSession).setAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS, mutableListOf(Pair(propertyOwnershipId, propertyId)))
+        assertEquals(deregisteredPropertyOwnershipIds, results)
+    }
+
+    @Test
+    fun `getDeregisteredPropertyOwnershipIdsFromSession returns empty list if no property ownerships were deregistered in the session`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(null)
+
+        // Act
+        val results = propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()
+
+        // Assert
+        assertEquals(emptyList(), results)
     }
 }

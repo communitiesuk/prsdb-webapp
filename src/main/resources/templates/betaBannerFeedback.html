@@ -1,14 +1,26 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="betaFeedbackModel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="feedbackUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="referrerHeader" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{betaBannerFeedback.heading}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, null)}">
-    <th:block th:replace="~{forms/betaBannerFeedbackForm :: betaBannerFeedbackForm}"></th:block>
+<html  th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{betaBannerFeedback.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, null, null)}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{betaBannerFeedback.heading}">
+        betaBannerFeedback.heading
+    </h1>
+    <p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
+</th:block>
+<th:block id="form-content">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'feedback', #{betaBannerFeedback.label}, null)}">
+        <input type="hidden" name="referrerHeader" th:value="${referrerHeader}" />
+        <div th:replace="~{fragments/forms/textArea :: textArea(label=null, fieldName='feedback',hint= #{betaBannerFeedback.hint}, limit=1200, ariaLabel=#{betaBannerFeedback.label})}"></div>
+        <div th:replace="~{fragments/forms/emailInput :: emailInput(#{betaBannerFeedback.emailLabel}, 'email', null)}"></div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{betaBannerFeedback.buttonText})}"></button>
     <section>
         <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
         <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
         <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.one}">betaBannerFeedback.paragraph.one</p>
     </section>
+</th:block>
 </html>

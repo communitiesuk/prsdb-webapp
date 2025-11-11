@@ -565,14 +565,11 @@ class PropertyComplianceJourney(
         }
     }
 
-    private fun getPropertyAddress() =
-        propertyOwnershipService
-            .getPropertyOwnership(propertyOwnershipId)
-            .property.address.singleLineAddress
+    private fun getPropertyAddress() = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).address.singleLineAddress
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
         val landlordEmail = propertyCompliance.propertyOwnership.primaryLandlord.email
-        val propertyAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress
+        val propertyAddress = propertyCompliance.propertyOwnership.address.singleLineAddress
 
         val confirmationMsgKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
         val compliantMsgs = confirmationMsgKeys.compliantMsgKeys.map { messageSource.getMessageForKey(it) }
@@ -608,10 +605,7 @@ class PropertyComplianceJourney(
             epcLookupService: EpcLookupService,
             propertyOwnershipService: PropertyOwnershipService,
         ): EpcDataModel? {
-            val uprn =
-                propertyOwnershipService
-                    .getPropertyOwnership(propertyOwnershipId)
-                    .property.address.uprn
+            val uprn = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).address.uprn
             return uprn?.let { epcLookupService.getEpcByUprn(it) }
         }
 

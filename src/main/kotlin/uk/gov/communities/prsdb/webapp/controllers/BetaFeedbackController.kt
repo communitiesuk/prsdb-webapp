@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.SUCCESS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
@@ -92,7 +92,6 @@ class BetaFeedbackController(
         model.addAttribute("formModel", formModel)
         val referrer = request.getHeader("referer")
         model.addAttribute("referrerHeader", referrer)
-        model.addAttribute("backUrl", referrer)
         return "betaBannerFeedback"
     }
 
@@ -114,7 +113,6 @@ class BetaFeedbackController(
         if (bindingResult.hasErrors()) {
             val referrer = request.getHeader("referer")
             model.addAttribute("referrerHeader", referrer)
-            model.addAttribute("backUrl", referrer)
             model.addAttribute("formModel", betaFeedbackModel)
             return "betaBannerFeedback"
         }
@@ -135,9 +133,10 @@ class BetaFeedbackController(
 
     companion object {
         const val LANDLORD_FEEDBACK_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
-        const val LANDLORD_FEEDBACK_SUCCESS_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
+        const val LANDLORD_FEEDBACK_SUCCESS_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
         const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
-        const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${SUCCESS_PATH_SEGMENT}"
+        const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL =
+            "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
         const val FEEDBACK_URL = "/${FEEDBACK_PATH_SEGMENT}"
     }
 }

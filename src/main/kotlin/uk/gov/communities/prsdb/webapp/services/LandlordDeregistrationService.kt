@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -31,7 +31,7 @@ class LandlordDeregistrationService(
             formContextService.deleteFormContexts(incompletePropertyRegistrations)
         }
 
-        val registeredProperties = propertyOwnershipService.retrieveAllPropertiesForLandlord(baseUserId)
+        val registeredProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
         if (registeredProperties.isNotEmpty()) {
             propertyDeregistrationService.deregisterProperties(registeredProperties)
         }

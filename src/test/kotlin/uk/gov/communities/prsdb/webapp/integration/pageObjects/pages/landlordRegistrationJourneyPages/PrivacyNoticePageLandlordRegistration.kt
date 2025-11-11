@@ -3,7 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class PrivacyNoticePageLandlordRegistration(
@@ -13,6 +14,8 @@ class PrivacyNoticePageLandlordRegistration(
         RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
     ) {
     val form = PrivacyNoticeForm(page)
+
+    val sectionHeader = SectionHeader(page.locator("html"))
 
     fun agreeAndSubmit() {
         form.iAgreeCheckbox.check()
@@ -25,7 +28,7 @@ class PrivacyNoticePageLandlordRegistration(
 
     class PrivacyNoticeForm(
         page: Page,
-    ) : FormWithSectionHeader(page) {
+    ) : PostForm(page) {
         val iAgreeCheckbox = Checkboxes(locator).getCheckbox("true")
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -18,17 +17,13 @@ class EicrCheckYourAnswersPagePropertyComplianceUpdate(
             PropertyComplianceStepId.UpdateEicrCheckYourAnswers,
         ),
     ) {
-    val form = EicrCheckYourAnswersForm(page)
+    val form = Form(page)
 
-    class EicrCheckYourAnswersForm(
-        page: Page,
-    ) : Form(page) {
-        val summaryList = EicrCheckYourAnswersSummaryList(locator)
-    }
+    val summaryList = EicrCheckYourAnswersSummaryList(page)
 
     class EicrCheckYourAnswersSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
+        page: Page,
+    ) : SummaryList(page) {
         val eicrRow = getRow("Electrical Installation Condition Report")
         val issueDateRow = getRow("Issue date")
         val exemptionRow = getRow("Exemption")

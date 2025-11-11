@@ -42,7 +42,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Selective
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -50,7 +50,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val addressLookupService: AddressLookupService,
+    private val addressService: AddressService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val localAuthorityService: LocalAuthorityService,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
@@ -160,7 +160,7 @@ class PropertyRegistrationJourney(
                 ),
             nextStepIfAddressesFound = RegisterPropertyStepId.SelectAddress,
             nextStepIfNoAddressesFound = RegisterPropertyStepId.NoAddressFound,
-            addressLookupService = addressLookupService,
+            addressService = addressService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
             restrictToEngland = true,
@@ -597,7 +597,7 @@ class PropertyRegistrationJourney(
             val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             propertyRegistrationService.registerProperty(
-                address = address,
+                addressModel = address,
                 propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(filteredJourneyData)!!,
                 licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!,
                 licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(filteredJourneyData)!!,

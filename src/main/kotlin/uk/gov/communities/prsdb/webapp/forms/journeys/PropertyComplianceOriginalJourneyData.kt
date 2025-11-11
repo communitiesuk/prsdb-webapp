@@ -121,7 +121,7 @@ class PropertyComplianceOriginalJourneyData private constructor(
 
         return EpcDataModel(
             certificateNumber = certificateNumber,
-            singleLineAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress,
+            singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
             energyRating = rating,
             expiryDate = expiryDate.toKotlinLocalDate(),
         )
