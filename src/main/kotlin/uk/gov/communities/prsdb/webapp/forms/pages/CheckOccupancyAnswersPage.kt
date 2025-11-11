@@ -20,7 +20,7 @@ class CheckOccupancyAnswersPage(
                 "summaryName" to "forms.update.checkOccupancy.summaryName",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                "insetText" to "forms.update.checkOccupancy.insetText",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         missingAnswersRedirect = missingAnswersRedirect,

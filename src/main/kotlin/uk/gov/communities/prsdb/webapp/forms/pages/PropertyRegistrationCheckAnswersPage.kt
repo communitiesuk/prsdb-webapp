@@ -21,7 +21,7 @@ class PropertyRegistrationCheckAnswersPage(
             mapOf(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
-                "insetText" to "forms.update.checkOccupancy.insetText",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         templateName = "forms/propertyRegistrationCheckAnswersForm",

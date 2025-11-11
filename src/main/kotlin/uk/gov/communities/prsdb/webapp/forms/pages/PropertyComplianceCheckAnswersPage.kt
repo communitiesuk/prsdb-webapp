@@ -21,7 +21,7 @@ class PropertyComplianceCheckAnswersPage(
     uploadService: UploadService,
     private val propertyAddressProvider: () -> String,
 ) : CheckAnswersPage(
-        content = mapOf("insetText" to "forms.update.checkOccupancy.insetText"),
+        content = mapOf("insetText" to true),
         journeyDataService = journeyDataService,
         templateName = "forms/propertyComplianceCheckAnswersForm",
         missingAnswersRedirect = missingAnswersRedirect,

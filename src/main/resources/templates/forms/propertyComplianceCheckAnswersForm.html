@@ -12,8 +12,8 @@
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.title}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <h1 class="govuk-heading-l" th:text="#{forms.checkComplianceAnswers.heading(${propertyAddress})}">forms.checkComplianceAnswers.heading</h1>
-        <th:block th:if="${insetText != null}">
-            <p class="govuk-inset-text" th:text="#{${insetText}}">insetText</p>
+        <th:block th:if="${insetText == true}">
+            <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
         </th:block>
         <h2 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.summaryName}">forms.checkComplianceAnswers.summaryName</h2>
         <h3 class="govuk-heading-m" th:text="#{forms.checkComplianceAnswers.gasSafety.heading}">forms.checkComplianceAnswers.gasSafety.heading</h3>

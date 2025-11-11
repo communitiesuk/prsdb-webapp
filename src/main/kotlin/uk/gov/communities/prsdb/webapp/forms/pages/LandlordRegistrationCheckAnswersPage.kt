@@ -16,7 +16,7 @@ class LandlordRegistrationCheckAnswersPage(
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
-                "insetText" to "forms.update.checkOccupancy.insetText",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         shouldDisplaySectionHeader = true,
