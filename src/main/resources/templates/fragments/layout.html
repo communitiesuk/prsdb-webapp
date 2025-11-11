@@ -3,7 +3,6 @@
 <!--/*@thymesVar id="navLinks" type="java.util.List<String>"*/-->
 <!--/*@thymesVar id="plausibleUrl" type="java.util.List<String>"*/-->
 <!--/*@thymesVar id="googleTagManagerUrl" type="java.util.List<String>"*/-->
-<!--/*@thymesVar id="googleAnalyticsUrl" type="java.util.List<String>"*/-->
 <!DOCTYPE html>
 <html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template govuk-template--rebranded">
 <head>
@@ -23,7 +22,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/custom.css}">
     <script defer th:attr="data-domain=${plausibleDomainId}" th:src="${plausibleUrl}"></script>
 </head>
-<script async th:src="${googleTagManagerUrl}+'?id='+${googleAnalyticsMeasurementId}"></script>
+<script async th:src="${googleTagManagerUrl}+${googleAnalyticsMeasurementId}"></script>
 <body class="govuk-template__body">
 <div th:replace="~{ fragments/banners/cookieBanner:: cookieBanner }"></div>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>

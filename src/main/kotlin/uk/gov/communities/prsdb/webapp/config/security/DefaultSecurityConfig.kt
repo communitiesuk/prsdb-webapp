@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT_DOWNLOADS
+import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT
 import uk.gov.communities.prsdb.webapp.constants.REGION_1_GOOGLE_ANALYTICS
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
@@ -93,7 +93,7 @@ class DefaultSecurityConfig(
 
     companion object {
         const val CONTENT_SECURITY_POLICY_DIRECTIVES =
-            "default-src 'self'; script-src 'self' $GOOGLE_TAG_MANAGER $PLAUSIBLE_SCRIPT_DOWNLOADS; " +
+            "default-src 'self'; script-src 'self' $GOOGLE_TAG_MANAGER $PLAUSIBLE_SCRIPT; " +
                 "connect-src $REGION_1_GOOGLE_ANALYTICS;"
     }
 }
