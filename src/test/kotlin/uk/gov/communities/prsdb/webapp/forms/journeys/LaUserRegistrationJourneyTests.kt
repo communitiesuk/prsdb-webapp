@@ -9,13 +9,13 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -30,15 +30,15 @@ class LaUserRegistrationJourneyTests {
     private lateinit var mockJourneyDataService: JourneyDataService
 
     @Mock
-    private lateinit var mockInvitationService: LocalAuthorityInvitationService
+    private lateinit var mockInvitationService: LocalCouncilInvitationService
 
     @Mock
-    private lateinit var mockLocalAuthorityDataService: LocalAuthorityDataService
+    private lateinit var mockLocalCouncilDataService: LocalCouncilDataService
 
     @Mock
     private lateinit var mockSecurityContextService: SecurityContextService
 
-    private lateinit var invitation: LocalAuthorityInvitation
+    private lateinit var invitation: LocalCouncilInvitation
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
@@ -56,8 +56,8 @@ class LaUserRegistrationJourneyTests {
         completeHandleSubmitAndRedirect()
 
         // Assert
-        verify(mockLocalAuthorityDataService).registerUserAndReturnID(baseUserId, localAuthority, name, email, invitedAsAdmin, true)
-        verify(mockLocalAuthorityDataService).setLastUserIdRegisteredThisSession(expectedLaUser.id)
+        verify(mockLocalCouncilDataService).registerUserAndReturnID(baseUserId, localAuthority, name, email, invitedAsAdmin, true)
+        verify(mockLocalCouncilDataService).setLastUserIdRegisteredThisSession(expectedLaUser.id)
     }
 
     @Test
@@ -96,17 +96,17 @@ class LaUserRegistrationJourneyTests {
 
     private fun completeHandleSubmitAndRedirect() {
         val testJourney =
-            LaUserRegistrationJourney(
+            LocalCouncilUserRegistrationJourney(
                 validator = alwaysTrueValidator,
                 journeyDataService = mockJourneyDataService,
                 invitationService = mockInvitationService,
-                localAuthorityDataService = mockLocalAuthorityDataService,
+                localCouncilDataService = mockLocalCouncilDataService,
                 invitation = invitation,
                 securityContextService = mockSecurityContextService,
             )
 
         testJourney.completeStep(
-            stepPathSegment = RegisterLaUserStepId.CheckAnswers.urlPathSegment,
+            stepPathSegment = RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment,
             formData = mapOf(),
             subPageNumber = null,
             principal = mock(),
@@ -116,37 +116,37 @@ class LaUserRegistrationJourneyTests {
     private fun setupInvitationAndLAUserMocks(
         name: String = "Test user",
         email: String = "test.user@example.com",
-        localAuthority: LocalAuthority = createLocalAuthority(),
+        localCouncil: LocalCouncil = createLocalAuthority(),
         invitedAsAdmin: Boolean = false,
         baseUserId: String = "test-base-user-id",
-    ): LocalAuthorityUser {
+    ): LocalCouncilUser {
         createLocalAuthority()
 
         val journeyData = JourneyDataBuilder.forLaUser(name, email).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
         invitation =
-            LocalAuthorityInvitation(
+            LocalCouncilInvitation(
                 token = UUID.randomUUID(),
                 email = email,
-                invitingAuthority = localAuthority,
+                invitingAuthority = localCouncil,
                 invitedAsAdmin = invitedAsAdmin,
             )
 
         val newLaUser =
-            LocalAuthorityUser(
+            LocalCouncilUser(
                 baseUser = createOneLoginUser(baseUserId),
                 isManager = invitedAsAdmin,
-                localAuthority = localAuthority,
+                localCouncil = localCouncil,
                 name = name,
                 email = email,
                 hasAcceptedPrivacyNotice = true,
             )
 
         whenever(
-            mockLocalAuthorityDataService.registerUserAndReturnID(
+            mockLocalCouncilDataService.registerUserAndReturnID(
                 baseUserId = anyOrNull(),
-                localAuthority = eq(invitation.invitingAuthority),
+                localCouncil = eq(invitation.invitingAuthority),
                 name = eq(name),
                 email = eq(email),
                 invitedAsAdmin = eq(invitedAsAdmin),

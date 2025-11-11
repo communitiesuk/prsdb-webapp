@@ -31,17 +31,17 @@ import uk.gov.communities.prsdb.webapp.constants.LA_USERS_INVITED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUserOrInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityAdminUserOrInvitationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilAdminUserOrInvitationDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserOrInvitationDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalCouncilUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserDeletionEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_USER_ID
@@ -62,7 +62,7 @@ class LocalAuthorityDataServiceTests {
     private lateinit var localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository
 
     @Mock
-    private lateinit var invitationService: LocalAuthorityInvitationService
+    private lateinit var invitationService: LocalCouncilInvitationService
 
     @Mock
     private lateinit var oneLoginUserService: OneLoginUserService
@@ -77,22 +77,22 @@ class LocalAuthorityDataServiceTests {
     private lateinit var registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>
 
     @Mock
-    private lateinit var deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>
+    private lateinit var deletionConfirmationSender: EmailNotificationService<LocalCouncilUserDeletionEmail>
 
     @Mock
-    private lateinit var deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>
+    private lateinit var deletionConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserDeletionInformAdminEmail>
 
     @Mock
     private lateinit var invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>
 
     @InjectMocks
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @BeforeEach
     fun setup() {
         // Construct the service under test with all mocked dependencies so Mockito mocks are used at runtime.
-        localAuthorityDataService =
-            LocalAuthorityDataService(
+        localCouncilDataService =
+            LocalCouncilDataService(
                 localAuthorityUserRepository,
                 localAuthorityUserOrInvitationRepository,
                 invitationService,
@@ -118,14 +118,14 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         val (returnedUserModel, returnedLocalAuthority) =
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+            localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID,
                 baseUser.id,
             )
 
         // Assert
         Assertions.assertEquals(
-            LocalAuthorityUserDataModel(
+            LocalCouncilUserDataModel(
                 localAuthorityUser.id,
                 localAuthorityUser.name,
                 localAuthority.name,
@@ -145,7 +145,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+            localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID,
                 createOneLoginUser().id,
             )
@@ -162,7 +162,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+            localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                 DEFAULT_LA_ID - 1,
                 baseUser.id,
             )
@@ -179,7 +179,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         val returnedLocalAuthorityUser =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID)
+            localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID)
 
         // Assert
         Assertions.assertEquals(localAuthorityUser, returnedLocalAuthorityUser)
@@ -193,7 +193,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         val errorThrown =
             assertThrows<ResponseStatusException> {
-                localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(
+                localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(
                     DEFAULT_LA_USER_ID,
                     DEFAULT_LA_ID,
                 )
@@ -212,7 +212,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(
+            localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(
                 DEFAULT_LA_USER_ID,
                 DEFAULT_LA_ID + 1,
             )
@@ -229,23 +229,23 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
+        val user1 = LocalCouncilUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalCouncilUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
+            LocalCouncilUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         val expectedLaUserList =
             listOf(
-                LocalAuthorityUserOrInvitationDataModel(1, "User 1", localAuthority.name, true, false),
-                LocalAuthorityUserOrInvitationDataModel(2, "User 2", localAuthority.name, false, false),
-                LocalAuthorityUserOrInvitationDataModel(3, "invite@test.com", localAuthority.name, false, true),
+                LocalCouncilUserOrInvitationDataModel(1, "User 1", localAuthority.name, true, false),
+                LocalCouncilUserOrInvitationDataModel(2, "User 2", localAuthority.name, false, false),
+                LocalCouncilUserOrInvitationDataModel(3, "invite@test.com", localAuthority.name, false, true),
             )
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+        val userList = localCouncilDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertIterableEquals(expectedLaUserList, userList)
@@ -261,16 +261,16 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
+        val user1 = LocalCouncilUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalCouncilUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
+            LocalCouncilUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+        val userList = localCouncilDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertEquals(3, userList.content.size)
@@ -280,10 +280,10 @@ class LocalAuthorityDataServiceTests {
     fun `Returns the requested page of users if there are more users in the database than MAX_ENTRIES_IN_TABLE_PAGE`() {
         // Arrange
         val localAuthority = createLocalAuthority(123)
-        val usersFromRepository = mutableListOf<LocalAuthorityUserOrInvitation>()
+        val usersFromRepository = mutableListOf<LocalCouncilUserOrInvitation>()
         for (i in 1..20) {
             usersFromRepository.add(
-                LocalAuthorityUserOrInvitation(
+                LocalCouncilUserOrInvitation(
                     i.toLong(),
                     LOCAL_AUTHORITY_USER_ENTITY_TYPE,
                     "User $i",
@@ -310,24 +310,24 @@ class LocalAuthorityDataServiceTests {
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest2))
             .thenReturn(PageImpl(usersFromRepository.subList(10, 20).toList(), pageRequest2, 3))
 
-        val expectedUserListPage1 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
-        val expectedUserListPage2 = mutableListOf<LocalAuthorityUserOrInvitationDataModel>()
+        val expectedUserListPage1 = mutableListOf<LocalCouncilUserOrInvitationDataModel>()
+        val expectedUserListPage2 = mutableListOf<LocalCouncilUserOrInvitationDataModel>()
         for (i in 1..10) {
-            expectedUserListPage1.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
+            expectedUserListPage1.add(LocalCouncilUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
         }
         for (i in 11..20) {
-            expectedUserListPage2.add(LocalAuthorityUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
+            expectedUserListPage2.add(LocalCouncilUserOrInvitationDataModel(i.toLong(), "User $i", "name", false, false))
         }
 
         // Act
         val userListPage1 =
-            localAuthorityDataService.getPaginatedUsersAndInvitations(
+            localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 1,
                 filterOutLaAdminInvitations = false,
             )
         val userListPage2 =
-            localAuthorityDataService.getPaginatedUsersAndInvitations(
+            localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 2,
                 filterOutLaAdminInvitations = false,
@@ -348,20 +348,20 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
+        val user1 = LocalCouncilUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalCouncilUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", false, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
+            LocalCouncilUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
         val adminInvitation =
-            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite.admin@test.com", true, localAuthority)
+            LocalCouncilUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite.admin@test.com", true, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation, adminInvitation), pageRequest, 4))
         val expectedAdminInvitationDataModel =
-            LocalAuthorityUserOrInvitationDataModel(3, "invite.admin@test.com", localAuthority.name, true, true)
+            LocalCouncilUserOrInvitationDataModel(3, "invite.admin@test.com", localAuthority.name, true, true)
 
         // Act
-        val userList = localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+        val userList = localCouncilDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
 
         // Assert
         Assertions.assertEquals(4, userList.content.size)
@@ -378,17 +378,17 @@ class LocalAuthorityDataServiceTests {
                 10,
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, "local_authority_admin", "User 2", false, localAuthority)
+        val user1 = LocalCouncilUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalCouncilUserOrInvitation(2, "local_authority_admin", "User 2", false, localAuthority)
         val nonAdminInvitation =
-            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
+            LocalCouncilUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findByLocalAuthorityNotIncludingAdminInvitations(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, nonAdminInvitation), pageRequest, 3))
 
         // Act
         val userList =
-            localAuthorityDataService.getPaginatedUsersAndInvitations(
+            localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 1,
                 filterOutLaAdminInvitations = true,
@@ -406,25 +406,25 @@ class LocalAuthorityDataServiceTests {
             PageRequest.of(
                 1,
                 10,
-                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localAuthority.name"), Sort.Order.asc("name")),
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localCouncil.name"), Sort.Order.asc("name")),
             )
-        val user1 = LocalAuthorityUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
-        val user2 = LocalAuthorityUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", true, localAuthority)
+        val user1 = LocalCouncilUserOrInvitation(1, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 1", true, localAuthority)
+        val user2 = LocalCouncilUserOrInvitation(2, LOCAL_AUTHORITY_USER_ENTITY_TYPE, "User 2", true, localAuthority)
         val invitation =
-            LocalAuthorityUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", true, localAuthority)
+            LocalCouncilUserOrInvitation(3, LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE, "invite@test.com", true, localAuthority)
 
         whenever(localAuthorityUserOrInvitationRepository.findAllByIsManagerTrue(pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         val expectedAdminUsersAndInvitationList =
             listOf(
-                LocalAuthorityAdminUserOrInvitationDataModel(1, "User 1", localAuthority.name, false),
-                LocalAuthorityAdminUserOrInvitationDataModel(2, "User 2", localAuthority.name, false),
-                LocalAuthorityAdminUserOrInvitationDataModel(3, "invite@test.com", localAuthority.name, true),
+                LocalCouncilAdminUserOrInvitationDataModel(1, "User 1", localAuthority.name, false),
+                LocalCouncilAdminUserOrInvitationDataModel(2, "User 2", localAuthority.name, false),
+                LocalCouncilAdminUserOrInvitationDataModel(3, "invite@test.com", localAuthority.name, true),
             )
 
         // Act
-        val adminUsersAndInvitationList = localAuthorityDataService.getPaginatedAdminUsersAndInvitations(1)
+        val adminUsersAndInvitationList = localCouncilDataService.getPaginatedAdminUsersAndInvitations(1)
 
         // Assert
         Assertions.assertIterableEquals(expectedAdminUsersAndInvitationList, adminUsersAndInvitationList)
@@ -440,12 +440,12 @@ class LocalAuthorityDataServiceTests {
         whenever(localAuthorityUserRepository.findById(DEFAULT_LA_USER_ID)).thenReturn(Optional.of(localAuthorityUser))
 
         // Act
-        localAuthorityDataService.updateUserAccessLevel(LocalAuthorityUserAccessLevelRequestModel(false), DEFAULT_LA_USER_ID)
+        localCouncilDataService.updateUserAccessLevel(LocalCouncilUserAccessLevelRequestModel(false), DEFAULT_LA_USER_ID)
 
         // Assert
-        val localAuthorityUserCaptor = argumentCaptor<LocalAuthorityUser>()
-        verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
-        assertTrue(ReflectionEquals(expectedUpdatedLocalAuthorityUser).matches(localAuthorityUserCaptor.firstValue))
+        val localCouncilUserCaptor = argumentCaptor<LocalCouncilUser>()
+        verify(localAuthorityUserRepository).save(localCouncilUserCaptor.capture())
+        assertTrue(ReflectionEquals(expectedUpdatedLocalAuthorityUser).matches(localCouncilUserCaptor.firstValue))
     }
 
     @Test
@@ -456,7 +456,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         val errorThrown =
             assertThrows<ResponseStatusException> {
-                localAuthorityDataService.updateUserAccessLevel(LocalAuthorityUserAccessLevelRequestModel(false), DEFAULT_LA_USER_ID)
+                localCouncilDataService.updateUserAccessLevel(LocalCouncilUserAccessLevelRequestModel(false), DEFAULT_LA_USER_ID)
             }
         Assertions.assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
     }
@@ -475,7 +475,7 @@ class LocalAuthorityDataServiceTests {
 
         // Act
         val localAuthorityUserID =
-            localAuthorityDataService.registerUserAndReturnID(
+            localCouncilDataService.registerUserAndReturnID(
                 baseUser.id,
                 localAuthority,
                 newLocalAuthorityUser.name,
@@ -485,9 +485,9 @@ class LocalAuthorityDataServiceTests {
             )
 
         // Assert
-        val localAuthorityUserCaptor = argumentCaptor<LocalAuthorityUser>()
-        verify(localAuthorityUserRepository).save(localAuthorityUserCaptor.capture())
-        assertTrue(ReflectionEquals(newLocalAuthorityUser, "id").matches(localAuthorityUserCaptor.firstValue))
+        val localCouncilUserCaptor = argumentCaptor<LocalCouncilUser>()
+        verify(localAuthorityUserRepository).save(localCouncilUserCaptor.capture())
+        assertTrue(ReflectionEquals(newLocalAuthorityUser, "id").matches(localCouncilUserCaptor.firstValue))
 
         assertEquals(newLocalAuthorityUser.id, localAuthorityUserID)
     }
@@ -499,7 +499,7 @@ class LocalAuthorityDataServiceTests {
 
         whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localAuthorityUser)
 
-        assertTrue(localAuthorityDataService.getIsLocalAuthorityUser(baseUserId))
+        assertTrue(localCouncilDataService.getIsLocalAuthorityUser(baseUserId))
     }
 
     @Test
@@ -508,7 +508,7 @@ class LocalAuthorityDataServiceTests {
 
         whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
-        assertFalse(localAuthorityDataService.getIsLocalAuthorityUser(baseUserId))
+        assertFalse(localCouncilDataService.getIsLocalAuthorityUser(baseUserId))
     }
 
     @Test
@@ -518,7 +518,7 @@ class LocalAuthorityDataServiceTests {
 
         whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localAuthorityUser)
 
-        assertEquals(localAuthorityUser, localAuthorityDataService.getLocalAuthorityUser(baseUserId))
+        assertEquals(localAuthorityUser, localCouncilDataService.getLocalAuthorityUser(baseUserId))
     }
 
     @Test
@@ -527,7 +527,7 @@ class LocalAuthorityDataServiceTests {
 
         whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
-        assertThrows<ResponseStatusException> { localAuthorityDataService.getLocalAuthorityUser(baseUserId) }
+        assertThrows<ResponseStatusException> { localCouncilDataService.getLocalAuthorityUser(baseUserId) }
     }
 
     @Test
@@ -536,7 +536,7 @@ class LocalAuthorityDataServiceTests {
         val localAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)
 
         // Act
-        localAuthorityDataService.deleteUser(localAuthorityUser)
+        localCouncilDataService.deleteUser(localAuthorityUser)
 
         // Assert
         verify(localAuthorityUserRepository).deleteById(DEFAULT_LA_USER_ID)
@@ -559,7 +559,7 @@ class LocalAuthorityDataServiceTests {
         val invitedEmail = "invitee@test.com"
 
         // Act
-        localAuthorityDataService.sendUserInvitedEmailsToAdmins(localAuthority, invitedEmail)
+        localCouncilDataService.sendUserInvitedEmailsToAdmins(localAuthority, invitedEmail)
 
         // Assert
         val emailCaptor = argumentCaptor<LocalCouncilUserInvitationInformAdminEmail>()
@@ -584,7 +584,7 @@ class LocalAuthorityDataServiceTests {
         whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
         // Act
-        localAuthorityDataService.sendUserInvitedEmailsToAdmins(localAuthority, "nobody@test.com")
+        localCouncilDataService.sendUserInvitedEmailsToAdmins(localAuthority, "nobody@test.com")
 
         // Assert
         verify(invitationConfirmationSenderAdmin, org.mockito.kotlin.times(0)).sendEmail(any(), any())
@@ -598,7 +598,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(deletedUsers)
 
         // Act
-        val returnedDeletedUsers = localAuthorityDataService.getUsersDeletedThisSession()
+        val returnedDeletedUsers = localCouncilDataService.getUsersDeletedThisSession()
 
         // Assert
         Assertions.assertEquals(deletedUsers, returnedDeletedUsers)
@@ -607,10 +607,10 @@ class LocalAuthorityDataServiceTests {
     @Test
     fun `getUsersDeletedThisSession returns an empty list if there are no deleted users stored in the session`() {
         // Act
-        val returnedDeletedUsers = localAuthorityDataService.getUsersDeletedThisSession()
+        val returnedDeletedUsers = localCouncilDataService.getUsersDeletedThisSession()
 
         // Assert
-        Assertions.assertEquals(emptyList<LocalAuthorityUser>(), returnedDeletedUsers)
+        Assertions.assertEquals(emptyList<LocalCouncilUser>(), returnedDeletedUsers)
     }
 
     @Test
@@ -622,7 +622,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(deletedUsers)
 
         // Act
-        val deletedUser = localAuthorityDataService.getUserDeletedThisSessionById(user.id)
+        val deletedUser = localCouncilDataService.getUserDeletedThisSessionById(user.id)
 
         // Assert
         Assertions.assertEquals(user, deletedUser)
@@ -639,7 +639,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         val errorThrown =
             assertThrows<ResponseStatusException> {
-                localAuthorityDataService.getUserDeletedThisSessionById(
+                localCouncilDataService.getUserDeletedThisSessionById(
                     user.id,
                 )
             }
@@ -658,7 +658,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         val errorThrown =
             assertThrows<ResponseStatusException> {
-                localAuthorityDataService.getUserDeletedThisSessionById(
+                localCouncilDataService.getUserDeletedThisSessionById(
                     user.id,
                 )
             }
@@ -675,7 +675,7 @@ class LocalAuthorityDataServiceTests {
         val userBeingDeleted = createLocalAuthorityUser(id = 2L)
 
         // Act
-        localAuthorityDataService.addDeletedUserToSession(userBeingDeleted)
+        localCouncilDataService.addDeletedUserToSession(userBeingDeleted)
 
         // Assert
         verify(mockHttpSession).setAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION, listOf(existingDeletedUser, userBeingDeleted))
@@ -689,7 +689,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(cancelledInvitations)
 
         // Act
-        val returnedCancelledInvitations = localAuthorityDataService.getInvitationsCancelledThisSession()
+        val returnedCancelledInvitations = localCouncilDataService.getInvitationsCancelledThisSession()
 
         // Assert
         Assertions.assertEquals(cancelledInvitations, returnedCancelledInvitations)
@@ -698,7 +698,7 @@ class LocalAuthorityDataServiceTests {
     @Test
     fun `getInvitationsCancelledThisSession returns an empty list if there are no cancelled invitations stored in the session`() {
         // Act
-        val returnedCancelledInvitations = localAuthorityDataService.getInvitationsCancelledThisSession()
+        val returnedCancelledInvitations = localCouncilDataService.getInvitationsCancelledThisSession()
 
         // Assert
         Assertions.assertEquals(emptyList<Pair<Long, String>>(), returnedCancelledInvitations)
@@ -714,7 +714,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(cancelledInvitations)
 
         // Act
-        val cancelledInvitation = localAuthorityDataService.getInvitationCancelledThisSessionById(invitation.id)
+        val cancelledInvitation = localCouncilDataService.getInvitationCancelledThisSessionById(invitation.id)
 
         // Assert
         Assertions.assertEquals(invitation, cancelledInvitation)
@@ -733,7 +733,7 @@ class LocalAuthorityDataServiceTests {
         // Act and Assert
         val errorThrown =
             assertThrows<ResponseStatusException> {
-                localAuthorityDataService.getInvitationCancelledThisSessionById(
+                localCouncilDataService.getInvitationCancelledThisSessionById(
                     invitation.id,
                 )
             }
@@ -749,7 +749,7 @@ class LocalAuthorityDataServiceTests {
         val invitationBeingCancelled = createLocalAuthorityInvitation(id = 2L)
 
         // Act
-        localAuthorityDataService.addCancelledInvitationToSession(invitationBeingCancelled)
+        localCouncilDataService.addCancelledInvitationToSession(invitationBeingCancelled)
 
         // Assert
         verify(mockHttpSession)
@@ -767,7 +767,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(invitedUsers)
 
         // Act
-        val returnedLastInvitedUser = localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(1)
+        val returnedLastInvitedUser = localCouncilDataService.getLastLocalAuthorityUserInvitedThisSession(1)
 
         // Assert
         Assertions.assertEquals("user.2@example.com", returnedLastInvitedUser)
@@ -780,7 +780,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(invitedUsers)
 
         // Act
-        val returnedLastInvitedUser = localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(1)
+        val returnedLastInvitedUser = localCouncilDataService.getLastLocalAuthorityUserInvitedThisSession(1)
 
         // Assert
         Assertions.assertNull(returnedLastInvitedUser)
@@ -793,7 +793,7 @@ class LocalAuthorityDataServiceTests {
             .thenReturn(listOf(Pair(1, "existing.invite@example.com")))
 
         // Act
-        localAuthorityDataService.addInvitedLocalAuthorityUserToSession(1, "new.invite@example.com")
+        localCouncilDataService.addInvitedLocalAuthorityUserToSession(1, "new.invite@example.com")
 
         // Assert
         verify(mockHttpSession).setAttribute(

@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import java.net.URI
 
-data class LocalAuthorityAdminInvitationEmail(
-    var localAuthority: LocalAuthority,
+data class LocalCouncilAdminInvitationEmail(
+    var localCouncil: LocalCouncil,
     var invitationUri: URI,
 ) : EmailTemplateModel {
     private val localAuthorityKey = "name of council"
@@ -14,7 +14,7 @@ data class LocalAuthorityAdminInvitationEmail(
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
-            localAuthorityKey to localAuthority.name,
+            localAuthorityKey to localCouncil.name,
             invitationKey to invitationUri.toString(),
         )
 }

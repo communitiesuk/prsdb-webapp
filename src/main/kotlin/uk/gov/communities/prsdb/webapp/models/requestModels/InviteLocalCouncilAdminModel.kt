@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
-class InviteLocalAuthorityAdminModel : ConfirmedEmailRequestModel() {
+class InviteLocalCouncilAdminModel : ConfirmedEmailRequestModel() {
     @NotNull(message = "forms.selectLocalAuthority.error.missing")
     var localAuthorityId: Int? = null
 }

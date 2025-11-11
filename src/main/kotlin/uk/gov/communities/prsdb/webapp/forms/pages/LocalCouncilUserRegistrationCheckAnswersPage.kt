@@ -2,15 +2,15 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
+import uk.gov.communities.prsdb.webapp.helpers.LocalCouncilUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 
-class LaUserRegistrationCheckAnswersPage(
+class LocalCouncilUserRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
-    private val invitationService: LocalAuthorityInvitationService,
+    private val invitationService: LocalCouncilInvitationService,
     missingAnswersRedirect: String,
 ) : BasicCheckAnswersPage(
         content =
@@ -40,13 +40,13 @@ class LaUserRegistrationCheckAnswersPage(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLaUser.checkAnswers.rowHeading.name",
-                LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
-                RegisterLaUserStepId.Name.urlPathSegment,
+                LocalCouncilUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
+                RegisterLocalCouncilUserStepId.Name.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLaUser.checkAnswers.rowHeading.email",
-                LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
-                RegisterLaUserStepId.Email.urlPathSegment,
+                LocalCouncilUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
+                RegisterLocalCouncilUserStepId.Email.urlPathSegment,
             ),
         )
     }

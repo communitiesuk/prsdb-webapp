@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
@@ -14,24 +14,24 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.InvalidLinkPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
 class LaUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-lauser.sql") {
     @Autowired
-    lateinit var localAuthorityService: LocalAuthorityService
+    lateinit var localCouncilService: LocalCouncilService
 
     @Autowired
-    lateinit var invitationService: LocalAuthorityInvitationService
+    lateinit var invitationService: LocalCouncilInvitationService
 
-    lateinit var invitation: LocalAuthorityInvitation
+    lateinit var invitation: LocalCouncilInvitation
 
     @BeforeEach
     fun setup() {
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",
-                authority = localAuthorityService.retrieveLocalAuthorityById(2),
+                authority = localCouncilService.retrieveLocalAuthorityById(2),
             )
 
         invitation = invitationService.getInvitationFromToken(token)

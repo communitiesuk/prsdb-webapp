@@ -1,5 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels
 
-data class LocalAuthorityUserAccessLevelRequestModel(
+data class LocalCouncilUserAccessLevelRequestModel(
     val isManager: Boolean,
 )

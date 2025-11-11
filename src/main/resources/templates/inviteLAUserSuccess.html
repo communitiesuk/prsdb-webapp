@@ -11,11 +11,11 @@
         <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.one}">
             addLAUserSuccess.whatHappensNext.para1
         </p>
-        <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.two(${localAuthority.name})}">
+        <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
             addLAUserSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-council/{id}/invite-new-user(id=${localAuthority.id})}, #{addLAUserSuccess.inviteAnother})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-council/{id}/invite-new-user(id=${localCouncil.id})}, #{addLAUserSuccess.inviteAnother})}">
                 addLAUserSuccess.inviteAnother
             </a>
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}}, #{addLAUserSuccess.returnToDashboard})}">

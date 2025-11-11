@@ -20,7 +20,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
@@ -35,7 +35,7 @@ class PasscodeServiceTests {
     private lateinit var mockSession: HttpSession
     private lateinit var passcodeService: PasscodeService
 
-    private val mockLocalAuthority = LocalAuthority()
+    private val mockLocalCouncil = LocalCouncil()
     private val mockPasscode = Passcode()
 
     @BeforeEach
@@ -51,7 +51,7 @@ class PasscodeServiceTests {
     fun `generatePasscode creates a valid passcode for the given local authority`() {
         val localAuthorityId = 123L
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
+        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -72,14 +72,14 @@ class PasscodeServiceTests {
             "Generated passcode '${savedPasscode.passcode}' contains unsafe characters",
         )
         assertNotNull(savedPasscode.passcode)
-        assertEquals(mockLocalAuthority, savedPasscode.localAuthority)
+        assertEquals(mockLocalCouncil, savedPasscode.localCouncil)
     }
 
     @Test
     fun `generatePasscode handles collisions and creates unique passcode`() {
         val localAuthorityId = 123L
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
+        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(true, true, false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -101,7 +101,7 @@ class PasscodeServiceTests {
                 passcodeService.generatePasscode(localAuthorityId)
             }
 
-        assertEquals("LocalAuthority with id $localAuthorityId not found", exception.message)
+        assertEquals("LocalCouncil with id $localAuthorityId not found", exception.message)
         verify(mockPasscodeRepository).count()
     }
 
@@ -141,7 +141,7 @@ class PasscodeServiceTests {
     fun `generatePasscode succeeds when count is just below limit`() {
         val localAuthorityId = 123L
         whenever(mockPasscodeRepository.count()).thenReturn(999L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
+        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -157,9 +157,9 @@ class PasscodeServiceTests {
     fun `generateAndStorePasscode creates and stores a valid passcode for the given local authority`() {
         val localAuthorityId = 123L
         val mockPasscodeValue = "ABC123"
-        val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalAuthority)
+        val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalCouncil)
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
+        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscodeWithValue)
 
@@ -180,7 +180,7 @@ class PasscodeServiceTests {
             "Generated passcode '${savedPasscode.passcode}' contains unsafe characters",
         )
         assertNotNull(savedPasscode.passcode)
-        assertEquals(mockLocalAuthority, savedPasscode.localAuthority)
+        assertEquals(mockLocalCouncil, savedPasscode.localCouncil)
     }
 
     @Test
@@ -233,10 +233,10 @@ class PasscodeServiceTests {
     fun `getOrGeneratePasscode generates new passcode when no cached passcode exists`() {
         val localAuthorityId = 123L
         val mockPasscodeValue = "XYZ789"
-        val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalAuthority)
+        val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalCouncil)
         whenever(mockSession.getAttribute(LAST_GENERATED_PASSCODE)).thenReturn(null)
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalAuthority))
+        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscodeWithValue)
 

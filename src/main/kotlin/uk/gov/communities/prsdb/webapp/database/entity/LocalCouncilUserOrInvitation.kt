@@ -12,8 +12,8 @@ import java.io.Serializable
 
 @Entity
 @Table(name = "local_authority_user_or_invitation")
-@IdClass(LocalAuthorityUserOrInvitation.CompositeKey::class)
-class LocalAuthorityUserOrInvitation() {
+@IdClass(LocalCouncilUserOrInvitation.CompositeKey::class)
+class LocalCouncilUserOrInvitation() {
     // Types used for IdClass must:
     // - implement equals and hashCode (hence being a data class)
     // - have a no-args constructor (hence having default values)
@@ -40,14 +40,14 @@ class LocalAuthorityUserOrInvitation() {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "local_authority_id", referencedColumnName = "id", nullable = false)
-    lateinit var localAuthority: LocalAuthority
+    lateinit var localCouncil: LocalCouncil
         private set
 
-    constructor(id: Long, entityType: String, name: String, isManager: Boolean, localAuthority: LocalAuthority) : this() {
+    constructor(id: Long, entityType: String, name: String, isManager: Boolean, localCouncil: LocalCouncil) : this() {
         this.id = id
         this.entityType = entityType
         this.name = name
         this.isManager = isManager
-        this.localAuthority = localAuthority
+        this.localCouncil = localCouncil
     }
 }

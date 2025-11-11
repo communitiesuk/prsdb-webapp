@@ -16,67 +16,67 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTI
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserOrInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityAdminUserOrInvitationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserOrInvitationDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityUserDeletionInformAdminEmail
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilAdminUserOrInvitationDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserOrInvitationDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalCouncilUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserDeletionEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserDeletionInformAdminEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
 
 @PrsdbWebService
-class LocalAuthorityDataService(
+class LocalCouncilDataService(
     private val localAuthorityUserRepository: LocalAuthorityUserRepository,
     private val localAuthorityUserOrInvitationRepository: LocalAuthorityUserOrInvitationRepository,
-    private val invitationService: LocalAuthorityInvitationService,
+    private val invitationService: LocalCouncilInvitationService,
     private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
-    private val deletionConfirmationSender: EmailNotificationService<LocalAuthorityUserDeletionEmail>,
-    private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalAuthorityUserDeletionInformAdminEmail>,
+    private val deletionConfirmationSender: EmailNotificationService<LocalCouncilUserDeletionEmail>,
+    private val deletionConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserDeletionInformAdminEmail>,
     private val invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>,
 ) {
     fun getUserAndLocalAuthorityIfAuthorizedUser(
         localAuthorityId: Int,
         subjectId: String,
-    ): Pair<LocalAuthorityUserDataModel, LocalAuthority> {
+    ): Pair<LocalCouncilUserDataModel, LocalCouncil> {
         val localAuthorityUser =
             localAuthorityUserRepository.findByBaseUser_Id(subjectId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $subjectId is not an LA user")
         val userModel =
-            LocalAuthorityUserDataModel(
+            LocalCouncilUserDataModel(
                 localAuthorityUser.id,
                 localAuthorityUser.name,
-                localAuthorityUser.localAuthority.name,
+                localAuthorityUser.localCouncil.name,
                 localAuthorityUser.isManager,
                 localAuthorityUser.email,
             )
 
-        if (localAuthorityUser.localAuthority.id != localAuthorityId) {
+        if (localAuthorityUser.localCouncil.id != localAuthorityId) {
             throw AccessDeniedException(
-                "Local authority user for LA ${localAuthorityUser.localAuthority.id} tried to manage users for LA $localAuthorityId",
+                "Local authority user for LA ${localAuthorityUser.localCouncil.id} tried to manage users for LA $localAuthorityId",
             )
         }
 
-        return Pair(userModel, localAuthorityUser.localAuthority)
+        return Pair(userModel, localAuthorityUser.localCouncil)
     }
 
     fun getLocalAuthorityUserIfAuthorizedLA(
         localAuthorityUserId: Long,
         localAuthorityId: Int,
-    ): LocalAuthorityUser {
+    ): LocalCouncilUser {
         val localAuthorityUser =
             localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId not found")
 
-        if (localAuthorityUser.localAuthority.id != localAuthorityId) {
+        if (localAuthorityUser.localCouncil.id != localAuthorityId) {
             throw AccessDeniedException("Local authority user $localAuthorityUserId does not belong to LA $localAuthorityId")
         }
 
@@ -84,11 +84,11 @@ class LocalAuthorityDataService(
     }
 
     fun getPaginatedUsersAndInvitations(
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         currentPageNumber: Int,
         pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
         filterOutLaAdminInvitations: Boolean = true,
-    ): Page<LocalAuthorityUserOrInvitationDataModel> {
+    ): Page<LocalCouncilUserOrInvitationDataModel> {
         val pageRequest =
             PageRequest.of(
                 currentPageNumber,
@@ -98,24 +98,24 @@ class LocalAuthorityDataService(
         if (filterOutLaAdminInvitations) {
             return localAuthorityUserOrInvitationRepository
                 .findByLocalAuthorityNotIncludingAdminInvitations(
-                    localAuthority,
+                    localCouncil,
                     pageRequest,
                 ).map {
-                    LocalAuthorityUserOrInvitationDataModel(
+                    LocalCouncilUserOrInvitationDataModel(
                         id = it.id,
                         userNameOrEmail = it.name,
-                        localAuthorityName = localAuthority.name,
+                        localAuthorityName = localCouncil.name,
                         isManager = it.isManager,
                         isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
                     )
                 }
         }
 
-        return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest).map {
-            LocalAuthorityUserOrInvitationDataModel(
+        return localAuthorityUserOrInvitationRepository.findByLocalAuthority(localCouncil, pageRequest).map {
+            LocalCouncilUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
-                localAuthorityName = localAuthority.name,
+                localAuthorityName = localCouncil.name,
                 isManager = it.isManager,
                 isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
@@ -125,18 +125,18 @@ class LocalAuthorityDataService(
     fun getPaginatedAdminUsersAndInvitations(
         currentPageNumber: Int,
         pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
-    ): Page<LocalAuthorityAdminUserOrInvitationDataModel> {
+    ): Page<LocalCouncilAdminUserOrInvitationDataModel> {
         val pageRequest =
             PageRequest.of(
                 currentPageNumber,
                 pageSize,
-                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localAuthority.name"), Sort.Order.asc("name")),
+                Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("localCouncil.name"), Sort.Order.asc("name")),
             )
         return localAuthorityUserOrInvitationRepository.findAllByIsManagerTrue(pageRequest).map {
-            LocalAuthorityAdminUserOrInvitationDataModel(
+            LocalCouncilAdminUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
-                localAuthorityName = it.localAuthority.name,
+                localAuthorityName = it.localCouncil.name,
                 isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
             )
         }
@@ -145,7 +145,7 @@ class LocalAuthorityDataService(
     fun getLocalAuthorityUserOrNull(localAuthorityUserId: Long) = localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
 
     fun updateUserAccessLevel(
-        localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
+        localAuthorityUserAccessLevel: LocalCouncilUserAccessLevelRequestModel,
         localAuthorityUserId: Long,
     ) {
         val localAuthorityUser =
@@ -156,29 +156,29 @@ class LocalAuthorityDataService(
         localAuthorityUserRepository.save(localAuthorityUser)
     }
 
-    fun deleteUser(localAuthorityUser: LocalAuthorityUser) {
-        localAuthorityUserRepository.deleteById(localAuthorityUser.id)
+    fun deleteUser(localCouncilUser: LocalCouncilUser) {
+        localAuthorityUserRepository.deleteById(localCouncilUser.id)
 
         deletionConfirmationSender.sendEmail(
-            localAuthorityUser.email,
-            LocalAuthorityUserDeletionEmail(
-                councilName = localAuthorityUser.localAuthority.name,
+            localCouncilUser.email,
+            LocalCouncilUserDeletionEmail(
+                councilName = localCouncilUser.localCouncil.name,
             ),
         )
 
-        sendUserDeletedEmailsToAdmins(localAuthorityUser)
+        sendUserDeletedEmailsToAdmins(localCouncilUser)
     }
 
     fun sendUserInvitedEmailsToAdmins(
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         invitedEmail: String,
     ) {
         val localAdminsByAuthority =
-            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)
+            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localCouncil.id)
 
         val emailToAdmins =
             LocalCouncilUserInvitationInformAdminEmail(
-                councilName = localAuthority.name,
+                councilName = localCouncil.name,
                 email = invitedEmail,
                 prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
             )
@@ -191,17 +191,17 @@ class LocalAuthorityDataService(
         }
     }
 
-    private fun sendUserDeletedEmailsToAdmins(localAuthorityUser: LocalAuthorityUser) {
+    private fun sendUserDeletedEmailsToAdmins(localCouncilUser: LocalCouncilUser) {
         val localAdminsByAuthority =
-            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityUser.localAuthority.id)
+            localAuthorityUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localCouncilUser.localCouncil.id)
 
         for (admin in localAdminsByAuthority) {
             deletionConfirmationSenderAdmin.sendEmail(
                 admin.email,
-                LocalAuthorityUserDeletionInformAdminEmail(
-                    councilName = localAuthorityUser.localAuthority.name,
-                    email = localAuthorityUser.email,
-                    userName = localAuthorityUser.name,
+                LocalCouncilUserDeletionInformAdminEmail(
+                    councilName = localCouncilUser.localCouncil.name,
+                    email = localCouncilUser.email,
+                    userName = localCouncilUser.name,
                     prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
                 ),
             )
@@ -211,18 +211,18 @@ class LocalAuthorityDataService(
     @Transactional
     fun registerUserAndReturnID(
         baseUserId: String,
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         name: String,
         email: String,
         invitedAsAdmin: Boolean,
         hasAcceptedPrivacyNotice: Boolean,
     ): Long {
-        val localAuthorityUser =
+        val localCouncilUser =
             localAuthorityUserRepository.save(
-                LocalAuthorityUser(
+                LocalCouncilUser(
                     baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
                     isManager = invitedAsAdmin,
-                    localAuthority = localAuthority,
+                    localCouncil = localCouncil,
                     name = name,
                     email = email,
                     hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice,
@@ -230,20 +230,20 @@ class LocalAuthorityDataService(
             )
 
         registrationConfirmationSender.sendEmail(
-            localAuthorityUser.email,
+            localCouncilUser.email,
             LocalCouncilRegistrationConfirmationEmail(
-                councilName = localAuthority.name,
+                councilName = localCouncil.name,
                 prsdURL = absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
                 isAdmin = invitedAsAdmin,
             ),
         )
 
-        return localAuthorityUser.id
+        return localCouncilUser.id
     }
 
     fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localAuthorityUserRepository.findByBaseUser_Id(baseUserId) != null
 
-    fun getLocalAuthorityUser(baseUserId: String): LocalAuthorityUser {
+    fun getLocalAuthorityUser(baseUserId: String): LocalCouncilUser {
         val localAuthorityUser =
             localAuthorityUserRepository.findByBaseUser_Id(baseUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $baseUserId not found")
@@ -251,7 +251,7 @@ class LocalAuthorityDataService(
         return localAuthorityUser
     }
 
-    fun getLocalAuthorityUserById(localAuthorityUserId: Long): LocalAuthorityUser =
+    fun getLocalAuthorityUserById(localAuthorityUserId: Long): LocalCouncilUser =
         localAuthorityUserRepository.findByIdOrNull(localAuthorityUserId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local authority users with ID $localAuthorityUserId not found")
 
@@ -259,11 +259,11 @@ class LocalAuthorityDataService(
 
     fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
 
-    fun getUsersDeletedThisSession(): MutableList<LocalAuthorityUser> =
-        session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalAuthorityUser>?
+    fun getUsersDeletedThisSession(): MutableList<LocalCouncilUser> =
+        session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalCouncilUser>?
             ?: mutableListOf()
 
-    fun getUserDeletedThisSessionById(localAuthorityUserId: Long): LocalAuthorityUser {
+    fun getUserDeletedThisSessionById(localAuthorityUserId: Long): LocalCouncilUser {
         val deletedUser =
             getUsersDeletedThisSession().find { it.id == localAuthorityUserId }
                 ?: throw ResponseStatusException(
@@ -276,26 +276,26 @@ class LocalAuthorityDataService(
         return deletedUser
     }
 
-    private fun throwErrorIfLocalAuthorityUserExists(localAuthorityUser: LocalAuthorityUser) {
-        if (localAuthorityUserRepository.existsById(localAuthorityUser.id)) {
+    private fun throwErrorIfLocalAuthorityUserExists(localCouncilUser: LocalCouncilUser) {
+        if (localAuthorityUserRepository.existsById(localCouncilUser.id)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "User with id ${localAuthorityUser.id} is still in the local_authority_user table",
+                "User with id ${localCouncilUser.id} is still in the local_authority_user table",
             )
         }
     }
 
-    fun addDeletedUserToSession(deletedUser: LocalAuthorityUser) =
+    fun addDeletedUserToSession(deletedUser: LocalCouncilUser) =
         session.setAttribute(
             LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION,
             getUsersDeletedThisSession().plus(deletedUser),
         )
 
-    fun getInvitationsCancelledThisSession(): MutableList<LocalAuthorityInvitation> =
-        session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<LocalAuthorityInvitation>?
+    fun getInvitationsCancelledThisSession(): MutableList<LocalCouncilInvitation> =
+        session.getAttribute(LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION) as MutableList<LocalCouncilInvitation>?
             ?: mutableListOf()
 
-    fun getInvitationCancelledThisSessionById(invitationId: Long): LocalAuthorityInvitation {
+    fun getInvitationCancelledThisSessionById(invitationId: Long): LocalCouncilInvitation {
         val invitation =
             getInvitationsCancelledThisSession().find { it.id == invitationId }
                 ?: throw ResponseStatusException(
@@ -308,7 +308,7 @@ class LocalAuthorityDataService(
         return invitation
     }
 
-    fun addCancelledInvitationToSession(invitation: LocalAuthorityInvitation) =
+    fun addCancelledInvitationToSession(invitation: LocalCouncilInvitation) =
         session.setAttribute(
             LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION,
             getInvitationsCancelledThisSession().plus(invitation),

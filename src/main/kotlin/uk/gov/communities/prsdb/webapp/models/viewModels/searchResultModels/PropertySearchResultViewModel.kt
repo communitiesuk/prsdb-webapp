@@ -26,7 +26,7 @@ data class PropertySearchResultViewModel(
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
             localAuthority =
-                propertyOwnership.address.localAuthority
+                propertyOwnership.address.localCouncil
                     ?.name,
             landlord =
                 PropertySearchResultLandlordViewModel(

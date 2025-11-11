@@ -17,7 +17,7 @@ class EmailTemplateModelsTests {
         private fun templateList() =
             listOf(
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationEmail(
+                    LocalCouncilInvitationEmail(
                         MockLocalAuthorityData.createLocalAuthority(),
                         URI("invitationUri"),
                         "prsdUrl",
@@ -26,11 +26,11 @@ class EmailTemplateModelsTests {
                     "/emails/LocalAuthorityInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationCancellationEmail(MockLocalAuthorityData.createLocalAuthority()),
+                    LocalCouncilInvitationCancellationEmail(MockLocalAuthorityData.createLocalAuthority()),
                     "/emails/LocalAuthorityInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityAdminInvitationEmail(MockLocalAuthorityData.createLocalAuthority(), URI("invitationUri")),
+                    LocalCouncilAdminInvitationEmail(MockLocalAuthorityData.createLocalAuthority(), URI("invitationUri")),
                     "/emails/LocalAuthorityAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
@@ -202,11 +202,11 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityUserDeletionEmail("councilName"),
+                    LocalCouncilUserDeletionEmail("councilName"),
                     "/emails/LocalCouncilUserDeletion.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityUserDeletionInformAdminEmail("councilName", "email", "userName", "prsdUrl"),
+                    LocalCouncilUserDeletionInformAdminEmail("councilName", "email", "userName", "prsdUrl"),
                     "/emails/LocalCouncilUserDeletionAdminEmail.md",
                 ),
                 EmailTemplateTestData(

@@ -30,35 +30,35 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.constants.VOWELS
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.LOCAL_AUTHORITY_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.LOCAL_AUTHORITY_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.ConfirmedEmailRequestModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalCouncilUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_ADMIN', 'SYSTEM_OPERATOR')")
 @PrsdbController
 @RequestMapping(LOCAL_AUTHORITY_ROUTE)
-class ManageLocalAuthorityUsersController(
-    var invitationEmailSender: EmailNotificationService<LocalAuthorityInvitationEmail>,
-    var cancellationEmailSender: EmailNotificationService<LocalAuthorityInvitationCancellationEmail>,
-    var invitationService: LocalAuthorityInvitationService,
-    val localAuthorityDataService: LocalAuthorityDataService,
+class ManageLocalCouncilUsersController(
+    var invitationEmailSender: EmailNotificationService<LocalCouncilInvitationEmail>,
+    var cancellationEmailSender: EmailNotificationService<LocalCouncilInvitationCancellationEmail>,
+    var invitationService: LocalCouncilInvitationService,
+    val localCouncilDataService: LocalCouncilDataService,
     val absoluteUrlProvider: AbsoluteUrlProvider,
-    val localAuthorityService: LocalAuthorityService,
+    val localCouncilService: LocalCouncilService,
     val securityContextService: SecurityContextService,
 ) {
     @GetMapping("/$MANAGE_USERS_PATH_SEGMENT")
@@ -74,7 +74,7 @@ class ManageLocalAuthorityUsersController(
         val localAuthority = getLocalAuthority(principal, localAuthorityId, request)
 
         val pagedUserList =
-            localAuthorityDataService.getPaginatedUsersAndInvitations(
+            localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 page - 1,
                 filterOutLaAdminInvitations = !request.isUserInRole(ROLE_SYSTEM_OPERATOR),
@@ -110,7 +110,7 @@ class ManageLocalAuthorityUsersController(
         throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
 
         val localAuthorityUser =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+            localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
         model.addAttribute("backUrl", "../$MANAGE_USERS_PATH_SEGMENT")
         model.addAttribute("localAuthorityUser", localAuthorityUser)
@@ -140,15 +140,15 @@ class ManageLocalAuthorityUsersController(
     fun updateUserAccessLevel(
         @PathVariable localAuthorityId: Int,
         @PathVariable localAuthorityUserId: Long,
-        @ModelAttribute localAuthorityUserAccessLevel: LocalAuthorityUserAccessLevelRequestModel,
+        @ModelAttribute localAuthorityUserAccessLevel: LocalCouncilUserAccessLevelRequestModel,
         principal: Principal,
         request: HttpServletRequest,
     ): String {
         throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, localAuthorityUserId, request)
 
-        localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
+        localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(localAuthorityUserId, localAuthorityId)
 
-        localAuthorityDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
+        localCouncilDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
         return "redirect:${getLaManageUsersRoute(localAuthorityId)}"
     }
 
@@ -163,7 +163,7 @@ class ManageLocalAuthorityUsersController(
         throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, deleteeId, request)
 
         val userToDelete =
-            localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
+            localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
         model.addAttribute("user", userToDelete)
         model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$deleteeId")
         return "deleteLAUser"
@@ -178,9 +178,9 @@ class ManageLocalAuthorityUsersController(
         request: HttpServletRequest,
     ): String {
         throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(principal, localAuthorityId, deleteeId, request)
-        val userBeingDeleted = localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
+        val userBeingDeleted = localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
 
-        localAuthorityDataService.deleteUser(userBeingDeleted)
+        localCouncilDataService.deleteUser(userBeingDeleted)
 
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
             (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
@@ -188,13 +188,13 @@ class ManageLocalAuthorityUsersController(
             // If the user is a system operator they can delete themself from the local_authority_user table
             // If this happens we will need to update their user roles as the Manage LA Users page
             // will throw an error if they have the LA_ADMIN role but are no longer in the local_authority_users table.
-            val currentUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+            val currentUser = localCouncilDataService.getLocalAuthorityUser(principal.name)
             if (currentUser.id == userBeingDeleted.id) {
                 securityContextService.refreshContext()
             }
         }
 
-        localAuthorityDataService.addDeletedUserToSession(userBeingDeleted)
+        localCouncilDataService.addDeletedUserToSession(userBeingDeleted)
         return "redirect:../$DELETE_USER_CONFIRMATION_ROUTE"
     }
 
@@ -206,7 +206,7 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        val userDeletedThisSession = localAuthorityDataService.getUserDeletedThisSessionById(deleteeId)
+        val userDeletedThisSession = localCouncilDataService.getUserDeletedThisSessionById(deleteeId)
 
         model.addAttribute("deletedUserName", userDeletedThisSession.name)
 
@@ -258,18 +258,18 @@ class ManageLocalAuthorityUsersController(
             val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
             invitationEmailSender.sendEmail(
                 emailModel.email,
-                LocalAuthorityInvitationEmail(
+                LocalCouncilInvitationEmail(
                     currentAuthority,
                     invitationLinkAddress,
                     absoluteUrlProvider.buildLocalAuthorityDashboardUri().toString(),
                 ),
             )
-            localAuthorityDataService.sendUserInvitedEmailsToAdmins(
+            localCouncilDataService.sendUserInvitedEmailsToAdmins(
                 currentAuthority,
                 emailModel.email,
             )
 
-            localAuthorityDataService.addInvitedLocalAuthorityUserToSession(localAuthorityId, emailModel.email)
+            localCouncilDataService.addInvitedLocalAuthorityUserToSession(localAuthorityId, emailModel.email)
 
             return "redirect:$INVITE_USER_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
@@ -286,7 +286,7 @@ class ManageLocalAuthorityUsersController(
         request: HttpServletRequest,
     ): String {
         val invitedEmail =
-            localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(localAuthorityId)
+            localCouncilDataService.getLastLocalAuthorityUserInvitedThisSession(localAuthorityId)
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "No email address found in the session for a user invited to local authority with id $localAuthorityId",
@@ -343,10 +343,10 @@ class ManageLocalAuthorityUsersController(
 
         cancellationEmailSender.sendEmail(
             invitation.invitedEmail,
-            LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority),
+            LocalCouncilInvitationCancellationEmail(invitation.invitingAuthority),
         )
 
-        localAuthorityDataService.addCancelledInvitationToSession(
+        localCouncilDataService.addCancelledInvitationToSession(
             invitation,
         )
 
@@ -361,7 +361,7 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         request: HttpServletRequest,
     ): String {
-        val invitationDeletedThisSession = localAuthorityDataService.getInvitationCancelledThisSessionById(invitationId)
+        val invitationDeletedThisSession = localCouncilDataService.getInvitationCancelledThisSessionById(invitationId)
 
         model.addAttribute("deletedEmail", invitationDeletedThisSession.invitedEmail)
 
@@ -379,7 +379,7 @@ class ManageLocalAuthorityUsersController(
     ) {
         if (!request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
             val (currentUser, _) =
-                localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                     localAuthorityId,
                     principal.name,
                 )
@@ -393,12 +393,12 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         localAuthorityId: Int,
         request: HttpServletRequest,
-    ): LocalAuthority =
+    ): LocalCouncil =
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            localAuthorityService.retrieveLocalAuthorityById(localAuthorityId)
+            localCouncilService.retrieveLocalAuthorityById(localAuthorityId)
         } else {
             val laUserAndla =
-                localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                     localAuthorityId,
                     principal.name,
                 )
@@ -409,13 +409,13 @@ class ManageLocalAuthorityUsersController(
         principal: Principal,
         localAuthorityId: Int,
         request: HttpServletRequest,
-    ): LocalAuthorityUserDataModel? {
+    ): LocalCouncilUserDataModel? {
         if (!request.isUserInRole(ROLE_LA_ADMIN)) {
             return null
         }
         try {
             val (currentUser, _) =
-                localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+                localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
                     localAuthorityId,
                     principal.name,
                 )

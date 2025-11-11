@@ -10,12 +10,12 @@ import uk.gov.communities.prsdb.webapp.constants.DPO_COMMUNITIES_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController.Companion.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController.Companion.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE
 
 @PrsdbController
 @RequestMapping(LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
-class LocalAuthorityPrivacyNoticeController {
+class LocalCouncilPrivacyNoticeController {
     @GetMapping
     fun getPrivacyNoticePage(model: Model): String {
         model.addAttribute("complaintsProcedureUrl", COMPLAINTS_PROCEDURE_URL)

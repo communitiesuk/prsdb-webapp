@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -26,9 +26,9 @@ class MockLandlordData {
     companion object {
         fun createAddress(
             singleLineAddress: String = "1 Example Road, EG1 2AB",
-            localAuthority: LocalAuthority? = createLocalAuthority(),
+            localCouncil: LocalCouncil? = createLocalAuthority(),
             uprn: Long? = null,
-        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
+        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localCouncil)
 
         fun createOneLoginUser(id: String = "") = OneLoginUser(id)
 
@@ -147,8 +147,8 @@ class MockLandlordData {
 
         fun createPasscode(
             code: String = "ABCDEF",
-            localAuthority: LocalAuthority = createLocalAuthority(),
+            localCouncil: LocalCouncil = createLocalAuthority(),
             baseUser: OneLoginUser? = createOneLoginUser(),
-        ) = Passcode(code, localAuthority, baseUser)
+        ) = Passcode(code, localCouncil, baseUser)
     }
 }

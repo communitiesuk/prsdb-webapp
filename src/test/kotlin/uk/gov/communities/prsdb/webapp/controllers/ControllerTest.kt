@@ -16,14 +16,14 @@ import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
-import uk.gov.communities.prsdb.webapp.config.security.LocalAuthoritySecurityConfig
+import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfig
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
     DefaultSecurityConfig::class,
     LandlordSecurityConfig::class,
-    LocalAuthoritySecurityConfig::class,
+    LocalCouncilSecurityConfig::class,
     CustomErrorConfig::class,
     TrailingSlashFilterConfiguration::class,
     BackLinkInterceptorConfig::class,

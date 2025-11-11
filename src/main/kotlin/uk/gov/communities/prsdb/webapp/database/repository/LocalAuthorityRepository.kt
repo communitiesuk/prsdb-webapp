@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 
-interface LocalAuthorityRepository : JpaRepository<LocalAuthority, Int> {
-    fun findByCustodianCode(custodianCode: String): LocalAuthority?
+interface LocalAuthorityRepository : JpaRepository<LocalCouncil, Int> {
+    fun findByCustodianCode(custodianCode: String): LocalCouncil?
 
-    fun findAllByOrderByNameAsc(): List<LocalAuthority>
+    fun findAllByOrderByNameAsc(): List<LocalCouncil>
 }

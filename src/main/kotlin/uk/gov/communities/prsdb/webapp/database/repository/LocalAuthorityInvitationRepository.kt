@@ -2,17 +2,17 @@ package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import java.util.UUID
 
-interface LocalAuthorityInvitationRepository : JpaRepository<LocalAuthorityInvitation?, Long?> {
-    fun findByToken(token: UUID): LocalAuthorityInvitation?
+interface LocalAuthorityInvitationRepository : JpaRepository<LocalCouncilInvitation?, Long?> {
+    fun findByToken(token: UUID): LocalCouncilInvitation?
 
     fun findByInvitingAuthority(
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         pageRequest: PageRequest,
-    ): List<LocalAuthorityInvitation>
+    ): List<LocalCouncilInvitation>
 
-    fun countByInvitingAuthority(invitingAuthority: LocalAuthority): Long
+    fun countByInvitingAuthority(invitingAuthority: LocalCouncil): Long
 }

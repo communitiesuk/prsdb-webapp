@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-data class LocalAuthorityUserDeletionInformAdminEmail(
+data class LocalCouncilUserDeletionInformAdminEmail(
     val councilName: String,
     val email: String,
     val userName: String,

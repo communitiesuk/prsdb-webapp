@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CancelLaUserInvitationSuccessBasePage
 
 class CancelLaUserInvitationSuccessPage(
@@ -9,7 +9,7 @@ class CancelLaUserInvitationSuccessPage(
     urlArguments: Map<String, String>,
 ) : CancelLaUserInvitationSuccessBasePage(
         page,
-        ManageLocalAuthorityUsersController.getLaCancelInviteSuccessRoute(
+        ManageLocalCouncilUsersController.getLaCancelInviteSuccessRoute(
             urlArguments["localAuthorityId"]!!.toInt(),
             urlArguments["invitationId"]!!.toLong(),
         ),

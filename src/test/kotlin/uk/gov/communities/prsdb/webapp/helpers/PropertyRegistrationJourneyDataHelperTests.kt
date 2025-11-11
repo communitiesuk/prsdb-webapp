@@ -10,19 +10,19 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import kotlin.test.assertEquals
 
 class PropertyRegistrationJourneyDataHelperTests {
-    private lateinit var mockLocalAuthorityService: LocalAuthorityService
+    private lateinit var mockLocalCouncilService: LocalCouncilService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
-        mockLocalAuthorityService = mock()
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockLocalAuthorityService)
+        mockLocalCouncilService = mock()
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockLocalCouncilService)
     }
 
     @Test
@@ -30,7 +30,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val selectedAddress = "1 Example Address, EG1 2AB"
         val localAuthority = createLocalAuthority()
         val mockJourneyData =
-            journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = localAuthority).build()
+            journeyDataBuilder.withSelectedAddress(selectedAddress, localCouncil = localAuthority).build()
         val expectedAddressDataModel = AddressDataModel(selectedAddress, localAuthorityId = localAuthority.id)
 
         val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData)
@@ -56,7 +56,7 @@ class PropertyRegistrationJourneyDataHelperTests {
                 localAuthorityId = localAuthority.id,
             )
 
-        whenever(mockLocalAuthorityService.retrieveLocalAuthorityByCustodianCode(localAuthority.custodianCode)).thenReturn(
+        whenever(mockLocalCouncilService.retrieveLocalAuthorityByCustodianCode(localAuthority.custodianCode)).thenReturn(
             localAuthority,
         )
 

@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 
-data class LocalAuthorityInvitationCancellationEmail(
-    val localAuthority: LocalAuthority,
+data class LocalCouncilInvitationCancellationEmail(
+    val localCouncil: LocalCouncil,
 ) : EmailTemplateModel {
     private val localAuthorityKey = "name of council"
 
@@ -11,6 +11,6 @@ data class LocalAuthorityInvitationCancellationEmail(
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
-            localAuthorityKey to localAuthority.name,
+            localAuthorityKey to localCouncil.name,
         )
 }

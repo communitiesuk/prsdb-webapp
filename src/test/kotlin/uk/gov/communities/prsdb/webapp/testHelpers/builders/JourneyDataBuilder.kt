@@ -14,13 +14,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
@@ -58,12 +58,12 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPa
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 import java.time.LocalDate
 
 class JourneyDataBuilder(
-    private val mockLocalAuthorityService: LocalAuthorityService = mock(),
+    private val mockLocalCouncilService: LocalCouncilService = mock(),
     initialJourneyData: JourneyData? = null,
 ) {
     private val journeyData = initialJourneyData?.toMutableMap() ?: mutableMapOf()
@@ -116,8 +116,8 @@ class JourneyDataBuilder(
                 RegisterPropertyStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
-        fun propertyDefault(localAuthorityService: LocalAuthorityService) =
-            JourneyDataBuilder(localAuthorityService, defaultPropertyJourneyData).withSelectedAddress(
+        fun propertyDefault(localCouncilService: LocalCouncilService) =
+            JourneyDataBuilder(localCouncilService, defaultPropertyJourneyData).withSelectedAddress(
                 DEFAULT_ADDRESS,
                 709902,
                 createLocalAuthority(),
@@ -144,8 +144,8 @@ class JourneyDataBuilder(
                 LandlordRegistrationStepId.CheckAnswers.urlPathSegment to emptyMap(),
             )
 
-        fun landlordDefault(localAuthorityService: LocalAuthorityService) =
-            JourneyDataBuilder(localAuthorityService, defaultLandlordJourneyData).withSelectedAddress(
+        fun landlordDefault(localCouncilService: LocalCouncilService) =
+            JourneyDataBuilder(localCouncilService, defaultLandlordJourneyData).withSelectedAddress(
                 DEFAULT_ADDRESS,
                 709902,
                 createLocalAuthority(),
@@ -191,11 +191,11 @@ class JourneyDataBuilder(
     fun withSelectedAddress(
         singleLineAddress: String = "1 Street Address, City, AB1 2CD",
         uprn: Long? = null,
-        localAuthority: LocalAuthority? = createLocalAuthority(),
+        localCouncil: LocalCouncil? = createLocalAuthority(),
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
-        localAuthority?.let {
-            whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
+        localCouncil?.let {
+            whenever(mockLocalCouncilService.retrieveLocalAuthorityById(localCouncil.id)).thenReturn(localCouncil)
         }
 
         if (!isContactAddress) {
@@ -203,7 +203,7 @@ class JourneyDataBuilder(
         }
 
         journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] =
-            Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localAuthority?.id, uprn = uprn)))
+            Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localCouncil?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         journeyData[selectAddressKey] = mapOf("address" to singleLineAddress)
@@ -214,7 +214,7 @@ class JourneyDataBuilder(
         addressLineOne: String = "1 Street Address",
         townOrCity: String = "City",
         postcode: String = "AB1 2CD",
-        localAuthority: LocalAuthority? = null,
+        localCouncil: LocalCouncil? = null,
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
@@ -232,12 +232,12 @@ class JourneyDataBuilder(
             withEnglandOrWalesResidence()
         }
 
-        if (localAuthority != null) {
-            whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(localAuthority.id)).thenReturn(localAuthority)
+        if (localCouncil != null) {
+            whenever(mockLocalCouncilService.retrieveLocalAuthorityById(localCouncil.id)).thenReturn(localCouncil)
         }
 
         journeyData[RegisterPropertyStepId.LocalAuthority.urlPathSegment] =
-            mapOf("localAuthorityId" to localAuthority?.id)
+            mapOf("localAuthorityId" to localCouncil?.id)
 
         return this
     }
@@ -407,7 +407,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder =
         this
             .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
-            .withSelectedAddress(selectedAddress, localAuthority = null, isContactAddress = true)
+            .withSelectedAddress(selectedAddress, localCouncil = null, isContactAddress = true)
 
     fun withNonEnglandOrWalesAndManualContactAddress(
         countryOfResidence: String,
@@ -971,18 +971,18 @@ class JourneyDataBuilder(
     }
 
     fun withLandingPageReached(): JourneyDataBuilder {
-        journeyData[RegisterLaUserStepId.LandingPage.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withPrivacyNoticeConfirmed(): JourneyDataBuilder {
-        journeyData[RegisterLaUserStepId.PrivacyNotice.urlPathSegment] =
+        journeyData[RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment] =
             mapOf<String, Any?>(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true)
         return this
     }
 
     fun withName(name: String = "Mary Margaret"): JourneyDataBuilder {
-        journeyData[RegisterLaUserStepId.Name.urlPathSegment] = mapOf(NameFormModel::name.name to name)
+        journeyData[RegisterLocalCouncilUserStepId.Name.urlPathSegment] = mapOf(NameFormModel::name.name to name)
         return this
     }
 

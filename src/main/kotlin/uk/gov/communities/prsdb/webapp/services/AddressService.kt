@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 @PrsdbWebService
 class AddressService(
     private val addressRepository: AddressRepository,
-    private val localAuthorityService: LocalAuthorityService,
+    private val localCouncilService: LocalCouncilService,
 ) {
     @Transactional
     fun findOrCreateAddress(addressDataModel: AddressDataModel) =
@@ -18,7 +18,7 @@ class AddressService(
             addressRepository.findByIsActiveTrueAndUprn(addressDataModel.uprn)
                 ?: throw EntityNotFoundException("No active address found with UPRN ${addressDataModel.uprn}")
         } else {
-            val localAuthority = addressDataModel.localAuthorityId?.let { localAuthorityService.retrieveLocalAuthorityById(it) }
+            val localAuthority = addressDataModel.localAuthorityId?.let { localCouncilService.retrieveLocalAuthorityById(it) }
             addressRepository.save(Address(addressDataModel, localAuthority))
         }
 

@@ -4,25 +4,25 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUserOrInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUserOrInvitation
 
-interface LocalAuthorityUserOrInvitationRepository : JpaRepository<LocalAuthorityUserOrInvitation?, Long?> {
+interface LocalAuthorityUserOrInvitationRepository : JpaRepository<LocalCouncilUserOrInvitation?, Long?> {
     fun findByLocalAuthority(
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         pageable: Pageable,
-    ): Page<LocalAuthorityUserOrInvitation>
+    ): Page<LocalCouncilUserOrInvitation>
 
     @Query(
         "SELECT u " +
-            "FROM LocalAuthorityUserOrInvitation u " +
-            "WHERE u.localAuthority = :localAuthority " +
+            "FROM LocalCouncilUserOrInvitation u " +
+            "WHERE u.localCouncil = :localCouncil " +
             "AND NOT (u.entityType = 'local_authority_invitation' AND u.isManager = true)",
     )
     fun findByLocalAuthorityNotIncludingAdminInvitations(
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         pageable: Pageable,
-    ): Page<LocalAuthorityUserOrInvitation>
+    ): Page<LocalCouncilUserOrInvitation>
 
-    fun findAllByIsManagerTrue(pageable: Pageable): Page<LocalAuthorityUserOrInvitation>
+    fun findAllByIsManagerTrue(pageable: Pageable): Page<LocalCouncilUserOrInvitation>
 }

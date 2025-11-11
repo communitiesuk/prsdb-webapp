@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne
 import java.util.UUID
 
 @Entity
-class LocalAuthorityInvitation(
+class LocalCouncilInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
@@ -28,13 +28,13 @@ class LocalAuthorityInvitation(
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
-    lateinit var invitingAuthority: LocalAuthority
+    lateinit var invitingAuthority: LocalCouncil
         private set
 
     constructor(
         token: UUID,
         email: String,
-        invitingAuthority: LocalAuthority,
+        invitingAuthority: LocalCouncil,
         invitedAsAdmin: Boolean = false,
     ) : this() {
         this.token = token
@@ -43,7 +43,7 @@ class LocalAuthorityInvitation(
         this.invitedAsAdmin = invitedAsAdmin
     }
 
-    constructor(id: Long, token: UUID, email: String, invitingAuthority: LocalAuthority, invitedAsAdmin: Boolean = false) : this(id) {
+    constructor(id: Long, token: UUID, email: String, invitingAuthority: LocalCouncil, invitedAsAdmin: Boolean = false) : this(id) {
         this.token = token
         this.invitedEmail = email
         this.invitingAuthority = invitingAuthority

@@ -23,29 +23,29 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getCancelInviteConfirmationRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getDeleteUserConfirmationRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaCancelInviteSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaDeleteUserSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaEditUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteUserSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteConfirmationRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getDeleteUserConfirmationRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaCancelInviteRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaCancelInviteSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaDeleteUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaDeleteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaEditUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaInviteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaManageUsersRoute
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalCouncilUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationCancellationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationCancellationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.DEFAULT_LA_INVITATION_ID
@@ -61,7 +61,7 @@ import java.net.URI
 import java.net.URLEncoder
 import kotlin.test.Test
 
-@WebMvcTest(ManageLocalAuthorityUsersController::class)
+@WebMvcTest(ManageLocalCouncilUsersController::class)
 class ManageLocalAuthorityUsersControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -69,16 +69,16 @@ class ManageLocalAuthorityUsersControllerTests(
     lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean
-    lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+    lateinit var localCouncilInvitationService: LocalCouncilInvitationService
 
     @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockitoBean
-    lateinit var localAuthorityService: LocalAuthorityService
+    lateinit var localCouncilService: LocalCouncilService
 
     @MockitoBean
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @MockitoBean
     private lateinit var securityContextService: SecurityContextService
@@ -111,17 +111,17 @@ class ManageLocalAuthorityUsersControllerTests(
                     status { isForbidden() }
                 }
 
-            verify(localAuthorityDataService, never()).getPaginatedUsersAndInvitations(any(), any(), anyOrNull(), anyOrNull())
+            verify(localCouncilDataService, never()).getPaginatedUsersAndInvitations(any(), any(), anyOrNull(), anyOrNull())
         }
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `index returns 200 for authorized user`() {
             val loggedInUserModel = createdLoggedInUserModel()
-            val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-                .thenReturn(Pair(loggedInUserModel, localAuthority))
-            whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
+            val localCouncil = LocalCouncil(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+                .thenReturn(Pair(loggedInUserModel, localCouncil))
+            whenever(localCouncilDataService.getPaginatedUsersAndInvitations(localCouncil, 0))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
             mvc
@@ -130,7 +130,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     status { isOk() }
                     model {
                         attribute("currentUserId", loggedInUserModel.id)
-                        attribute("localAuthority", localAuthority)
+                        attribute("localCouncil", localCouncil)
                     }
                 }
         }
@@ -138,7 +138,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `index returns 403 for admin user accessing another LA`() {
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenThrow(AccessDeniedException(""))
 
             mvc
@@ -152,14 +152,14 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `index returns 200 for a system operator`() {
             val localAuthority = setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
-            whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(eq(localAuthority), eq(0), anyOrNull(), anyOrNull()))
+            whenever(localCouncilDataService.getPaginatedUsersAndInvitations(eq(localAuthority), eq(0), anyOrNull(), anyOrNull()))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
             mvc
                 .get(getLaManageUsersRoute(NON_ADMIN_LA_ID))
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("localAuthority", localAuthority)
+                        attribute("localCouncil", localAuthority)
                     }
                 }
         }
@@ -168,10 +168,10 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `index returns 404 for authorized user accessing a page less than 1`() {
             val loggedInUserModel = createdLoggedInUserModel()
-            val localAuthority = LocalAuthority(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
-                .thenReturn(Pair(loggedInUserModel, localAuthority))
-            whenever(localAuthorityDataService.getPaginatedUsersAndInvitations(localAuthority, 0))
+            val localCouncil = LocalCouncil(DEFAULT_LA_ID, "Test Local Authority", "custodianCode")
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+                .thenReturn(Pair(loggedInUserModel, localCouncil))
+            whenever(localCouncilDataService.getPaginatedUsersAndInvitations(localCouncil, 0))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
             mvc
@@ -193,7 +193,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
             postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
 
-            verify(localAuthorityInvitationService).createInvitationToken(invitedEmail, localAuthority, false)
+            verify(localCouncilInvitationService).createInvitationToken(invitedEmail, localAuthority, false)
         }
 
         @Test
@@ -214,7 +214,7 @@ class ManageLocalAuthorityUsersControllerTests(
             verify(emailNotificationService)
                 .sendEmail(
                     invitedEmail,
-                    LocalAuthorityInvitationEmail(
+                    LocalCouncilInvitationEmail(
                         localAuthority,
                         URI(invitationUrl),
                         dashboardUrl,
@@ -231,7 +231,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
             postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
 
-            verify(localAuthorityDataService)
+            verify(localCouncilDataService)
                 .sendUserInvitedEmailsToAdmins(localAuthority, invitedEmail)
         }
 
@@ -244,7 +244,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
             postToSendInvitationAndAssertRedirectionToConfirmation(DEFAULT_LA_ID, invitedEmail)
 
-            verify(localAuthorityDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
+            verify(localCouncilDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
         }
 
         @Test
@@ -273,27 +273,27 @@ class ManageLocalAuthorityUsersControllerTests(
 
             postToSendInvitationAndAssertRedirectionToConfirmation(NON_ADMIN_LA_ID, invitedEmail)
 
-            verify(localAuthorityInvitationService).createInvitationToken(invitedEmail, localAuthority, false)
+            verify(localCouncilInvitationService).createInvitationToken(invitedEmail, localAuthority, false)
 
             verify(emailNotificationService)
                 .sendEmail(
                     invitedEmail,
-                    LocalAuthorityInvitationEmail(
+                    LocalCouncilInvitationEmail(
                         localAuthority,
                         URI(invitationUrl),
                         dashboardUrl,
                     ),
                 )
-            verify(localAuthorityDataService)
+            verify(localCouncilDataService)
                 .sendUserInvitedEmailsToAdmins(localAuthority, invitedEmail)
-            verify(localAuthorityDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
+            verify(localCouncilDataService).addInvitedLocalAuthorityUserToSession(localAuthority.id, invitedEmail)
         }
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `inviteNewUserConfirmation returns 200 if a user was invited to the requested local authority this session`() {
             setupDefaultLocalAuthorityForLaAdmin()
-            whenever((localAuthorityDataService.getLastLocalAuthorityUserInvitedThisSession(DEFAULT_LA_ID)))
+            whenever((localCouncilDataService.getLastLocalAuthorityUserInvitedThisSession(DEFAULT_LA_ID)))
                 .thenReturn("invited.email@example.com")
 
             mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
@@ -304,7 +304,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `inviteNewUserConfirmation returns 404 if no user was invited to the requested local authority this session`() {
-            whenever((localAuthorityDataService.getLastUserIdRegisteredThisSession())).thenReturn(null)
+            whenever((localCouncilDataService.getLastUserIdRegisteredThisSession())).thenReturn(null)
 
             mvc.get(getLaInviteUserSuccessRoute(DEFAULT_LA_ID)).andExpect {
                 status { isNotFound() }
@@ -315,8 +315,8 @@ class ManageLocalAuthorityUsersControllerTests(
             userIsSystemOperator: Boolean = false,
             invitationUrl: String = "https://test-service.gov.uk/sign-up-la-user",
             dashboardUrl: String = "https://test-service.gov.uk",
-        ): LocalAuthority {
-            whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
+        ): LocalCouncil {
+            whenever(localCouncilInvitationService.createInvitationToken(any(), any(), any()))
                 .thenReturn("test-token")
             whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
                 .thenReturn(URI(invitationUrl))
@@ -358,7 +358,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getEditUserAccessLevelPage returns 403 for admin user accessing another LA`() {
             createdLoggedInUserModel()
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenThrow(AccessDeniedException(""))
 
             mvc
@@ -372,7 +372,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getEditUserAccessLevelPage returns 404 for admin user accessing a LA user that does not exist or is from another LA`() {
             setupDefaultLocalAuthorityForLaAdmin()
-            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
+            whenever(localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
             mvc
@@ -396,11 +396,11 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
             val loggedInUser = createLocalAuthorityUser(name = "Logged In User")
-            val loggedInUserModel = LocalAuthorityUserDataModel.fromLocalAuthorityUser(loggedInUser)
+            val loggedInUserModel = LocalCouncilUserDataModel.fromLocalAuthorityUser(loggedInUser)
             val localAuthority = createLocalAuthority()
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenReturn(Pair(loggedInUserModel, localAuthority))
-            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
+            whenever(localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(loggedInUserModel.id, DEFAULT_LA_ID))
                 .thenReturn(loggedInUser)
 
             mvc
@@ -445,7 +445,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `updateUserAccessLevel gives a 403 when trying to update currently logged in user`() {
             val loggedInUserModel = createdLoggedInUserModel()
             val localAuthority = createLocalAuthority()
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenReturn(Pair(loggedInUserModel, localAuthority))
 
             mvc
@@ -487,8 +487,8 @@ class ManageLocalAuthorityUsersControllerTests(
                     }
                 }
 
-            verify(localAuthorityDataService).updateUserAccessLevel(
-                LocalAuthorityUserAccessLevelRequestModel(true),
+            verify(localCouncilDataService).updateUserAccessLevel(
+                LocalCouncilUserAccessLevelRequestModel(true),
                 DEFAULT_LA_USER_ID,
             )
         }
@@ -529,7 +529,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `confirmDeleteUser gives a 403 when trying to delete currently logged in user`() {
             val loggedInUserModel = createdLoggedInUserModel()
             val localAuthority = createLocalAuthority()
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenReturn(Pair(loggedInUserModel, localAuthority))
 
             mvc
@@ -551,7 +551,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
             postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user)
 
-            verify(localAuthorityDataService).addDeletedUserToSession(user)
+            verify(localCouncilDataService).addDeletedUserToSession(user)
         }
 
         @Test
@@ -563,7 +563,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
             postDeleteUserAndAssertSuccess(NON_ADMIN_LA_ID, user)
 
-            verify(localAuthorityDataService).addDeletedUserToSession(user)
+            verify(localCouncilDataService).addDeletedUserToSession(user)
         }
 
         @Test
@@ -571,7 +571,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `deleteUser returns 403 if a user who is not a system operator attempts to delete themself`() {
             val loggedInUserModel = createdLoggedInUserModel()
             val localAuthority = createLocalAuthority()
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenReturn(Pair(loggedInUserModel, localAuthority))
 
             mvc
@@ -588,7 +588,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `deleteUser allows a system operator to delete themself then refreshes the user roles`() {
             val localAuthority = setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
             val user = setupLocalAuthorityUserToEdit(localAuthority, DEFAULT_LOGGED_IN_LA_USER_ID)
-            whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(user)
+            whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(user)
 
             postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user)
 
@@ -601,7 +601,7 @@ class ManageLocalAuthorityUsersControllerTests(
             val localAuthority = setupLocalAuthorityForSystemOperator(DEFAULT_LA_ID)
             val user = setupLocalAuthorityUserToEdit(localAuthority, DEFAULT_LA_USER_ID)
             val loggedInUser = createLocalAuthorityUser(id = DEFAULT_LOGGED_IN_LA_USER_ID)
-            whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(loggedInUser)
+            whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(loggedInUser)
 
             postDeleteUserAndAssertSuccess(DEFAULT_LA_ID, user)
 
@@ -613,7 +613,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `deleteUserSuccess returns 200 if the user was deleted this session`() {
             setupDefaultLocalAuthorityForLaAdmin()
             val localAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID)
-            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityUser.id))
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(localAuthorityUser.id))
                 .thenReturn(localAuthorityUser)
             mvc
                 .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
@@ -625,7 +625,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `deleteUserSuccess returns 404 if the user was not deleted in this session`() {
-            whenever(localAuthorityDataService.getUserDeletedThisSessionById(DEFAULT_LA_USER_ID))
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(DEFAULT_LA_USER_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             mvc
                 .get(getLaDeleteUserSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_USER_ID))
@@ -637,7 +637,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `delete user success page returns 500 if the user is still in the database`() {
-            whenever(localAuthorityDataService.getUserDeletedThisSessionById(DEFAULT_LA_USER_ID))
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(DEFAULT_LA_USER_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
 
             mvc
@@ -649,9 +649,9 @@ class ManageLocalAuthorityUsersControllerTests(
 
         private fun postDeleteUserAndAssertSuccess(
             laId: Int = DEFAULT_LA_ID,
-            userBeingDeleted: LocalAuthorityUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID),
-        ): LocalAuthorityUser {
-            whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(userBeingDeleted.id, laId))
+            userBeingDeleted: LocalCouncilUser = createLocalAuthorityUser(id = DEFAULT_LA_USER_ID),
+        ): LocalCouncilUser {
+            whenever(localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(userBeingDeleted.id, laId))
                 .thenReturn(userBeingDeleted)
 
             mvc
@@ -665,7 +665,7 @@ class ManageLocalAuthorityUsersControllerTests(
                     }
                 }
 
-            verify(localAuthorityDataService).deleteUser(userBeingDeleted)
+            verify(localCouncilDataService).deleteUser(userBeingDeleted)
 
             return userBeingDeleted
         }
@@ -679,7 +679,7 @@ class ManageLocalAuthorityUsersControllerTests(
             setupDefaultLocalAuthorityForLaAdmin()
 
             val invitation = createLocalAuthorityInvitation()
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -695,7 +695,7 @@ class ManageLocalAuthorityUsersControllerTests(
             setupLocalAuthorityForSystemOperator(NON_ADMIN_LA_ID)
 
             val invitation = createLocalAuthorityInvitation(invitingAuthority = createLocalAuthority(id = NON_ADMIN_LA_ID))
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(NON_ADMIN_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -708,11 +708,11 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `confirmCancelInvitation returns 403 for admin user accessing another LA`() {
-            whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+            whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenThrow(AccessDeniedException(""))
 
             val invitation = createLocalAuthorityInvitation()
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -727,7 +727,7 @@ class ManageLocalAuthorityUsersControllerTests(
             setupDefaultLocalAuthorityForLaAdmin()
 
             val invitation = createLocalAuthorityInvitation(invitingAuthority = createLocalAuthority(id = 789))
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
@@ -739,7 +739,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation returns 404 if the invitation is not in the database`() {
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
 
             mvc
                 .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
@@ -766,7 +766,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation emails a cancellation notification to the invited email address`() {
             val invitation = createLocalAuthorityInvitation()
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
@@ -780,13 +780,13 @@ class ManageLocalAuthorityUsersControllerTests(
                 }
 
             verify(emailNotificationService)
-                .sendEmail(invitation.invitedEmail, LocalAuthorityInvitationCancellationEmail(invitation.invitingAuthority))
+                .sendEmail(invitation.invitedEmail, LocalCouncilInvitationCancellationEmail(invitation.invitingAuthority))
         }
 
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitation returns 404 if the invite is not in the database`() {
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(null)
             mvc
                 .get(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID))
                 .andExpect { status { isNotFound() } }
@@ -797,7 +797,7 @@ class ManageLocalAuthorityUsersControllerTests(
         fun `cancelInvitationSuccess returns 200 if the invitation was cancelled this session`() {
             val deletedInvitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
 
-            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(deletedInvitation.id))
+            whenever(localCouncilDataService.getInvitationCancelledThisSessionById(deletedInvitation.id))
                 .thenReturn(deletedInvitation)
 
             setupDefaultLocalAuthorityForLaAdmin()
@@ -810,7 +810,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitationSuccess returns 404 if the invite is not found in the session`() {
-            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(DEFAULT_LA_INVITATION_ID))
+            whenever(localCouncilDataService.getInvitationCancelledThisSessionById(DEFAULT_LA_INVITATION_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
             mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
@@ -821,7 +821,7 @@ class ManageLocalAuthorityUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelInvitationSuccess returns 500 if the invitation is still in the database`() {
-            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(DEFAULT_LA_INVITATION_ID))
+            whenever(localCouncilDataService.getInvitationCancelledThisSessionById(DEFAULT_LA_INVITATION_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
 
             mvc.get(getLaCancelInviteSuccessRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)).andExpect {
@@ -831,7 +831,7 @@ class ManageLocalAuthorityUsersControllerTests(
 
         private fun setupInvitationPostToCancelInvitationAndAssertSuccess() {
             val invitation = createLocalAuthorityInvitation(DEFAULT_LA_INVITATION_ID)
-            whenever(localAuthorityInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
+            whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LA_INVITATION_ID)).thenReturn(invitation)
 
             mvc
                 .post(getLaCancelInviteRoute(DEFAULT_LA_ID, DEFAULT_LA_INVITATION_ID)) {
@@ -844,36 +844,36 @@ class ManageLocalAuthorityUsersControllerTests(
                     }
                 }
 
-            verify(localAuthorityInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
+            verify(localCouncilInvitationService).deleteInvitation(DEFAULT_LA_INVITATION_ID)
 
-            verify(localAuthorityDataService).addCancelledInvitationToSession(invitation)
+            verify(localCouncilDataService).addCancelledInvitationToSession(invitation)
         }
     }
 
-    private fun setupLocalAuthorityForSystemOperator(laId: Int = DEFAULT_LA_ID): LocalAuthority {
+    private fun setupLocalAuthorityForSystemOperator(laId: Int = DEFAULT_LA_ID): LocalCouncil {
         val localAuthority = createLocalAuthority(id = laId)
-        whenever(localAuthorityService.retrieveLocalAuthorityById(laId))
+        whenever(localCouncilService.retrieveLocalAuthorityById(laId))
             .thenReturn(localAuthority)
 
         return localAuthority
     }
 
-    private fun setupDefaultLocalAuthorityForLaAdmin(): LocalAuthority {
+    private fun setupDefaultLocalAuthorityForLaAdmin(): LocalCouncil {
         val loggedInUserModel = createdLoggedInUserModel()
         val localAuthority = createLocalAuthority()
-        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
+        whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(DEFAULT_LA_ID, "user"))
             .thenReturn(Pair(loggedInUserModel, localAuthority))
 
         return localAuthority
     }
 
     private fun setupLocalAuthorityUserToEdit(
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         laUserId: Long = DEFAULT_LA_USER_ID,
-    ): LocalAuthorityUser {
+    ): LocalCouncilUser {
         val baseUser = createOneLoginUser("user")
-        val localAuthorityUser = createLocalAuthorityUser(baseUser, localAuthority, laUserId)
-        whenever(localAuthorityDataService.getLocalAuthorityUserIfAuthorizedLA(laUserId, localAuthority.id))
+        val localAuthorityUser = createLocalAuthorityUser(baseUser, localCouncil, laUserId)
+        whenever(localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(laUserId, localCouncil.id))
             .thenReturn(
                 localAuthorityUser,
             )

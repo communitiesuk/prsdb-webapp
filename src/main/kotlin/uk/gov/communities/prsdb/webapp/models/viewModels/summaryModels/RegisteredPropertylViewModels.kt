@@ -28,7 +28,7 @@ data class RegisteredPropertyLocalCouncilViewModel(
                             propertyOwnership.registrationNumber,
                         ).toString(),
                 localAuthorityName =
-                    propertyOwnership.address.localAuthority!!
+                    propertyOwnership.address.localCouncil!!
                         .name,
                 licenseTypeMessageKey =
                     MessageKeyConverter.convert(

@@ -38,7 +38,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -63,7 +63,7 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockRegistrationNumberService: RegistrationNumberService
 
     @Mock
-    private lateinit var mockLocalAuthorityDataService: LocalAuthorityDataService
+    private lateinit var mockLocalCouncilDataService: LocalCouncilDataService
 
     @Mock
     private lateinit var mockLicenseService: LicenseService
@@ -186,7 +186,7 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetLandlordRegisteredPropertiesDetails {
         private val landlord = MockLandlordData.createLandlord()
-        private val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
+        private val localCouncil = LocalCouncil(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         private val expectedIsTenantedMessageKey = "commonText.no"
         private val expectedCurrentUrlKey = 101
@@ -194,7 +194,7 @@ class PropertyOwnershipServiceTests {
         private val propertyOwnership1 =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = landlord,
-                address = MockLandlordData.createAddress("11 Example Road, EG1 2AB", localAuthority),
+                address = MockLandlordData.createAddress("11 Example Road, EG1 2AB", localCouncil),
                 registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
                 license = null,
                 currentNumTenants = 0,
@@ -203,7 +203,7 @@ class PropertyOwnershipServiceTests {
         private val propertyOwnership2 =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = landlord,
-                address = MockLandlordData.createAddress("12 Example Road, EG1 2AB", localAuthority),
+                address = MockLandlordData.createAddress("12 Example Road, EG1 2AB", localCouncil),
                 registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 654321),
                 license = null,
                 currentNumTenants = 0,
@@ -267,7 +267,7 @@ class PropertyOwnershipServiceTests {
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(propertyOwnership1.registrationNumber)
                                 .toString(),
-                        localAuthorityName = localAuthority.name,
+                        localAuthorityName = localCouncil.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
@@ -281,7 +281,7 @@ class PropertyOwnershipServiceTests {
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(propertyOwnership2.registrationNumber)
                                 .toString(),
-                        localAuthorityName = localAuthority.name,
+                        localAuthorityName = localCouncil.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
@@ -342,7 +342,7 @@ class PropertyOwnershipServiceTests {
                 propertyOwnership,
             )
 
-            whenever(mockLocalAuthorityDataService.getIsLocalAuthorityUser(principalName)).thenReturn(true)
+            whenever(mockLocalCouncilDataService.getIsLocalAuthorityUser(principalName)).thenReturn(true)
 
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
@@ -359,7 +359,7 @@ class PropertyOwnershipServiceTests {
                 propertyOwnership,
             )
 
-            whenever(mockLocalAuthorityDataService.getIsLocalAuthorityUser(principalName)).thenReturn(false)
+            whenever(mockLocalCouncilDataService.getIsLocalAuthorityUser(principalName)).thenReturn(false)
 
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)

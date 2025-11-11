@@ -47,7 +47,7 @@ data class AddressDataModel(
         fun fromAddress(address: Address) =
             AddressDataModel(
                 singleLineAddress = address.singleLineAddress,
-                localAuthorityId = address.localAuthority?.id,
+                localAuthorityId = address.localCouncil?.id,
                 uprn = address.uprn,
                 organisation = address.organisation,
                 subBuilding = address.subBuilding,

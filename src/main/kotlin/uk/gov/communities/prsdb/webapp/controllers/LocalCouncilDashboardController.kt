@@ -11,15 +11,15 @@ import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
 @PrsdbController
 @RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT")
-class LocalAuthorityDashboardController(
-    val localAuthorityDataService: LocalAuthorityDataService,
+class LocalCouncilDashboardController(
+    val localCouncilDataService: LocalCouncilDataService,
     val userRolesService: UserRolesService,
 ) {
     @GetMapping
@@ -30,7 +30,7 @@ class LocalAuthorityDashboardController(
         model: Model,
         principal: Principal,
     ): String {
-        val localAuthorityUser = localAuthorityDataService.getLocalAuthorityUser(principal.name)
+        val localAuthorityUser = localCouncilDataService.getLocalAuthorityUser(principal.name)
 
         val isAdmin = userRolesService.getHasLocalAuthorityAdminRole(principal.name)
 
@@ -44,7 +44,7 @@ class LocalAuthorityDashboardController(
                         false,
                     ),
                     NavigationLinkViewModel(
-                        ManageLocalAuthorityUsersController.getLaManageUsersRoute(localAuthorityUser.localAuthority.id),
+                        ManageLocalCouncilUsersController.getLaManageUsersRoute(localAuthorityUser.localCouncil.id),
                         "navLink.manageUsers.title",
                         false,
                     ),
@@ -53,10 +53,10 @@ class LocalAuthorityDashboardController(
         }
 
         model.addAttribute("userName", localAuthorityUser.name)
-        model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
+        model.addAttribute("localAuthority", localAuthorityUser.localCouncil.name)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
-        model.addAttribute("privacyNoticeUrl", LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
+        model.addAttribute("privacyNoticeUrl", LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
         model.addAttribute(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_PRSD,

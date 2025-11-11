@@ -5,14 +5,14 @@
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{deleteLAUserSuccess.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <span th:text="#{deleteLAUserSuccess.banner.body(${deletedUserName}, ${localAuthority.name})}"
+            <span th:text="#{deleteLAUserSuccess.banner.body(${deletedUserName}, ${localCouncil.name})}"
                   th:remove="tag">deleteLAUserSuccess.banner.body</span>
         </div>
         <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{deleteLAUserSuccess.whatHappensNext.paragraph.one(${localAuthority.name})}">
+        <p class="govuk-body" th:text="#{deleteLAUserSuccess.whatHappensNext.paragraph.one(${localCouncil.name})}">
             deleteLAUserSuccess.whatHappensNext.para1
         </p>
-        <p class="govuk-body" th:text="#{deleteLAUserSuccess.whatHappensNext.paragraph.two(${localAuthority.name})}">
+        <p class="govuk-body" th:text="#{deleteLAUserSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
             deleteLAUserSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">

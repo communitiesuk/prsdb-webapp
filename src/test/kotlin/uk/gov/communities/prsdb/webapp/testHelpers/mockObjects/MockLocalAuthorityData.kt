@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
-import uk.gov.communities.prsdb.webapp.models.dataModels.LocalAuthorityUserDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
 import java.time.Instant
 import java.util.UUID
 
@@ -19,24 +19,24 @@ class MockLocalAuthorityData {
             id: Int = DEFAULT_LA_ID,
             custodianCode: String = "custodian code",
             name: String = "name",
-        ): LocalAuthority = LocalAuthority(id, name, custodianCode)
+        ): LocalCouncil = LocalCouncil(id, name, custodianCode)
 
         const val DEFAULT_LA_USER_ID = 456L
 
         fun createLocalAuthorityUser(
             baseUser: OneLoginUser = MockOneLoginUserData.createOneLoginUser(),
-            localAuthority: LocalAuthority = createLocalAuthority(),
+            localCouncil: LocalCouncil = createLocalAuthority(),
             id: Long = DEFAULT_LA_USER_ID,
             isManager: Boolean = true,
             name: String = "name",
             email: String = "email",
-        ): LocalAuthorityUser = LocalAuthorityUser(id, baseUser, isManager, localAuthority, name, email, true)
+        ): LocalCouncilUser = LocalCouncilUser(id, baseUser, isManager, localCouncil, name, email, true)
 
         const val DEFAULT_LOGGED_IN_LA_USER_ID = 789L
 
-        fun createdLoggedInUserModel(userId: Long = DEFAULT_LOGGED_IN_LA_USER_ID): LocalAuthorityUserDataModel {
+        fun createdLoggedInUserModel(userId: Long = DEFAULT_LOGGED_IN_LA_USER_ID): LocalCouncilUserDataModel {
             val defaultLA = createLocalAuthority()
-            return LocalAuthorityUserDataModel(
+            return LocalCouncilUserDataModel(
                 id = userId,
                 localAuthorityName = defaultLA.name,
                 isManager = true,
@@ -52,12 +52,12 @@ class MockLocalAuthorityData {
             id: Long = DEFAULT_LA_INVITATION_ID,
             token: UUID = UUID.randomUUID(),
             email: String = "invited.email@example.com",
-            invitingAuthority: LocalAuthority = createLocalAuthority(DEFAULT_LA_ID),
+            invitingAuthority: LocalCouncil = createLocalAuthority(DEFAULT_LA_ID),
             invitedAsAdmin: Boolean = false,
             createdDate: Instant = Instant.now(),
-        ): LocalAuthorityInvitation {
-            val localAuthorityInvitation =
-                LocalAuthorityInvitation(
+        ): LocalCouncilInvitation {
+            val localCouncilInvitation =
+                LocalCouncilInvitation(
                     id = id,
                     token = token,
                     email = email,
@@ -65,9 +65,9 @@ class MockLocalAuthorityData {
                     invitedAsAdmin = invitedAsAdmin,
                 )
 
-            ReflectionTestUtils.setField(localAuthorityInvitation, "createdDate", createdDate)
+            ReflectionTestUtils.setField(localCouncilInvitation, "createdDate", createdDate)
 
-            return localAuthorityInvitation
+            return localCouncilInvitation
         }
     }
 }

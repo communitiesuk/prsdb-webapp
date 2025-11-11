@@ -16,22 +16,22 @@ import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController.Companion.LA_USER_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LA_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(LA_USER_REGISTRATION_ROUTE)
-class RegisterLAUserController(
-    private val laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory,
-    private val invitationService: LocalAuthorityInvitationService,
-    private val localAuthorityDataService: LocalAuthorityDataService,
+class RegisterLocalCouncilUserController(
+    private val localCouncilUserRegistrationJourneyFactory: LocalCouncilUserRegistrationJourneyFactory,
+    private val invitationService: LocalCouncilInvitationService,
+    private val localCouncilDataService: LocalCouncilDataService,
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
@@ -39,7 +39,7 @@ class RegisterLAUserController(
         @RequestParam(value = TOKEN, required = true) token: String,
     ): CharSequence {
         // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
-        // the LocalAuthorityInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
+        // the LocalCouncilInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
         // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         val invitation = invitationService.getInvitationOrNull(token)
 
@@ -50,7 +50,7 @@ class RegisterLAUserController(
             "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
         } else {
             invitationService.storeTokenInSession(token)
-            return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}"
+            return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}"
         }
     }
 
@@ -73,7 +73,7 @@ class RegisterLAUserController(
             return ModelAndView("redirect:$LOCAL_AUTHORITY_DASHBOARD_URL")
         }
 
-        return laUserRegistrationJourneyFactory
+        return localCouncilUserRegistrationJourneyFactory
             .create(invitation)
             .getModelAndViewForStep(
                 LANDING_PAGE_PATH_SEGMENT,
@@ -94,7 +94,7 @@ class RegisterLAUserController(
             return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
-        return laUserRegistrationJourneyFactory
+        return localCouncilUserRegistrationJourneyFactory
             .create(invitationService.getInvitationFromToken(token))
             .getModelAndViewForStep(
                 stepName,
@@ -116,7 +116,7 @@ class RegisterLAUserController(
             return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
-        return laUserRegistrationJourneyFactory
+        return localCouncilUserRegistrationJourneyFactory
             .create(invitationService.getInvitationFromToken(token))
             .completeStep(
                 stepName,
@@ -132,20 +132,20 @@ class RegisterLAUserController(
         principal: Principal,
     ): String {
         val localAuthorityUserID =
-            localAuthorityDataService.getLastUserIdRegisteredThisSession()
+            localCouncilDataService.getLastUserIdRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "No registered LA user was found in the session",
                 )
 
         val localAuthorityUser =
-            localAuthorityDataService.getLocalAuthorityUserOrNull(localAuthorityUserID)
+            localCouncilDataService.getLocalAuthorityUserOrNull(localAuthorityUserID)
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "No LA user with ID $localAuthorityUserID was found in the database",
                 )
 
-        model.addAttribute("localAuthority", localAuthorityUser.localAuthority.name)
+        model.addAttribute("localAuthority", localAuthorityUser.localCouncil.name)
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
         return "registerLAUserSuccess"

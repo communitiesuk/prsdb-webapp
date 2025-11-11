@@ -12,9 +12,9 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import kotlin.test.Test
@@ -28,7 +28,7 @@ class GeneratePasscodeControllerTests(
     private lateinit var passcodeService: PasscodeService
 
     @MockitoBean
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @Test
     fun `generatePasscodeGet returns a redirect for unauthenticated user`() {
@@ -55,8 +55,8 @@ class GeneratePasscodeControllerTests(
         val localAuthorityUser = createLocalAuthorityUser()
         val testPasscode = "ABC123"
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
+        whenever(passcodeService.getOrGeneratePasscode(localAuthorityUser.localCouncil.id.toLong()))
             .thenReturn(testPasscode)
 
         mvc
@@ -76,8 +76,8 @@ class GeneratePasscodeControllerTests(
     fun `generatePasscodeGet returns passcode limit error when limit exceeded`() {
         val localAuthorityUser = createLocalAuthorityUser()
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
+        whenever(passcodeService.getOrGeneratePasscode(localAuthorityUser.localCouncil.id.toLong()))
             .thenThrow(PasscodeLimitExceededException("Passcode limit exceeded"))
 
         mvc
@@ -117,8 +117,8 @@ class GeneratePasscodeControllerTests(
         val localAuthorityUser = createLocalAuthorityUser()
         val testPasscode = "DEF456"
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.generateAndStorePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
+        whenever(passcodeService.generateAndStorePasscode(localAuthorityUser.localCouncil.id.toLong()))
             .thenReturn(testPasscode)
 
         mvc
@@ -141,8 +141,8 @@ class GeneratePasscodeControllerTests(
     fun `generatePasscodePost returns passcode limit error when limit exceeded`() {
         val localAuthorityUser = createLocalAuthorityUser()
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.generateAndStorePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
+        whenever(passcodeService.generateAndStorePasscode(localAuthorityUser.localCouncil.id.toLong()))
             .thenThrow(PasscodeLimitExceededException("Passcode limit exceeded"))
 
         mvc

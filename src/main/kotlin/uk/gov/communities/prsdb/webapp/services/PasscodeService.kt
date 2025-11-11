@@ -33,10 +33,10 @@ class PasscodeService(
             throw PasscodeLimitExceededException("Maximum number of passcodes ($MAX_PASSCODES) has been reached")
         }
 
-        val localAuthority =
+        val localCouncil =
             localAuthorityRepository
                 .findById(localAuthorityId.toInt())
-                .orElseThrow { IllegalArgumentException("LocalAuthority with id $localAuthorityId not found") }
+                .orElseThrow { IllegalArgumentException("LocalCouncil with id $localAuthorityId not found") }
 
         var passcodeString: String
         do {
@@ -46,7 +46,7 @@ class PasscodeService(
         val passcode =
             Passcode(
                 passcode = passcodeString,
-                localAuthority = localAuthority,
+                localCouncil = localCouncil,
             )
 
         return passcodeRepository.save(passcode)

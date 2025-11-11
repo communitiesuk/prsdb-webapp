@@ -8,17 +8,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
 import kotlin.test.Test
 
-@WebMvcTest(LocalAuthorityDashboardController::class)
+@WebMvcTest(LocalCouncilDashboardController::class)
 class LocalAuthorityDashboardControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -66,7 +66,7 @@ class LocalAuthorityDashboardControllerTests(
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `localAuthorityDashboard returns 200 for authorised local authority admin user`() {
         val localAuthorityUser = createLocalAuthorityUser()
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
+        whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
 
         mvc
             .get(LOCAL_AUTHORITY_DASHBOARD_URL)
@@ -79,7 +79,7 @@ class LocalAuthorityDashboardControllerTests(
     @WithMockUser(roles = ["LA_USER"])
     fun `localAuthorityDashboard returns 200 for authorised local authority user`() {
         val localAuthorityUser = createLocalAuthorityUser()
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
+        whenever(localCouncilDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
 
         mvc
             .get(LOCAL_AUTHORITY_DASHBOARD_URL)

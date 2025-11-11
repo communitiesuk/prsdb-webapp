@@ -25,18 +25,18 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANAGE_LA_ADMINS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.INVITE_LA_ADMIN_CONFIRMATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.INVITE_LA_ADMIN_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.MANAGE_LA_ADMINS_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
-import uk.gov.communities.prsdb.webapp.models.requestModels.LocalAuthorityUserAccessLevelRequestModel
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LA_ADMIN_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LA_ADMIN_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.MANAGE_LA_ADMINS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
+import uk.gov.communities.prsdb.webapp.models.requestModels.LocalCouncilUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityAdminInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilAdminInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
@@ -44,21 +44,21 @@ import java.net.URI
 import java.net.URLEncoder
 import kotlin.test.Test
 
-@WebMvcTest(ManageLocalAuthorityAdminsController::class)
+@WebMvcTest(ManageLocalCouncilAdminsController::class)
 class ManageLocalAuthorityAdminsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    lateinit var localAuthorityService: LocalAuthorityService
+    lateinit var localCouncilService: LocalCouncilService
 
     @MockitoBean
-    lateinit var localAuthorityDataService: LocalAuthorityDataService
+    lateinit var localCouncilDataService: LocalCouncilDataService
 
     @MockitoBean
     lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean
-    lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+    lateinit var localCouncilInvitationService: LocalCouncilInvitationService
 
     @MockitoBean
     lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -85,7 +85,7 @@ class ManageLocalAuthorityAdminsControllerTests(
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `inviteLocalAuthorityAdmin returns 200 for authorized users`() {
         val localAuthorities = listOf(createLocalAuthority())
-        whenever(localAuthorityService.retrieveAllLocalAuthorities()).thenReturn(
+        whenever(localCouncilService.retrieveAllLocalAuthorities()).thenReturn(
             localAuthorities,
         )
 
@@ -104,11 +104,11 @@ class ManageLocalAuthorityAdminsControllerTests(
         val urlEncodedModel = "email=$encodedTestEmail&confirmEmail=$encodedTestEmail&localAuthorityId=${localAuthority.id}"
         val invitationUri = URI("https://test-service.gov.uk/sign-up-la-user")
 
-        whenever(localAuthorityInvitationService.createInvitationToken(any(), any(), any()))
+        whenever(localCouncilInvitationService.createInvitationToken(any(), any(), any()))
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(invitationUri)
-        whenever(localAuthorityService.retrieveLocalAuthorityById(MockLocalAuthorityData.DEFAULT_LA_ID))
+        whenever(localCouncilService.retrieveLocalAuthorityById(MockLocalAuthorityData.DEFAULT_LA_ID))
             .thenReturn(localAuthority)
 
         mvc
@@ -123,7 +123,7 @@ class ManageLocalAuthorityAdminsControllerTests(
                 flash { attribute("localAuthorityName", localAuthority.name) }
             }
 
-        verify(emailNotificationService).sendEmail(testEmail, LocalAuthorityAdminInvitationEmail(localAuthority, invitationUri))
+        verify(emailNotificationService).sendEmail(testEmail, LocalCouncilAdminInvitationEmail(localAuthority, invitationUri))
     }
 
     @Test
@@ -139,7 +139,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `manageAdmins returns 403 for LA users`() {
-            mvc.get(MANAGE_LA_ADMINS_ROUTE)
+            mvc
+                .get(MANAGE_LA_ADMINS_ROUTE)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -148,7 +149,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `manageAdmins returns 403 for LA admin users`() {
-            mvc.get(MANAGE_LA_ADMINS_ROUTE)
+            mvc
+                .get(MANAGE_LA_ADMINS_ROUTE)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -157,9 +159,10 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `manageAdmins returns 200 for system operators`() {
-            whenever(localAuthorityDataService.getPaginatedAdminUsersAndInvitations(eq(0), anyOrNull()))
+            whenever(localCouncilDataService.getPaginatedAdminUsersAndInvitations(eq(0), anyOrNull()))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
-            mvc.get(MANAGE_LA_ADMINS_ROUTE)
+            mvc
+                .get(MANAGE_LA_ADMINS_ROUTE)
                 .andExpect {
                     status { isOk() }
                     model {
@@ -180,14 +183,15 @@ class ManageLocalAuthorityAdminsControllerTests(
 
         @BeforeEach
         fun setup() {
-            whenever(localAuthorityDataService.getLocalAuthorityUserById(localAuthorityAdmin.id))
+            whenever(localCouncilDataService.getLocalAuthorityUserById(localAuthorityAdmin.id))
                 .thenReturn(localAuthorityAdmin)
         }
 
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `editAdminsAccessLevel request returns 403 for LA users`() {
-            mvc.get(editLocalAuthorityAdminRoute)
+            mvc
+                .get(editLocalAuthorityAdminRoute)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -196,7 +200,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `editAdminsAccessLevel request returns 403 for LA admin users`() {
-            mvc.get(editLocalAuthorityAdminRoute)
+            mvc
+                .get(editLocalAuthorityAdminRoute)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -205,7 +210,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `editAdminsAccessLevel GET request returns 200 for system operators`() {
-            mvc.get(editLocalAuthorityAdminRoute)
+            mvc
+                .get(editLocalAuthorityAdminRoute)
                 .andExpect {
                     status { isOk() }
                     model {
@@ -220,19 +226,20 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `editAdminsAccessLevel POST request returns redirect after editing admin for system operators`() {
-            mvc.post(editLocalAuthorityAdminRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = "isManager=false"
-                with(csrf())
-            }.andExpect {
-                status {
-                    is3xxRedirection()
-                    redirectedUrl(MANAGE_LA_ADMINS_ROUTE)
+            mvc
+                .post(editLocalAuthorityAdminRoute) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    content = "isManager=false"
+                    with(csrf())
+                }.andExpect {
+                    status {
+                        is3xxRedirection()
+                        redirectedUrl(MANAGE_LA_ADMINS_ROUTE)
+                    }
                 }
-            }
 
-            verify(localAuthorityDataService).updateUserAccessLevel(
-                LocalAuthorityUserAccessLevelRequestModel(false),
+            verify(localCouncilDataService).updateUserAccessLevel(
+                LocalCouncilUserAccessLevelRequestModel(false),
                 localAuthorityAdmin.id,
             )
         }
@@ -246,14 +253,15 @@ class ManageLocalAuthorityAdminsControllerTests(
 
         @BeforeEach
         fun setup() {
-            whenever(localAuthorityDataService.getLocalAuthorityUserById(localAuthorityAdmin.id))
+            whenever(localCouncilDataService.getLocalAuthorityUserById(localAuthorityAdmin.id))
                 .thenReturn(localAuthorityAdmin)
         }
 
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `deleteAdmin request returns 403 for LA users`() {
-            mvc.get(deleteLocalAuthorityAdminRoute)
+            mvc
+                .get(deleteLocalAuthorityAdminRoute)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -262,7 +270,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `deleteAdmin request returns 403 for LA admin users`() {
-            mvc.get(deleteLocalAuthorityAdminRoute)
+            mvc
+                .get(deleteLocalAuthorityAdminRoute)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -271,7 +280,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `deleteAdmin GET request returns 200 for system operators`() {
-            mvc.get(deleteLocalAuthorityAdminRoute)
+            mvc
+                .get(deleteLocalAuthorityAdminRoute)
                 .andExpect {
                     status { isOk() }
                     model {
@@ -284,24 +294,25 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `deleteAdmin POST request returns redirect after deleting admin for system operators`() {
-            mvc.post(deleteLocalAuthorityAdminRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                with(csrf())
-            }.andExpect {
-                status {
-                    is3xxRedirection()
-                    redirectedUrl("../$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}/$CONFIRMATION_PATH_SEGMENT")
+            mvc
+                .post(deleteLocalAuthorityAdminRoute) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    with(csrf())
+                }.andExpect {
+                    status {
+                        is3xxRedirection()
+                        redirectedUrl("../$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}/$CONFIRMATION_PATH_SEGMENT")
+                    }
                 }
-            }
 
-            verify(localAuthorityDataService).deleteUser(localAuthorityAdmin)
-            verify(localAuthorityDataService).addDeletedUserToSession(localAuthorityAdmin)
+            verify(localCouncilDataService).deleteUser(localAuthorityAdmin)
+            verify(localCouncilDataService).addDeletedUserToSession(localAuthorityAdmin)
         }
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `deleteAdminConfirmation returns 404 if the user was not deleted in this session`() {
-            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id))
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             mvc
                 .get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
@@ -313,7 +324,7 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `deleteAdminConfirmation returns 500 if the user is still in the database`() {
-            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id))
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id))
                 .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
 
             mvc
@@ -326,14 +337,15 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `deleteAdminConfirmation returns 200 when user has been deleted in this session`() {
-            whenever(localAuthorityDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id)).thenReturn(localAuthorityAdmin)
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(localAuthorityAdmin.id)).thenReturn(localAuthorityAdmin)
 
-            mvc.get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
+            mvc
+                .get("$deleteLocalAuthorityAdminRoute/$CONFIRMATION_PATH_SEGMENT")
                 .andExpect {
                     status { isOk() }
                     model {
                         attribute("deletedUserName", localAuthorityAdmin.name)
-                        attribute("localAuthority", localAuthorityAdmin.localAuthority)
+                        attribute("localCouncil", localAuthorityAdmin.localCouncil)
                         attribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
                     }
                 }
@@ -350,7 +362,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_USER"])
         fun `cancelAdminInvitation request returns 403 for LA users`() {
-            mvc.get(cancelLocalAuthorityAdminInviteRoute)
+            mvc
+                .get(cancelLocalAuthorityAdminInviteRoute)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -359,7 +372,8 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `cancelAdminInvitation request returns 403 for LA admin users`() {
-            mvc.get(cancelLocalAuthorityAdminInviteRoute)
+            mvc
+                .get(cancelLocalAuthorityAdminInviteRoute)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -368,10 +382,11 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitation GET request returns 404 when admin invitation is not found`() {
-            whenever(localAuthorityInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
+            whenever(localCouncilInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
                 .thenReturn(null)
 
-            mvc.get(cancelLocalAuthorityAdminInviteRoute)
+            mvc
+                .get(cancelLocalAuthorityAdminInviteRoute)
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -380,10 +395,11 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitation GET request returns 200 for system operators when admin invitation exists`() {
-            whenever(localAuthorityInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
+            whenever(localCouncilInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
                 .thenReturn(localAuthorityAdminInvite)
 
-            mvc.get(cancelLocalAuthorityAdminInviteRoute)
+            mvc
+                .get(cancelLocalAuthorityAdminInviteRoute)
                 .andExpect {
                     status { isOk() }
                     model {
@@ -396,44 +412,47 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitation POST request returns 404 when admin invitation is not found`() {
-            whenever(localAuthorityInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
+            whenever(localCouncilInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
                 .thenReturn(null)
 
-            mvc.post(cancelLocalAuthorityAdminInviteRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                with(csrf())
-            }.andExpect {
-                status { isNotFound() }
-            }
+            mvc
+                .post(cancelLocalAuthorityAdminInviteRoute) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    with(csrf())
+                }.andExpect {
+                    status { isNotFound() }
+                }
         }
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitation POST request returns redirect after deleting admin invite for system operators`() {
-            whenever(localAuthorityInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
+            whenever(localCouncilInvitationService.getAdminInvitationByIdOrNull(localAuthorityAdminInvite.id))
                 .thenReturn(localAuthorityAdminInvite)
 
-            mvc.post(cancelLocalAuthorityAdminInviteRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                with(csrf())
-            }.andExpect {
-                status {
-                    is3xxRedirection()
-                    redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/${localAuthorityAdminInvite.id}/$CONFIRMATION_PATH_SEGMENT")
+            mvc
+                .post(cancelLocalAuthorityAdminInviteRoute) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    with(csrf())
+                }.andExpect {
+                    status {
+                        is3xxRedirection()
+                        redirectedUrl("../$CANCEL_INVITATION_PATH_SEGMENT/${localAuthorityAdminInvite.id}/$CONFIRMATION_PATH_SEGMENT")
+                    }
                 }
-            }
 
-            verify(localAuthorityInvitationService).deleteInvitation(localAuthorityAdminInvite.id)
-            verify(localAuthorityDataService).addCancelledInvitationToSession(localAuthorityAdminInvite)
+            verify(localCouncilInvitationService).deleteInvitation(localAuthorityAdminInvite.id)
+            verify(localCouncilDataService).addCancelledInvitationToSession(localAuthorityAdminInvite)
         }
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitationConfirmation returns 404 if the invite was not deleted in the session`() {
-            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id))
+            whenever(localCouncilDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
-            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
+            mvc
+                .get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -442,10 +461,11 @@ class ManageLocalAuthorityAdminsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitationConfirmation returns 500 if the invitation is still in the database`() {
-            whenever(localAuthorityDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id))
+            whenever(localCouncilDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id))
                 .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
 
-            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
+            mvc
+                .get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
                 .andExpect {
                     status { isInternalServerError() }
                 }
@@ -455,15 +475,16 @@ class ManageLocalAuthorityAdminsControllerTests(
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `cancelAdminInvitationConfirmation returns 200 when invite has been deleted in this session`() {
             whenever(
-                localAuthorityDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id),
+                localCouncilDataService.getInvitationCancelledThisSessionById(localAuthorityAdminInvite.id),
             ).thenReturn(localAuthorityAdminInvite)
 
-            mvc.get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
+            mvc
+                .get("$cancelLocalAuthorityAdminInviteRoute/$CONFIRMATION_PATH_SEGMENT")
                 .andExpect {
                     status { isOk() }
                     model {
                         attribute("deletedEmail", localAuthorityAdminInvite.invitedEmail)
-                        attribute("localAuthority", localAuthorityAdminInvite.invitingAuthority)
+                        attribute("localCouncil", localAuthorityAdminInvite.invitingAuthority)
                         attribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
                     }
                 }

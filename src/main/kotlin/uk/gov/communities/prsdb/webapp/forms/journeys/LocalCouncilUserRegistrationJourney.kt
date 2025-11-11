@@ -5,35 +5,35 @@ import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.LaUserRegistrationCheckAnswersPage
+import uk.gov.communities.prsdb.webapp.forms.pages.LocalCouncilUserRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
-import uk.gov.communities.prsdb.webapp.helpers.LaUserRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.helpers.LocalCouncilUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LocalAuthorityPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
-class LaUserRegistrationJourney(
+class LocalCouncilUserRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val invitationService: LocalAuthorityInvitationService,
-    private val localAuthorityDataService: LocalAuthorityDataService,
-    private val invitation: LocalAuthorityInvitation,
+    private val invitationService: LocalCouncilInvitationService,
+    private val localCouncilDataService: LocalCouncilDataService,
+    private val invitation: LocalCouncilInvitation,
     private val securityContextService: SecurityContextService,
-) : Journey<RegisterLaUserStepId>(
+) : Journey<RegisterLocalCouncilUserStepId>(
         journeyType = JourneyType.LA_USER_REGISTRATION,
-        initialStepId = RegisterLaUserStepId.LandingPage,
+        initialStepId = RegisterLocalCouncilUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
     ) {
@@ -59,11 +59,11 @@ class LaUserRegistrationJourney(
         )
 
     private fun isJourneyDataInitialized(journeyData: JourneyData): Boolean =
-        journeyData.containsKey(RegisterLaUserStepId.Email.urlPathSegment)
+        journeyData.containsKey(RegisterLocalCouncilUserStepId.Email.urlPathSegment)
 
     private fun landingPageStep() =
         Step(
-            id = RegisterLaUserStepId.LandingPage,
+            id = RegisterLocalCouncilUserStepId.LandingPage,
             page =
                 Page(
                     formModel = NoInputFormModel::class,
@@ -73,13 +73,13 @@ class LaUserRegistrationJourney(
                             "title" to "registerLAUser.title",
                         ),
                 ),
-            nextAction = { _, _ -> Pair(RegisterLaUserStepId.PrivacyNotice, null) },
+            nextAction = { _, _ -> Pair(RegisterLocalCouncilUserStepId.PrivacyNotice, null) },
             saveAfterSubmit = false,
         )
 
     private fun privacyNoticeStep() =
         Step(
-            id = RegisterLaUserStepId.PrivacyNotice,
+            id = RegisterLocalCouncilUserStepId.PrivacyNotice,
             page =
                 Page(
                     formModel = LocalAuthorityPrivacyNoticeFormModel::class,
@@ -88,7 +88,7 @@ class LaUserRegistrationJourney(
                         mapOf(
                             "title" to "registerLAUser.title",
                             "submitButtonText" to "forms.buttons.continue",
-                            "localAuthorityPrivacyNoticeUrl" to LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE,
+                            "localAuthorityPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE,
                             "options" to
                                 listOf(
                                     CheckboxViewModel(
@@ -99,13 +99,13 @@ class LaUserRegistrationJourney(
                             BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
                         ),
                 ),
-            nextAction = { _, _ -> Pair(RegisterLaUserStepId.Name, null) },
+            nextAction = { _, _ -> Pair(RegisterLocalCouncilUserStepId.Name, null) },
             saveAfterSubmit = false,
         )
 
     private fun registerUserStep() =
         Step(
-            id = RegisterLaUserStepId.Name,
+            id = RegisterLocalCouncilUserStepId.Name,
             page =
                 Page(
                     formModel = NameFormModel::class,
@@ -119,13 +119,13 @@ class LaUserRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            nextAction = { _, _ -> Pair(RegisterLaUserStepId.Email, null) },
+            nextAction = { _, _ -> Pair(RegisterLocalCouncilUserStepId.Email, null) },
             saveAfterSubmit = false,
         )
 
     private fun emailStep() =
         Step(
-            id = RegisterLaUserStepId.Email,
+            id = RegisterLocalCouncilUserStepId.Email,
             page =
                 Page(
                     formModel = EmailFormModel::class,
@@ -139,30 +139,30 @@ class LaUserRegistrationJourney(
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
-            nextAction = { _, _ -> Pair(RegisterLaUserStepId.CheckAnswers, null) },
+            nextAction = { _, _ -> Pair(RegisterLocalCouncilUserStepId.CheckAnswers, null) },
             saveAfterSubmit = false,
         )
 
     private fun checkAnswersStep() =
         Step(
-            id = RegisterLaUserStepId.CheckAnswers,
-            page = LaUserRegistrationCheckAnswersPage(journeyDataService, invitationService, unreachableStepRedirect),
+            id = RegisterLocalCouncilUserStepId.CheckAnswers,
+            page = LocalCouncilUserRegistrationCheckAnswersPage(journeyDataService, invitationService, unreachableStepRedirect),
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersHandleSubmitAndRedirect(filteredJourneyData) },
             saveAfterSubmit = false,
         )
 
     private fun checkAnswersHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
         val localAuthorityUserID =
-            localAuthorityDataService.registerUserAndReturnID(
+            localCouncilDataService.registerUserAndReturnID(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                localAuthority = invitation.invitingAuthority,
-                name = LaUserRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
-                email = LaUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
+                localCouncil = invitation.invitingAuthority,
+                name = LocalCouncilUserRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
+                email = LocalCouncilUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 invitedAsAdmin = invitation.invitedAsAdmin,
-                hasAcceptedPrivacyNotice = LaUserRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData)!!,
+                hasAcceptedPrivacyNotice = LocalCouncilUserRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData)!!,
             )
 
-        localAuthorityDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)
+        localCouncilDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)
 
         invitationService.deleteInvitation(invitation)
         invitationService.clearTokenFromSession()

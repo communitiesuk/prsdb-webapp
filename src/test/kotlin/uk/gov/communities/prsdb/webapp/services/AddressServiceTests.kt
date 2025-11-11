@@ -28,7 +28,7 @@ class AddressServiceTests {
     private lateinit var mockAddressRepository: AddressRepository
 
     @Mock
-    private lateinit var mockLocalAuthorityService: LocalAuthorityService
+    private lateinit var mockLocalCouncilService: LocalCouncilService
 
     @InjectMocks
     private lateinit var addressService: AddressService
@@ -64,7 +64,7 @@ class AddressServiceTests {
         fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`(addressDataModel: AddressDataModel) {
             // Arrange
             addressDataModel.localAuthorityId?.let {
-                whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(it))
+                whenever(mockLocalCouncilService.retrieveLocalAuthorityById(it))
                     .thenReturn(MockLocalAuthorityData.createLocalAuthority(id = it))
             }
 

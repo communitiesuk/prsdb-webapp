@@ -4,11 +4,11 @@
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper" id="main-content">
         <div id="form-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#form-content/content()})}">
-            <form th:action="@{''}" method="post" novalidate th:object="${localAuthorityUser}">
-                <fieldset id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'isManager', ${localAuthorityUser.name}, null)}">
+            <form th:action="@{''}" method="post" novalidate th:object="${localCouncilUser}">
+                <fieldset id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'isManager', ${localCouncilUser.name}, null)}">
                     <p class="govuk-body">
                         <strong th:text="#{editLAUserAccess.subHeading.beforeEmail}">editLAUserAccess.subHeading.beforeEmail</strong>
-                        <span th:remove="tag" th:text="${localAuthorityUser.email}"></span>
+                        <span th:remove="tag" th:text="${localCouncilUser.email}"></span>
                     </p>
                     <h2 class="govuk-heading-m" th:text="#{editLAUserAccess.radios.heading}">editLAUserAccess.radios.heading</h2>
                     <input th:replace="~{fragments/forms/radios :: radios(null, 'isManager', null, ${options})}">

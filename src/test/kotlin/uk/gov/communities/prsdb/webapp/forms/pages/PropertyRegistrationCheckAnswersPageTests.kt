@@ -21,13 +21,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
     private lateinit var journeyDataService: JourneyDataService
     private lateinit var validator: Validator
     private lateinit var pageData: PageData
@@ -36,14 +36,14 @@ class PropertyRegistrationCheckAnswersPageTests {
 
     @BeforeEach
     fun setup() {
-        localAuthorityService = mock()
+        localCouncilService = mock()
         journeyDataService = mock()
-        page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService, "/redirect")
+        page = PropertyRegistrationCheckAnswersPage(journeyDataService, localCouncilService, "/redirect")
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(localAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(localCouncilService)
     }
 
     private fun getPropertyDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
@@ -88,7 +88,7 @@ class PropertyRegistrationCheckAnswersPageTests {
                 null,
             ),
             propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localCouncil"
             },
         )
     }
@@ -135,7 +135,7 @@ class PropertyRegistrationCheckAnswersPageTests {
                 ),
             ),
             propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localCouncil"
             },
         )
 

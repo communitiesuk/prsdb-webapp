@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
@@ -29,7 +29,7 @@ import kotlin.time.Duration.Companion.minutes
 
 class LocalAuthorityInvitationServiceTests {
     private lateinit var mockLaInviteRepository: LocalAuthorityInvitationRepository
-    private lateinit var inviteService: LocalAuthorityInvitationService
+    private lateinit var inviteService: LocalCouncilInvitationService
     private lateinit var journeyDataService: JourneyDataService
     private lateinit var session: HttpSession
 
@@ -37,7 +37,7 @@ class LocalAuthorityInvitationServiceTests {
     fun setup() {
         mockLaInviteRepository = mock()
         session = MockHttpSession()
-        inviteService = LocalAuthorityInvitationService(mockLaInviteRepository, session)
+        inviteService = LocalCouncilInvitationService(mockLaInviteRepository, session)
         journeyDataService = mock()
     }
 
@@ -47,7 +47,7 @@ class LocalAuthorityInvitationServiceTests {
 
         val token = inviteService.createInvitationToken("email", authority)
 
-        val inviteCaptor = captor<LocalAuthorityInvitation>()
+        val inviteCaptor = captor<LocalCouncilInvitation>()
         verify(mockLaInviteRepository).save(inviteCaptor.capture())
 
         assertEquals(authority, inviteCaptor.value.invitingAuthority)
@@ -196,7 +196,7 @@ class LocalAuthorityInvitationServiceTests {
         val invitationFromDatabase = MockLocalAuthorityData.createLocalAuthorityInvitation(id = testId)
 
         whenever(mockLaInviteRepository.findById(testId))
-            .thenReturn(Optional.of(invitationFromDatabase) as Optional<LocalAuthorityInvitation?>)
+            .thenReturn(Optional.of(invitationFromDatabase) as Optional<LocalCouncilInvitation?>)
 
         assertEquals(invitationFromDatabase, inviteService.getInvitationByIdOrNull(testId))
     }
@@ -212,7 +212,7 @@ class LocalAuthorityInvitationServiceTests {
     fun `getAdminInvitationByIdOrNull returns an invitation if the id is in the database and it is admin`() {
         val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(invitedAsAdmin = true)
 
-        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalAuthorityInvitation?>)
+        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalCouncilInvitation?>)
 
         val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
 
@@ -232,7 +232,7 @@ class LocalAuthorityInvitationServiceTests {
     fun `getAdminInvitationByIdOrNull returns an null if the id is in the database and it is NOT admin`() {
         val invitation = MockLocalAuthorityData.createLocalAuthorityInvitation(invitedAsAdmin = false)
 
-        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalAuthorityInvitation?>)
+        whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalCouncilInvitation?>)
 
         val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
 

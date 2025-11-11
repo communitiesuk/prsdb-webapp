@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 
 @Entity
-class LocalAuthorityUser(
+class LocalCouncilUser(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
@@ -31,7 +31,7 @@ class LocalAuthorityUser(
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "local_authority_id", nullable = false)
-    lateinit var localAuthority: LocalAuthority
+    lateinit var localCouncil: LocalCouncil
         private set
 
     @Column(nullable = false)
@@ -42,7 +42,7 @@ class LocalAuthorityUser(
         id: Long,
         baseUser: OneLoginUser,
         isManager: Boolean,
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         name: String,
         email: String,
         hasAcceptedPrivacyNotice: Boolean,
@@ -50,7 +50,7 @@ class LocalAuthorityUser(
         this(id) {
         this.baseUser = baseUser
         this.isManager = isManager
-        this.localAuthority = localAuthority
+        this.localCouncil = localCouncil
         this.name = name
         this.email = email
         this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice
@@ -59,14 +59,14 @@ class LocalAuthorityUser(
     constructor(
         baseUser: OneLoginUser,
         isManager: Boolean,
-        localAuthority: LocalAuthority,
+        localCouncil: LocalCouncil,
         name: String,
         email: String,
         hasAcceptedPrivacyNotice: Boolean,
     ) : this() {
         this.baseUser = baseUser
         this.isManager = isManager
-        this.localAuthority = localAuthority
+        this.localCouncil = localCouncil
         this.name = name
         this.email = email
         this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice

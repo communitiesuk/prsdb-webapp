@@ -22,23 +22,23 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
@@ -48,7 +48,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaAdminInvitationPage
@@ -301,56 +301,66 @@ class Navigator(
     }
 
     fun navigateToLaUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
     fun navigateToLaUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
+        navigate(
+            "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}",
+        )
     }
 
     fun skipToLaUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLaUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyDataBuilder().withLandingPageReached().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.PrivacyNotice.urlPathSegment}")
+        navigate(
+            "${
+                RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
+            }",
+        )
         return createValidPage(page, PrivacyNoticePageLaUserRegistration::class)
     }
 
     fun skipToLaUserRegistrationNameFormPage(token: UUID): NameFormPageLaUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Name.urlPathSegment}")
+        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}")
         return createValidPage(page, NameFormPageLaUserRegistration::class)
     }
 
     fun skipToLaUserRegistrationEmailFormPage(token: UUID): EmailFormPageLaUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Email.urlPathSegment}")
+        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}")
         return createValidPage(page, EmailFormPageLaUserRegistration::class)
     }
 
     fun skipToLaUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLaUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationCheckAnswers().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
+        navigate(
+            "${
+                RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
+            }",
+        )
         return createValidPage(page, CheckAnswersPageLaUserRegistration::class)
     }
 
     fun navigateToLaUserRegistrationConfirmationPage() {
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
@@ -1244,12 +1254,12 @@ class Navigator(
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE)
+        navigate(ManageLocalCouncilAdminsController.INVITE_LA_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }
 
     fun goToManageLaAdminsPage(): ManageLaAdminsPage {
-        navigate(ManageLocalAuthorityAdminsController.MANAGE_LA_ADMINS_ROUTE)
+        navigate(ManageLocalCouncilAdminsController.MANAGE_LA_ADMINS_ROUTE)
         return createValidPage(page, ManageLaAdminsPage::class)
     }
 

@@ -6,15 +6,15 @@
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(null, ~{::#confirmation-banner/content()})}">
             <strong>
-                <span th:text="#{cancelLAUserInvitationSuccess.banner.body(${deletedEmail}, ${localAuthority.name})}"
+                <span th:text="#{cancelLAUserInvitationSuccess.banner.body(${deletedEmail}, ${localCouncil.name})}"
                       th:remove="tag">cancelLAUserInvitationSuccess.banner.body</span>
             </strong>
         </div>
         <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{cancelLAUserInvitationSuccess.whatHappensNext.paragraph.one(${localAuthority.name})}">
+        <p class="govuk-body" th:text="#{cancelLAUserInvitationSuccess.whatHappensNext.paragraph.one(${localCouncil.name})}">
             cancelLAUserInvitationSuccess.whatHappensNext.para1
         </p>
-        <p class="govuk-body" th:text="#{cancelLAUserInvitationSuccess.whatHappensNext.paragraph.two(${localAuthority.name})}">
+        <p class="govuk-body" th:text="#{cancelLAUserInvitationSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
             cancelLAUserInvitationSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">

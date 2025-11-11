@@ -21,7 +21,7 @@ class PropertySearchResultViewModelTests {
                         .fromRegistrationNumber(propertyOwnership.registrationNumber)
                         .toString(),
                 localAuthority =
-                    propertyOwnership.address.localAuthority?.name,
+                    propertyOwnership.address.localCouncil?.name,
                 landlord =
                     PropertySearchResultLandlordViewModel(
                         id = propertyOwnership.primaryLandlord.id,

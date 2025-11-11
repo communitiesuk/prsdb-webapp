@@ -11,8 +11,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -26,16 +26,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegis
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.PrivacyNoticePageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import java.net.URI
 
 class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-lauser.sql") {
     @Autowired
-    lateinit var localAuthorityService: LocalAuthorityService
+    lateinit var localCouncilService: LocalCouncilService
 
     @Autowired
-    lateinit var invitationService: LocalAuthorityInvitationService
+    lateinit var invitationService: LocalCouncilInvitationService
 
     @MockitoSpyBean
     lateinit var laUserRepository: LocalAuthorityUserRepository
@@ -46,14 +46,14 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
     @MockitoSpyBean
     override lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    lateinit var invitation: LocalAuthorityInvitation
+    lateinit var invitation: LocalCouncilInvitation
 
     @BeforeEach
     fun setup() {
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",
-                authority = localAuthorityService.retrieveLocalAuthorityById(2),
+                authority = localCouncilService.retrieveLocalAuthorityById(2),
             )
 
         invitation = invitationService.getInvitationFromToken(token)
@@ -97,15 +97,15 @@ class LaUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mock
         checkAnswersPage.form.submit()
         val confirmationPage = assertPageIs(page, ConfirmationPageLaUserRegistration::class)
 
-        val invitationCaptor = captor<LocalAuthorityInvitation>()
+        val invitationCaptor = captor<LocalCouncilInvitation>()
         verify(invitationRepository).delete(invitationCaptor.capture())
         assertEquals(invitation.token, invitationCaptor.value.token)
 
         // Confirmation page - render
-        val laUserCaptor = captor<LocalAuthorityUser>()
+        val laUserCaptor = captor<LocalCouncilUser>()
         verify(laUserRepository).save(laUserCaptor.capture())
 
-        assertThat(confirmationPage.bannerHeading).containsText("You’ve registered as a ${laUserCaptor.value.localAuthority.name} user")
+        assertThat(confirmationPage.bannerHeading).containsText("You’ve registered as a ${laUserCaptor.value.localCouncil.name} user")
         assertThat(confirmationPage.bodyHeading).containsText("What happens next")
 
         // Return to dashboard button

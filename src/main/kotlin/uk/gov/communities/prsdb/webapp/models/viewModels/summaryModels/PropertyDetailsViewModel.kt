@@ -62,7 +62,7 @@ class PropertyDetailsViewModel(
                 }
                 addRow(
                     "propertyDetails.propertyRecord.localAuthority",
-                    propertyOwnership.address.localAuthority
+                    propertyOwnership.address.localCouncil
                         ?.name,
                 )
                 addRow(

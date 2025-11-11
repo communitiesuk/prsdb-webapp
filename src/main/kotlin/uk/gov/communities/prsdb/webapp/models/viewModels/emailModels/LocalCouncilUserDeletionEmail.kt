@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-data class LocalAuthorityUserDeletionEmail(
+data class LocalCouncilUserDeletionEmail(
     val councilName: String,
 ) : EmailTemplateModel {
     private val councilNameKey = "Council Name"

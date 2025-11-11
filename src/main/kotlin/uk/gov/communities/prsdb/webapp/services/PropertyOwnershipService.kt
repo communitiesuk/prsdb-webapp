@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
-    private val localAuthorityDataService: LocalAuthorityDataService,
+    private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
     private val formContextService: FormContextService,
     private val backLinkService: BackUrlStorageService,
@@ -77,7 +77,7 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
 
-        val isLocalAuthority = localAuthorityDataService.getIsLocalAuthorityUser(baseUserId)
+        val isLocalAuthority = localCouncilDataService.getIsLocalAuthorityUser(baseUserId)
 
         val isPrimaryLandlord = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 

@@ -7,20 +7,20 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 
-@WebMvcTest(LocalAuthorityPrivacyNoticeController::class)
+@WebMvcTest(LocalCouncilPrivacyNoticeController::class)
 class LocalAuthorityPrivacyNoticeControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @Test
     fun `LocalAuthorityPrivacyNoticeController returns 200 for unauthenticated user`() {
-        mvc.get(LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE).andExpect {
+        mvc.get(LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE).andExpect {
             status { isOk() }
         }
     }
 
     @Test
     fun `LocalAuthorityPrivacyNoticeController returns 308 for unauthenticated user with trailing slash`() {
-        mvc.get("${LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE}/").andExpect {
+        mvc.get("${LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE}/").andExpect {
             status { isPermanentRedirect() }
         }
     }
@@ -28,7 +28,7 @@ class LocalAuthorityPrivacyNoticeControllerTests(
     @Test
     @WithMockUser
     fun `LocalAuthorityPrivacyNoticeController returns 200 for authenticated user`() {
-        mvc.get(LocalAuthorityPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE).andExpect {
+        mvc.get(LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE).andExpect {
             status { isOk() }
         }
     }

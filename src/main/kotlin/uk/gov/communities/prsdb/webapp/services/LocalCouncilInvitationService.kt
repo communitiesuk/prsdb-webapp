@@ -8,33 +8,33 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthorityInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import java.util.UUID
 import kotlin.time.Duration.Companion.hours
 
 @PrsdbWebService
-class LocalAuthorityInvitationService(
+class LocalCouncilInvitationService(
     val invitationRepository: LocalAuthorityInvitationRepository,
     private val session: HttpSession,
 ) {
     fun createInvitationToken(
         email: String,
-        authority: LocalAuthority,
+        authority: LocalCouncil,
         invitedAsAdmin: Boolean = false,
     ): String {
         val token = UUID.randomUUID()
-        invitationRepository.save(LocalAuthorityInvitation(token, email, authority, invitedAsAdmin))
+        invitationRepository.save(LocalCouncilInvitation(token, email, authority, invitedAsAdmin))
         return token.toString()
     }
 
-    fun getAuthorityForToken(token: String): LocalAuthority = getInvitationFromToken(token).invitingAuthority
+    fun getAuthorityForToken(token: String): LocalCouncil = getInvitationFromToken(token).invitingAuthority
 
     fun getEmailAddressForToken(token: String): String = getInvitationFromToken(token).invitedEmail
 
-    fun getInvitationFromToken(token: String): LocalAuthorityInvitation {
+    fun getInvitationFromToken(token: String): LocalCouncilInvitation {
         val tokenUuid = UUID.fromString(token)
         val invitation =
             invitationRepository.findByToken(tokenUuid) ?: throw TokenNotFoundException("Invitation token not found in database")
@@ -42,7 +42,7 @@ class LocalAuthorityInvitationService(
         return invitation
     }
 
-    fun deleteInvitation(invitation: LocalAuthorityInvitation) {
+    fun deleteInvitation(invitation: LocalCouncilInvitation) {
         invitationRepository.delete(invitation)
     }
 
@@ -59,7 +59,7 @@ class LocalAuthorityInvitationService(
         }
     }
 
-    fun getInvitationOrNull(token: String): LocalAuthorityInvitation? =
+    fun getInvitationOrNull(token: String): LocalCouncilInvitation? =
         try {
             getInvitationFromToken(token)
         } catch (e: TokenNotFoundException) {
@@ -76,9 +76,9 @@ class LocalAuthorityInvitationService(
         session.setAttribute(LA_USER_INVITATION_TOKEN, null)
     }
 
-    fun getInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? = invitationRepository.findById(id).orElse(null)
+    fun getInvitationByIdOrNull(id: Long): LocalCouncilInvitation? = invitationRepository.findById(id).orElse(null)
 
-    fun throwErrorIfInvitationExists(invitation: LocalAuthorityInvitation) {
+    fun throwErrorIfInvitationExists(invitation: LocalCouncilInvitation) {
         if (invitationRepository.existsById(invitation.id)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -87,7 +87,7 @@ class LocalAuthorityInvitationService(
         }
     }
 
-    fun getAdminInvitationByIdOrNull(id: Long): LocalAuthorityInvitation? {
+    fun getAdminInvitationByIdOrNull(id: Long): LocalCouncilInvitation? {
         val invitation = getInvitationByIdOrNull(id)
         return if (invitation?.invitedAsAdmin == true) {
             invitation
@@ -96,7 +96,7 @@ class LocalAuthorityInvitationService(
         }
     }
 
-    fun getInvitationHasExpired(invitation: LocalAuthorityInvitation): Boolean {
+    fun getInvitationHasExpired(invitation: LocalCouncilInvitation): Boolean {
         val expiresAtInstant =
             invitation.createdDate
                 .toKotlinInstant()

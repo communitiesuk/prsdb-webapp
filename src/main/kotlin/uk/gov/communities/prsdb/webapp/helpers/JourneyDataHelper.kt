@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalAuthorityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalCouncilFormModel
 import java.time.LocalDate
 
 open class JourneyDataHelper {
@@ -71,7 +71,7 @@ open class JourneyDataHelper {
                     getFieldIntegerValue(
                         journeyData,
                         it,
-                        SelectLocalAuthorityFormModel::localAuthorityId.name,
+                        SelectLocalCouncilFormModel::localAuthorityId.name,
                     ) ?: return null
                 }
 
