@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
 import kotlin.String
 
@@ -18,7 +18,7 @@ class EmailTemplateModelsTests {
             listOf(
                 EmailTemplateTestData(
                     LocalCouncilInvitationEmail(
-                        MockLocalAuthorityData.createLocalAuthority(),
+                        MockLocalCouncilData.createLocalAuthority(),
                         URI("invitationUri"),
                         "prsdUrl",
                         ONE_LOGIN_INFO_URL,
@@ -26,11 +26,11 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalCouncilInvitationCancellationEmail(MockLocalAuthorityData.createLocalAuthority()),
+                    LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalAuthority()),
                     "/emails/LocalCouncilInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalCouncilAdminInvitationEmail(MockLocalAuthorityData.createLocalAuthority(), URI("invitationUri")),
+                    LocalCouncilAdminInvitationEmail(MockLocalCouncilData.createLocalAuthority(), URI("invitationUri")),
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(

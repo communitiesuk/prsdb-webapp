@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -65,7 +65,7 @@ class AddressServiceTests {
             // Arrange
             addressDataModel.localAuthorityId?.let {
                 whenever(mockLocalCouncilService.retrieveLocalAuthorityById(it))
-                    .thenReturn(MockLocalAuthorityData.createLocalAuthority(id = it))
+                    .thenReturn(MockLocalCouncilData.createLocalAuthority(id = it))
             }
 
             whenever(mockAddressRepository.save(any())).thenReturn(MockLandlordData.createAddress())

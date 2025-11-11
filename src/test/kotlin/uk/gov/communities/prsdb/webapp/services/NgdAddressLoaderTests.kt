@@ -38,7 +38,7 @@ import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -283,7 +283,7 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalAuthorityData.createLocalAuthority(custodianCode = "1"))
+        val localAuthorities = listOf(MockLocalCouncilData.createLocalAuthority(custodianCode = "1"))
         whenever(mockLocalAuthorityRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
@@ -332,7 +332,7 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("largeCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalAuthorityData.createLocalAuthority(custodianCode = "1"))
+        val localAuthorities = listOf(MockLocalCouncilData.createLocalAuthority(custodianCode = "1"))
         whenever(mockLocalAuthorityRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)

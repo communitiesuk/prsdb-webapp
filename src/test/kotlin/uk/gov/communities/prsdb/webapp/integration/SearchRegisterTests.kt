@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.ADDRESS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.CONTACT_INFO_COL_INDEX
@@ -83,7 +83,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             searchLandlordRegisterPage.searchBar.search("L-CKSQ-3SX9")
             searchLandlordRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
         }
 
         @Test
@@ -189,7 +189,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         fun `Back link returns to the LA dashboard page`(page: Page) {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.backLink.clickAndWait()
-            assertPageIs(page, LocalAuthorityDashboardPage::class)
+            assertPageIs(page, LocalCouncilDashboardPage::class)
         }
 
         @Test
@@ -200,7 +200,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
 
             resultTable.getClickableCell(0, LANDLORD_COL_INDEX).link.clickAndWait()
 
-            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            val landlordPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
             landlordPage.backLink.clickAndWait()
 
             assertPageIs(page, SearchLandlordRegisterPage::class)
@@ -270,7 +270,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).clickAndWait()
-            assertPageIs(page, PropertyDetailsPageLocalAuthorityView::class, mapOf("propertyOwnershipId" to "1"))
+            assertPageIs(page, PropertyDetailsPageLocalCouncilView::class, mapOf("propertyOwnershipId" to "1"))
         }
 
         @Test
@@ -279,7 +279,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
 
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
         }
 
         @Test
@@ -404,7 +404,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         fun `Back link returns to the LA dashboard page`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToLandlordSearchPage()
             searchPropertyRegisterPage.backLink.clickAndWait()
-            assertPageIs(page, LocalAuthorityDashboardPage::class)
+            assertPageIs(page, LocalCouncilDashboardPage::class)
         }
 
         @Test
@@ -415,7 +415,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
 
             resultTable.getClickableCell(0, PROPERTY_LANDLORD_COL_INDEX).link.clickAndWait()
 
-            val landlordPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            val landlordPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
             landlordPage.backLink.clickAndWait()
 
             assertPageIs(page, SearchPropertyRegisterPage::class)
@@ -433,7 +433,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             val landlordPage =
                 assertPageIs(
                     page,
-                    PropertyDetailsPageLocalAuthorityView::class,
+                    PropertyDetailsPageLocalCouncilView::class,
                     mapOf("propertyOwnershipId" to "18"),
                 )
             landlordPage.backLink.clickAndWait()

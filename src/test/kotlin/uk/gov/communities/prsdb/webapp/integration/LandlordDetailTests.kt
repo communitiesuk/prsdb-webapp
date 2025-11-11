@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.assertEquals
@@ -125,12 +125,12 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             val propertyDetailsView =
                 assertPageIs(
                     page,
-                    PropertyDetailsPageLocalAuthorityView::class,
+                    PropertyDetailsPageLocalCouncilView::class,
                     mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
                 )
 
             propertyDetailsView.backLink.clickAndWait()
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
+            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
         }
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeLimitExceededPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertEquals
@@ -32,7 +32,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
 
         // Test return to dashboard link
         generatePasscodePage.returnToDashboardButton.clickAndWait()
-        assertPageIs(page, LocalAuthorityDashboardPage::class)
+        assertPageIs(page, LocalCouncilDashboardPage::class)
     }
 
     @Test

@@ -50,7 +50,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 import java.net.URI
 
@@ -332,9 +332,9 @@ class PropertyOwnershipServiceTests {
         fun `returns property ownership when user is an la user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val localAuthorityUser =
-                MockLocalAuthorityData.createLocalAuthorityUser(
+                MockLocalCouncilData.createLocalAuthorityUser(
                     MockOneLoginUserData.createOneLoginUser("not-the-landlord"),
-                    MockLocalAuthorityData.createLocalAuthority(),
+                    MockLocalCouncilData.createLocalAuthority(),
                 )
             val principalName = localAuthorityUser.baseUser.id
 
