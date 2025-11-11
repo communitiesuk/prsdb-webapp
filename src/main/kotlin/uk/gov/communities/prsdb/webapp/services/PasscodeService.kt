@@ -98,6 +98,7 @@ class PasscodeService(
 
         val user = oneLoginUserService.findOrCreate1LUser(userId)
         passcode.claimByUser(user)
+        passcodeRepository.save(passcode)
         session.setAttribute(HAS_USER_CLAIMED_A_PASSCODE, true)
         return true
     }

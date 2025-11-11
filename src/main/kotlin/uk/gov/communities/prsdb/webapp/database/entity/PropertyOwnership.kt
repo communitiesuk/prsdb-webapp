@@ -9,9 +9,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import java.time.LocalDate
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -21,12 +20,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     var isActive: Boolean = false
-
-    var tenancyStartDate: LocalDate? = null
-
-    @Column(nullable = false)
-    lateinit var occupancyType: OccupancyType
-        private set
 
     @Column(nullable = false)
     lateinit var ownershipType: OwnershipType
@@ -47,9 +40,12 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var primaryLandlord: Landlord
         private set
 
+    @Column(nullable = false)
+    lateinit var propertyBuildType: PropertyType
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "property_id", nullable = false)
-    lateinit var property: Property
+    @JoinColumn(name = "address_id", nullable = false)
+    lateinit var address: Address
         private set
 
     @OneToOne(optional = true)
@@ -65,27 +61,27 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         private set
 
     constructor(
-        occupancyType: OccupancyType,
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         registrationNumber: RegistrationNumber,
         primaryLandlord: Landlord,
-        property: Property,
+        propertyBuildType: PropertyType,
+        address: Address,
         license: License?,
         incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
     ) : this() {
-        this.isActive = isActive
-        this.occupancyType = occupancyType
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
         this.primaryLandlord = primaryLandlord
-        this.property = property
+        this.propertyBuildType = propertyBuildType
+        this.address = address
         this.license = license
         this.incompleteComplianceForm = incompleteComplianceForm
+        this.isActive = isActive
     }
 
     val isOccupied: Boolean
