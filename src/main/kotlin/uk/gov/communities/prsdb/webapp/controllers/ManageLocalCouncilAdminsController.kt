@@ -60,7 +60,7 @@ class ManageLocalCouncilAdminsController(
         addSelectOptionsToModel(model)
         model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalCouncilAdminModel())
 
-        return "inviteLocalAuthorityAdminUser"
+        return "inviteLocalCouncilAdminUser"
     }
 
     @PostMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
@@ -74,7 +74,7 @@ class ManageLocalCouncilAdminsController(
     ): String {
         if (bindingResult.hasErrors()) {
             addSelectOptionsToModel(model)
-            return "inviteLocalAuthorityAdminUser"
+            return "inviteLocalCouncilAdminUser"
         }
 
         try {
@@ -97,7 +97,7 @@ class ManageLocalCouncilAdminsController(
             return "redirect:$INVITE_LA_ADMIN_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
-            return "inviteLocalAuthorityAdminUser"
+            return "inviteLocalCouncilAdminUser"
         }
     }
 
@@ -122,7 +122,7 @@ class ManageLocalCouncilAdminsController(
         // TODO PRSD-672: Add link to the system operator dashboard
         model.addAttribute("dashboardUrl", "#")
 
-        return "inviteLocalAuthorityAdminConfirmation"
+        return "inviteLocalCouncilAdminConfirmation"
     }
 
     @GetMapping("/$MANAGE_LA_ADMINS_PATH_SEGMENT")
@@ -147,7 +147,7 @@ class ManageLocalCouncilAdminsController(
         model.addAttribute("cancelInvitationPathSegment", CANCEL_INVITATION_PATH_SEGMENT)
         model.addAttribute("editUserPathSegment", EDIT_ADMIN_PATH_SEGMENT)
         model.addAttribute("inviteAdminsUrl", INVITE_LA_ADMIN_ROUTE)
-        return "manageLocalAuthorityAdmins"
+        return "manageLocalCouncilAdmins"
     }
 
     @GetMapping("/$EDIT_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
@@ -176,7 +176,7 @@ class ManageLocalCouncilAdminsController(
             ),
         )
         model.addAttribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
-        return "editLAUserAccess"
+        return "editLocalCouncilUserAccess"
     }
 
     @PostMapping("/$EDIT_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
@@ -197,7 +197,7 @@ class ManageLocalCouncilAdminsController(
         val localAuthorityUser = localCouncilDataService.getLocalAuthorityUserById(localAuthorityUserId)
         model.addAttribute("user", localAuthorityUser)
         model.addAttribute("backLinkPath", "../$EDIT_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
-        return "deleteLAUser"
+        return "deleteLocalCouncilUser"
     }
 
     @PostMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
@@ -234,7 +234,7 @@ class ManageLocalCouncilAdminsController(
 
         model.addAttribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
 
-        return "deleteLAUserSuccess"
+        return "deleteLocalCouncilUserSuccess"
     }
 
     @GetMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
@@ -250,7 +250,7 @@ class ManageLocalCouncilAdminsController(
         model.addAttribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
         model.addAttribute("email", invitation.invitedEmail)
 
-        return "cancelLAUserInvitation"
+        return "cancelLocalCouncilUserInvitation"
     }
 
     @PostMapping("/$CANCEL_INVITATION_PATH_SEGMENT/{invitationId}")
@@ -286,7 +286,7 @@ class ManageLocalCouncilAdminsController(
         model.addAttribute("deletedEmail", invitationDeletedThisSession.invitedEmail)
         model.addAttribute("localAuthority", invitationDeletedThisSession.invitingAuthority)
         model.addAttribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
-        return "cancelLAUserInvitationSuccess"
+        return "cancelLocalCouncilUserInvitationSuccess"
     }
 
     private fun getIsCurrentUserBeingDeletedAsAdmin(

@@ -148,11 +148,11 @@ class RegisterLocalCouncilUserController(
         model.addAttribute("localAuthority", localAuthorityUser.localCouncil.name)
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
-        return "registerLAUserSuccess"
+        return "registerLocalCouncilUserSuccess"
     }
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
-    fun invalidToken(model: Model): String = "invalidLaInvitationLink"
+    fun invalidToken(model: Model): String = "invalidLocalCouncilInvitationLink"
 
     private fun getValidTokenFromSessionOrNull(): String? {
         val token = invitationService.getTokenFromSession()

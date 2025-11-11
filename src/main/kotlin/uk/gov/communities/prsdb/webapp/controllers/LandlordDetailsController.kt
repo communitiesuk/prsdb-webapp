@@ -110,7 +110,7 @@ class LandlordDetailsController(
 
         model.addAttribute("backUrl", "/")
 
-        return "localAuthorityLandlordDetailsView"
+        return "localCouncilLandlordDetailsView"
     }
 
     companion object {

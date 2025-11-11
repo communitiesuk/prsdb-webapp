@@ -23,7 +23,7 @@ class LocalCouncilPrivacyNoticeController {
         model.addAttribute("informationCommissionersOfficeUrl", INFORMATION_COMMISSIONERS_OFFICE_URL)
         model.addAttribute("dataProtectionCommunitiesEmails", DATA_PROTECTION_COMMUNITIES_EMAILS)
         model.addAttribute("dataProtectionOfficerEmail", DPO_COMMUNITIES_EMAILS)
-        return "localAuthorityPrivacyNotice"
+        return "localCouncilPrivacyNotice"
     }
 
     companion object {

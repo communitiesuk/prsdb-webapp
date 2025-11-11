@@ -61,7 +61,7 @@ class LocalCouncilDashboardController(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_PRSD,
         )
-        return "localAuthorityDashboard"
+        return "localCouncilDashboard"
     }
 
     companion object {

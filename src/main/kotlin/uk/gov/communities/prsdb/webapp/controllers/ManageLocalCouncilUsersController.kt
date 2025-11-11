@@ -96,7 +96,7 @@ class ManageLocalCouncilUsersController(
         // TODO: PRSD-672 - if the user is not an la admin, make this a link to the system operator dashboard
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
 
-        return "manageLAUsers"
+        return "manageLocalCouncilUsers"
     }
 
     @GetMapping("/$EDIT_USER_ROUTE")
@@ -133,7 +133,7 @@ class ManageLocalCouncilUsersController(
         )
         model.addAttribute("deleteUserUrl", getLaDeleteUserRoute(localAuthorityId, localAuthorityUserId))
 
-        return "editLAUserAccess"
+        return "editLocalCouncilUserAccess"
     }
 
     @PostMapping("/$EDIT_USER_ROUTE")
@@ -166,7 +166,7 @@ class ManageLocalCouncilUsersController(
             localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(deleteeId, localAuthorityId)
         model.addAttribute("user", userToDelete)
         model.addAttribute("backLinkPath", "../$EDIT_USER_PATH_SEGMENT/$deleteeId")
-        return "deleteLAUser"
+        return "deleteLocalCouncilUser"
     }
 
     @PostMapping("/$DELETE_USER_ROUTE")
@@ -214,7 +214,7 @@ class ManageLocalCouncilUsersController(
 
         model.addAttribute("returnToManageUsersUrl", getLaManageUsersRoute(localAuthorityId))
 
-        return "deleteLAUserSuccess"
+        return "deleteLocalCouncilUserSuccess"
     }
 
     @GetMapping("/$INVITE_NEW_USER_PATH_SEGMENT")
@@ -231,7 +231,7 @@ class ManageLocalCouncilUsersController(
         model.addAttribute("councilNameBeginsWithVowel", councilNameBeginsWithVowel)
         model.addAttribute("confirmedEmailRequestModel", ConfirmedEmailRequestModel())
 
-        return "inviteLAUser"
+        return "inviteLocalCouncilUser"
     }
 
     @PostMapping("/$INVITE_NEW_USER_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
@@ -250,7 +250,7 @@ class ManageLocalCouncilUsersController(
         model.addAttribute("councilName", currentAuthority.name)
 
         if (bindingResult.hasErrors()) {
-            return "inviteLAUser"
+            return "inviteLocalCouncilUser"
         }
 
         try {
@@ -274,7 +274,7 @@ class ManageLocalCouncilUsersController(
             return "redirect:$INVITE_USER_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
             bindingResult.reject("addLAUser.error.retryable")
-            return "inviteLAUser"
+            return "inviteLocalCouncilUser"
         }
     }
 
@@ -295,7 +295,7 @@ class ManageLocalCouncilUsersController(
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
         model.addAttribute("invitedEmailAddress", invitedEmail)
-        return "inviteLAUserSuccess"
+        return "inviteLocalCouncilUserSuccess"
     }
 
     @GetMapping("/$CANCEL_INVITE_ROUTE")
@@ -324,7 +324,7 @@ class ManageLocalCouncilUsersController(
         model.addAttribute("backLinkPath", "../$MANAGE_USERS_PATH_SEGMENT")
         model.addAttribute("email", invitation.invitedEmail)
 
-        return "cancelLAUserInvitation"
+        return "cancelLocalCouncilUserInvitation"
     }
 
     @PostMapping("/$CANCEL_INVITE_ROUTE")
@@ -368,7 +368,7 @@ class ManageLocalCouncilUsersController(
         model.addAttribute("localAuthority", getLocalAuthority(principal, localAuthorityId, request))
         model.addAttribute("returnToManageUsersUrl", getLaManageUsersRoute(localAuthorityId))
 
-        return "cancelLAUserInvitationSuccess"
+        return "cancelLocalCouncilUserInvitationSuccess"
     }
 
     private fun throwErrorIfNonSystemOperatorIsUpdatingTheirOwnAccount(

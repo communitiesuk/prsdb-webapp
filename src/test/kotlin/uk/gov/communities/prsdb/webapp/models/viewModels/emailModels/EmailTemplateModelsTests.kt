@@ -23,15 +23,15 @@ class EmailTemplateModelsTests {
                         "prsdUrl",
                         ONE_LOGIN_INFO_URL,
                     ),
-                    "/emails/LocalAuthorityInvitation.md",
+                    "/emails/LocalCouncilInvitation.md",
                 ),
                 EmailTemplateTestData(
                     LocalCouncilInvitationCancellationEmail(MockLocalAuthorityData.createLocalAuthority()),
-                    "/emails/LocalAuthorityInvitationCancellation.md",
+                    "/emails/LocalCouncilInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
                     LocalCouncilAdminInvitationEmail(MockLocalAuthorityData.createLocalAuthority(), URI("invitationUri")),
-                    "/emails/LocalAuthorityAdminInvitation.md",
+                    "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
