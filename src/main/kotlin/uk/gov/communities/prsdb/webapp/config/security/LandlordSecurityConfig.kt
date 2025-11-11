@@ -74,7 +74,7 @@ class LandlordSecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES).reportOnly()
                     }
             }
 
