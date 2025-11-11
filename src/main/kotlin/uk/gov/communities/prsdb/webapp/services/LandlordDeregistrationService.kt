@@ -31,7 +31,7 @@ class LandlordDeregistrationService(
             formContextService.deleteFormContexts(incompletePropertyRegistrations)
         }
 
-        val registeredProperties = propertyOwnershipService.retrieveAllPropertiesForLandlord(baseUserId)
+        val registeredProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
         if (registeredProperties.isNotEmpty()) {
             propertyDeregistrationService.deregisterProperties(registeredProperties)
         }

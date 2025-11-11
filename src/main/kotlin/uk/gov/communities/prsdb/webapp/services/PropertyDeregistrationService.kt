@@ -3,12 +3,11 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTRATION_ENTITY_IDS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 @PrsdbWebService
 class PropertyDeregistrationService(
-    private val propertyService: PropertyService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
@@ -21,7 +20,6 @@ class PropertyDeregistrationService(
             propertyComplianceService.deletePropertyComplianceByOwnershipId(it.id)
             it.incompleteComplianceForm?.let { incompleteComplianceForm -> formContextService.deleteFormContext(incompleteComplianceForm) }
             propertyOwnershipService.deletePropertyOwnership(it)
-            propertyService.deleteProperty(it.property)
             if (it.license != null) licenseService.deleteLicense(it.license!!)
         }
     }
@@ -29,26 +27,23 @@ class PropertyDeregistrationService(
     @Transactional
     fun deregisterProperties(propertyOwnerships: List<PropertyOwnership>) {
         val propertyOwnershipIds = propertyOwnerships.map { it.id }
-        val properties = propertyOwnerships.map { it.property }
         val licenses = propertyOwnerships.mapNotNull { it.license }
         val incompleteComplianceForms = propertyOwnerships.mapNotNull { it.incompleteComplianceForm }
 
         propertyComplianceService.deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds)
         propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
-        propertyService.deleteProperties(properties)
         licenseService.deleteLicenses(licenses)
         formContextService.deleteFormContexts(incompleteComplianceForms)
     }
 
-    fun addDeregisteredPropertyAndOwnershipIdsToSession(
-        propertyOwnershipId: Long,
-        propertyId: Long,
-    ) = session.setAttribute(
-        PROPERTY_DEREGISTRATION_ENTITY_IDS,
-        getDeregisteredPropertyAndOwnershipIdsFromSession().plus(Pair(propertyOwnershipId, propertyId)),
-    )
+    fun addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId: Long) =
+        session.setAttribute(
+            PROPERTIES_DEREGISTERED_THIS_SESSION,
+            getDeregisteredPropertyOwnershipIdsFromSession() + propertyOwnershipId,
+        )
 
-    fun getDeregisteredPropertyAndOwnershipIdsFromSession(): MutableList<Pair<Long, Long>> =
-        session.getAttribute(PROPERTY_DEREGISTRATION_ENTITY_IDS) as MutableList<Pair<Long, Long>>?
+    @Suppress("UNCHECKED_CAST")
+    fun getDeregisteredPropertyOwnershipIdsFromSession(): MutableList<Long> =
+        session.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION) as MutableList<Long>?
             ?: mutableListOf()
 }

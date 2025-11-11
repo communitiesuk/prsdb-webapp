@@ -80,7 +80,7 @@ class ComplianceStatusDataModelTests {
 
         // Assert
         assertEquals(propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
-        assertEquals(propertyOwnership.property.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
+        assertEquals(propertyOwnership.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
         assertEquals(propertyOwnershipRegNum, complianceStatusDataModel.registrationNumber)
         assertFalse(complianceStatusDataModel.isComplete)
     }
@@ -127,7 +127,7 @@ class ComplianceStatusDataModelTests {
 
         // Assert
         assertEquals(propertyCompliance.propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
-        assertEquals(propertyCompliance.propertyOwnership.property.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
+        assertEquals(propertyCompliance.propertyOwnership.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
         assertEquals(propertyOwnershipRegNum, complianceStatusDataModel.registrationNumber)
         assertTrue(complianceStatusDataModel.isComplete)
     }
