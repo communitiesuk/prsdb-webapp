@@ -240,8 +240,8 @@ class PropertyOwnershipService(
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
-    fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
-        propertyOwnershipRepository.delete(propertyOwnership)
+    fun deletePropertyOwnership(propertyOwnershipId: Long) {
+        propertyOwnershipRepository.deleteById(propertyOwnershipId)
     }
 
     fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {
