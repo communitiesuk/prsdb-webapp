@@ -18,7 +18,7 @@ class CheckLicensingAnswersPage(
                 "title" to "propertyDetails.update.title",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                "insetText" to "forms.update.checkOccupancy.insetText",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         missingAnswersRedirect = missingAnswersRedirect,
