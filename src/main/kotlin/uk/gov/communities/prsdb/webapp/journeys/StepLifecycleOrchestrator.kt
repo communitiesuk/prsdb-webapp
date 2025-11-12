@@ -95,8 +95,8 @@ sealed class StepLifecycleOrchestrator(
     companion object {
         operator fun invoke(journeyStep: JourneyStep<*, *, *>) =
             when (journeyStep) {
-                is JourneyStep.RoutedStep -> VisitableStepLifecycleOrchestrator(journeyStep)
-                is JourneyStep.UnroutedStep -> RedirectingStepLifecycleOrchestrator(journeyStep)
+                is JourneyStep.RequestableStep -> VisitableStepLifecycleOrchestrator(journeyStep)
+                is JourneyStep.InternalStep -> RedirectingStepLifecycleOrchestrator(journeyStep)
             }
     }
 }

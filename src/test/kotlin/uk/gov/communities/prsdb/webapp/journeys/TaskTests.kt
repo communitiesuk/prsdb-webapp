@@ -23,7 +23,7 @@ class TaskTests {
     }
 
     lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
-    private val firstStepMock = mock<JourneyStep.RoutedStep<*, *, JourneyState>>()
+    private val firstStepMock = mock<JourneyStep.RequestableStep<*, *, JourneyState>>()
     private val exitStepMock = mock<NavigationalStep>()
     private val stepsMock = listOf<StepInitialiser<*, JourneyState, *>>()
 

@@ -14,7 +14,7 @@ import kotlin.reflect.full.createInstance
 sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
-    open class RoutedStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+    open class RequestableStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
         stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val routeSegment: String get() = stepConfig.routeSegment
@@ -24,7 +24,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
     }
 
-    open class UnroutedStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+    open class InternalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
         stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         override fun getRouteSegmentOrNull(): String? = null

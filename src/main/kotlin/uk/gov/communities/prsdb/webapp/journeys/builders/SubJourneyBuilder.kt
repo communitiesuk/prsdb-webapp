@@ -37,7 +37,7 @@ class SubJourneyBuilder<TState : JourneyState>(
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> startingStep(
         segment: String,
-        uninitialisedStep: JourneyStep.RoutedStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
         firstStep = uninitialisedStep

@@ -24,15 +24,15 @@ open class JourneyBuilder<TState : JourneyState>(
                 val journeyStep = step.build(journey, unreachableStepDestination)
                 checkForUninitialisedParents(step)
                 when (journeyStep) {
-                    is JourneyStep.RoutedStep<*, *, TState> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
-                    is JourneyStep.UnroutedStep<*, *, TState> -> {}
+                    is JourneyStep.RequestableStep<*, *, TState> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
+                    is JourneyStep.InternalStep<*, *, TState> -> {}
                 }
             }
         }
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
         segment: String,
-        uninitialisedStep: JourneyStep.RoutedStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep)
@@ -41,7 +41,7 @@ open class JourneyBuilder<TState : JourneyState>(
     }
 
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
-        uninitialisedStep: JourneyStep.UnroutedStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep)

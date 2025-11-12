@@ -29,11 +29,11 @@ class TaskInitialiserTests {
         builder.parents { mock() }
 
         // Act
-        builder.redirectToStep { mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>() }
+        builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
 
         // Assert
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToStep { mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>() }
+            builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
         }
         assertThrows<JourneyInitialisationException> {
             builder.redirectToDestination { Destination.ExternalUrl("url") }
@@ -51,7 +51,7 @@ class TaskInitialiserTests {
 
         // Assert
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToStep { mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>() }
+            builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
         }
         assertThrows<JourneyInitialisationException> {
             builder.redirectToDestination { Destination.ExternalUrl("url") }
@@ -63,7 +63,7 @@ class TaskInitialiserTests {
         // Arrange
         val taskMock = mock<Task<JourneyState>>()
 
-        val nextStepMock = mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>()
+        val nextStepMock = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         val nextStepSegment = "nextStepSegment"
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
