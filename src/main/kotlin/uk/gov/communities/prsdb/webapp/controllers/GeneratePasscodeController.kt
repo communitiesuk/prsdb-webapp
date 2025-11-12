@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.GENERATE_PASSCODE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
@@ -60,6 +60,6 @@ class GeneratePasscodeController(
     }
 
     companion object {
-        const val GENERATE_PASSCODE_URL = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$GENERATE_PASSCODE_PATH_SEGMENT"
+        const val GENERATE_PASSCODE_URL = "/$LOCAL_COUNCIL_PATH_SEGMENT/$GENERATE_PASSCODE_PATH_SEGMENT"
     }
 }

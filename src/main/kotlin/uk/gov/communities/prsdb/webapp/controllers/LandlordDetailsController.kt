@@ -15,7 +15,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -115,7 +115,7 @@ class LandlordDetailsController(
 
     companion object {
         const val LANDLORD_DETAILS_FOR_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT"
-        const val LANDLORD_DETAILS_FOR_LA_USER_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
+        const val LANDLORD_DETAILS_FOR_LA_USER_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 
         fun getLandlordDetailsForLaUserPath(landlordId: Long? = null): String =

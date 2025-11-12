@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteConfirmationRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getDeleteUserConfirmationRoute
@@ -386,7 +386,7 @@ class ManageLocalCouncilUsersControllerTests(
         @WithMockUser(roles = ["LA_ADMIN"])
         fun `getEditUserAccessLevelPage returns 404 for admin user specifying a non-number for the user id`() {
             mvc
-                .get("/$LOCAL_AUTHORITY_PATH_SEGMENT/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/not-a-number")
+                .get("/$LOCAL_COUNCIL_PATH_SEGMENT/$DEFAULT_LA_ID/$EDIT_USER_PATH_SEGMENT/not-a-number")
                 .andExpect {
                     status { isNotFound() }
                 }

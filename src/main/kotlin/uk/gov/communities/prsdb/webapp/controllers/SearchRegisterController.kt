@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SEARCH_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -129,7 +129,7 @@ class SearchRegisterController(
         }"
 
     companion object {
-        const val SEARCH_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SEARCH_PATH_SEGMENT"
+        const val SEARCH_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$SEARCH_PATH_SEGMENT"
         const val SEARCH_LANDLORD_URL = "$SEARCH_ROUTE/$LANDLORD_PATH_SEGMENT"
         const val SEARCH_PROPERTY_URL = "$SEARCH_ROUTE/$PROPERTY_PATH_SEGMENT"
     }

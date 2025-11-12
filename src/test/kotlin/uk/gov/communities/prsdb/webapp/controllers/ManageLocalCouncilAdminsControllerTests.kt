@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MANAGE_LA_ADMINS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LA_ADMIN_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LA_ADMIN_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.MANAGE_LA_ADMINS_ROUTE
@@ -216,7 +216,7 @@ class ManageLocalCouncilAdminsControllerTests(
                     status { isOk() }
                     model {
                         attributeExists("options")
-                        attribute("backUrl", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+                        attribute("backUrl", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
                         attribute("localAuthorityUser", localAuthorityAdmin)
                         attribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
                     }
@@ -403,7 +403,7 @@ class ManageLocalCouncilAdminsControllerTests(
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+                        attribute("backLinkPath", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
                         attribute("email", localAuthorityAdminInvite.invitedEmail)
                     }
                 }

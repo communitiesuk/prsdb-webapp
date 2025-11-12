@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -192,7 +192,7 @@ class PropertyDetailsController(
 
         const val UPDATE_PROPERTY_DETAILS_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        const val LA_PROPERTY_DETAILS_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
+        const val LA_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
         fun getPropertyDetailsPath(
             propertyOwnershipId: Long,

@@ -13,8 +13,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LA_USER_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LA_USER_REGISTRATION_ROUTE
@@ -164,7 +164,7 @@ class RegisterLocalCouncilUserController(
     }
 
     companion object {
-        const val LA_USER_REGISTRATION_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$REGISTER_LA_USER_JOURNEY_URL"
+        const val LA_USER_REGISTRATION_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL"
 
         const val LA_USER_REGISTRATION_INVALID_LINK_ROUTE = "$LA_USER_REGISTRATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
     }

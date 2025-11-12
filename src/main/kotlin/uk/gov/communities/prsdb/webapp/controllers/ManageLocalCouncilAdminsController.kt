@@ -21,9 +21,9 @@ import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.INVITE_LA_ADMIN_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MANAGE_LA_ADMINS_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
@@ -55,7 +55,7 @@ class ManageLocalCouncilAdminsController(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val securityContextService: SecurityContextService,
 ) {
-    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT")
+    @GetMapping("/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT")
     fun inviteLocalAuthorityAdmin(model: Model): String {
         addSelectOptionsToModel(model)
         model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalCouncilAdminModel())
@@ -63,7 +63,7 @@ class ManageLocalCouncilAdminsController(
         return "inviteLocalCouncilAdminUser"
     }
 
-    @PostMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
+    @PostMapping("/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun sendInvitation(
         model: Model,
         @Valid
@@ -112,7 +112,7 @@ class ManageLocalCouncilAdminsController(
         model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
     }
 
-    @GetMapping("/$INVITE_LA_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
+    @GetMapping("/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
     fun confirmation(model: Model): String {
         if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localAuthorityName") == null) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing attributes, has the user navigated directly to this page?")
@@ -125,7 +125,7 @@ class ManageLocalCouncilAdminsController(
         return "inviteLocalCouncilAdminConfirmation"
     }
 
-    @GetMapping("/$MANAGE_LA_ADMINS_PATH_SEGMENT")
+    @GetMapping("/$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
     fun manageAdmins(
         model: Model,
         principal: Principal,
@@ -156,7 +156,7 @@ class ManageLocalCouncilAdminsController(
         model: Model,
     ): String {
         val localAuthorityUser = localCouncilDataService.getLocalAuthorityUserById(localAuthorityUserId)
-        model.addAttribute("backUrl", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+        model.addAttribute("backUrl", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
         model.addAttribute("localAuthorityUser", localAuthorityUser)
         model.addAttribute(
             "options",
@@ -247,7 +247,7 @@ class ManageLocalCouncilAdminsController(
                 HttpStatus.NOT_FOUND,
                 "Invitation with id $invitationId was not found in the local_authority_invitations table",
             )
-        model.addAttribute("backLinkPath", "../$MANAGE_LA_ADMINS_PATH_SEGMENT")
+        model.addAttribute("backLinkPath", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
         model.addAttribute("email", invitation.invitedEmail)
 
         return "cancelLocalCouncilUserInvitation"
@@ -295,9 +295,9 @@ class ManageLocalCouncilAdminsController(
     ): Boolean = principal.name == userBeingDeleted.baseUser.id
 
     companion object {
-        const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"
-        const val INVITE_LA_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LA_ADMIN_PATH_SEGMENT"
-        const val MANAGE_LA_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_LA_ADMINS_PATH_SEGMENT"
+        const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"
+        const val INVITE_LA_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT"
+        const val MANAGE_LA_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT"
 
         const val INVITE_LA_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LA_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }

@@ -13,14 +13,14 @@ class LocalCouncilPrivacyNoticeControllerTests(
 ) : ControllerTest(webContext) {
     @Test
     fun `LocalCouncilPrivacyNoticeController returns 200 for unauthenticated user`() {
-        mvc.get(LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE).andExpect {
+        mvc.get(LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE).andExpect {
             status { isOk() }
         }
     }
 
     @Test
     fun `LocalCouncilPrivacyNoticeController returns 308 for unauthenticated user with trailing slash`() {
-        mvc.get("${LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE}/").andExpect {
+        mvc.get("${LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE}/").andExpect {
             status { isPermanentRedirect() }
         }
     }
@@ -28,7 +28,7 @@ class LocalCouncilPrivacyNoticeControllerTests(
     @Test
     @WithMockUser
     fun `LocalCouncilPrivacyNoticeController returns 200 for authenticated user`() {
-        mvc.get(LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE).andExpect {
+        mvc.get(LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE).andExpect {
             status { isOk() }
         }
     }

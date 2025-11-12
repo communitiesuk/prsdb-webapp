@@ -32,7 +32,7 @@ class LocalCouncilUserRegistrationJourney(
     private val invitation: LocalCouncilInvitation,
     private val securityContextService: SecurityContextService,
 ) : Journey<RegisterLocalCouncilUserStepId>(
-        journeyType = JourneyType.LA_USER_REGISTRATION,
+        journeyType = JourneyType.LOCAL_COUNCIL_USER_REGISTRATION,
         initialStepId = RegisterLocalCouncilUserStepId.LandingPage,
         validator = validator,
         journeyDataService = journeyDataService,
@@ -88,7 +88,7 @@ class LocalCouncilUserRegistrationJourney(
                         mapOf(
                             "title" to "registerLAUser.title",
                             "submitButtonText" to "forms.buttons.continue",
-                            "localAuthorityPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE,
+                            "localAuthorityPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE,
                             "options" to
                                 listOf(
                                     CheckboxViewModel(

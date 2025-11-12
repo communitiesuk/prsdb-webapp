@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -22,25 +22,25 @@ class LocalCouncilSecurityConfig(
     @Order(3)
     fun localAuthoritySecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .securityMatcher("/$LOCAL_AUTHORITY_PATH_SEGMENT/**")
+            .securityMatcher("/$LOCAL_COUNCIL_PATH_SEGMENT/**")
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
+                    .requestMatchers(LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
                     .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
                 oauth.userInfoEndpoint { userInfo ->
-                    userInfo.oidcUserService(localAuthorityOidcUserService())
+                    userInfo.oidcUserService(localCouncilOidcUserService())
                 }
                 oauth.redirectionEndpoint { redirection ->
-                    redirection.baseUri("/$LOCAL_AUTHORITY_PATH_SEGMENT/login/oauth2/code/one-login")
+                    redirection.baseUri("/$LOCAL_COUNCIL_PATH_SEGMENT/login/oauth2/code/one-login")
                 }
             }.csrf { }
 
         return http.build()
     }
 
-    fun localAuthorityOidcUserService(): OAuth2UserService<OidcUserRequest, OidcUser> =
-        UserServiceFactory.create(userRolesService::getLocalAuthorityRolesForSubjectId)
+    fun localCouncilOidcUserService(): OAuth2UserService<OidcUserRequest, OidcUser> =
+        UserServiceFactory.create(userRolesService::getLocalCouncilRolesForSubjectId)
 }

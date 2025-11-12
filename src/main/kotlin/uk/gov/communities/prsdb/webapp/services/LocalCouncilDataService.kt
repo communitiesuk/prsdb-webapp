@@ -10,12 +10,12 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.LA_USERS_INVITED_THIS_SESSION
-import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATION_ENTITY_TYPE
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION
-import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LOCAL_COUNCIL_USERS_TABLE_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
@@ -86,7 +86,7 @@ class LocalCouncilDataService(
     fun getPaginatedUsersAndInvitations(
         localCouncil: LocalCouncil,
         currentPageNumber: Int,
-        pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
+        pageSize: Int = MAX_ENTRIES_IN_LOCAL_COUNCIL_USERS_TABLE_PAGE,
         filterOutLaAdminInvitations: Boolean = true,
     ): Page<LocalCouncilUserOrInvitationDataModel> {
         val pageRequest =
@@ -106,7 +106,7 @@ class LocalCouncilDataService(
                         userNameOrEmail = it.name,
                         localAuthorityName = localCouncil.name,
                         isManager = it.isManager,
-                        isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
+                        isPending = it.entityType == LOCAL_COUNCIL_INVITATION_ENTITY_TYPE,
                     )
                 }
         }
@@ -117,14 +117,14 @@ class LocalCouncilDataService(
                 userNameOrEmail = it.name,
                 localAuthorityName = localCouncil.name,
                 isManager = it.isManager,
-                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
+                isPending = it.entityType == LOCAL_COUNCIL_INVITATION_ENTITY_TYPE,
             )
         }
     }
 
     fun getPaginatedAdminUsersAndInvitations(
         currentPageNumber: Int,
-        pageSize: Int = MAX_ENTRIES_IN_LA_USERS_TABLE_PAGE,
+        pageSize: Int = MAX_ENTRIES_IN_LOCAL_COUNCIL_USERS_TABLE_PAGE,
     ): Page<LocalCouncilAdminUserOrInvitationDataModel> {
         val pageRequest =
             PageRequest.of(
@@ -137,7 +137,7 @@ class LocalCouncilDataService(
                 id = it.id,
                 userNameOrEmail = it.name,
                 localAuthorityName = it.localCouncil.name,
-                isPending = it.entityType == LOCAL_AUTHORITY_INVITATION_ENTITY_TYPE,
+                isPending = it.entityType == LOCAL_COUNCIL_INVITATION_ENTITY_TYPE,
             )
         }
     }
@@ -255,9 +255,9 @@ class LocalCouncilDataService(
         localCouncilUserRepository.findByIdOrNull(localAuthorityUserId)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local authority users with ID $localAuthorityUserId not found")
 
-    fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LA_USER_ID, localAuthorityUserId)
+    fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LOCAL_COUNCIL_USER_ID, localAuthorityUserId)
 
-    fun getLastUserIdRegisteredThisSession() = session.getAttribute(LA_USER_ID)?.toString()?.toLong()
+    fun getLastUserIdRegisteredThisSession() = session.getAttribute(LOCAL_COUNCIL_USER_ID)?.toString()?.toLong()
 
     fun getUsersDeletedThisSession(): MutableList<LocalCouncilUser> =
         session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalCouncilUser>?
@@ -318,14 +318,14 @@ class LocalCouncilDataService(
         getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }?.second
 
     private fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
-        session.getAttribute(LA_USERS_INVITED_THIS_SESSION) as MutableList<Pair<Int, String>>?
+        session.getAttribute(LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION) as MutableList<Pair<Int, String>>?
             ?: mutableListOf()
 
     fun addInvitedLocalAuthorityUserToSession(
         localAuthorityId: Int,
         invitedEmail: String,
     ) = session.setAttribute(
-        LA_USERS_INVITED_THIS_SESSION,
+        LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION,
         getLocalAuthorityUsersInvitedThisSession().plus(Pair(localAuthorityId, invitedEmail)),
     )
 }

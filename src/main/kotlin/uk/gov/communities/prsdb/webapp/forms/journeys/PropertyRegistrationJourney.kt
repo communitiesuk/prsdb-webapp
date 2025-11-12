@@ -5,7 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
+import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_COUNCIL_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -273,7 +273,7 @@ class PropertyRegistrationJourney(
                             "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
                             "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
                             "selectLabel" to "forms.selectLocalAuthority.select.label",
-                            "findLocalAuthorityUrl" to FIND_LOCAL_AUTHORITY_URL,
+                            "findLocalAuthorityUrl" to FIND_LOCAL_COUNCIL_URL,
                         ),
                     localCouncilService = localCouncilService,
                     displaySectionHeader = true,

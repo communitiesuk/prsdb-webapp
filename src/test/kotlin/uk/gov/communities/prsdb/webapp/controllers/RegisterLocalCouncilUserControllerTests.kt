@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LA_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
@@ -112,7 +112,7 @@ class RegisterLocalCouncilUserControllerTests(
             .perform(
                 MockMvcRequestBuilders
                     .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-                    .sessionAttr(LA_USER_ID, laUserId),
+                    .sessionAttr(LOCAL_COUNCIL_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
 
@@ -142,7 +142,7 @@ class RegisterLocalCouncilUserControllerTests(
             .perform(
                 MockMvcRequestBuilders
                     .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-                    .sessionAttr(LA_USER_ID, laUserId),
+                    .sessionAttr(LOCAL_COUNCIL_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 

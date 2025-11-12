@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
@@ -17,7 +17,7 @@ import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
 @PrsdbController
-@RequestMapping("/$LOCAL_AUTHORITY_PATH_SEGMENT")
+@RequestMapping("/$LOCAL_COUNCIL_PATH_SEGMENT")
 class LocalCouncilDashboardController(
     val localCouncilDataService: LocalCouncilDataService,
     val userRolesService: UserRolesService,
@@ -56,7 +56,7 @@ class LocalCouncilDashboardController(
         model.addAttribute("localAuthority", localAuthorityUser.localCouncil.name)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
-        model.addAttribute("privacyNoticeUrl", LocalCouncilPrivacyNoticeController.LOCAL_AUTHORITY_PRIVACY_NOTICE_ROUTE)
+        model.addAttribute("privacyNoticeUrl", LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
         model.addAttribute(
             "rentersRightsBillUrl",
             RENTERS_RIGHTS_BILL_PRSD,
@@ -65,6 +65,6 @@ class LocalCouncilDashboardController(
     }
 
     companion object {
-        const val LOCAL_AUTHORITY_DASHBOARD_URL = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
+        const val LOCAL_AUTHORITY_DASHBOARD_URL = "/$LOCAL_COUNCIL_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
     }
 }

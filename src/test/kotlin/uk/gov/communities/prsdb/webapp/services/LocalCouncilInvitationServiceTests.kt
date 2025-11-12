@@ -17,7 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
@@ -127,7 +127,7 @@ class LocalCouncilInvitationServiceTests {
         val createdDate =
             Clock.System
                 .now()
-                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .minus(LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS.hours)
                 .minus(1.minutes)
                 .toJavaInstant()
 
@@ -142,7 +142,7 @@ class LocalCouncilInvitationServiceTests {
         val createdDate =
             Clock.System
                 .now()
-                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .minus(LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS.hours)
                 .plus(30.minutes)
                 .toJavaInstant()
 
@@ -157,7 +157,7 @@ class LocalCouncilInvitationServiceTests {
         val createdDate =
             Clock.System
                 .now()
-                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .minus(LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS.hours)
                 .plus(30.minutes)
                 .toJavaInstant()
         whenever(mockLaInviteRepository.findByToken(testUuid))
@@ -172,7 +172,7 @@ class LocalCouncilInvitationServiceTests {
         val createdDate =
             Clock.System
                 .now()
-                .minus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .minus(LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS.hours)
                 .minus(1.minutes)
                 .toJavaInstant()
 

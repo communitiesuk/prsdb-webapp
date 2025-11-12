@@ -7,7 +7,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthorityUser
@@ -23,7 +23,7 @@ class LocalCouncilDashboardControllerTests(
     @Test
     fun `index returns a redirect for unauthenticated user`() {
         mvc
-            .get("/$LOCAL_AUTHORITY_PATH_SEGMENT")
+            .get("/$LOCAL_COUNCIL_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -32,7 +32,7 @@ class LocalCouncilDashboardControllerTests(
     @WithMockUser
     @Test
     fun `index returns 403 for unauthorized user`() {
-        mvc.get("/$LOCAL_AUTHORITY_PATH_SEGMENT").andExpect {
+        mvc.get("/$LOCAL_COUNCIL_PATH_SEGMENT").andExpect {
             status { isForbidden() }
         }
     }
@@ -40,7 +40,7 @@ class LocalCouncilDashboardControllerTests(
     @Test
     @WithMockUser(roles = ["LA_ADMIN"])
     fun `index returns a redirect for authorised user`() {
-        mvc.get("/$LOCAL_AUTHORITY_PATH_SEGMENT").andExpect {
+        mvc.get("/$LOCAL_COUNCIL_PATH_SEGMENT").andExpect {
             status { is3xxRedirection() }
         }
     }

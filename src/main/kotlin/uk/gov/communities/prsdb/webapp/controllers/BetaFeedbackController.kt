@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
@@ -134,9 +134,9 @@ class BetaFeedbackController(
     companion object {
         const val LANDLORD_FEEDBACK_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
         const val LANDLORD_FEEDBACK_SUCCESS_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
-        const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
+        const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_COUNCIL_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
         const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL =
-            "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
+            "/${LOCAL_COUNCIL_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
         const val FEEDBACK_URL = "/${FEEDBACK_PATH_SEGMENT}"
     }
 }

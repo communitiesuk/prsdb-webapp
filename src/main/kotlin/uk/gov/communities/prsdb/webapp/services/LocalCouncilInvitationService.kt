@@ -6,8 +6,8 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
@@ -67,13 +67,13 @@ class LocalCouncilInvitationService(
         }
 
     fun storeTokenInSession(token: String) {
-        session.setAttribute(LA_USER_INVITATION_TOKEN, token)
+        session.setAttribute(LOCAL_COUNCIL_USER_INVITATION_TOKEN, token)
     }
 
-    fun getTokenFromSession(): String? = session.getAttribute(LA_USER_INVITATION_TOKEN) as String?
+    fun getTokenFromSession(): String? = session.getAttribute(LOCAL_COUNCIL_USER_INVITATION_TOKEN) as String?
 
     fun clearTokenFromSession() {
-        session.setAttribute(LA_USER_INVITATION_TOKEN, null)
+        session.setAttribute(LOCAL_COUNCIL_USER_INVITATION_TOKEN, null)
     }
 
     fun getInvitationByIdOrNull(id: Long): LocalCouncilInvitation? = invitationRepository.findById(id).orElse(null)
@@ -100,7 +100,7 @@ class LocalCouncilInvitationService(
         val expiresAtInstant =
             invitation.createdDate
                 .toKotlinInstant()
-                .plus(LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS.hours)
+                .plus(LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS.hours)
 
         return Clock.System.now() > expiresAtInstant
     }

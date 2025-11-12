@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
@@ -26,15 +26,15 @@ class UserRolesService(
         return roles
     }
 
-    fun getLocalAuthorityRolesForSubjectId(subjectId: String): List<String> {
+    fun getLocalCouncilRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
         val matchingLocalAuthorityUser = localCouncilUserRepository.findByBaseUser_Id(subjectId)
         if (matchingLocalAuthorityUser != null) {
             if (matchingLocalAuthorityUser.isManager) {
-                roles.add(ROLE_LA_ADMIN)
+                roles.add(ROLE_LOCAL_COUNCIL_ADMIN)
             }
-            roles.add(ROLE_LA_USER)
+            roles.add(ROLE_LOCAL_COUNCIL_USER)
         }
 
         val matchingSystemOperator = systemOperatorRepository.findByBaseUser_Id(subjectId)
@@ -47,7 +47,7 @@ class UserRolesService(
 
     fun getAllRolesForSubjectId(subjectId: String): List<String> =
         getLandlordRolesForSubjectId(subjectId) +
-            getLocalAuthorityRolesForSubjectId(subjectId)
+            getLocalCouncilRolesForSubjectId(subjectId)
 
     fun getHasLandlordUserRole(subjectId: String): Boolean {
         val roles = getLandlordRolesForSubjectId(subjectId)
@@ -55,12 +55,12 @@ class UserRolesService(
     }
 
     fun getHasLocalAuthorityRole(subjectId: String): Boolean {
-        val roles = getLocalAuthorityRolesForSubjectId(subjectId)
-        return roles.contains(ROLE_LA_USER) || roles.contains(ROLE_LA_ADMIN)
+        val roles = getLocalCouncilRolesForSubjectId(subjectId)
+        return roles.contains(ROLE_LOCAL_COUNCIL_USER) || roles.contains(ROLE_LOCAL_COUNCIL_ADMIN)
     }
 
     fun getHasLocalAuthorityAdminRole(subjectId: String): Boolean {
-        val roles = getLocalAuthorityRolesForSubjectId(subjectId)
-        return roles.contains(ROLE_LA_ADMIN)
+        val roles = getLocalCouncilRolesForSubjectId(subjectId)
+        return roles.contains(ROLE_LOCAL_COUNCIL_ADMIN)
     }
 }

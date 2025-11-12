@@ -24,10 +24,10 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.constants.VOWELS
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
@@ -183,7 +183,7 @@ class ManageLocalCouncilUsersController(
         localCouncilDataService.deleteUser(userBeingDeleted)
 
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
-            (request.isUserInRole(ROLE_LA_ADMIN) || request.isUserInRole(ROLE_LA_USER))
+            (request.isUserInRole(ROLE_LOCAL_COUNCIL_ADMIN) || request.isUserInRole(ROLE_LOCAL_COUNCIL_USER))
         ) {
             // If the user is a system operator they can delete themself from the local_authority_user table
             // If this happens we will need to update their user roles as the Manage LA Users page
@@ -410,7 +410,7 @@ class ManageLocalCouncilUsersController(
         localAuthorityId: Int,
         request: HttpServletRequest,
     ): LocalCouncilUserDataModel? {
-        if (!request.isUserInRole(ROLE_LA_ADMIN)) {
+        if (!request.isUserInRole(ROLE_LOCAL_COUNCIL_ADMIN)) {
             return null
         }
         try {
@@ -427,7 +427,7 @@ class ManageLocalCouncilUsersController(
     }
 
     companion object {
-        const val LOCAL_AUTHORITY_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/{localAuthorityId}"
+        const val LOCAL_AUTHORITY_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/{localAuthorityId}"
         const val EDIT_USER_ROUTE = "$EDIT_USER_PATH_SEGMENT/{localAuthorityUserId}"
         const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{deleteeId}"
         const val DELETE_USER_CONFIRMATION_ROUTE = "$DELETE_USER_ROUTE/$CONFIRMATION_PATH_SEGMENT"

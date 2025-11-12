@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
@@ -61,8 +61,8 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(2, roles.size)
-        Assertions.assertEquals(ROLE_LA_ADMIN, roles[0])
-        Assertions.assertEquals(ROLE_LA_USER, roles[1])
+        Assertions.assertEquals(ROLE_LOCAL_COUNCIL_ADMIN, roles[0])
+        Assertions.assertEquals(ROLE_LOCAL_COUNCIL_USER, roles[1])
     }
 
     @Test
@@ -79,7 +79,7 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertEquals(ROLE_LA_USER, roles[0])
+        Assertions.assertEquals(ROLE_LOCAL_COUNCIL_USER, roles[0])
     }
 
     @Test
@@ -172,7 +172,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertTrue(roles.isEmpty())
@@ -188,12 +188,12 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(2, roles.size)
-        Assertions.assertTrue(roles.contains(ROLE_LA_ADMIN))
-        Assertions.assertTrue(roles.contains(ROLE_LA_USER))
+        Assertions.assertTrue(roles.contains(ROLE_LOCAL_COUNCIL_ADMIN))
+        Assertions.assertTrue(roles.contains(ROLE_LOCAL_COUNCIL_USER))
     }
 
     @Test
@@ -206,11 +206,11 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertTrue(roles.contains(ROLE_LA_USER))
+        Assertions.assertTrue(roles.contains(ROLE_LOCAL_COUNCIL_USER))
     }
 
     @Test
@@ -223,7 +223,7 @@ class UserRolesServiceTests {
             .thenReturn(systemOperator)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(1, roles.size)
