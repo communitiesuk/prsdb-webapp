@@ -116,7 +116,7 @@ class BetaFeedbackControllerTests(
     }
 
     @Nested
-    inner class LocalAuthorityFeedbackTests {
+    inner class LocalCouncilFeedbackTests {
         @Test
         fun `localAuthorityFeedback returns redirect for unauthenticated users`() {
             mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL).andExpect {

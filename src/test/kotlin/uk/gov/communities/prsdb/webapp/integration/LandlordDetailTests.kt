@@ -72,7 +72,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
     }
 
     @Nested
-    inner class LandlordDetailsLocalAuthorityView {
+    inner class LandlordDetailsLocalCouncilView {
         @Test
         fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)

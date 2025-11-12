@@ -19,7 +19,7 @@ class LandlordPrivacyNoticeFormModel : PrivacyNoticeFormModel() {
 }
 
 @IsValidPrioritised
-class LocalAuthorityPrivacyNoticeFormModel : PrivacyNoticeFormModel() {
+class LocalCouncilPrivacyNoticeFormModel : PrivacyNoticeFormModel() {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(

@@ -123,7 +123,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
-    inner class SelectLocalAuthorityStep {
+    inner class SelectLocalCouncilStep {
         @Test
         fun `Submitting without selecting an LA return an error`(page: Page) {
             val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()

@@ -13,7 +13,7 @@ class SelectLocalCouncilFormPagePropertyRegistration(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
     ) {
-    val form = SelectLocalAuthorityForm(page)
+    val form = SelectLocalCouncilForm(page)
 
     fun submitLocalAuthority(
         partialName: String,
@@ -23,7 +23,7 @@ class SelectLocalCouncilFormPagePropertyRegistration(
         form.submit()
     }
 
-    class SelectLocalAuthorityForm(
+    class SelectLocalCouncilForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val laSelect = Select(locator)

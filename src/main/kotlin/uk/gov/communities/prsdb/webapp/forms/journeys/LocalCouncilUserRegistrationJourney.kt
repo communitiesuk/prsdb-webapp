@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepI
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.helpers.LocalCouncilUserRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LocalAuthorityPrivacyNoticeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LocalCouncilPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
@@ -82,7 +82,7 @@ class LocalCouncilUserRegistrationJourney(
             id = RegisterLocalCouncilUserStepId.PrivacyNotice,
             page =
                 Page(
-                    formModel = LocalAuthorityPrivacyNoticeFormModel::class,
+                    formModel = LocalCouncilPrivacyNoticeFormModel::class,
                     templateName = "forms/localAuthorityPrivacyNoticeForm",
                     content =
                         mapOf(
