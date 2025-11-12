@@ -6,6 +6,9 @@ We are setting the flags statically - their values will be set in the codebase.
 
 We are using an Aspect Oriented Programming (AOP) approach, using annotations to switch behavior based on the value of a feature flag.
 
+Flags should have expiry dates to prevent unintentionally leaving feature flags in our code for a long time.
+We are not stopping the flags from working when they expire, but we do have a test that checks whether each feature has a flag and whether it is in date.
+
 ## Adding/Modifying Feature Flags
 
 Feature flags are defined in the FeatureFlagConfig.kt file. Individual flags are set and enabled in the featureFlags val.
@@ -22,3 +25,9 @@ You can define a service which calls different versions of a function depending 
 * Annotate members in your interface with @PrsdbFlip(name = "...", alterBean = "...") where the alterBean value matches the name you gave to your second implementation (see ExampleFeatureFlagServiceImplFlagOn.kt).
 
 To use your feature flagged service, pass in the interface (see ExampleFeatureFlagTestController) - it will automatically call the correct implementation based on the feature flag value.
+
+## Tests
+Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabed or disabled in particular tests as required
+(See ExampleFeatureFlagServiceTest.kt).
+
+
