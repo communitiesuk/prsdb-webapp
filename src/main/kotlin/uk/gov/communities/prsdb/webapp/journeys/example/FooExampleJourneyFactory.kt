@@ -39,6 +39,7 @@ class FooExampleJourneyFactory(
         return journey(stateFactory.getObject()) {
             unreachableStepStep { journey.taskListStep }
             step("task-list", journey.taskListStep) {
+                initialStep()
                 nextUrl { "task-list" }
             }
             task(journey.occupationTask) {

@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
@@ -56,6 +57,8 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         parentage = currentParentage
         return this
     }
+
+    fun initialStep(): StepInitialiser<TStep, TState, TMode> = parents { NoParents() }
 
     fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -225,6 +226,29 @@ class StepInitialiserTests {
         assertThrows<JourneyInitialisationException> {
             builder.build(mock(), mock())
         }
+    }
+
+    @Test
+    fun `initialStep sets a step to have no parents`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock)
+        val parentage = NoParents()
+        builder.initialStep()
+        builder.nextUrl { "next" }
+
+        // Act
+        builder.build(mock(), mock())
+
+        // Assert
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            any<NoParents>(),
+            anyOrNull(),
+        )
     }
 
     @Test
