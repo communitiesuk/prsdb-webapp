@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.config.featureFlags
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -15,6 +13,7 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
@@ -23,11 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.service.notify.NotificationClient
 
-@Configuration
-@ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
-class TestConfigFeatureFlag
-
-@SpringBootTest(classes = [TestConfigFeatureFlag::class])
+@SpringBootTest(classes = [FeatureFlagConfig::class])
 class FeatureFlagTest {
     @Autowired
     private var context: ConfigurableApplicationContext? = null

@@ -75,6 +75,7 @@ class PrsdbProcessApplicationTests {
                 TestcontainersConfiguration::class.importedBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
+                // TestConfigFeatureFlag::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
