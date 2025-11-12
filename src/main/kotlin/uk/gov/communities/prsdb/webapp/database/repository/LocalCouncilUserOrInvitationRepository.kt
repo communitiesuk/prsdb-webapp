@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUserOrInvitation
 
-interface LocalAuthorityUserOrInvitationRepository : JpaRepository<LocalCouncilUserOrInvitation?, Long?> {
+interface LocalCouncilUserOrInvitationRepository : JpaRepository<LocalCouncilUserOrInvitation?, Long?> {
     fun findByLocalAuthority(
         localCouncil: LocalCouncil,
         pageable: Pageable,

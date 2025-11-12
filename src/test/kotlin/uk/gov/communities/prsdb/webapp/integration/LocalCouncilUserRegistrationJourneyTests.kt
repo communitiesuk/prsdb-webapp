@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -38,10 +38,10 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
     lateinit var invitationService: LocalCouncilInvitationService
 
     @MockitoSpyBean
-    lateinit var laUserRepository: LocalAuthorityUserRepository
+    lateinit var laUserRepository: LocalCouncilUserRepository
 
     @MockitoSpyBean
-    lateinit var invitationRepository: LocalAuthorityInvitationRepository
+    lateinit var invitationRepository: LocalCouncilInvitationRepository
 
     @MockitoSpyBean
     override lateinit var absoluteUrlProvider: AbsoluteUrlProvider

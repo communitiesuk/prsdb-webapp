@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
@@ -19,16 +19,16 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSystemOperato
 
 class UserRolesServiceTests {
     private lateinit var landlordRepository: LandlordRepository
-    private lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
+    private lateinit var localCouncilUserRepository: LocalCouncilUserRepository
     private lateinit var systemOperatorRepository: SystemOperatorRepository
     private lateinit var userRolesService: UserRolesService
 
     @BeforeEach
     fun setup() {
         landlordRepository = Mockito.mock(LandlordRepository::class.java)
-        localAuthorityUserRepository = Mockito.mock(LocalAuthorityUserRepository::class.java)
+        localCouncilUserRepository = Mockito.mock(LocalCouncilUserRepository::class.java)
         systemOperatorRepository = Mockito.mock(SystemOperatorRepository::class.java)
-        userRolesService = UserRolesService(landlordRepository, localAuthorityUserRepository, systemOperatorRepository)
+        userRolesService = UserRolesService(landlordRepository, localCouncilUserRepository, systemOperatorRepository)
     }
 
     @Test
@@ -53,7 +53,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -71,7 +71,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -121,7 +121,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -137,7 +137,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -184,7 +184,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -202,7 +202,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -251,7 +251,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -267,7 +267,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -295,7 +295,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -311,7 +311,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -354,7 +354,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -370,7 +370,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalAuthorityUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act

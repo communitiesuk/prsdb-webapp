@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 @Profile("require-passcode")
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
-    private val localAuthorityRepository: LocalAuthorityRepository,
+    private val localCouncilRepository: LocalCouncilRepository,
     private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
 ) {
@@ -34,7 +34,7 @@ class PasscodeService(
         }
 
         val localCouncil =
-            localAuthorityRepository
+            localCouncilRepository
                 .findById(localAuthorityId.toInt())
                 .orElseThrow { IllegalArgumentException("LocalCouncil with id $localAuthorityId not found") }
 

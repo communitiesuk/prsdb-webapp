@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -30,7 +30,7 @@ import java.util.Optional
 
 class PasscodeServiceTests {
     private lateinit var mockPasscodeRepository: PasscodeRepository
-    private lateinit var mockLocalAuthorityRepository: LocalAuthorityRepository
+    private lateinit var mockLocalCouncilRepository: LocalCouncilRepository
     private lateinit var mockOneLoginUserService: OneLoginUserService
     private lateinit var mockSession: HttpSession
     private lateinit var passcodeService: PasscodeService
@@ -41,17 +41,17 @@ class PasscodeServiceTests {
     @BeforeEach
     fun setup() {
         mockPasscodeRepository = mock()
-        mockLocalAuthorityRepository = mock()
+        mockLocalCouncilRepository = mock()
         mockOneLoginUserService = mock()
         mockSession = mock()
-        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalAuthorityRepository, mockOneLoginUserService, mockSession)
+        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalCouncilRepository, mockOneLoginUserService, mockSession)
     }
 
     @Test
     fun `generatePasscode creates a valid passcode for the given local authority`() {
         val localAuthorityId = 123L
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
+        whenever(mockLocalCouncilRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -59,7 +59,7 @@ class PasscodeServiceTests {
 
         assertEquals(mockPasscode, result)
         verify(mockPasscodeRepository).count()
-        verify(mockLocalAuthorityRepository).findById(localAuthorityId.toInt())
+        verify(mockLocalCouncilRepository).findById(localAuthorityId.toInt())
 
         val passcodeCaptor = captor<Passcode>()
         verify(mockPasscodeRepository).save(passcodeCaptor.capture())
@@ -79,7 +79,7 @@ class PasscodeServiceTests {
     fun `generatePasscode handles collisions and creates unique passcode`() {
         val localAuthorityId = 123L
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
+        whenever(mockLocalCouncilRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(true, true, false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -94,7 +94,7 @@ class PasscodeServiceTests {
     fun `generatePasscode throws exception when local authority not found`() {
         val localAuthorityId = 999L
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.empty())
+        whenever(mockLocalCouncilRepository.findById(anyInt())).thenReturn(Optional.empty())
 
         val exception =
             assertThrows(IllegalArgumentException::class.java) {
@@ -117,7 +117,7 @@ class PasscodeServiceTests {
 
         assertEquals("Maximum number of passcodes (1000) has been reached", exception.message)
         verify(mockPasscodeRepository).count()
-        verify(mockLocalAuthorityRepository, never()).findById(anyInt())
+        verify(mockLocalCouncilRepository, never()).findById(anyInt())
         verify(mockPasscodeRepository, never()).save(any(Passcode::class.java))
     }
 
@@ -133,7 +133,7 @@ class PasscodeServiceTests {
 
         assertEquals("Maximum number of passcodes (1000) has been reached", exception.message)
         verify(mockPasscodeRepository).count()
-        verify(mockLocalAuthorityRepository, never()).findById(anyInt())
+        verify(mockLocalCouncilRepository, never()).findById(anyInt())
         verify(mockPasscodeRepository, never()).save(any(Passcode::class.java))
     }
 
@@ -141,7 +141,7 @@ class PasscodeServiceTests {
     fun `generatePasscode succeeds when count is just below limit`() {
         val localAuthorityId = 123L
         whenever(mockPasscodeRepository.count()).thenReturn(999L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
+        whenever(mockLocalCouncilRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -149,7 +149,7 @@ class PasscodeServiceTests {
 
         assertEquals(mockPasscode, result)
         verify(mockPasscodeRepository).count()
-        verify(mockLocalAuthorityRepository).findById(localAuthorityId.toInt())
+        verify(mockLocalCouncilRepository).findById(localAuthorityId.toInt())
         verify(mockPasscodeRepository).save(any(Passcode::class.java))
     }
 
@@ -159,7 +159,7 @@ class PasscodeServiceTests {
         val mockPasscodeValue = "ABC123"
         val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalCouncil)
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
+        whenever(mockLocalCouncilRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscodeWithValue)
 
@@ -167,7 +167,7 @@ class PasscodeServiceTests {
 
         assertEquals(mockPasscodeValue, result)
         verify(mockPasscodeRepository).count()
-        verify(mockLocalAuthorityRepository).findById(localAuthorityId.toInt())
+        verify(mockLocalCouncilRepository).findById(localAuthorityId.toInt())
 
         val passcodeCaptor = captor<Passcode>()
         verify(mockPasscodeRepository).save(passcodeCaptor.capture())
@@ -225,7 +225,7 @@ class PasscodeServiceTests {
         assertEquals(cachedPasscode, result)
         verify(mockSession).getAttribute(LAST_GENERATED_PASSCODE)
         verify(mockPasscodeRepository, never()).count()
-        verify(mockLocalAuthorityRepository, never()).findById(anyInt())
+        verify(mockLocalCouncilRepository, never()).findById(anyInt())
         verify(mockPasscodeRepository, never()).save(any(Passcode::class.java))
     }
 
@@ -236,7 +236,7 @@ class PasscodeServiceTests {
         val mockPasscodeWithValue = Passcode(mockPasscodeValue, mockLocalCouncil)
         whenever(mockSession.getAttribute(LAST_GENERATED_PASSCODE)).thenReturn(null)
         whenever(mockPasscodeRepository.count()).thenReturn(500L)
-        whenever(mockLocalAuthorityRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
+        whenever(mockLocalCouncilRepository.findById(anyInt())).thenReturn(Optional.of(mockLocalCouncil))
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscodeWithValue)
 
@@ -246,7 +246,7 @@ class PasscodeServiceTests {
         verify(mockSession).getAttribute(LAST_GENERATED_PASSCODE)
         verify(mockSession).setAttribute(LAST_GENERATED_PASSCODE, mockPasscodeValue)
         verify(mockPasscodeRepository).count()
-        verify(mockLocalAuthorityRepository).findById(localAuthorityId.toInt())
+        verify(mockLocalCouncilRepository).findById(localAuthorityId.toInt())
         verify(mockPasscodeRepository).save(any(Passcode::class.java))
     }
 

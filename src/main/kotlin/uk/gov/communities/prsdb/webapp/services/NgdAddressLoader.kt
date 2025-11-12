@@ -10,7 +10,7 @@ import org.json.JSONObject
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
@@ -25,12 +25,12 @@ import java.util.zip.ZipInputStream
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
-    localAuthorityRepository: LocalAuthorityRepository,
+    localCouncilRepository: LocalCouncilRepository,
     environment: Environment,
 ) {
     private lateinit var ngdAddressLoaderRepository: NgdAddressLoaderRepository
 
-    private val localAuthorityCustodianCodeToId by lazy { localAuthorityRepository.findAll().associate { it.custodianCode to it.id } }
+    private val localAuthorityCustodianCodeToId by lazy { localCouncilRepository.findAll().associate { it.custodianCode to it.id } }
 
     private val isLocalEnvironment by lazy { environment.activeProfiles.contains("local") }
 

@@ -10,14 +10,14 @@ import uk.gov.communities.prsdb.webapp.constants.LA_USER_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import java.util.UUID
 import kotlin.time.Duration.Companion.hours
 
 @PrsdbWebService
 class LocalCouncilInvitationService(
-    val invitationRepository: LocalAuthorityInvitationRepository,
+    val invitationRepository: LocalCouncilInvitationRepository,
     private val session: HttpSession,
 ) {
     fun createInvitationToken(

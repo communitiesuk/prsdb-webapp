@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import java.util.UUID
 
-interface LocalAuthorityInvitationRepository : JpaRepository<LocalCouncilInvitation?, Long?> {
+interface LocalCouncilInvitationRepository : JpaRepository<LocalCouncilInvitation?, Long?> {
     fun findByToken(token: UUID): LocalCouncilInvitation?
 
     fun findByInvitingAuthority(

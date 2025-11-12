@@ -19,7 +19,7 @@ import org.springframework.mock.web.MockHttpSession
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_INVITATION_LIFETIME_IN_HOURS
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.util.Optional
@@ -28,7 +28,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class LocalCouncilInvitationServiceTests {
-    private lateinit var mockLaInviteRepository: LocalAuthorityInvitationRepository
+    private lateinit var mockLaInviteRepository: LocalCouncilInvitationRepository
     private lateinit var inviteService: LocalCouncilInvitationService
     private lateinit var journeyDataService: JourneyDataService
     private lateinit var session: HttpSession

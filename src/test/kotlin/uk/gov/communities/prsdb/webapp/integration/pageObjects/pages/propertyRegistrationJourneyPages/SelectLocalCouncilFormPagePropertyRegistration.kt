@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Select
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class SelectLocalAuthorityFormPagePropertyRegistration(
+class SelectLocalCouncilFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
