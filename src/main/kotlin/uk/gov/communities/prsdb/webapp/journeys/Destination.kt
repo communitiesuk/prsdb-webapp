@@ -1,14 +1,14 @@
-package uk.gov.communities.prsdb.webapp.journeys.example
+package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 
 sealed class Destination {
     fun toModelAndView(): ModelAndView =
         when (this) {
-            is Step -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
+            is VisitableStep -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
             is ExternalUrl -> ModelAndView("redirect:$externalUrl", params)
             is Template -> ModelAndView(templateName, content)
+            is NavigationalStep -> StepLifecycleOrchestrator(step).getStepModelAndView()
         }
 
     fun withModelContent(content: Map<String, Any?>): Destination =
@@ -17,8 +17,8 @@ sealed class Destination {
             else -> this
         }
 
-    class Step(
-        val step: JourneyStep<*, *, *>,
+    class VisitableStep(
+        val step: JourneyStep.RoutedStep<*, *, *>,
         val journeyId: String,
     ) : Destination()
 
@@ -32,7 +32,15 @@ sealed class Destination {
         val content: Map<String, Any?> = mapOf(),
     ) : Destination()
 
+    class NavigationalStep(
+        val step: JourneyStep.UnroutedStep<*, *, *>,
+    ) : Destination()
+
     companion object {
-        operator fun invoke(step: JourneyStep<*, *, *>): Destination = Step(step, step.currentJourneyId)
+        operator fun invoke(step: JourneyStep<*, *, *>): Destination =
+            when (step) {
+                is JourneyStep.RoutedStep -> VisitableStep(step, step.currentJourneyId)
+                is JourneyStep.UnroutedStep -> NavigationalStep(step)
+            }
     }
 }

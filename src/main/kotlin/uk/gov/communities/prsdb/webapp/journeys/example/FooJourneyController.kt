@@ -25,6 +25,7 @@ class FooJourneyController(
         @PathVariable("stepName") stepName: String,
     ): ModelAndView =
         try {
+            println("Getting step $stepName for property $propertyId")
             journeyFactory.createJourneySteps(propertyId)[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -40,6 +41,7 @@ class FooJourneyController(
         @RequestParam formData: PageData,
     ): ModelAndView =
         try {
+            println("Posting step $stepName for property $propertyId with data $formData")
             journeyFactory.createJourneySteps(propertyId)[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {

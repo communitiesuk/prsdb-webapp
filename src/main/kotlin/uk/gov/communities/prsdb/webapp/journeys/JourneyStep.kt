@@ -6,15 +6,36 @@ import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.collections.plus
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
+    open class RoutedStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+        val routeSegment: String get() = stepConfig.routeSegment
+
+        override fun getRouteSegmentOrNull(): String? = stepConfig.routeSegment
+
+        override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
+    }
+
+    open class UnroutedStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+        override fun getRouteSegmentOrNull(): String? = null
+
+        override fun isRouteSegmentInitialised(): Boolean = true
+    }
+
+    abstract fun getRouteSegmentOrNull(): String?
+
+    abstract fun isRouteSegmentInitialised(): Boolean
+
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
     fun beforeIsStepReachable() {
         stepConfig.beforeIsStepReachable(state)
@@ -89,12 +110,12 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
             )
 
     fun submitFormData(bindingResult: BindingResult) {
-        state.addStepData(stepConfig.routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
+        getRouteSegmentOrNull()?.let { state.addStepData(it, stepConfig.formModelClass.cast(bindingResult.target).toPageData()) }
     }
 
     fun determineNextDestination(): Destination =
         stepConfig.mode(state)?.let { nextDestination(it) }
-            ?: Destination(this)
+            ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
 
     private lateinit var unreachableStepDestination: () -> Destination
 
@@ -118,13 +139,10 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
             val singleParentUrl =
                 parentage.allowingParentSteps
                     .singleOrNull()
-                    ?.stepConfig
-                    ?.routeSegment
+                    ?.getRouteSegmentOrNull()
             val backUrlOverrideValue = this.backUrlOverride?.let { it() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
-
-    val routeSegment: String get() = stepConfig.routeSegment
 
     val initialisationStage: StepInitialisationStage
         get() =
@@ -133,13 +151,13 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
                 isBaseClassInitialised && !stepConfig.isSubClassInitialised() -> StepInitialisationStage.PARTIALLY_INITIALISED
                 else -> StepInitialisationStage.FULLY_INITIALISED
             }
+
     private val isBaseClassInitialised: Boolean
         get() =
-            stepConfig.isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized &&
-                ::parentage.isInitialized
+            isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized && ::parentage.isInitialized
 
     fun initialize(
-        segment: String,
+        segment: String?,
         state: TState,
         backUrlOverride: (() -> String?)?,
         redirectDestinationProvider: (mode: TEnum) -> Destination,
@@ -149,7 +167,7 @@ open class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in T
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
         }
-        this.stepConfig.routeSegment = segment
+        segment?.let { this.stepConfig.routeSegment = it }
         this.state = state
         this.backUrlOverride = backUrlOverride
         this.nextDestination = redirectDestinationProvider

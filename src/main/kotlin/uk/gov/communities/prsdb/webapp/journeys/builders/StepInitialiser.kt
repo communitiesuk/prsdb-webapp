@@ -2,15 +2,15 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
-class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : JourneyState, TMode : Enum<TMode>>(
-    val segment: String,
+class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
+    val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
 ) {
     init {
@@ -21,11 +21,12 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
 
     private var backUrlOverride: (() -> String?)? = null
     private var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
+
     private var parentage: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, TState>): StepInitialiser<TStep, TState, TMode> {
+    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): StepInitialiser<TStep, TState, TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("Step $segment already has a next destination defined")
         }
@@ -56,6 +57,8 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
         parentage = currentParentage
         return this
     }
+
+    fun initialStep(): StepInitialiser<TStep, TState, TMode> = parents { NoParents() }
 
     fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {
@@ -90,7 +93,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, TState : Jou
             state,
             backUrlOverride,
             nextDestinationProvider ?: throw JourneyInitialisationException("Step $segment has no nextDestination defined"),
-            parentage?.invoke() ?: NoParents(),
+            parentage?.invoke() ?: throw JourneyInitialisationException("Step $segment has no parentage defined"),
             unreachableStepDestination
                 ?: defaultUnreachableStepDestination
                 ?: throw JourneyInitialisationException(
