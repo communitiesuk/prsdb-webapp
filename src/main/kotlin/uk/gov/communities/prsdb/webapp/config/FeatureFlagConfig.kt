@@ -10,7 +10,6 @@ import java.time.LocalDate
 
 @ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 @Configuration
-@ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 class FeatureFlagConfig {
     @Bean
     fun featureFlagManager(): FeatureFlagManager {

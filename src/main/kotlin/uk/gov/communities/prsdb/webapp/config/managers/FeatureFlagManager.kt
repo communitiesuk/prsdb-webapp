@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.config.managers
 
 import org.ff4j.FF4j
 import org.ff4j.core.Feature
+import org.ff4j.property.PropertyDate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
 
