@@ -10,6 +10,7 @@ import java.time.LocalDate
 
 @ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 @Configuration
+@ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 class FeatureFlagConfig {
     @Bean
     fun featureFlagManager(): FeatureFlagManager {
@@ -22,7 +23,7 @@ class FeatureFlagConfig {
         listOf(
             FeatureFlagModel(
                 name = EXAMPLE_FEATURE_FLAG_ONE,
-                enabled = true,
+                enabled = false,
                 expiryDate = LocalDate.of(2030, 2, 14),
             ),
         )
