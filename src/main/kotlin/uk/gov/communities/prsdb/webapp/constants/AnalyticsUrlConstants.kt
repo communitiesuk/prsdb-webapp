@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.constants
 
-const val REGION_1_GOOGLE_ANALYTICS = "https://region1.google-analytics.com"
+const val REGION_1_GOOGLE_ANALYTICS_URL = "https://region1.google-analytics.com"
 
-const val GOOGLE_TAG_MANAGER = "https://www.googletagmanager.com/gtag/js"
+const val GOOGLE_TAG_MANAGER_URL = "https://www.googletagmanager.com/gtag/js"
 
-const val PLAUSIBLE_SCRIPT = "https://plausible.io/js/script.file-downloads.hash.outbound-links.js"
+const val PLAUSIBLE_SCRIPT_URL = "https://plausible.io/js/script.file-downloads.hash.outbound-links.js"
+
+const val PLAUSIBLE_API_EVENT_URL = "https://plausible.io/api/event"

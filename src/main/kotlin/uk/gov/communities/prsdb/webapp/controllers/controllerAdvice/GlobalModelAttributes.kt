@@ -7,10 +7,10 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
-import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER
+import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
-import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT
+import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
@@ -38,8 +38,8 @@ class GlobalModelAttributes(
         model.addAttribute("googleAnalyticsMeasurementId", gaMeasurementId)
         model.addAttribute("googleAnalyticsCookieDomain", gaCookieDomain)
         model.addAttribute("plausibleDomainId", plausibleDomainId)
-        model.addAttribute("plausibleUrl", PLAUSIBLE_SCRIPT)
-        model.addAttribute("googleTagManagerUrl", "$GOOGLE_TAG_MANAGER?id=")
+        model.addAttribute("plausibleUrl", PLAUSIBLE_SCRIPT_URL)
+        model.addAttribute("googleTagManagerUrl", "$GOOGLE_TAG_MANAGER_URL?id=")
 
         // Feedback banner attributes
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
