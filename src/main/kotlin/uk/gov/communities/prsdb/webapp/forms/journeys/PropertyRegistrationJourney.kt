@@ -108,7 +108,7 @@ class PropertyRegistrationJourney(
                 selectAddressStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
-                localAuthorityStep(),
+                localCouncilStep(),
             ),
             "registerProperty.taskList.register.addAddress",
         )
@@ -258,13 +258,13 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalCouncil, null) },
             saveAfterSubmit = false,
         )
 
-    private fun localAuthorityStep() =
+    private fun localCouncilStep() =
         Step(
-            id = RegisterPropertyStepId.LocalAuthority,
+            id = RegisterPropertyStepId.LocalCouncil,
             page =
                 SelectLocalCouncilPage(
                     content =

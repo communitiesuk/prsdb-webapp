@@ -11,7 +11,7 @@ class SelectLocalCouncilFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalCouncil.urlPathSegment}",
     ) {
     val form = SelectLocalCouncilForm(page)
 

@@ -7,14 +7,14 @@ data class LocalCouncilAdminInvitationEmail(
     var localCouncil: LocalCouncil,
     var invitationUri: URI,
 ) : EmailTemplateModel {
-    private val localAuthorityKey = "name of council"
+    private val localCouncilKey = "name of council"
     private val invitationKey = "invitation url"
 
-    override val template = EmailTemplate.LOCAL_AUTHORITY_ADMIN_INVITATION_EMAIL
+    override val template = EmailTemplate.LOCAL_COUNCIL_ADMIN_INVITATION_EMAIL
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
-            localAuthorityKey to localCouncil.name,
+            localCouncilKey to localCouncil.name,
             invitationKey to invitationUri.toString(),
         )
 }

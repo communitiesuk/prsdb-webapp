@@ -403,7 +403,7 @@ class Navigator(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalAuthority().build(),
         )
-        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}")
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalCouncil.urlPathSegment}")
         return createValidPage(page, SelectLocalCouncilFormPagePropertyRegistration::class)
     }
 

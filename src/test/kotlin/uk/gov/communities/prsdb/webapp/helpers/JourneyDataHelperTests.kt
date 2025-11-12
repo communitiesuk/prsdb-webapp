@@ -56,7 +56,7 @@ class JourneyDataHelperTests {
             JourneyDataHelper.getManualAddress(
                 mockJourneyData,
                 "manual-address",
-                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                RegisterPropertyStepId.LocalCouncil.urlPathSegment,
             )
 
         assertEquals(expectedAddressDataModel, addressDataModel)

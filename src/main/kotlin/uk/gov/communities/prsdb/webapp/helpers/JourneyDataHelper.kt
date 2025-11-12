@@ -29,7 +29,7 @@ open class JourneyDataHelper {
         fun getManualAddress(
             journeyData: JourneyData,
             manualAddressPathSegment: String,
-            selectLocalAuthorityPathSegment: String? = null,
+            selectLocalCouncilPathSegment: String? = null,
         ): AddressDataModel? {
             val addressLineOne =
                 getFieldStringValue(
@@ -66,12 +66,12 @@ open class JourneyDataHelper {
                     ManualAddressFormModel::county.name,
                 )
 
-            val localAuthorityId =
-                selectLocalAuthorityPathSegment?.let {
+            val localCouncilId =
+                selectLocalCouncilPathSegment?.let {
                     getFieldIntegerValue(
                         journeyData,
                         it,
-                        SelectLocalCouncilFormModel::localAuthorityId.name,
+                        SelectLocalCouncilFormModel::localCouncilId.name,
                     ) ?: return null
                 }
 
@@ -81,7 +81,7 @@ open class JourneyDataHelper {
                 postcode,
                 addressLineTwo,
                 county,
-                localAuthorityId,
+                localCouncilId,
             )
         }
 

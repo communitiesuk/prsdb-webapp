@@ -236,7 +236,7 @@ class JourneyDataBuilder(
             whenever(mockLocalCouncilService.retrieveLocalAuthorityById(localCouncil.id)).thenReturn(localCouncil)
         }
 
-        journeyData[RegisterPropertyStepId.LocalAuthority.urlPathSegment] =
+        journeyData[RegisterPropertyStepId.LocalCouncil.urlPathSegment] =
             mapOf("localAuthorityId" to localCouncil?.id)
 
         return this

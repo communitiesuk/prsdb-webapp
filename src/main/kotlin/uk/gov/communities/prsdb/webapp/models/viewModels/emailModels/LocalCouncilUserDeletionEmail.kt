@@ -4,7 +4,7 @@ data class LocalCouncilUserDeletionEmail(
     val councilName: String,
 ) : EmailTemplateModel {
     private val councilNameKey = "Council Name"
-    override val template = EmailTemplate.LOCAL_AUTHORITY_USER_DELETION_EMAIL
+    override val template = EmailTemplate.LOCAL_COUNCIL_USER_DELETION_EMAIL
 
     override fun toHashMap() =
         hashMapOf(

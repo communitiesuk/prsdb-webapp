@@ -130,8 +130,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 localAuthority.name,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.LocalAuthority.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
+                    RegisterPropertyStepId.LocalCouncil.urlPathSegment +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LocalCouncil.urlPathSegment}",
                 ),
             ),
             propertyDetails.single {

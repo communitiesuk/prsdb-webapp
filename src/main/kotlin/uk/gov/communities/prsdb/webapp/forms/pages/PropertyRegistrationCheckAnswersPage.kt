@@ -78,7 +78,7 @@ class PropertyRegistrationCheckAnswersPage(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                 localCouncilService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
-                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                RegisterPropertyStepId.LocalCouncil.urlPathSegment,
             ),
         )
 

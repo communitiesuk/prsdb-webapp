@@ -2,13 +2,13 @@
 <!--/*@thymesVar id="informationCommissionersOfficeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="complaintsProcedureUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{localAuthorityPrivacyNotice.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{localCouncilPrivacyNotice.title}, ~{::main}, false)}">
 <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <section>
-            <h1 class="govuk-heading-l" th:text="#{localAuthorityPrivacyNotice.heading}">localAuthorityPrivacyNotice.heading</h1>
+            <h1 class="govuk-heading-l" th:text="#{localCouncilPrivacyNotice.heading}">localAuthorityPrivacyNotice.heading</h1>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{localAuthorityPrivacyNotice.section.one.heading}">localAuthorityPrivacyNotice.section.one.heading</h2>

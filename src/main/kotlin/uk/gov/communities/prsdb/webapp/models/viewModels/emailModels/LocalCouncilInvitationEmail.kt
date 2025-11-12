@@ -15,7 +15,7 @@ data class LocalCouncilInvitationEmail(
     private val prsdUrlKey = "prsd url"
     private val oneLoginUrlKey = "one login url"
 
-    override val template = EmailTemplate.LOCAL_AUTHORITY_INVITATION_EMAIL
+    override val template = EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
