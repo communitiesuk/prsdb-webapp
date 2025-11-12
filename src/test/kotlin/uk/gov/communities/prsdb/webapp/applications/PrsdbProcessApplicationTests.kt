@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.importedBeanName
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.scopedBeanName
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 
@@ -72,10 +71,9 @@ class PrsdbProcessApplicationTests {
                 VirusAlertSender::class.simpleBeanName,
                 OsDownloadsConfig::class.simpleBeanName,
                 NotifyIdService::class.scopedBeanName,
-                TestcontainersConfiguration::class.importedBeanName,
+                TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
-                // TestConfigFeatureFlag::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
