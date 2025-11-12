@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.VisitableStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RoutedStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
@@ -33,4 +33,4 @@ class EpcNotFoundStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
 @PrsdbWebComponent
 final class EpcNotFoundStep(
     stepConfig: EpcNotFoundStepConfig,
-) : VisitableStep<Complete, NoInputFormModel, EpcJourneyState>(stepConfig)
+) : RoutedStep<Complete, NoInputFormModel, EpcJourneyState>(stepConfig)

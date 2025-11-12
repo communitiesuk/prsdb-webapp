@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.VisitableStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RoutedStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -96,4 +96,4 @@ class FooCheckAnswersStepConfig(
 @PrsdbWebComponent
 final class FooCheckAnswersStep(
     stepConfig: FooCheckAnswersStepConfig,
-) : VisitableStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)
+) : RoutedStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)

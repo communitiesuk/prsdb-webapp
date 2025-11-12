@@ -141,16 +141,16 @@ class ParentageTests {
 
     @Test
     fun `SingleParent allows child based on condition`() {
-        val allowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { true }
-        val disallowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { false }
+        val allowingParent = SingleParent(mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>()) { true }
+        val disallowingParent = SingleParent(mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>()) { false }
         assertTrue(allowingParent.allowsChild())
         assertFalse(disallowingParent.allowsChild())
     }
 
     @Test
     fun `SingleParent aggregates allowingParentSteps and potentialParents as at most itself`() {
-        val allowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { true }
-        val disallowingParent = SingleParent(mock<JourneyStep.VisitableStep<TestEnum, *, JourneyState>>()) { false }
+        val allowingParent = SingleParent(mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>()) { true }
+        val disallowingParent = SingleParent(mock<JourneyStep.RoutedStep<TestEnum, *, JourneyState>>()) { false }
 
         assertSame(allowingParent.potentialParents.single(), allowingParent.step)
         assertSame(disallowingParent.potentialParents.single(), disallowingParent.step)
@@ -179,7 +179,7 @@ class ParentageTests {
     @Test
     fun `hasOutcome returns a single parent with the condition checking that steps outcome matches`() {
         // Arrange
-        val step = mock<JourneyStep.VisitableStep<TestEnum, *, *>>()
+        val step = mock<JourneyStep.RoutedStep<TestEnum, *, *>>()
 
         // Act
         val parent = step.hasOutcome(TestEnum.ENUM_VALUE)
@@ -212,7 +212,7 @@ class ParentageTests {
 
     companion object {
         fun mockStepWithRoute(route: String): JourneyStep<*, *, *> {
-            val step: JourneyStep<*, *, *> = mock<JourneyStep.VisitableStep<*, *, *>>()
+            val step: JourneyStep<*, *, *> = mock<JourneyStep.RoutedStep<*, *, *>>()
             whenever(step.getRouteSegmentOrNull()).thenReturn(route)
             return step
         }

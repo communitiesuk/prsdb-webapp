@@ -18,7 +18,7 @@ sealed class Destination {
         }
 
     class VisitableStep(
-        val step: JourneyStep.VisitableStep<*, *, *>,
+        val step: JourneyStep.RoutedStep<*, *, *>,
         val journeyId: String,
     ) : Destination()
 
@@ -33,14 +33,14 @@ sealed class Destination {
     ) : Destination()
 
     class NavigationalStep(
-        val step: JourneyStep.NotionalStep<*, *, *>,
+        val step: JourneyStep.UnroutedStep<*, *, *>,
     ) : Destination()
 
     companion object {
         operator fun invoke(step: JourneyStep<*, *, *>): Destination =
             when (step) {
-                is JourneyStep.VisitableStep -> VisitableStep(step, step.currentJourneyId)
-                is JourneyStep.NotionalStep -> NavigationalStep(step)
+                is JourneyStep.RoutedStep -> VisitableStep(step, step.currentJourneyId)
+                is JourneyStep.UnroutedStep -> NavigationalStep(step)
             }
     }
 }

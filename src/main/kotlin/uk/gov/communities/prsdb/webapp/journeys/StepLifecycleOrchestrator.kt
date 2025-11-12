@@ -11,7 +11,7 @@ sealed class StepLifecycleOrchestrator(
     abstract fun postStepModelAndView(formData: PageData): ModelAndView
 
     class VisitableStepLifecycleOrchestrator(
-        journeyStep: JourneyStep.VisitableStep<*, *, *>,
+        journeyStep: JourneyStep<*, *, *>,
     ) : StepLifecycleOrchestrator(journeyStep) {
         override fun getStepModelAndView(): ModelAndView {
             journeyStep.beforeIsStepReachable()
@@ -70,8 +70,8 @@ sealed class StepLifecycleOrchestrator(
         }
     }
 
-    class NavigationalStepLifecycleOrchestrator(
-        journeyStep: JourneyStep.NotionalStep<*, *, *>,
+    class RedirectingStepLifecycleOrchestrator(
+        journeyStep: JourneyStep<*, *, *>,
     ) : StepLifecycleOrchestrator(journeyStep) {
         override fun getStepModelAndView(): ModelAndView {
             journeyStep.beforeIsStepReachable()
@@ -95,8 +95,8 @@ sealed class StepLifecycleOrchestrator(
     companion object {
         operator fun invoke(journeyStep: JourneyStep<*, *, *>) =
             when (journeyStep) {
-                is JourneyStep.VisitableStep -> VisitableStepLifecycleOrchestrator(journeyStep)
-                is JourneyStep.NotionalStep -> NavigationalStepLifecycleOrchestrator(journeyStep)
+                is JourneyStep.RoutedStep -> VisitableStepLifecycleOrchestrator(journeyStep)
+                is JourneyStep.UnroutedStep -> RedirectingStepLifecycleOrchestrator(journeyStep)
             }
     }
 }
