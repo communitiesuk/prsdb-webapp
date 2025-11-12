@@ -64,6 +64,7 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
     // TODO PRSD-1550: It is ugly that step config has a value set during JourneyStep initialisation - it is only used to make "getFormModelFromState" work
     // Perhaps either the routeSegment or formModel should be passed into that method instead (and therefore all the other functions)
     // Alternatively, steps could reflexively access the form model on the JourneyStep in state without needing the route segment
+    // Another idea would to have this be set directly in the DSL (but enforce that it is set before the other values)
     lateinit var routeSegment: String
 
     fun isRouteSegmentInitialised(): Boolean = ::routeSegment.isInitialized
