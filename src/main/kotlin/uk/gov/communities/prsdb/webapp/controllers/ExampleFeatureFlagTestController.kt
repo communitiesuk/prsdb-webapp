@@ -17,7 +17,7 @@ class ExampleFeatureFlagTestController(
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("feature-flagged-service-test")
-    fun index(model: Model): String {
+    fun featureFlagTest(model: Model): String {
         val configFlagValue =
             if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"
