@@ -5,6 +5,6 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
 class SelectLocalCouncilFormModel : FormModel {
-    @NotNull(message = "forms.selectLocalAuthority.error.missing")
+    @NotNull(message = "forms.selectLocalCouncil.error.missing")
     var localCouncilId: Int? = null
 }

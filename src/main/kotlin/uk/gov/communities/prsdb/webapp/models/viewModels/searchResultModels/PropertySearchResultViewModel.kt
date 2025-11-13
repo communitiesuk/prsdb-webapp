@@ -10,7 +10,7 @@ data class PropertySearchResultViewModel(
     val id: Long,
     val address: String,
     val registrationNumber: String,
-    val localAuthority: String?,
+    val localCouncil: String?,
     val landlord: PropertySearchResultLandlordViewModel,
     val recordLink: String,
 ) {
@@ -25,7 +25,7 @@ data class PropertySearchResultViewModel(
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
-            localAuthority =
+            localCouncil =
                 propertyOwnership.address.localCouncil
                     ?.name,
             landlord =

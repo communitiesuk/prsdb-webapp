@@ -7,19 +7,19 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 data class LocalCouncilUserDataModel(
     val id: Long,
     val userName: String,
-    val localAuthorityName: String,
+    val localCouncilName: String,
     val isManager: Boolean,
     val email: String,
     val isPending: Boolean = false,
 ) {
     companion object {
-        fun fromLocalAuthorityUser(laUser: LocalCouncilUser) =
+        fun fromLocalCouncilUser(localCouncilUser: LocalCouncilUser) =
             LocalCouncilUserDataModel(
-                id = laUser.id,
-                userName = laUser.name,
-                localAuthorityName = laUser.localCouncil.name,
-                isManager = laUser.isManager,
-                email = laUser.email,
+                id = localCouncilUser.id,
+                userName = localCouncilUser.name,
+                localCouncilName = localCouncilUser.localCouncil.name,
+                isManager = localCouncilUser.isManager,
+                email = localCouncilUser.email,
                 isPending = false,
             )
     }

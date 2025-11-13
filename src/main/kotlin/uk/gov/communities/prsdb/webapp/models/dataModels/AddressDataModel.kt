@@ -24,14 +24,14 @@ data class AddressDataModel(
             postcode: String,
             addressLineTwo: String? = null,
             county: String? = null,
-            localAuthorityId: Int? = null,
+            localCouncilId: Int? = null,
         ): AddressDataModel =
             AddressDataModel(
                 singleLineAddress =
                     manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
                 townName = townOrCity,
                 postcode = postcode,
-                localCouncilId = localAuthorityId,
+                localCouncilId = localCouncilId,
             )
 
         fun manualAddressDataToSingleLineAddress(

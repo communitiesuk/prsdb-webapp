@@ -38,7 +38,7 @@ class MockLocalCouncilData {
             val defaultLA = createLocalAuthority()
             return LocalCouncilUserDataModel(
                 id = userId,
-                localAuthorityName = defaultLA.name,
+                localCouncilName = defaultLA.name,
                 isManager = true,
                 userName = "Logged In User",
                 isPending = false,

@@ -53,7 +53,7 @@ class PropertyRegistrationJourneyDataHelperTests {
                 addressLineOne,
                 townOrCity,
                 postcode,
-                localAuthorityId = localAuthority.id,
+                localCouncilId = localAuthority.id,
             )
 
         whenever(mockLocalCouncilService.retrieveLocalAuthorityByCustodianCode(localAuthority.custodianCode)).thenReturn(

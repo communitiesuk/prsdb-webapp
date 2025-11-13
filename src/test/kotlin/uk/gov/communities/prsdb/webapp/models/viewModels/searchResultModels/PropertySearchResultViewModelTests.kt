@@ -20,7 +20,7 @@ class PropertySearchResultViewModelTests {
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(propertyOwnership.registrationNumber)
                         .toString(),
-                localAuthority =
+                localCouncil =
                     propertyOwnership.address.localCouncil?.name,
                 landlord =
                     PropertySearchResultLandlordViewModel(

@@ -49,7 +49,7 @@ class JourneyDataHelperTests {
                 addressLineOne,
                 townOrCity,
                 postcode,
-                localAuthorityId = localAuthority.id,
+                localCouncilId = localAuthority.id,
             )
 
         val addressDataModel =

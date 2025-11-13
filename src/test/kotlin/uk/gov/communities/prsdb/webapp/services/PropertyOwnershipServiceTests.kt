@@ -267,7 +267,7 @@ class PropertyOwnershipServiceTests {
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(propertyOwnership1.registrationNumber)
                                 .toString(),
-                        localAuthorityName = localCouncil.name,
+                        localCouncilName = localCouncil.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
@@ -281,7 +281,7 @@ class PropertyOwnershipServiceTests {
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(propertyOwnership2.registrationNumber)
                                 .toString(),
-                        localAuthorityName = localCouncil.name,
+                        localCouncilName = localCouncil.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =

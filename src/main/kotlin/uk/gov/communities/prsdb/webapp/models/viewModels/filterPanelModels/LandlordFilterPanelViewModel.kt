@@ -11,9 +11,9 @@ class LandlordFilterPanelViewModel(
         filters =
             listOf(
                 FilterViewModel(
-                    headingMsgKey = "landlordSearch.filter.la.heading",
-                    searchRequestProperty = "restrictToLA",
-                    options = listOf(CheckboxViewModel(value = true, labelMsgKey = "landlordSearch.filter.la.label")),
+                    headingMsgKey = "landlordSearch.filter.localCouncil.heading",
+                    searchRequestProperty = "restrictToLocalcouncil",
+                    options = listOf(CheckboxViewModel(value = true, labelMsgKey = "landlordSearch.filter.localCouncil.label")),
                 ),
             ),
         searchRequestModel = searchRequestModel,

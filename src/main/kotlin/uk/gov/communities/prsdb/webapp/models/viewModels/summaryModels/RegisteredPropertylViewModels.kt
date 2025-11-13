@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 data class RegisteredPropertyLocalCouncilViewModel(
     val address: String,
     val registrationNumber: String,
-    val localAuthorityName: String,
+    val localCouncilName: String,
     val licenseTypeMessageKey: String,
     val isTenantedMessageKey: String,
     val recordLink: String,
@@ -27,7 +27,7 @@ data class RegisteredPropertyLocalCouncilViewModel(
                         .fromRegistrationNumber(
                             propertyOwnership.registrationNumber,
                         ).toString(),
-                localAuthorityName =
+                localCouncilName =
                     propertyOwnership.address.localCouncil!!
                         .name,
                 licenseTypeMessageKey =

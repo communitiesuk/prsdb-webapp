@@ -10,7 +10,7 @@ data class LocalCouncilInvitationEmail(
     var prsdUrl: String,
     var oneLoginUrl: String = ONE_LOGIN_INFO_URL,
 ) : EmailTemplateModel {
-    private val localAuthorityKey = "name of council"
+    private val localCouncilKey = "name of council"
     private val invitationKey = "invitation url"
     private val prsdUrlKey = "prsd url"
     private val oneLoginUrlKey = "one login url"
@@ -19,7 +19,7 @@ data class LocalCouncilInvitationEmail(
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
-            localAuthorityKey to localCouncil.name,
+            localCouncilKey to localCouncil.name,
             invitationKey to invitationUri.toString(),
             prsdUrlKey to prsdUrl,
             oneLoginUrlKey to oneLoginUrl,

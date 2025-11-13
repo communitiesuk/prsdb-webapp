@@ -396,7 +396,7 @@ class ManageLocalCouncilUsersControllerTests(
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `getEditUserAccessLevelPage returns 403 for admin user accessing their own edit page`() {
             val loggedInUser = createLocalAuthorityUser(name = "Logged In User")
-            val loggedInUserModel = LocalCouncilUserDataModel.fromLocalAuthorityUser(loggedInUser)
+            val loggedInUserModel = LocalCouncilUserDataModel.fromLocalCouncilUser(loggedInUser)
             val localAuthority = createLocalAuthority()
             whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(DEFAULT_LA_ID, "user"))
                 .thenReturn(Pair(loggedInUserModel, localAuthority))

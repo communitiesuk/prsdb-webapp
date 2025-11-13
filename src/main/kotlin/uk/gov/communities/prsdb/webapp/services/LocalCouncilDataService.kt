@@ -104,7 +104,7 @@ class LocalCouncilDataService(
                     LocalCouncilUserOrInvitationDataModel(
                         id = it.id,
                         userNameOrEmail = it.name,
-                        localAuthorityName = localCouncil.name,
+                        localCouncilName = localCouncil.name,
                         isManager = it.isManager,
                         isPending = it.entityType == LOCAL_COUNCIL_INVITATION_ENTITY_TYPE,
                     )
@@ -115,7 +115,7 @@ class LocalCouncilDataService(
             LocalCouncilUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
-                localAuthorityName = localCouncil.name,
+                localCouncilName = localCouncil.name,
                 isManager = it.isManager,
                 isPending = it.entityType == LOCAL_COUNCIL_INVITATION_ENTITY_TYPE,
             )
@@ -136,7 +136,7 @@ class LocalCouncilDataService(
             LocalCouncilAdminUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
-                localAuthorityName = it.localCouncil.name,
+                localCouncilName = it.localCouncil.name,
                 isPending = it.entityType == LOCAL_COUNCIL_INVITATION_ENTITY_TYPE,
             )
         }

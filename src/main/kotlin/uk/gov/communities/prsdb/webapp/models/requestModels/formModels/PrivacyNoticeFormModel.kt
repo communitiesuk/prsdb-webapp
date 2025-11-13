@@ -23,7 +23,7 @@ class LocalCouncilPrivacyNoticeFormModel : PrivacyNoticeFormModel() {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerLAUser.privacyNotice.checkbox.error.missing",
+                messageKey = "registerLocalCouncilUser.privacyNotice.checkbox.error.missing",
                 validatorType = TrueConstraintValidator::class,
             ),
         ],
