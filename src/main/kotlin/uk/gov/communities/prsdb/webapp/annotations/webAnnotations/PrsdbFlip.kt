@@ -5,7 +5,7 @@ import org.springframework.core.annotation.AliasFor
 
 @Flip(name = "")
 @Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.CLASS)
 annotation class PrsdbFlip(
     @get:AliasFor(annotation = Flip::class) val name: String,
     @get:AliasFor(annotation = Flip::class) val alterBean: String = "",
