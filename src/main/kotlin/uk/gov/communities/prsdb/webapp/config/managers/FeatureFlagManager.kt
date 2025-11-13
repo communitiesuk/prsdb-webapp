@@ -19,4 +19,8 @@ class FeatureFlagManager : FF4j() {
 
         this.createFeature(feature)
     }
+
+    fun checkFeature(featureName: String): Boolean = super.check(featureName)
+
+    override fun check(featureID: String?): Boolean = super.check(featureID)
 }
