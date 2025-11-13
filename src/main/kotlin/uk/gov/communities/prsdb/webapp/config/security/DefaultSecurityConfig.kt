@@ -19,9 +19,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfig
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
+import uk.gov.communities.prsdb.webapp.constants.GOOGLE_URL
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_API_EVENT_URL
-import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_SCRIPT_URL
+import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGION_1_GOOGLE_ANALYTICS_URL
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
@@ -94,7 +94,9 @@ class DefaultSecurityConfig(
 
     companion object {
         const val CONTENT_SECURITY_POLICY_DIRECTIVES =
-            "default-src 'self'; script-src 'self' $GOOGLE_TAG_MANAGER_URL $PLAUSIBLE_SCRIPT_URL; " +
-                "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $PLAUSIBLE_API_EVENT_URL;"
+            "default-src 'self'; " +
+                "script-src 'self' $PLAUSIBLE_URL; " +
+                "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
+                "img-src $GOOGLE_TAG_MANAGER_URL;"
     }
 }

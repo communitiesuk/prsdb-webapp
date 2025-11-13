@@ -4,6 +4,6 @@ const val REGION_1_GOOGLE_ANALYTICS_URL = "https://region1.google-analytics.com"
 
 const val GOOGLE_TAG_MANAGER_URL = "https://www.googletagmanager.com/gtag/js"
 
-const val PLAUSIBLE_SCRIPT_URL = "https://plausible.io/js/script.file-downloads.hash.outbound-links.js"
+const val GOOGLE_URL = "www.google.com"
 
-const val PLAUSIBLE_API_EVENT_URL = "https://plausible.io/api/event"
+const val PLAUSIBLE_URL = "https://plausible.io"
