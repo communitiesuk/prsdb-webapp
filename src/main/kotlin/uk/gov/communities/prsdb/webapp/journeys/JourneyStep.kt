@@ -122,7 +122,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     fun getUnreachableStepDestination() = unreachableStepDestination()
 
     val formModel: TFormModel?
-        get() = stepConfig.getFormModelFromState(state)
+        get() = stepConfig.getFormModelFromStateOrNull(state)
 
     lateinit var parentage: Parentage
 

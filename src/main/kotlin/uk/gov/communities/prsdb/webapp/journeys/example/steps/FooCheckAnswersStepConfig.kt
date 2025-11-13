@@ -89,7 +89,7 @@ class FooCheckAnswersStepConfig(
 
     override fun chooseTemplate(state: FooJourneyState): String = "forms/checkAnswersForm"
 
-    override fun mode(state: FooJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
+    override fun mode(state: FooJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")

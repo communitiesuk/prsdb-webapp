@@ -21,7 +21,7 @@ class HouseholdStepConfig : AbstractGenericStepConfig<Complete, NumberOfHousehol
 
     override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfHouseholdsForm"
 
-    override fun mode(state: OccupiedJourneyState) = getFormModelFromState(state)?.numberOfHouseholds?.let { Complete.COMPLETE }
+    override fun mode(state: OccupiedJourneyState) = getFormModelFromStateOrNull(state)?.numberOfHouseholds?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")

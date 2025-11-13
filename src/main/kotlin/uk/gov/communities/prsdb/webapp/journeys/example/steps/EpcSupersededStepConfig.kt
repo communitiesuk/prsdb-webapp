@@ -20,7 +20,7 @@ class EpcSupersededStepConfig : AbstractGenericStepConfig<Complete, NoInputFormM
 
     override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcSupersededForm"
 
-    override fun mode(state: EpcJourneyState): Complete? = getFormModelFromState(state)?.let { Complete.COMPLETE }
+    override fun mode(state: EpcJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")

@@ -23,7 +23,7 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
 
     override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfPeopleForm"
 
-    override fun mode(state: OccupiedJourneyState) = getFormModelFromState(state)?.numberOfPeople?.let { Complete.COMPLETE }
+    override fun mode(state: OccupiedJourneyState) = getFormModelFromStateOrNull(state)?.numberOfPeople?.let { Complete.COMPLETE }
 
     override fun beforeValidateSubmittedData(
         formData: PageData,

@@ -36,7 +36,7 @@ class OccupiedStepConfig : AbstractGenericStepConfig<YesOrNo, OccupancyFormModel
     override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/propertyOccupancyForm"
 
     override fun mode(state: OccupiedJourneyState): YesOrNo? =
-        getFormModelFromState(state)?.occupied?.let {
+        getFormModelFromStateOrNull(state)?.occupied?.let {
             when (it) {
                 true -> YesOrNo.YES
                 false -> YesOrNo.NO

@@ -163,7 +163,7 @@ class JourneyStepTests {
     ) {
         // Arrange
         val existingFormModel = TestFormModel().apply { field = "existingValue" }
-        whenever(step.stepConfig.getFormModelFromState(anyOrNull())).thenReturn(existingFormModel)
+        whenever(step.stepConfig.getFormModelFromStateOrNull(anyOrNull())).thenReturn(existingFormModel)
         step.initialize(
             "stepId",
             mock(),
