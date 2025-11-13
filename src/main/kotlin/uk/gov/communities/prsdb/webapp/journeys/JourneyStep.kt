@@ -99,7 +99,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         stepConfig.getStepSpecificContent(state) +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
-                "formModel" to (formModel ?: stepConfig.formModelClass.createInstance()),
+                "formModel" to (formModelOrNull ?: stepConfig.formModelClass.createInstance()),
             )
 
     fun getInvalidSubmissionContent(bindingResult: BindingResult) =
@@ -121,8 +121,11 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getUnreachableStepDestination() = unreachableStepDestination()
 
-    val formModel: TFormModel?
+    val formModelOrNull: TFormModel?
         get() = stepConfig.getFormModelFromStateOrNull(state)
+
+    val formModel: TFormModel
+        get() = stepConfig.getFormModelFromState(state)
 
     lateinit var parentage: Parentage
 

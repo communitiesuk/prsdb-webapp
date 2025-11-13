@@ -29,7 +29,7 @@ class FooCheckAnswersStepConfig(
 
     private fun getOccupationRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> {
         val occupiedStep = state.occupied
-        return if (occupiedStep?.formModel?.occupied == true) {
+        return if (occupiedStep?.formModelOrNull?.occupied == true) {
             val householdsStep = state.households
             val tenantsStep = state.tenants
             listOf(
@@ -40,12 +40,12 @@ class FooCheckAnswersStepConfig(
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.numberOfHouseholds.fieldSetHeading",
-                    householdsStep?.formModel?.numberOfHouseholds,
+                    householdsStep?.formModelOrNull?.numberOfHouseholds,
                     householdsStep?.routeSegment,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.numberOfPeople.fieldSetHeading",
-                    tenantsStep?.formModel?.numberOfPeople,
+                    tenantsStep?.formModelOrNull?.numberOfPeople,
                     tenantsStep?.routeSegment,
                 ),
             )

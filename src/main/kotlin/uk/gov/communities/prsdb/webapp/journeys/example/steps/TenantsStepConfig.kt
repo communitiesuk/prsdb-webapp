@@ -31,7 +31,7 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
     ): PageData {
         super.beforeValidateSubmittedData(formData, state)
 
-        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModel?.numberOfHouseholds)
+        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModelOrNull?.numberOfHouseholds)
     }
 }
 

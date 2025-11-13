@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.KClass
@@ -60,6 +61,10 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
             formModelClass.cast(binder.bindingResult.target)
         }
+
+    fun getFormModelFromState(state: TState): TFormModel =
+        getFormModelFromStateOrNull(state)
+            ?: throw NotNullFormModelValueIsNullException("Form model for step '$routeSegment' is null in journey state")
 
     // TODO PRSD-1550: It is ugly that step config has a value set during JourneyStep initialisation - it is only used to make "getFormModelFromState" work
     // Perhaps either the routeSegment or formModel should be passed into that method instead (and therefore all the other functions)

@@ -20,7 +20,7 @@ class EpcNotFoundStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
             "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "searchAgainUrl" to state.searchForEpc?.routeSegment,
-            "certificateNumber" to state.searchForEpc?.formModel?.certificateNumber,
+            "certificateNumber" to state.searchForEpc?.formModelOrNull?.certificateNumber,
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
