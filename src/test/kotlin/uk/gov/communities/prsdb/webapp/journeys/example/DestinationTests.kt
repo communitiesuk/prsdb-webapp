@@ -17,7 +17,7 @@ class DestinationTests {
     @Test
     fun `VisitableStep Destination with just a step returns a redirect for the current step and journey`() {
         // Arrange
-        val mockStep = mock<JourneyStep.RoutedStep<*, *, *>>()
+        val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
         val journeyId = "test-journey-id"
         val routeSegment = "test-segment"
 
@@ -36,7 +36,7 @@ class DestinationTests {
     @Test
     fun `VisitableStep Destination with explicit journeyId returns a redirect for the specified step and journey`() {
         // Arrange
-        val mockStep = mock<JourneyStep.RoutedStep<*, *, *>>()
+        val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
         val journeyId = "explicit-journey-id"
         val routeSegment = "explicit-segment"
 
@@ -137,7 +137,7 @@ class DestinationTests {
     @Test
     fun `withModelContent on non-Template Destination returns the same Destination`() {
         // Arrange
-        val mockStep = mock<JourneyStep.RoutedStep<*, *, *>>()
+        val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
         val journeyId = "test-journey-id"
         val routeSegment = "test-segment"
 
@@ -161,12 +161,12 @@ class DestinationTests {
     fun `NavigationalStep Destination calls through to a navigation step lifecycle orchestrator for that step`() {
         // Arrange
         val modelAndView = ModelAndView()
-        lateinit var capturedStep: JourneyStep.UnroutedStep<*, *, *>
+        lateinit var capturedStep: JourneyStep.InternalStep<*, *, *>
         mockConstruction(StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator::class.java) { mock, context ->
             whenever(mock.getStepModelAndView()).thenReturn(modelAndView)
-            capturedStep = context.arguments()[0] as JourneyStep.UnroutedStep<*, *, *>
+            capturedStep = context.arguments()[0] as JourneyStep.InternalStep<*, *, *>
         }.use {
-            val mockStep = mock<JourneyStep.UnroutedStep<*, *, *>>()
+            val mockStep = mock<JourneyStep.InternalStep<*, *, *>>()
 
             // Act
             val destination = Destination.NavigationalStep(mockStep)
@@ -181,14 +181,14 @@ class DestinationTests {
     @Test
     fun `Companion invoke returns the correct Destination type based on the JourneyStep provided`() {
         // Arrange
-        val mockRoutedStep = mock<JourneyStep.RoutedStep<*, *, *>>()
-        whenever(mockRoutedStep.currentJourneyId).thenReturn("journeyId")
+        val mockRequestableStep = mock<JourneyStep.RequestableStep<*, *, *>>()
+        whenever(mockRequestableStep.currentJourneyId).thenReturn("journeyId")
 
-        val mockUnroutedStep = mock<JourneyStep.UnroutedStep<*, *, *>>()
+        val mockInternalStep = mock<JourneyStep.InternalStep<*, *, *>>()
 
         // Act
-        val visitableDestination = Destination(mockRoutedStep)
-        val notionalDestination = Destination(mockUnroutedStep)
+        val visitableDestination = Destination(mockRequestableStep)
+        val notionalDestination = Destination(mockInternalStep)
 
         // Assert
         assertTrue(visitableDestination is Destination.VisitableStep)

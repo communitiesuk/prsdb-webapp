@@ -32,8 +32,8 @@ class JourneyStepTests {
         fun journeyStepProvider(): List<Named<out JourneyStep<TestEnum, TestFormModel, JourneyState>?>?> {
             val stepConfig: AbstractStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
             return listOf(
-                Named.of("Routed Step", JourneyStep.RoutedStep(stepConfig)),
-                Named.of("Unrouted Step", JourneyStep.UnroutedStep(stepConfig)),
+                Named.of("Requestable Step", JourneyStep.RequestableStep(stepConfig)),
+                Named.of("Internal Step", JourneyStep.InternalStep(stepConfig)),
             )
         }
     }
@@ -211,7 +211,7 @@ class JourneyStepTests {
     fun `submitFormData saves bindingResult target as form data in journey state for a VisitableStep`() {
         // Arrange
         val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
-        val step = JourneyStep.RoutedStep(stepConfig)
+        val step = JourneyStep.RequestableStep(stepConfig)
         whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(stepConfig.routeSegment).thenReturn("stepId")
         val state = mock<JourneyState>()
@@ -238,7 +238,7 @@ class JourneyStepTests {
     fun `submitFormData saves does nothing for a NotionalStep`() {
         // Arrange
         val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
-        val step = JourneyStep.UnroutedStep(stepConfig)
+        val step = JourneyStep.InternalStep(stepConfig)
         whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(step.stepConfig.routeSegment).thenReturn("stepId")
         val state = mock<JourneyState>()
