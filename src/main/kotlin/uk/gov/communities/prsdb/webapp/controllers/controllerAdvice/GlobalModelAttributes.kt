@@ -5,6 +5,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControllerAdvice
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.serverGeneratedNonce
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
 import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
@@ -40,6 +41,7 @@ class GlobalModelAttributes(
         model.addAttribute("plausibleDomainId", plausibleDomainId)
         model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
         model.addAttribute("googleTagManagerUrl", "$GOOGLE_TAG_MANAGER_URL/gtag/js?id=")
+        model.addAttribute("serverGeneratedNonce", serverGeneratedNonce)
 
         // Feedback banner attributes
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)

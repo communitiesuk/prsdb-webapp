@@ -3,6 +3,7 @@
 <!--/*@thymesVar id="navLinks" type="java.util.List<String>"*/-->
 <!--/*@thymesVar id="plausibleUrl" type="java.util.List<String>"*/-->
 <!--/*@thymesVar id="googleTagManagerUrl" type="java.util.List<String>"*/-->
+<!--/*@thymesVar id="serverGeneratedNonce" type="java.util.List<String>"*/-->
 <!DOCTYPE html>
 <html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template govuk-template--rebranded">
 <head>
@@ -20,9 +21,34 @@
     <link rel="stylesheet" th:href="@{/assets/css/accessible-autocomplete.min.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/moj-frontend.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/custom.css}">
-    <script defer th:attr="data-domain=${plausibleDomainId}" th:src="${plausibleUrl}"></script>
+    <script  defer th:attr="data-domain=${plausibleDomainId}" th:src="${plausibleUrl}"></script>
+    <script th:nonce="${serverGeneratedNonce}">window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 </head>
-<script async th:src="${googleTagManagerUrl}+${googleAnalyticsMeasurementId}"></script>
+<script th:nonce="${serverGeneratedNonce}">
+    <!-- Set consent for Google tag to denied by default -->
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'ad_storage': 'denied',
+        'analytics_storage': 'denied',
+        'wait_for_update': 500,
+    });
+</script>
+<script th:nonce="${serverGeneratedNonce}" async th:src="${googleTagManagerUrl}+${googleAnalyticsMeasurementId}"></script>
+<script th:nonce="${serverGeneratedNonce}" th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
+    <!-- Google tag (gtag.js) -->
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', [[${measurementIdAsString}]])
+</script>
+<script th:nonce="${serverGeneratedNonce}" th:inline="javascript">
+    // Add environment variables to the window so they can be accessed in js scripts
+    window.GOOGLE_ANALYTICS_MEASUREMENT_ID = [[${googleAnalyticsMeasurementId}]];
+    window.GOOGLE_COOKIE_DOMAIN = [[${googleAnalyticsCookieDomain}]];
+</script>
 <body class="govuk-template__body">
 <div th:replace="~{ fragments/banners/cookieBanner:: cookieBanner }"></div>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>

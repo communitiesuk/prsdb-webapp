@@ -6,12 +6,6 @@ import $ from 'jquery'
 import {initAll as initMoJDS} from '@ministryofjustice/frontend'
 import '../resources/css/custom.scss'
 import {setJsEnabled} from "#main-javascript/setJsEnabled.js";
-import {plausibleSetUp} from "#main-javascript/plausibleSetUp.js";
-import {setGtagConsentDefault} from "#main-javascript/googleAnalyticsSetUp.js";
-
-plausibleSetUp()
-
-setGtagConsentDefault()
 
 setJsEnabled()
 

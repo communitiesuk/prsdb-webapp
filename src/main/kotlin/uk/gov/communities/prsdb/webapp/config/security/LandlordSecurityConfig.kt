@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
-import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.contentSecurityPolicyDirectives
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
@@ -74,7 +74,7 @@ class LandlordSecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                            .policyDirectives(contentSecurityPolicyDirectives)
                     }
             }
 

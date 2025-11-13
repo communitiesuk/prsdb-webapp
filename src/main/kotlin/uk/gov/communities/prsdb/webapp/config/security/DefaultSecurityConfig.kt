@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.C
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import java.util.UUID
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -71,7 +72,7 @@ class DefaultSecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                            .policyDirectives(contentSecurityPolicyDirectives)
                     }
             }
 
@@ -93,10 +94,18 @@ class DefaultSecurityConfig(
     }
 
     companion object {
-        const val CONTENT_SECURITY_POLICY_DIRECTIVES =
+        private fun generateNonce(): String {
+            return UUID.randomUUID().toString()
+        }
+
+        val serverGeneratedNonce: String = generateNonce()
+
+        var contentSecurityPolicyDirectives =
             "default-src 'self'; " +
-                "script-src 'self' $PLAUSIBLE_URL; " +
+                "script-src 'self' 'nonce-$serverGeneratedNonce' $PLAUSIBLE_URL; " +
                 "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
-                "img-src $GOOGLE_TAG_MANAGER_URL;"
+                "img-src 'self' $GOOGLE_TAG_MANAGER_URL; " +
+                "style-src 'self'; " +
+                "object-src 'none; base-uri 'none'; frame-ancestors 'none';"
     }
 }
