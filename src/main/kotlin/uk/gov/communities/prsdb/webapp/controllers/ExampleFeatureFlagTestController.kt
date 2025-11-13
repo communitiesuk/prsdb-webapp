@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.ff4j.FF4j
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlaggedService
@@ -14,15 +14,15 @@ import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlagged
 @RequestMapping("/$LANDLORD_PATH_SEGMENT")
 class ExampleFeatureFlagTestController(
     private val exampleFeatureFlaggedService: ExampleFeatureFlaggedService,
-    private val ff4j: FF4j,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("feature-flagged-service-test")
-    fun index(model: Model): String {
+    fun featureFlagTest(model: Model): String {
         val configFlagValue =
-            if (ff4j.check(EXAMPLE_FEATURE_FLAG_ONE)) {
-                "Feature Flag in FF4JConfig is ON"
+            if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
+                "Feature Flag in FeatureFlagConfig is ON"
             } else {
-                "Feature Flag in FF4JConfig is OFF"
+                "Feature Flag in FeatureFlagConfig is OFF"
             }
         model.addAttribute("ffTestHeading", exampleFeatureFlaggedService.getFeatureFlagPageHeading())
         model.addAttribute("ffConfigFeature", configFlagValue)

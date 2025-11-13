@@ -1,0 +1,25 @@
+package uk.gov.communities.prsdb.webapp.config.featureFlags
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
+import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlaggedService
+
+// TODO PRSD-1683 - delete example feature flag implementation when no longer needed
+class ExampleFeatureFlagServiceTests : FeatureFlagTest() {
+    @Autowired
+    lateinit var service: ExampleFeatureFlaggedService
+
+    @Test
+    fun `when feature is disabled service uses flag-off bean`() {
+        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        assertEquals("Using ExampleFeatureFlaggedService - Flag OFF", service.getFeatureFlagPageHeading())
+    }
+
+    @Test
+    fun `when feature is disabled service uses flag-on bean`() {
+        featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
+        assertEquals("Using ExampleFeatureFlaggedService - Flag ON", service.getFeatureFlagPageHeading())
+    }
+}
