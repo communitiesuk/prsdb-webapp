@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Accepted
 
-Date of decision: Pending
+Date of decision: 13/11/2025
 
 ## Context and Problem Statement
 We would like to be able to deploy to production at any point, even if some features are incomplete or otherwise
@@ -70,7 +70,7 @@ alternative implementations of the same interface, or an interface determining w
 * Good, because it integrates well with our DI system and keeps code clean.
 * Bad, because it does not support advanced features like A/B testing or gradual rollouts without custom code.
 * Good, because any advanced features implemented will be well understood by us.
-* Neutral, as it requires a restart with reconfiguration to change flags, but this is acceptable for our use case.
+* Neutral, because it requires a restart with reconfiguration to change flags, but this is acceptable for our use case.
 
 ### Library selecting beans by per-environment configuration with additional overrides
 
@@ -81,7 +81,7 @@ advantages of the previous option, but with some additional features provided by
 * Good, because it integrates well with our DI system and keeps code clean.
 * Good, because it supports some advanced features using static context without custom code.
 * Bad, because any advanced features not supported by the library would require integrated custom implementation.
-* Neutral, as it requires a restart with reconfiguration to change flags, but this is acceptable for our use case.
+* Neutral, because it requires a restart with reconfiguration to change flags, but this is acceptable for our use case.
 * Good, because it will support extension to dynamic flags in future if needed.
 
 ### Library selecting beans with self-hosted dynamic flags
