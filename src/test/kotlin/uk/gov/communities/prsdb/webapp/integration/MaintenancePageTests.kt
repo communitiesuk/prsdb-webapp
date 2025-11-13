@@ -21,7 +21,7 @@ class MaintenanceModeTests : MaintenancePageTests() {
 
     @Test
     fun `User is redirected to maintenance page when accessing the local council dashboard`(page: Page) {
-        navigator.navigate(LocalCouncilDashboardController.LOCAL_AUTHORITY_DASHBOARD_URL)
+        navigator.navigate(LocalCouncilDashboardController.LOCAL_COUNCIL_DASHBOARD_URL)
         assertPageIs(page, MaintenancePage::class)
     }
 }

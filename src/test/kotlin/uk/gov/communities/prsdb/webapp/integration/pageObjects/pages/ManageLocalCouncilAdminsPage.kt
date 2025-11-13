@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.MANAGE_LA_ADMINS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ManageLocalCouncilAdminsPage(
     page: Page,
-) : BasePage(page, MANAGE_LA_ADMINS_ROUTE) {
+) : BasePage(page, MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE) {
     val table = Table(page)
     val inviteAnotherAdminButton = Button.byText(page, "Invite another admin")
     val noAdminsHeader = Heading(page.locator("main h2.govuk-heading-m"))

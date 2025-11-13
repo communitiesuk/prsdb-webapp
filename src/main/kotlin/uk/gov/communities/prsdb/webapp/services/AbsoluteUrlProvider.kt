@@ -23,7 +23,7 @@ class AbsoluteUrlProvider {
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
 
-    fun buildLocalAuthorityDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
+    fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
 
     fun buildInvitationUri(token: String): URI =
         uriFromMethodCall(on(RegisterLocalCouncilUserController::class.java).acceptInvitation(token))

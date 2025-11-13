@@ -119,23 +119,23 @@ class BetaFeedbackControllerTests(
     inner class LocalCouncilFeedbackTests {
         @Test
         fun `localAuthorityFeedback returns redirect for unauthenticated users`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL).andExpect {
                 status { is3xxRedirection() }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `localAuthorityFeedback returns success for LA_USER role`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL).andExpect {
                 status { isOk() }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `localAuthorityFeedback returns success for LA_ADMIN role`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL).andExpect {
                 status { isOk() }
             }
         }
@@ -143,14 +143,14 @@ class BetaFeedbackControllerTests(
         @Test
         @WithMockUser
         fun `localAuthorityFeedback returns 403 for unauthorized roles`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL).andExpect {
                 status { isForbidden() }
             }
         }
 
         @Test
         fun `localAuthorityFeedbackSuccess returns redirect for unauthenticated users`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -158,29 +158,29 @@ class BetaFeedbackControllerTests(
         @Test
         @WithMockUser
         fun `localAuthorityFeedbackSuccess returns 403 for unauthorized roles`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL).andExpect {
                 status { isForbidden() }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `localAuthorityFeedbackSuccess returns success for LA_USER role`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL).andExpect {
                 status { isOk() }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `localAuthorityFeedbackSuccess returns success for LA_ADMIN role`() {
-            mvc.get(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL).andExpect {
+            mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL).andExpect {
                 status { isOk() }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `submitting localAuthorityFeedback escapes brackets in feedback, emails the team and redirects to the success page`() {
             val betaFeedbackModel =
                 BetaFeedbackModel().apply {
@@ -192,9 +192,9 @@ class BetaFeedbackControllerTests(
             val expectedEscapedFeedback = "This is a test feedback with brackets \\(\\) \\[\\]"
 
             submitFeedbackCheckRedirectionAndVerifyEmailSent(
-                BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL,
+                BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL,
                 betaFeedbackModel,
-                BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL,
+                BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL,
                 expectedEscapedFeedback,
             )
         }

@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
-@PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+@PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
 @PrsdbController
 @RequestMapping("/$LOCAL_COUNCIL_PATH_SEGMENT")
 class LocalCouncilDashboardController(
@@ -23,16 +23,16 @@ class LocalCouncilDashboardController(
     val userRolesService: UserRolesService,
 ) {
     @GetMapping
-    fun index(): CharSequence = "redirect:$LOCAL_AUTHORITY_DASHBOARD_URL"
+    fun index(): CharSequence = "redirect:$LOCAL_COUNCIL_DASHBOARD_URL"
 
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
-    fun localAuthorityDashboard(
+    fun localCouncilDashboard(
         model: Model,
         principal: Principal,
     ): String {
-        val localAuthorityUser = localCouncilDataService.getLocalAuthorityUser(principal.name)
+        val localCouncilUser = localCouncilDataService.getLocalCouncilUser(principal.name)
 
-        val isAdmin = userRolesService.getHasLocalAuthorityAdminRole(principal.name)
+        val isAdmin = userRolesService.getHasLocalCouncilAdminRole(principal.name)
 
         if (isAdmin) {
             model.addAttribute(
@@ -44,7 +44,7 @@ class LocalCouncilDashboardController(
                         false,
                     ),
                     NavigationLinkViewModel(
-                        ManageLocalCouncilUsersController.getLaManageUsersRoute(localAuthorityUser.localCouncil.id),
+                        ManageLocalCouncilUsersController.getLocalCouncilManageUsersRoute(localCouncilUser.localCouncil.id),
                         "navLink.manageUsers.title",
                         false,
                     ),
@@ -52,8 +52,8 @@ class LocalCouncilDashboardController(
             )
         }
 
-        model.addAttribute("userName", localAuthorityUser.name)
-        model.addAttribute("localAuthority", localAuthorityUser.localCouncil.name)
+        model.addAttribute("userName", localCouncilUser.name)
+        model.addAttribute("localAuthority", localCouncilUser.localCouncil.name)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
         model.addAttribute("privacyNoticeUrl", LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
@@ -65,6 +65,6 @@ class LocalCouncilDashboardController(
     }
 
     companion object {
-        const val LOCAL_AUTHORITY_DASHBOARD_URL = "/$LOCAL_COUNCIL_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
+        const val LOCAL_COUNCIL_DASHBOARD_URL = "/$LOCAL_COUNCIL_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
     }
 }

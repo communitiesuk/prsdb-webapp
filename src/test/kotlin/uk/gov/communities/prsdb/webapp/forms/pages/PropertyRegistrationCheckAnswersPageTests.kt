@@ -83,7 +83,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                 localAuthority.name,
                 null,
             ),
@@ -126,7 +126,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                 localAuthority.name,
                 SummaryListRowActionViewModel(
                     "forms.links.change",

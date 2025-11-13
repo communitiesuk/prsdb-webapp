@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
 class EditLocalCouncilUserTests : IntegrationTestWithMutableData("data-local.sql") {
     @BeforeEach
     fun setupAbsoluteUrlProvider() {
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
     }
 
     @Test

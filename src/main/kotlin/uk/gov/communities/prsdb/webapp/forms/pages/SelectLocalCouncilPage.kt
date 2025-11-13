@@ -21,7 +21,7 @@ class SelectLocalCouncilPage(
         filteredJourneyData: JourneyData?,
     ) {
         val localAuthoritiesSelectOptions =
-            localCouncilService.retrieveAllLocalAuthorities().map {
+            localCouncilService.retrieveAllLocalCouncils().map {
                 SelectViewModel(
                     value = it.id,
                     label = it.name,

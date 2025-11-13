@@ -8,9 +8,9 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepositor
 class LocalCouncilService(
     private val localCouncilRepository: LocalCouncilRepository,
 ) {
-    fun retrieveLocalAuthorityById(id: Int) = localCouncilRepository.getReferenceById(id)
+    fun retrieveLocalCouncilById(id: Int) = localCouncilRepository.getReferenceById(id)
 
     fun retrieveLocalAuthorityByCustodianCode(custodianCode: String) = localCouncilRepository.findByCustodianCode(custodianCode)
 
-    fun retrieveAllLocalAuthorities(): List<LocalCouncil> = localCouncilRepository.findAllByOrderByNameAsc()
+    fun retrieveAllLocalCouncils(): List<LocalCouncil> = localCouncilRepository.findAllByOrderByNameAsc()
 }

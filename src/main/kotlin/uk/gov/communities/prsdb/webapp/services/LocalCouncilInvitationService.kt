@@ -30,7 +30,7 @@ class LocalCouncilInvitationService(
         return token.toString()
     }
 
-    fun getAuthorityForToken(token: String): LocalCouncil = getInvitationFromToken(token).invitingAuthority
+    fun getAuthorityForToken(token: String): LocalCouncil = getInvitationFromToken(token).invitingCouncil
 
     fun getEmailAddressForToken(token: String): String = getInvitationFromToken(token).invitedEmail
 

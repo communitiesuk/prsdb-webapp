@@ -12,7 +12,8 @@ class CheckAnswersPageLocalCouncilUserRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment}",
+        "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+            "/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment}",
     ) {
     val form = PostForm(page)
 

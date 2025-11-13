@@ -9,7 +9,7 @@ class CancelLocalCouncilUserInvitationSuccessPage(
     urlArguments: Map<String, String>,
 ) : CancelLocalCouncilUserInvitationSuccessBasePage(
         page,
-        ManageLocalCouncilUsersController.getLaCancelInviteSuccessRoute(
+        ManageLocalCouncilUsersController.getLocalCouncilCancelInviteSuccessRoute(
             urlArguments["localAuthorityId"]!!.toInt(),
             urlArguments["invitationId"]!!.toLong(),
         ),

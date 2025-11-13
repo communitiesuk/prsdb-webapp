@@ -34,7 +34,7 @@ class LocalCouncilUserRegistrationCheckAnswersPage(
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerLaUser.checkAnswers.rowHeading.localAuthority",
+                "registerLaUser.checkAnswers.rowHeading.localCouncil",
                 localAuthority.name,
                 null,
             ),

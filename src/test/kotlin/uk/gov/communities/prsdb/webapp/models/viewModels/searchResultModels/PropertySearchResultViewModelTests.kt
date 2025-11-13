@@ -26,9 +26,12 @@ class PropertySearchResultViewModelTests {
                     PropertySearchResultLandlordViewModel(
                         id = propertyOwnership.primaryLandlord.id,
                         name = propertyOwnership.primaryLandlord.name,
-                        recordLink = LandlordDetailsController.getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id),
+                        recordLink =
+                            LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(
+                                propertyOwnership.primaryLandlord.id,
+                            ),
                     ),
-                recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = true),
+                recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true),
             )
 
         val propertySearchResultViewModel = PropertySearchResultViewModel.fromPropertyOwnership(propertyOwnership)

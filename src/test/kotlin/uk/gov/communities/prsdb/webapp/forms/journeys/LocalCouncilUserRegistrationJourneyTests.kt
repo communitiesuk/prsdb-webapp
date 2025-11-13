@@ -146,7 +146,7 @@ class LocalCouncilUserRegistrationJourneyTests {
         whenever(
             mockLocalCouncilDataService.registerUserAndReturnID(
                 baseUserId = anyOrNull(),
-                localCouncil = eq(invitation.invitingAuthority),
+                localCouncil = eq(invitation.invitingCouncil),
                 name = eq(name),
                 email = eq(email),
                 invitedAsAdmin = eq(invitedAsAdmin),

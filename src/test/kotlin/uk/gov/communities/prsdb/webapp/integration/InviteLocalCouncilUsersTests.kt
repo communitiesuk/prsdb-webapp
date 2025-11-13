@@ -24,7 +24,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
     fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
             .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI("https:gov.uk"))
+        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.submitMatchingEmail("test@example.com")

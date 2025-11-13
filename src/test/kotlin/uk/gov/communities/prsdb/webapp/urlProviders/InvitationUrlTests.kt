@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.journeys.LocalCouncilUserRegistrationJourney
@@ -71,7 +71,7 @@ class InvitationUrlTests(
     private lateinit var localCouncilUserRegistrationJourney: LocalCouncilUserRegistrationJourney
 
     @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
     fun `The invitation URL generated when a new user is invited is routed to the accept invitation controller method`() {
         // Arrange
         val loggedInUser = createdLoggedInUserModel()
@@ -79,7 +79,7 @@ class InvitationUrlTests(
         val testToken = "test token"
         val testEmail = "test@example.com"
 
-        whenever(localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(123, "user")).thenReturn(
+        whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(123, "user")).thenReturn(
             Pair(
                 loggedInUser,
                 localAuthority,
@@ -104,7 +104,7 @@ class InvitationUrlTests(
 
         // Act
         mvc
-            .post(getLaInviteNewUserRoute(123)) {
+            .post(getLocalCouncilInviteNewUserRoute(123)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedConfirmedEmailContent
                 with(csrf())

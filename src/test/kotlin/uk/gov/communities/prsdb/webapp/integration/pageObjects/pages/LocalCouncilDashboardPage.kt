@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BetaBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class LocalCouncilDashboardPage(
     page: Page,
-) : BasePage(page, LOCAL_AUTHORITY_DASHBOARD_URL) {
+) : BasePage(page, LOCAL_COUNCIL_DASHBOARD_URL) {
     val betaBanner = BetaBanner(page)
     val bannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
     val bannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))

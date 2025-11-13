@@ -56,9 +56,9 @@ class ManageLocalCouncilAdminsController(
     private val securityContextService: SecurityContextService,
 ) {
     @GetMapping("/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT")
-    fun inviteLocalAuthorityAdmin(model: Model): String {
+    fun inviteLocalCouncilAdmin(model: Model): String {
         addSelectOptionsToModel(model)
-        model.addAttribute("inviteLocalAuthorityAdminModel", InviteLocalCouncilAdminModel())
+        model.addAttribute("inviteLocalCouncilAdminModel", InviteLocalCouncilAdminModel())
 
         return "inviteLocalCouncilAdminUser"
     }
@@ -78,47 +78,47 @@ class ManageLocalCouncilAdminsController(
         }
 
         try {
-            val localAuthority = localCouncilService.retrieveLocalAuthorityById(inviteLocalCouncilAdminModel.localAuthorityId!!)
+            val localCouncil = localCouncilService.retrieveLocalCouncilById(inviteLocalCouncilAdminModel.localCouncilId!!)
 
             val token =
                 invitationService.createInvitationToken(
                     inviteLocalCouncilAdminModel.email,
-                    localAuthority,
+                    localCouncil,
                     invitedAsAdmin = true,
                 )
             val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
             invitationEmailSender.sendEmail(
                 inviteLocalCouncilAdminModel.email,
-                LocalCouncilAdminInvitationEmail(localAuthority, invitationLinkAddress),
+                LocalCouncilAdminInvitationEmail(localCouncil, invitationLinkAddress),
             )
 
             redirectAttributes.addFlashAttribute("invitedEmailAddress", inviteLocalCouncilAdminModel.email)
-            redirectAttributes.addFlashAttribute("localAuthorityName", localAuthority.name)
-            return "redirect:$INVITE_LA_ADMIN_CONFIRMATION_ROUTE"
+            redirectAttributes.addFlashAttribute("localCouncilName", localCouncil.name)
+            return "redirect:$INVITE_LOCAL_COUNCIL_ADMIN_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
-            bindingResult.reject("addLAUser.error.retryable")
+            bindingResult.reject("addLocalCouncilUser.error.retryable")
             return "inviteLocalCouncilAdminUser"
         }
     }
 
     private fun addSelectOptionsToModel(model: Model) {
-        val localAuthoritiesSelectOptions =
-            localCouncilService.retrieveAllLocalAuthorities().map {
+        val localCouncilsSelectOptions =
+            localCouncilService.retrieveAllLocalCouncils().map {
                 SelectViewModel(
                     value = it.id,
                     label = it.name,
                 )
             }
-        model.addAttribute("selectOptions", localAuthoritiesSelectOptions)
+        model.addAttribute("selectOptions", localCouncilsSelectOptions)
     }
 
     @GetMapping("/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT")
     fun confirmation(model: Model): String {
-        if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localAuthorityName") == null) {
+        if (model.getAttribute("invitedEmailAddress") == null || model.getAttribute("localCouncilName") == null) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing attributes, has the user navigated directly to this page?")
         }
 
-        model.addAttribute("inviteAnotherUserUrl", INVITE_LA_ADMIN_ROUTE)
+        model.addAttribute("inviteAnotherUserUrl", INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
         // TODO PRSD-672: Add link to the system operator dashboard
         model.addAttribute("dashboardUrl", "#")
 
@@ -136,7 +136,7 @@ class ManageLocalCouncilAdminsController(
             localCouncilDataService.getPaginatedAdminUsersAndInvitations(page - 1)
 
         if (pagedUserList.totalPages != 0 && pagedUserList.totalPages < page) {
-            return "redirect:$MANAGE_LA_ADMINS_ROUTE"
+            return "redirect:$MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE"
         }
 
         model.addAttribute("userList", pagedUserList)
@@ -146,66 +146,66 @@ class ManageLocalCouncilAdminsController(
         )
         model.addAttribute("cancelInvitationPathSegment", CANCEL_INVITATION_PATH_SEGMENT)
         model.addAttribute("editUserPathSegment", EDIT_ADMIN_PATH_SEGMENT)
-        model.addAttribute("inviteAdminsUrl", INVITE_LA_ADMIN_ROUTE)
+        model.addAttribute("inviteAdminsUrl", INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
         return "manageLocalCouncilAdmins"
     }
 
-    @GetMapping("/$EDIT_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
+    @GetMapping("/$EDIT_ADMIN_PATH_SEGMENT/{localCouncilUserId}")
     fun editAdminsAccessLevel(
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable localCouncilUserId: Long,
         model: Model,
     ): String {
-        val localAuthorityUser = localCouncilDataService.getLocalAuthorityUserById(localAuthorityUserId)
+        val localCouncilUser = localCouncilDataService.getLocalCouncilUserById(localCouncilUserId)
         model.addAttribute("backUrl", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
-        model.addAttribute("localAuthorityUser", localAuthorityUser)
+        model.addAttribute("localCouncilUser", localCouncilUser)
         model.addAttribute(
             "options",
             listOf(
                 RadiosButtonViewModel(
                     false,
                     "basic",
-                    "editLAUserAccess.radios.option.basic.label",
-                    "editLAUserAccess.radios.option.basic.hint",
+                    "editLocalCouncilUserAccess.radios.option.basic.label",
+                    "editLocalCouncilUserAccess.radios.option.basic.hint",
                 ),
                 RadiosButtonViewModel(
                     true,
                     "admin",
-                    "editLAUserAccess.radios.option.admin.label",
-                    "editLAUserAccess.radios.option.admin.hint",
+                    "editLocalCouncilUserAccess.radios.option.admin.label",
+                    "editLocalCouncilUserAccess.radios.option.admin.hint",
                 ),
             ),
         )
-        model.addAttribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
+        model.addAttribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localCouncilUserId")
         return "editLocalCouncilUserAccess"
     }
 
-    @PostMapping("/$EDIT_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
+    @PostMapping("/$EDIT_ADMIN_PATH_SEGMENT/{localCouncilUserId}")
     fun editAdminsAccessLevel(
-        @PathVariable localAuthorityUserId: Long,
-        @ModelAttribute localAuthorityUserAccessLevel: LocalCouncilUserAccessLevelRequestModel,
+        @PathVariable localCouncilUserId: Long,
+        @ModelAttribute localCouncilUserAccessLevel: LocalCouncilUserAccessLevelRequestModel,
     ): String {
-        localCouncilDataService.updateUserAccessLevel(localAuthorityUserAccessLevel, localAuthorityUserId)
+        localCouncilDataService.updateUserAccessLevel(localCouncilUserAccessLevel, localCouncilUserId)
 
-        return "redirect:$MANAGE_LA_ADMINS_ROUTE"
+        return "redirect:$MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE"
     }
 
-    @GetMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
+    @GetMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localCouncilUserId}")
     fun deleteAdmin(
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable localCouncilUserId: Long,
         model: Model,
     ): String {
-        val localAuthorityUser = localCouncilDataService.getLocalAuthorityUserById(localAuthorityUserId)
-        model.addAttribute("user", localAuthorityUser)
-        model.addAttribute("backLinkPath", "../$EDIT_ADMIN_PATH_SEGMENT/$localAuthorityUserId")
+        val localCouncilUser = localCouncilDataService.getLocalCouncilUserById(localCouncilUserId)
+        model.addAttribute("user", localCouncilUser)
+        model.addAttribute("backLinkPath", "../$EDIT_ADMIN_PATH_SEGMENT/$localCouncilUserId")
         return "deleteLocalCouncilUser"
     }
 
-    @PostMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localAuthorityUserId}")
+    @PostMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localCouncilUserId}")
     fun deleteAdmin(
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable localCouncilUserId: Long,
         principal: Principal,
     ): String {
-        val userBeingDeleted = localCouncilDataService.getLocalAuthorityUserById(localAuthorityUserId)
+        val userBeingDeleted = localCouncilDataService.getLocalCouncilUserById(localCouncilUserId)
 
         // If the user is deleting their own admin account we will need to update their user roles
         val refreshSecurityContextAfterDelete = getIsCurrentUserBeingDeletedAsAdmin(principal, userBeingDeleted)
@@ -218,21 +218,21 @@ class ManageLocalCouncilAdminsController(
 
         localCouncilDataService.addDeletedUserToSession(userBeingDeleted)
 
-        return "redirect:../$DELETE_ADMIN_PATH_SEGMENT/$localAuthorityUserId/$CONFIRMATION_PATH_SEGMENT"
+        return "redirect:../$DELETE_ADMIN_PATH_SEGMENT/$localCouncilUserId/$CONFIRMATION_PATH_SEGMENT"
     }
 
-    @GetMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localAuthorityUserId}/$CONFIRMATION_PATH_SEGMENT")
+    @GetMapping("/$DELETE_ADMIN_PATH_SEGMENT/{localCouncilUserId}/$CONFIRMATION_PATH_SEGMENT")
     fun deleteAdminConfirmation(
-        @PathVariable localAuthorityUserId: Long,
+        @PathVariable localCouncilUserId: Long,
         model: Model,
     ): String {
-        val userDeletedThisSession = localCouncilDataService.getUserDeletedThisSessionById(localAuthorityUserId)
+        val userDeletedThisSession = localCouncilDataService.getUserDeletedThisSessionById(localCouncilUserId)
 
         model.addAttribute("deletedUserName", userDeletedThisSession.name)
 
-        model.addAttribute("localAuthority", userDeletedThisSession.localCouncil)
+        model.addAttribute("localCouncil", userDeletedThisSession.localCouncil)
 
-        model.addAttribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
+        model.addAttribute("returnToManageUsersUrl", MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
 
         return "deleteLocalCouncilUserSuccess"
     }
@@ -245,7 +245,7 @@ class ManageLocalCouncilAdminsController(
         val invitation =
             invitationService.getAdminInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+                "Invitation with id $invitationId was not found in the local_council_invitations table",
             )
         model.addAttribute("backLinkPath", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
         model.addAttribute("email", invitation.invitedEmail)
@@ -260,13 +260,13 @@ class ManageLocalCouncilAdminsController(
         val invitation =
             invitationService.getAdminInvitationByIdOrNull(invitationId) ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Invitation with id $invitationId was not found in the local_authority_invitations table",
+                "Invitation with id $invitationId was not found in the local_council_invitations table",
             )
         invitationService.deleteInvitation(invitationId)
 
         cancellationEmailSender.sendEmail(
             invitation.invitedEmail,
-            LocalCouncilInvitationCancellationEmail(invitation.invitingAuthority),
+            LocalCouncilInvitationCancellationEmail(invitation.invitingCouncil),
         )
 
         localCouncilDataService.addCancelledInvitationToSession(
@@ -284,8 +284,8 @@ class ManageLocalCouncilAdminsController(
         val invitationDeletedThisSession = localCouncilDataService.getInvitationCancelledThisSessionById(invitationId)
 
         model.addAttribute("deletedEmail", invitationDeletedThisSession.invitedEmail)
-        model.addAttribute("localAuthority", invitationDeletedThisSession.invitingAuthority)
-        model.addAttribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
+        model.addAttribute("localCouncil", invitationDeletedThisSession.invitingCouncil)
+        model.addAttribute("returnToManageUsersUrl", MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
         return "cancelLocalCouncilUserInvitationSuccess"
     }
 
@@ -296,9 +296,9 @@ class ManageLocalCouncilAdminsController(
 
     companion object {
         const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"
-        const val INVITE_LA_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT"
-        const val MANAGE_LA_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT"
+        const val INVITE_LOCAL_COUNCIL_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT"
+        const val MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT"
 
-        const val INVITE_LA_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LA_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
+        const val INVITE_LOCAL_COUNCIL_ADMIN_CONFIRMATION_ROUTE = "$INVITE_LOCAL_COUNCIL_ADMIN_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }
 }

@@ -22,11 +22,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLaManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -166,12 +166,12 @@ class Navigator(
     private val port: Int,
 ) {
     fun goToManageLaUsers(authorityId: Int): ManageLocalCouncilUsersPage {
-        navigate(getLaManageUsersRoute(authorityId))
+        navigate(getLocalCouncilManageUsersRoute(authorityId))
         return createValidPage(page, ManageLocalCouncilUsersPage::class)
     }
 
     fun goToInviteNewLaUser(authorityId: Int): InviteNewLocalCouncilUserPage {
-        navigate(getLaInviteNewUserRoute(authorityId))
+        navigate(getLocalCouncilInviteNewUserRoute(authorityId))
         return createValidPage(page, InviteNewLocalCouncilUserPage::class)
     }
 
@@ -301,13 +301,14 @@ class Navigator(
     }
 
     fun navigateToLaUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
     fun navigateToLaUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
         navigate(
-            "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}",
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}",
         )
     }
 
@@ -319,8 +320,9 @@ class Navigator(
         )
         navigate(
             "${
-                RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
-            }",
+                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
+                }",
         )
         return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
     }
@@ -331,7 +333,10 @@ class Navigator(
             LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
         )
-        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}")
+        navigate(
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}",
+        )
         return createValidPage(page, NameFormPageLocalCouncilUserRegistration::class)
     }
 
@@ -341,7 +346,10 @@ class Navigator(
             LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
         )
-        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}")
+        navigate(
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}",
+        )
         return createValidPage(page, EmailFormPageLocalCouncilUserRegistration::class)
     }
 
@@ -353,14 +361,15 @@ class Navigator(
         )
         navigate(
             "${
-                RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
-            }",
+                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
+                }",
         )
         return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
     }
 
     fun navigateToLaUserRegistrationConfirmationPage() {
-        navigate("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
@@ -1004,7 +1013,7 @@ class Navigator(
     }
 
     fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalCouncilViewLandlordDetailsPage {
-        navigate(LandlordDetailsController.getLandlordDetailsForLaUserPath(id))
+        navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(id))
         return createValidPage(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
@@ -1031,7 +1040,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = false))
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = false))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -1040,7 +1049,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalCouncilView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = true))
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = true))
         return createValidPage(
             page,
             PropertyDetailsPageLocalCouncilView::class,
@@ -1200,7 +1209,7 @@ class Navigator(
     }
 
     fun goToLocalAuthorityDashboard(): LocalCouncilDashboardPage {
-        navigate(LOCAL_AUTHORITY_DASHBOARD_URL)
+        navigate(LOCAL_COUNCIL_DASHBOARD_URL)
         return createValidPage(page, LocalCouncilDashboardPage::class)
     }
 
@@ -1254,12 +1263,12 @@ class Navigator(
     }
 
     fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate(ManageLocalCouncilAdminsController.INVITE_LA_ADMIN_ROUTE)
+        navigate(ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }
 
     fun goToManageLaAdminsPage(): ManageLocalCouncilAdminsPage {
-        navigate(ManageLocalCouncilAdminsController.MANAGE_LA_ADMINS_ROUTE)
+        navigate(ManageLocalCouncilAdminsController.MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
         return createValidPage(page, ManageLocalCouncilAdminsPage::class)
     }
 
@@ -1289,7 +1298,7 @@ class Navigator(
     }
 
     fun goToLocalCouncilBetaFeedbackPage(): LocalCouncilBetaFeedbackPage {
-        navigate(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL)
+        navigate(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL)
         return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
     }
 

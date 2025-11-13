@@ -9,5 +9,5 @@ class NameFormPageLocalCouncilUserRegistration(
     page: Page,
 ) : NameFormPage(
         page,
-        "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}",
+        "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}",
     )

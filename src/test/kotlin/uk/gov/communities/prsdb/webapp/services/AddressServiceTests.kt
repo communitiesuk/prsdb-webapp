@@ -64,7 +64,7 @@ class AddressServiceTests {
         fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`(addressDataModel: AddressDataModel) {
             // Arrange
             addressDataModel.localAuthorityId?.let {
-                whenever(mockLocalCouncilService.retrieveLocalAuthorityById(it))
+                whenever(mockLocalCouncilService.retrieveLocalCouncilById(it))
                     .thenReturn(MockLocalCouncilData.createLocalAuthority(id = it))
             }
 

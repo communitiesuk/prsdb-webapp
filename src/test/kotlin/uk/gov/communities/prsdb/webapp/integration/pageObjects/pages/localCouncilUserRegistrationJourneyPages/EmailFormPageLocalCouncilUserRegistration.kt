@@ -9,5 +9,6 @@ class EmailFormPageLocalCouncilUserRegistration(
     page: Page,
 ) : EmailFormPage(
         page,
-        "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}",
+        "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+            "/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}",
     )

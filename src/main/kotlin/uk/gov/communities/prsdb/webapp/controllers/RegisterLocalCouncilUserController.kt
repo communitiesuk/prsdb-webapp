@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LA_USER_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(LA_USER_REGISTRATION_ROUTE)
+@RequestMapping(LOCAL_COUNCIL_USER_REGISTRATION_ROUTE)
 class RegisterLocalCouncilUserController(
     private val localCouncilUserRegistrationJourneyFactory: LocalCouncilUserRegistrationJourneyFactory,
     private val invitationService: LocalCouncilInvitationService,
@@ -44,13 +44,13 @@ class RegisterLocalCouncilUserController(
         val invitation = invitationService.getInvitationOrNull(token)
 
         return if (invitation == null) {
-            "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
+            "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE"
         } else if (invitationService.getInvitationHasExpired(invitation)) {
             invitationService.deleteInvitation(invitation)
-            "redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE"
+            "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE"
         } else {
             invitationService.storeTokenInSession(token)
-            return "redirect:${LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}"
+            return "redirect:${LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}"
         }
     }
 
@@ -62,15 +62,15 @@ class RegisterLocalCouncilUserController(
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
+            return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
         val invitation = invitationService.getInvitationFromToken(token)
 
-        if (userRolesService.getHasLocalAuthorityRole(principal.name)) {
+        if (userRolesService.getHasLocalCouncilRole(principal.name)) {
             invitationService.deleteInvitation(invitation)
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LOCAL_AUTHORITY_DASHBOARD_URL")
+            return ModelAndView("redirect:$LOCAL_COUNCIL_DASHBOARD_URL")
         }
 
         return localCouncilUserRegistrationJourneyFactory
@@ -91,7 +91,7 @@ class RegisterLocalCouncilUserController(
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
+            return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
         return localCouncilUserRegistrationJourneyFactory
@@ -113,7 +113,7 @@ class RegisterLocalCouncilUserController(
         val token = getValidTokenFromSessionOrNull()
         if (token == null) {
             invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LA_USER_REGISTRATION_INVALID_LINK_ROUTE")
+            return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
         return localCouncilUserRegistrationJourneyFactory
@@ -131,22 +131,22 @@ class RegisterLocalCouncilUserController(
         model: Model,
         principal: Principal,
     ): String {
-        val localAuthorityUserID =
+        val localCouncilUserID =
             localCouncilDataService.getLastUserIdRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "No registered LA user was found in the session",
+                    "No registered Local Council user was found in the session",
                 )
 
-        val localAuthorityUser =
-            localCouncilDataService.getLocalAuthorityUserOrNull(localAuthorityUserID)
+        val localCouncilUser =
+            localCouncilDataService.getLocalCouncilUserOrNull(localCouncilUserID)
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "No LA user with ID $localAuthorityUserID was found in the database",
+                    "No Local Council user with ID $localCouncilUserID was found in the database",
                 )
 
-        model.addAttribute("localAuthority", localAuthorityUser.localCouncil.name)
-        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+        model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
+        model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "registerLocalCouncilUserSuccess"
     }
@@ -164,8 +164,9 @@ class RegisterLocalCouncilUserController(
     }
 
     companion object {
-        const val LA_USER_REGISTRATION_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL"
+        const val LOCAL_COUNCIL_USER_REGISTRATION_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL"
 
-        const val LA_USER_REGISTRATION_INVALID_LINK_ROUTE = "$LA_USER_REGISTRATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
+        const val LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE =
+            "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }

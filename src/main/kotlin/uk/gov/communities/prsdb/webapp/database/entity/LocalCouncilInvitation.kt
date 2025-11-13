@@ -28,7 +28,7 @@ class LocalCouncilInvitation(
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
-    lateinit var invitingAuthority: LocalCouncil
+    lateinit var invitingCouncil: LocalCouncil
         private set
 
     constructor(
@@ -39,14 +39,14 @@ class LocalCouncilInvitation(
     ) : this() {
         this.token = token
         this.invitedEmail = email
-        this.invitingAuthority = invitingAuthority
+        this.invitingCouncil = invitingAuthority
         this.invitedAsAdmin = invitedAsAdmin
     }
 
     constructor(id: Long, token: UUID, email: String, invitingAuthority: LocalCouncil, invitedAsAdmin: Boolean = false) : this(id) {
         this.token = token
         this.invitedEmail = email
-        this.invitingAuthority = invitingAuthority
+        this.invitingCouncil = invitingAuthority
         this.invitedAsAdmin = invitedAsAdmin
     }
 }

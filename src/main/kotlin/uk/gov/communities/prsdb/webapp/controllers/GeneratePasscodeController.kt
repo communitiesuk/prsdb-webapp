@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.GENERATE_PASSCODE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import java.security.Principal
 
-@PreAuthorize("hasRole('LA_ADMIN')")
+@PreAuthorize("hasRole('LOCAL_COUNCIL_ADMIN')")
 @PrsdbController
 @RequestMapping(GeneratePasscodeController.GENERATE_PASSCODE_URL)
 @Profile("require-passcode")
@@ -28,11 +28,11 @@ class GeneratePasscodeController(
         model: Model,
         principal: Principal,
     ): String {
-        val localAuthorityUser = localCouncilDataService.getLocalAuthorityUser(principal.name)
-        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+        val localCouncilUser = localCouncilDataService.getLocalCouncilUser(principal.name)
+        model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return try {
-            val passcode = passcodeService.getOrGeneratePasscode(localAuthorityUser.localCouncil.id.toLong())
+            val passcode = passcodeService.getOrGeneratePasscode(localCouncilUser.localCouncil.id.toLong())
             model.addAttribute("passcode", passcode)
             "generatePasscode"
         } catch (e: PasscodeLimitExceededException) {
@@ -45,14 +45,14 @@ class GeneratePasscodeController(
         model: Model,
         principal: Principal,
     ): String {
-        val localAuthorityUser = localCouncilDataService.getLocalAuthorityUser(principal.name)
-        model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+        val localCouncilUser = localCouncilDataService.getLocalCouncilUser(principal.name)
+        model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return try {
-            val passcode = passcodeService.generateAndStorePasscode(localAuthorityUser.localCouncil.id.toLong())
+            val passcode = passcodeService.generateAndStorePasscode(localCouncilUser.localCouncil.id.toLong())
             model.addAttribute("passcode", passcode)
-            model.addAttribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
-            model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+            model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
+            model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
             "generatePasscode"
         } catch (e: PasscodeLimitExceededException) {
             "error/passcodeLimit"

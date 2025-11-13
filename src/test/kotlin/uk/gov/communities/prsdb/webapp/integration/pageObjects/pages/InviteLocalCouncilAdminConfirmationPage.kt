@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class InviteLocalCouncilAdminConfirmationPage(
     page: Page,
-) : BasePage(page, ManageLocalCouncilAdminsController.INVITE_LA_ADMIN_CONFIRMATION_ROUTE) {
+) : BasePage(page, ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_CONFIRMATION_ROUTE) {
     val confirmationBanner = ConfirmationBanner(page)
     val returnToDashboardButton = Button.byText(page, "Return to dashboard")
     val inviteAnotherUserButton = Button.byText(page, "Invite another user")

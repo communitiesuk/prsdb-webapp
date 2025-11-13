@@ -37,7 +37,7 @@ data class RegisteredPropertyLocalCouncilViewModel(
                 isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.isOccupied),
                 recordLink =
                     PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
+                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }
@@ -62,7 +62,7 @@ data class RegisteredPropertyLandlordViewModel(
                         ).toString(),
                 recordLink =
                     PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLaView = false)
+                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }

@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class InviteLaAdminPage(
     page: Page,
-) : BasePage(page, ManageLocalCouncilAdminsController.INVITE_LA_ADMIN_ROUTE) {
+) : BasePage(page, ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE) {
     val form = InviteLaAdminForm(page)
 
     fun fillInFormAndSubmit(

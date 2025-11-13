@@ -51,7 +51,7 @@ class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-la-
     inner class DeleteAdmin {
         @Test
         fun `user can be deleted`(page: Page) {
-            whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+            whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
             // Navigate to the delete page for la admin
             var manageAdminPage = navigator.goToManageLaAdminsPage()

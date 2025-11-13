@@ -13,7 +13,7 @@ class PropertyDetailsPageLocalCouncilView(
         page,
         PropertyDetailsController.getPropertyDetailsPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            isLaView = true,
+            isLocalCouncilView = true,
         ),
     ) {
     val insetText = InsetText(page)

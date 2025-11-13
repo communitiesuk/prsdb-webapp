@@ -272,7 +272,7 @@ class PropertyOwnershipServiceTests {
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
                             PropertyDetailsController
-                                .getPropertyDetailsPath(propertyOwnership1.id, isLaView = true)
+                                .getPropertyDetailsPath(propertyOwnership1.id, isLocalCouncilView = true)
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyLocalCouncilViewModel(
@@ -286,7 +286,7 @@ class PropertyOwnershipServiceTests {
                         isTenantedMessageKey = expectedIsTenantedMessageKey,
                         recordLink =
                             PropertyDetailsController
-                                .getPropertyDetailsPath(propertyOwnership2.id, isLaView = true)
+                                .getPropertyDetailsPath(propertyOwnership2.id, isLocalCouncilView = true)
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 )

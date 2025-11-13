@@ -25,9 +25,9 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LA_ADMIN_CONFIRMATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LA_ADMIN_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.MANAGE_LA_ADMINS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LOCAL_COUNCIL_ADMIN_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.models.requestModels.LocalCouncilUserAccessLevelRequestModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -68,7 +68,7 @@ class ManageLocalCouncilAdminsControllerTests(
 
     @Test
     fun `inviteLocalAuthorityAdmin redirects unauthenticated users`() {
-        mvc.get(INVITE_LA_ADMIN_ROUTE).andExpect {
+        mvc.get(INVITE_LOCAL_COUNCIL_ADMIN_ROUTE).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -76,7 +76,7 @@ class ManageLocalCouncilAdminsControllerTests(
     @Test
     @WithMockUser
     fun `inviteLocalAuthorityAdmin returns 403 for unauthorized users`() {
-        mvc.get(INVITE_LA_ADMIN_ROUTE).andExpect {
+        mvc.get(INVITE_LOCAL_COUNCIL_ADMIN_ROUTE).andExpect {
             status { isForbidden() }
         }
     }
@@ -85,13 +85,13 @@ class ManageLocalCouncilAdminsControllerTests(
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `inviteLocalAuthorityAdmin returns 200 for authorized users`() {
         val localAuthorities = listOf(createLocalAuthority())
-        whenever(localCouncilService.retrieveAllLocalAuthorities()).thenReturn(
+        whenever(localCouncilService.retrieveAllLocalCouncils()).thenReturn(
             localAuthorities,
         )
 
-        mvc.get(INVITE_LA_ADMIN_ROUTE).andExpect {
+        mvc.get(INVITE_LOCAL_COUNCIL_ADMIN_ROUTE).andExpect {
             status { isOk() }
-            model { attributeExists("selectOptions", "inviteLocalAuthorityAdminModel") }
+            model { attributeExists("selectOptions", "inviteLocalCouncilAdminModel") }
         }
     }
 
@@ -108,19 +108,19 @@ class ManageLocalCouncilAdminsControllerTests(
             .thenReturn("test-token")
         whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
             .thenReturn(invitationUri)
-        whenever(localCouncilService.retrieveLocalAuthorityById(MockLocalCouncilData.DEFAULT_LA_ID))
+        whenever(localCouncilService.retrieveLocalCouncilById(MockLocalCouncilData.DEFAULT_LA_ID))
             .thenReturn(localAuthority)
 
         mvc
-            .post(INVITE_LA_ADMIN_ROUTE) {
+            .post(INVITE_LOCAL_COUNCIL_ADMIN_ROUTE) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = urlEncodedModel
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl("${INVITE_LA_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                redirectedUrl("${INVITE_LOCAL_COUNCIL_ADMIN_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                 flash { attribute("invitedEmailAddress", testEmail) }
-                flash { attribute("localAuthorityName", localAuthority.name) }
+                flash { attribute("localCouncilName", localAuthority.name) }
             }
 
         verify(emailNotificationService).sendEmail(testEmail, LocalCouncilAdminInvitationEmail(localAuthority, invitationUri))
@@ -129,7 +129,7 @@ class ManageLocalCouncilAdminsControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `navigating straight to the confirmation page returns 400`() {
-        mvc.get(INVITE_LA_ADMIN_CONFIRMATION_ROUTE).andExpect {
+        mvc.get(INVITE_LOCAL_COUNCIL_ADMIN_CONFIRMATION_ROUTE).andExpect {
             status { isBadRequest() }
         }
     }
@@ -137,20 +137,20 @@ class ManageLocalCouncilAdminsControllerTests(
     @Nested
     inner class ManageAdmins {
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `manageAdmins returns 403 for LA users`() {
             mvc
-                .get(MANAGE_LA_ADMINS_ROUTE)
+                .get(MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
                 .andExpect {
                     status { isForbidden() }
                 }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `manageAdmins returns 403 for LA admin users`() {
             mvc
-                .get(MANAGE_LA_ADMINS_ROUTE)
+                .get(MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -162,14 +162,14 @@ class ManageLocalCouncilAdminsControllerTests(
             whenever(localCouncilDataService.getPaginatedAdminUsersAndInvitations(eq(0), anyOrNull()))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
             mvc
-                .get(MANAGE_LA_ADMINS_ROUTE)
+                .get(MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
                 .andExpect {
                     status { isOk() }
                     model {
                         attributeExists("userList", "paginationViewModel")
                         attribute("cancelInvitationPathSegment", CANCEL_INVITATION_PATH_SEGMENT)
                         attribute("editUserPathSegment", EDIT_ADMIN_PATH_SEGMENT)
-                        attribute("inviteAdminsUrl", INVITE_LA_ADMIN_ROUTE)
+                        attribute("inviteAdminsUrl", INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
                     }
                 }
         }
@@ -183,12 +183,12 @@ class ManageLocalCouncilAdminsControllerTests(
 
         @BeforeEach
         fun setup() {
-            whenever(localCouncilDataService.getLocalAuthorityUserById(localAuthorityAdmin.id))
+            whenever(localCouncilDataService.getLocalCouncilUserById(localAuthorityAdmin.id))
                 .thenReturn(localAuthorityAdmin)
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `editAdminsAccessLevel request returns 403 for LA users`() {
             mvc
                 .get(editLocalAuthorityAdminRoute)
@@ -198,7 +198,7 @@ class ManageLocalCouncilAdminsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `editAdminsAccessLevel request returns 403 for LA admin users`() {
             mvc
                 .get(editLocalAuthorityAdminRoute)
@@ -217,7 +217,7 @@ class ManageLocalCouncilAdminsControllerTests(
                     model {
                         attributeExists("options")
                         attribute("backUrl", "../$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT")
-                        attribute("localAuthorityUser", localAuthorityAdmin)
+                        attribute("localCouncilUser", localAuthorityAdmin)
                         attribute("deleteUserUrl", "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${localAuthorityAdmin.id}")
                     }
                 }
@@ -234,7 +234,7 @@ class ManageLocalCouncilAdminsControllerTests(
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl(MANAGE_LA_ADMINS_ROUTE)
+                        redirectedUrl(MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
                     }
                 }
 
@@ -253,12 +253,12 @@ class ManageLocalCouncilAdminsControllerTests(
 
         @BeforeEach
         fun setup() {
-            whenever(localCouncilDataService.getLocalAuthorityUserById(localAuthorityAdmin.id))
+            whenever(localCouncilDataService.getLocalCouncilUserById(localAuthorityAdmin.id))
                 .thenReturn(localAuthorityAdmin)
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `deleteAdmin request returns 403 for LA users`() {
             mvc
                 .get(deleteLocalAuthorityAdminRoute)
@@ -268,7 +268,7 @@ class ManageLocalCouncilAdminsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `deleteAdmin request returns 403 for LA admin users`() {
             mvc
                 .get(deleteLocalAuthorityAdminRoute)
@@ -346,7 +346,7 @@ class ManageLocalCouncilAdminsControllerTests(
                     model {
                         attribute("deletedUserName", localAuthorityAdmin.name)
                         attribute("localCouncil", localAuthorityAdmin.localCouncil)
-                        attribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
+                        attribute("returnToManageUsersUrl", MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
                     }
                 }
         }
@@ -360,7 +360,7 @@ class ManageLocalCouncilAdminsControllerTests(
             "${SYSTEM_OPERATOR_ROUTE}/$CANCEL_INVITATION_PATH_SEGMENT/${localAuthorityAdminInvite.id}"
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `cancelAdminInvitation request returns 403 for LA users`() {
             mvc
                 .get(cancelLocalAuthorityAdminInviteRoute)
@@ -370,7 +370,7 @@ class ManageLocalCouncilAdminsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `cancelAdminInvitation request returns 403 for LA admin users`() {
             mvc
                 .get(cancelLocalAuthorityAdminInviteRoute)
@@ -484,8 +484,8 @@ class ManageLocalCouncilAdminsControllerTests(
                     status { isOk() }
                     model {
                         attribute("deletedEmail", localAuthorityAdminInvite.invitedEmail)
-                        attribute("localCouncil", localAuthorityAdminInvite.invitingAuthority)
-                        attribute("returnToManageUsersUrl", MANAGE_LA_ADMINS_ROUTE)
+                        attribute("localCouncil", localAuthorityAdminInvite.invitingCouncil)
+                        attribute("returnToManageUsersUrl", MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
                     }
                 }
         }

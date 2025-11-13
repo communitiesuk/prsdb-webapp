@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class InviteNewLaUserSuccessPage(
     page: Page,
     urlArguments: Map<String, String>,
-) : BasePage(page, ManageLocalCouncilUsersController.getLaInviteUserSuccessRoute(urlArguments["localAuthorityId"]!!.toInt())) {
+) : BasePage(page, ManageLocalCouncilUsersController.getLocalCouncilInviteUserSuccessRoute(urlArguments["localAuthorityId"]!!.toInt())) {
     val confirmationBanner = ConfirmationBanner(page)
     val returnToDashboardButton = Button.byText(page, "Return to dashboard")
 }

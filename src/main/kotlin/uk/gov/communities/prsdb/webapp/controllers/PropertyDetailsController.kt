@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -134,9 +134,9 @@ class PropertyDetailsController(
             )
         }
 
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LA_PROPERTY_DETAILS_ROUTE)
-    fun getPropertyDetailsLaView(
+    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
+    @GetMapping(LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE)
+    fun getPropertyDetailsLocalCouncilView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
         principal: Principal,
@@ -148,7 +148,7 @@ class PropertyDetailsController(
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
-                .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
+                .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey())
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
@@ -182,7 +182,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
-        model.addAttribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+        model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"
     }
@@ -192,13 +192,13 @@ class PropertyDetailsController(
 
         const val UPDATE_PROPERTY_DETAILS_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        const val LA_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
+        const val LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
         fun getPropertyDetailsPath(
             propertyOwnershipId: Long,
-            isLaView: Boolean = false,
+            isLocalCouncilView: Boolean = false,
         ): String =
-            UriTemplate(if (isLaView) LA_PROPERTY_DETAILS_ROUTE else LANDLORD_PROPERTY_DETAILS_ROUTE)
+            UriTemplate(if (isLocalCouncilView) LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE else LANDLORD_PROPERTY_DETAILS_ROUTE)
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 

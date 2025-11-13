@@ -34,12 +34,12 @@ data class PropertySearchResultViewModel(
                     name = propertyOwnership.primaryLandlord.name,
                     recordLink =
                         LandlordDetailsController
-                            .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
+                            .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
                             .overrideBackLinkForUrl(currentUrlKey),
                 ),
             recordLink =
                 PropertyDetailsController
-                    .getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
+                    .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
                     .overrideBackLinkForUrl(currentUrlKey),
         )
     }

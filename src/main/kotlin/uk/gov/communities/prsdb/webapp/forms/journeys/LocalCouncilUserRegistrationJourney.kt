@@ -155,7 +155,7 @@ class LocalCouncilUserRegistrationJourney(
         val localAuthorityUserID =
             localCouncilDataService.registerUserAndReturnID(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                localCouncil = invitation.invitingAuthority,
+                localCouncil = invitation.invitingCouncil,
                 name = LocalCouncilUserRegistrationJourneyDataHelper.getName(filteredJourneyData)!!,
                 email = LocalCouncilUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData)!!,
                 invitedAsAdmin = invitation.invitedAsAdmin,

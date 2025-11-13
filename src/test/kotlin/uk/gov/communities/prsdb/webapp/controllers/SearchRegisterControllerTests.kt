@@ -46,7 +46,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `SearchRegisterController returns 200 for authorized user`() {
         mvc
             .get(SearchRegisterController.SEARCH_LANDLORD_URL)
@@ -56,7 +56,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForLandlords returns 200 for a valid page request`() {
         whenever(landlordService.searchForLandlords("PRSDB", "user", requestedPageIndex = 1))
             .thenReturn(
@@ -86,7 +86,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForLandlords returns 404 if the requested page number is less than 1`() {
         mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB&page=0").andExpect {
             status { isNotFound() }
@@ -94,7 +94,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForLandlords redirects if the requested page number is more than the total pages`() {
         whenever(landlordService.searchForLandlords("PRSDB", "user", requestedPageIndex = 2))
             .thenReturn(
@@ -114,7 +114,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForProperties returns 200 for a valid page request`() {
         whenever(
             propertyOwnershipService.searchForProperties(
@@ -136,7 +136,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForProperties returns 404 if the requested page number is less than 1`() {
         mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB&page=0").andExpect {
             status { isNotFound() }
@@ -144,7 +144,7 @@ class SearchRegisterControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForProperties redirects if the requested page number is more than the total pages`() {
         whenever(
             propertyOwnershipService.searchForProperties(

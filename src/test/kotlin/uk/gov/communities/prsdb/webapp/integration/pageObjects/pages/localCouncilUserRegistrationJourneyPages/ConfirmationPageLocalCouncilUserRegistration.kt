@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ConfirmationPageLocalCouncilUserRegistration(
     page: Page,
-) : BasePage(page, "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") {
+) : BasePage(page, "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") {
     val bannerHeading = Heading(page.locator(".govuk-panel__title"))
     val bodyHeading = Heading(page.locator(".govuk-heading-xl"))
     val returnToDashboardButton = Button.byText(page, "Go to dashboard")

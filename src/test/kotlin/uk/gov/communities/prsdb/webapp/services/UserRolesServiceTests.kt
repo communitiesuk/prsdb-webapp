@@ -299,7 +299,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
         Assertions.assertTrue(hasLocalAuthorityUserRole)
@@ -315,7 +315,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
         Assertions.assertTrue(hasLocalAuthorityUserRole)
@@ -330,7 +330,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLocalAuthorityUserRole)
@@ -342,7 +342,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLocalAuthorityUserRole)
@@ -358,7 +358,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
         Assertions.assertTrue(hasLocalAuthorityUserRole)
@@ -374,7 +374,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLocalAuthorityUserRole)
@@ -389,7 +389,7 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLocalAuthorityUserRole)
@@ -401,7 +401,7 @@ class UserRolesServiceTests {
         val baseUser = MockOneLoginUserData.createOneLoginUser()
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalAuthorityUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLocalAuthorityUserRole)

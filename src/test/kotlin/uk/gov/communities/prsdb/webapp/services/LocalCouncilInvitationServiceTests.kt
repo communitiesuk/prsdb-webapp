@@ -50,7 +50,7 @@ class LocalCouncilInvitationServiceTests {
         val inviteCaptor = captor<LocalCouncilInvitation>()
         verify(mockLaInviteRepository).save(inviteCaptor.capture())
 
-        assertEquals(authority, inviteCaptor.value.invitingAuthority)
+        assertEquals(authority, inviteCaptor.value.invitingCouncil)
         assertEquals(token, inviteCaptor.value.token.toString())
     }
 

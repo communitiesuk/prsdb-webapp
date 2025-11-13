@@ -53,12 +53,12 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",
-                authority = localCouncilService.retrieveLocalAuthorityById(2),
+                authority = localCouncilService.retrieveLocalCouncilById(2),
             )
 
         invitation = invitationService.getInvitationFromToken(token)
 
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
     }
 
     @Test

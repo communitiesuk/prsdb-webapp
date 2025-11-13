@@ -6,5 +6,5 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 @IsValidPrioritised
 class InviteLocalCouncilAdminModel : ConfirmedEmailRequestModel() {
     @NotNull(message = "forms.selectLocalAuthority.error.missing")
-    var localAuthorityId: Int? = null
+    var localCouncilId: Int? = null
 }

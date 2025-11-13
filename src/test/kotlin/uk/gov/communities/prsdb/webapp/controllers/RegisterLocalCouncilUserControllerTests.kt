@@ -58,9 +58,9 @@ class RegisterLocalCouncilUserControllerTests(
         whenever(invitationService.getInvitationOrNull(validToken)).thenReturn(invitation)
         whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(false)
 
-        mvc.get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken").andExpect {
+        mvc.get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken").andExpect {
             status { is3xxRedirection() }
-            redirectedUrl("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
+            redirectedUrl("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
         }
 
         verify(invitationService).getInvitationOrNull(validToken)
@@ -73,9 +73,9 @@ class RegisterLocalCouncilUserControllerTests(
     fun `acceptInvitation endpoint rejects invalid token and redirects to the invalid link page`() {
         whenever(invitationService.getInvitationOrNull(invalidToken)).thenReturn(null)
 
-        mvc.get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$invalidToken").andExpect {
+        mvc.get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$invalidToken").andExpect {
             status { is3xxRedirection() }
-            redirectedUrl(RegisterLocalCouncilUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+            redirectedUrl(RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
         }
 
         verify(invitationService).getInvitationOrNull(invalidToken)
@@ -88,9 +88,9 @@ class RegisterLocalCouncilUserControllerTests(
         whenever(invitationService.getInvitationOrNull(expiredToken)).thenReturn(invitation)
         whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(true)
 
-        mvc.get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$expiredToken").andExpect {
+        mvc.get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$expiredToken").andExpect {
             status { is3xxRedirection() }
-            redirectedUrl(RegisterLocalCouncilUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+            redirectedUrl(RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
         }
 
         verify(invitationService).getInvitationOrNull(expiredToken)
@@ -106,12 +106,12 @@ class RegisterLocalCouncilUserControllerTests(
         val localAuthorityUser = MockLocalCouncilData.createLocalAuthorityUser()
 
         whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
-        whenever(localCouncilDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LOCAL_COUNCIL_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
@@ -123,10 +123,10 @@ class RegisterLocalCouncilUserControllerTests(
         val localAuthorityUser = MockLocalCouncilData.createLocalAuthorityUser()
 
         whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(null)
-        whenever(localCouncilDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(localAuthorityUser)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localAuthorityUser)
 
         mvc
-            .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect { status { isBadRequest() } }
     }
 
@@ -136,12 +136,12 @@ class RegisterLocalCouncilUserControllerTests(
         val laUserId = 0L
 
         whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
-        whenever(localCouncilDataService.getLocalAuthorityUserOrNull(laUserId)).thenReturn(null)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(null)
 
         mvc
             .perform(
                 MockMvcRequestBuilders
-                    .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LOCAL_COUNCIL_USER_ID, laUserId),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -151,36 +151,36 @@ class RegisterLocalCouncilUserControllerTests(
     fun `getLandingPage redirects if there is no valid token in the session and clears any token from the session`() {
         whenever(invitationService.getTokenFromSession()).thenReturn(null)
         mvc
-            .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(RegisterLocalCouncilUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+                redirectedUrl(RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
             }
 
         verify(invitationService).clearTokenFromSession()
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `getLandingPage returns 302 for authenticated user with Local Authority role`() {
-        whenever(userRolesService.getHasLocalAuthorityRole(any())).thenReturn(true)
+        whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)
         mvc
-            .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
                 with(oidcLogin())
             }.andExpectAll {
                 status { is3xxRedirection() }
-                redirectedUrl(LocalCouncilDashboardController.LOCAL_AUTHORITY_DASHBOARD_URL)
+                redirectedUrl(LocalCouncilDashboardController.LOCAL_COUNCIL_DASHBOARD_URL)
             }
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `getLandingPage deletes the invitation for authenticated user with Local Authority role`() {
         val invitation = LocalCouncilInvitation()
         whenever(invitationService.getInvitationFromToken(validToken)).thenReturn(invitation)
-        whenever(userRolesService.getHasLocalAuthorityRole(any())).thenReturn(true)
+        whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)
         mvc
-            .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
                 with(oidcLogin())
             }
 
@@ -193,10 +193,10 @@ class RegisterLocalCouncilUserControllerTests(
     fun `getJourneyStep redirects if there is no valid token in the session and clears any token from the session`() {
         whenever(invitationService.getTokenFromSession()).thenReturn(null)
         mvc
-            .get("${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/name")
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/name")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(RegisterLocalCouncilUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+                redirectedUrl(RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
             }
 
         verify(invitationService).clearTokenFromSession()

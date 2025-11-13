@@ -118,7 +118,7 @@ class LocalCouncilDataServiceTests {
 
         // Act
         val (returnedUserModel, returnedLocalAuthority) =
-            localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+            localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(
                 DEFAULT_LA_ID,
                 baseUser.id,
             )
@@ -145,7 +145,7 @@ class LocalCouncilDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+            localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(
                 DEFAULT_LA_ID,
                 createOneLoginUser().id,
             )
@@ -162,7 +162,7 @@ class LocalCouncilDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localCouncilDataService.getUserAndLocalAuthorityIfAuthorizedUser(
+            localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(
                 DEFAULT_LA_ID - 1,
                 baseUser.id,
             )
@@ -179,7 +179,7 @@ class LocalCouncilDataServiceTests {
 
         // Act
         val returnedLocalAuthorityUser =
-            localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(DEFAULT_LA_USER_ID, DEFAULT_LA_ID)
+            localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(DEFAULT_LA_USER_ID, DEFAULT_LA_ID)
 
         // Assert
         Assertions.assertEquals(localAuthorityUser, returnedLocalAuthorityUser)
@@ -193,7 +193,7 @@ class LocalCouncilDataServiceTests {
         // Act and Assert
         val errorThrown =
             assertThrows<ResponseStatusException> {
-                localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(
+                localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(
                     DEFAULT_LA_USER_ID,
                     DEFAULT_LA_ID,
                 )
@@ -212,7 +212,7 @@ class LocalCouncilDataServiceTests {
 
         // Act and Assert
         assertThrows<AccessDeniedException> {
-            localCouncilDataService.getLocalAuthorityUserIfAuthorizedLA(
+            localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(
                 DEFAULT_LA_USER_ID,
                 DEFAULT_LA_ID + 1,
             )
@@ -245,7 +245,12 @@ class LocalCouncilDataServiceTests {
             )
 
         // Act
-        val userList = localCouncilDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+        val userList =
+            localCouncilDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLocalCouncilAdminInvitations = false,
+            )
 
         // Assert
         Assertions.assertIterableEquals(expectedLaUserList, userList)
@@ -270,7 +275,12 @@ class LocalCouncilDataServiceTests {
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         // Act
-        val userList = localCouncilDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+        val userList =
+            localCouncilDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLocalCouncilAdminInvitations = false,
+            )
 
         // Assert
         Assertions.assertEquals(3, userList.content.size)
@@ -324,13 +334,13 @@ class LocalCouncilDataServiceTests {
             localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 1,
-                filterOutLaAdminInvitations = false,
+                filterOutLocalCouncilAdminInvitations = false,
             )
         val userListPage2 =
             localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 2,
-                filterOutLaAdminInvitations = false,
+                filterOutLocalCouncilAdminInvitations = false,
             )
 
         // Assert
@@ -361,7 +371,12 @@ class LocalCouncilDataServiceTests {
             LocalCouncilUserOrInvitationDataModel(3, "invite.admin@test.com", localAuthority.name, true, true)
 
         // Act
-        val userList = localCouncilDataService.getPaginatedUsersAndInvitations(localAuthority, 1, filterOutLaAdminInvitations = false)
+        val userList =
+            localCouncilDataService.getPaginatedUsersAndInvitations(
+                localAuthority,
+                1,
+                filterOutLocalCouncilAdminInvitations = false,
+            )
 
         // Assert
         Assertions.assertEquals(4, userList.content.size)
@@ -391,7 +406,7 @@ class LocalCouncilDataServiceTests {
             localCouncilDataService.getPaginatedUsersAndInvitations(
                 localAuthority,
                 1,
-                filterOutLaAdminInvitations = true,
+                filterOutLocalCouncilAdminInvitations = true,
             )
 
         // Assert
@@ -471,7 +486,7 @@ class LocalCouncilDataServiceTests {
 
         whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
         whenever(localCouncilUserRepository.save(any())).thenReturn(newLocalAuthorityUser)
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
         // Act
         val localAuthorityUserID =
@@ -518,7 +533,7 @@ class LocalCouncilDataServiceTests {
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localAuthorityUser)
 
-        assertEquals(localAuthorityUser, localCouncilDataService.getLocalAuthorityUser(baseUserId))
+        assertEquals(localAuthorityUser, localCouncilDataService.getLocalCouncilUser(baseUserId))
     }
 
     @Test
@@ -527,7 +542,7 @@ class LocalCouncilDataServiceTests {
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
-        assertThrows<ResponseStatusException> { localCouncilDataService.getLocalAuthorityUser(baseUserId) }
+        assertThrows<ResponseStatusException> { localCouncilDataService.getLocalCouncilUser(baseUserId) }
     }
 
     @Test
@@ -553,7 +568,7 @@ class LocalCouncilDataServiceTests {
 
         whenever(localCouncilUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id))
             .thenReturn(listOf(admin1, admin2))
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri())
+        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri())
             .thenReturn(URI.create("http://localhost/dashboard"))
 
         val invitedEmail = "invitee@test.com"
@@ -581,7 +596,7 @@ class LocalCouncilDataServiceTests {
         val localAuthority = createLocalAuthority(123)
         whenever(localCouncilUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)).thenReturn(emptyList())
         // The service constructs an email using the absolute URL provider; ensure it returns a non-null URI in tests.
-        whenever(absoluteUrlProvider.buildLocalAuthorityDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
+        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
         // Act
         localCouncilDataService.sendUserInvitedEmailsToAdmins(localAuthority, "nobody@test.com")
@@ -767,7 +782,7 @@ class LocalCouncilDataServiceTests {
             .thenReturn(invitedUsers)
 
         // Act
-        val returnedLastInvitedUser = localCouncilDataService.getLastLocalAuthorityUserInvitedThisSession(1)
+        val returnedLastInvitedUser = localCouncilDataService.getLastLocalCouncilUserInvitedThisSession(1)
 
         // Assert
         Assertions.assertEquals("user.2@example.com", returnedLastInvitedUser)
@@ -780,7 +795,7 @@ class LocalCouncilDataServiceTests {
             .thenReturn(invitedUsers)
 
         // Act
-        val returnedLastInvitedUser = localCouncilDataService.getLastLocalAuthorityUserInvitedThisSession(1)
+        val returnedLastInvitedUser = localCouncilDataService.getLastLocalCouncilUserInvitedThisSession(1)
 
         // Assert
         Assertions.assertNull(returnedLastInvitedUser)
@@ -793,7 +808,7 @@ class LocalCouncilDataServiceTests {
             .thenReturn(listOf(Pair(1, "existing.invite@example.com")))
 
         // Act
-        localCouncilDataService.addInvitedLocalAuthorityUserToSession(1, "new.invite@example.com")
+        localCouncilDataService.addInvitedLocalCouncilUserToSession(1, "new.invite@example.com")
 
         // Assert
         verify(mockHttpSession).setAttribute(

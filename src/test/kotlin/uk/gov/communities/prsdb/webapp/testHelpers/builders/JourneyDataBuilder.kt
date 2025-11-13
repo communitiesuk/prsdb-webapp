@@ -195,7 +195,7 @@ class JourneyDataBuilder(
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         localCouncil?.let {
-            whenever(mockLocalCouncilService.retrieveLocalAuthorityById(localCouncil.id)).thenReturn(localCouncil)
+            whenever(mockLocalCouncilService.retrieveLocalCouncilById(localCouncil.id)).thenReturn(localCouncil)
         }
 
         if (!isContactAddress) {
@@ -233,7 +233,7 @@ class JourneyDataBuilder(
         }
 
         if (localCouncil != null) {
-            whenever(mockLocalCouncilService.retrieveLocalAuthorityById(localCouncil.id)).thenReturn(localCouncil)
+            whenever(mockLocalCouncilService.retrieveLocalCouncilById(localCouncil.id)).thenReturn(localCouncil)
         }
 
         journeyData[RegisterPropertyStepId.LocalCouncil.urlPathSegment] =

@@ -29,6 +29,6 @@ class LocalCouncilUserRegistrationJourneyFactory(
         )
 
     companion object {
-        const val JOURNEY_DATA_KEY = RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE
+        const val JOURNEY_DATA_KEY = RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
     }
 }

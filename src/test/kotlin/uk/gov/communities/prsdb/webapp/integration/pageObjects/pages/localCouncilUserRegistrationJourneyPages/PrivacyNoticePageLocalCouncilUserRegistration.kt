@@ -11,7 +11,8 @@ class PrivacyNoticePageLocalCouncilUserRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterLocalCouncilUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment}",
+        "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+            "/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment}",
     ) {
     val form = PrivacyNoticeForm(page)
 

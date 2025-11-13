@@ -6,4 +6,4 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 
 class InvalidLinkPageLocalCouncilUserRegistration(
     page: Page,
-) : ErrorBasePage(page, RegisterLocalCouncilUserController.LA_USER_REGISTRATION_INVALID_LINK_ROUTE)
+) : ErrorBasePage(page, RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
