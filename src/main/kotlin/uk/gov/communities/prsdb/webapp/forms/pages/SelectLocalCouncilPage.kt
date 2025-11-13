@@ -12,7 +12,7 @@ class SelectLocalCouncilPage(
     private val localCouncilService: LocalCouncilService,
 ) : AbstractPage(
         formModel = SelectLocalCouncilFormModel::class,
-        templateName = "forms/selectLocalAuthorityForm",
+        templateName = "forms/selectLocalCouncilForm",
         content = content,
         shouldDisplaySectionHeader = displaySectionHeader,
     ) {
@@ -20,7 +20,7 @@ class SelectLocalCouncilPage(
         modelAndView: ModelAndView,
         filteredJourneyData: JourneyData?,
     ) {
-        val localAuthoritiesSelectOptions =
+        val localCouncilsSelectOptions =
             localCouncilService.retrieveAllLocalCouncils().map {
                 SelectViewModel(
                     value = it.id,
@@ -28,6 +28,6 @@ class SelectLocalCouncilPage(
                 )
             }
 
-        modelAndView.addObject("selectOptions", localAuthoritiesSelectOptions)
+        modelAndView.addObject("selectOptions", localCouncilsSelectOptions)
     }
 }

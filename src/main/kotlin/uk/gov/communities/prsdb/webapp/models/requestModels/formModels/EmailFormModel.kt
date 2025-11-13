@@ -27,7 +27,7 @@ class EmailFormModel : FormModel {
     companion object {
         fun fromLandlord(landlord: Landlord): EmailFormModel = EmailFormModel().apply { emailAddress = landlord.email }
 
-        fun fromLaInvitation(invitation: LocalCouncilInvitation): EmailFormModel =
+        fun fromLocalCouncilInvitation(invitation: LocalCouncilInvitation): EmailFormModel =
             EmailFormModel().apply {
                 emailAddress =
                     invitation.invitedEmail

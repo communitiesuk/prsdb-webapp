@@ -40,7 +40,7 @@ class LocalCouncilUserRegistrationJourney(
     init {
         val journeyData = journeyDataService.getJourneyDataFromSession()
         if (!isJourneyDataInitialized(journeyData)) {
-            val emailForm = EmailFormModel.fromLaInvitation(invitation)
+            val emailForm = EmailFormModel.fromLocalCouncilInvitation(invitation)
             val newJourneyData = journeyData + emailStep().stepDataPair(journeyData, emailForm, subPageNumber = null)
             journeyDataService.setJourneyDataInSession(newJourneyData)
         }
@@ -67,10 +67,10 @@ class LocalCouncilUserRegistrationJourney(
             page =
                 Page(
                     formModel = NoInputFormModel::class,
-                    templateName = "registerLaUser",
+                    templateName = "registerLocalCouncilUser",
                     content =
                         mapOf(
-                            "title" to "registerLAUser.title",
+                            "title" to "registerLocalCouncilUser.title",
                         ),
                 ),
             nextAction = { _, _ -> Pair(RegisterLocalCouncilUserStepId.PrivacyNotice, null) },
@@ -86,14 +86,14 @@ class LocalCouncilUserRegistrationJourney(
                     templateName = "forms/localAuthorityPrivacyNoticeForm",
                     content =
                         mapOf(
-                            "title" to "registerLAUser.title",
+                            "title" to "registerLocalCouncilUser.title",
                             "submitButtonText" to "forms.buttons.continue",
-                            "localAuthorityPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE,
+                            "localCouncilPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE,
                             "options" to
                                 listOf(
                                     CheckboxViewModel(
                                         value = "true",
-                                        labelMsgKey = "registerLAUser.privacyNotice.checkBox.label",
+                                        labelMsgKey = "registerLocalCouncilUser.privacyNotice.checkBox.label",
                                     ),
                                 ),
                             BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
@@ -112,7 +112,7 @@ class LocalCouncilUserRegistrationJourney(
                     templateName = "forms/nameForm",
                     content =
                         mapOf(
-                            "title" to "registerLAUser.title",
+                            "title" to "registerLocalCouncilUser.title",
                             "fieldSetHeading" to "forms.name.fieldSetHeading",
                             "fieldSetHint" to "forms.name.fieldSetHint",
                             "label" to "forms.name.label",
@@ -132,10 +132,10 @@ class LocalCouncilUserRegistrationJourney(
                     templateName = "forms/emailForm",
                     content =
                         mapOf(
-                            "title" to "registerLAUser.title",
-                            "fieldSetHeading" to "registerLAUser.email.fieldSetHeading",
-                            "fieldSetHint" to "registerLAUser.email.fieldSetHint",
-                            "label" to "registerLAUser.email.label",
+                            "title" to "registerLocalCouncilUser.title",
+                            "fieldSetHeading" to "registerLocalCouncilUser.email.fieldSetHeading",
+                            "fieldSetHint" to "registerLocalCouncilUser.email.fieldSetHint",
+                            "label" to "registerLocalCouncilUser.email.label",
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),
@@ -152,7 +152,7 @@ class LocalCouncilUserRegistrationJourney(
         )
 
     private fun checkAnswersHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
-        val localAuthorityUserID =
+        val localCouncilUserID =
             localCouncilDataService.registerUserAndReturnID(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 localCouncil = invitation.invitingCouncil,
@@ -162,7 +162,7 @@ class LocalCouncilUserRegistrationJourney(
                 hasAcceptedPrivacyNotice = LocalCouncilUserRegistrationJourneyDataHelper.getHasAcceptedPrivacyNotice(filteredJourneyData)!!,
             )
 
-        localCouncilDataService.setLastUserIdRegisteredThisSession(localAuthorityUserID)
+        localCouncilDataService.setLastUserIdRegisteredThisSession(localCouncilUserID)
 
         invitationService.deleteInvitation(invitation)
         invitationService.clearTokenFromSession()

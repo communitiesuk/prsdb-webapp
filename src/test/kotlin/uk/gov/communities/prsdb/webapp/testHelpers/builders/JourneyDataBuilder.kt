@@ -203,7 +203,7 @@ class JourneyDataBuilder(
         }
 
         journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] =
-            Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localAuthorityId = localCouncil?.id, uprn = uprn)))
+            Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localCouncilId = localCouncil?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         journeyData[selectAddressKey] = mapOf("address" to singleLineAddress)

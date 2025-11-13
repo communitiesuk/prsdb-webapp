@@ -63,7 +63,7 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localCouncil",
-                localCouncilService.retrieveLocalCouncilById(address.localAuthorityId!!).name,
+                localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
                 null,
             ),
         )
@@ -77,7 +77,7 @@ class PropertyRegistrationCheckAnswersPage(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.propertyDetails.localCouncil",
-                localCouncilService.retrieveLocalCouncilById(address.localAuthorityId!!).name,
+                localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
                 RegisterPropertyStepId.LocalCouncil.urlPathSegment,
             ),
         )

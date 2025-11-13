@@ -65,7 +65,7 @@ class LandlordDetailsUpdateJourneyDataHelperTests {
 
         val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
-        assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localAuthorityId = authority.id), addressUpdate)
+        assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localCouncilId = authority.id), addressUpdate)
     }
 
     @Test

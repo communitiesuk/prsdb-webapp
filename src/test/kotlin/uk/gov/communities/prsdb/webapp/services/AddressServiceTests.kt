@@ -63,7 +63,7 @@ class AddressServiceTests {
         @MethodSource("uk.gov.communities.prsdb.webapp.services.AddressServiceTests#provideAddressDataModels")
         fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`(addressDataModel: AddressDataModel) {
             // Arrange
-            addressDataModel.localAuthorityId?.let {
+            addressDataModel.localCouncilId?.let {
                 whenever(mockLocalCouncilService.retrieveLocalCouncilById(it))
                     .thenReturn(MockLocalCouncilData.createLocalAuthority(id = it))
             }
@@ -114,8 +114,8 @@ class AddressServiceTests {
         @JvmStatic
         private fun provideAddressDataModels() =
             listOf(
-                named("no local authority", AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = null)),
-                named("a local authority", AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = 1)),
+                named("no local authority", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = null)),
+                named("a local authority", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = 1)),
             )
     }
 }

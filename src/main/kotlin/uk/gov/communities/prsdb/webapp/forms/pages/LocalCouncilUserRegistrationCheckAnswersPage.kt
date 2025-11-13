@@ -15,8 +15,8 @@ class LocalCouncilUserRegistrationCheckAnswersPage(
 ) : BasicCheckAnswersPage(
         content =
             mapOf(
-                "title" to "registerLAUser.title",
-                "summaryName" to "registerLaUser.checkAnswers.summaryName",
+                "title" to "registerLocalCouncilUser.title",
+                "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
                 "submitButtonText" to "forms.buttons.confirm",
             ),
         journeyDataService = journeyDataService,
@@ -25,26 +25,26 @@ class LocalCouncilUserRegistrationCheckAnswersPage(
     override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
         val sessionToken = invitationService.getTokenFromSession()
 
-        val localAuthority =
+        val localCouncil =
             if (sessionToken != null) {
                 invitationService.getAuthorityForToken(sessionToken)
             } else {
-                throw PrsdbWebException("Local authority not found for this invitation token")
+                throw PrsdbWebException("Local council not found for this invitation token")
             }
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerLaUser.checkAnswers.rowHeading.localCouncil",
-                localAuthority.name,
+                "registerLocalCouncilUser.checkAnswers.rowHeading.localCouncil",
+                localCouncil.name,
                 null,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerLaUser.checkAnswers.rowHeading.name",
+                "registerLocalCouncilUser.checkAnswers.rowHeading.name",
                 LocalCouncilUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
                 RegisterLocalCouncilUserStepId.Name.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerLaUser.checkAnswers.rowHeading.email",
+                "registerLocalCouncilUser.checkAnswers.rowHeading.email",
                 LocalCouncilUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
                 RegisterLocalCouncilUserStepId.Email.urlPathSegment,
             ),

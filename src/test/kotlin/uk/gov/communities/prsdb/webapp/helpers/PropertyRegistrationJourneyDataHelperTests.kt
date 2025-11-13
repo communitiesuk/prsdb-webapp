@@ -31,7 +31,7 @@ class PropertyRegistrationJourneyDataHelperTests {
         val localAuthority = createLocalAuthority()
         val mockJourneyData =
             journeyDataBuilder.withSelectedAddress(selectedAddress, localCouncil = localAuthority).build()
-        val expectedAddressDataModel = AddressDataModel(selectedAddress, localAuthorityId = localAuthority.id)
+        val expectedAddressDataModel = AddressDataModel(selectedAddress, localCouncilId = localAuthority.id)
 
         val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData)
 

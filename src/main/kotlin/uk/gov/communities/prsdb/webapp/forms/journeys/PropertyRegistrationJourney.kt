@@ -270,10 +270,10 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
-                            "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
-                            "selectLabel" to "forms.selectLocalAuthority.select.label",
-                            "findLocalAuthorityUrl" to FIND_LOCAL_COUNCIL_URL,
+                            "fieldSetHeading" to "forms.selectLocalCouncil.fieldSetHeading",
+                            "fieldSetHint" to "forms.selectLocalCouncil.fieldSetHint",
+                            "selectLabel" to "forms.selectLocalCouncil.select.label",
+                            "findLocalCouncilUrl" to FIND_LOCAL_COUNCIL_URL,
                         ),
                     localCouncilService = localCouncilService,
                     displaySectionHeader = true,
