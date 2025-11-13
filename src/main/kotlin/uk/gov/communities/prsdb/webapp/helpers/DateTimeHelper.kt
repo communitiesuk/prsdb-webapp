@@ -9,6 +9,8 @@ import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.yearsUntil
 import java.time.Clock
+import java.time.ZoneId
+import java.util.Date
 
 class DateTimeHelper(
     private val clock: Clock = Clock.systemDefaultZone(),
@@ -40,5 +42,8 @@ class DateTimeHelper(
             }
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
+
+        fun getJavaDateFromLocalDate(localDate: java.time.LocalDate): Date =
+            Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
     }
 }

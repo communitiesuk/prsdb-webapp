@@ -8,8 +8,8 @@ import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
 import java.time.LocalDate
 
-@Configuration
 @ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
+@Configuration
 class FeatureFlagConfig {
     @Bean
     fun featureFlagManager(): FeatureFlagManager {
@@ -22,7 +22,7 @@ class FeatureFlagConfig {
         listOf(
             FeatureFlagModel(
                 name = EXAMPLE_FEATURE_FLAG_ONE,
-                enabled = false,
+                enabled = true,
                 expiryDate = LocalDate.of(2030, 2, 14),
             ),
         )
