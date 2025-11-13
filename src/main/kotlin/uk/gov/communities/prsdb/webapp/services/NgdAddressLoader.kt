@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityNotFoundException
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
@@ -8,6 +7,7 @@ import org.hibernate.SessionFactory
 import org.hibernate.StatelessSession
 import org.json.JSONArray
 import org.json.JSONObject
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
@@ -26,19 +26,23 @@ class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
     localAuthorityRepository: LocalAuthorityRepository,
+    environment: Environment,
 ) {
     private lateinit var ngdAddressLoaderRepository: NgdAddressLoaderRepository
 
-    private val localAuthorityCustodianCodeToId: Map<String, Int> by lazy {
-        localAuthorityRepository.findAll().associate { it.custodianCode to it.id }
-    }
+    private val localAuthorityCustodianCodeToId by lazy { localAuthorityRepository.findAll().associate { it.custodianCode to it.id } }
+
+    private val isLocalEnvironment by lazy { environment.activeProfiles.contains("local") }
 
     fun loadNewDataPackageVersions() {
         val statelessSession = sessionFactory.openStatelessSession()
         statelessSession.use { session ->
             ngdAddressLoaderRepository = NgdAddressLoaderRepository(session)
 
-            var storedDataPackageVersionId = getStoredDataPackageVersionId() ?: loadInitialDataPackageVersion(session)
+            val storedDataPackageVersionIdOrNull = getStoredDataPackageVersionId()
+            log("Starting to load new data package versions. Version before load is $storedDataPackageVersionIdOrNull")
+
+            var storedDataPackageVersionId = storedDataPackageVersionIdOrNull ?: loadInitialDataPackageVersion(session)
             do {
                 val nextDataPackageVersionId = getNextDataPackageVersionId(storedDataPackageVersionId)
                 if (nextDataPackageVersionId != null) {
@@ -49,6 +53,8 @@ class NgdAddressLoader(
 
             // TODO PRSD-1609: Handle inactive addresses that are still in use
             deleteUnusedInactiveAddresses(session)
+
+            log("New data package versions loaded. Version after load is $storedDataPackageVersionId")
         }
     }
 
@@ -144,7 +150,7 @@ class NgdAddressLoader(
                             batchRecordCount = 0
                         }
 
-                        if ((index + 1) % 10000 == 0) log("Loaded ${index + 1} records")
+                        if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
                 }
             }
@@ -182,7 +188,8 @@ class NgdAddressLoader(
                 null
             } else {
                 localAuthorityCustodianCodeToId[custodianCode]
-                    ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
+                // TODO PRSD-1643: Handle addresses in England with non-English custodian codes
+                // ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
             }
 
         preparedStatement.setLong(1, csvRecord.get("uprn").toLong())
@@ -216,7 +223,8 @@ class NgdAddressLoader(
     }
 
     private fun log(message: String) {
-        println("${Instant.now().atZone(ZoneId.systemDefault())} $message")
+        val messagePrefix = if (isLocalEnvironment) "${Instant.now().atZone(ZoneId.systemDefault())} " else ""
+        println("$messagePrefix$message")
     }
 
     companion object {

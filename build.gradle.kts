@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.4.10"
+    id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
@@ -93,8 +93,10 @@ dependencies {
     // Streaming upload without storing on local system
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
 
-    // Gradle plugin
-    implementation("org.springframework.boot:spring-boot-gradle-plugin:3.5.6")
+    // FF4J feature flags
+    implementation("org.ff4j:ff4j-core:2.0.0")
+    implementation("org.ff4j:ff4j-aop:2.0.0")
+    implementation("org.ff4j:ff4j-spring-boot-autoconfigure-common:2.0.0")
 }
 
 kotlin {

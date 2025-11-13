@@ -30,7 +30,7 @@ class VirusAlertSender(
             certificateDescriptionForSubject(fileCategory),
             certificateDescriptionForHeading(fileCategory),
             certificateDescriptionForBody(fileCategory),
-            propertyOwnership.property.address.singleLineAddress,
+            propertyOwnership.address.singleLineAddress,
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
             absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
         )

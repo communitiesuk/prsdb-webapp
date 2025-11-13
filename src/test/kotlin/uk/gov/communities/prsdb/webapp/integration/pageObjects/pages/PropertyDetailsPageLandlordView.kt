@@ -30,5 +30,6 @@ class PropertyDetailsPageLandlordView(
         val updateExpiredGasSafetyLink = Link.byText(page, "Upload a new certificate")
         val updateExpiredEicrLink = Link.byText(page, "Upload a new EICR")
         val addEpcOrMeesExemptionLink = Link.byText(page, "add a new certificate or add a MEES exemption")
+        val addComplianceInformationLink = Link.byText(page, "Add compliance information")
     }
 }

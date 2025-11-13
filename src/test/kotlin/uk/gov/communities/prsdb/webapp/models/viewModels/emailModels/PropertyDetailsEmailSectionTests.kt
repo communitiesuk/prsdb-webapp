@@ -83,23 +83,11 @@ class PropertyDetailsEmailSectionTests {
         val propertyOwnerships =
             listOf(
                 MockLandlordData.createPropertyOwnership(
-                    property =
-                        MockLandlordData.createProperty(
-                            address =
-                                MockLandlordData.createAddress(
-                                    singleLineAddress = "1 Imaginary Street, Fakeville, FA1 2KE",
-                                ),
-                        ),
+                    address = MockLandlordData.createAddress(singleLineAddress = "1 Imaginary Street, Fakeville, FA1 2KE"),
                     registrationNumber = registrationNumber1,
                 ),
                 MockLandlordData.createPropertyOwnership(
-                    property =
-                        MockLandlordData.createProperty(
-                            address =
-                                MockLandlordData.createAddress(
-                                    singleLineAddress = "2 Mythical Place, Fakeville, FA3 4KE",
-                                ),
-                        ),
+                    address = MockLandlordData.createAddress(singleLineAddress = "2 Mythical Place, Fakeville, FA3 4KE"),
                     registrationNumber = registrationNumber2,
                 ),
             )

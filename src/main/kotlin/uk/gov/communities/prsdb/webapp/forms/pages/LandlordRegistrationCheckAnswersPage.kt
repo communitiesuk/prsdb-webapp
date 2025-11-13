@@ -16,6 +16,7 @@ class LandlordRegistrationCheckAnswersPage(
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         shouldDisplaySectionHeader = true,
@@ -67,14 +68,7 @@ class LandlordRegistrationCheckAnswersPage(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
                 LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!.singleLineAddress,
-                getContactAddressChangeURLPathSegment(filteredJourneyData),
+                LandlordRegistrationStepId.LookupAddress.urlPathSegment,
             ),
         )
-
-    private fun getContactAddressChangeURLPathSegment(journeyData: JourneyData): String =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
-            LandlordRegistrationStepId.ManualAddress.urlPathSegment
-        } else {
-            LandlordRegistrationStepId.LookupAddress.urlPathSegment
-        }
 }

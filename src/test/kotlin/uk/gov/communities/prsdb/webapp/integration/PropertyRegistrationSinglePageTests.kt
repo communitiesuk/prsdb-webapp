@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
@@ -21,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.local.api.MockOSPlacesAPIResponses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -63,9 +61,8 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `If no English addresses are found, user can search again or enter address manually via the No Address Found step`(page: Page) {
             // Lookup address finds no English results
-            val houseNumber = "15"
-            val postcode = "AB1 2CD"
-            whenever(osPlacesClient.search(houseNumber, postcode, true)).thenReturn(MockOSPlacesAPIResponses.createResponseOfSize(0))
+            val houseNumber = "NOT A HOUSE NUMBER"
+            val postcode = "NOT A POSTCODE"
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
@@ -400,14 +397,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `After changing an answer, submitting a full section returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            checkAnswersPage.form.summaryList.ownershipRow.actions.actionLink
+            checkAnswersPage.summaryList.ownershipRow.actions.actionLink
                 .clickAndWait()
             val ownershipPage = BasePage.assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
             ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
             checkAnswersPage = BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.form.summaryList.licensingRow.actions.actionLink
+            checkAnswersPage.summaryList.licensingRow.actions.actionLink
                 .clickAndWait()
             val licensingTypePage = BasePage.assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 

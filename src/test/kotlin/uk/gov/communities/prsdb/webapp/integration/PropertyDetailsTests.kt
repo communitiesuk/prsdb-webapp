@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEicrPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
@@ -150,6 +151,18 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
+            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
+                val propertyOwnershipId = 1
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText("This property does not have any compliance information. Add compliance information")
+            }
+
+            @Test
             fun `is not visible when all certs are compliant`(page: Page) {
                 val propertyOwnershipId = 11
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
@@ -220,6 +233,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     detailsPage.notificationBanner.addEpcOrMeesExemptionLink.clickAndWait()
 
                     assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "10"))
+                }
+
+                @Test
+                fun `add compliance information when no compliance information redirects to the compliance journey`(page: Page) {
+                    val propertyOwnershipId = 1
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.addComplianceInformationLink.clickAndWait()
+
+                    assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
                 }
             }
         }
@@ -345,6 +367,18 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 ).containsText(
                     "This property’s energy performance certificate (EPC) is below E.",
                 )
+            }
+
+            @Test
+            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
+                val propertyOwnershipId = 1
+                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText("The landlord has not added any compliance information for this property.")
             }
 
             @Test

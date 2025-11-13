@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createProperty
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class PropertyDetailsViewModelTests {
@@ -35,10 +34,7 @@ class PropertyDetailsViewModelTests {
         // Arrange
         val propertyOwnership =
             createPropertyOwnership(
-                property =
-                    createProperty(
-                        address = createAddress(uprn = 1234.toLong()),
-                    ),
+                address = createAddress(uprn = 1234.toLong()),
                 currentNumTenants = 2,
             )
 
@@ -245,10 +241,7 @@ class PropertyDetailsViewModelTests {
         // Arrange
         val expectedUprn = 1234.toLong()
         val address = createAddress(uprn = expectedUprn)
-        val propertyOwnership =
-            createPropertyOwnership(
-                property = createProperty(address = address),
-            )
+        val propertyOwnership = createPropertyOwnership(address = address)
 
         // Act
         val viewModel = PropertyDetailsViewModel(propertyOwnership)
@@ -293,13 +286,7 @@ class PropertyDetailsViewModelTests {
                 currentNumTenants = 3,
                 currentNumHouseholds = 2,
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
-                property =
-                    createProperty(
-                        address =
-                            createAddress(
-                                uprn = 1234.toLong(),
-                            ),
-                    ),
+                address = createAddress(uprn = 1234.toLong()),
             )
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true)
@@ -320,13 +307,7 @@ class PropertyDetailsViewModelTests {
                 currentNumTenants = 3,
                 currentNumHouseholds = 2,
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
-                property =
-                    createProperty(
-                        address =
-                            createAddress(
-                                uprn = 1234.toLong(),
-                            ),
-                    ),
+                address = createAddress(uprn = 1234.toLong()),
             )
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false)

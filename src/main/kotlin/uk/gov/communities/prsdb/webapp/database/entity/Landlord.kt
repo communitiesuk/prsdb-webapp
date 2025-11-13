@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import java.time.LocalDate
@@ -19,7 +19,7 @@ class Landlord() : ModifiableAuditableEntity() {
     val id: Long = 0
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "subject_identifier", nullable = false, foreignKey = ForeignKey(name = "FK_LANDLORD_1L_USER"))
+    @JoinColumn(name = "subject_identifier", nullable = false, unique = true)
     lateinit var baseUser: OneLoginUser
         private set
 
@@ -33,28 +33,21 @@ class Landlord() : ModifiableAuditableEntity() {
     lateinit var phoneNumber: String
 
     @ManyToOne(optional = false)
-    @JoinColumn(
-        name = "address_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "FK_LANDLORD_ADDRESS"),
-    )
+    @JoinColumn(name = "address_id", nullable = false)
     lateinit var address: Address
 
     @Column(nullable = false)
     lateinit var countryOfResidence: String
         private set
 
+    @Column(length = 1000)
     var nonEnglandOrWalesAddress: String? = null
         private set
 
     var dateOfBirth: LocalDate? = null
 
     @OneToOne(optional = false)
-    @JoinColumn(
-        name = "registration_number_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "FK_LANDLORD_REG_NUM"),
-    )
+    @JoinColumn(name = "registration_number_id", nullable = false, unique = true)
     lateinit var registrationNumber: RegistrationNumber
         private set
 
@@ -70,8 +63,11 @@ class Landlord() : ModifiableAuditableEntity() {
     var hasAcceptedPrivacyNotice: Boolean = false
         private set
 
-    @Column(nullable = true)
-    var hasRespondedToFeedback: Boolean? = false
+    @Column(nullable = false)
+    var hasRespondedToFeedback: Boolean = false
+
+    @OneToMany(mappedBy = "primaryLandlord", orphanRemoval = true)
+    private val propertyOwnerships: MutableSet<PropertyOwnership> = mutableSetOf()
 
     constructor(
         baseUser: OneLoginUser,
@@ -103,5 +99,5 @@ class Landlord() : ModifiableAuditableEntity() {
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
 
     val shouldSeeFeedback: Boolean
-        get() = hasRespondedToFeedback != true
+        get() = !hasRespondedToFeedback
 }

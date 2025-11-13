@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_LANDLORD_DETAILS_URL
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDetailsUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFact
 class LandlordDetailsUpdateJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
-    private val addressLookupService: AddressLookupService,
+    private val addressService: AddressService,
     private val landlordService: LandlordService,
 ) {
     fun create(
@@ -24,7 +24,7 @@ class LandlordDetailsUpdateJourneyFactory(
     ) = LandlordDetailsUpdateJourney(
         validator,
         journeyDataServiceFactory.create(getJourneyDataKey(stepName)),
-        addressLookupService,
+        addressService,
         landlordService,
         landlordBaseUserId,
         stepName,

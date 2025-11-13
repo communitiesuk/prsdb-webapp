@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -21,28 +20,20 @@ class LicenseService(
             ),
         )
 
-    fun deleteLicense(license: License) {
-        licenseRepository.delete(license)
-    }
-
-    fun deleteLicenses(licenses: List<License>) {
-        licenseRepository.deleteAll(licenses)
-    }
-
-    @Transactional
     fun updateLicence(
         license: License?,
         updateLicenceType: LicensingType?,
         updateLicenceNumber: String?,
     ): License? =
         if (updateLicenceType == LicensingType.NO_LICENSING) {
-            license?.let { deleteLicense(license) }
+            license?.let { licenseRepository.delete(license) }
             null
         } else if (license == null) {
             createLicense(updateLicenceType!!, updateLicenceNumber!!)
         } else {
             updateLicenceType?.let { license.licenseType = it }
             updateLicenceNumber?.let { license.licenseNumber = it }
+            licenseRepository.save(license)
             license
         }
 }
