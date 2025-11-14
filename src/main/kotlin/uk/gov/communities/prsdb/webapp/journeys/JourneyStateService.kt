@@ -90,8 +90,8 @@ class JourneyStateService(
                 .build(true)
                 .toUriString()
 
-        fun urlToStepIfReachable(step: JourneyStep.RequestableStep<*, *, *>) =
-            if (step.isStepReachable) {
+        fun urlToStepIfReachable(step: JourneyStep<*, *, *>) =
+            if (step.isStepReachable && step is JourneyStep.RequestableStep<*, *, *>) {
                 urlToStep(step)
             } else {
                 null

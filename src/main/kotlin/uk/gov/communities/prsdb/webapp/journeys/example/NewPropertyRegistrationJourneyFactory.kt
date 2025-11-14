@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAdd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
@@ -43,7 +44,11 @@ class NewPropertyRegistrationJourneyFactory(
         val state = stateFactory.getObject()
 
         return journey(state) {
-            unreachableStepStep { journey.addressTask.firstStep }
+            unreachableStepStep { journey.taskListStep }
+            step("task-list", journey.taskListStep) {
+                initialStep()
+                nextUrl { "task-list" }
+            }
             task(journey.addressTask) {
                 parents { NoParents() }
                 redirectToStep { journey.propertyTypeStep }
@@ -77,6 +82,7 @@ class NewPropertyRegistrationJourneyFactory(
 @PrsdbWebComponent
 @Scope("prototype")
 class PropertyRegistrationJourneyState(
+    val taskListStep: PropertyRegistrationTaskListStep,
     override val lookupStep: LookupAddressStep,
     override val selectAddressStep: SelectAddressStep,
     override val alreadyRegisteredStep: AlreadyRegisteredStep,

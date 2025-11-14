@@ -50,6 +50,14 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
+    fun noNextDestination(): StepInitialiser<TStep, TState, TMode> {
+        if (nextDestinationProvider != null) {
+            throw JourneyInitialisationException("Step $segment already has a next destination defined")
+        }
+        nextDestinationProvider = { throw JourneyInitialisationException("Step $segment has no next destination") }
+        return this
+    }
+
     fun parents(currentParentage: () -> Parentage): StepInitialiser<TStep, TState, TMode> {
         if (parentage != null) {
             throw JourneyInitialisationException("Step $segment already has parentage defined")
