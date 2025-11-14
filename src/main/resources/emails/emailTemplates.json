@@ -2,23 +2,23 @@
   {
     "test_id": "d0a5908e-240b-4951-8b88-908f0082960b",
     "prod_id": "511d1529-981e-48d8-b86a-fd0abc607ad3",
-    "enumName": "LOCAL_AUTHORITY_INVITATION_EMAIL",
+    "enumName": "LOCAL_COUNCIL_INVITATION_EMAIL",
     "subject": "GOV.UK - You’ve been invited by a local council to register on the PRS Database",
-    "bodyLocation": "/emails/LocalAuthorityInvitation.md"
+    "bodyLocation": "/emails/LocalCouncilInvitation.md"
   },
   {
     "test_id": "72b0d2ac-3684-48c6-8ece-d27c2d89047d",
     "prod_id": "ada7d8fc-a5d7-44d7-9e13-f0bd187d4ed0",
-    "enumName": "LOCAL_AUTHORITY_INVITATION_CANCELLATION_EMAIL",
+    "enumName": "LOCAL_COUNCIL_INVITATION_CANCELLATION_EMAIL",
     "subject": "GOV.UK - Your invite to register on the PRS Database has been cancelled",
-    "bodyLocation": "/emails/LocalAuthorityInvitationCancellation.md"
+    "bodyLocation": "/emails/LocalCouncilInvitationCancellation.md"
   },
   {
     "test_id": "767e3b8e-8977-4107-8a3a-11cb40300113",
     "prod_id": "a70690a0-2822-4bf7-a53b-0839f46f7d9b",
-    "enumName": "LOCAL_AUTHORITY_ADMIN_INVITATION_EMAIL",
+    "enumName": "LOCAL_COUNCIL_ADMIN_INVITATION_EMAIL",
     "subject": "PRD – You’ve been invited to register as a local council admin on the Privately Rented Database",
-    "bodyLocation": "/emails/LocalAuthorityAdminInvitation.md"
+    "bodyLocation": "/emails/LocalCouncilAdminInvitation.md"
   },
   {
     "test_id": "9f2ddab0-590d-467f-bc26-f0b5f283ae18",
@@ -177,14 +177,14 @@
   {
     "test_id": "08c3368a-fa91-479e-a81b-6d29758dc730",
     "prod_id": "6c535878-26cf-4bef-b4c8-c260857ca76b",
-    "enumName": "LOCAL_AUTHORITY_USER_DELETION_EMAIL",
+    "enumName": "LOCAL_COUNCIL_USER_DELETION_EMAIL",
     "subject": "GOV.UK - Your access to a local council account on the PRS database has been removed",
     "bodyLocation": "/emails/LocalCouncilUserDeletion.md"
   },
   {
     "test_id": "4b2109a1-333e-4b3b-8085-f699edcd562f",
     "prod_id": "8b55a301-b7e1-42e6-a873-775ac828fa69",
-    "enumName": "LOCAL_AUTHORITY_USER_DELETION_INFORM_ADMIN_EMAIL",
+    "enumName": "LOCAL_COUNCIL_USER_DELETION_INFORM_ADMIN_EMAIL",
     "subject": "GOV.UK - A user has been removed from a local council account that you manage",
     "bodyLocation": "/emails/LocalCouncilUserDeletionAdminEmail.md"
   },
