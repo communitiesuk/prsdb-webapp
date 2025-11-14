@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+
 interface Parentage {
     fun allowsChild(): Boolean
 
@@ -75,5 +77,7 @@ fun Task<*>.isComplete() =
     SingleParent(notionalExitStep) {
         notionalExitStep.outcome() == NavigationComplete.COMPLETE
     }
+
+fun JourneyStep<Complete, *, *>.isComplete() = this.hasOutcome(Complete.COMPLETE)
 
 fun JourneyStep<*, *, *>.always(): Parentage = SingleParent(this) { true }

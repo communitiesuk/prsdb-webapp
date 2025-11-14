@@ -12,14 +12,20 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.step.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalAuthorityStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
 
@@ -38,7 +44,11 @@ class NewPropertyRegistrationJourneyFactory(
             }
             step("ownership-type", journey.ownershipTypeStep) {
                 parents { journey.addressTask.isComplete() }
-                nextStep { TODO("Add link to next step once added") }
+                nextStep { journey.licensingTask.firstStep }
+            }
+            task(journey.licensingTask) {
+                parents { journey.ownershipTypeStep.isComplete() }
+                redirectToStep { TODO("Add next step once implemented") }
             }
         }
     }
@@ -58,8 +68,14 @@ class PropertyRegistrationJourneyState(
     private val journeyStateService: JourneyStateService,
     val addressTask: AddressTask,
     val ownershipTypeStep: OwnershipTypeStep,
+    override val licensingTypeStep: LicensingTypeStep,
+    override val selectiveLicenceStep: SelectiveLicenceStep,
+    override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
+    override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
+    val licensingTask: LicensingTask,
 ) : AbstractJourneyState(journeyStateService),
-    AddressState {
+    AddressState,
+    LicensingState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state
