@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -47,6 +48,14 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
             throw JourneyInitialisationException("Step $segment already has a next destination defined")
         }
         nextDestinationProvider = destinationProvider
+        return this
+    }
+
+    fun noNextDestination(): StepInitialiser<TStep, TState, TMode> {
+        if (nextDestinationProvider != null) {
+            throw JourneyInitialisationException("Step $segment already has a next destination defined")
+        }
+        nextDestinationProvider = { throw PrsdbWebException("Step $segment has no next destination so cannot be posted to") }
         return this
     }
 

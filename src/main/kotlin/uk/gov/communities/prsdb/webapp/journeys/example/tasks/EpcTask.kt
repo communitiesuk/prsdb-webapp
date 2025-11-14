@@ -6,11 +6,11 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @PrsdbWebComponent
 @Scope("prototype")

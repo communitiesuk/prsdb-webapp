@@ -39,7 +39,7 @@ class SearchEpcStepConfig(
 
     override fun afterSubmitFormData(state: EpcJourneyState) {
         super.afterSubmitFormData(state)
-        val formModel = getFormModelFromState(state) ?: return
+        val formModel = getFormModelFromStateOrNull(state) ?: return
 
         val epc = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
         state.searchedEpc = epc

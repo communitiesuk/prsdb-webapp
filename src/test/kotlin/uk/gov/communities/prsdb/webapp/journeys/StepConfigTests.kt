@@ -43,7 +43,7 @@ class StepConfigTests {
             val validator = SpringValidatorAdapter(validatorFactory.validator)
             step.validator = validator
 
-            val formModel = step.getFormModelFromState(state)
+            val formModel = step.getFormModelFromStateOrNull(state)
             assertNotNull(formModel)
             assertEquals("value", formModel?.field)
             assertEquals(123L, formModel?.otherField)
