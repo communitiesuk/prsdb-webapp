@@ -1,15 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.util.UriComponentsBuilder
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 sealed class Destination {
-    fun toModelAndView(): ModelAndView =
-        when (this) {
-            is VisitableStep -> ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
-            is ExternalUrl -> ModelAndView("redirect:$externalUrl", params)
-            is Template -> ModelAndView(templateName, content)
-            is NavigationalStep -> StepLifecycleOrchestrator(step).getStepModelAndView()
-        }
+    abstract fun toModelAndView(): ModelAndView
+
+    abstract fun toUrlStringOrNull(): String?
 
     fun withModelContent(content: Map<String, Any?>): Destination =
         when (this) {
@@ -20,21 +19,42 @@ sealed class Destination {
     class VisitableStep(
         val step: JourneyStep.RequestableStep<*, *, *>,
         val journeyId: String,
-    ) : Destination()
+    ) : Destination() {
+        override fun toModelAndView() = ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
+
+        override fun toUrlStringOrNull() = JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId)
+    }
 
     class ExternalUrl(
         val externalUrl: String,
         val params: Map<String, String> = mapOf(),
-    ) : Destination()
+    ) : Destination() {
+        override fun toModelAndView() = ModelAndView("redirect:$externalUrl", params)
+
+        override fun toUrlStringOrNull() =
+            UriComponentsBuilder
+                .fromUriString(externalUrl)
+                .apply {
+                    params.forEach { (key, value) -> queryParam(key, value) }
+                }.toUriString()
+    }
 
     class Template(
         val templateName: String,
         val content: Map<String, Any?> = mapOf(),
-    ) : Destination()
+    ) : Destination() {
+        override fun toModelAndView() = ModelAndView(templateName, content)
+
+        override fun toUrlStringOrNull() = null
+    }
 
     class NavigationalStep(
         val step: JourneyStep.InternalStep<*, *, *>,
-    ) : Destination()
+    ) : Destination() {
+        override fun toModelAndView() = StepLifecycleOrchestrator(step).getStepModelAndView()
+
+        override fun toUrlStringOrNull() = step.determineNextDestination().toUrlStringOrNull()
+    }
 
     companion object {
         operator fun invoke(step: JourneyStep<*, *, *>): Destination =
