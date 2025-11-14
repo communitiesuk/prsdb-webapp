@@ -13,19 +13,25 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.step.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalAuthorityStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
 
@@ -37,10 +43,14 @@ class NewPropertyRegistrationJourneyFactory(
         val state = stateFactory.getObject()
 
         return journey(state) {
-            unreachableStepUrl { "all-went-wrong" }
+            unreachableStepStep { journey.addressTask.firstStep }
             task(journey.addressTask) {
                 parents { NoParents() }
-                redirectToStep { journey.ownershipTypeStep }
+                redirectToStep { journey.propertyTypeStep }
+            }
+            step("property-type", journey.propertyTypeStep) {
+                parents { journey.addressTask.isComplete() }
+                nextStep { journey.ownershipTypeStep }
             }
             step("ownership-type", journey.ownershipTypeStep) {
                 parents { journey.addressTask.isComplete() }
@@ -48,7 +58,15 @@ class NewPropertyRegistrationJourneyFactory(
             }
             task(journey.licensingTask) {
                 parents { journey.ownershipTypeStep.isComplete() }
-                redirectToStep { TODO("Add next step once implemented") }
+                redirectToStep { journey.occupationTask.firstStep }
+            }
+            task(journey.occupationTask) {
+                parents { journey.licensingTask.isComplete() }
+                redirectToStep { journey.cyaStep }
+            }
+            step("check-your-answers", journey.cyaStep) {
+                parents { journey.occupationTask.isComplete() }
+                nextUrl { "/" }
             }
         }
     }
@@ -67,15 +85,22 @@ class PropertyRegistrationJourneyState(
     override val localAuthorityStep: LocalAuthorityStep,
     private val journeyStateService: JourneyStateService,
     val addressTask: AddressTask,
+    val propertyTypeStep: PropertyTypeStep,
     val ownershipTypeStep: OwnershipTypeStep,
     override val licensingTypeStep: LicensingTypeStep,
     override val selectiveLicenceStep: SelectiveLicenceStep,
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     val licensingTask: LicensingTask,
+    override val occupied: OccupiedStep,
+    override val households: HouseholdStep,
+    override val tenants: TenantsStep,
+    val occupationTask: OccupationTask,
+    val cyaStep: PropertyRegistrationCheckAnswersStep,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
-    LicensingState {
+    LicensingState,
+    OccupiedJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state

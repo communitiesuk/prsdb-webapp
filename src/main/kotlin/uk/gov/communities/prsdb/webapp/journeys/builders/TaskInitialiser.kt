@@ -17,7 +17,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
     private var destinationProvider: ((mode: NavigationComplete) -> Destination)? = null
     private var parentage: (() -> Parentage)? = null
 
-    fun redirectToStep(nextStepProvider: (mode: NavigationComplete) -> JourneyStep<*, *, TStateInit>): TaskInitialiser<TStateInit> {
+    fun redirectToStep(nextStepProvider: (mode: NavigationComplete) -> JourneyStep<*, *, *>): TaskInitialiser<TStateInit> {
         if (destinationProvider != null) {
             throw JourneyInitialisationException("Task $name already has a redirectTo defined")
         }

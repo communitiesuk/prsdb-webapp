@@ -19,13 +19,13 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
-import uk.gov.communities.prsdb.webapp.journeys.example.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 @PrsdbWebService

@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalAuthorityStep
@@ -8,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Manua
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 interface AddressState : JourneyState {
     val lookupStep: LookupAddressStep
@@ -19,4 +22,26 @@ interface AddressState : JourneyState {
     var cachedAddresses: List<AddressDataModel>?
 
     fun getMatchingAddress(address: String): AddressDataModel? = cachedAddresses?.singleOrNull { it.singleLineAddress == address }
+
+    fun getAddressOrNull(): AddressDataModel? {
+        val selectedAddress = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it) }
+        return selectedAddress ?: AddressDataModel.fromManualAddressDataOrNull()
+    }
+
+    fun getAddress(): AddressDataModel =
+        getAddressOrNull() ?: throw NotNullFormModelValueIsNullException("No address found in AddressState")
+
+    private fun AddressDataModel.Companion.fromManualAddressDataOrNull() =
+        manualAddressStep.formModelOrNull?.let { manualAddressData ->
+            localAuthorityStep.formModelOrNull?.let { localAuthorityData ->
+                AddressDataModel.fromManualAddressData(
+                    addressLineOne = manualAddressData.notNullValue(ManualAddressFormModel::addressLineOne),
+                    addressLineTwo = manualAddressData.addressLineTwo,
+                    townOrCity = manualAddressData.notNullValue(ManualAddressFormModel::townOrCity),
+                    county = manualAddressData.county,
+                    postcode = manualAddressData.notNullValue(ManualAddressFormModel::postcode),
+                    localAuthorityId = localAuthorityData.localAuthorityId,
+                )
+            }
+        }
 }

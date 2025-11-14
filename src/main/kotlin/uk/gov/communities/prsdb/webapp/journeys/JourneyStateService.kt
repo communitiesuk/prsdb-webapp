@@ -81,5 +81,20 @@ class JourneyStateService(
                 .queryParam(JOURNEY_ID_PARAM, journeyId)
                 .build(true)
                 .toUriString()
+
+        fun urlToStep(step: JourneyStep.RequestableStep<*, *, *>): String =
+            UriComponentsBuilder
+                .newInstance()
+                .path(step.routeSegment)
+                .queryParam(JOURNEY_ID_PARAM, step.currentJourneyId)
+                .build(true)
+                .toUriString()
+
+        fun urlToStepIfReachable(step: JourneyStep.RequestableStep<*, *, *>) =
+            if (step.isStepReachable) {
+                urlToStep(step)
+            } else {
+                null
+            }
     }
 }
