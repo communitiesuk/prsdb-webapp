@@ -22,7 +22,8 @@ sealed class Destination {
     ) : Destination() {
         override fun toModelAndView() = ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
 
-        override fun toUrlStringOrNull() = JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId)
+        override fun toUrlStringOrNull() =
+            if (step.isStepReachable) JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId) else null
     }
 
     class ExternalUrl(
@@ -53,7 +54,7 @@ sealed class Destination {
     ) : Destination() {
         override fun toModelAndView() = StepLifecycleOrchestrator(step).getStepModelAndView()
 
-        override fun toUrlStringOrNull() = step.determineNextDestination().toUrlStringOrNull()
+        override fun toUrlStringOrNull() = if (step.isStepReachable) step.determineNextDestination().toUrlStringOrNull() else null
     }
 
     companion object {
