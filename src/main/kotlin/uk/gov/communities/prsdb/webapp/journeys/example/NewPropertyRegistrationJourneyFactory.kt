@@ -47,7 +47,7 @@ class NewPropertyRegistrationJourneyFactory(
             unreachableStepStep { journey.taskListStep }
             step("task-list", journey.taskListStep) {
                 initialStep()
-                nextUrl { "task-list" }
+                noNextDestination()
             }
             task(journey.addressTask) {
                 parents { NoParents() }

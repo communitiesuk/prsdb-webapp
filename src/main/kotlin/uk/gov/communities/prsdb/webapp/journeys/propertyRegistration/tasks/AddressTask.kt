@@ -49,7 +49,7 @@ class AddressTask : Task<AddressState>() {
             }
             step("already-registered", journey.alreadyRegisteredStep) {
                 parents { journey.selectAddressStep.hasOutcome(SelectAddressMode.ADDRESS_ALREADY_REGISTERED) }
-                nextStep { throw IllegalStateException("Journey ends here for already registered addresses") }
+                noNextDestination()
             }
             step("local-authority", journey.localAuthorityStep) {
                 parents { journey.manualAddressStep.hasOutcome(Complete.COMPLETE) }
