@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 interface Parentage {
     fun allowsChild(): Boolean

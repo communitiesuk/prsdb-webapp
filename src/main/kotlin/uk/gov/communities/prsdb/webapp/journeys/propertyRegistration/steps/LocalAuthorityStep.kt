@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalAuthorityFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.SelectViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService

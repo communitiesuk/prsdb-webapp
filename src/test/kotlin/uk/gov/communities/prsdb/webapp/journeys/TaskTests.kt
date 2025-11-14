@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 class TaskTests {
     class TestTask : Task<JourneyState>() {
