@@ -234,7 +234,7 @@ class LocalCouncilDataServiceTests {
         val invitation =
             LocalCouncilUserOrInvitation(3, LOCAL_COUNCIL_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
-        whenever(localCouncilUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+        whenever(localCouncilUserOrInvitationRepository.findByLocalCouncil(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         val expectedLaUserList =
@@ -271,7 +271,7 @@ class LocalCouncilDataServiceTests {
         val invitation =
             LocalCouncilUserOrInvitation(3, LOCAL_COUNCIL_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
-        whenever(localCouncilUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+        whenever(localCouncilUserOrInvitationRepository.findByLocalCouncil(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
         // Act
@@ -315,9 +315,9 @@ class LocalCouncilDataServiceTests {
                 Sort.by(Sort.Order.desc("entityType"), Sort.Order.asc("name")),
             )
 
-        whenever(localCouncilUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest1))
+        whenever(localCouncilUserOrInvitationRepository.findByLocalCouncil(localAuthority, pageRequest1))
             .thenReturn(PageImpl(usersFromRepository.subList(0, 10).toList(), pageRequest1, 3))
-        whenever(localCouncilUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest2))
+        whenever(localCouncilUserOrInvitationRepository.findByLocalCouncil(localAuthority, pageRequest2))
             .thenReturn(PageImpl(usersFromRepository.subList(10, 20).toList(), pageRequest2, 3))
 
         val expectedUserListPage1 = mutableListOf<LocalCouncilUserOrInvitationDataModel>()
@@ -365,7 +365,7 @@ class LocalCouncilDataServiceTests {
         val adminInvitation =
             LocalCouncilUserOrInvitation(3, LOCAL_COUNCIL_INVITATION_ENTITY_TYPE, "invite.admin@test.com", true, localAuthority)
 
-        whenever(localCouncilUserOrInvitationRepository.findByLocalAuthority(localAuthority, pageRequest))
+        whenever(localCouncilUserOrInvitationRepository.findByLocalCouncil(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation, adminInvitation), pageRequest, 4))
         val expectedAdminInvitationDataModel =
             LocalCouncilUserOrInvitationDataModel(3, "invite.admin@test.com", localAuthority.name, true, true)
@@ -398,7 +398,7 @@ class LocalCouncilDataServiceTests {
         val nonAdminInvitation =
             LocalCouncilUserOrInvitation(3, LOCAL_COUNCIL_INVITATION_ENTITY_TYPE, "invite@test.com", false, localAuthority)
 
-        whenever(localCouncilUserOrInvitationRepository.findByLocalAuthorityNotIncludingAdminInvitations(localAuthority, pageRequest))
+        whenever(localCouncilUserOrInvitationRepository.findByLocalCouncilNotIncludingAdminInvitations(localAuthority, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, nonAdminInvitation), pageRequest, 3))
 
         // Act
@@ -514,7 +514,7 @@ class LocalCouncilDataServiceTests {
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localAuthorityUser)
 
-        assertTrue(localCouncilDataService.getIsLocalAuthorityUser(baseUserId))
+        assertTrue(localCouncilDataService.getIsLocalCouncilUser(baseUserId))
     }
 
     @Test
@@ -523,7 +523,7 @@ class LocalCouncilDataServiceTests {
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
-        assertFalse(localCouncilDataService.getIsLocalAuthorityUser(baseUserId))
+        assertFalse(localCouncilDataService.getIsLocalCouncilUser(baseUserId))
     }
 
     @Test
@@ -566,7 +566,7 @@ class LocalCouncilDataServiceTests {
         val admin1 = createLocalAuthorityUser(baseUser1, localAuthority, isManager = true)
         val admin2 = createLocalAuthorityUser(baseUser2, localAuthority, isManager = true)
 
-        whenever(localCouncilUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id))
+        whenever(localCouncilUserRepository.findAllByLocalCouncil_IdAndIsManagerTrue(localAuthority.id))
             .thenReturn(listOf(admin1, admin2))
         whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri())
             .thenReturn(URI.create("http://localhost/dashboard"))
@@ -594,7 +594,7 @@ class LocalCouncilDataServiceTests {
     @Test
     fun `sendNewUserAddedEmailsToAdmins does nothing if there are no admin users`() {
         val localAuthority = createLocalAuthority(123)
-        whenever(localCouncilUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localAuthority.id)).thenReturn(emptyList())
+        whenever(localCouncilUserRepository.findAllByLocalCouncil_IdAndIsManagerTrue(localAuthority.id)).thenReturn(emptyList())
         // The service constructs an email using the absolute URL provider; ensure it returns a non-null URI in tests.
         whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 

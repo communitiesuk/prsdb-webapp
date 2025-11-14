@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUserOrInvitation
 
 interface LocalCouncilUserOrInvitationRepository : JpaRepository<LocalCouncilUserOrInvitation?, Long?> {
-    fun findByLocalAuthority(
+    fun findByLocalCouncil(
         localCouncil: LocalCouncil,
         pageable: Pageable,
     ): Page<LocalCouncilUserOrInvitation>
@@ -19,7 +19,7 @@ interface LocalCouncilUserOrInvitationRepository : JpaRepository<LocalCouncilUse
             "WHERE u.localCouncil = :localCouncil " +
             "AND NOT (u.entityType = 'local_authority_invitation' AND u.isManager = true)",
     )
-    fun findByLocalAuthorityNotIncludingAdminInvitations(
+    fun findByLocalCouncilNotIncludingAdminInvitations(
         localCouncil: LocalCouncil,
         pageable: Pageable,
     ): Page<LocalCouncilUserOrInvitation>

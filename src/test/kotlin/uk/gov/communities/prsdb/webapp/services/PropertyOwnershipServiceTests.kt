@@ -342,7 +342,7 @@ class PropertyOwnershipServiceTests {
                 propertyOwnership,
             )
 
-            whenever(mockLocalCouncilDataService.getIsLocalAuthorityUser(principalName)).thenReturn(true)
+            whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(true)
 
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
@@ -359,7 +359,7 @@ class PropertyOwnershipServiceTests {
                 propertyOwnership,
             )
 
-            whenever(mockLocalCouncilDataService.getIsLocalAuthorityUser(principalName)).thenReturn(false)
+            whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
 
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)

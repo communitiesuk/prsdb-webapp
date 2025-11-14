@@ -44,43 +44,44 @@ class LocalCouncilDataService(
     private val invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>,
 ) {
     fun getUserAndLocalCouncilIfAuthorizedUser(
-        localAuthorityId: Int,
+        localCouncilId: Int,
         subjectId: String,
     ): Pair<LocalCouncilUserDataModel, LocalCouncil> {
-        val localAuthorityUser =
+        val localCouncilUser =
             localCouncilUserRepository.findByBaseUser_Id(subjectId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $subjectId is not an LA user")
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $subjectId is not a Local Council user")
         val userModel =
             LocalCouncilUserDataModel(
-                localAuthorityUser.id,
-                localAuthorityUser.name,
-                localAuthorityUser.localCouncil.name,
-                localAuthorityUser.isManager,
-                localAuthorityUser.email,
+                localCouncilUser.id,
+                localCouncilUser.name,
+                localCouncilUser.localCouncil.name,
+                localCouncilUser.isManager,
+                localCouncilUser.email,
             )
 
-        if (localAuthorityUser.localCouncil.id != localAuthorityId) {
+        if (localCouncilUser.localCouncil.id != localCouncilId) {
             throw AccessDeniedException(
-                "Local authority user for LA ${localAuthorityUser.localCouncil.id} tried to manage users for LA $localAuthorityId",
+                "Local Council user for Local Council ${localCouncilUser.localCouncil.id}" +
+                    " tried to manage users for Local Council $localCouncilId",
             )
         }
 
-        return Pair(userModel, localAuthorityUser.localCouncil)
+        return Pair(userModel, localCouncilUser.localCouncil)
     }
 
     fun getLocalCouncilUserIfAuthorizedLocalCouncil(
-        localAuthorityUserId: Long,
-        localAuthorityId: Int,
+        localCouncilUserId: Long,
+        localCouncilId: Int,
     ): LocalCouncilUser {
-        val localAuthorityUser =
-            localCouncilUserRepository.findByIdOrNull(localAuthorityUserId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId not found")
+        val localCouncilUser =
+            localCouncilUserRepository.findByIdOrNull(localCouncilUserId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localCouncilUserId not found")
 
-        if (localAuthorityUser.localCouncil.id != localAuthorityId) {
-            throw AccessDeniedException("Local authority user $localAuthorityUserId does not belong to LA $localAuthorityId")
+        if (localCouncilUser.localCouncil.id != localCouncilId) {
+            throw AccessDeniedException("Local Council user $localCouncilUserId does not belong to Local Council $localCouncilId")
         }
 
-        return localAuthorityUser
+        return localCouncilUser
     }
 
     fun getPaginatedUsersAndInvitations(
@@ -97,7 +98,7 @@ class LocalCouncilDataService(
             )
         if (filterOutLocalCouncilAdminInvitations) {
             return localCouncilUserOrInvitationRepository
-                .findByLocalAuthorityNotIncludingAdminInvitations(
+                .findByLocalCouncilNotIncludingAdminInvitations(
                     localCouncil,
                     pageRequest,
                 ).map {
@@ -111,7 +112,7 @@ class LocalCouncilDataService(
                 }
         }
 
-        return localCouncilUserOrInvitationRepository.findByLocalAuthority(localCouncil, pageRequest).map {
+        return localCouncilUserOrInvitationRepository.findByLocalCouncil(localCouncil, pageRequest).map {
             LocalCouncilUserOrInvitationDataModel(
                 id = it.id,
                 userNameOrEmail = it.name,
@@ -142,18 +143,18 @@ class LocalCouncilDataService(
         }
     }
 
-    fun getLocalCouncilUserOrNull(localAuthorityUserId: Long) = localCouncilUserRepository.findByIdOrNull(localAuthorityUserId)
+    fun getLocalCouncilUserOrNull(localCouncilUserId: Long) = localCouncilUserRepository.findByIdOrNull(localCouncilUserId)
 
     fun updateUserAccessLevel(
-        localAuthorityUserAccessLevel: LocalCouncilUserAccessLevelRequestModel,
-        localAuthorityUserId: Long,
+        localCouncilUserAccessLevel: LocalCouncilUserAccessLevelRequestModel,
+        localCouncilUserId: Long,
     ) {
-        val localAuthorityUser =
-            localCouncilUserRepository.findByIdOrNull(localAuthorityUserId)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localAuthorityUserId does not exist")
+        val localCouncilUser =
+            localCouncilUserRepository.findByIdOrNull(localCouncilUserId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $localCouncilUserId does not exist")
 
-        localAuthorityUser.isManager = localAuthorityUserAccessLevel.isManager
-        localCouncilUserRepository.save(localAuthorityUser)
+        localCouncilUser.isManager = localCouncilUserAccessLevel.isManager
+        localCouncilUserRepository.save(localCouncilUser)
     }
 
     fun deleteUser(localCouncilUser: LocalCouncilUser) {
@@ -173,8 +174,8 @@ class LocalCouncilDataService(
         localCouncil: LocalCouncil,
         invitedEmail: String,
     ) {
-        val localAdminsByAuthority =
-            localCouncilUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localCouncil.id)
+        val localAdminsByCouncil =
+            localCouncilUserRepository.findAllByLocalCouncil_IdAndIsManagerTrue(localCouncil.id)
 
         val emailToAdmins =
             LocalCouncilUserInvitationInformAdminEmail(
@@ -183,7 +184,7 @@ class LocalCouncilDataService(
                 prsdURL = absoluteUrlProvider.buildLocalCouncilDashboardUri().toString(),
             )
 
-        for (admin in localAdminsByAuthority) {
+        for (admin in localAdminsByCouncil) {
             invitationConfirmationSenderAdmin.sendEmail(
                 admin.email,
                 emailToAdmins,
@@ -192,10 +193,10 @@ class LocalCouncilDataService(
     }
 
     private fun sendUserDeletedEmailsToAdmins(localCouncilUser: LocalCouncilUser) {
-        val localAdminsByAuthority =
-            localCouncilUserRepository.findAllByLocalAuthority_IdAndIsManagerTrue(localCouncilUser.localCouncil.id)
+        val localAdminsByCouncil =
+            localCouncilUserRepository.findAllByLocalCouncil_IdAndIsManagerTrue(localCouncilUser.localCouncil.id)
 
-        for (admin in localAdminsByAuthority) {
+        for (admin in localAdminsByCouncil) {
             deletionConfirmationSenderAdmin.sendEmail(
                 admin.email,
                 LocalCouncilUserDeletionInformAdminEmail(
@@ -241,21 +242,21 @@ class LocalCouncilDataService(
         return localCouncilUser.id
     }
 
-    fun getIsLocalAuthorityUser(baseUserId: String): Boolean = localCouncilUserRepository.findByBaseUser_Id(baseUserId) != null
+    fun getIsLocalCouncilUser(baseUserId: String): Boolean = localCouncilUserRepository.findByBaseUser_Id(baseUserId) != null
 
     fun getLocalCouncilUser(baseUserId: String): LocalCouncilUser {
-        val localAuthorityUser =
+        val localCouncilUser =
             localCouncilUserRepository.findByBaseUser_Id(baseUserId)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User $baseUserId not found")
 
-        return localAuthorityUser
+        return localCouncilUser
     }
 
-    fun getLocalCouncilUserById(localAuthorityUserId: Long): LocalCouncilUser =
-        localCouncilUserRepository.findByIdOrNull(localAuthorityUserId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local authority users with ID $localAuthorityUserId not found")
+    fun getLocalCouncilUserById(localCouncilUserId: Long): LocalCouncilUser =
+        localCouncilUserRepository.findByIdOrNull(localCouncilUserId)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Local Council users with ID $localCouncilUserId not found")
 
-    fun setLastUserIdRegisteredThisSession(localAuthorityUserId: Long) = session.setAttribute(LOCAL_COUNCIL_USER_ID, localAuthorityUserId)
+    fun setLastUserIdRegisteredThisSession(localCouncilUserId: Long) = session.setAttribute(LOCAL_COUNCIL_USER_ID, localCouncilUserId)
 
     fun getLastUserIdRegisteredThisSession() = session.getAttribute(LOCAL_COUNCIL_USER_ID)?.toString()?.toLong()
 
@@ -263,24 +264,24 @@ class LocalCouncilDataService(
         session.getAttribute(LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION) as MutableList<LocalCouncilUser>?
             ?: mutableListOf()
 
-    fun getUserDeletedThisSessionById(localAuthorityUserId: Long): LocalCouncilUser {
+    fun getUserDeletedThisSessionById(localCouncilUserId: Long): LocalCouncilUser {
         val deletedUser =
-            getUsersDeletedThisSession().find { it.id == localAuthorityUserId }
+            getUsersDeletedThisSession().find { it.id == localCouncilUserId }
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "User with id $localAuthorityUserId was not found in the list of deleted users in the session",
+                    "User with id $localCouncilUserId was not found in the list of deleted users in the session",
                 )
 
-        throwErrorIfLocalAuthorityUserExists(deletedUser)
+        throwErrorIfLocalCouncilUserExists(deletedUser)
 
         return deletedUser
     }
 
-    private fun throwErrorIfLocalAuthorityUserExists(localCouncilUser: LocalCouncilUser) {
+    private fun throwErrorIfLocalCouncilUserExists(localCouncilUser: LocalCouncilUser) {
         if (localCouncilUserRepository.existsById(localCouncilUser.id)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "User with id ${localCouncilUser.id} is still in the local_authority_user table",
+                "User with id ${localCouncilUser.id} is still in the local_council_user table",
             )
         }
     }
@@ -314,18 +315,18 @@ class LocalCouncilDataService(
             getInvitationsCancelledThisSession().plus(invitation),
         )
 
-    fun getLastLocalCouncilUserInvitedThisSession(localAuthorityId: Int): String? =
-        getLocalAuthorityUsersInvitedThisSession().lastOrNull { it.first == localAuthorityId }?.second
+    fun getLastLocalCouncilUserInvitedThisSession(localCouncilId: Int): String? =
+        getLocalCouncilUsersInvitedThisSession().lastOrNull { it.first == localCouncilId }?.second
 
-    private fun getLocalAuthorityUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
+    private fun getLocalCouncilUsersInvitedThisSession(): MutableList<Pair<Int, String>> =
         session.getAttribute(LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION) as MutableList<Pair<Int, String>>?
             ?: mutableListOf()
 
     fun addInvitedLocalCouncilUserToSession(
-        localAuthorityId: Int,
+        localCouncilId: Int,
         invitedEmail: String,
     ) = session.setAttribute(
         LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION,
-        getLocalAuthorityUsersInvitedThisSession().plus(Pair(localAuthorityId, invitedEmail)),
+        getLocalCouncilUsersInvitedThisSession().plus(Pair(localCouncilId, invitedEmail)),
     )
 }

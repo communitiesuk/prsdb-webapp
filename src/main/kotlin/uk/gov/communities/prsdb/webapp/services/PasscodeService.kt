@@ -26,7 +26,7 @@ class PasscodeService(
     }
 
     @Transactional
-    fun generatePasscode(localAuthorityId: Long): Passcode {
+    fun generatePasscode(localCouncilId: Long): Passcode {
         // Check if passcode limit has been reached
         val currentPasscodeCount = passcodeRepository.count()
         if (currentPasscodeCount >= MAX_PASSCODES) {
@@ -35,8 +35,8 @@ class PasscodeService(
 
         val localCouncil =
             localCouncilRepository
-                .findById(localAuthorityId.toInt())
-                .orElseThrow { IllegalArgumentException("LocalCouncil with id $localAuthorityId not found") }
+                .findById(localCouncilId.toInt())
+                .orElseThrow { IllegalArgumentException("LocalCouncil with id $localCouncilId not found") }
 
         var passcodeString: String
         do {
@@ -58,13 +58,13 @@ class PasscodeService(
         session.setAttribute(LAST_GENERATED_PASSCODE, passcode)
     }
 
-    fun generateAndStorePasscode(localAuthorityId: Long): String {
-        val generatedPasscode = generatePasscode(localAuthorityId)
+    fun generateAndStorePasscode(localCouncilId: Long): String {
+        val generatedPasscode = generatePasscode(localCouncilId)
         setLastGeneratedPasscode(generatedPasscode.passcode)
         return generatedPasscode.passcode
     }
 
-    fun getOrGeneratePasscode(localAuthorityId: Long): String = getLastGeneratedPasscode() ?: generateAndStorePasscode(localAuthorityId)
+    fun getOrGeneratePasscode(localCouncilId: Long): String = getLastGeneratedPasscode() ?: generateAndStorePasscode(localCouncilId)
 
     fun isValidPasscode(passcode: String): Boolean {
         val normalizedPasscode = normalizePasscode(passcode)

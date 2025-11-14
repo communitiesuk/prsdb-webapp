@@ -10,7 +10,7 @@ class LocalCouncilService(
 ) {
     fun retrieveLocalCouncilById(id: Int) = localCouncilRepository.getReferenceById(id)
 
-    fun retrieveLocalAuthorityByCustodianCode(custodianCode: String) = localCouncilRepository.findByCustodianCode(custodianCode)
+    fun retrieveLocalCouncilByCustodianCode(custodianCode: String) = localCouncilRepository.findByCustodianCode(custodianCode)
 
     fun retrieveAllLocalCouncils(): List<LocalCouncil> = localCouncilRepository.findAllByOrderByNameAsc()
 }

@@ -9,5 +9,5 @@ interface LocalCouncilUserRepository : JpaRepository<LocalCouncilUser, Long> {
     fun findByBaseUser_Id(userName: String): LocalCouncilUser?
 
     @Suppress("ktlint:standard:function-naming")
-    fun findAllByLocalAuthority_IdAndIsManagerTrue(localAuthorityId: Int): List<LocalCouncilUser>
+    fun findAllByLocalCouncil_IdAndIsManagerTrue(localAuthorityId: Int): List<LocalCouncilUser>
 }

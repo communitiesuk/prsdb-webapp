@@ -29,9 +29,9 @@ class UserRolesService(
     fun getLocalCouncilRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
-        val matchingLocalAuthorityUser = localCouncilUserRepository.findByBaseUser_Id(subjectId)
-        if (matchingLocalAuthorityUser != null) {
-            if (matchingLocalAuthorityUser.isManager) {
+        val matchingLocalCouncilUser = localCouncilUserRepository.findByBaseUser_Id(subjectId)
+        if (matchingLocalCouncilUser != null) {
+            if (matchingLocalCouncilUser.isManager) {
                 roles.add(ROLE_LOCAL_COUNCIL_ADMIN)
             }
             roles.add(ROLE_LOCAL_COUNCIL_USER)

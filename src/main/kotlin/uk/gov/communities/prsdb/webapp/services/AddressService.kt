@@ -18,8 +18,8 @@ class AddressService(
             addressRepository.findByIsActiveTrueAndUprn(addressDataModel.uprn)
                 ?: throw EntityNotFoundException("No active address found with UPRN ${addressDataModel.uprn}")
         } else {
-            val localAuthority = addressDataModel.localCouncilId?.let { localCouncilService.retrieveLocalCouncilById(it) }
-            addressRepository.save(Address(addressDataModel, localAuthority))
+            val localCouncil = addressDataModel.localCouncilId?.let { localCouncilService.retrieveLocalCouncilById(it) }
+            addressRepository.save(Address(addressDataModel, localCouncil))
         }
 
     fun searchForAddresses(

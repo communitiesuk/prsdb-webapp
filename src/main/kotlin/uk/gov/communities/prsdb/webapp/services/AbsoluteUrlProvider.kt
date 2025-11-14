@@ -18,8 +18,8 @@ class AbsoluteUrlProvider {
     @Value("\${base-url.landlord}")
     private lateinit var landlordBaseUrl: String
 
-    @Value("\${base-url.local-authority}")
-    private lateinit var localAuthorityBaseUrl: String
+    @Value("\${base-url.local-council}")
+    private lateinit var localCouncilBaseUrl: String
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
 
@@ -42,7 +42,7 @@ class AbsoluteUrlProvider {
         val baseUrl =
             when (methodCallUriComponents.pathSegments[0]) {
                 LANDLORD_PATH_SEGMENT -> landlordBaseUrl
-                LOCAL_COUNCIL_PATH_SEGMENT -> localAuthorityBaseUrl
+                LOCAL_COUNCIL_PATH_SEGMENT -> localCouncilBaseUrl
                 else -> throw IllegalArgumentException("Unknown base URL for path: ${methodCallUriComponents.path}")
             }
 

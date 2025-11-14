@@ -77,11 +77,11 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
 
-        val isLocalAuthority = localCouncilDataService.getIsLocalAuthorityUser(baseUserId)
+        val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
 
         val isPrimaryLandlord = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 
-        if (!isLocalAuthority && !isPrimaryLandlord) {
+        if (!isLocalCouncil && !isPrimaryLandlord) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "The current user is not authorised to view property ownership $propertyOwnershipId",
@@ -133,8 +133,8 @@ class PropertyOwnershipService(
 
     fun searchForProperties(
         searchTerm: String,
-        laBaseUserId: String,
-        restrictToLA: Boolean = false,
+        localCouncilBaseUserId: String,
+        restrictToLocalCouncil: Boolean = false,
         restrictToLicenses: List<LicensingType> = LicensingType.entries,
         requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
@@ -147,24 +147,24 @@ class PropertyOwnershipService(
             if (prn != null) {
                 propertyOwnershipRepository.searchMatchingPRN(
                     prn.number,
-                    laBaseUserId,
-                    restrictToLA,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
                     restrictToLicenses,
                     pageRequest,
                 )
             } else if (uprn != null) {
                 propertyOwnershipRepository.searchMatchingUPRN(
                     uprn,
-                    laBaseUserId,
-                    restrictToLA,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
                     restrictToLicenses,
                     pageRequest,
                 )
             } else {
                 propertyOwnershipRepository.searchMatching(
                     searchTerm,
-                    laBaseUserId,
-                    restrictToLA,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
                     restrictToLicenses,
                     pageRequest,
                 )

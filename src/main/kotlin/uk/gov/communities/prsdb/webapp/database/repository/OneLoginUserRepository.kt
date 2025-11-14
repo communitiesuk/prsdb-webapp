@@ -13,5 +13,5 @@ interface OneLoginUserRepository : JpaRepository<OneLoginUser, String> {
             "AND one_login_user.id NOT IN (SELECT subject_identifier FROM local_authority_user);",
         nativeQuery = true,
     )
-    fun deleteIfNotLocalAuthorityUser(oneLoginUserId: String)
+    fun deleteIfNotLocalCouncilUser(oneLoginUserId: String)
 }

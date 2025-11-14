@@ -31,7 +31,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",
-                authority = localCouncilService.retrieveLocalCouncilById(2),
+                council = localCouncilService.retrieveLocalCouncilById(2),
             )
 
         invitation = invitationService.getInvitationFromToken(token)

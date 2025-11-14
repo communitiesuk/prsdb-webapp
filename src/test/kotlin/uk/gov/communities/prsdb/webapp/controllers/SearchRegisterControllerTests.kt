@@ -119,7 +119,7 @@ class SearchRegisterControllerTests(
         whenever(
             propertyOwnershipService.searchForProperties(
                 searchTerm = "PRSDB",
-                laBaseUserId = "user",
+                localCouncilBaseUserId = "user",
                 requestedPageIndex = 1,
             ),
         ).thenReturn(
@@ -149,7 +149,7 @@ class SearchRegisterControllerTests(
         whenever(
             propertyOwnershipService.searchForProperties(
                 searchTerm = "PRSDB",
-                laBaseUserId = "user",
+                localCouncilBaseUserId = "user",
                 requestedPageIndex = 2,
             ),
         ).thenReturn(

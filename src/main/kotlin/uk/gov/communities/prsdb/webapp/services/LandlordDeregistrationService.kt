@@ -37,7 +37,7 @@ class LandlordDeregistrationService(
         }
 
         landlordRepository.deleteByBaseUser_Id(baseUserId)
-        oneLoginUserRepository.deleteIfNotLocalAuthorityUser(baseUserId)
+        oneLoginUserRepository.deleteIfNotLocalCouncilUser(baseUserId)
 
         return registeredProperties
     }

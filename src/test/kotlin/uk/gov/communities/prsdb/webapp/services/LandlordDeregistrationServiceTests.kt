@@ -70,7 +70,7 @@ class LandlordDeregistrationServiceTests {
         landlordDeregistrationService.deregisterLandlordAndTheirProperties(baseUserId)
 
         verify(mockFormContextRepository).findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION)
-        verify(mockOneLoginUserRepository).deleteIfNotLocalAuthorityUser(baseUserId)
+        verify(mockOneLoginUserRepository).deleteIfNotLocalCouncilUser(baseUserId)
     }
 
     @Test

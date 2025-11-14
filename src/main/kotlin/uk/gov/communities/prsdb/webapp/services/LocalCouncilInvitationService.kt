@@ -22,11 +22,11 @@ class LocalCouncilInvitationService(
 ) {
     fun createInvitationToken(
         email: String,
-        authority: LocalCouncil,
+        council: LocalCouncil,
         invitedAsAdmin: Boolean = false,
     ): String {
         val token = UUID.randomUUID()
-        invitationRepository.save(LocalCouncilInvitation(token, email, authority, invitedAsAdmin))
+        invitationRepository.save(LocalCouncilInvitation(token, email, council, invitedAsAdmin))
         return token.toString()
     }
 
@@ -82,7 +82,7 @@ class LocalCouncilInvitationService(
         if (invitationRepository.existsById(invitation.id)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Invitation with id ${invitation.id} is still in the local_authority_invitations table",
+                "Invitation with id ${invitation.id} is still in the local_council_invitations table",
             )
         }
     }
