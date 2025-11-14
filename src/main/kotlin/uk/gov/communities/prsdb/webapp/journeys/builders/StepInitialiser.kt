@@ -26,6 +26,8 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     private var additionalConfig: (TStep.() -> Unit)? = null
     private var unreachableStepDestination: (() -> Destination)? = null
 
+    private var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
+
     fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): StepInitialiser<TStep, TState, TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("Step $segment already has a next destination defined")
@@ -84,6 +86,11 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
+    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepInitialiser<TStep, TState, TMode> {
+        additionalContentProviders.add(getAdditionalContent)
+        return this
+    }
+
     fun build(
         state: TState,
         defaultUnreachableStepDestination: (() -> Destination)?,
@@ -99,7 +106,9 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
                 ?: throw JourneyInitialisationException(
                     "Step $segment has no unreachableStepDestination defined, and there is no default set at the journey level either",
                 ),
-        )
+        ) {
+            additionalContentProviders.associate { provider -> provider() }
+        }
 
         if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $segment base class has not been initialised correctly")
@@ -110,6 +119,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {
             throw JourneyInitialisationException("Custom configuration for Step $segment has not fully initialised the step")
         }
+
         return step
     }
 

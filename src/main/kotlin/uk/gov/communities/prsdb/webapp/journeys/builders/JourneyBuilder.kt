@@ -8,15 +8,35 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
+
+interface JourneyBuilderDsl<TState : JourneyState> {
+    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
+        segment: String,
+        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    )
+
+    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
+        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    )
+
+    fun task(
+        uninitialisedTask: Task<TState>,
+        init: TaskInitialiser<TState>.() -> Unit,
+    )
+}
 
 open class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
     val journey: TState,
-) {
+) : JourneyBuilderDsl<TState> {
     protected fun getStepInitialisers() = stepsUnderConstruction.toList()
 
     private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
     private var unreachableStepDestination: (() -> Destination)? = null
+    private val sections: MutableList<SectionBuilder<TState>> = mutableListOf()
 
     fun build(): Map<String, StepLifecycleOrchestrator> =
         buildMap {
@@ -30,7 +50,7 @@ open class JourneyBuilder<TState : JourneyState>(
             }
         }
 
-    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
         segment: String,
         uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
@@ -40,7 +60,7 @@ open class JourneyBuilder<TState : JourneyState>(
         stepsUnderConstruction.add(stepInitialiser)
     }
 
-    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
         uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
@@ -49,7 +69,7 @@ open class JourneyBuilder<TState : JourneyState>(
         stepsUnderConstruction.add(stepInitialiser)
     }
 
-    fun task(
+    override fun task(
         uninitialisedTask: Task<TState>,
         init: TaskInitialiser<TState>.() -> Unit,
     ) {
@@ -57,6 +77,15 @@ open class JourneyBuilder<TState : JourneyState>(
         taskInitialiser.init()
         val taskSteps = taskInitialiser.mapToStepInitialisers(journey)
         stepsUnderConstruction.addAll(taskSteps)
+    }
+
+    fun section(
+        headingMessageKey: String,
+        init: JourneyBuilderDsl<TState>.() -> Unit,
+    ) {
+        val sectionBuilder = SectionBuilder<TState>(headingMessageKey, this)
+        sectionBuilder.init()
+        sections.add(sectionBuilder)
     }
 
     fun unreachableStepUrl(getUrl: () -> String) {
@@ -95,6 +124,38 @@ open class JourneyBuilder<TState : JourneyState>(
             val builder = JourneyBuilder(state)
             builder.init()
             return builder.build()
+        }
+    }
+}
+
+class SectionBuilder<TState : JourneyState>(
+    private val headingMessageKey: String,
+    private val journeyBuilder: JourneyBuilder<TState>,
+) : JourneyBuilderDsl<TState> {
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
+        segment: String,
+        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    ) = journeyBuilder.step<TMode, TStep>(segment, uninitialisedStep) {
+        init()
+        withAdditionalContentProperty { "sectionHeaderInfo" to SectionHeaderViewModel(headingMessageKey, 1, 2) }
+    }
+
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
+        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    ) = journeyBuilder.notionalStep<TMode, TStep>(uninitialisedStep) {
+        init()
+        withAdditionalContentProperty { "sectionHeaderInfo" to SectionHeaderViewModel(headingMessageKey, 1, 2) }
+    }
+
+    override fun task(
+        uninitialisedTask: Task<TState>,
+        init: TaskInitialiser<TState>.() -> Unit,
+    ) = journeyBuilder.task(uninitialisedTask) {
+        init()
+        withConfigurationForAllSteps {
+            withAdditionalContentProperty { "sectionHeaderInfo" to SectionHeaderViewModel(headingMessageKey, 1, 2) }
         }
     }
 }
