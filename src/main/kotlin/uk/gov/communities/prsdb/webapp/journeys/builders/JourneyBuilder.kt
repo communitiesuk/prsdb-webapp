@@ -36,7 +36,7 @@ open class JourneyBuilder<TState : JourneyState>(
 
     private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
     private var unreachableStepDestination: (() -> Destination)? = null
-    private val sections: MutableList<SectionBuilder<TState>> = mutableListOf()
+    private val sections: MutableList<String> = mutableListOf()
 
     fun build(): Map<String, StepLifecycleOrchestrator> =
         buildMap {
@@ -85,7 +85,7 @@ open class JourneyBuilder<TState : JourneyState>(
     ) {
         val sectionBuilder = SectionBuilder<TState>(headingMessageKey, this)
         sectionBuilder.init()
-        sections.add(sectionBuilder)
+        sections.add(headingMessageKey)
     }
 
     fun unreachableStepUrl(getUrl: () -> String) {
@@ -116,6 +116,12 @@ open class JourneyBuilder<TState : JourneyState>(
         }
     }
 
+    fun getSectionHeaderViewModel(headingMessageKey: String): SectionHeaderViewModel {
+        val sectionIndex = sections.indexOf(headingMessageKey) + 1
+        val totalSections = sections.size
+        return SectionHeaderViewModel(headingMessageKey, sectionIndex, totalSections)
+    }
+
     companion object {
         fun <TState : JourneyState> journey(
             state: TState,
@@ -138,7 +144,7 @@ class SectionBuilder<TState : JourneyState>(
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) = journeyBuilder.step<TMode, TStep>(segment, uninitialisedStep) {
         init()
-        withAdditionalContentProperty { "sectionHeaderInfo" to SectionHeaderViewModel(headingMessageKey, 1, 2) }
+        withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
@@ -146,7 +152,7 @@ class SectionBuilder<TState : JourneyState>(
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) = journeyBuilder.notionalStep<TMode, TStep>(uninitialisedStep) {
         init()
-        withAdditionalContentProperty { "sectionHeaderInfo" to SectionHeaderViewModel(headingMessageKey, 1, 2) }
+        withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
     }
 
     override fun task(
@@ -155,7 +161,7 @@ class SectionBuilder<TState : JourneyState>(
     ) = journeyBuilder.task(uninitialisedTask) {
         init()
         withConfigurationForAllSteps {
-            withAdditionalContentProperty { "sectionHeaderInfo" to SectionHeaderViewModel(headingMessageKey, 1, 2) }
+            withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
         }
     }
 }
