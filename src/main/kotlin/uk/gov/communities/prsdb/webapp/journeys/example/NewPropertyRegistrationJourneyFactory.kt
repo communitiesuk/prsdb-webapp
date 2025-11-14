@@ -6,12 +6,13 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.step.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalAuthorityStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
@@ -33,7 +34,11 @@ class NewPropertyRegistrationJourneyFactory(
             unreachableStepUrl { "all-went-wrong" }
             task(journey.addressTask) {
                 parents { NoParents() }
-                redirectToDestination { Destination.ExternalUrl("/") }
+                redirectToStep { journey.ownershipTypeStep }
+            }
+            step("ownership-type", journey.ownershipTypeStep) {
+                parents { journey.addressTask.isComplete() }
+                nextStep { TODO("Add link to next step once added") }
             }
         }
     }
@@ -52,6 +57,7 @@ class PropertyRegistrationJourneyState(
     override val localAuthorityStep: LocalAuthorityStep,
     private val journeyStateService: JourneyStateService,
     val addressTask: AddressTask,
+    val ownershipTypeStep: OwnershipTypeStep,
 ) : AbstractJourneyState(journeyStateService),
     AddressState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
