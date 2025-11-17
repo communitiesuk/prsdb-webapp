@@ -4,6 +4,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFeatureFlagged
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -17,7 +18,7 @@ class ExampleFeatureFlagTestController(
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("feature-flagged-service-test")
-    fun featureFlagTest(model: Model): String {
+    fun featureFlaggedServiceTest(model: Model): String {
         val configFlagValue =
             if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"
@@ -28,6 +29,21 @@ class ExampleFeatureFlagTestController(
         model.addAttribute("ffConfigFeature", configFlagValue)
 
         // TODO PRSD-1683 - delete template when no longer needed
+        return "featureFlagTest"
+    }
+
+    @PrsdbFeatureFlagged(EXAMPLE_FEATURE_FLAG_ONE)
+    @GetMapping("/feature-flagged-endpoint-test")
+    fun featureFlaggedEndpointTest(model: Model): String {
+        val configFlagValue =
+            if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
+                "Feature Flag in FeatureFlagConfig is ON"
+            } else {
+                "Feature Flag in FeatureFlagConfig is OFF"
+            }
+        model.addAttribute("ffTestHeading", "Feature flagged controller endpoint - ACTIVE")
+        model.addAttribute("ffConfigFeature", configFlagValue)
+
         return "featureFlagTest"
     }
 }

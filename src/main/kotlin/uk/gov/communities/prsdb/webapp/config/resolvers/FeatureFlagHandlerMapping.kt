@@ -1,0 +1,18 @@
+package uk.gov.communities.prsdb.webapp.config.resolvers
+
+import org.springframework.web.servlet.mvc.condition.RequestCondition
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFeatureFlagged
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagChecker
+import java.lang.reflect.Method
+
+class FeatureFlagHandlerMapping(
+    private val featureFlagChecker: FeatureFlagChecker,
+) : RequestMappingHandlerMapping() {
+    override fun getCustomMethodCondition(method: Method): RequestCondition<*>? {
+        val featureFlagged = method.getAnnotation(PrsdbFeatureFlagged::class.java)
+        return featureFlagged?.let {
+            FeatureFlaggedRequestCondition(it.flagName, featureFlagChecker)
+        }
+    }
+}
