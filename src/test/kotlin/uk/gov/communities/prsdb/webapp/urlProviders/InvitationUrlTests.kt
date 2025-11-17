@@ -40,7 +40,7 @@ import kotlin.test.Test
 
 @WebMvcTest(
     controllers = [ManageLocalCouncilUsersController::class, RegisterLocalCouncilUserController::class],
-    properties = ["base-url.local-authority=http://localhost:8080/$LOCAL_COUNCIL_PATH_SEGMENT"],
+    properties = ["base-url.local-council=http://localhost:8080/$LOCAL_COUNCIL_PATH_SEGMENT"],
 )
 @Import(AbsoluteUrlProvider::class)
 class InvitationUrlTests(
@@ -75,19 +75,19 @@ class InvitationUrlTests(
     fun `The invitation URL generated when a new user is invited is routed to the accept invitation controller method`() {
         // Arrange
         val loggedInUser = createdLoggedInUserModel()
-        val localAuthority = createTestLocalAuthority()
+        val localCouncil = createTestLocalCouncil()
         val testToken = "test token"
         val testEmail = "test@example.com"
 
         whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(123, "user")).thenReturn(
             Pair(
                 loggedInUser,
-                localAuthority,
+                localCouncil,
             ),
         )
 
-        whenever(localCouncilInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
-        whenever(localCouncilInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
+        whenever(localCouncilInvitationService.createInvitationToken(testEmail, localCouncil)).thenReturn(testToken)
+        whenever(localCouncilInvitationService.getAuthorityForToken(testToken)).thenReturn(localCouncil)
         whenever(localCouncilInvitationService.tokenIsValid(testToken)).thenReturn(true)
 
         val invitationCaptor = argumentCaptor<LocalCouncilInvitationEmail>()
@@ -124,10 +124,10 @@ class InvitationUrlTests(
         return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
     }
 
-    private fun createTestLocalAuthority(): LocalCouncil {
+    private fun createTestLocalCouncil(): LocalCouncil {
         val localCouncil = LocalCouncil()
         ReflectionTestUtils.setField(localCouncil, "id", 123)
-        ReflectionTestUtils.setField(localCouncil, "name", "Test Local Authority")
+        ReflectionTestUtils.setField(localCouncil, "name", "Test Local Council")
         return localCouncil
     }
 }

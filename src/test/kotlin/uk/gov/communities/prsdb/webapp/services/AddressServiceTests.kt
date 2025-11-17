@@ -65,7 +65,7 @@ class AddressServiceTests {
             // Arrange
             addressDataModel.localCouncilId?.let {
                 whenever(mockLocalCouncilService.retrieveLocalCouncilById(it))
-                    .thenReturn(MockLocalCouncilData.createLocalAuthority(id = it))
+                    .thenReturn(MockLocalCouncilData.createLocalCouncil(id = it))
             }
 
             whenever(mockAddressRepository.save(any())).thenReturn(MockLandlordData.createAddress())
@@ -114,8 +114,8 @@ class AddressServiceTests {
         @JvmStatic
         private fun provideAddressDataModels() =
             listOf(
-                named("no local authority", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = null)),
-                named("a local authority", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = 1)),
+                named("no local council", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = null)),
+                named("a local council", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = 1)),
             )
     }
 }

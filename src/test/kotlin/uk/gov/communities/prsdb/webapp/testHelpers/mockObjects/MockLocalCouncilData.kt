@@ -11,34 +11,34 @@ import java.util.UUID
 
 class MockLocalCouncilData {
     companion object {
-        const val DEFAULT_LA_ID = 123
+        const val DEFAULT_LOCAL_COUNCIL_ID = 123
 
-        const val NON_ADMIN_LA_ID = 456
+        const val NON_ADMIN_LOCAL_COUNCIL_ID = 456
 
-        fun createLocalAuthority(
-            id: Int = DEFAULT_LA_ID,
+        fun createLocalCouncil(
+            id: Int = DEFAULT_LOCAL_COUNCIL_ID,
             custodianCode: String = "custodian code",
             name: String = "name",
         ): LocalCouncil = LocalCouncil(id, name, custodianCode)
 
-        const val DEFAULT_LA_USER_ID = 456L
+        const val DEFAULT_LOCAL_COUNCIL_USER_ID = 456L
 
-        fun createLocalAuthorityUser(
+        fun createLocalCouncilUser(
             baseUser: OneLoginUser = MockOneLoginUserData.createOneLoginUser(),
-            localCouncil: LocalCouncil = createLocalAuthority(),
-            id: Long = DEFAULT_LA_USER_ID,
+            localCouncil: LocalCouncil = createLocalCouncil(),
+            id: Long = DEFAULT_LOCAL_COUNCIL_USER_ID,
             isManager: Boolean = true,
             name: String = "name",
             email: String = "email",
         ): LocalCouncilUser = LocalCouncilUser(id, baseUser, isManager, localCouncil, name, email, true)
 
-        const val DEFAULT_LOGGED_IN_LA_USER_ID = 789L
+        const val DEFAULT_LOGGED_IN_LOCAL_COUNCIL_USER_ID = 789L
 
-        fun createdLoggedInUserModel(userId: Long = DEFAULT_LOGGED_IN_LA_USER_ID): LocalCouncilUserDataModel {
-            val defaultLA = createLocalAuthority()
+        fun createdLoggedInUserModel(userId: Long = DEFAULT_LOGGED_IN_LOCAL_COUNCIL_USER_ID): LocalCouncilUserDataModel {
+            val defaultLocalCouncil = createLocalCouncil()
             return LocalCouncilUserDataModel(
                 id = userId,
-                localCouncilName = defaultLA.name,
+                localCouncilName = defaultLocalCouncil.name,
                 isManager = true,
                 userName = "Logged In User",
                 isPending = false,
@@ -46,13 +46,13 @@ class MockLocalCouncilData {
             )
         }
 
-        const val DEFAULT_LA_INVITATION_ID = 123L
+        const val DEFAULT_LOCAL_COUNCIL_INVITATION_ID = 123L
 
-        fun createLocalAuthorityInvitation(
-            id: Long = DEFAULT_LA_INVITATION_ID,
+        fun createLocalCouncilInvitation(
+            id: Long = DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
             token: UUID = UUID.randomUUID(),
             email: String = "invited.email@example.com",
-            invitingAuthority: LocalCouncil = createLocalAuthority(DEFAULT_LA_ID),
+            invitingCouncil: LocalCouncil = createLocalCouncil(DEFAULT_LOCAL_COUNCIL_ID),
             invitedAsAdmin: Boolean = false,
             createdDate: Instant = Instant.now(),
         ): LocalCouncilInvitation {
@@ -61,7 +61,7 @@ class MockLocalCouncilData {
                     id = id,
                     token = token,
                     email = email,
-                    invitingAuthority = invitingAuthority,
+                    invitingCouncil = invitingCouncil,
                     invitedAsAdmin = invitedAsAdmin,
                 )
 

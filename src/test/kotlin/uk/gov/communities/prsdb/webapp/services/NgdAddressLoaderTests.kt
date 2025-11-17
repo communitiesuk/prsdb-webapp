@@ -283,7 +283,7 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalCouncilData.createLocalAuthority(custodianCode = "1"))
+        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
@@ -332,7 +332,7 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("largeCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalCouncilData.createLocalAuthority(custodianCode = "1"))
+        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)

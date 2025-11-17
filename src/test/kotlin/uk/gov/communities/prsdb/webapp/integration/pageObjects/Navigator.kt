@@ -165,13 +165,13 @@ class Navigator(
     private val page: Page,
     private val port: Int,
 ) {
-    fun goToManageLaUsers(authorityId: Int): ManageLocalCouncilUsersPage {
-        navigate(getLocalCouncilManageUsersRoute(authorityId))
+    fun goToManageLaUsers(councilId: Int): ManageLocalCouncilUsersPage {
+        navigate(getLocalCouncilManageUsersRoute(councilId))
         return createValidPage(page, ManageLocalCouncilUsersPage::class)
     }
 
-    fun goToInviteNewLaUser(authorityId: Int): InviteNewLocalCouncilUserPage {
-        navigate(getLocalCouncilInviteNewUserRoute(authorityId))
+    fun goToInviteNewLaUser(councilId: Int): InviteNewLocalCouncilUserPage {
+        navigate(getLocalCouncilInviteNewUserRoute(councilId))
         return createValidPage(page, InviteNewLocalCouncilUserPage::class)
     }
 
@@ -407,10 +407,10 @@ class Navigator(
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalCouncilFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationSelectLocalCouncilPage(): SelectLocalCouncilFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalAuthority().build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalCouncil().build(),
         )
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalCouncil.urlPathSegment}")
         return createValidPage(page, SelectLocalCouncilFormPagePropertyRegistration::class)
@@ -1012,7 +1012,7 @@ class Navigator(
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
-    fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalCouncilViewLandlordDetailsPage {
+    fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
         navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(id))
         return createValidPage(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
@@ -1048,7 +1048,7 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalCouncilView {
+    fun goToPropertyDetailsLocalCouncilView(id: Long): PropertyDetailsPageLocalCouncilView {
         navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = true))
         return createValidPage(
             page,
@@ -1208,7 +1208,7 @@ class Navigator(
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 
-    fun goToLocalAuthorityDashboard(): LocalCouncilDashboardPage {
+    fun goToLocalCouncilDashboard(): LocalCouncilDashboardPage {
         navigate(LOCAL_COUNCIL_DASHBOARD_URL)
         return createValidPage(page, LocalCouncilDashboardPage::class)
     }

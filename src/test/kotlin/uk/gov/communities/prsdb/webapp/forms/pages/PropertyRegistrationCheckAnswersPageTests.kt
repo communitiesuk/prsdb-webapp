@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
@@ -61,8 +61,8 @@ class PropertyRegistrationCheckAnswersPageTests {
         // Arrange
         val addressName = "4, Example Road, EG"
         val uprn: Long = 1002001
-        val localAuthority = createLocalAuthority()
-        val journeyData = journeyDataBuilder.withSelectedAddress(addressName, uprn, localAuthority).build()
+        val localCouncil = createLocalCouncil()
+        val journeyData = journeyDataBuilder.withSelectedAddress(addressName, uprn, localCouncil).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)
@@ -84,7 +84,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         assertEquals(
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localCouncil",
-                localAuthority.name,
+                localCouncil.name,
                 null,
             ),
             propertyDetails.single {
@@ -99,11 +99,11 @@ class PropertyRegistrationCheckAnswersPageTests {
         val addressLineOne = "3 Example Road"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val localAuthority = createLocalAuthority()
+        val localCouncil = createLocalCouncil()
 
         val journeyData =
             journeyDataBuilder
-                .withManualAddress(addressLineOne, townOrCity, postcode, localAuthority)
+                .withManualAddress(addressLineOne, townOrCity, postcode, localCouncil)
                 .build()
 
         // Act
@@ -127,7 +127,7 @@ class PropertyRegistrationCheckAnswersPageTests {
         assertEquals(
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localCouncil",
-                localAuthority.name,
+                localCouncil.name,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
                     RegisterPropertyStepId.LocalCouncil.urlPathSegment +

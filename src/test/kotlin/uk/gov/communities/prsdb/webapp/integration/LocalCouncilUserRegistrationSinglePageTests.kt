@@ -54,7 +54,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     @Nested
     inner class LaUserRegistrationStepLandingPage : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
-        fun `Navigating here as a registered local authority user redirects to the LA dashboard page`(page: Page) {
+        fun `Navigating here as a registered local council user redirects to the Local Council dashboard page`(page: Page) {
             navigator.navigateToLaUserRegistrationLandingPage(invitation.token)
             val dashboardPage = BasePage.assertPageIs(page, LocalCouncilDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.bannerHeading).containsText("Mock User")

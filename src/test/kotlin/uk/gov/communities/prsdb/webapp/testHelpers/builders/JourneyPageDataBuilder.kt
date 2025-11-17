@@ -47,7 +47,7 @@ class JourneyPageDataBuilder {
 
         fun beforePropertyRegistrationManualAddress() = beforePropertyRegistrationSelectAddress().withManualAddressSelected()
 
-        fun beforePropertyRegistrationSelectLocalAuthority() = beforePropertyRegistrationManualAddress().withManualAddress()
+        fun beforePropertyRegistrationSelectLocalCouncil() = beforePropertyRegistrationManualAddress().withManualAddress()
 
         fun beforePropertyRegistrationPropertyType() = JourneyDataBuilder().withLookupAddress().withSelectedAddress()
 

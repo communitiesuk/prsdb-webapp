@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import kotlin.test.assertEquals
 
 class PropertyRegistrationJourneyDataHelperTests {
@@ -28,10 +28,10 @@ class PropertyRegistrationJourneyDataHelperTests {
     @Test
     fun `getAddress returns the selected address`() {
         val selectedAddress = "1 Example Address, EG1 2AB"
-        val localAuthority = createLocalAuthority()
+        val localCouncil = createLocalCouncil()
         val mockJourneyData =
-            journeyDataBuilder.withSelectedAddress(selectedAddress, localCouncil = localAuthority).build()
-        val expectedAddressDataModel = AddressDataModel(selectedAddress, localCouncilId = localAuthority.id)
+            journeyDataBuilder.withSelectedAddress(selectedAddress, localCouncil = localCouncil).build()
+        val expectedAddressDataModel = AddressDataModel(selectedAddress, localCouncilId = localCouncil.id)
 
         val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData)
 
@@ -43,21 +43,21 @@ class PropertyRegistrationJourneyDataHelperTests {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val localAuthority = createLocalAuthority()
+        val localCouncil = createLocalCouncil()
         val mockJourneyData =
             journeyDataBuilder
-                .withManualAddress(addressLineOne, townOrCity, postcode, localAuthority)
+                .withManualAddress(addressLineOne, townOrCity, postcode, localCouncil)
                 .build()
         val expectedAddressDataModel =
             AddressDataModel.fromManualAddressData(
                 addressLineOne,
                 townOrCity,
                 postcode,
-                localCouncilId = localAuthority.id,
+                localCouncilId = localCouncil.id,
             )
 
-        whenever(mockLocalCouncilService.retrieveLocalCouncilByCustodianCode(localAuthority.custodianCode)).thenReturn(
-            localAuthority,
+        whenever(mockLocalCouncilService.retrieveLocalCouncilByCustodianCode(localCouncil.custodianCode)).thenReturn(
+            localCouncil,
         )
 
         val addressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(mockJourneyData)

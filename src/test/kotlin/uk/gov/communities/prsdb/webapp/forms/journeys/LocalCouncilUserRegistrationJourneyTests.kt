@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import java.util.UUID
 
@@ -46,7 +46,7 @@ class LocalCouncilUserRegistrationJourneyTests {
     fun `handleSubmitAndRedirect registers the new user and adds their id to the session`() {
         val name = "Test user"
         val email = "test.user@example.com"
-        val localAuthority = createLocalAuthority()
+        val localAuthority = createLocalCouncil()
         val invitedAsAdmin = true
         val baseUserId = "test-base-user-id"
 
@@ -116,11 +116,11 @@ class LocalCouncilUserRegistrationJourneyTests {
     private fun setupInvitationAndLAUserMocks(
         name: String = "Test user",
         email: String = "test.user@example.com",
-        localCouncil: LocalCouncil = createLocalAuthority(),
+        localCouncil: LocalCouncil = createLocalCouncil(),
         invitedAsAdmin: Boolean = false,
         baseUserId: String = "test-base-user-id",
     ): LocalCouncilUser {
-        createLocalAuthority()
+        createLocalCouncil()
 
         val journeyData = JourneyDataBuilder.forLaUser(name, email).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)

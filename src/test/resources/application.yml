@@ -15,7 +15,7 @@ notify:
 
 base-url:
   landlord: example.com
-  local-authority: example.com
+  local-council: example.com
 
 aws:
   s3:

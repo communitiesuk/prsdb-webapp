@@ -15,7 +15,7 @@ class SelectLocalCouncilFormPagePropertyRegistration(
     ) {
     val form = SelectLocalCouncilForm(page)
 
-    fun submitLocalAuthority(
+    fun submitLocalCouncil(
         partialName: String,
         fullName: String,
     ) {

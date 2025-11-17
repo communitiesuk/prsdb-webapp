@@ -26,7 +26,7 @@ class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql
 
     @Test
     fun `The feedback link from a lc user's beta banner opens a feedback page which includes the referrerHeader`(page: Page) {
-        val dashboard = navigator.goToLocalAuthorityDashboard()
+        val dashboard = navigator.goToLocalCouncilDashboard()
         val popupPromise =
             page.waitForPopup {
                 dashboard.betaBanner.giveFeedbackLink.clickAndWait()

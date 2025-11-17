@@ -126,9 +126,9 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     inner class SelectLocalCouncilStep {
         @Test
         fun `Submitting without selecting an LA return an error`(page: Page) {
-            val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
-            selectLocalAuthorityPage.form.submit()
-            assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
+            val selectLocalCouncilPage = navigator.skipToPropertyRegistrationSelectLocalCouncilPage()
+            selectLocalCouncilPage.form.submit()
+            assertThat(selectLocalCouncilPage.form.getErrorMessage("localCouncilId"))
                 .containsText("Select a local council to continue")
         }
     }

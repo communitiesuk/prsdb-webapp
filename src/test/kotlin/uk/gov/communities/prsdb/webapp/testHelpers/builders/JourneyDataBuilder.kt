@@ -59,7 +59,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEic
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import java.time.LocalDate
 
 class JourneyDataBuilder(
@@ -120,7 +120,7 @@ class JourneyDataBuilder(
             JourneyDataBuilder(localCouncilService, defaultPropertyJourneyData).withSelectedAddress(
                 DEFAULT_ADDRESS,
                 709902,
-                createLocalAuthority(),
+                createLocalCouncil(),
             )
 
         private val defaultLandlordJourneyData: JourneyData =
@@ -148,7 +148,7 @@ class JourneyDataBuilder(
             JourneyDataBuilder(localCouncilService, defaultLandlordJourneyData).withSelectedAddress(
                 DEFAULT_ADDRESS,
                 709902,
-                createLocalAuthority(),
+                createLocalCouncil(),
             )
 
         fun forLaUser(
@@ -191,7 +191,7 @@ class JourneyDataBuilder(
     fun withSelectedAddress(
         singleLineAddress: String = "1 Street Address, City, AB1 2CD",
         uprn: Long? = null,
-        localCouncil: LocalCouncil? = createLocalAuthority(),
+        localCouncil: LocalCouncil? = createLocalCouncil(),
         isContactAddress: Boolean = false,
     ): JourneyDataBuilder {
         localCouncil?.let {
@@ -237,7 +237,7 @@ class JourneyDataBuilder(
         }
 
         journeyData[RegisterPropertyStepId.LocalCouncil.urlPathSegment] =
-            mapOf("localAuthorityId" to localCouncil?.id)
+            mapOf("localCouncilId" to localCouncil?.id)
 
         return this
     }

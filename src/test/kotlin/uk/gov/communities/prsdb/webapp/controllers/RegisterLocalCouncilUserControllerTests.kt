@@ -44,7 +44,7 @@ class RegisterLocalCouncilUserControllerTests(
 
     private val expiredToken = "expired-token"
 
-    private val invitation = MockLocalCouncilData.createLocalAuthorityInvitation()
+    private val invitation = MockLocalCouncilData.createLocalCouncilInvitation()
 
     @BeforeEach
     fun setupMocks() {
@@ -103,10 +103,10 @@ class RegisterLocalCouncilUserControllerTests(
     @WithMockUser
     fun `getConfirmation returns 200 if an LA user has been registered`() {
         val laUserId = 0L
-        val localAuthorityUser = MockLocalCouncilData.createLocalAuthorityUser()
+        val localCouncilUser = MockLocalCouncilData.createLocalCouncilUser()
 
         whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
-        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localAuthorityUser)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localCouncilUser)
 
         mvc
             .perform(
@@ -120,10 +120,10 @@ class RegisterLocalCouncilUserControllerTests(
     @WithMockUser
     fun `getConfirmation returns 400 if there's no LA user ID in session`() {
         val laUserId = 0L
-        val localAuthorityUser = MockLocalCouncilData.createLocalAuthorityUser()
+        val localCouncilUser = MockLocalCouncilData.createLocalCouncilUser()
 
         whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(null)
-        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localAuthorityUser)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localCouncilUser)
 
         mvc
             .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
@@ -162,7 +162,7 @@ class RegisterLocalCouncilUserControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `getLandingPage returns 302 for authenticated user with Local Authority role`() {
+    fun `getLandingPage returns 302 for authenticated user with Local Council role`() {
         whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)
         mvc
             .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
@@ -175,7 +175,7 @@ class RegisterLocalCouncilUserControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `getLandingPage deletes the invitation for authenticated user with Local Authority role`() {
+    fun `getLandingPage deletes the invitation for authenticated user with Local Council role`() {
         val invitation = LocalCouncilInvitation()
         whenever(invitationService.getInvitationFromToken(validToken)).thenReturn(invitation)
         whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)

@@ -13,12 +13,12 @@ class InviteLaAdminPage(
     val form = InviteLaAdminForm(page)
 
     fun fillInFormAndSubmit(
-        partialLocalAuthorityName: String,
-        fullLocalAuthorityName: String,
+        partialLocalCouncilName: String,
+        fullLocalCouncilName: String,
         email: String,
         confirmEmail: String,
     ) {
-        form.localAuthoritySelect.fillPartialAndSelectValue(partialLocalAuthorityName, fullLocalAuthorityName)
+        form.localCouncilSelect.fillPartialAndSelectValue(partialLocalCouncilName, fullLocalCouncilName)
         form.emailInput.fill(email)
         form.confirmEmailInput.fill(confirmEmail)
         form.submit()
@@ -27,7 +27,7 @@ class InviteLaAdminPage(
     class InviteLaAdminForm(
         page: Page,
     ) : PostForm(page) {
-        val localAuthoritySelect = Select(locator)
+        val localCouncilSelect = Select(locator)
         val emailInput = TextInput.emailByFieldName(locator, "email")
         val confirmEmailInput = TextInput.emailByFieldName(locator, "confirmEmail")
     }

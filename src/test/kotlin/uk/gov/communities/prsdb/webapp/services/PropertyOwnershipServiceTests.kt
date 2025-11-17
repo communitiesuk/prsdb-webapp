@@ -331,12 +331,12 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns property ownership when user is an la user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            val localAuthorityUser =
-                MockLocalCouncilData.createLocalAuthorityUser(
+            val localCouncilUser =
+                MockLocalCouncilData.createLocalCouncilUser(
                     MockOneLoginUserData.createOneLoginUser("not-the-landlord"),
-                    MockLocalCouncilData.createLocalAuthority(),
+                    MockLocalCouncilData.createLocalCouncil(),
                 )
-            val principalName = localAuthorityUser.baseUser.id
+            val principalName = localCouncilUser.baseUser.id
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,

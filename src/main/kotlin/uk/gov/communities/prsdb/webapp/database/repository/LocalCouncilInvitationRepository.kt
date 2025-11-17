@@ -9,10 +9,10 @@ import java.util.UUID
 interface LocalCouncilInvitationRepository : JpaRepository<LocalCouncilInvitation?, Long?> {
     fun findByToken(token: UUID): LocalCouncilInvitation?
 
-    fun findByInvitingAuthority(
+    fun findByInvitingCouncil(
         localCouncil: LocalCouncil,
         pageRequest: PageRequest,
     ): List<LocalCouncilInvitation>
 
-    fun countByInvitingAuthority(invitingAuthority: LocalCouncil): Long
+    fun countByInvitingCouncil(invitingAuthority: LocalCouncil): Long
 }

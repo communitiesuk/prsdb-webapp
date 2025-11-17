@@ -42,29 +42,29 @@ class LocalCouncilInvitationServiceTests {
     }
 
     @Test
-    fun `createInviteToken saves the created invite token for the given authority`() {
-        val authority = MockLocalCouncilData.createLocalAuthority()
+    fun `createInviteToken saves the created invite token for the given council`() {
+        val council = MockLocalCouncilData.createLocalCouncil()
 
-        val token = inviteService.createInvitationToken("email", authority)
+        val token = inviteService.createInvitationToken("email", council)
 
         val inviteCaptor = captor<LocalCouncilInvitation>()
         verify(mockLaInviteRepository).save(inviteCaptor.capture())
 
-        assertEquals(authority, inviteCaptor.value.invitingCouncil)
+        assertEquals(council, inviteCaptor.value.invitingCouncil)
         assertEquals(token, inviteCaptor.value.token.toString())
     }
 
     @Test
-    fun `getAuthorityForToken returns the authority the token was created with`() {
+    fun `getCouncilForToken returns the council the token was created with`() {
         val testUuid = UUID.randomUUID()
-        val testAuthority = MockLocalCouncilData.createLocalAuthority(id = 789)
+        val testCouncil = MockLocalCouncilData.createLocalCouncil(id = 789)
 
         whenever(mockLaInviteRepository.findByToken(testUuid))
-            .thenReturn(MockLocalCouncilData.createLocalAuthorityInvitation(invitingAuthority = testAuthority, token = testUuid))
+            .thenReturn(MockLocalCouncilData.createLocalCouncilInvitation(invitingCouncil = testCouncil, token = testUuid))
 
-        val authority = inviteService.getAuthorityForToken(testUuid.toString())
+        val council = inviteService.getAuthorityForToken(testUuid.toString())
 
-        assertEquals(authority, testAuthority)
+        assertEquals(council, testCouncil)
     }
 
     @Test
@@ -72,7 +72,7 @@ class LocalCouncilInvitationServiceTests {
         val testUuid = UUID.randomUUID()
         val testEmail = "test@example.com"
         whenever(mockLaInviteRepository.findByToken(testUuid))
-            .thenReturn(MockLocalCouncilData.createLocalAuthorityInvitation(email = testEmail, token = testUuid))
+            .thenReturn(MockLocalCouncilData.createLocalCouncilInvitation(email = testEmail, token = testUuid))
 
         val email = inviteService.getEmailAddressForToken(testUuid.toString())
 
@@ -82,7 +82,7 @@ class LocalCouncilInvitationServiceTests {
     @Test
     fun `getInvitationFromToken returns an invitation if the token is in the database`() {
         val testUuid = UUID.randomUUID()
-        val testInvitation = MockLocalCouncilData.createLocalAuthorityInvitation(token = testUuid)
+        val testInvitation = MockLocalCouncilData.createLocalCouncilInvitation(token = testUuid)
         whenever(mockLaInviteRepository.findByToken(testUuid))
             .thenReturn(testInvitation)
 
@@ -103,7 +103,7 @@ class LocalCouncilInvitationServiceTests {
     @Test
     fun `getInvitationOrNull returns an invitation if the token is in the database`() {
         val testUuid = UUID.randomUUID()
-        val testInvitation = MockLocalCouncilData.createLocalAuthorityInvitation(token = testUuid)
+        val testInvitation = MockLocalCouncilData.createLocalCouncilInvitation(token = testUuid)
         whenever(mockLaInviteRepository.findByToken(testUuid))
             .thenReturn(testInvitation)
 
@@ -131,7 +131,7 @@ class LocalCouncilInvitationServiceTests {
                 .minus(1.minutes)
                 .toJavaInstant()
 
-        val invitation = MockLocalCouncilData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate)
+        val invitation = MockLocalCouncilData.createLocalCouncilInvitation(token = testUuid, createdDate = createdDate)
 
         assertTrue(inviteService.getInvitationHasExpired(invitation))
     }
@@ -146,7 +146,7 @@ class LocalCouncilInvitationServiceTests {
                 .plus(30.minutes)
                 .toJavaInstant()
 
-        val invitation = MockLocalCouncilData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate)
+        val invitation = MockLocalCouncilData.createLocalCouncilInvitation(token = testUuid, createdDate = createdDate)
 
         assertFalse(inviteService.getInvitationHasExpired(invitation))
     }
@@ -161,7 +161,7 @@ class LocalCouncilInvitationServiceTests {
                 .plus(30.minutes)
                 .toJavaInstant()
         whenever(mockLaInviteRepository.findByToken(testUuid))
-            .thenReturn(MockLocalCouncilData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate))
+            .thenReturn(MockLocalCouncilData.createLocalCouncilInvitation(token = testUuid, createdDate = createdDate))
 
         assertTrue(inviteService.tokenIsValid(testUuid.toString()))
     }
@@ -177,7 +177,7 @@ class LocalCouncilInvitationServiceTests {
                 .toJavaInstant()
 
         whenever(mockLaInviteRepository.findByToken(testUuid))
-            .thenReturn(MockLocalCouncilData.createLocalAuthorityInvitation(token = testUuid, createdDate = createdDate))
+            .thenReturn(MockLocalCouncilData.createLocalCouncilInvitation(token = testUuid, createdDate = createdDate))
 
         assertFalse(inviteService.tokenIsValid(testUuid.toString()))
     }
@@ -193,7 +193,7 @@ class LocalCouncilInvitationServiceTests {
     @Test
     fun `getInvitationByIdOrNull returns an invitation if the id is in the database`() {
         val testId = 123.toLong()
-        val invitationFromDatabase = MockLocalCouncilData.createLocalAuthorityInvitation(id = testId)
+        val invitationFromDatabase = MockLocalCouncilData.createLocalCouncilInvitation(id = testId)
 
         whenever(mockLaInviteRepository.findById(testId))
             .thenReturn(Optional.of(invitationFromDatabase) as Optional<LocalCouncilInvitation?>)
@@ -210,7 +210,7 @@ class LocalCouncilInvitationServiceTests {
 
     @Test
     fun `getAdminInvitationByIdOrNull returns an invitation if the id is in the database and it is admin`() {
-        val invitation = MockLocalCouncilData.createLocalAuthorityInvitation(invitedAsAdmin = true)
+        val invitation = MockLocalCouncilData.createLocalCouncilInvitation(invitedAsAdmin = true)
 
         whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalCouncilInvitation?>)
 
@@ -230,7 +230,7 @@ class LocalCouncilInvitationServiceTests {
 
     @Test
     fun `getAdminInvitationByIdOrNull returns an null if the id is in the database and it is NOT admin`() {
-        val invitation = MockLocalCouncilData.createLocalAuthorityInvitation(invitedAsAdmin = false)
+        val invitation = MockLocalCouncilData.createLocalCouncilInvitation(invitedAsAdmin = false)
 
         whenever(mockLaInviteRepository.findById(invitation.id)).thenReturn(Optional.of(invitation) as Optional<LocalCouncilInvitation?>)
 
@@ -242,7 +242,7 @@ class LocalCouncilInvitationServiceTests {
     @Test
     fun `throwErrorIfInvitationExists does not throws error if invitation doesn't exist`() {
         // Arrange
-        val invitation = MockLocalCouncilData.createLocalAuthorityInvitation()
+        val invitation = MockLocalCouncilData.createLocalCouncilInvitation()
         whenever(mockLaInviteRepository.existsById(invitation.id)).thenReturn(false)
 
         // Act and Assert
@@ -254,7 +254,7 @@ class LocalCouncilInvitationServiceTests {
     @Test
     fun `throwErrorIfInvitationExists throws INTERNAL SERVER ERROR if invitation still exists`() {
         // Arrange
-        val invitation = MockLocalCouncilData.createLocalAuthorityInvitation()
+        val invitation = MockLocalCouncilData.createLocalCouncilInvitation()
         whenever(mockLaInviteRepository.existsById(invitation.id)).thenReturn(true)
 
         // Act and Assert

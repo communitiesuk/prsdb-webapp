@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import java.time.Instant
 import java.time.LocalDate
 
@@ -26,7 +26,7 @@ class MockLandlordData {
     companion object {
         fun createAddress(
             singleLineAddress: String = "1 Example Road, EG1 2AB",
-            localCouncil: LocalCouncil? = createLocalAuthority(),
+            localCouncil: LocalCouncil? = createLocalCouncil(),
             uprn: Long? = null,
         ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localCouncil)
 
@@ -114,7 +114,7 @@ class MockLandlordData {
             context: String =
                 "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
                     "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
-                    "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
+                    "\\\"localCouncilId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
                     "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"2, Example Road, EG\"}}",
             user: OneLoginUser = createOneLoginUser(),
             createdDate: Instant = Instant.now(),
@@ -147,7 +147,7 @@ class MockLandlordData {
 
         fun createPasscode(
             code: String = "ABCDEF",
-            localCouncil: LocalCouncil = createLocalAuthority(),
+            localCouncil: LocalCouncil = createLocalCouncil(),
             baseUser: OneLoginUser? = createOneLoginUser(),
         ) = Passcode(code, localCouncil, baseUser)
     }

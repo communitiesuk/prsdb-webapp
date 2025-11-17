@@ -34,6 +34,6 @@ class NotMaintenanceModeTests : MaintenancePageTests() {
 
     @Test
     fun `User can reach the local council dashboard`() {
-        navigator.goToLocalAuthorityDashboard()
+        navigator.goToLocalCouncilDashboard()
     }
 }

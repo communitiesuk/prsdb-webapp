@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -37,19 +37,19 @@ class JourneyDataHelperTests {
     }
 
     @Test
-    fun `getManualAddress returns an address with a local authority from journey data`() {
+    fun `getManualAddress returns an address with a local council from journey data`() {
         val addressLineOne = "1 Example Address"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val localAuthority = createLocalAuthority()
+        val localCouncil = createLocalCouncil()
         val mockJourneyData =
-            journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode, localAuthority).build()
+            journeyDataBuilder.withManualAddress(addressLineOne, townOrCity, postcode, localCouncil).build()
         val expectedAddressDataModel =
             AddressDataModel.fromManualAddressData(
                 addressLineOne,
                 townOrCity,
                 postcode,
-                localCouncilId = localAuthority.id,
+                localCouncilId = localCouncil.id,
             )
 
         val addressDataModel =

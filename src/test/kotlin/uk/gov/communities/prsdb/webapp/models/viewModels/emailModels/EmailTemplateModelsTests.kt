@@ -18,7 +18,7 @@ class EmailTemplateModelsTests {
             listOf(
                 EmailTemplateTestData(
                     LocalCouncilInvitationEmail(
-                        MockLocalCouncilData.createLocalAuthority(),
+                        MockLocalCouncilData.createLocalCouncil(),
                         URI("invitationUri"),
                         "prsdUrl",
                         ONE_LOGIN_INFO_URL,
@@ -26,11 +26,11 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalAuthority()),
+                    LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalCouncil()),
                     "/emails/LocalCouncilInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalCouncilAdminInvitationEmail(MockLocalCouncilData.createLocalAuthority(), URI("invitationUri")),
+                    LocalCouncilAdminInvitationEmail(MockLocalCouncilData.createLocalCouncil(), URI("invitationUri")),
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(

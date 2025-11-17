@@ -60,12 +60,12 @@ class LandlordDetailsUpdateJourneyDataHelperTests {
     fun `getAddressIfPresent returns the selected address if the selected address in in journey data`() {
         val singleLineAddress = "address passed in"
         val uprn: Long = 44
-        val authority = LocalCouncil()
-        val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, authority).build()
+        val council = LocalCouncil()
+        val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, council).build()
 
         val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
-        assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localCouncilId = authority.id), addressUpdate)
+        assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localCouncilId = council.id), addressUpdate)
     }
 
     @Test

@@ -10,7 +10,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
 import kotlin.test.Test
 
 @WebMvcTest(LocalCouncilDashboardController::class)
@@ -46,7 +46,7 @@ class LocalCouncilDashboardControllerTests(
     }
 
     @Test
-    fun `localAuthorityDashboard returns a redirect for unauthenticated user`() {
+    fun `localCouncilDashboard returns a redirect for unauthenticated user`() {
         mvc.get(LOCAL_COUNCIL_DASHBOARD_URL).andExpect {
             status { is3xxRedirection() }
         }
@@ -54,7 +54,7 @@ class LocalCouncilDashboardControllerTests(
 
     @Test
     @WithMockUser
-    fun `localAuthorityDashboard returns 403 for unauthorized user`() {
+    fun `localCouncilDashboard returns 403 for unauthorized user`() {
         mvc
             .get(LOCAL_COUNCIL_DASHBOARD_URL)
             .andExpect {
@@ -64,9 +64,9 @@ class LocalCouncilDashboardControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `localAuthorityDashboard returns 200 for authorised local authority admin user`() {
-        val localAuthorityUser = createLocalAuthorityUser()
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localAuthorityUser)
+    fun `localCouncilDashboard returns 200 for authorised local council admin user`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
 
         mvc
             .get(LOCAL_COUNCIL_DASHBOARD_URL)
@@ -77,9 +77,9 @@ class LocalCouncilDashboardControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `localAuthorityDashboard returns 200 for authorised local authority user`() {
-        val localAuthorityUser = createLocalAuthorityUser()
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localAuthorityUser)
+    fun `localCouncilDashboard returns 200 for authorised local council user`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
 
         mvc
             .get(LOCAL_COUNCIL_DASHBOARD_URL)
