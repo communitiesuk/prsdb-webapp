@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -45,7 +46,7 @@ class NewPropertyRegistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
-            step("task-list", journey.taskListStep) {
+            step(TASK_LIST_PATH_SEGMENT, journey.taskListStep) {
                 initialStep()
                 noNextDestination()
             }
@@ -109,7 +110,6 @@ class PropertyRegistrationJourneyState(
     OccupiedJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
 
-    // TODO PRSD-1546: Choose where to initialize and validate journey state
     final fun initializeJourneyState(user: Principal): String {
         val journeyId = generateJourneyId(user)
 
@@ -120,7 +120,7 @@ class PropertyRegistrationJourneyState(
 
     companion object {
         fun generateJourneyId(user: Principal): String =
-            "Prop reg journey for user ${user.name}"
+            "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
                 .hashCode()
                 .toUInt()
                 .times(111113111U)
