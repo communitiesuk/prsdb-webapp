@@ -1,10 +1,11 @@
 package uk.gov.communities.prsdb.webapp.annotations.webAnnotations
 
+import org.springframework.beans.factory.support.BeanDefinitionBuilder
 import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.type.AnnotatedTypeMetadata
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -21,9 +22,31 @@ class FeatureCondition : Condition {
         val attributes = metadata.getAnnotationAttributes(PrsdbConditionalOnFeatureEnabled::class.java.name)
         val featureName = attributes?.get("featureName") as? String ?: return false
 
-/*        val featureFlagManager = context.beanFactory?.getBean(FeatureFlagManager::class.java)
-        return featureFlagManager?.checkFeature(featureName) ?: false*/
+        val registry = context.registry
+        val beanName = "featureFlagConfigForConditionTag"
 
-        return featureName == EXAMPLE_FEATURE_FLAG_ONE
+        // Ensure a bean definition exists early (so other condition checks can see it)
+        if (!registry.containsBeanDefinition(beanName)) {
+            val bd =
+                BeanDefinitionBuilder
+                    .genericBeanDefinition(FeatureFlagConfig::class.java)
+                    .beanDefinition
+            registry.registerBeanDefinition(beanName, bd)
+        }
+
+        // Try to resolve the bean from the bean factory (may be null in some phases)
+        val beanFactory = context.beanFactory
+        val featureFlagConfig =
+            beanFactory?.let {
+                if (it.containsBean(beanName)) it.getBean(beanName) as? FeatureFlagConfig else null
+            }
+
+        val manager = featureFlagConfig?.featureFlagManager()
+
+        // If we have an instance use it; otherwise, check the bean definition existed and assume disabled fallback
+        return manager?.let { m ->
+            // consult FF4j API safely
+            m.exist(featureName) && m.check(featureName)
+        } ?: false
     }
 }
