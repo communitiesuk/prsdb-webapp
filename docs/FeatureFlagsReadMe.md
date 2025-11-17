@@ -34,7 +34,8 @@ To make an endpoint available only when a feature is disabled, annotate it with 
 (See examples in ExampleFeatureFlagTestController)
 
 ## Tests
-Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabed or disabled in particular tests as required
-(See ExampleFeatureFlagServiceTest.kt).
+Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabled or disabled in particular tests as required.
 
-
+See the following for example tests:
+* ExampleFeatureFlagServiceTest.kt
+* ExampleFeatureFlaggedEndpointAvailabilityTest.kt
