@@ -18,10 +18,10 @@ class ExampleFeatureFlagTestController(
     private val exampleFeatureFlaggedService: ExampleFeatureFlaggedService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    @GetMapping("feature-flagged-service-test")
+    @GetMapping(FEATURED_FLAGGED_SERVICE_TEST_URL_SEGMENT)
     fun featureFlaggedServiceTest(model: Model): String {
         val configFlagValue =
-            if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
+            if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"
             } else {
                 "Feature Flag in FeatureFlagConfig is OFF"
@@ -34,10 +34,10 @@ class ExampleFeatureFlagTestController(
     }
 
     @AvailableWhenFeatureFlagEnabled(EXAMPLE_FEATURE_FLAG_ONE)
-    @GetMapping("/feature-flagged-endpoint-test")
+    @GetMapping(FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT)
     fun featureFlaggedEndpointTest(model: Model): String {
         val configFlagValue =
-            if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
+            if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"
             } else {
                 "Feature Flag in FeatureFlagConfig is OFF"
@@ -49,10 +49,10 @@ class ExampleFeatureFlagTestController(
     }
 
     @AvailableWhenFeatureFlagDisabled(EXAMPLE_FEATURE_FLAG_ONE)
-    @GetMapping("/inverse-feature-flagged-endpoint-test")
+    @GetMapping(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT)
     fun inverseFeatureFlaggedEndpointTest(model: Model): String {
         val configFlagValue =
-            if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
+            if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"
             } else {
                 "Feature Flag in FeatureFlagConfig is OFF"
@@ -61,5 +61,16 @@ class ExampleFeatureFlagTestController(
         model.addAttribute("ffConfigFeature", configFlagValue)
 
         return "featureFlagTest"
+    }
+
+    companion object {
+        const val FEATURED_FLAGGED_SERVICE_TEST_URL_SEGMENT = "feature-flagged-service-test"
+        const val FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT = "feature-flagged-endpoint-test"
+        const val INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT = "inverse-feature-flagged-endpoint-test"
+
+        const val FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_SERVICE_TEST_URL_SEGMENT"
+        const val FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT"
+        const val INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT"
     }
 }

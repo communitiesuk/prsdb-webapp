@@ -39,3 +39,4 @@ Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig 
 See the following for example tests:
 * ExampleFeatureFlagServiceTest.kt
 * ExampleFeatureFlaggedEndpointAvailabilityTest.kt
+* ExampleFeatureFlagTestControllerTests.kt

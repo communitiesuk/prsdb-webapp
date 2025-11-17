@@ -11,7 +11,8 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
 
 // TODO PRSD-1683 - delete example feature flag implementation when no longer needed
 class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTest() {
@@ -34,7 +35,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTest() {
     fun `featureFlagEnabled endpoint is available when the flag is on`() {
         featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
-            .get("/$LANDLORD_PATH_SEGMENT/feature-flagged-endpoint-test")
+            .get(FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
     }
 
@@ -43,7 +44,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTest() {
     fun `featureFlagEnabled endpoint is unavailable when the flag is off`() {
         featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
-            .get("/$LANDLORD_PATH_SEGMENT/feature-flagged-endpoint-test")
+            .get(FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isNotFound() } }
     }
 
@@ -52,7 +53,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTest() {
     fun `inverseFeatureFlagEnabled endpoint is available when the flag is off`() {
         featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
-            .get("/$LANDLORD_PATH_SEGMENT/inverse-feature-flagged-endpoint-test")
+            .get(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
     }
 
@@ -61,7 +62,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTest() {
     fun `inverseFeatureFlagEnabled endpoint is unavailable when the flag is on`() {
         featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
-            .get("/$LANDLORD_PATH_SEGMENT/inverse-feature-flagged-endpoint-test")
+            .get(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isNotFound() } }
     }
 }
