@@ -6,6 +6,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import uk.gov.communities.prsdb.webapp.config.resolvers.FeatureFlagHandlerMapping
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagChecker
 
+// There should be at most one WebMvcRegistrations bean in the application
 @Component
 class PrsdbWebMvcRegistration(
     private val featureFlagChecker: FeatureFlagChecker,
