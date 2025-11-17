@@ -140,9 +140,11 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     val backUrl: String?
         get() {
             val singleParentUrl =
-                parentage.allowingParentSteps
-                    .singleOrNull()
-                    ?.getRouteSegmentOrNull()
+                when (val singleParentStep = parentage.allowingParentSteps.singleOrNull()) {
+                    is InternalStep<*, *, *> -> singleParentStep.backUrl
+                    is RequestableStep<*, *, *> -> JourneyStateService.urlToStep(singleParentStep)
+                    null -> null
+                }
             val backUrlOverrideValue = this.backUrlOverride?.let { it() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
