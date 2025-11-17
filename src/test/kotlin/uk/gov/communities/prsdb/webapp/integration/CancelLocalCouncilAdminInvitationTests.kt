@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-class CancelLocalCouncilAdminInvitationTests : IntegrationTestWithMutableData("data-edit-la-admin-users-and-invitations.sql") {
+class CancelLocalCouncilAdminInvitationTests : IntegrationTestWithMutableData("data-edit-local-council-admin-users-and-invitations.sql") {
     val invitationId = 1L
     val invitedEmail = "cart@example.com"
 

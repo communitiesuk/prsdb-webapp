@@ -6,7 +6,7 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
        ('urn:fdc:gov.uk:2022:D', '01/15/25'),
        ('urn:fdc:gov.uk:2022:E', '01/15/25');
 
-INSERT INTO local_authority_user (id, subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
+INSERT INTO local_council_user (id, subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES (1, 'urn:fdc:gov.uk:2022:D', true, 4, '10/14/24', '10/14/24', 'D name', 'test3@example.com', true),
        (2, 'urn:fdc:gov.uk:2022:E', true, 1, '10/09/24', '10/09/24', 'E name', 'Arthur.Dent4@test.com', true),
@@ -14,7 +14,7 @@ VALUES (1, 'urn:fdc:gov.uk:2022:D', true, 4, '10/14/24', '10/14/24', 'D name', '
        (4, 'urn:fdc:gov.uk:2022:B', true, 4, '10/09/24', '10/09/24', 'B name', 'Arthur.Dent3@test.com', true),
        (5, 'urn:fdc:gov.uk:2022:C', true, 1, '10/07/24', '10/07/24', 'C name', 'Ford.Prefect2@test.com', true);
 
-INSERT INTO local_authority_invitation (id, invited_email, inviting_authority_id, token, invited_as_admin)
+INSERT INTO local_council_invitation (id, invited_email, inviting_council_id, token, invited_as_admin)
 VALUES     (1, 'H@example.com', 4, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e65', true),
            (2, 'I@example.com', 4, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e67', true),
            (3, 'F@example.com', 4, 'e98583f2-91b1-46ed-afb1-6cfcbaf97e63', true),

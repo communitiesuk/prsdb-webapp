@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
     @Nested
-    inner class LaUserInvitation : NestedIntegrationTestWithMutableData("data-la-users-and-invitations.sql") {
+    inner class LaUserInvitation : NestedIntegrationTestWithMutableData("data-local-council-users-and-invitations.sql") {
         @Test
         fun `an la user invitation can be cancelled`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
@@ -53,7 +53,7 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LaAdminInvitation : NestedIntegrationTestWithMutableData("data-la-invitations-user-is-system-operator.sql") {
+    inner class LaAdminInvitation : NestedIntegrationTestWithMutableData("data-local-council-invitations-user-is-system-operator.sql") {
         @Test
         fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page

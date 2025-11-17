@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
-class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-lauser.sql") {
+class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-local-council-user.sql") {
     @Autowired
     lateinit var localCouncilService: LocalCouncilService
 

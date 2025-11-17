@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-class EditLocalCouncilAdminSinglePageTests : IntegrationTestWithImmutableData("data-edit-la-admin-users-and-invitations.sql") {
+class EditLocalCouncilAdminSinglePageTests : IntegrationTestWithImmutableData("data-edit-local-council-admin-users-and-invitations.sql") {
     val laAdminId = 1L
 
     @Nested

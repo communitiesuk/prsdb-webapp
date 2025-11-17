@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import java.net.URI
 
-class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-lauser.sql") {
+class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-local-council-user.sql") {
     @Autowired
     lateinit var localCouncilService: LocalCouncilService
 

@@ -19,7 +19,7 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
     @Nested
     inner class WithAdminUsersAndInvites :
         NestedIntegrationTestWithImmutableData(
-            "data-la-admin-users-and-invitations-user-is-system-operator.sql",
+            "data-local-council-admin-users-and-invitations-user-is-system-operator.sql",
         ) {
         @Test
         fun `invite another admin button goes to invite new user page`(page: Page) {
@@ -121,7 +121,7 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
     @Nested
     inner class WithoutAdminUsersAndInvites :
         NestedIntegrationTestWithImmutableData(
-            "data-no-la-admin-users-or-invitations-user-is-system-operator.sql",
+            "data-no-local-council-admin-users-or-invitations-user-is-system-operator.sql",
         ) {
         @Test
         fun `manage LA admins page shows no entries message when there are no admins or invites`(page: Page) {

@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import java.net.URI
 import kotlin.test.assertTrue
 
-class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-la-admin-users-and-invitations.sql") {
+class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-local-council-admin-users-and-invitations.sql") {
     val laAdminId = 1L
     val laAdminName = "Art Name"
     val laAdminEmail = "art@example.com"

@@ -41,7 +41,7 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
     }
 
     @Nested
-    inner class UserIsLaAdminButNotSystemOperator : NestedIntegrationTestWithImmutableData("data-la-users-and-invitations.sql") {
+    inner class UserIsLaAdminButNotSystemOperator : NestedIntegrationTestWithImmutableData("data-local-council-users-and-invitations.sql") {
         @Test
         fun `table of users renders`() {
             val managePage = navigator.goToManageLaUsers(localCouncilId)
@@ -80,7 +80,7 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
 
     @Nested
     inner class UserIsSystemOperatorButNotLaAdmin :
-        NestedIntegrationTestWithImmutableData("data-la-invitations-user-is-system-operator.sql") {
+        NestedIntegrationTestWithImmutableData("data-local-council-invitations-user-is-system-operator.sql") {
         @Test
         fun `table renders all user types including la admin invitations`() {
             val managePage = navigator.goToManageLaUsers(localCouncilId)
