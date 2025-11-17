@@ -39,7 +39,7 @@ class LocalAuthorityStepConfig(
 
     override fun chooseTemplate(state: JourneyState): String = "forms/selectLocalAuthorityForm"
 
-    override fun mode(state: JourneyState) = Complete.COMPLETE
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")

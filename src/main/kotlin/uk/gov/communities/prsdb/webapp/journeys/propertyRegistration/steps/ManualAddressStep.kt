@@ -28,7 +28,7 @@ class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddres
 
     override fun chooseTemplate(state: JourneyState): String = "forms/manualAddressForm"
 
-    override fun mode(state: JourneyState) = Complete.COMPLETE
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")

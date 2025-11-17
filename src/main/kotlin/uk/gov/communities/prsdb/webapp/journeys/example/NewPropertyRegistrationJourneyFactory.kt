@@ -58,7 +58,7 @@ class NewPropertyRegistrationJourneyFactory(
                 nextStep { journey.ownershipTypeStep }
             }
             step("ownership-type", journey.ownershipTypeStep) {
-                parents { journey.addressTask.isComplete() }
+                parents { journey.propertyTypeStep.isComplete() }
                 nextStep { journey.licensingTask.firstStep }
             }
             task(journey.licensingTask) {

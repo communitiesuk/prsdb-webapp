@@ -26,7 +26,8 @@ class FooJourneyController(
     ): ModelAndView =
         try {
             println("Getting step $stepName")
-            journeyFactory.createJourneySteps()[stepName]?.getStepModelAndView()
+            val journeyMap = journeyFactory.createJourneySteps()
+            journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
             val journeyId = journeyFactory.initializeJourneyState(principal)

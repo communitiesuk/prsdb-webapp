@@ -30,7 +30,7 @@ class NoAddressFoundStepConfig : AbstractGenericStepConfig<Complete, NoInputForm
 
     override fun chooseTemplate(state: AddressState): String = "forms/noAddressFoundForm"
 
-    override fun mode(state: AddressState) = Complete.COMPLETE
+    override fun mode(state: AddressState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")
