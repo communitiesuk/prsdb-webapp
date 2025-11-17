@@ -14,5 +14,5 @@ interface LocalCouncilInvitationRepository : JpaRepository<LocalCouncilInvitatio
         pageRequest: PageRequest,
     ): List<LocalCouncilInvitation>
 
-    fun countByInvitingCouncil(invitingAuthority: LocalCouncil): Long
+    fun countByInvitingCouncil(invitingCouncil: LocalCouncil): Long
 }

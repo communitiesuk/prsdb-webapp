@@ -129,7 +129,7 @@ class LocalCouncilUserRegistrationJourneyTests {
             LocalCouncilInvitation(
                 token = UUID.randomUUID(),
                 email = email,
-                invitingAuthority = localCouncil,
+                invitingCouncil = localCouncil,
                 invitedAsAdmin = invitedAsAdmin,
             )
 

@@ -36,8 +36,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     )
     fun searchMatchingPRN(
         @Param("searchPRN") searchPRN: Long,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
+        @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
     ): Page<PropertyOwnership>
@@ -52,8 +52,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     )
     fun searchMatchingUPRN(
         @Param("searchUPRN") searchUPRN: Long,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
+        @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
     ): Page<PropertyOwnership>
@@ -69,8 +69,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     )
     fun searchMatching(
         @Param("searchTerm") searchTerm: String,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
+        @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
     ): Page<PropertyOwnership>
@@ -80,17 +80,17 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "#{T(uk.gov.communities.prsdb.webapp.constants.enums.LicensingType).NO_LICENSING}"
 
         // Determines whether the property's address is in the LA user's LA
-        private const val LA_FILTER =
+        private const val LOCAL_COUNCIL_FILTER =
             """
-            AND ((SELECT a.local_authority_id 
+            AND ((SELECT a.local_council_id 
                   FROM address a 
                   WHERE po.address_id = a.id)
                  =
                  (SELECT la.id 
-                  FROM local_authority la
-                  JOIN local_authority_user lau ON la.id = lau.local_authority_id
-                  WHERE lau.subject_identifier = :laUserBaseId)
-                 OR NOT :restrictToLA) 
+                  FROM local_council la
+                  JOIN local_council_user lau ON la.id = lau.local_council_id
+                  WHERE lau.subject_identifier = :localCouncilUserBaseId)
+                 OR NOT :restrictToLocalCouncil) 
             """
 
         private const val LICENSE_FILTER =
@@ -103,6 +103,6 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                     AND :${NO_LICENCE_TYPE} IN :restrictToLicenses)
             """
 
-        private const val FILTERS = LA_FILTER + LICENSE_FILTER
+        private const val FILTERS = LOCAL_COUNCIL_FILTER + LICENSE_FILTER
     }
 }

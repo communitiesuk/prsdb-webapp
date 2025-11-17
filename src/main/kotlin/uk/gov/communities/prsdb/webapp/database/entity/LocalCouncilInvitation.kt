@@ -34,12 +34,12 @@ class LocalCouncilInvitation(
     constructor(
         token: UUID,
         email: String,
-        invitingAuthority: LocalCouncil,
+        invitingCouncil: LocalCouncil,
         invitedAsAdmin: Boolean = false,
     ) : this() {
         this.token = token
         this.invitedEmail = email
-        this.invitingCouncil = invitingAuthority
+        this.invitingCouncil = invitingCouncil
         this.invitedAsAdmin = invitedAsAdmin
     }
 

@@ -13,7 +13,7 @@ class Passcode() : ModifiableAuditableEntity() {
         private set
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "local_authority_id", nullable = false)
+    @JoinColumn(name = "local_council_id", nullable = false)
     lateinit var localCouncil: LocalCouncil
         private set
 

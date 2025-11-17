@@ -54,7 +54,7 @@ class Address() : ModifiableAuditableEntity() {
         private set
 
     @ManyToOne
-    @JoinColumn(name = "local_authority_id")
+    @JoinColumn(name = "local_council_id")
     var localCouncil: LocalCouncil? = null
         private set
 

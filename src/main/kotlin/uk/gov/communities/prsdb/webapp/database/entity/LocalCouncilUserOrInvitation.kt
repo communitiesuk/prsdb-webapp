@@ -39,7 +39,7 @@ class LocalCouncilUserOrInvitation() {
         private set
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "local_authority_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "local_council_id", referencedColumnName = "id", nullable = false)
     lateinit var localCouncil: LocalCouncil
         private set
 
