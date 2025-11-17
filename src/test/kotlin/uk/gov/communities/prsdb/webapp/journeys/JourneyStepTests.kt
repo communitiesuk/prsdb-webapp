@@ -279,7 +279,7 @@ class JourneyStepTests {
         )
 
         // Act
-        val outcome = step.outcome()
+        val outcome = step.outcome
 
         // Assert
         assertEquals(TestEnum.ENUM_VALUE, outcome)
@@ -303,7 +303,7 @@ class JourneyStepTests {
         )
 
         // Act
-        val outcome = step.outcome()
+        val outcome = step.outcome
 
         // Assert
         assertNull(outcome)

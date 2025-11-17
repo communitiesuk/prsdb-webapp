@@ -131,7 +131,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private lateinit var state: TState
 
-    fun outcome(): TEnum? = if (isStepReachable)stepConfig.mode(state) else null
+    val outcome: TEnum? get() = if (isStepReachable)stepConfig.mode(state) else null
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 

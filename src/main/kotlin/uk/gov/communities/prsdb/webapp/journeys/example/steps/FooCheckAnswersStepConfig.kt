@@ -63,7 +63,7 @@ class FooCheckAnswersStepConfig(
 
     private fun getEpcStatusRow(state: FooJourneyState): SummaryListRowViewModel {
         val fieldValue =
-            when (state.epcQuestion.outcome()) {
+            when (state.epcQuestion.outcome) {
                 EpcStatus.AUTOMATCHED -> "forms.checkComplianceAnswers.epc.view"
                 EpcStatus.NOT_AUTOMATCHED -> "forms.checkComplianceAnswers.epc.view"
                 EpcStatus.NO_EPC -> "forms.checkComplianceAnswers.certificate.notAdded"

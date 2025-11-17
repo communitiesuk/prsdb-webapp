@@ -92,7 +92,7 @@ final class PropertyRegistrationTaskListStep(
 
 fun RequestableStep<*, *, *>.taskStatus(): TaskStatus =
     when {
-        this.outcome() != null -> TaskStatus.COMPLETED
+        this.outcome != null -> TaskStatus.COMPLETED
         this.isStepReachable -> TaskStatus.NOT_STARTED
         else -> TaskStatus.CANNOT_START
     }
