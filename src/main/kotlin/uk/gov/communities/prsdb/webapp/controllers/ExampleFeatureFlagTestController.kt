@@ -49,8 +49,8 @@ class ExampleFeatureFlagTestController(
     }
 
     @AvailableWhenFeatureFlagDisabled(EXAMPLE_FEATURE_FLAG_ONE)
-    @GetMapping("/feature-flagged-endpoint-test2")
-    fun featureFlaggedEndpointTest2(model: Model): String {
+    @GetMapping("/inverse-feature-flagged-endpoint-test")
+    fun inverseFeatureFlaggedEndpointTest(model: Model): String {
         val configFlagValue =
             if (featureFlagManager.check(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"

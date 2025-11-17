@@ -26,6 +26,13 @@ You can define a service which calls different versions of a function depending 
 
 To use your feature flagged service, pass in the interface (see ExampleFeatureFlagTestController) - it will automatically call the correct implementation based on the feature flag value.
 
+## Feature flagged endpoints
+To make an endpoint available only when a feature is enabled, annotate it with @AvailableWhenFeatureFlagEnabled("flag-name")
+
+To make an endpoint available only when a feature is disabled, annotate it with @AvailableWhenFeatureFlagDisabled("flag-name")
+
+(See examples in ExampleFeatureFlagTestController)
+
 ## Tests
 Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabed or disabled in particular tests as required
 (See ExampleFeatureFlagServiceTest.kt).
