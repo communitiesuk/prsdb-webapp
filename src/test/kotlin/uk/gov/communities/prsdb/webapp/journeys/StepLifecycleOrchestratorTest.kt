@@ -168,9 +168,9 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeSubmitFormData()
         myInOrder.verify(stepConfig).submitFormData(anyOrNull())
         myInOrder.verify(stepConfig).afterSubmitFormData()
-        myInOrder.verify(stepConfig).beforeDetermineRedirect()
+        myInOrder.verify(stepConfig).beforeDetermineNextDestination()
         myInOrder.verify(stepConfig).determineNextDestination()
-        myInOrder.verify(stepConfig).afterDetermineRedirect()
+        myInOrder.verify(stepConfig).afterDetermineNextDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -216,9 +216,9 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeIsStepReachable()
         myInOrder.verify(stepConfig).isStepReachable
         myInOrder.verify(stepConfig).afterIsStepReached()
-        myInOrder.verify(stepConfig).beforeDetermineRedirect()
+        myInOrder.verify(stepConfig).beforeDetermineNextDestination()
         myInOrder.verify(stepConfig).determineNextDestination()
-        myInOrder.verify(stepConfig).afterDetermineRedirect()
+        myInOrder.verify(stepConfig).afterDetermineNextDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$nextUrl")

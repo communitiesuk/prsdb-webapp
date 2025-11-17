@@ -75,13 +75,11 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         stepConfig.afterSubmitFormData(state)
     }
 
-    fun beforeDetermineRedirect() {
-        stepConfig.beforeDetermineRedirect(state)
+    fun beforeDetermineNextDestination() {
+        stepConfig.beforeDetermineNextDestination(state)
     }
 
-    fun afterDetermineRedirect() {
-        stepConfig.afterDetermineRedirect(state)
-    }
+    fun afterDetermineNextDestination(destination: Destination) = stepConfig.afterDetermineNextDestination(state, destination)
 
     val isStepReachable: Boolean
         get() = parentage.allowsChild()

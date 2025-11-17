@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
@@ -53,25 +54,23 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun afterSubmitFormData(state: PropertyRegistrationJourneyState) {
         try {
-            val registrationNumber =
-                propertyRegistrationService.registerProperty(
-                    addressModel = state.getAddress(),
-                    propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
-                    licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-                    licenceNumber = state.getLicenceNumberOrNull() ?: "",
-                    ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
-                    numberOfHouseholds =
-                        state.households.formModelOrNull
-                            ?.notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                            ?.toInt() ?: 0,
-                    numberOfPeople =
-                        state.tenants.formModelOrNull
-                            ?.notNullValue(NumberOfPeopleFormModel::numberOfPeople)
-                            ?.toInt() ?: 0,
-                    baseUserId = SecurityContextHolder.getContext().authentication.name,
-                )
-            state.propertyRegistrationNumber = registrationNumber.number
-        } catch (exception: EntityExistsException) {
+            propertyRegistrationService.registerProperty(
+                addressModel = state.getAddress(),
+                propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+                licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+                licenceNumber = state.getLicenceNumberOrNull() ?: "",
+                ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                numberOfHouseholds =
+                    state.households.formModelOrNull
+                        ?.notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                        ?.toInt() ?: 0,
+                numberOfPeople =
+                    state.tenants.formModelOrNull
+                        ?.notNullValue(NumberOfPeopleFormModel::numberOfPeople)
+                        ?.toInt() ?: 0,
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+            )
+        } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true
         }
     }
@@ -167,9 +166,20 @@ class PropertyRegistrationCyaStepConfig(
             },
         )
 
+    override fun afterDetermineNextDestination(
+        state: PropertyRegistrationJourneyState,
+        destination: Destination,
+    ): Destination =
+        if (state.isAddressAlreadyRegistered == true) {
+            Destination(state.alreadyRegisteredStep)
+        } else {
+            state.deleteJourney()
+            destination
+        }
+
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun mode(state: PropertyRegistrationJourneyState): Complete? = state.propertyRegistrationNumber.let { Complete.COMPLETE }
+    override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state).let { Complete.COMPLETE }
 }
 
 @Scope("prototype")

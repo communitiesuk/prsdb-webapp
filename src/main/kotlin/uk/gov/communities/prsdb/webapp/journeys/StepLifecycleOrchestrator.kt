@@ -58,11 +58,11 @@ sealed class StepLifecycleOrchestrator(
                 journeyStep.submitFormData(bindingResult)
                 journeyStep.afterSubmitFormData()
 
-                journeyStep.beforeDetermineRedirect()
+                journeyStep.beforeDetermineNextDestination()
                 val nextDestination = journeyStep.determineNextDestination()
-                journeyStep.afterDetermineRedirect()
+                val finalDestination = journeyStep.afterDetermineNextDestination(nextDestination)
 
-                return nextDestination.toModelAndView()
+                return finalDestination.toModelAndView()
             }
 
             val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
@@ -78,11 +78,11 @@ sealed class StepLifecycleOrchestrator(
             if (journeyStep.isStepReachable) {
                 journeyStep.afterIsStepReached()
 
-                journeyStep.beforeDetermineRedirect()
+                journeyStep.beforeDetermineNextDestination()
                 val nextDestination = journeyStep.determineNextDestination()
-                journeyStep.afterDetermineRedirect()
+                val finalDestination = journeyStep.afterDetermineNextDestination(nextDestination)
 
-                return nextDestination.toModelAndView()
+                return finalDestination.toModelAndView()
             }
 
             val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
