@@ -33,6 +33,9 @@ To make an endpoint available only when a feature is disabled, annotate it with 
 
 (See examples in ExampleFeatureFlagTestController)
 
+We should be able to add multiple such annotations to an endpoint if required, although this is untested we don't really have a good way of combining mixtures of @AvailableWhenFeatureFlagEnabled and @AvailableWhenFeatureFlagDisabled annotations
+(multiple annotations of the same type are combined in the "combine" function of FeatureFlaggedRequestCondition and InverseFeatureFlaggedRequestCondition).
+
 ## Tests
 Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabled or disabled in particular tests as required.
 
