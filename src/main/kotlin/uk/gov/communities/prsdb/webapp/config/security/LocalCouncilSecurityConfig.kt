@@ -20,7 +20,7 @@ class LocalCouncilSecurityConfig(
 ) {
     @Bean
     @Order(3)
-    fun localAuthoritySecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun localCouncilSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/$LOCAL_COUNCIL_PATH_SEGMENT/**")
             .authorizeHttpRequests { requests ->

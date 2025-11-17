@@ -11,7 +11,7 @@ import jakarta.persistence.Table
 import java.io.Serializable
 
 @Entity
-@Table(name = "local_authority_user_or_invitation")
+@Table(name = "local_council_user_or_invitation")
 @IdClass(LocalCouncilUserOrInvitation.CompositeKey::class)
 class LocalCouncilUserOrInvitation() {
     // Types used for IdClass must:

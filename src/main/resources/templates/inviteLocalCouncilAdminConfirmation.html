@@ -4,26 +4,26 @@
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{addLAUserSuccess.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <span th:text="#{forms.inviteLaAdminUserConfirmation.banner.body(${invitedEmailAddress}, ${localAuthorityName})}" th:remove="tag">addLAUserSuccess.banner.body</span>
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{addLocalCouncilUserSuccess.banner.heading}, ~{::#confirmation-banner/content()})}">
+            <span th:text="#{forms.inviteLocalCouncilAdminUserConfirmation.banner.body(${invitedEmailAddress}, ${localCouncilName})}" th:remove="tag">addLocalCouncilUserSuccess.banner.body</span>
         </div>
         <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.one}">
-            addLAUserSuccess.whatHappensNext.para1
+        <p class="govuk-body" th:text="#{addLocalCouncilUserSuccess.whatHappensNext.paragraph.one}">
+            addLocalCouncilUserSuccess.whatHappensNext.para1
         </p>
-        <p class="govuk-body" th:text="#{addLAUserSuccess.whatHappensNext.paragraph.two(${localAuthorityName})}">
-            addLAUserSuccess.whatHappensNext.para2
+        <p class="govuk-body" th:text="#{addLocalCouncilUserSuccess.whatHappensNext.paragraph.two(${localCouncilName})}">
+            addLocalCouncilUserSuccess.whatHappensNext.para2
         </p>
-        <p class="govuk-body" th:text="#{forms.inviteLaAdminUserConfirmation.whatHappensNext.paragraph.three(${localAuthorityName})}">
-            forms.inviteLaAdminUserConfirmation.whatHappensNext.paragraph.three
+        <p class="govuk-body" th:text="#{forms.inviteLocalCouncilAdminUserConfirmation.whatHappensNext.paragraph.three(${localCouncilName})}">
+            forms.inviteLocalCouncilAdminUserConfirmation.whatHappensNext.paragraph.three
         </p>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAnotherUserUrl}}, #{addLAUserSuccess.inviteAnother})}">
-                addLAUserSuccess.inviteAnother
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAnotherUserUrl}}, #{addLocalCouncilUserSuccess.inviteAnother})}">
+                addLocalCouncilUserSuccess.inviteAnother
             </a>
             <!--TODO PRSD-672 - replace with an enabled button-->
-            <a th:replace="~{fragments/buttons/disabledSecondaryButtonLink :: disabledSecondaryButtonLink(@{${dashboardUrl}}, #{addLAUserSuccess.returnToDashboard})}">
-                addLAUserSuccess.returnToDashboard
+            <a th:replace="~{fragments/buttons/disabledSecondaryButtonLink :: disabledSecondaryButtonLink(@{${dashboardUrl}}, #{addLocalCouncilUserSuccess.returnToDashboard})}">
+                addLocalCouncilUserSuccess.returnToDashboard
             </a>
         </div>
     </div>

@@ -86,10 +86,10 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                   FROM address a 
                   WHERE po.address_id = a.id)
                  =
-                 (SELECT la.id 
-                  FROM local_council la
-                  JOIN local_council_user lau ON la.id = lau.local_council_id
-                  WHERE lau.subject_identifier = :localCouncilUserBaseId)
+                 (SELECT lc.id 
+                  FROM local_council lc
+                  JOIN local_council_user lcu ON lc.id = lcu.local_council_id
+                  WHERE lcu.subject_identifier = :localCouncilUserBaseId)
                  OR NOT :restrictToLocalCouncil) 
             """
 

@@ -8,10 +8,10 @@
             <form th:action="@{''}" method="post" novalidate th:object="${inviteLocalCouncilAdminModel}">
                 <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
                 <fieldset id="fieldset-content"
-                          th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'laAdminInvitation', #{forms.inviteLocalCouncilAdminUser.fieldSetHeading}, #{forms.inviteLocalCouncilAdminUser.fieldSetHint})}">
-                    <select th:replace="~{fragments/forms/select :: select(#{forms.inviteLocalCouncilAdminUser.selectLabel},'localAuthorityId',null, ${selectOptions})}"></select>
-                    <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.primaryEmailLabel}, 'email', null)}">
-                    <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLAUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
+                          th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localCouncilAdminInvitation', #{forms.inviteLocalCouncilAdminUser.fieldSetHeading}, #{forms.inviteLocalCouncilAdminUser.fieldSetHint})}">
+                    <select th:replace="~{fragments/forms/select :: select(#{forms.inviteLocalCouncilAdminUser.selectLabel},'localCouncilId',null, ${selectOptions})}"></select>
+                    <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLocalCouncilUser.form.primaryEmailLabel}, 'email', null)}">
+                    <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLocalCouncilUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
                 </fieldset>
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
             </form>

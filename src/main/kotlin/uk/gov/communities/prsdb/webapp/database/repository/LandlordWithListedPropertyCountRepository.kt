@@ -51,12 +51,12 @@ interface LandlordWithListedPropertyCountRepository : JpaRepository<LandlordWith
              AND (EXISTS (SELECT po.id 
                           FROM property_ownership po 
                           JOIN address a ON po.address_id = a.id
-                          JOIN local_council la ON a.local_council_id = la.id
-                          JOIN local_council_user lau ON la.id = lau.local_council_id
+                          JOIN local_council lc ON a.local_council_id = lc.id
+                          JOIN local_council_user lcu ON lc.id = lcu.local_council_id
                           WHERE l.id = po.primary_landlord_id 
                           AND po.is_active 
-                          AND lau.subject_identifier = :localCouncilUserBaseId)
-                  OR NOT :restrictToLA) 
+                          AND lcu.subject_identifier = :localCouncilUserBaseId)
+                  OR NOT :restrictToLocalCouncil) 
             """
     }
 }
