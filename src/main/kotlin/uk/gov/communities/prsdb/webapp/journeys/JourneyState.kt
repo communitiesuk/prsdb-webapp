@@ -11,4 +11,6 @@ interface JourneyState {
     )
 
     val journeyId: String
+
+    fun deleteJourney()
 }

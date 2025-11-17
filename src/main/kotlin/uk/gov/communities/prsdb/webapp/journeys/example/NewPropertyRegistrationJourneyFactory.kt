@@ -5,7 +5,9 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -15,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CompletePropertyRegistrationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -77,7 +80,14 @@ class NewPropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step("check-your-answers", journey.cyaStep) {
                     parents { journey.occupationTask.isComplete() }
-                    nextUrl { "/" }
+                    nextStep { journey.completeJourneyStep }
+                }
+                notionalStep(journey.completeJourneyStep) {
+                    parents { journey.cyaStep.isComplete() }
+                    unreachableStepStep {
+                        if (journey.isAddressAlreadyRegistered == true) journey.alreadyRegisteredStep else journey.taskListStep
+                    }
+                    nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
         }
@@ -110,11 +120,14 @@ class PropertyRegistrationJourneyState(
     override val tenants: TenantsStep,
     val occupationTask: OccupationTask,
     val cyaStep: PropertyRegistrationCheckAnswersStep,
+    val completeJourneyStep: CompletePropertyRegistrationStep,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
     LicensingState,
     OccupiedJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
+    override var isAddressAlreadyRegistered: Boolean? by mutableDelegate("isAddressAlreadyRegistered", serializer())
+    var propertyRegistrationNumber: Long? by mutableDelegate("registered-prn", serializer())
 
     final fun initializeJourneyState(user: Principal): String {
         val journeyId = generateJourneyId(user)
@@ -123,6 +136,8 @@ class PropertyRegistrationJourneyState(
             .initialiseJourneyWithId(journeyId) {}
         return journeyId
     }
+
+    fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
     companion object {
         fun generateJourneyId(user: Principal): String =
