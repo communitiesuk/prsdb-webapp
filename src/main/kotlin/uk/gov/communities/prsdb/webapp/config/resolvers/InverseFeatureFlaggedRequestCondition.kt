@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.config.resolvers
 
 import jakarta.servlet.http.HttpServletRequest
-import uk.gov.communities.prsdb.webapp.services.FeatureFlagChecker
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 
 class InverseFeatureFlaggedRequestCondition(
     flagName: String,
-    featureFlagChecker: FeatureFlagChecker,
-) : FeatureFlaggedRequestCondition(flagName, featureFlagChecker) {
+    featureFlagManager: FeatureFlagManager,
+) : FeatureFlaggedRequestCondition(flagName, featureFlagManager) {
     override fun getMatchingCondition(request: HttpServletRequest): FeatureFlaggedRequestCondition? =
-        if (featureFlagChecker.isFeatureEnabled(flagName)) {
+        if (featureFlagManager.checkFeature(flagName)) {
             null
         } else {
             this

@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
-import uk.gov.communities.prsdb.webapp.services.FeatureFlagChecker
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
@@ -77,7 +76,6 @@ class PrsdbProcessApplicationTests {
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
                 PrsdbWebMvcRegistration::class.simpleBeanName,
-                FeatureFlagChecker::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
