@@ -8,8 +8,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
@@ -46,33 +46,39 @@ class NewPropertyRegistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
-            step(TASK_LIST_PATH_SEGMENT, journey.taskListStep) {
-                initialStep()
-                noNextDestination()
+            section {
+                withHeadingMessageKey("registerProperty.taskList.register.heading")
+                step(TASK_LIST_PATH_SEGMENT, journey.taskListStep) {
+                    initialStep()
+                    noNextDestination()
+                }
+                task(journey.addressTask) {
+                    parents { journey.taskListStep.always() }
+                    redirectToStep { journey.propertyTypeStep }
+                }
+                step("property-type", journey.propertyTypeStep) {
+                    parents { journey.addressTask.isComplete() }
+                    nextStep { journey.ownershipTypeStep }
+                }
+                step("ownership-type", journey.ownershipTypeStep) {
+                    parents { journey.propertyTypeStep.isComplete() }
+                    nextStep { journey.licensingTask.firstStep }
+                }
+                task(journey.licensingTask) {
+                    parents { journey.ownershipTypeStep.isComplete() }
+                    redirectToStep { journey.occupationTask.firstStep }
+                }
+                task(journey.occupationTask) {
+                    parents { journey.licensingTask.isComplete() }
+                    redirectToStep { journey.cyaStep }
+                }
             }
-            task(journey.addressTask) {
-                parents { NoParents() }
-                redirectToStep { journey.propertyTypeStep }
-            }
-            step("property-type", journey.propertyTypeStep) {
-                parents { journey.addressTask.isComplete() }
-                nextStep { journey.ownershipTypeStep }
-            }
-            step("ownership-type", journey.ownershipTypeStep) {
-                parents { journey.propertyTypeStep.isComplete() }
-                nextStep { journey.licensingTask.firstStep }
-            }
-            task(journey.licensingTask) {
-                parents { journey.ownershipTypeStep.isComplete() }
-                redirectToStep { journey.occupationTask.firstStep }
-            }
-            task(journey.occupationTask) {
-                parents { journey.licensingTask.isComplete() }
-                redirectToStep { journey.cyaStep }
-            }
-            step("check-your-answers", journey.cyaStep) {
-                parents { journey.occupationTask.isComplete() }
-                nextUrl { "/" }
+            section {
+                withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
+                step("check-your-answers", journey.cyaStep) {
+                    parents { journey.occupationTask.isComplete() }
+                    nextUrl { "/" }
+                }
             }
         }
     }
