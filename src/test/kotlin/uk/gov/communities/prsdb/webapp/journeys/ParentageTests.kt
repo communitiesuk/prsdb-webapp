@@ -185,10 +185,10 @@ class ParentageTests {
         val parent = step.hasOutcome(TestEnum.ENUM_VALUE)
 
         // Assert
-        whenever(step.outcome()).thenReturn(TestEnum.ENUM_VALUE)
+        whenever(step.outcome).thenReturn(TestEnum.ENUM_VALUE)
         assertTrue(parent.allowsChild())
 
-        whenever(step.outcome()).thenReturn(TestEnum.ALTERNATIVE_VALUE)
+        whenever(step.outcome).thenReturn(TestEnum.ALTERNATIVE_VALUE)
         assertFalse(parent.allowsChild())
     }
 
@@ -203,10 +203,10 @@ class ParentageTests {
         val parent = task.isComplete()
 
         // Assert
-        whenever(step.outcome()).thenReturn(NavigationComplete.COMPLETE)
+        whenever(step.outcome).thenReturn(NavigationComplete.COMPLETE)
         assertTrue(parent.allowsChild())
 
-        whenever(step.outcome()).thenReturn(null)
+        whenever(step.outcome).thenReturn(null)
         assertFalse(parent.allowsChild())
     }
 

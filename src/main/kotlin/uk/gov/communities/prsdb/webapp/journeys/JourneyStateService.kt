@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.context.annotation.RequestScope
+import org.springframework.context.annotation.Scope
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
 import java.util.UUID
 
 @PrsdbWebService
-@RequestScope
+@Scope("request")
 class JourneyStateService(
     private val session: HttpSession,
     private val journeyIdOrNull: String?,
@@ -81,5 +81,20 @@ class JourneyStateService(
                 .queryParam(JOURNEY_ID_PARAM, journeyId)
                 .build(true)
                 .toUriString()
+
+        fun urlToStep(step: JourneyStep.RequestableStep<*, *, *>): String =
+            UriComponentsBuilder
+                .newInstance()
+                .path(step.routeSegment)
+                .queryParam(JOURNEY_ID_PARAM, step.currentJourneyId)
+                .build(true)
+                .toUriString()
+
+        fun urlToStepIfReachable(step: JourneyStep<*, *, *>) =
+            if (step.isStepReachable && step is JourneyStep.RequestableStep<*, *, *>) {
+                urlToStep(step)
+            } else {
+                null
+            }
     }
 }

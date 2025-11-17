@@ -163,7 +163,7 @@ class JourneyStepTests {
     ) {
         // Arrange
         val existingFormModel = TestFormModel().apply { field = "existingValue" }
-        whenever(step.stepConfig.getFormModelFromState(anyOrNull())).thenReturn(existingFormModel)
+        whenever(step.stepConfig.getFormModelFromStateOrNull(anyOrNull())).thenReturn(existingFormModel)
         step.initialize(
             "stepId",
             mock(),
@@ -279,7 +279,7 @@ class JourneyStepTests {
         )
 
         // Act
-        val outcome = step.outcome()
+        val outcome = step.outcome
 
         // Assert
         assertEquals(TestEnum.ENUM_VALUE, outcome)
@@ -303,7 +303,7 @@ class JourneyStepTests {
         )
 
         // Act
-        val outcome = step.outcome()
+        val outcome = step.outcome
 
         // Assert
         assertNull(outcome)
