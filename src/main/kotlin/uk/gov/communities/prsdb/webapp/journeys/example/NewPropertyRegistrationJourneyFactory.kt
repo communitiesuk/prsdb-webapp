@@ -46,12 +46,12 @@ class NewPropertyRegistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
+            step(TASK_LIST_PATH_SEGMENT, journey.taskListStep) {
+                initialStep()
+                noNextDestination()
+            }
             section {
                 withHeadingMessageKey("registerProperty.taskList.register.heading")
-                step(TASK_LIST_PATH_SEGMENT, journey.taskListStep) {
-                    initialStep()
-                    noNextDestination()
-                }
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     redirectToStep { journey.propertyTypeStep }
