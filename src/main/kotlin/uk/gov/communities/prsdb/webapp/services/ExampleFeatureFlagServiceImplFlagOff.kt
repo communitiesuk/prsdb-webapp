@@ -9,4 +9,6 @@ import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlagged
 @PrsdbWebService("example-feature-flag-one-flag-off")
 class ExampleFeatureFlagServiceImplFlagOff : ExampleFeatureFlaggedService {
     override fun getFeatureFlagPageHeading() = "Using ExampleFeatureFlaggedService - Flag OFF"
+
+    override fun getTemplateName(): String = "disabledFeature"
 }

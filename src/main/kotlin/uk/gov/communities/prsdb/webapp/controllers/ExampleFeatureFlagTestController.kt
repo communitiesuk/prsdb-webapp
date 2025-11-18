@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagDisabled
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
@@ -32,6 +30,9 @@ class ExampleFeatureFlagTestController(
         // TODO PRSD-1683 - delete template when no longer needed
         return "featureFlagTest"
     }
+
+    @GetMapping(FEATURED_FLAGGED_TEMPLATE_TEST_URL_SEGMENT)
+    fun featureFlaggedTemplateTest(): String = exampleFeatureFlaggedService.getTemplateName()
 
     @AvailableWhenFeatureFlagEnabled(EXAMPLE_FEATURE_FLAG_ONE)
     @GetMapping(FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT)
@@ -65,6 +66,7 @@ class ExampleFeatureFlagTestController(
 
     companion object {
         const val FEATURED_FLAGGED_SERVICE_TEST_URL_SEGMENT = "feature-flagged-service-test"
+        const val FEATURED_FLAGGED_TEMPLATE_TEST_URL_SEGMENT = "feature-flagged-template-test"
         const val FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT = "feature-flagged-endpoint-test"
         const val INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT = "inverse-feature-flagged-endpoint-test"
 
@@ -72,5 +74,6 @@ class ExampleFeatureFlagTestController(
         const val FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT"
         const val INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT"
+        const val FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_TEMPLATE_TEST_URL_SEGMENT"
     }
 }
