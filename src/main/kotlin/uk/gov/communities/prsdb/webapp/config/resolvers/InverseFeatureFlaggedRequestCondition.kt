@@ -8,15 +8,8 @@ open class InverseFeatureFlaggedRequestCondition(
     val flagName: String,
     val featureFlagManager: FeatureFlagManager,
 ) : RequestCondition<InverseFeatureFlaggedRequestCondition> {
-    override fun combine(other: InverseFeatureFlaggedRequestCondition): InverseFeatureFlaggedRequestCondition {
-        return object : InverseFeatureFlaggedRequestCondition(flagName, featureFlagManager) {
-            override fun getMatchingCondition(request: HttpServletRequest): InverseFeatureFlaggedRequestCondition? {
-                val thisDisabled = !featureFlagManager.checkFeature(this@InverseFeatureFlaggedRequestCondition.flagName)
-                val otherDisabled = !featureFlagManager.checkFeature(other.flagName)
-                return if (thisDisabled && otherDisabled) this else null
-            }
-        }
-    }
+    override fun combine(other: InverseFeatureFlaggedRequestCondition): InverseFeatureFlaggedRequestCondition =
+        throw NotImplementedError("Combining feature flagged conditions has not been implemented.")
 
     override fun getMatchingCondition(request: HttpServletRequest): InverseFeatureFlaggedRequestCondition? =
         if (featureFlagManager.checkFeature(flagName)) {
@@ -29,5 +22,5 @@ open class InverseFeatureFlaggedRequestCondition(
     override fun compareTo(
         other: InverseFeatureFlaggedRequestCondition,
         request: HttpServletRequest,
-    ): Int = 0
+    ): Int = throw NotImplementedError("Comparing feature flagged conditions has not been implemented.")
 }

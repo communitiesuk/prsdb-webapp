@@ -8,15 +8,9 @@ open class FeatureFlaggedRequestCondition(
     val flagName: String,
     val featureFlagManager: FeatureFlagManager,
 ) : RequestCondition<FeatureFlaggedRequestCondition> {
-    override fun combine(other: FeatureFlaggedRequestCondition): FeatureFlaggedRequestCondition {
-        return object : FeatureFlaggedRequestCondition(flagName, featureFlagManager) {
-            override fun getMatchingCondition(request: HttpServletRequest): FeatureFlaggedRequestCondition? {
-                val thisEnabled = featureFlagManager.checkFeature(this@FeatureFlaggedRequestCondition.flagName)
-                val otherEnabled = featureFlagManager.checkFeature(other.flagName)
-                return if (thisEnabled && otherEnabled) this else null
-            }
-        }
-    }
+    // Currently unused. Could be used to combine different conditions e.g. class level and method level conditions.
+    override fun combine(other: FeatureFlaggedRequestCondition): FeatureFlaggedRequestCondition =
+        throw NotImplementedError("Combining feature flagged conditions has not been implemented.")
 
     override fun getMatchingCondition(request: HttpServletRequest): FeatureFlaggedRequestCondition? =
         if (featureFlagManager.checkFeature(flagName)) {
@@ -29,5 +23,5 @@ open class FeatureFlaggedRequestCondition(
     override fun compareTo(
         other: FeatureFlaggedRequestCondition,
         request: HttpServletRequest,
-    ): Int = 0
+    ): Int = throw NotImplementedError("Comparing feature flagged conditions has not been implemented.")
 }
