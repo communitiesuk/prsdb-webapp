@@ -10,7 +10,7 @@ class ExampleFeatureFlaggedTemplateSelectionTests : FeatureFlagTestCallingEndpoi
     @Test
     @WithMockUser
     fun `when feature is enabled returns enabledFeature template`() {
-        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_ONE)
 
         mvc
             .get(FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE)
@@ -22,7 +22,7 @@ class ExampleFeatureFlaggedTemplateSelectionTests : FeatureFlagTestCallingEndpoi
     @Test
     @WithMockUser
     fun `when feature is disabled returns disabledFeature template`() {
-        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_ONE)
 
         mvc
             .get(FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE)

@@ -75,4 +75,38 @@ class FeatureFlagManagerTests {
         verify(featureFlagManager).check(captor.capture())
         assertEquals(featureName, captor.value)
     }
+
+    @Test
+    fun `enableFeature calls super enable method with correct feature name`() {
+        // Arrange
+        featureFlagManager = spy(FeatureFlagManager())
+        val featureName = "SOME_FEATURE_FLAG"
+        featureFlagManager.createFeature(featureName)
+
+        // Act
+        featureFlagManager.enableFeature(featureName)
+
+        // Assert
+        val captor = ArgumentCaptor.forClass(String::class.java)
+
+        verify(featureFlagManager).enable(captor.capture())
+        assertEquals(featureName, captor.value)
+    }
+
+    @Test
+    fun `disableFeature calls super disable method with correct feature name`() {
+        // Arrange
+        featureFlagManager = spy(FeatureFlagManager())
+        val featureName = "SOME_FEATURE_FLAG"
+        featureFlagManager.createFeature(featureName)
+
+        // Act
+        featureFlagManager.disableFeature(featureName)
+
+        // Assert
+        val captor = ArgumentCaptor.forClass(String::class.java)
+
+        verify(featureFlagManager).disable(captor.capture())
+        assertEquals(featureName, captor.value)
+    }
 }
