@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.config.resolvers
+package uk.gov.communities.prsdb.webapp.config.conditions
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.servlet.mvc.condition.RequestCondition

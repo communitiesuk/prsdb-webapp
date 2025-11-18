@@ -5,8 +5,8 @@ import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.config.conditions.FeatureFlaggedRequestCondition
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.config.resolvers.FeatureFlaggedRequestCondition
 
 class FeatureFlaggedRequestConditionTests {
     @MockitoBean
