@@ -44,7 +44,7 @@ Currently, we enforce that only one of these annotations can be used on a given 
 * Added a request condition to be used with each annotation.
     * Currently only implemented getMatchingCondition
     * There are combine and compareTo methods which may be useful for combining or prioritizing multiple conditions if we need to do that in future.
-* FeatureFlagHandlerMapping - this checks every endpoint in the codebase, and applies the relevant request condition if one of the feature flag annotations is present.
+* FeatureFlagConditionMapping - this checks every endpoint in the codebase, and applies the relevant request condition if one of the feature flag annotations is present.
 
 
 ## Tests

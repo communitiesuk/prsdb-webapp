@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.config.conditions.InverseFeatureFlaggedRe
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import java.lang.reflect.Method
 
-class FeatureFlagHandlerMapping(
+class FeatureFlagConditionMapping(
     private val featureFlagManager: FeatureFlagManager,
 ) : RequestMappingHandlerMapping() {
     override fun getCustomMethodCondition(method: Method): RequestCondition<*>? {

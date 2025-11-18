@@ -11,16 +11,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagEnabled
 import uk.gov.communities.prsdb.webapp.config.conditions.FeatureFlaggedRequestCondition
 import uk.gov.communities.prsdb.webapp.config.conditions.InverseFeatureFlaggedRequestCondition
-import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagHandlerMappingTests.TestController.Companion.FLAG_NAME
+import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagConditionMappingTests.TestController.Companion.FLAG_NAME
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.config.mappings.FeatureFlagHandlerMapping
+import uk.gov.communities.prsdb.webapp.config.mappings.FeatureFlagConditionMapping
 import java.lang.reflect.Method
 
-class FeatureFlagHandlerMappingTests {
+class FeatureFlagConditionMappingTests {
     @MockitoBean
     private var mockFeatureFlagManager: FeatureFlagManager = Mockito.mock(FeatureFlagManager::class.java)
 
-    private val handlerMapping = FeatureFlagHandlerMapping(mockFeatureFlagManager)
+    private val handlerMapping = FeatureFlagConditionMapping(mockFeatureFlagManager)
 
     class TestController {
         @AvailableWhenFeatureFlagEnabled(FLAG_NAME)
@@ -37,7 +37,7 @@ class FeatureFlagHandlerMappingTests {
     }
 
     private fun invokeGetCustomMethodCondition(method: Method): RequestCondition<*>? {
-        val reflected = FeatureFlagHandlerMapping::class.java.getDeclaredMethod("getCustomMethodCondition", Method::class.java)
+        val reflected = FeatureFlagConditionMapping::class.java.getDeclaredMethod("getCustomMethodCondition", Method::class.java)
         reflected.isAccessible = true
         return reflected.invoke(handlerMapping, method) as RequestCondition<*>?
     }
