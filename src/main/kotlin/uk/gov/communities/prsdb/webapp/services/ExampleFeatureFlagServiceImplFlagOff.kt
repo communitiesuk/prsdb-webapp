@@ -10,5 +10,6 @@ import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlagged
 class ExampleFeatureFlagServiceImplFlagOff : ExampleFeatureFlaggedService {
     override fun getFeatureFlagPageHeading() = "Using ExampleFeatureFlaggedService - Flag OFF"
 
+    // TODO PRSD-1683 - delete template when no longer needed
     override fun getTemplateName(): String = "disabledFeature"
 }

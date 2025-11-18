@@ -9,7 +9,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 
 class FeatureFlagTestCallingEndpoints : FeatureFlagTest() {
-    // TODO PRSD-1647 - make tests for endpoint availability inherit from this class
     @Autowired
     lateinit var webContext: WebApplicationContext
 
