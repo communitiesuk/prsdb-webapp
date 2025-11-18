@@ -7,6 +7,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.config.conditions.FeatureFlaggedRequestCondition
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import kotlin.test.assertEquals
 
 class FeatureFlaggedRequestConditionTests {
     @MockitoBean
@@ -22,14 +23,22 @@ class FeatureFlaggedRequestConditionTests {
 
     @Test
     fun `getMatchingCondition returns this when feature flag is enabled`() {
+        // Arrange
         whenever(mockFeatureFlagManager.checkFeature(flagName)).thenReturn(true)
+
+        // Act
         val result = featureFlaggedRequestCondition.getMatchingCondition(mock())
-        assert(result === featureFlaggedRequestCondition)
+
+        // Assert
+        assertEquals(featureFlaggedRequestCondition, result)
     }
 
     @Test
     fun `getMatchingCondition returns null when feature flag is disabled`() {
+        // Arrange
         whenever(mockFeatureFlagManager.checkFeature(flagName)).thenReturn(false)
+
+        // Act & Assert
         assertNull(featureFlaggedRequestCondition.getMatchingCondition(mock()))
     }
 }

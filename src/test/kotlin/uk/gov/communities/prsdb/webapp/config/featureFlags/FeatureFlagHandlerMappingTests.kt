@@ -44,24 +44,36 @@ class FeatureFlagHandlerMappingTests {
 
     @Test
     fun `getCustomMethodCondition returns FeatureFlaggedRequestCondition for AvailableWhenFeatureFlagEnabled`() {
-        val method: Method = TestController::class.java.getMethod("enabledMethod")
+        // Arrange
+        val method = TestController::class.java.getMethod("enabledMethod")
+
+        // Act
         val condition = invokeGetCustomMethodCondition(method)
+
+        // Assert
         assertTrue(condition is FeatureFlaggedRequestCondition)
         assertEquals(FLAG_NAME, (condition as FeatureFlaggedRequestCondition).flagName)
     }
 
     @Test
     fun `getCustomMethodCondition returns InverseFeatureFlaggedRequestCondition for AvailableWhenFeatureFlagDisabled`() {
-        val method: Method = TestController::class.java.getMethod("disabledMethod")
+        // Arrange
+        val method = TestController::class.java.getMethod("disabledMethod")
+
+        // Act
         val condition = invokeGetCustomMethodCondition(method)
+
+        // Assert
         assertTrue(condition is InverseFeatureFlaggedRequestCondition)
         assertEquals(FLAG_NAME, (condition as InverseFeatureFlaggedRequestCondition).flagName)
     }
 
     @Test
     fun `getCustomMethodCondition returns null when no annotation present`() {
-        val method: Method = TestController::class.java.getMethod("noAnnotationMethod")
-        val condition = invokeGetCustomMethodCondition(method)
-        assertNull(condition)
+        // Arrange
+        val method = TestController::class.java.getMethod("noAnnotationMethod")
+
+        // Act, Assert
+        assertNull(invokeGetCustomMethodCondition(method))
     }
 }
