@@ -17,6 +17,8 @@ class TaskInitialiser<TStateInit : JourneyState>(
     private var destinationProvider: ((mode: NavigationComplete) -> Destination)? = null
     private var parentage: (() -> Parentage)? = null
 
+    private var allStepsConfiguration: MutableList<StepInitialiser<*, TStateInit, *>.() -> Unit> = mutableListOf()
+
     fun redirectToStep(nextStepProvider: (mode: NavigationComplete) -> JourneyStep<*, *, *>): TaskInitialiser<TStateInit> {
         if (destinationProvider != null) {
             throw JourneyInitialisationException("Task $name already has a redirectTo defined")
@@ -41,13 +43,26 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return this
     }
 
+    fun withConfigurationForAllSteps(configuration: StepInitialiser<*, TStateInit, *>.() -> Unit): TaskInitialiser<TStateInit> {
+        allStepsConfiguration.add(configuration)
+        return this
+    }
+
     fun mapToStepInitialisers(state: TStateInit): List<StepInitialiser<*, TStateInit, *>> {
         val nonNullDestinationProvider =
             destinationProvider ?: throw JourneyInitialisationException("Task $name does not have a nextDestination defined")
         val taskParentage = parentage?.invoke() ?: throw JourneyInitialisationException("Task $name does not have parentage defined")
 
-        return task.getTaskSteps(state, taskParentage) {
-            nextDestination(nonNullDestinationProvider)
+        val allStepInitialisers =
+            task.getTaskSteps(state, taskParentage) {
+                nextDestination(nonNullDestinationProvider)
+            }
+
+        allStepInitialisers.forEach { stepInitialiser ->
+            allStepsConfiguration.forEach { config ->
+                stepInitialiser.config()
+            }
         }
+        return allStepInitialisers
     }
 }

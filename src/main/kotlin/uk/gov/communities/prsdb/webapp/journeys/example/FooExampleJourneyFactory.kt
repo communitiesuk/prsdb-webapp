@@ -42,13 +42,19 @@ class FooExampleJourneyFactory(
                 initialStep()
                 nextUrl { "task-list" }
             }
-            task(journey.occupationTask) {
-                parents { journey.taskListStep.always() }
-                redirectToStep { journey.fooCheckYourAnswersStep }
+            section {
+                withHeadingMessageKey("tasks-section-part-1")
+                task(journey.occupationTask) {
+                    parents { journey.taskListStep.always() }
+                    redirectToStep { journey.fooCheckYourAnswersStep }
+                }
             }
-            task(journey.epcTask) {
-                parents { journey.occupationTask.isComplete() }
-                redirectToStep { journey.fooCheckYourAnswersStep }
+            section {
+                withHeadingMessageKey("tasks-section-part-2")
+                task(journey.epcTask) {
+                    parents { journey.occupationTask.isComplete() }
+                    redirectToStep { journey.fooCheckYourAnswersStep }
+                }
             }
             step("check-your-answers", journey.fooCheckYourAnswersStep) {
                 parents {

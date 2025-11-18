@@ -97,6 +97,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getPageVisitContent() =
         stepConfig.getStepSpecificContent(state) +
+            additionalContentProvider() +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
                 "formModel" to (formModelOrNull ?: stepConfig.formModelClass.createInstance()),
@@ -104,6 +105,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getInvalidSubmissionContent(bindingResult: BindingResult) =
         stepConfig.getStepSpecificContent(state) +
+            additionalContentProvider() +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
                 BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult,
@@ -137,6 +139,8 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private var backUrlOverride: (() -> String?)? = null
 
+    private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
+
     val backUrl: String?
         get() {
             val singleParentUrl =
@@ -168,6 +172,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
         unreachableStepDestinationProvider: () -> Destination,
+        additionalContentProvider: (() -> Map<String, Any>)? = null,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
@@ -178,6 +183,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
         this.unreachableStepDestination = unreachableStepDestinationProvider
+        additionalContentProvider?.let { this.additionalContentProvider = it }
     }
 
     val currentJourneyId: String
