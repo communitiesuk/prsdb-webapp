@@ -64,6 +64,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
@@ -83,6 +84,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             eq(null),
+            anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
@@ -134,6 +136,7 @@ class StepInitialiserTests {
             lambdaCaptor.capture(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
         val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
         with(result as Destination.ExternalUrl) {
@@ -164,6 +167,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             lambdaCaptor.capture(),
+            anyOrNull(),
             anyOrNull(),
             anyOrNull(),
         )
@@ -212,6 +216,7 @@ class StepInitialiserTests {
             anyOrNull(),
             eq(parentage),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
@@ -247,6 +252,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             any<NoParents>(),
+            anyOrNull(),
             anyOrNull(),
         )
     }
@@ -316,6 +322,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             captor.capture(),
+            anyOrNull(),
         )
         val destination = captor.firstValue()
         with(destination as Destination.ExternalUrl) {
@@ -343,6 +350,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             eq(defaultUnreachableRedirectLambda),
+            anyOrNull(),
         )
     }
 
@@ -354,6 +362,93 @@ class StepInitialiserTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.build(mock(), null) }
+    }
+
+    @Test
+    fun `if no additional content providers are set, an empty Map is passed`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock)
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build(mock(), mock())
+
+        // Assert
+        val mapCaptor = argumentCaptor<() -> Map<String, Any>>()
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            mapCaptor.capture(),
+        )
+        val additionalContent = mapCaptor.firstValue()
+        assertEquals(emptyMap(), additionalContent)
+    }
+
+    @Test
+    fun `a single additional content provider is passed to the step when built`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock)
+        val expectedKey = "testKey"
+        val expectedValue = "testValue"
+        builder.withAdditionalContentProperty { expectedKey to expectedValue }
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build(mock(), mock())
+
+        // Assert
+        val mapCaptor = argumentCaptor<() -> Map<String, Any>>()
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            mapCaptor.capture(),
+        )
+        val additionalContent = mapCaptor.firstValue()
+        assertEquals(mapOf(expectedKey to expectedValue), additionalContent)
+    }
+
+    @Test
+    fun `multiple additional content providers are combined into a single Map`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock)
+        val firstKey = "firstKey"
+        val firstValue = "firstValue"
+        val secondKey = "secondKey"
+        val secondValue = 177
+        builder.withAdditionalContentProperty { firstKey to firstValue }
+        builder.withAdditionalContentProperty { secondKey to secondValue }
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build(mock(), mock())
+
+        // Assert
+        val mapCaptor = argumentCaptor<() -> Map<String, Any>>()
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            mapCaptor.capture(),
+        )
+        val additionalContent = mapCaptor.firstValue()
+        assertEquals(mapOf(firstKey to firstValue, secondKey to secondValue), additionalContent)
     }
 
     private fun mockInitialisableStep() =

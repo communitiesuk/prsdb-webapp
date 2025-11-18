@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 class TaskTests {
     class TestTask : Task<JourneyState>() {
@@ -79,7 +79,7 @@ class TaskTests {
     fun `when the first step of a task is reachable and the first step's outcome is null, the taskStatus is NOT_STARTED`() {
         // Arrange
         whenever(firstStepMock.isStepReachable).thenReturn(true)
-        whenever(firstStepMock.outcome()).thenReturn(null)
+        whenever(firstStepMock.outcome).thenReturn(null)
 
         val task = initialisedTask()
 
@@ -94,7 +94,7 @@ class TaskTests {
     fun `when the first step of a task is complete and the task is not complete, the taskStatus is IN_PROGRESS`() {
         // Arrange
         whenever(firstStepMock.isStepReachable).thenReturn(true)
-        whenever(firstStepMock.outcome()).thenReturn(Complete.COMPLETE)
+        whenever(firstStepMock.outcome).thenReturn(Complete.COMPLETE)
 
         val task = initialisedTask()
 

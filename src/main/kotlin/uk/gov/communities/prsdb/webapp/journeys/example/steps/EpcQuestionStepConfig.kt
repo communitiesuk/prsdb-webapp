@@ -57,7 +57,7 @@ class EpcQuestionStepConfig(
     }
 
     override fun mode(state: EpcJourneyState) =
-        getFormModelFromState(state)?.hasCert?.let {
+        getFormModelFromStateOrNull(state)?.hasCert?.let {
             when (it) {
                 HasEpc.YES -> if (state.automatchedEpc != null) EpcStatus.AUTOMATCHED else EpcStatus.NOT_AUTOMATCHED
                 HasEpc.NO, HasEpc.NOT_REQUIRED -> EpcStatus.NO_EPC

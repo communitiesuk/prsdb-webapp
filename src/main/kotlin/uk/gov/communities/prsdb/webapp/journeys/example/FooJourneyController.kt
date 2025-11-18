@@ -12,40 +12,43 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import java.security.Principal
 
 @PrsdbController
-@RequestMapping("new-journey")
+@RequestMapping("new-journey/{journeyId}")
 class FooJourneyController(
     val journeyFactory: FooExampleJourneyFactory,
-    val journeyStateService: JourneyStateService,
 ) {
-    @GetMapping("{propertyId}/{stepName}")
+    @GetMapping("{stepName}")
     fun getStep(
-        @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
+        @PathVariable journeyId: Long,
+        principal: Principal,
     ): ModelAndView =
         try {
-            println("Getting step $stepName for property $propertyId")
-            journeyFactory.createJourneySteps(propertyId)[stepName]?.getStepModelAndView()
+            println("Getting step $stepName")
+            val journeyMap = journeyFactory.createJourneySteps(journeyId)
+            journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyId)
+            val journeyId = journeyFactory.initializeJourneyState(journeyId)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
 
-    @PostMapping("{propertyId}/{stepName}")
+    @PostMapping("{stepName}")
     fun postStep(
-        @PathVariable("propertyId") propertyId: Long,
         @PathVariable("stepName") stepName: String,
+        @PathVariable journeyId: Long,
         @RequestParam formData: PageData,
+        principal: Principal,
     ): ModelAndView =
         try {
-            println("Posting step $stepName for property $propertyId with data $formData")
-            journeyFactory.createJourneySteps(propertyId)[stepName]?.postStepModelAndView(formData)
+            println("Posting step $stepName with data $formData")
+            journeyFactory.createJourneySteps(journeyId)[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyId)
+            val journeyId = FooJourneyState.generateJourneyId(journeyId)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }

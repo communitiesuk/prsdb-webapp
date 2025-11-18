@@ -97,13 +97,15 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getPageVisitContent() =
         stepConfig.getStepSpecificContent(state) +
+            additionalContentProvider() +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
-                "formModel" to (formModel ?: stepConfig.formModelClass.createInstance()),
+                "formModel" to (formModelOrNull ?: stepConfig.formModelClass.createInstance()),
             )
 
     fun getInvalidSubmissionContent(bindingResult: BindingResult) =
         stepConfig.getStepSpecificContent(state) +
+            additionalContentProvider() +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
                 BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult,
@@ -121,25 +123,32 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getUnreachableStepDestination() = unreachableStepDestination()
 
-    val formModel: TFormModel?
+    val formModelOrNull: TFormModel?
+        get() = stepConfig.getFormModelFromStateOrNull(state)
+
+    val formModel: TFormModel
         get() = stepConfig.getFormModelFromState(state)
 
     lateinit var parentage: Parentage
 
     private lateinit var state: TState
 
-    fun outcome(): TEnum? = if (isStepReachable)stepConfig.mode(state) else null
+    val outcome: TEnum? get() = if (isStepReachable)stepConfig.mode(state) else null
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 
     private var backUrlOverride: (() -> String?)? = null
 
+    private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
+
     val backUrl: String?
         get() {
             val singleParentUrl =
-                parentage.allowingParentSteps
-                    .singleOrNull()
-                    ?.getRouteSegmentOrNull()
+                when (val singleParentStep = parentage.allowingParentSteps.singleOrNull()) {
+                    is InternalStep<*, *, *> -> singleParentStep.backUrl
+                    is RequestableStep<*, *, *> -> JourneyStateService.urlToStep(singleParentStep)
+                    null -> null
+                }
             val backUrlOverrideValue = this.backUrlOverride?.let { it() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
@@ -163,6 +172,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
         unreachableStepDestinationProvider: () -> Destination,
+        additionalContentProvider: (() -> Map<String, Any>)? = null,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
@@ -173,6 +183,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
         this.unreachableStepDestination = unreachableStepDestinationProvider
+        additionalContentProvider?.let { this.additionalContentProvider = it }
     }
 
     val currentJourneyId: String

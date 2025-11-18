@@ -42,7 +42,7 @@ class CheckEpcStepConfig(
     override fun chooseTemplate(state: EpcJourneyState): String = "forms/checkMatchedEpcForm"
 
     override fun mode(state: EpcJourneyState): YesOrNo? =
-        getFormModelFromState(state)?.let {
+        getFormModelFromStateOrNull(state)?.let {
             when (it.matchedEpcIsCorrect) {
                 true -> YesOrNo.YES
                 false -> YesOrNo.NO
