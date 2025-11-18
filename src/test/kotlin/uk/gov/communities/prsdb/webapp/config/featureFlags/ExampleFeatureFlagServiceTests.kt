@@ -22,4 +22,16 @@ class ExampleFeatureFlagServiceTests : FeatureFlagTest() {
         featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
         assertEquals("Using ExampleFeatureFlaggedService - Flag ON", service.getFeatureFlagPageHeading())
     }
+
+    @Test
+    fun `getTemplateName returns disabledFeature when feature is disabled`() {
+        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        assertEquals("disabledFeature", service.getTemplateName())
+    }
+
+    @Test
+    fun `getTemplateName returns enabledFeature when feature is enabled`() {
+        featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
+        assertEquals("enabledFeature", service.getTemplateName())
+    }
 }
