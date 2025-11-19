@@ -71,14 +71,18 @@ class SelectAddressStepConfig(
         }
     }
 
+    override fun afterSubmitFormData(state: AddressState) {
+        super.afterSubmitFormData(state)
+        state.isAddressAlreadyRegistered = state.getAddressOrNull()?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) }
+    }
+
     override fun chooseTemplate(state: AddressState): String = "forms/selectAddressForm"
 
     override fun mode(state: AddressState): SelectAddressMode? =
         getFormModelFromStateOrNull(state)?.address?.let { selectAddress ->
             when {
                 selectAddress == MANUAL_ADDRESS_CHOSEN -> SelectAddressMode.MANUAL_ADDRESS
-                state.getMatchingAddress(selectAddress)?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) } == true ->
-                    SelectAddressMode.ADDRESS_ALREADY_REGISTERED
+                state.isAddressAlreadyRegistered == true -> SelectAddressMode.ADDRESS_ALREADY_REGISTERED
                 else -> SelectAddressMode.ADDRESS_SELECTED
             }
         }

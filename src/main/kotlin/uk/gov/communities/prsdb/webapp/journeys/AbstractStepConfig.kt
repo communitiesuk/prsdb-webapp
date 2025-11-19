@@ -45,9 +45,12 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     open fun afterSubmitFormData(state: TState) {}
 
-    open fun beforeDetermineRedirect(state: TState) {}
+    open fun beforeDetermineNextDestination(state: TState) {}
 
-    open fun afterDetermineRedirect(state: TState) {}
+    open fun afterDetermineNextDestination(
+        state: TState,
+        destination: Destination,
+    ): Destination = destination
 
     abstract fun isSubClassInitialised(): Boolean
 
