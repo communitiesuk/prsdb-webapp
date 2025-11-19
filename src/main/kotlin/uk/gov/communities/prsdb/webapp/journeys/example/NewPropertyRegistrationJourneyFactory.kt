@@ -5,7 +5,9 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -77,7 +79,7 @@ class NewPropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step("check-your-answers", journey.cyaStep) {
                     parents { journey.occupationTask.isComplete() }
-                    nextUrl { "/" }
+                    nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
         }
@@ -115,6 +117,7 @@ class PropertyRegistrationJourneyState(
     LicensingState,
     OccupiedJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
+    override var isAddressAlreadyRegistered: Boolean? by mutableDelegate("isAddressAlreadyRegistered", serializer())
 
     final fun initializeJourneyState(user: Principal): String {
         val journeyId = generateJourneyId(user)
@@ -123,6 +126,8 @@ class PropertyRegistrationJourneyState(
             .initialiseJourneyWithId(journeyId) {}
         return journeyId
     }
+
+    fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
     companion object {
         fun generateJourneyId(user: Principal): String =

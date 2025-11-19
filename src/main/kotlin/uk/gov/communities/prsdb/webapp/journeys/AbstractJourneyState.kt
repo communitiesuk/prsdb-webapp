@@ -20,6 +20,8 @@ abstract class AbstractJourneyState(
     override val journeyId: String
         get() = journeyStateService.journeyId
 
+    override fun deleteJourney() = journeyStateService.deleteState()
+
     fun <TJourney : AbstractJourneyState, TProperty : Any> mutableDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
