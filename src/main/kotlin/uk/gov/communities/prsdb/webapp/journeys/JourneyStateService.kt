@@ -31,7 +31,10 @@ class JourneyStateService(
     val journeyStateMetadataMap get() = objectToTypedStringKeyedMap<String>(session.getAttribute(JOURNEY_STATE_KEY_STORE_KEY)) ?: mapOf()
     val journeyDataKey get() = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
 
-    fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyDataKey))?.get(key)
+    fun getValue(key: String): Any? {
+        val retval = objectToStringKeyedMap(session.getAttribute(journeyDataKey))?.get(key)
+        return retval
+    }
 
     fun addSingleStepData(
         key: String,
