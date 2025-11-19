@@ -19,4 +19,10 @@ class FeatureFlagManager : FF4j() {
 
         this.createFeature(feature)
     }
+
+    fun checkFeature(featureName: String): Boolean = super.check(featureName)
+
+    fun enableFeature(flagName: String) = super.enable(flagName)
+
+    fun disableFeature(flagName: String) = super.disable(flagName)
 }
