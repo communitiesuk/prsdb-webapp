@@ -20,6 +20,7 @@ interface AddressState : JourneyState {
     val manualAddressStep: ManualAddressStep
     val localAuthorityStep: LocalAuthorityStep
     var cachedAddresses: List<AddressDataModel>?
+    var isAddressAlreadyRegistered: Boolean?
 
     fun getMatchingAddress(address: String): AddressDataModel? = cachedAddresses?.singleOrNull { it.singleLineAddress == address }
 

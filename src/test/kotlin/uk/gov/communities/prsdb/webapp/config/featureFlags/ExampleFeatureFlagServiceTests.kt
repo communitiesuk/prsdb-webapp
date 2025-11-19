@@ -13,13 +13,25 @@ class ExampleFeatureFlagServiceTests : FeatureFlagTest() {
 
     @Test
     fun `when feature is disabled service uses flag-off bean`() {
-        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_ONE)
         assertEquals("Using ExampleFeatureFlaggedService - Flag OFF", service.getFeatureFlagPageHeading())
     }
 
     @Test
     fun `when feature is disabled service uses flag-on bean`() {
-        featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_ONE)
         assertEquals("Using ExampleFeatureFlaggedService - Flag ON", service.getFeatureFlagPageHeading())
+    }
+
+    @Test
+    fun `getTemplateName returns disabledFeature when feature is disabled`() {
+        featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_ONE)
+        assertEquals("disabledFeature", service.getTemplateName())
+    }
+
+    @Test
+    fun `getTemplateName returns enabledFeature when feature is enabled`() {
+        featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_ONE)
+        assertEquals("enabledFeature", service.getTemplateName())
     }
 }

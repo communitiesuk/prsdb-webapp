@@ -153,7 +153,7 @@ class StepLifecycleOrchestratorTest {
         whenever(stepConfig.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
 
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.determineNextDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+        whenever(stepConfig.afterDetermineNextDestination(anyOrNull())).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
@@ -168,9 +168,9 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeSubmitFormData()
         myInOrder.verify(stepConfig).submitFormData(anyOrNull())
         myInOrder.verify(stepConfig).afterSubmitFormData()
-        myInOrder.verify(stepConfig).beforeDetermineRedirect()
+        myInOrder.verify(stepConfig).beforeDetermineNextDestination()
         myInOrder.verify(stepConfig).determineNextDestination()
-        myInOrder.verify(stepConfig).afterDetermineRedirect()
+        myInOrder.verify(stepConfig).afterDetermineNextDestination(anyOrNull())
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -207,7 +207,7 @@ class StepLifecycleOrchestratorTest {
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)
         val nextUrl = "nextUrl"
-        whenever(stepConfig.determineNextDestination()).thenReturn(Destination.ExternalUrl(nextUrl))
+        whenever(stepConfig.afterDetermineNextDestination(anyOrNull())).thenReturn(Destination.ExternalUrl(nextUrl))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
@@ -216,9 +216,9 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeIsStepReachable()
         myInOrder.verify(stepConfig).isStepReachable
         myInOrder.verify(stepConfig).afterIsStepReached()
-        myInOrder.verify(stepConfig).beforeDetermineRedirect()
+        myInOrder.verify(stepConfig).beforeDetermineNextDestination()
         myInOrder.verify(stepConfig).determineNextDestination()
-        myInOrder.verify(stepConfig).afterDetermineRedirect()
+        myInOrder.verify(stepConfig).afterDetermineNextDestination(anyOrNull())
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$nextUrl")
