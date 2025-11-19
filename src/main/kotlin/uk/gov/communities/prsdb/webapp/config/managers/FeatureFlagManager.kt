@@ -16,6 +16,7 @@ class FeatureFlagManager : FF4j() {
     private fun initializeFeatureFlag(flag: FeatureFlagModel) {
         val feature = Feature(flag.name, flag.enabled)
         feature.addProperty(PropertyDate("expiryDate", DateTimeHelper.getJavaDateFromLocalDate(flag.expiryDate)))
+        feature.group = flag.flagGroup
 
         this.createFeature(feature)
     }

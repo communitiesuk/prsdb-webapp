@@ -26,6 +26,9 @@ You can define a service which calls different versions of a function depending 
 
 To use your feature flagged service, pass in the interface (see ExampleFeatureFlagTestController) - it will automatically call the correct implementation based on the feature flag value.
 
+## Feature flag groups
+Feature flags can be assigned to a group (each flag can only be in one group though). This may be useful for grouping features into a partiular release.
+
 ## Tests
 Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabed or disabled in particular tests as required
 (See ExampleFeatureFlagServiceTest.kt).
