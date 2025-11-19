@@ -22,7 +22,7 @@ class FeatureFlagConfig {
         listOf(
             FeatureFlagModel(
                 name = EXAMPLE_FEATURE_FLAG_ONE,
-                enabled = false,
+                enabled = true,
                 expiryDate = LocalDate.of(2030, 2, 14),
             ),
         )
