@@ -40,7 +40,7 @@ class ExampleFeatureFlagTestController(
             if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
                 "Feature Flag in FeatureFlagConfig is ON"
             } else {
-                "Feature Flag in FeatureFlagConfig is OFF"
+                throw IllegalStateException("Feature flag should be enabled to access this endpoint")
             }
         model.addAttribute("ffTestHeading", "Feature flagged controller endpoint - available when flag is ENABLED")
         model.addAttribute("ffConfigFeature", configFlagValue)
@@ -53,7 +53,7 @@ class ExampleFeatureFlagTestController(
     fun inverseFeatureFlaggedEndpointTest(model: Model): String {
         val configFlagValue =
             if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
-                "Feature Flag in FeatureFlagConfig is ON"
+                throw IllegalStateException("Feature flag should be disabled to access this endpoint")
             } else {
                 "Feature Flag in FeatureFlagConfig is OFF"
             }
