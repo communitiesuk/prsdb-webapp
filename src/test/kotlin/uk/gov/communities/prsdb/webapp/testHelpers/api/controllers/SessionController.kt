@@ -21,7 +21,17 @@ class SessionController(
     fun setJourneyData(
         @RequestBody requestBody: SetJourneyDataRequestModel,
     ) {
-        session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyData())
+        session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyState())
+    }
+
+    @PostMapping("/$SET_JOURNEY_STATE_PATH_SEGMENT", consumes = ["application/json"])
+    fun setJourneyState(
+        @RequestBody requestBody: SetJourneyDataRequestModel,
+    ) {
+        val keyToUse = "Any-olf-key"
+        session.setAttribute("journeyStateKeyStore", mapOf(requestBody.journeyDataKey to keyToUse))
+        val state = requestBody.getJourneyState()
+        session.setAttribute(keyToUse, state)
     }
 
     @PostMapping("/$STORE_INVITATION_TOKEN_PATH_SEGMENT", consumes = ["application/json"])
@@ -33,7 +43,9 @@ class SessionController(
 
     companion object {
         const val SET_JOURNEY_DATA_PATH_SEGMENT = "set-journey-data"
+        const val SET_JOURNEY_STATE_PATH_SEGMENT = "set-journey-state"
         const val SET_JOURNEY_DATA_ROUTE = "local/$SET_JOURNEY_DATA_PATH_SEGMENT"
+        const val SET_JOURNEY_STATE_ROUTE = "local/$SET_JOURNEY_STATE_PATH_SEGMENT"
 
         const val STORE_INVITATION_TOKEN_PATH_SEGMENT = "store-token"
         const val STORE_INVITATION_TOKEN_ROUTE = "local/$STORE_INVITATION_TOKEN_PATH_SEGMENT"

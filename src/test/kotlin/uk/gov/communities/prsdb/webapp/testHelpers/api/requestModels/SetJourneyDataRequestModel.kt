@@ -14,6 +14,24 @@ data class SetJourneyDataRequestModel(
 ) {
     constructor(journeyDataKey: String, journeyData: JourneyData) : this(journeyDataKey, objectMapper.writeValueAsString(journeyData))
 
+    fun getJourneyState(): JourneyData =
+        objectToStringKeyedMap(objectMapper.readValue(serializedJourneyData, Any::class.java)) ?: emptyMap()
+
+    companion object {
+        private val objectMapper =
+            ObjectMapper()
+                .registerModule(SimpleModule().addDeserializer(Map::class.java, JourneyDataDeserializer()))
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
+}
+
+data class SetJourneyStateRequestModel(
+    val journeyId: String,
+    val serializedJourneyData: String,
+) {
+    constructor(journeyDataKey: String, journeyData: JourneyData) : this(journeyDataKey, objectMapper.writeValueAsString(journeyData))
+
     fun getJourneyData(): JourneyData = objectToStringKeyedMap(objectMapper.readValue(serializedJourneyData, Any::class.java)) ?: emptyMap()
 
     companion object {
