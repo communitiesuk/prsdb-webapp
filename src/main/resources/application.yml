@@ -91,6 +91,10 @@ google-analytics:
 
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
+
+ff4j:
+  web-console:
+    enabled: false
 ---
 
 spring:
