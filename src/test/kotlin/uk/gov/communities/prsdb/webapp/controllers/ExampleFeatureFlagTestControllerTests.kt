@@ -37,6 +37,8 @@ class ExampleFeatureFlagTestControllerTests(
     @WithMockUser
     @Test
     fun `featureFlaggedEndpointTest calls the featureFlagManager to check if the feature is enabled`() {
+        whenever(featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)).thenReturn(true)
+
         mvc
             .get(FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
@@ -47,6 +49,8 @@ class ExampleFeatureFlagTestControllerTests(
     @WithMockUser
     @Test
     fun `inverseFeatureFlaggedEndpointTest calls the featureFlagManager to check if the feature is enabled`() {
+        whenever(featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)).thenReturn(false)
+
         mvc
             .get(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
