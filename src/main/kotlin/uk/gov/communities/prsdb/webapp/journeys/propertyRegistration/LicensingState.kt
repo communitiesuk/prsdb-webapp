@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
@@ -21,7 +20,4 @@ interface LicensingState : JourneyState {
             LicensingType.HMO_ADDITIONAL_LICENCE -> hmoAdditionalLicenceStep.formModelOrNull?.licenceNumber
             else -> null
         }
-
-    fun getLicenceNumber(): String =
-        getLicenceNumberOrNull() ?: throw NotNullFormModelValueIsNullException("No Licence number found in LicensingState")
 }
