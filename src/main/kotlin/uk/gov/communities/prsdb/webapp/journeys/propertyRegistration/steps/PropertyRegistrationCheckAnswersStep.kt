@@ -179,7 +179,7 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state).let { Complete.COMPLETE }
+    override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @Scope("prototype")
