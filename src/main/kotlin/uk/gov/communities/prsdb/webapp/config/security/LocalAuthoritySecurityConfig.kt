@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
-import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.contentSecurityPolicyDirectives
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityPrivacyNoticeController
@@ -45,7 +45,7 @@ class LocalAuthoritySecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(contentSecurityPolicyDirectives)
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
                     }
                     .permissionsPolicyHeader {
                             permissions ->

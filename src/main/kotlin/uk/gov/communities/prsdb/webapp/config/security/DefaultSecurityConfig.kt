@@ -73,7 +73,7 @@ class DefaultSecurityConfig(
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
-                            .policyDirectives(contentSecurityPolicyDirectives)
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
                     }
                     .permissionsPolicyHeader {
                             permissions ->
@@ -81,7 +81,7 @@ class DefaultSecurityConfig(
                             .policy(PERMISSIONS_POLICY_DIRECTIVES)
                     }
             }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
-            
+
         return http.build()
     }
 
@@ -100,7 +100,7 @@ class DefaultSecurityConfig(
     }
 
     companion object {
-        var contentSecurityPolicyDirectives =
+        const val CONTENT_SECURITY_POLICY_DIRECTIVES =
             "default-src 'self'; " +
                 "script-src 'self' 'nonce-' $PLAUSIBLE_URL $GOOGLE_TAG_MANAGER_URL; " +
                 "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
