@@ -36,3 +36,7 @@ beta-feedback:
 os:
   api-key: ${OS_API_KEY}
   downloads.base-url: https://api.os.uk/downloads/v1
+
+ff4j:
+  web-console:
+    enabled: false

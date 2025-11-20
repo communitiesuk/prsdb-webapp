@@ -31,7 +31,6 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -97,7 +96,6 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
                 ownershipType = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
@@ -147,7 +145,6 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                occupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
                 ownershipType = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
@@ -803,11 +800,11 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `deletePropertyOwnership calls delete on the propertyOwnershipRepository`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val propertyOwnershipId = 1L
 
-        propertyOwnershipService.deletePropertyOwnership(propertyOwnership)
+        propertyOwnershipService.deletePropertyOwnership(propertyOwnershipId)
 
-        verify(mockPropertyOwnershipRepository).delete(propertyOwnership)
+        verify(mockPropertyOwnershipRepository).deleteById(propertyOwnershipId)
     }
 
     @Test

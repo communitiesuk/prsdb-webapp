@@ -63,8 +63,14 @@ class DefaultSecurityConfig(
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**")
+            }.headers { headers ->
+                headers
+                    .permissionsPolicyHeader {
+                            permissions ->
+                        permissions
+                            .policy(PERMISSIONS_POLICY_DIRECTIVES)
+                    }
             }
-
         return http.build()
     }
 
@@ -80,5 +86,21 @@ class DefaultSecurityConfig(
         oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}/$SIGN_OUT_PATH_SEGMENT")
         oidcLogoutSuccessHandler.setDefaultTargetUrl("/$SIGN_OUT_PATH_SEGMENT")
         return oidcLogoutSuccessHandler
+    }
+
+    companion object {
+        // The permission policy directives are from:
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
+        // This is the list of permissions that we are blocking.
+        const val PERMISSIONS_POLICY_DIRECTIVES =
+            "accelerometer=(), aria-notify=(), attribution-reporting=(), " +
+                "autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), " +
+                "compute-pressure=(), cross-origin-isolated=(), deferred-fetch=(), deferred-fetch-minimal=(), " +
+                "display-capture=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), " +
+                "gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), language-detector=(), local-fonts=(), " +
+                "magnetometer=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), " +
+                "picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), " +
+                "serial=(), storage-access=(), summarizer=(), translator=(), usb=(), web-share=(), " +
+                "window-management=(), xr-spatial-tracking=()"
     }
 }

@@ -209,17 +209,6 @@ class PropertyComplianceService(
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
 
-    fun deletePropertyCompliance(propertyCompliance: PropertyCompliance) {
-        propertyComplianceRepository.delete(propertyCompliance)
-    }
-
-    fun deletePropertyComplianceByOwnershipId(propertyOwnershipId: Long) =
-        propertyComplianceRepository.deleteByPropertyOwnership_Id(propertyOwnershipId)
-
-    fun deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds: List<Long>) {
-        propertyComplianceRepository.deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
-    }
-
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {
         val certificate = certificateUploadRepository.findByFileUpload_Id(id)

@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -76,7 +75,6 @@ class MockLandlordData {
         }
 
         fun createPropertyOwnership(
-            occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
@@ -91,7 +89,6 @@ class MockLandlordData {
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
-                    occupancyType = occupancyType,
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,

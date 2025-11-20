@@ -61,10 +61,10 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
-            "JOIN address a ON po.address_id = a.id " +
-            "WHERE po.is_active AND a.single_line_address %> :searchTerm " +
+            "WHERE po.single_line_address %>> :searchTerm " +
+            "AND po.is_active " +
             FILTERS +
-            "ORDER BY a.single_line_address <->> :searchTerm",
+            "ORDER BY po.single_line_address <->>> :searchTerm",
         nativeQuery = true,
     )
     fun searchMatching(
@@ -86,9 +86,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                   FROM address a 
                   WHERE po.address_id = a.id)
                  =
-                 (SELECT lc.id 
-                  FROM local_council lc
-                  JOIN local_council_user lcu ON lc.id = lcu.local_council_id
+                 (SELECT lcu.local_council_id 
+                  FROM local_council_user lcu
                   WHERE lcu.subject_identifier = :localCouncilUserBaseId)
                  OR NOT :restrictToLocalCouncil) 
             """

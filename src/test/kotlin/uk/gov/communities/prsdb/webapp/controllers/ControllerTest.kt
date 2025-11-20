@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.filter.UrlHandlerFilter
+import uk.gov.communities.prsdb.webapp.PrsdbWebMvcRegistration
 import uk.gov.communities.prsdb.webapp.config.BackLinkInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
@@ -54,4 +55,7 @@ abstract class ControllerTest(
 
     @MockitoBean
     lateinit var userRolesService: UserRolesService
+
+    @MockitoBean
+    lateinit var mockPrsdbWebMvcRegistration: PrsdbWebMvcRegistration
 }

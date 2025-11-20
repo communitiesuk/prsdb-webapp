@@ -94,9 +94,7 @@ dependencies {
     implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
 
     // FF4J feature flags
-    implementation("org.ff4j:ff4j-core:2.0.0")
-    implementation("org.ff4j:ff4j-aop:2.0.0")
-    implementation("org.ff4j:ff4j-spring-boot-autoconfigure-common:2.0.0")
+    implementation("org.ff4j:ff4j-spring-boot-starter-webmvc:2.0.0")
 }
 
 kotlin {

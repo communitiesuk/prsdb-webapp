@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -49,14 +48,12 @@ class PropertyOwnershipService(
         address: Address,
         license: License? = null,
         isActive: Boolean = true,
-        occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
-                occupancyType = occupancyType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
@@ -243,8 +240,8 @@ class PropertyOwnershipService(
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
-    fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
-        propertyOwnershipRepository.delete(propertyOwnership)
+    fun deletePropertyOwnership(propertyOwnershipId: Long) {
+        propertyOwnershipRepository.deleteById(propertyOwnershipId)
     }
 
     fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {

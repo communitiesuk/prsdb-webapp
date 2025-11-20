@@ -154,6 +154,7 @@ class NgdAddressLoader(
                     }
                 }
             }
+            updatePropertyOwnershipSingleLineAddresses()
             setStoredDataPackageVersionId(dataPackageVersionId)
             transaction.commit()
         } catch (exception: Exception) {
@@ -207,6 +208,12 @@ class NgdAddressLoader(
 
         preparedStatement.addBatch()
         return true
+    }
+
+    private fun updatePropertyOwnershipSingleLineAddresses() {
+        log("Starting to update property ownership single line addresses")
+        ngdAddressLoaderRepository.updatePropertyOwnershipSingleLineAddresses()
+        log("Property ownership single line addresses updated")
     }
 
     private fun deleteUnusedInactiveAddresses(session: StatelessSession) {

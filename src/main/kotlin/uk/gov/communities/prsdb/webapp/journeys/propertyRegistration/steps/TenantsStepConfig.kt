@@ -1,11 +1,12 @@
-package uk.gov.communities.prsdb.webapp.journeys.example.steps
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 
 @Scope("prototype")
@@ -23,7 +24,7 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
 
     override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfPeopleForm"
 
-    override fun mode(state: OccupiedJourneyState) = getFormModelFromState(state)?.numberOfPeople?.let { Complete.COMPLETE }
+    override fun mode(state: OccupiedJourneyState) = getFormModelFromStateOrNull(state)?.numberOfPeople?.let { Complete.COMPLETE }
 
     override fun beforeValidateSubmittedData(
         formData: PageData,
@@ -31,7 +32,7 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
     ): PageData {
         super.beforeValidateSubmittedData(formData, state)
 
-        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModel?.numberOfHouseholds)
+        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModelOrNull?.numberOfHouseholds)
     }
 }
 
@@ -39,4 +40,4 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
 @PrsdbWebComponent
 final class TenantsStep(
     stepConfig: TenantsStepConfig,
-) : JourneyStep<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>(stepConfig)
+) : RequestableStep<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>(stepConfig)

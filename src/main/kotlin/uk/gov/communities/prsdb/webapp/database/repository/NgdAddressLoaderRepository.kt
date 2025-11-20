@@ -53,6 +53,11 @@ class NgdAddressLoaderRepository(
         return connection.prepareStatement(query)
     }
 
+    fun updatePropertyOwnershipSingleLineAddresses() {
+        val query = "CALL update_property_ownership_single_line_addresses();"
+        session.createNativeMutationQuery(query).executeUpdate()
+    }
+
     fun deleteUnusedInactiveAddresses() {
         val query =
             """

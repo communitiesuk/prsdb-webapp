@@ -283,7 +283,6 @@ class PropertyRegistrationServiceTests {
                 address = any(),
                 license = anyOrNull(),
                 isActive = any(),
-                occupancyType = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
