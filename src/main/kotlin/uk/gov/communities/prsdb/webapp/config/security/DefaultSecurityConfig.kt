@@ -75,7 +75,7 @@ class DefaultSecurityConfig(
                         csp
                             .policyDirectives(contentSecurityPolicyDirectives)
                     }
-            }.addFilterAfter(CSPNonceFilter(), HeaderWriterFilter::class.java)
+            }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
 
         return http.build()
     }

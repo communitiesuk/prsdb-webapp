@@ -44,7 +44,7 @@ class GlobalModelAttributes(
         model.addAttribute("plausibleDomainId", plausibleDomainId)
         model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
         model.addAttribute("googleTagManagerUrl", "$GOOGLE_TAG_MANAGER_URL/gtag/js?id=")
-        model.addAttribute("serverGeneratedNonce", "nonce-")
+        model.addAttribute("serverGeneratedNonce", getCurrentNonce())
 
         // Feedback banner attributes
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)

@@ -29,9 +29,7 @@ class CSPNonceFilter() : Filter {
             val nonceArray = ByteArray(NONCE_SIZE)
             secureRandom.nextBytes(nonceArray)
             val nonce = Base64.getEncoder().encodeToString(nonceArray)
-
             request?.setAttribute(CSP_NONCE_ATTRIBUTE, nonce)
-
             try {
                 chain.doFilter(request, CSPNonceResponseWrapper(response, nonce))
             } catch (e: Exception) {
@@ -52,25 +50,25 @@ class CSPNonceFilter() : Filter {
     ) : HttpServletResponseWrapper(response) {
         override fun setHeader(
             name: String,
-            value: String,
+            value: String?,
         ) {
-            if ((name == "Content-Security-Policy") && (value.isNotBlank())) {
+            if ((name == "Content-Security-Policy") && (value != null) && value.isNotBlank()) {
                 val newValue = value.replace("'nonce-'", "'nonce-$nonce'")
-                (this as HttpServletResponse).setHeader(name, newValue)
+                super.setHeader(name, newValue)
             } else {
-                (this as HttpServletResponse).setHeader(name, value)
+                super.setHeader(name, value)
             }
         }
 
         override fun addHeader(
             name: String,
-            value: String,
+            value: String?,
         ) {
-            if ((name == "Content-Security-Policy") && (value.isNotBlank())) {
+            if ((name == "Content-Security-Policy") && (value != null) && value.isNotBlank()) {
                 val newValue = value.replace("'nonce-'", "'nonce-$nonce'")
-                (this as HttpServletResponse).addHeader(name, newValue)
+                super.addHeader(name, newValue)
             } else {
-                (this as HttpServletResponse).addHeader(name, value)
+                super.addHeader(name, value)
             }
         }
     }
