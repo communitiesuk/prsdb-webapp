@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
-import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 
-@Component
+@PrsdbWebComponent
 class FeatureFlagAnnotationValidator(
     private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
 ) : ApplicationListener<ContextRefreshedEvent> {
