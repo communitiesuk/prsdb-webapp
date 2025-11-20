@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
@@ -65,6 +66,14 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "AND po.is_active " +
             FILTERS +
             "ORDER BY po.single_line_address <->>> :searchTerm",
+        countQuery =
+            "SELECT count(*) " +
+                "FROM (SELECT 1 " +
+                "      FROM property_ownership po " +
+                "      WHERE po.single_line_address %>> :searchTerm " +
+                "      AND  po.is_active " +
+                FILTERS +
+                "      LIMIT $MAX_ENTRIES_IN_PROPERTIES_SEARCH) subquery;",
         nativeQuery = true,
     )
     fun searchMatching(
@@ -99,7 +108,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                   WHERE po.license_id = l.id)
                  IN :restrictToLicenses
                  OR po.license_id IS NULL 
-                    AND :${NO_LICENCE_TYPE} IN :restrictToLicenses)
+                    AND :$NO_LICENCE_TYPE IN :restrictToLicenses)
             """
 
         private const val FILTERS = LOCAL_COUNCIL_FILTER + LICENSE_FILTER
