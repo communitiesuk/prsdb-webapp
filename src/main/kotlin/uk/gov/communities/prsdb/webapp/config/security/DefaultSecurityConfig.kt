@@ -101,6 +101,6 @@ class DefaultSecurityConfig(
                 "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
                 "img-src 'self' $GOOGLE_TAG_MANAGER_URL; " +
                 "style-src 'self'; " +
-                "object-src 'none; base-uri 'none'; frame-ancestors 'none';"
+                "object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
     }
 }
