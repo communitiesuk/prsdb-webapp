@@ -24,32 +24,34 @@ class FeatureFlagConfig {
         return featureFlagManager
     }
 
-    val featureFlags =
-        listOf(
-            FeatureFlagModel(
-                name = EXAMPLE_FEATURE_FLAG_ONE,
-                enabled = true,
-                expiryDate = LocalDate.of(2030, 2, 14),
-            ),
-            FeatureFlagModel(
-                name = EXAMPLE_FEATURE_FLAG_TWO,
-                enabled = true,
-                expiryDate = LocalDate.of(2030, 2, 14),
-                flagGroup = RELEASE_1_0,
-            ),
-            FeatureFlagModel(
-                name = EXAMPLE_FEATURE_FLAG_THREE,
-                enabled = false,
-                expiryDate = LocalDate.of(2030, 2, 14),
-                flagGroup = RELEASE_1_0,
-            ),
-        )
+    companion object {
+        val featureFlags =
+            listOf(
+                FeatureFlagModel(
+                    name = EXAMPLE_FEATURE_FLAG_ONE,
+                    enabled = true,
+                    expiryDate = LocalDate.of(2030, 2, 14),
+                ),
+                FeatureFlagModel(
+                    name = EXAMPLE_FEATURE_FLAG_TWO,
+                    enabled = true,
+                    expiryDate = LocalDate.of(2030, 2, 14),
+                    flagGroup = RELEASE_1_0,
+                ),
+                FeatureFlagModel(
+                    name = EXAMPLE_FEATURE_FLAG_THREE,
+                    enabled = false,
+                    expiryDate = LocalDate.of(2030, 2, 14),
+                    flagGroup = RELEASE_1_0,
+                ),
+            )
 
-    val featureGroups =
-        listOf(
-            FeatureFlagGroupModel(
-                name = RELEASE_1_0,
-                enabled = true,
-            ),
-        )
+        val featureGroups =
+            listOf(
+                FeatureFlagGroupModel(
+                    name = RELEASE_1_0,
+                    enabled = true,
+                ),
+            )
+    }
 }

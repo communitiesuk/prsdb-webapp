@@ -11,8 +11,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagDisabled
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagEnabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagAnnotationValidator
 
 class FeatureFlagAnnotationValidatorTests {
@@ -28,14 +28,14 @@ class FeatureFlagAnnotationValidatorTests {
     }
 
     class TestController {
-        @AvailableWhenFeatureFlagEnabled("flagA")
-        @AvailableWhenFeatureFlagDisabled("flagA")
+        @AvailableWhenFeatureEnabled("flagA")
+        @AvailableWhenFeatureDisabled("flagA")
         fun conflictingMethod() {}
 
-        @AvailableWhenFeatureFlagEnabled("flagB")
+        @AvailableWhenFeatureEnabled("flagB")
         fun enabledMethod() {}
 
-        @AvailableWhenFeatureFlagDisabled("flagC")
+        @AvailableWhenFeatureDisabled("flagC")
         fun disabledMethod() {}
 
         fun noAnnotationMethod() {}
