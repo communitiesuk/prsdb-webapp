@@ -1262,7 +1262,7 @@ class Navigator(
         )
     }
 
-    fun goToInviteLaAdmin(): InviteLaAdminPage {
+    fun goToInviteLocalCouncilAdmin(): InviteLaAdminPage {
         navigate(ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
         return createValidPage(page, InviteLaAdminPage::class)
     }

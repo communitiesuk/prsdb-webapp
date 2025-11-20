@@ -12,7 +12,7 @@ class LandlordFilterPanelViewModel(
             listOf(
                 FilterViewModel(
                     headingMsgKey = "landlordSearch.filter.localCouncil.heading",
-                    searchRequestProperty = "restrictToLocalcouncil",
+                    searchRequestProperty = "restrictToLocalCouncil",
                     options = listOf(CheckboxViewModel(value = true, labelMsgKey = "landlordSearch.filter.localCouncil.label")),
                 ),
             ),

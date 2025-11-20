@@ -9,7 +9,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserSuccessPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserSuccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
@@ -28,7 +28,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
 
         val invitePage = navigator.goToInviteNewLaUser(1)
         invitePage.submitMatchingEmail("test@example.com")
-        val successPage = assertPageIs(page, InviteNewLaUserSuccessPage::class, mapOf("localAuthorityId" to "1"))
+        val successPage = assertPageIs(page, InviteNewLocalCouncilUserSuccessPage::class, mapOf("localCouncilId" to "1"))
         assertThat(successPage.confirmationBanner).containsText("You’ve sent test@example.com an invite to the database")
 
         verify(invitationConfirmationSenderAdmin, times(5)).sendEmail(

@@ -53,7 +53,7 @@ class LocalCouncilDashboardController(
         }
 
         model.addAttribute("userName", localCouncilUser.name)
-        model.addAttribute("localAuthority", localCouncilUser.localCouncil.name)
+        model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
         model.addAttribute("privacyNoticeUrl", LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)

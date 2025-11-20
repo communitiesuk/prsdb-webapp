@@ -83,7 +83,7 @@ class LocalCouncilUserRegistrationJourney(
             page =
                 Page(
                     formModel = LocalCouncilPrivacyNoticeFormModel::class,
-                    templateName = "forms/localAuthorityPrivacyNoticeForm",
+                    templateName = "forms/localCouncilPrivacyNoticeForm",
                     content =
                         mapOf(
                             "title" to "registerLocalCouncilUser.title",

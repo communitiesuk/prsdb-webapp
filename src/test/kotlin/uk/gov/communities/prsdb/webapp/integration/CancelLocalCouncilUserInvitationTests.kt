@@ -35,7 +35,7 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
                 assertPageIs(
                     page,
                     CancelLocalCouncilUserInvitationSuccessPage::class,
-                    mapOf("localAuthorityId" to "1", "invitationId" to "1"),
+                    mapOf("localCouncilId" to "1", "invitationId" to "1"),
                 )
 
             // The success page confirms the user is deleted
@@ -72,7 +72,7 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
                 assertPageIs(
                     page,
                     CancelLocalCouncilUserInvitationSuccessPage::class,
-                    mapOf("localAuthorityId" to "1", "invitationId" to "4"),
+                    mapOf("localCouncilId" to "1", "invitationId" to "4"),
                 )
 
             // The success page confirms the user is deleted

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class InviteLocalCouncilAdminSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `inviting a new LA admin shows validation errors if the email is invalid or the email addresses don't match`(page: Page) {
-        val invitePage = navigator.goToInviteLaAdmin()
+        val invitePage = navigator.goToInviteLocalCouncilAdmin()
         invitePage.fillInFormAndSubmit("BATH AND", "BATH AND NORTH EAST SOMERSET COUNCIL", "not-an-email", "different@example.com")
         assertThat(invitePage.form.getErrorMessage("email")).containsText("Enter an email address in the correct format")
         assertThat(invitePage.form.getErrorMessage("confirmEmail")).containsText("Both email addresses should match")
@@ -15,9 +15,9 @@ class InviteLocalCouncilAdminSinglePageTests : IntegrationTestWithImmutableData(
 
     @Test
     fun `inviting a new LA admin shows validation errors if any of the fields are empty`(page: Page) {
-        val invitePage = navigator.goToInviteLaAdmin()
+        val invitePage = navigator.goToInviteLocalCouncilAdmin()
         invitePage.form.submit()
-        assertThat(invitePage.form.getErrorMessage("localAuthorityId")).containsText("Select a local council to continue")
+        assertThat(invitePage.form.getErrorMessage("localCouncilId")).containsText("Select a local council to continue")
         assertThat(invitePage.form.getErrorMessage("email")).containsText("You must enter an email address")
         assertThat(invitePage.form.getErrorMessage("confirmEmail")).containsText("You must enter and confirm their email address")
     }

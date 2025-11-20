@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerLAUser.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{registerLocalCouncilUser.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLaUser.success.banner.title(${localCouncil})}, ~{::#confirmation-banner/content()})}">
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLocalCouncilUser.success.banner.title(${localCouncil})}, ~{::#confirmation-banner/content()})}">
         </div>
         <h2 class="govuk-heading-xl" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{registerLaUser.success.whatHappensNext.paragraph.one}">
-            registerLaUser.success.whatHappensNext.paragraph.one
+        <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.whatHappensNext.paragraph.one}">
+            registerLocalCouncilUser.success.whatHappensNext.paragraph.one
         </p>
-        <p class="govuk-body" th:text="#{registerLaUser.success.whatHappensNext.paragraph.two}">
-            registerLaUser.success.whatHappensNext.paragraph.two
+        <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.whatHappensNext.paragraph.two}">
+            registerLocalCouncilUser.success.whatHappensNext.paragraph.two
         </p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerLaUser.success.whatHappensNext.bullet.one}">
-                registerLaUser.success.whatHappensNext.bullet.one
+            <li th:text="#{registerLocalCouncilUser.success.whatHappensNext.bullet.one}">
+                registerLocalCouncilUser.success.whatHappensNext.bullet.one
             </li>
-            <li th:text="#{registerLaUser.success.whatHappensNext.bullet.two}">
-                registerLaUser.success.whatHappensNext.bullet.two
+            <li th:text="#{registerLocalCouncilUser.success.whatHappensNext.bullet.two}">
+                registerLocalCouncilUser.success.whatHappensNext.bullet.two
             </li>
         </ul>
         <div class="govuk-button-group">
             <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
-                registerLaUser.success.goToDashboardButtonText
+                registerLocalCouncilUser.success.goToDashboardButtonText
             </a>
         </div>
     </div>

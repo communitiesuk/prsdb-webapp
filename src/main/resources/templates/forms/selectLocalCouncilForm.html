@@ -4,18 +4,18 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="selectOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="selectLabel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="findLocalAuthorityUrl" type=""*/-->
+<!--/*@thymesVar id="findLocalCouncilUrl" type=""*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <fieldset id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localAuthorityId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localCouncilId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.selectLocalAuthority.paragraph.one.beforeLink}">forms.selectLocalAuthority.paragraph.one.beforeLink</span>
-            <a class="govuk-link" target="_blank" th:href="${findLocalAuthorityUrl}" th:text="#{forms.selectLocalAuthority.paragraph.one.linkText}">forms.selectLocalAuthority.paragraph.one.linkText
-            </a><span th:remove="tag" th:text="#{forms.selectLocalAuthority.paragraph.one.afterLink}">forms.selectLocalAuthority.paragraph.one.afterLink</span>
+            <span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.one.beforeLink}">forms.selectLocalCouncil.paragraph.one.beforeLink</span>
+            <a class="govuk-link" target="_blank" th:href="${findLocalCouncilUrl}" th:text="#{forms.selectLocalCouncil.paragraph.one.linkText}">forms.selectLocalCouncil.paragraph.one.linkText
+            </a><span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.one.afterLink}">forms.selectLocalCouncil.paragraph.one.afterLink</span>
         </p>
-        <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localAuthorityId',null, ${selectOptions})}"></select>
+        <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localCouncilId',null, ${selectOptions})}"></select>
     </fieldset>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
 </th:block>

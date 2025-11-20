@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{deleteLAUserSuccess.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUserSuccess.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{deleteLAUserSuccess.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <span th:text="#{deleteLAUserSuccess.banner.body(${deletedUserName}, ${localCouncil.name})}"
-                  th:remove="tag">deleteLAUserSuccess.banner.body</span>
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{deleteLocalCouncilUserSuccess.banner.heading}, ~{::#confirmation-banner/content()})}">
+            <span th:text="#{deleteLocalCouncilUserSuccess.banner.body(${deletedUserName}, ${localCouncil.name})}"
+                  th:remove="tag">deleteLocalCouncilUserSuccess.banner.body</span>
         </div>
         <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{deleteLAUserSuccess.whatHappensNext.paragraph.one(${localCouncil.name})}">
+        <p class="govuk-body" th:text="#{deleteLocalCouncilUserSuccess.whatHappensNext.paragraph.one(${localCouncil.name})}">
             deleteLAUserSuccess.whatHappensNext.para1
         </p>
-        <p class="govuk-body" th:text="#{deleteLAUserSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
-            deleteLAUserSuccess.whatHappensNext.para2
+        <p class="govuk-body" th:text="#{deleteLocalCouncilUserSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
+            deleteLocalCouncilUserSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${returnToManageUsersUrl}}, #{deleteLAUserSuccess.returnToManageUsers})}">
-                deleteLAUserSuccess.returnToManageUsers
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${returnToManageUsersUrl}}, #{deleteLocalCouncilUserSuccess.returnToManageUsers})}">
+                deleteLocalCouncilUserSuccess.returnToManageUsers
             </a>
         </div>
     </div>

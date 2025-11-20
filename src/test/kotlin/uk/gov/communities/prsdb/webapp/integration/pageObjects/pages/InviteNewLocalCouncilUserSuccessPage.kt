@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ConfirmationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class InviteNewLaUserSuccessPage(
+class InviteNewLocalCouncilUserSuccessPage(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(page, ManageLocalCouncilUsersController.getLocalCouncilInviteUserSuccessRoute(urlArguments["localCouncilId"]!!.toInt())) {

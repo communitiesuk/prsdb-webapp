@@ -38,7 +38,7 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25');
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
+VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localCouncilId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
        (2, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
        (3, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
        (4, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),

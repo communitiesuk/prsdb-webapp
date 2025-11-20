@@ -12,11 +12,11 @@ import java.net.URI
 
 class InviteLocalCouncilAdminTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
-    fun `inviting a new LA admin ends with a confirmation page`(page: Page) {
+    fun `inviting a new Local Council admin ends with a confirmation page`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
-            .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
+            .thenReturn(URI("www.prsd.gov.uk/register-local-council-user/test-token"))
 
-        val invitePage = navigator.goToInviteLaAdmin()
+        val invitePage = navigator.goToInviteLocalCouncilAdmin()
         invitePage.fillInFormAndSubmit("BATH AND ", "BATH AND NORTH EAST SOMERSET COUNCIL", "admin@example.com", "admin@example.com")
 
         // Confirmation page

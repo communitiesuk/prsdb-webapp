@@ -10,7 +10,7 @@ class DeleteLocalCouncilUserSuccessPage(
 ) : DeleteLocalCouncilUserSuccessBasePage(
         page,
         ManageLocalCouncilUsersController.getLocalCouncilDeleteUserSuccessRoute(
-            urlArguments["localAuthorityId"]!!.toInt(),
+            urlArguments["localCouncilId"]!!.toInt(),
             urlArguments["deleteeId"]!!.toLong(),
         ),
     )
