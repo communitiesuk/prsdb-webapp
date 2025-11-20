@@ -113,7 +113,7 @@ class GeneratePasscodeControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `generatePasscodePost returns 200 and generates new passcode for authorized LA admin`() {
+    fun `generatePasscodePost returns 200 and generates new passcode for authorized Local Council admin`() {
         val localCouncilUser = createLocalCouncilUser()
         val testPasscode = "DEF456"
 
@@ -157,7 +157,7 @@ class GeneratePasscodeControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `generatePasscodeGet returns 403 for LA_USER role (should only allow LA_ADMIN)`() {
+    fun `generatePasscodeGet returns 403 for LOCAL_COUNCIL_USER role (should only allow LOCAL_COUNCIL_ADMIN)`() {
         mvc
             .get(GENERATE_PASSCODE_URL)
             .andExpect {
@@ -167,7 +167,7 @@ class GeneratePasscodeControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `generatePasscodePost returns 403 for LA_USER role (should only allow LA_ADMIN)`() {
+    fun `generatePasscodePost returns 403 for LOCAL_COUNCIL_USER role (should only allow LOCAL_COUNCIL_ADMIN)`() {
         mvc
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED

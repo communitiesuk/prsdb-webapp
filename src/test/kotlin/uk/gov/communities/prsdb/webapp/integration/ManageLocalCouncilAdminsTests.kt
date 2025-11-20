@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableD
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.ACCOUNT_STATUS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.LOCAL_COUNCIL_COL_INDEX
@@ -23,14 +23,14 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
         ) {
         @Test
         fun `invite another admin button goes to invite new user page`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
             manageAdminPage.inviteAnotherAdminButton.clickAndWait()
-            assertPageIs(page, InviteLaAdminPage::class)
+            assertPageIs(page, InviteLocalCouncilAdminPage::class)
         }
 
         @Test
         fun `pagination component renders with more than 10 table entries`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
             val pagination = manageAdminPage.getPaginationComponent()
             assertEquals(manageAdminPage.table.rows.count(), 10)
             assertThat(pagination.nextLink).isVisible()
@@ -47,7 +47,7 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
 
         @Test
         fun `admins are listed in the correct order`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
 
             // Header
             assertThat(manageAdminPage.table.headerRow.getCell(USERNAME_COL_INDEX)).containsText("Username")
@@ -105,14 +105,14 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
 
         @Test
         fun `Change link for an active user goes to the edit admin page`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
             manageAdminPage.getChangeLink(0).clickAndWait()
-            assertPageIs(page, EditLocalCouncilAdminPage::class, mapOf("laAdminId" to 5.toString()))
+            assertPageIs(page, EditLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to 5.toString()))
         }
 
         @Test
         fun `Change link for a pending invite goes to the cancel admin invite page`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
             manageAdminPage.getChangeLink(5).clickAndWait()
             assertPageIs(page, CancelLocalCouncilAdminInvitationPage::class, mapOf("invitationId" to 4.toString()))
         }
@@ -124,8 +124,8 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
             "data-no-local-council-admin-users-or-invitations-user-is-system-operator.sql",
         ) {
         @Test
-        fun `manage LA admins page shows no entries message when there are no admins or invites`(page: Page) {
-            val manageAdminPage = navigator.goToManageLaAdminsPage()
+        fun `manage LocalCouncil admins page shows no entries message when there are no admins or invites`(page: Page) {
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
             assertThat(manageAdminPage.noAdminsHeader).containsText("No local council admins were found.")
         }
     }

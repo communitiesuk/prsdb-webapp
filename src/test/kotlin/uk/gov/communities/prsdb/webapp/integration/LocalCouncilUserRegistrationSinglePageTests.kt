@@ -38,11 +38,11 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     }
 
     @Nested
-    inner class LaUserRegistrationAcceptInvitationRoute {
+    inner class LocalCouncilUserRegistrationAcceptInvitationRoute {
         @Test
         fun `Navigating here with an invalid token redirects to the invalid link page`(page: Page) {
             val invalidToken = "1234abcd-5678-abcd-1234-567abcd1111d"
-            navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invalidToken)
+            navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(invalidToken)
             val invalidLinkPage = BasePage.assertPageIs(page, InvalidLinkPageLocalCouncilUserRegistration::class)
             BaseComponent.assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
             assertThat(
@@ -52,10 +52,10 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     }
 
     @Nested
-    inner class LaUserRegistrationStepLandingPage : NestedIntegrationTestWithImmutableData("data-local.sql") {
+    inner class LocalCouncilUserRegistrationStepLandingPage : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `Navigating here as a registered local council user redirects to the Local Council dashboard page`(page: Page) {
-            navigator.navigateToLaUserRegistrationLandingPage(invitation.token)
+            navigator.navigateToLocalCouncilUserRegistrationLandingPage(invitation.token)
             val dashboardPage = BasePage.assertPageIs(page, LocalCouncilDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.bannerHeading).containsText("Mock User")
             BaseComponent.assertThat(dashboardPage.bannerSubHeading).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
@@ -63,30 +63,30 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     }
 
     @Nested
-    inner class LaUserRegistrationStepName {
+    inner class LocalCouncilUserRegistrationStepName {
         @Test
         fun `Submitting an empty name returns an error`() {
-            val namePage = navigator.skipToLaUserRegistrationNameFormPage(invitation.token)
+            val namePage = navigator.skipToLocalCouncilUserRegistrationNameFormPage(invitation.token)
             namePage.submitName("")
             assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
         }
     }
 
     @Nested
-    inner class LaUserRegistrationPrivacyNoticeName {
+    inner class LocalCouncilUserRegistrationPrivacyNoticeName {
         @Test
         fun `Submitting without confirming returns an error`() {
-            val privacyNoticePage = navigator.skipToLaUserRegistrationPrivacyNoticePage(invitation.token)
+            val privacyNoticePage = navigator.skipToLocalCouncilUserRegistrationPrivacyNoticePage(invitation.token)
             privacyNoticePage.form.submit()
             assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must confirm you’ve read the privacy notice to continue")
         }
     }
 
     @Nested
-    inner class LaUserRegistrationStepEmail {
+    inner class LocalCouncilUserRegistrationStepEmail {
         @Test
         fun `Submitting an empty e-mail address returns an error`() {
-            val emailPage = navigator.skipToLaUserRegistrationEmailFormPage(invitation.token)
+            val emailPage = navigator.skipToLocalCouncilUserRegistrationEmailFormPage(invitation.token)
             emailPage.submitEmail("")
             assertThat(emailPage.form.getErrorMessage())
                 .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
@@ -94,17 +94,17 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Submitting an invalid e-mail address returns an error`() {
-            val emailPage = navigator.skipToLaUserRegistrationEmailFormPage(invitation.token)
+            val emailPage = navigator.skipToLocalCouncilUserRegistrationEmailFormPage(invitation.token)
             emailPage.submitEmail("notAnEmail")
             assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
         }
     }
 
     @Nested
-    inner class LaUserRegistrationCheckAnswers {
+    inner class LocalCouncilUserRegistrationCheckAnswers {
         @Test
         fun `Change Name link navigates to the name step`(page: Page) {
-            val checkAnswersPage = navigator.skipToLaUserRegistrationCheckAnswersPage(invitation.token)
+            val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.nameRow
                 .clickActionLinkAndWait()
             BasePage.assertPageIs(page, NameFormPageLocalCouncilUserRegistration::class)
@@ -112,7 +112,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Change Email link navigates to the email step`(page: Page) {
-            val checkAnswersPage = navigator.skipToLaUserRegistrationCheckAnswersPage(invitation.token)
+            val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.emailRow
                 .clickActionLinkAndWait()
             BasePage.assertPageIs(page, EmailFormPageLocalCouncilUserRegistration::class)
@@ -120,10 +120,10 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     }
 
     @Nested
-    inner class LaUserRegistrationSuccess {
+    inner class LocalCouncilUserRegistrationSuccess {
         @Test
         fun `Navigating directly to here with an incomplete form returns a 400 error page`(page: Page) {
-            navigator.navigateToLaUserRegistrationConfirmationPage()
+            navigator.navigateToLocalCouncilUserRegistrationConfirmationPage()
             val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
             BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }

@@ -15,23 +15,28 @@ import java.net.URI
 import kotlin.test.assertTrue
 
 class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-local-council-admin-users-and-invitations.sql") {
-    val laAdminId = 1L
-    val laAdminName = "Art Name"
-    val laAdminEmail = "art@example.com"
+    val localCouncilAdminId = 1L
+    val localCouncilAdminName = "Art Name"
+    val localCouncilAdminEmail = "art@example.com"
 
     @Nested
     inner class EditAdmin {
         @Test
         fun `an admin access can be changed to basic`(page: Page) {
             // Click the change link for the la admin to edit
-            var manageAdminPage = navigator.goToManageLaAdminsPage()
-            assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(laAdminName)
+            var manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
+            assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(localCouncilAdminName)
             manageAdminPage.getChangeLink(0).clickAndWait()
 
             // Demote the admin to basic user
-            val editAdminPage = assertPageIs(page, EditLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
-            assertThat(editAdminPage.name).containsText(laAdminName)
-            assertThat(editAdminPage.email).containsText(laAdminEmail)
+            val editAdminPage =
+                assertPageIs(
+                    page,
+                    EditLocalCouncilAdminPage::class,
+                    mapOf("localCouncilAdminId" to localCouncilAdminId.toString()),
+                )
+            assertThat(editAdminPage.name).containsText(localCouncilAdminName)
+            assertThat(editAdminPage.email).containsText(localCouncilAdminEmail)
             assertTrue(editAdminPage.isManagerSelected)
 
             // Update the user's access level to basic
@@ -42,7 +47,7 @@ class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-loc
             // Check user is not on manage admins page
             val numberOfTableRows = manageAdminPage.table.rows.count()
             for (i in 0 until numberOfTableRows) {
-                assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(laAdminName)
+                assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(localCouncilAdminName)
             }
         }
     }
@@ -54,16 +59,26 @@ class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-loc
             whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
             // Navigate to the delete page for la admin
-            var manageAdminPage = navigator.goToManageLaAdminsPage()
-            assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(laAdminName)
+            var manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
+            assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(localCouncilAdminName)
             manageAdminPage.getChangeLink(0).clickAndWait()
-            val editAdminPage = assertPageIs(page, EditLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+            val editAdminPage =
+                assertPageIs(
+                    page,
+                    EditLocalCouncilAdminPage::class,
+                    mapOf("localCouncilAdminId" to localCouncilAdminId.toString()),
+                )
             editAdminPage.removeAccountButton.clickAndWait()
 
             // Delete la admin
-            val deleteAdminPage = assertPageIs(page, DeleteLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
-            assertThat(deleteAdminPage.userDetailsSection).containsText(laAdminName)
-            assertThat(deleteAdminPage.userDetailsSection).containsText(laAdminEmail)
+            val deleteAdminPage =
+                assertPageIs(
+                    page,
+                    DeleteLocalCouncilAdminPage::class,
+                    mapOf("localCouncilAdminId" to localCouncilAdminId.toString()),
+                )
+            assertThat(deleteAdminPage.userDetailsSection).containsText(localCouncilAdminName)
+            assertThat(deleteAdminPage.userDetailsSection).containsText(localCouncilAdminEmail)
             deleteAdminPage.form.submit()
 
             // Delete la admin success page
@@ -71,11 +86,11 @@ class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-loc
                 assertPageIs(
                     page,
                     DeleteLocalCouncilAdminSuccessPage::class,
-                    mapOf("laAdminId" to laAdminId.toString()),
+                    mapOf("localCouncilAdminId" to localCouncilAdminId.toString()),
                 )
             assertThat(
                 deleteAdminSuccessPage.confirmationBanner,
-            ).containsText("You’ve removed $laAdminName’s account from BATH AND NORTH EAST SOMERSET COUNCIL")
+            ).containsText("You’ve removed $localCouncilAdminName’s account from BATH AND NORTH EAST SOMERSET COUNCIL")
 
             // Return to manage admins page
             deleteAdminSuccessPage.returnButton.clickAndWait()
@@ -84,7 +99,7 @@ class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-loc
             // Check user is not on manage admins page
             val numberOfTableRows = manageAdminPage.table.rows.count()
             for (i in 0 until numberOfTableRows) {
-                assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(laAdminName)
+                assertThat(manageAdminPage.table.getCell(i, USERNAME_COL_INDEX)).not().containsText(localCouncilAdminName)
             }
         }
     }

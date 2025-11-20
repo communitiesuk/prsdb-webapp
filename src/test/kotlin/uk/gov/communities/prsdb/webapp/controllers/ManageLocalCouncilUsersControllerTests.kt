@@ -137,7 +137,7 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `index returns 403 for admin user accessing another LA`() {
+        fun `index returns 403 for admin user accessing another Local Council`() {
             whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(DEFAULT_LOCAL_COUNCIL_ID, "user"))
                 .thenThrow(AccessDeniedException(""))
 
@@ -186,7 +186,7 @@ class ManageLocalCouncilUsersControllerTests(
     inner class InviteNewUser {
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `sendInvitation as an la admin creates an invitation token`() {
+        fun `sendInvitation as an local council admin creates an invitation token`() {
             val invitedEmail = "new-user@example.com"
 
             val localCouncil = setupSuccessfulPostToSendInvitationAndReturnLocalCouncil()
@@ -199,7 +199,7 @@ class ManageLocalCouncilUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `sendInvitation emails the invited user`() {
-            val invitationUrl = "https://test-service.gov.uk/sign-up-la-user"
+            val invitationUrl = "https://test-service.gov.uk/sign-up-local-council-user"
             val dashboardUrl = "https://test-service.gov.uk"
             val localCouncil =
                 setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
@@ -249,7 +249,7 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `sendInvitation as an la admin with valid form redirects to confirmation page`() {
+        fun `sendInvitation as a local council admin with valid form redirects to confirmation page`() {
             val invitedEmail = "new-user@example.com"
 
             setupSuccessfulPostToSendInvitationAndReturnLocalCouncil()
@@ -259,8 +259,8 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `sendInvitation as a system operator with valid form creates the tokens, sends emails and redirects as for an LA admin`() {
-            val invitationUrl = "https://test-service.gov.uk/sign-up-la-user"
+        fun `sendInvitation as a system operator with valid form creates the tokens, sends emails and redirects as for an admin`() {
+            val invitationUrl = "https://test-service.gov.uk/sign-up-local-council-user"
             val dashboardUrl = "https://test-service.gov.uk"
             val localCouncil =
                 setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
@@ -292,7 +292,7 @@ class ManageLocalCouncilUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `inviteNewUserConfirmation returns 200 if a user was invited to the requested local council this session`() {
-            setupDefaultLocalCouncilForLaAdmin()
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
             whenever((localCouncilDataService.getLastLocalCouncilUserInvitedThisSession(DEFAULT_LOCAL_COUNCIL_ID)))
                 .thenReturn("invited.email@example.com")
 
@@ -313,7 +313,7 @@ class ManageLocalCouncilUsersControllerTests(
 
         private fun setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
             userIsSystemOperator: Boolean = false,
-            invitationUrl: String = "https://test-service.gov.uk/sign-up-la-user",
+            invitationUrl: String = "https://test-service.gov.uk/sign-up-local-council-user",
             dashboardUrl: String = "https://test-service.gov.uk",
         ): LocalCouncil {
             whenever(localCouncilInvitationService.createInvitationToken(any(), any(), any()))
@@ -325,16 +325,16 @@ class ManageLocalCouncilUsersControllerTests(
             return if (userIsSystemOperator) {
                 setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
             } else {
-                setupDefaultLocalCouncilForLaAdmin()
+                setupDefaultLocalCouncilForLocalCouncilAdmin()
             }
         }
 
         private fun postToSendInvitationAndAssertRedirectionToConfirmation(
-            laId: Int = DEFAULT_LOCAL_COUNCIL_ID,
+            localCouncilId: Int = DEFAULT_LOCAL_COUNCIL_ID,
             invitedEmail: String,
         ) {
             mvc
-                .post(getLocalCouncilInviteNewUserRoute(laId)) {
+                .post(getLocalCouncilInviteNewUserRoute(localCouncilId)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = urlEncodedConfirmedEmailDataModel(invitedEmail)
                     with(csrf())
@@ -356,7 +356,7 @@ class ManageLocalCouncilUsersControllerTests(
     inner class EditUser {
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `getEditUserAccessLevelPage returns 403 for admin user accessing another LA`() {
+        fun `getEditUserAccessLevelPage returns 403 for admin user accessing another Local Council`() {
             createdLoggedInUserModel()
             whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(DEFAULT_LOCAL_COUNCIL_ID, "user"))
                 .thenThrow(AccessDeniedException(""))
@@ -370,8 +370,8 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `getEditUserAccessLevelPage returns 404 for admin user accessing a LA user that does not exist or is from another LA`() {
-            setupDefaultLocalCouncilForLaAdmin()
+        fun `getEditUserAccessLevelPage returns 404 for admin user accessing a LC user that does not exist or is from another LC`() {
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
             whenever(
                 localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(
                     DEFAULT_LOCAL_COUNCIL_USER_ID,
@@ -416,8 +416,8 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `getEditUserAccessLevelPage returns 200 for admin user accessing a user from its LA`() {
-            val localCouncil = setupDefaultLocalCouncilForLaAdmin()
+        fun `getEditUserAccessLevelPage returns 200 for admin user accessing a user from its Local Council`() {
+            val localCouncil = setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             setupLocalCouncilUserToEdit(localCouncil)
 
@@ -464,8 +464,8 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `updateUserAccessLevel updates the given user's access level when called by an la admin`() {
-            setupDefaultLocalCouncilForLaAdmin()
+        fun `updateUserAccessLevel updates the given user's access level when called by a local council admin`() {
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             postUpdateUserAccessLevelAndAssertSuccess(DEFAULT_LOCAL_COUNCIL_ID)
         }
@@ -478,9 +478,9 @@ class ManageLocalCouncilUsersControllerTests(
             postUpdateUserAccessLevelAndAssertSuccess()
         }
 
-        private fun postUpdateUserAccessLevelAndAssertSuccess(laId: Int = DEFAULT_LOCAL_COUNCIL_ID) {
+        private fun postUpdateUserAccessLevelAndAssertSuccess(localCouncilId: Int = DEFAULT_LOCAL_COUNCIL_ID) {
             mvc
-                .post(getLocalCouncilEditUserRoute(laId, DEFAULT_LOCAL_COUNCIL_USER_ID)) {
+                .post(getLocalCouncilEditUserRoute(localCouncilId, DEFAULT_LOCAL_COUNCIL_USER_ID)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = "isManager=true"
                     with(csrf())
@@ -502,8 +502,8 @@ class ManageLocalCouncilUsersControllerTests(
     inner class DeleteUser {
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `confirmDeleteUser gives a 200 for admins of the LA containing the user`() {
-            val localCouncil = setupDefaultLocalCouncilForLaAdmin()
+        fun `confirmDeleteUser gives a 200 for admins of the Local Council containing the user`() {
+            val localCouncil = setupDefaultLocalCouncilForLocalCouncilAdmin()
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
@@ -548,8 +548,8 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `deleteUser deletes the specified user for an la admin and adds their details to the session`() {
-            val localCouncil = setupDefaultLocalCouncilForLaAdmin()
+        fun `deleteUser deletes the specified user for an local council admin and adds their details to the session`() {
+            val localCouncil = setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             val user = setupLocalCouncilUserToEdit(localCouncil)
 
@@ -615,7 +615,7 @@ class ManageLocalCouncilUsersControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `deleteUserSuccess returns 200 if the user was deleted this session`() {
-            setupDefaultLocalCouncilForLaAdmin()
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
             val localCouncilUser = createLocalCouncilUser(id = DEFAULT_LOCAL_COUNCIL_USER_ID)
             whenever(localCouncilDataService.getUserDeletedThisSessionById(localCouncilUser.id))
                 .thenReturn(localCouncilUser)
@@ -652,14 +652,14 @@ class ManageLocalCouncilUsersControllerTests(
         }
 
         private fun postDeleteUserAndAssertSuccess(
-            laId: Int = DEFAULT_LOCAL_COUNCIL_ID,
+            localCouncilId: Int = DEFAULT_LOCAL_COUNCIL_ID,
             userBeingDeleted: LocalCouncilUser = createLocalCouncilUser(id = DEFAULT_LOCAL_COUNCIL_USER_ID),
         ): LocalCouncilUser {
-            whenever(localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(userBeingDeleted.id, laId))
+            whenever(localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(userBeingDeleted.id, localCouncilId))
                 .thenReturn(userBeingDeleted)
 
             mvc
-                .post(getLocalCouncilDeleteUserRoute(laId, userBeingDeleted.id)) {
+                .post(getLocalCouncilDeleteUserRoute(localCouncilId, userBeingDeleted.id)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
@@ -679,8 +679,8 @@ class ManageLocalCouncilUsersControllerTests(
     inner class CancelInvitation {
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `confirmCancelInvitation returns a 200 for admins of the inviting LA`() {
-            setupDefaultLocalCouncilForLaAdmin()
+        fun `confirmCancelInvitation returns a 200 for admins of the inviting Local Council`() {
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             val invitation = createLocalCouncilInvitation()
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
@@ -711,7 +711,7 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `confirmCancelInvitation returns 403 for admin user accessing another LA`() {
+        fun `confirmCancelInvitation returns 403 for admin user accessing another Local Council`() {
             whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(DEFAULT_LOCAL_COUNCIL_ID, "user"))
                 .thenThrow(AccessDeniedException(""))
 
@@ -727,8 +727,8 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `confirmCancelInvitation returns 403 for admin user accessing an invitation from another LA`() {
-            setupDefaultLocalCouncilForLaAdmin()
+        fun `confirmCancelInvitation returns 403 for admin user accessing an invitation from another Local Council`() {
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             val invitation = createLocalCouncilInvitation(invitingCouncil = createLocalCouncil(id = 789))
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
@@ -756,7 +756,7 @@ class ManageLocalCouncilUsersControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `cancelInvitation removes the invitation from the database and adds it to the session when called by an la admin`() {
+        fun `cancelInvitation removes the invitation from the database and adds it to the session when called by an local council admin`() {
             setupInvitationPostToCancelInvitationAndAssertSuccess()
         }
 
@@ -804,7 +804,7 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getInvitationCancelledThisSessionById(deletedInvitation.id))
                 .thenReturn(deletedInvitation)
 
-            setupDefaultLocalCouncilForLaAdmin()
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             mvc
                 .get(getLocalCouncilCancelInviteSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
@@ -854,15 +854,15 @@ class ManageLocalCouncilUsersControllerTests(
         }
     }
 
-    private fun setupLocalCouncilForSystemOperator(laId: Int = DEFAULT_LOCAL_COUNCIL_ID): LocalCouncil {
-        val localCouncil = createLocalCouncil(id = laId)
-        whenever(localCouncilService.retrieveLocalCouncilById(laId))
+    private fun setupLocalCouncilForSystemOperator(localCouncilId: Int = DEFAULT_LOCAL_COUNCIL_ID): LocalCouncil {
+        val localCouncil = createLocalCouncil(id = localCouncilId)
+        whenever(localCouncilService.retrieveLocalCouncilById(localCouncilId))
             .thenReturn(localCouncil)
 
         return localCouncil
     }
 
-    private fun setupDefaultLocalCouncilForLaAdmin(): LocalCouncil {
+    private fun setupDefaultLocalCouncilForLocalCouncilAdmin(): LocalCouncil {
         val loggedInUserModel = createdLoggedInUserModel()
         val localCouncil = createLocalCouncil()
         whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(DEFAULT_LOCAL_COUNCIL_ID, "user"))
@@ -873,11 +873,11 @@ class ManageLocalCouncilUsersControllerTests(
 
     private fun setupLocalCouncilUserToEdit(
         localCouncil: LocalCouncil,
-        laUserId: Long = DEFAULT_LOCAL_COUNCIL_USER_ID,
+        localCouncilUserId: Long = DEFAULT_LOCAL_COUNCIL_USER_ID,
     ): LocalCouncilUser {
         val baseUser = createOneLoginUser("user")
-        val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil, laUserId)
-        whenever(localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(laUserId, localCouncil.id))
+        val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil, localCouncilUserId)
+        whenever(localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(localCouncilUserId, localCouncil.id))
             .thenReturn(
                 localCouncilUser,
             )

@@ -15,12 +15,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
     @Nested
-    inner class LaUserInvitation : NestedIntegrationTestWithMutableData("data-local-council-users-and-invitations.sql") {
+    inner class LocalCouncilUserInvitation : NestedIntegrationTestWithMutableData("data-local-council-users-and-invitations.sql") {
         @Test
-        fun `an la user invitation can be cancelled`(page: Page) {
+        fun `a LocalCouncil user invitation can be cancelled`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 2
-            var manageUsersPage = navigator.goToManageLaUsers(1)
+            var manageUsersPage = navigator.goToManageLocalCouncilUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(
                 manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX),
@@ -53,12 +53,13 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LaAdminInvitation : NestedIntegrationTestWithMutableData("data-local-council-invitations-user-is-system-operator.sql") {
+    inner class LocalCouncilAdminInvitation :
+        NestedIntegrationTestWithMutableData("data-local-council-invitations-user-is-system-operator.sql") {
         @Test
-        fun `an la admin invitation can be cancelled by a system operator`(page: Page) {
+        fun `a LocalCouncil admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 3
-            var manageUsersPage = navigator.goToManageLaUsers(1)
+            var manageUsersPage = navigator.goToManageLocalCouncilUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX)).containsText("x.adminuser@example.com")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")

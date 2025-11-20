@@ -19,14 +19,14 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
 
     @Test
     fun `invite button goes to invite new user page`(page: Page) {
-        val managePage = navigator.goToManageLaUsers(localCouncilId)
+        val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
         managePage.inviteAnotherUserButton.clickAndWait()
         assertPageIs(page, InviteNewLocalCouncilUserPage::class)
     }
 
     @Test
     fun `pagination component renders with more than 10 table entries`(page: Page) {
-        val managePage = navigator.goToManageLaUsers(localCouncilId)
+        val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
         val pagination = managePage.getPaginationComponent()
         assertThat(pagination.nextLink).isVisible()
         assertEquals("1", pagination.currentPageNumberLinkText)
@@ -44,7 +44,7 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
     inner class UserIsLaAdminButNotSystemOperator : NestedIntegrationTestWithImmutableData("data-local-council-users-and-invitations.sql") {
         @Test
         fun `table of users renders`() {
-            val managePage = navigator.goToManageLaUsers(localCouncilId)
+            val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
 
             // Header
             assertThat(managePage.table.headerRow.getCell(USERNAME_COL_INDEX)).containsText("Username")
@@ -72,18 +72,18 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
 
         @Test
         fun `return to dashboard button goes to LA dashboard`(page: Page) {
-            val managePage = navigator.goToManageLaUsers(localCouncilId)
+            val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
             managePage.returnToDashboardButton.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)
         }
     }
 
     @Nested
-    inner class UserIsSystemOperatorButNotLaAdmin :
+    inner class UserIsSystemOperatorButNotLocalCouncilAdmin :
         NestedIntegrationTestWithImmutableData("data-local-council-invitations-user-is-system-operator.sql") {
         @Test
-        fun `table renders all user types including la admin invitations`() {
-            val managePage = navigator.goToManageLaUsers(localCouncilId)
+        fun `table renders all user types including LocalCouncil admin invitations`() {
+            val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
 
             // Header
             assertThat(managePage.table.headerRow.getCell(USERNAME_COL_INDEX)).containsText("Username")

@@ -21,12 +21,12 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
     private lateinit var invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>
 
     @Test
-    fun `inviting a new LA user ends with a success page with a button linking to the dashboard`(page: Page) {
+    fun `inviting a new LocalCouncil user ends with a success page with a button linking to the dashboard`(page: Page) {
         whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
-            .thenReturn(URI("www.prsd.gov.uk/register-la-user/test-token"))
+            .thenReturn(URI("www.prsd.gov.uk/register-local-council-user/test-token"))
         whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI("https:gov.uk"))
 
-        val invitePage = navigator.goToInviteNewLaUser(1)
+        val invitePage = navigator.goToInviteNewLocalCouncilUser(1)
         invitePage.submitMatchingEmail("test@example.com")
         val successPage = assertPageIs(page, InviteNewLocalCouncilUserSuccessPage::class, mapOf("localCouncilId" to "1"))
         assertThat(successPage.confirmationBanner).containsText("You’ve sent test@example.com an invite to the database")

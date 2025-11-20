@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminConfirmationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
 
@@ -26,7 +26,7 @@ class InviteLocalCouncilAdminTests : IntegrationTestWithMutableData("data-local.
 
         // Invite another user
         confirmationPage.inviteAnotherUserButton.clickAndWait()
-        assertPageIs(page, InviteLaAdminPage::class)
+        assertPageIs(page, InviteLocalCouncilAdminPage::class)
 
         // TODO PRSD-672 - check the Return to Dashboard button
     }

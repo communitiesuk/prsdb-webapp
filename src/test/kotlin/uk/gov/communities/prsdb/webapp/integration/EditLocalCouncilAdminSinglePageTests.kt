@@ -9,22 +9,22 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class EditLocalCouncilAdminSinglePageTests : IntegrationTestWithImmutableData("data-edit-local-council-admin-users-and-invitations.sql") {
-    val laAdminId = 1L
+    val localCouncilAdminId = 1L
 
     @Nested
     inner class EditAdmin {
         @Test
         fun `back link goes to manage admin users page`(page: Page) {
-            val editAdminPage = navigator.goToEditAdminsPage(laAdminId)
+            val editAdminPage = navigator.goToEditAdminsPage(localCouncilAdminId)
             editAdminPage.backLink.clickAndWait()
             assertPageIs(page, ManageLocalCouncilAdminsPage::class)
         }
 
         @Test
         fun `remove this account button goes to delete admin page`(page: Page) {
-            val editAdminPage = navigator.goToEditAdminsPage(laAdminId)
+            val editAdminPage = navigator.goToEditAdminsPage(localCouncilAdminId)
             editAdminPage.removeAccountButton.clickAndWait()
-            assertPageIs(page, DeleteLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+            assertPageIs(page, DeleteLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
         }
     }
 
@@ -32,9 +32,9 @@ class EditLocalCouncilAdminSinglePageTests : IntegrationTestWithImmutableData("d
     inner class DeleteAdmin {
         @Test
         fun `back link goes to edit admin page`(page: Page) {
-            val deleteAdminPage = navigator.goToDeleteLaAdminPage(laAdminId)
+            val deleteAdminPage = navigator.goToDeleteLocalCouncilAdminPage(localCouncilAdminId)
             deleteAdminPage.backLink.clickAndWait()
-            assertPageIs(page, EditLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+            assertPageIs(page, EditLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
         }
     }
 }

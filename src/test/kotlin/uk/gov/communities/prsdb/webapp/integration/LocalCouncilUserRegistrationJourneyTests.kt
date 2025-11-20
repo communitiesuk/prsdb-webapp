@@ -38,7 +38,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
     lateinit var invitationService: LocalCouncilInvitationService
 
     @MockitoSpyBean
-    lateinit var laUserRepository: LocalCouncilUserRepository
+    lateinit var localCouncilUserRepository: LocalCouncilUserRepository
 
     @MockitoSpyBean
     lateinit var invitationRepository: LocalCouncilInvitationRepository
@@ -64,7 +64,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         // Accept invitation route
-        navigator.navigateToLaUserRegistrationAcceptInvitationRoute(invitation.token.toString())
+        navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(invitation.token.toString())
         val landingPage = assertPageIs(page, LandingPageLocalCouncilUserRegistration::class)
         // Landing page - render
         assertThat(landingPage.headingCaption).containsText("Before you register")
@@ -102,10 +102,12 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
         assertEquals(invitation.token, invitationCaptor.value.token)
 
         // Confirmation page - render
-        val laUserCaptor = captor<LocalCouncilUser>()
-        verify(laUserRepository).save(laUserCaptor.capture())
+        val localCouncilUserCaptor = captor<LocalCouncilUser>()
+        verify(localCouncilUserRepository).save(localCouncilUserCaptor.capture())
 
-        assertThat(confirmationPage.bannerHeading).containsText("You’ve registered as a ${laUserCaptor.value.localCouncil.name} user")
+        assertThat(
+            confirmationPage.bannerHeading,
+        ).containsText("You’ve registered as a ${localCouncilUserCaptor.value.localCouncil.name} user")
         assertThat(confirmationPage.bodyHeading).containsText("What happens next")
 
         // Return to dashboard button
@@ -120,7 +122,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
         @Test
         fun `User with an expired token is redirected to the invalid link page`(page: Page) {
             val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
-            navigator.navigateToLaUserRegistrationAcceptInvitationRoute(expiredToken)
+            navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(expiredToken)
             val invalidLinkPage = assertPageIs(page, InvalidLinkPageLocalCouncilUserRegistration::class)
             assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
             assertThat(

@@ -48,7 +48,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getAllRolesForSubjectId returns ROLE_LA_ADMIN for a local council manager`() {
+    fun `getAllRolesForSubjectId returns ROLE_LOCAL_COUNCIL_ADMIN for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
@@ -66,7 +66,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getAllRolesForSubjectId returns ROLE_LA_USER for a standard local council user`() {
+    fun `getAllRolesForSubjectId returns ROLE_LOCAL_COUNCIL_USER for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
@@ -179,7 +179,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLocalCouncilRolesForSubjectId returns ROLE_LA_ADMIN and ROLE_LA_USER for a local council manager`() {
+    fun `getLocalCouncilRolesForSubjectId returns ROLE_LOCAL_COUNCIL_ADMIN and ROLE_LOCAL_COUNCIL_USER for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
@@ -197,7 +197,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLocalCouncilRolesForSubjectId returns ROLE_LA_USER for a standard local council user`() {
+    fun `getLocalCouncilRolesForSubjectId returns ROLE_LOCAL_COUNCIL_USER for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)

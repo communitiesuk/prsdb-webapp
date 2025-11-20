@@ -13,7 +13,7 @@ open class EditLocalCouncilUserBasePage(
 ) : BasePage(page, urlSegment) {
     val name = Heading(page.locator("h1.govuk-fieldset__heading"))
     val email = Paragraph.byText(page, "Email:")
-    val form = EditLaUserForm(page)
+    val form = EditLocalCouncilUserForm(page)
     val removeAccountButton = Button.byText(page, "Remove this account")
 
     fun selectManagerRadio() {
@@ -27,7 +27,7 @@ open class EditLocalCouncilUserBasePage(
     val isManagerSelected: Boolean
         get() = form.isManagerRadios.selectedValue == "true"
 
-    class EditLaUserForm(
+    class EditLocalCouncilUserForm(
         page: Page,
     ) : PostForm(page) {
         val isManagerRadios = Radios(locator)

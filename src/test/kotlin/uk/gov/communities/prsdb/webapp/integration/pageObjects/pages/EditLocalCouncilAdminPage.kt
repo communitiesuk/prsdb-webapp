@@ -9,6 +9,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 class EditLocalCouncilAdminPage(
     page: Page,
     urlArguments: Map<String, String>,
-) : EditLocalCouncilUserBasePage(page, "$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/${urlArguments["laAdminId"]}") {
+) : EditLocalCouncilUserBasePage(page, "$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/${urlArguments["localCouncilAdminId"]}") {
     val backLink = BackLink.default(page)
 }

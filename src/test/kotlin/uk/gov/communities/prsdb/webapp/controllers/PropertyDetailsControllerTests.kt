@@ -64,7 +64,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `getPropertyDetails returns 403 for an unauthorized user with la admin role`() {
+        fun `getPropertyDetails returns 403 for an unauthorized user with local council admin role`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
                 status { status { isForbidden() } }
             }
@@ -72,7 +72,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getPropertyDetails returns 403 for an unauthorized user with la user role`() {
+        fun `getPropertyDetails returns 403 for an unauthorized user with local council user role`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
                 status { status { isForbidden() } }
             }
@@ -95,9 +95,9 @@ class PropertyDetailsControllerTests(
     }
 
     @Nested
-    inner class GetPropertyDetailsLaViewTests {
+    inner class GetPropertyDetailsLocalCouncilViewTests {
         @Test
-        fun `getPropertyDetailsLaView returns a redirect for an unauthenticated user`() {
+        fun `getPropertyDetailsLocalCouncilView returns a redirect for an unauthenticated user`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { is3xxRedirection() }
             }
@@ -105,7 +105,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser
-        fun `getPropertyDetailsLaView returns 403 for an unauthorized user`() {
+        fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isForbidden() } }
             }
@@ -113,7 +113,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetailsLaView returns 403 for an unauthorized user with only the landlord role`() {
+        fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user with only the landlord role`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isForbidden() } }
             }
@@ -121,7 +121,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getPropertyDetailsLaView returns 200 for a valid request from an LA user`() {
+        fun `getPropertyDetailsLocalCouncilView returns 200 for a valid request from an LocalCouncil user`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
@@ -136,7 +136,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `getPropertyDetailsLaView returns 200 for a valid request from an LA admin`() {
+        fun `getPropertyDetailsLocalCouncilView returns 200 for a valid request from an LocalCouncil admin`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))

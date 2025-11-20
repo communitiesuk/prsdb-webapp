@@ -126,7 +126,7 @@ class BetaFeedbackControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `localCouncilFeedback returns success for LA_USER role`() {
+        fun `localCouncilFeedback returns success for LOCAL_COUNCIL_USER role`() {
             mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL).andExpect {
                 status { isOk() }
             }
@@ -134,7 +134,7 @@ class BetaFeedbackControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `localCouncilFeedback returns success for LA_ADMIN role`() {
+        fun `localCouncilFeedback returns success for LOCAl_COUNCIL_ADMIN role`() {
             mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL).andExpect {
                 status { isOk() }
             }
@@ -165,7 +165,7 @@ class BetaFeedbackControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `localCouncilFeedbackSuccess returns success for LA_USER role`() {
+        fun `localCouncilFeedbackSuccess returns success for LOCAL_COUNCIL_USER role`() {
             mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL).andExpect {
                 status { isOk() }
             }
@@ -173,7 +173,7 @@ class BetaFeedbackControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `localCouncilFeedbackSuccess returns success for LA_ADMIN role`() {
+        fun `localCouncilFeedbackSuccess returns success for LOCAL_COUNCIL_ADMIN role`() {
             mvc.get(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL).andExpect {
                 status { isOk() }
             }

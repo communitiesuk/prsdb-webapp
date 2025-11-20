@@ -11,5 +11,5 @@ class DeleteLocalCouncilAdminSuccessPage(
     urlArguments: Map<String, String>,
 ) : DeleteLocalCouncilUserSuccessBasePage(
         page,
-        "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${urlArguments["laAdminId"]}/$CONFIRMATION_PATH_SEGMENT",
+        "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${urlArguments["localCouncilAdminId"]}/$CONFIRMATION_PATH_SEGMENT",
     )

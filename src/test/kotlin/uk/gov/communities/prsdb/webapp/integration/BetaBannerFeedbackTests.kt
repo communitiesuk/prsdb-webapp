@@ -32,7 +32,7 @@ class BetaBannerFeedbackTests : IntegrationTestWithImmutableData("data-local.sql
                 dashboard.betaBanner.giveFeedbackLink.clickAndWait()
             }
         val feedbackPage = assertPageIs(popupPromise, BetaFeedbackPage::class)
-        // On the deployed service, an AWS cloudfront function will insert the "/local-council" prefix to hit the LOCAL_AUTHORITY_FEEDBACK_URL endpoint
+        // On the deployed service, an AWS cloudfront function will insert the "/local-council" prefix to hit the LOCAL_COUNCIL_FEEDBACK_URL endpoint
 
         assertThat(feedbackPage.form.referrerInput).hasValue("http://localhost:$port/local-council/dashboard?continue")
     }

@@ -46,23 +46,23 @@ class LocalCouncilUserRegistrationJourneyTests {
     fun `handleSubmitAndRedirect registers the new user and adds their id to the session`() {
         val name = "Test user"
         val email = "test.user@example.com"
-        val localAuthority = createLocalCouncil()
+        val localCouncil = createLocalCouncil()
         val invitedAsAdmin = true
         val baseUserId = "test-base-user-id"
 
-        val expectedLaUser = setupInvitationAndLAUserMocks(name, email, localAuthority, invitedAsAdmin, baseUserId)
+        val expectedLocalCouncilUser = setupInvitationAndLocalCouncilUserMocks(name, email, localCouncil, invitedAsAdmin, baseUserId)
 
         // Act
         completeHandleSubmitAndRedirect()
 
         // Assert
-        verify(mockLocalCouncilDataService).registerUserAndReturnID(baseUserId, localAuthority, name, email, invitedAsAdmin, true)
-        verify(mockLocalCouncilDataService).setLastUserIdRegisteredThisSession(expectedLaUser.id)
+        verify(mockLocalCouncilDataService).registerUserAndReturnID(baseUserId, localCouncil, name, email, invitedAsAdmin, true)
+        verify(mockLocalCouncilDataService).setLastUserIdRegisteredThisSession(expectedLocalCouncilUser.id)
     }
 
     @Test
     fun `handleSubmitAndRedirect deletes the invitation from the database`() {
-        setupInvitationAndLAUserMocks()
+        setupInvitationAndLocalCouncilUserMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -73,7 +73,7 @@ class LocalCouncilUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect updates user roles`() {
-        setupInvitationAndLAUserMocks()
+        setupInvitationAndLocalCouncilUserMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -84,7 +84,7 @@ class LocalCouncilUserRegistrationJourneyTests {
 
     @Test
     fun `handleSubmitAndRedirect clears data from the session`() {
-        setupInvitationAndLAUserMocks()
+        setupInvitationAndLocalCouncilUserMocks()
 
         // Act
         completeHandleSubmitAndRedirect()
@@ -113,7 +113,7 @@ class LocalCouncilUserRegistrationJourneyTests {
         )
     }
 
-    private fun setupInvitationAndLAUserMocks(
+    private fun setupInvitationAndLocalCouncilUserMocks(
         name: String = "Test user",
         email: String = "test.user@example.com",
         localCouncil: LocalCouncil = createLocalCouncil(),
@@ -122,7 +122,7 @@ class LocalCouncilUserRegistrationJourneyTests {
     ): LocalCouncilUser {
         createLocalCouncil()
 
-        val journeyData = JourneyDataBuilder.forLaUser(name, email).build()
+        val journeyData = JourneyDataBuilder.forLocalCouncilUser(name, email).build()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(journeyData)
 
         invitation =
@@ -133,7 +133,7 @@ class LocalCouncilUserRegistrationJourneyTests {
                 invitedAsAdmin = invitedAsAdmin,
             )
 
-        val newLaUser =
+        val newLocalCouncilUser =
             LocalCouncilUser(
                 baseUser = createOneLoginUser(baseUserId),
                 isManager = invitedAsAdmin,
@@ -152,10 +152,10 @@ class LocalCouncilUserRegistrationJourneyTests {
                 invitedAsAdmin = eq(invitedAsAdmin),
                 hasAcceptedPrivacyNotice = eq(true),
             ),
-        ).thenReturn(newLaUser.id)
+        ).thenReturn(newLocalCouncilUser.id)
 
         JourneyTestHelper.setMockUser(baseUserId)
 
-        return newLaUser
+        return newLocalCouncilUser
     }
 }

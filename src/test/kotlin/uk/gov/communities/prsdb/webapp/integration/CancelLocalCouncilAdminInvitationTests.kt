@@ -16,7 +16,7 @@ class CancelLocalCouncilAdminInvitationTests : IntegrationTestWithMutableData("d
     @Test
     fun `user can be deleted`(page: Page) {
         // Navigate to the cancel la invitation page
-        var manageAdminPage = navigator.goToManageLaAdminsPage()
+        var manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
         assertThat(manageAdminPage.table.getCell(2, USERNAME_COL_INDEX)).containsText(invitedEmail)
         manageAdminPage.getChangeLink(2).clickAndWait()
 

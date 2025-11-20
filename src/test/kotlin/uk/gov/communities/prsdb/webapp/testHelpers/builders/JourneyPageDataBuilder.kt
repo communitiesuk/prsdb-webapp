@@ -36,11 +36,11 @@ class JourneyPageDataBuilder {
 
         fun beforeLandlordRegistrationDeclaration() = beforeLandlordRegistrationCheckAnswers().withCheckedAnswers()
 
-        fun beforeLaUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
+        fun beforeLocalCouncilUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
 
-        fun beforeLaUserRegistrationEmail() = beforeLaUserRegistrationName().withName()
+        fun beforeLocalCouncilUserRegistrationEmail() = beforeLocalCouncilUserRegistrationName().withName()
 
-        fun beforeLaUserRegistrationCheckAnswers() = beforeLaUserRegistrationEmail().withEmailAddress()
+        fun beforeLocalCouncilUserRegistrationCheckAnswers() = beforeLocalCouncilUserRegistrationEmail().withEmailAddress()
 
         fun beforePropertyRegistrationSelectAddress(customLookedUpAddresses: List<AddressDataModel>? = null) =
             JourneyDataBuilder().withLookupAddress().withLookedUpAddresses(customLookedUpAddresses)

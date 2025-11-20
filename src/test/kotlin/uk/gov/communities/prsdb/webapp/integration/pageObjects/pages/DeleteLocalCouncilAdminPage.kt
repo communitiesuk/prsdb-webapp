@@ -9,6 +9,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.D
 class DeleteLocalCouncilAdminPage(
     page: Page,
     urlArguments: Map<String, String>,
-) : DeleteLocalCouncilUserBasePage(page, "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${urlArguments["laAdminId"]}") {
+) : DeleteLocalCouncilUserBasePage(page, "$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/${urlArguments["localCouncilAdminId"]}") {
     val backLink = BackLink.default(page)
 }

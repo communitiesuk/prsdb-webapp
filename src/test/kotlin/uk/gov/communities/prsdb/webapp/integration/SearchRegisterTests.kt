@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage.Companion.LISTED_PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.LA_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.LOCAL_COUNCIL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
@@ -144,12 +144,12 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             assertThat(filter.panel).isVisible()
 
             // Apply LA filter
-            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my council")
-            laFilter.checkCheckbox("true")
+            val localCouncilFilter = filter.getFilterCheckboxes("Show landlords operating in my council")
+            localCouncilFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            val laFilterSelectedHeadingText = filter.selectedHeadings.first().innerText()
-            assertContains(laFilterSelectedHeadingText, "Show landlords operating in my council")
+            val localCouncilFilterSelectedHeadingText = filter.selectedHeadings.first().innerText()
+            assertContains(localCouncilFilterSelectedHeadingText, "Show landlords operating in my council")
             val resultTable = searchLandlordRegisterPage.resultTable
             assertEquals(1, resultTable.rows.count())
 
@@ -159,7 +159,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             assertThat(resultTable.rows).not().hasCount(0)
 
             // Clear all filters
-            laFilter.checkCheckbox("true")
+            localCouncilFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             filter.clearFiltersLink.clickAndWait()
@@ -176,8 +176,8 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
 
             // Apply LA filter
             val filter = searchLandlordRegisterPage.filterPanel
-            val laFilter = filter.getFilterCheckboxes("Show landlords operating in my council")
-            laFilter.checkCheckbox("true")
+            val localCouncilFilter = filter.getFilterCheckboxes("Show landlords operating in my council")
+            localCouncilFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             // Search again
@@ -186,7 +186,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         }
 
         @Test
-        fun `Back link returns to the LA dashboard page`(page: Page) {
+        fun `Back link returns to the LocalCouncil dashboard page`(page: Page) {
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.backLink.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)
@@ -237,8 +237,8 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             assertThat(resultTable.headerRow.getCell(REG_NUM_COL_INDEX)).containsText("Registration number")
             assertThat(resultTable.getCell(0, ADDRESS_COL_INDEX)).containsText("P-CCCT-GRKQ")
 
-            assertThat(resultTable.headerRow.getCell(LA_COL_INDEX)).containsText("Local council")
-            assertThat(resultTable.getCell(0, LA_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
+            assertThat(resultTable.headerRow.getCell(LOCAL_COUNCIL_COL_INDEX)).containsText("Local council")
+            assertThat(resultTable.getCell(0, LOCAL_COUNCIL_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
 
             assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
             assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
@@ -328,9 +328,9 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         @Test
         fun `filter panel can be toggled and used to refine search results`(page: Page) {
             val expectedMatchingPropertyCount = 5
-            val expectedPropertyInLACount = 4
-            val expectedPropertyInLAWithSelectiveLicenseCount = 1
-            val expectedPropertyInLAWithSelectiveOrNoLicenseCount = 3
+            val expectedPropertyInLocalCouncilCount = 4
+            val expectedPropertyInLocalCouncilWithSelectiveLicenseCount = 1
+            val expectedPropertyInLocalCouncilWithSelectiveOrNoLicenseCount = 3
             val expectedPropertyWithSelectiveOrNoLicenseCount = 4
 
             // Initial search
@@ -349,13 +349,13 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             assertTrue(filter.panel.isVisible)
 
             // Apply LA filter
-            val laFilter = filter.getFilterCheckboxes("Show properties in my council")
-            laFilter.checkCheckbox("true")
+            val localCouncilFilter = filter.getFilterCheckboxes("Show properties in my council")
+            localCouncilFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
-            val laFilterSelectedHeadingText = filter.selectedHeadings.nth(0).innerText()
-            assertContains(laFilterSelectedHeadingText, "Show properties in my council")
-            assertEquals(expectedPropertyInLACount, resultTable.rows.count())
+            val localCouncilFilterSelectedHeadingText = filter.selectedHeadings.nth(0).innerText()
+            assertContains(localCouncilFilterSelectedHeadingText, "Show properties in my council")
+            assertEquals(expectedPropertyInLocalCouncilCount, resultTable.rows.count())
 
             // Apply Selective license filter
             val licenseFilter = filter.getFilterCheckboxes("Property licence")
@@ -364,12 +364,12 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
 
             val licenseFilterSelectedHeadingText = filter.selectedHeadings.nth(1).innerText()
             assertContains(licenseFilterSelectedHeadingText, "Property licence")
-            assertEquals(expectedPropertyInLAWithSelectiveLicenseCount, resultTable.rows.count())
+            assertEquals(expectedPropertyInLocalCouncilWithSelectiveLicenseCount, resultTable.rows.count())
 
             // Apply No license filter
             licenseFilter.checkCheckbox(LicensingType.NO_LICENSING.name)
             filter.clickApplyFiltersButton()
-            assertEquals(expectedPropertyInLAWithSelectiveOrNoLicenseCount, resultTable.rows.count())
+            assertEquals(expectedPropertyInLocalCouncilWithSelectiveOrNoLicenseCount, resultTable.rows.count())
 
             // Remove LA filter
             filter.getRemoveFilterTag("Properties in my council").clickAndWait()
@@ -391,8 +391,8 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
 
             // Apply LA filter
             val filter = searchPropertyRegisterPage.filterPanel
-            val laFilter = filter.getFilterCheckboxes("Show properties in my council")
-            laFilter.checkCheckbox("true")
+            val localCouncilFilter = filter.getFilterCheckboxes("Show properties in my council")
+            localCouncilFilter.checkCheckbox("true")
             filter.clickApplyFiltersButton()
 
             // Search again
@@ -401,7 +401,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         }
 
         @Test
-        fun `Back link returns to the LA dashboard page`(page: Page) {
+        fun `Back link returns to the LocalCouncil dashboard page`(page: Page) {
             val searchPropertyRegisterPage = navigator.goToLandlordSearchPage()
             searchPropertyRegisterPage.backLink.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)

@@ -151,7 +151,7 @@ class JourneyDataBuilder(
                 createLocalCouncil(),
             )
 
-        fun forLaUser(
+        fun forLocalCouncilUser(
             name: String,
             email: String,
         ) = JourneyDataBuilder()

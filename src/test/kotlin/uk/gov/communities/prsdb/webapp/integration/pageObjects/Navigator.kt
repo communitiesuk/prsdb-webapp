@@ -58,7 +58,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -165,12 +165,12 @@ class Navigator(
     private val page: Page,
     private val port: Int,
 ) {
-    fun goToManageLaUsers(councilId: Int): ManageLocalCouncilUsersPage {
+    fun goToManageLocalCouncilUsers(councilId: Int): ManageLocalCouncilUsersPage {
         navigate(getLocalCouncilManageUsersRoute(councilId))
         return createValidPage(page, ManageLocalCouncilUsersPage::class)
     }
 
-    fun goToInviteNewLaUser(councilId: Int): InviteNewLocalCouncilUserPage {
+    fun goToInviteNewLocalCouncilUser(councilId: Int): InviteNewLocalCouncilUserPage {
         navigate(getLocalCouncilInviteNewUserRoute(councilId))
         return createValidPage(page, InviteNewLocalCouncilUserPage::class)
     }
@@ -300,11 +300,11 @@ class Navigator(
         navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
-    fun navigateToLaUserRegistrationAcceptInvitationRoute(token: String) {
+    fun navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(token: String) {
         navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
-    fun navigateToLaUserRegistrationLandingPage(token: UUID) {
+    fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
         navigate(
             "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
@@ -312,7 +312,7 @@ class Navigator(
         )
     }
 
-    fun skipToLaUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLocalCouncilUserRegistration {
+    fun skipToLocalCouncilUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
@@ -327,11 +327,11 @@ class Navigator(
         return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationNameFormPage(token: UUID): NameFormPageLocalCouncilUserRegistration {
+    fun skipToLocalCouncilUserRegistrationNameFormPage(token: UUID): NameFormPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
+            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationName().build(),
         )
         navigate(
             "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
@@ -340,11 +340,11 @@ class Navigator(
         return createValidPage(page, NameFormPageLocalCouncilUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationEmailFormPage(token: UUID): EmailFormPageLocalCouncilUserRegistration {
+    fun skipToLocalCouncilUserRegistrationEmailFormPage(token: UUID): EmailFormPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
+            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationEmail().build(),
         )
         navigate(
             "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
@@ -353,11 +353,11 @@ class Navigator(
         return createValidPage(page, EmailFormPageLocalCouncilUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLocalCouncilUserRegistration {
+    fun skipToLocalCouncilUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
             LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLaUserRegistrationCheckAnswers().build(),
+            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationCheckAnswers().build(),
         )
         navigate(
             "${
@@ -368,7 +368,7 @@ class Navigator(
         return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
     }
 
-    fun navigateToLaUserRegistrationConfirmationPage() {
+    fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
         navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
@@ -1262,24 +1262,24 @@ class Navigator(
         )
     }
 
-    fun goToInviteLocalCouncilAdmin(): InviteLaAdminPage {
+    fun goToInviteLocalCouncilAdmin(): InviteLocalCouncilAdminPage {
         navigate(ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
-        return createValidPage(page, InviteLaAdminPage::class)
+        return createValidPage(page, InviteLocalCouncilAdminPage::class)
     }
 
-    fun goToManageLaAdminsPage(): ManageLocalCouncilAdminsPage {
+    fun goToManageLocalCouncilAdminsPage(): ManageLocalCouncilAdminsPage {
         navigate(ManageLocalCouncilAdminsController.MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
         return createValidPage(page, ManageLocalCouncilAdminsPage::class)
     }
 
-    fun goToEditAdminsPage(laAdminId: Long): EditLocalCouncilAdminPage {
-        navigate("$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/$laAdminId")
-        return createValidPage(page, EditLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+    fun goToEditAdminsPage(localCouncilAdminId: Long): EditLocalCouncilAdminPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/$localCouncilAdminId")
+        return createValidPage(page, EditLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
     }
 
-    fun goToDeleteLaAdminPage(laAdminId: Long): DeleteLocalCouncilAdminPage {
-        navigate("$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$laAdminId")
-        return createValidPage(page, DeleteLocalCouncilAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+    fun goToDeleteLocalCouncilAdminPage(localCouncilAdminId: Long): DeleteLocalCouncilAdminPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localCouncilAdminId")
+        return createValidPage(page, DeleteLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
     }
 
     fun goToCancelAdminInvitePage(invitationId: Long): CancelLocalCouncilAdminInvitationPage {

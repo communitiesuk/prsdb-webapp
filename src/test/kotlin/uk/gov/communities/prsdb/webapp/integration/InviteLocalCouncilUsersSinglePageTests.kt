@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test
 
 class InviteLocalCouncilUsersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
-    fun `inviting a new LA user shows validation errors if the email addresses don't match`() {
-        val invitePage = navigator.goToInviteNewLaUser(2)
+    fun `inviting a new LocalCouncil user shows validation errors if the email addresses don't match`() {
+        val invitePage = navigator.goToInviteNewLocalCouncilUser(2)
         invitePage.submitMismatchedEmails("test@example.com", "different@example.com")
         assertThat(invitePage.form.getErrorMessage()).containsText("Both email addresses should match")
     }

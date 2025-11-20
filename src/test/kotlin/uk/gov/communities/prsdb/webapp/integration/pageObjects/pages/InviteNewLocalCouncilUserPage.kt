@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class InviteNewLocalCouncilUserPage(
     page: Page,
 ) : BasePage(page, "/$INVITE_NEW_USER_PATH_SEGMENT") {
-    val form = InviteNewLaUserForm(page)
+    val form = InviteNewLocalCouncilUserForm(page)
 
     fun submitMatchingEmail(email: String) {
         form.emailInput.fill(email)
@@ -26,7 +26,7 @@ class InviteNewLocalCouncilUserPage(
         form.submit()
     }
 
-    class InviteNewLaUserForm(
+    class InviteNewLocalCouncilUserForm(
         page: Page,
     ) : PostForm(page) {
         val emailInput = TextInput.emailByFieldName(locator, "email")

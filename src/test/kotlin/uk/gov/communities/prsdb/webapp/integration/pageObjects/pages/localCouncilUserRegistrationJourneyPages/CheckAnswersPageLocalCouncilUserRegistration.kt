@@ -19,9 +19,9 @@ class CheckAnswersPageLocalCouncilUserRegistration(
 
     val heading = Heading(page.locator("h1"))
 
-    val summaryList = CheckAnswersLaUserRegistrationSummaryList(page)
+    val summaryList = CheckAnswersLocalCouncilUserRegistrationSummaryList(page)
 
-    class CheckAnswersLaUserRegistrationSummaryList(
+    class CheckAnswersLocalCouncilUserRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
         val nameRow = getRow("Name")

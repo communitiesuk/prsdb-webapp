@@ -138,7 +138,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getUserAndLocalCouncilIfAuthorizedUser throws an AccessDeniedException if the user is not an LA user`() {
+    fun `getUserAndLocalCouncilIfAuthorizedUser throws an AccessDeniedException if the user is not an LocalCouncil user`() {
         // Arrange
         whenever(localCouncilUserRepository.findByBaseUser_Id(anyString()))
             .thenThrow(AccessDeniedException(""))
@@ -153,7 +153,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getUserAndLocalCouncilIfAuthorizedUser throws an AccessDeniedException if the user's LA is not the given LA'`() {
+    fun `getUserAndLocalCouncilIfAuthorizedUser throws an AccessDeniedException if the user's LC is not the given LocalCouncil'`() {
         // Arrange
         val baseUser = createOneLoginUser()
         val localCouncil = createLocalCouncil()
@@ -170,7 +170,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getLocalCouncilUserIfAuthorizedLocalCouncil returns the Local Council user if they are a member of the LA`() {
+    fun `getLocalCouncilUserIfAuthorizedLocalCouncil returns the Local Council user if they are a member of the LocalCouncil`() {
         // Arrange
         val localCouncil = createLocalCouncil()
         val baseUser = createOneLoginUser()
@@ -202,7 +202,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getLocalCouncilUserIfAuthorizedLocalCouncil throws an AccessDeniedException if the LA user belongs to a different LA`() {
+    fun `getLocalCouncilUserIfAuthorizedLocalCouncil throws an AccessDeniedException if the LC user belongs to a different LocalCouncil`() {
         // Arrange
         val localCouncil = createLocalCouncil()
         val baseUser = createOneLoginUser()
@@ -237,7 +237,7 @@ class LocalCouncilDataServiceTests {
         whenever(localCouncilUserOrInvitationRepository.findByLocalCouncil(localCouncil, pageRequest))
             .thenReturn(PageImpl(listOf(user1, user2, invitation), pageRequest, 3))
 
-        val expectedLaUserList =
+        val expectedLocalCouncilUserList =
             listOf(
                 LocalCouncilUserOrInvitationDataModel(1, "User 1", localCouncil.name, true, false),
                 LocalCouncilUserOrInvitationDataModel(2, "User 2", localCouncil.name, false, false),
@@ -253,7 +253,7 @@ class LocalCouncilDataServiceTests {
             )
 
         // Assert
-        Assertions.assertIterableEquals(expectedLaUserList, userList)
+        Assertions.assertIterableEquals(expectedLocalCouncilUserList, userList)
     }
 
     @Test
@@ -349,7 +349,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getPaginatedUsersAndInvitations returns all users and invitations if filterOutLaAdminInvitations is false`() {
+    fun `getPaginatedUsersAndInvitations returns all users and invitations if filterOutLocalCouncilAdminInvitations is false`() {
         // Arrange
         val localCouncil = createLocalCouncil(123)
         val pageRequest =
@@ -384,7 +384,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getPaginatedUsersAndInvitations returns users and non-admin invitations if filterOutLaAdminInvitations is true`() {
+    fun `getPaginatedUsersAndInvitations returns users and non-admin invitations if filterOutLocalCouncilAdminInvitations is true`() {
         // Arrange
         val localCouncil = createLocalCouncil(123)
         val pageRequest =
@@ -464,7 +464,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `updateUserAccessLevel throws a NOT_FOUND error if the LA user does not exist`() {
+    fun `updateUserAccessLevel throws a NOT_FOUND error if the LocalCouncil user does not exist`() {
         // Arrange
         whenever(localCouncilUserRepository.findById(anyLong())).thenReturn(Optional.empty())
 
@@ -519,7 +519,7 @@ class LocalCouncilDataServiceTests {
 
     @Test
     fun `getIsLocalCouncilUser returns false when the user is not a local council user`() {
-        val baseUserId = "not-an-la-user"
+        val baseUserId = "not-an-lc-user"
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
@@ -538,7 +538,7 @@ class LocalCouncilDataServiceTests {
 
     @Test
     fun `getLocalCouncilUser throws an error if baseUserId does not match an entry in the localCouncilUser table`() {
-        val baseUserId = "not-an-la-user"
+        val baseUserId = "not-an-lc-user"
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
 
@@ -775,7 +775,7 @@ class LocalCouncilDataServiceTests {
     }
 
     @Test
-    fun `getLastLocalCouncilUserInvitedThisSession returns the most recently added details for that LA from the session`() {
+    fun `getLastLocalCouncilUserInvitedThisSession returns the most recently added details for that LocalCouncil from the session`() {
         // Arrange
         val invitedUsers = listOf(Pair(1, "user.1@example.com"), Pair(1, "user.2@example.com"), Pair(2, "user.2@example.com"))
         whenever(mockHttpSession.getAttribute(LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION))

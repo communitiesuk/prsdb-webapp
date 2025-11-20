@@ -101,29 +101,29 @@ class RegisterLocalCouncilUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `getConfirmation returns 200 if an LA user has been registered`() {
-        val laUserId = 0L
+    fun `getConfirmation returns 200 if an LocalCouncil user has been registered`() {
+        val localCouncilUserId = 0L
         val localCouncilUser = MockLocalCouncilData.createLocalCouncilUser()
 
-        whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
-        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localCouncilUser)
+        whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(localCouncilUserId)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(localCouncilUserId)).thenReturn(localCouncilUser)
 
         mvc
             .perform(
                 MockMvcRequestBuilders
                     .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-                    .sessionAttr(LOCAL_COUNCIL_USER_ID, laUserId),
+                    .sessionAttr(LOCAL_COUNCIL_USER_ID, localCouncilUserId),
             ).andExpect(MockMvcResultMatchers.status().isOk())
     }
 
     @Test
     @WithMockUser
-    fun `getConfirmation returns 400 if there's no LA user ID in session`() {
-        val laUserId = 0L
+    fun `getConfirmation returns 400 if there's no LocalCouncil user ID in session`() {
+        val localCouncilUserId = 0L
         val localCouncilUser = MockLocalCouncilData.createLocalCouncilUser()
 
         whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(null)
-        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(localCouncilUser)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(localCouncilUserId)).thenReturn(localCouncilUser)
 
         mvc
             .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
@@ -132,17 +132,17 @@ class RegisterLocalCouncilUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `getConfirmation returns 400 if the LA user ID in session is not valid`() {
-        val laUserId = 0L
+    fun `getConfirmation returns 400 if the LocalCouncil user ID in session is not valid`() {
+        val localCouncilUserId = 0L
 
-        whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(laUserId)
-        whenever(localCouncilDataService.getLocalCouncilUserOrNull(laUserId)).thenReturn(null)
+        whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(localCouncilUserId)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(localCouncilUserId)).thenReturn(null)
 
         mvc
             .perform(
                 MockMvcRequestBuilders
                     .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-                    .sessionAttr(LOCAL_COUNCIL_USER_ID, laUserId),
+                    .sessionAttr(LOCAL_COUNCIL_USER_ID, localCouncilUserId),
             ).andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 

@@ -17,7 +17,7 @@ class SearchPropertyRegisterPage(
     companion object {
         const val PROPERTY_COL_INDEX: Int = 0
         const val REG_NUM_COL_INDEX: Int = 1
-        const val LA_COL_INDEX: Int = 2
+        const val LOCAL_COUNCIL_COL_INDEX: Int = 2
         const val PROPERTY_LANDLORD_COL_INDEX: Int = 3
     }
 }

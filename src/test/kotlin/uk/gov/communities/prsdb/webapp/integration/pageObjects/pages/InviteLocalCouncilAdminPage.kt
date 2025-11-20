@@ -7,10 +7,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Select
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class InviteLaAdminPage(
+class InviteLocalCouncilAdminPage(
     page: Page,
 ) : BasePage(page, ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE) {
-    val form = InviteLaAdminForm(page)
+    val form = InviteLocalCouncilAdminForm(page)
 
     fun fillInFormAndSubmit(
         partialLocalCouncilName: String,
@@ -24,7 +24,7 @@ class InviteLaAdminPage(
         form.submit()
     }
 
-    class InviteLaAdminForm(
+    class InviteLocalCouncilAdminForm(
         page: Page,
     ) : PostForm(page) {
         val localCouncilSelect = Select(locator)
