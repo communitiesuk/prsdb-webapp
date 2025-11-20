@@ -34,12 +34,14 @@ class FeatureFlagConfig {
                 ),
                 FeatureFlagModel(
                     name = EXAMPLE_FEATURE_FLAG_TWO,
+                    // Please leave this flag enabled to demo the value being overridden by the flag group
                     enabled = true,
                     expiryDate = LocalDate.of(2030, 2, 14),
                     flagGroup = RELEASE_1_0,
                 ),
                 FeatureFlagModel(
                     name = EXAMPLE_FEATURE_FLAG_THREE,
+                    // Please leave this flag disabled to demo the value being overridden by the flag group
                     enabled = false,
                     expiryDate = LocalDate.of(2030, 2, 14),
                     flagGroup = RELEASE_1_0,
