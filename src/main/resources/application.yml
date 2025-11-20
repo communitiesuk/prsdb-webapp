@@ -27,14 +27,6 @@ spring:
       platform: ${ENVIRONMENT_NAME}
       continue-on-error: true
 
-  data:
-    redis:
-      host: ${ELASTICACHE_URL}
-      port: ${ELASTICACHE_PORT}
-      password: ${ELASTICACHE_PASSWORD}
-      ssl:
-        enabled: true
-
   mvc.format.date: "d MMMM yyyy"
 
   thymeleaf:
@@ -121,6 +113,14 @@ spring:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: notarealpassword
+      ssl:
+        enabled: false
 
 ---
 
