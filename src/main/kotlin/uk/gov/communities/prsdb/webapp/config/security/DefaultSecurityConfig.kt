@@ -15,7 +15,9 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
@@ -28,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.C
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import java.util.UUID
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -74,7 +75,7 @@ class DefaultSecurityConfig(
                         csp
                             .policyDirectives(contentSecurityPolicyDirectives)
                     }
-            }
+            }.addFilterAfter(CSPNonceFilter(), HeaderWriterFilter::class.java)
 
         return http.build()
     }
@@ -94,15 +95,9 @@ class DefaultSecurityConfig(
     }
 
     companion object {
-        private fun generateNonce(): String {
-            return UUID.randomUUID().toString()
-        }
-
-        val serverGeneratedNonce: String = generateNonce()
-
         var contentSecurityPolicyDirectives =
             "default-src 'self'; " +
-                "script-src 'self' 'nonce-$serverGeneratedNonce' $PLAUSIBLE_URL; " +
+                "script-src 'self' 'nonce-' $PLAUSIBLE_URL; " +
                 "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
                 "img-src 'self' $GOOGLE_TAG_MANAGER_URL; " +
                 "style-src 'self'; " +
