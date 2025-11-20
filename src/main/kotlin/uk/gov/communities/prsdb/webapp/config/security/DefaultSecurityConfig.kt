@@ -97,7 +97,7 @@ class DefaultSecurityConfig(
     companion object {
         var contentSecurityPolicyDirectives =
             "default-src 'self'; " +
-                "script-src 'self' 'nonce-' $PLAUSIBLE_URL; " +
+                "script-src 'self' 'nonce-' $PLAUSIBLE_URL $GOOGLE_TAG_MANAGER_URL; " +
                 "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
                 "img-src 'self' $GOOGLE_TAG_MANAGER_URL; " +
                 "style-src 'self'; " +

@@ -36,7 +36,7 @@
         'wait_for_update': 500,
     });
 </script>
-<script th:nonce="${serverGeneratedNonce}" async th:src="${googleTagManagerUrl}+${googleAnalyticsMeasurementId}"></script>
+<script async th:src="${googleTagManagerUrl}+${googleAnalyticsMeasurementId}"></script>
 <script th:nonce="${serverGeneratedNonce}" th:inline="javascript" th:with="measurementIdAsString=${googleAnalyticsMeasurementId}">
     <!-- Google tag (gtag.js) -->
     window.dataLayer = window.dataLayer || [];
