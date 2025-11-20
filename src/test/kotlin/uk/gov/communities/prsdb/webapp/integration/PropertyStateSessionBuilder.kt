@@ -14,7 +14,13 @@ class PropertyStateSessionBuilder : JourneyStateSessionBuilder<PropertyStateSess
 
     companion object {
         fun beforePropertyRegistrationSelectAddress(customLookedUpAddresses: List<AddressDataModel>? = null) =
-            PropertyStateSessionBuilder().withLookupAddress().withCachedAddresses(customLookedUpAddresses)
+            if (customLookedUpAddresses != null) {
+                PropertyStateSessionBuilder()
+                    .withLookupAddress()
+                    .withCachedAddresses(customLookedUpAddresses)
+            } else {
+                PropertyStateSessionBuilder().withLookupAddress()
+            }
 
         fun beforePropertyRegistrationManualAddress() = beforePropertyRegistrationSelectAddress().withManualAddressSelected()
 

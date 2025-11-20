@@ -360,7 +360,11 @@ class Navigator(
     }
 
     fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
-        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT")
+        navigate(
+            "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+                "$TASK_LIST_PATH_SEGMENT?" +
+                "journeyId=${PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY}",
+        )
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
