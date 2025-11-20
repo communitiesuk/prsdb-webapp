@@ -14,8 +14,7 @@ data class SetJourneyDataRequestModel(
 ) {
     constructor(journeyDataKey: String, journeyData: JourneyData) : this(journeyDataKey, objectMapper.writeValueAsString(journeyData))
 
-    fun getJourneyState(): JourneyData =
-        objectToStringKeyedMap(objectMapper.readValue(serializedJourneyData, Any::class.java)) ?: emptyMap()
+    fun getJourneyData(): JourneyData = objectToStringKeyedMap(objectMapper.readValue(serializedJourneyData, Any::class.java)) ?: emptyMap()
 
     companion object {
         private val objectMapper =
@@ -32,7 +31,8 @@ data class SetJourneyStateRequestModel(
 ) {
     constructor(journeyDataKey: String, journeyData: JourneyData) : this(journeyDataKey, objectMapper.writeValueAsString(journeyData))
 
-    fun getJourneyData(): JourneyData = objectToStringKeyedMap(objectMapper.readValue(serializedJourneyData, Any::class.java)) ?: emptyMap()
+    fun getJourneyState(): JourneyData =
+        objectToStringKeyedMap(objectMapper.readValue(serializedJourneyData, Any::class.java)) ?: emptyMap()
 
     companion object {
         private val objectMapper =

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 
 @Profile("local")
@@ -21,15 +22,15 @@ class SessionController(
     fun setJourneyData(
         @RequestBody requestBody: SetJourneyDataRequestModel,
     ) {
-        session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyState())
+        session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyData())
     }
 
     @PostMapping("/$SET_JOURNEY_STATE_PATH_SEGMENT", consumes = ["application/json"])
     fun setJourneyState(
-        @RequestBody requestBody: SetJourneyDataRequestModel,
+        @RequestBody requestBody: SetJourneyStateRequestModel,
     ) {
-        val keyToUse = "Any-olf-key"
-        session.setAttribute("journeyStateKeyStore", mapOf(requestBody.journeyDataKey to keyToUse))
+        val keyToUse = "test-journey-key"
+        session.setAttribute("journeyStateKeyStore", mapOf(requestBody.journeyId to keyToUse))
         val state = requestBody.getJourneyState()
         session.setAttribute(keyToUse, state)
     }
