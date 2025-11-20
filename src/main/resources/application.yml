@@ -116,11 +116,11 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: notarealpassword
+      host: ${ELASTICACHE_URL}
+      port: ${ELASTICACHE_PORT}
+      password: ${ELASTICACHE_PASSWORD}
       ssl:
-        enabled: false
+        enabled: true
 
 ---
 
