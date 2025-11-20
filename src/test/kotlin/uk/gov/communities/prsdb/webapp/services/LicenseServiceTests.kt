@@ -41,24 +41,6 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `deleteLicense deletes a license`() {
-        val licence = License()
-
-        licenseService.deleteLicense(licence)
-
-        verify(mockLicenseRepository).delete(licence)
-    }
-
-    @Test
-    fun `deleteLicenses deletes a list from the licenseRepository`() {
-        val licenses = listOf(License(), License())
-
-        licenseService.deleteLicenses(licenses)
-
-        verify(mockLicenseRepository).deleteAll(licenses)
-    }
-
-    @Test
     fun `updateLicence returns an updated licence when there is an existing licence and a new licence`() {
         val licence = License(LicensingType.HMO_MANDATORY_LICENCE, "LN123456")
         val newLicence = License(LicensingType.SELECTIVE_LICENCE, "SL123456")

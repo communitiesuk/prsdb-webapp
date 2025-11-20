@@ -75,8 +75,13 @@ class DefaultSecurityConfig(
                         csp
                             .policyDirectives(contentSecurityPolicyDirectives)
                     }
+                    .permissionsPolicyHeader {
+                            permissions ->
+                        permissions
+                            .policy(PERMISSIONS_POLICY_DIRECTIVES)
+                    }
             }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
-
+            
         return http.build()
     }
 
@@ -102,5 +107,19 @@ class DefaultSecurityConfig(
                 "img-src 'self' $GOOGLE_TAG_MANAGER_URL; " +
                 "style-src 'self'; " +
                 "object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
+
+        // The permission policy directives are from:
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy#directives
+        // This is the list of permissions that we are blocking.
+        const val PERMISSIONS_POLICY_DIRECTIVES =
+            "accelerometer=(), aria-notify=(), attribution-reporting=(), " +
+                "autoplay=(), bluetooth=(), browsing-topics=(), camera=(), captured-surface-control=(), " +
+                "compute-pressure=(), cross-origin-isolated=(), deferred-fetch=(), deferred-fetch-minimal=(), " +
+                "display-capture=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), " +
+                "gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), language-detector=(), local-fonts=(), " +
+                "magnetometer=(), microphone=(), midi=(), on-device-speech-recognition=(), otp-credentials=(), payment=(), " +
+                "picture-in-picture=(), publickey-credentials-create=(), publickey-credentials-get=(), screen-wake-lock=(), " +
+                "serial=(), storage-access=(), summarizer=(), translator=(), usb=(), web-share=(), " +
+                "window-management=(), xr-spatial-tracking=()"
     }
 }

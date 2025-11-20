@@ -10,26 +10,22 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.Complete
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 @PrsdbWebService
@@ -43,100 +39,28 @@ class FooExampleJourneyFactory(
         return journey(stateFactory.getObject()) {
             unreachableStepStep { journey.taskListStep }
             step("task-list", journey.taskListStep) {
+                initialStep()
                 nextUrl { "task-list" }
             }
-            step("occupied", journey.occupied) {
-                parents { journey.taskListStep.always() }
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.households
-                        YesOrNo.NO -> journey.fooCheckYourAnswersStep
-                    }
+            section {
+                withHeadingMessageKey("tasks-section-part-1")
+                task(journey.occupationTask) {
+                    parents { journey.taskListStep.always() }
+                    redirectToStep { journey.fooCheckYourAnswersStep }
                 }
             }
-            step("households", journey.households) {
-                parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.tenants }
-            }
-            step("tenants", journey.tenants) {
-                parents { journey.households.hasOutcome(Complete.COMPLETE) }
-                nextStep { journey.fooCheckYourAnswersStep }
-            }
-            step("has-epc", journey.epcQuestion) {
-                parents { journey.taskListStep.always() }
-                nextStep { mode ->
-                    when (mode) {
-                        EpcStatus.AUTOMATCHED -> journey.checkAutomatchedEpc
-                        EpcStatus.NOT_AUTOMATCHED -> journey.searchForEpc
-                        EpcStatus.NO_EPC -> journey.fooCheckYourAnswersStep
-                    }
+            section {
+                withHeadingMessageKey("tasks-section-part-2")
+                task(journey.epcTask) {
+                    parents { journey.occupationTask.isComplete() }
+                    redirectToStep { journey.fooCheckYourAnswersStep }
                 }
-            }
-            step<YesOrNo, CheckEpcStepConfig>("check-automatched-epc", journey.checkAutomatchedEpc) {
-                parents { journey.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.fooCheckYourAnswersStep
-                        YesOrNo.NO -> journey.searchForEpc
-                    }
-                }
-                stepSpecificInitialisation {
-                    usingEpc { automatchedEpc }
-                }
-            }
-            step("search-for-epc", journey.searchForEpc) {
-                parents {
-                    OrParents(
-                        journey.epcQuestion.hasOutcome(EpcStatus.NOT_AUTOMATCHED),
-                        journey.checkAutomatchedEpc.hasOutcome(YesOrNo.NO),
-                    )
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        EpcSearchResult.FOUND -> journey.checkSearchedEpc
-                        EpcSearchResult.SUPERSEDED -> journey.epcSuperseded
-                        EpcSearchResult.NOT_FOUND -> journey.epcNotFound
-                    }
-                }
-            }
-            step("superseded-epc", journey.epcSuperseded) {
-                parents { journey.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
-                nextStep { journey.checkSearchedEpc }
-            }
-            step<YesOrNo, CheckEpcStepConfig>("check-found-epc", journey.checkSearchedEpc) {
-                parents {
-                    OrParents(
-                        journey.searchForEpc.hasOutcome(EpcSearchResult.FOUND),
-                        journey.epcSuperseded.hasOutcome(Complete.COMPLETE),
-                    )
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.fooCheckYourAnswersStep
-                        YesOrNo.NO -> journey.searchForEpc
-                    }
-                }
-                stepSpecificInitialisation {
-                    usingEpc { searchedEpc }
-                }
-            }
-            step("epc-not-found", journey.epcNotFound) {
-                parents { journey.searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
-                nextStep { journey.fooCheckYourAnswersStep }
             }
             step("check-your-answers", journey.fooCheckYourAnswersStep) {
                 parents {
                     AndParents(
-                        OrParents(
-                            journey.occupied.hasOutcome(YesOrNo.NO),
-                            journey.tenants.hasOutcome(Complete.COMPLETE),
-                        ),
-                        OrParents(
-                            journey.epcQuestion.hasOutcome(EpcStatus.NO_EPC),
-                            journey.checkAutomatchedEpc.hasOutcome(YesOrNo.YES),
-                            journey.checkSearchedEpc.hasOutcome(YesOrNo.YES),
-                            journey.epcNotFound.hasOutcome(Complete.COMPLETE),
-                        ),
+                        journey.occupationTask.isComplete(),
+                        journey.epcTask.isComplete(),
                     )
                 }
                 nextUrl { "/" }
@@ -162,6 +86,8 @@ class FooJourneyState(
     override val checkSearchedEpc: CheckEpcStep,
     val fooCheckYourAnswersStep: FooCheckAnswersStep,
     private val journeyStateService: JourneyStateService,
+    val occupationTask: OccupationTask,
+    val epcTask: EpcTask,
 ) : AbstractJourneyState(journeyStateService),
     OccupiedJourneyState,
     EpcJourneyState {

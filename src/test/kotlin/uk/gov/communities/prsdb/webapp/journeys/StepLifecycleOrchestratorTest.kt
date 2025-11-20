@@ -8,13 +8,27 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
 
 class StepLifecycleOrchestratorTest {
     @Test
-    fun `when step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
+    fun `when used like a naive constructor, StepLifecycleOrchestrator returns a corresponding orchestrator`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val internalStep = mock<JourneyStep.InternalStep<*, *, *>>()
+        val requestableStep = mock<JourneyStep.RequestableStep<*, *, *>>()
+
+        // Act
+        val notionalOrchestrator = StepLifecycleOrchestrator(internalStep)
+        val visitableOrchestrator = StepLifecycleOrchestrator(requestableStep)
+
+        // Assert
+        assertTrue(notionalOrchestrator is StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator)
+        assertTrue(visitableOrchestrator is StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator)
+    }
+
+    @Test
+    fun `when visitable step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
+        // Arrange
+        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(false)
@@ -33,10 +47,11 @@ class StepLifecycleOrchestratorTest {
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
     }
 
+    @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `when step is reachable, getStepModelAndView calls all step methods in the correct order and returns the content and view`() {
+    fun `when visitable step is reachable, getStepModelAndView calls all step methods in the correct order and returns the content and view`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)
@@ -64,9 +79,9 @@ class StepLifecycleOrchestratorTest {
     }
 
     @Test
-    fun `when step is unreachable, postStepModelAndView calls step methods in the correct order and returns redirect`() {
+    fun `when visitable step is unreachable, postStepModelAndView calls step methods in the correct order and returns redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(false)
@@ -88,7 +103,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when invalid data is posted, postStepModelAndView calls step methods in the correct order and returns error content and view`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)
@@ -126,7 +141,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when valid data is posted, postStepModelAndView calls step methods in the correct order and returns redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.isStepReachable).thenReturn(true)
@@ -138,7 +153,7 @@ class StepLifecycleOrchestratorTest {
         whenever(stepConfig.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
 
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.determineNextDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+        whenever(stepConfig.afterDetermineNextDestination(anyOrNull())).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
@@ -153,11 +168,59 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(stepConfig).beforeSubmitFormData()
         myInOrder.verify(stepConfig).submitFormData(anyOrNull())
         myInOrder.verify(stepConfig).afterSubmitFormData()
-        myInOrder.verify(stepConfig).beforeDetermineRedirect()
+        myInOrder.verify(stepConfig).beforeDetermineNextDestination()
         myInOrder.verify(stepConfig).determineNextDestination()
-        myInOrder.verify(stepConfig).afterDetermineRedirect()
+        myInOrder.verify(stepConfig).afterDetermineNextDestination(anyOrNull())
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
+    }
+
+    @Test
+    fun `when notional step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
+        // Arrange
+        val stepConfig = mock<JourneyStep.InternalStep<*, *, *>>()
+        val myInOrder = inOrder(stepConfig)
+        val orchestrator = StepLifecycleOrchestrator(stepConfig)
+        whenever(stepConfig.isStepReachable).thenReturn(false)
+        val redirectUrl = "redirectUrl"
+        whenever(stepConfig.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+
+        // Act
+        val modelAndView = orchestrator.getStepModelAndView()
+
+        // Assert
+        myInOrder.verify(stepConfig).beforeIsStepReachable()
+        myInOrder.verify(stepConfig).isStepReachable
+        myInOrder.verify(stepConfig).getUnreachableStepDestination()
+
+        assertTrue(modelAndView.model.isEmpty())
+        assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
+    }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun `when notional step is reachable, getStepModelAndView calls all step methods in the correct order and returns the next destination`() {
+        // Arrange
+        val stepConfig = mock<JourneyStep.InternalStep<*, *, *>>()
+        val myInOrder = inOrder(stepConfig)
+        val orchestrator = StepLifecycleOrchestrator(stepConfig)
+        whenever(stepConfig.isStepReachable).thenReturn(true)
+        val nextUrl = "nextUrl"
+        whenever(stepConfig.afterDetermineNextDestination(anyOrNull())).thenReturn(Destination.ExternalUrl(nextUrl))
+
+        // Act
+        val modelAndView = orchestrator.getStepModelAndView()
+
+        // Assert
+        myInOrder.verify(stepConfig).beforeIsStepReachable()
+        myInOrder.verify(stepConfig).isStepReachable
+        myInOrder.verify(stepConfig).afterIsStepReached()
+        myInOrder.verify(stepConfig).beforeDetermineNextDestination()
+        myInOrder.verify(stepConfig).determineNextDestination()
+        myInOrder.verify(stepConfig).afterDetermineNextDestination(anyOrNull())
+
+        assertTrue(modelAndView.model.isEmpty())
+        assertEquals(modelAndView.viewName, "redirect:$nextUrl")
     }
 }

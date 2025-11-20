@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -48,17 +49,23 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var address: Address
         private set
 
-    @OneToOne(optional = true)
+    @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
 
-    @OneToOne(optional = true)
+    @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "incomplete_compliance_form_id", nullable = true, unique = true)
     var incompleteComplianceForm: FormContext? = null
 
-    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
-    var certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
+    @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
+    lateinit var singleLineAddress: String
         private set
+
+    @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
+    private val propertyCompliance: PropertyCompliance? = null
+
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
+    private val certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
 
     constructor(
         ownershipType: OwnershipType,
