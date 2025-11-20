@@ -23,25 +23,26 @@ class CSPNonceFilter() : Filter {
         response: HttpServletResponse?,
         chain: FilterChain,
     ) {
+        var wrappedResponseOrNull: CSPNonceResponseWrapper? = null
+
         if (response != null) {
-            val secureRandom = java.security.SecureRandom()
-//    val secureRandom = random() // This kotlin method uses the Java one above?
-            val nonceArray = ByteArray(NONCE_SIZE)
-            secureRandom.nextBytes(nonceArray)
-            val nonce = Base64.getEncoder().encodeToString(nonceArray)
+            val nonce = generateNonce()
             request?.setAttribute(CSP_NONCE_ATTRIBUTE, nonce)
-            try {
-                chain.doFilter(request, CSPNonceResponseWrapper(response, nonce))
-            } catch (e: Exception) {
-                throw e
-            }
-        } else {
-            try {
-                chain.doFilter(request, null)
-            } catch (e: Exception) {
-                throw e
-            }
+            wrappedResponseOrNull = CSPNonceResponseWrapper(response, nonce)
         }
+
+        try {
+            chain.doFilter(request, wrappedResponseOrNull)
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    private fun generateNonce(): String {
+        val secureRandom = java.security.SecureRandom()
+        val nonceArray = ByteArray(NONCE_SIZE)
+        secureRandom.nextBytes(nonceArray)
+        return Base64.getEncoder().encodeToString(nonceArray)
     }
 
     class CSPNonceResponseWrapper(
@@ -52,7 +53,7 @@ class CSPNonceFilter() : Filter {
             name: String,
             value: String?,
         ) {
-            if ((name == "Content-Security-Policy") && (value != null) && value.isNotBlank()) {
+            if ((name == "Content-Security-Policy") && !value.isNullOrBlank()) {
                 val newValue = value.replace("'nonce-'", "'nonce-$nonce'")
                 super.setHeader(name, newValue)
             } else {
@@ -64,7 +65,7 @@ class CSPNonceFilter() : Filter {
             name: String,
             value: String?,
         ) {
-            if ((name == "Content-Security-Policy") && (value != null) && value.isNotBlank()) {
+            if ((name == "Content-Security-Policy") && !value.isNullOrBlank()) {
                 val newValue = value.replace("'nonce-'", "'nonce-$nonce'")
                 super.addHeader(name, newValue)
             } else {
