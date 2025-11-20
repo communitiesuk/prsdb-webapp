@@ -67,7 +67,8 @@ class NewRegisterPropertyController(
     ): ModelAndView =
         try {
             println("Posting step $stepName with data $formData")
-            propertyRegistrationJourneyFactory.createJourneySteps()[stepName]?.postStepModelAndView(formData)
+            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
+            journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
             val journeyId = PropertyRegistrationJourneyState.generateJourneyId(principal)

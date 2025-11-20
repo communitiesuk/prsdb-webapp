@@ -62,6 +62,7 @@ open class JourneyStateSessionBuilder<SelfType : JourneyStateSessionBuilder<Self
         houseNameOrNumber: String = "4",
         postcode: String = "EG1 2AB",
         isContactAddress: Boolean = false,
+        wasFound: Boolean = true,
     ): SelfType {
         val addressFormModel =
             LookupAddressFormModel().apply {
@@ -72,10 +73,16 @@ open class JourneyStateSessionBuilder<SelfType : JourneyStateSessionBuilder<Self
             if (isContactAddress) "lookup-contact-address" else "lookup-address",
             addressFormModel,
         )
+        if (wasFound) {
+            withCachedAddresses(
+                listOf(AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localAuthorityId = 22, uprn = 44)),
+            )
+        }
         return this as SelfType
     }
 
     fun withManualAddressSelected(isContactAddress: Boolean = false): SelfType {
+        withCachedAddresses(listOf(AddressDataModel("singleLineAddress", localAuthorityId = 22, uprn = 44)))
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         val selectAddressFormModel =
             SelectAddressFormModel().apply {
@@ -85,10 +92,8 @@ open class JourneyStateSessionBuilder<SelfType : JourneyStateSessionBuilder<Self
         return this as SelfType
     }
 
-    fun withCachedAddresses(addresses: List<AddressDataModel>?): SelfType {
-        addresses?.let {
-            additionalDataMap["cachedAddresses"] = Json.encodeToString(serializer(), addresses)
-        }
+    fun withCachedAddresses(addresses: List<AddressDataModel>): SelfType {
+        additionalDataMap["cachedAddresses"] = Json.encodeToString(serializer(), addresses)
         return this as SelfType
     }
 
@@ -124,13 +129,7 @@ open class JourneyStateSessionBuilder<SelfType : JourneyStateSessionBuilder<Self
         localCouncil: LocalCouncil? = null,
         isContactAddress: Boolean = false,
     ): SelfType {
-        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
-        val selectAddressFormModel =
-            SelectAddressFormModel().apply {
-                address = MANUAL_ADDRESS_CHOSEN
-            }
-        withSubmittedValue(selectAddressKey, selectAddressFormModel)
-
+        withManualAddressSelected(isContactAddress)
         val manualAddressKey = if (isContactAddress) "manual-contact-address" else "manual-address"
         val manualAddressFormModel =
             ManualAddressFormModel().apply {
