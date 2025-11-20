@@ -5,7 +5,6 @@ import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -59,15 +58,15 @@ class SelectAddressStepConfig(
         super.afterValidateSubmittedData(bindingResult, state)
 
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
-        val selectedAddress = selectAddressFormModel.notNullValue(SelectAddressFormModel::address)
-
-        when {
-            selectedAddress == MANUAL_ADDRESS_CHOSEN -> {}
-            state.getMatchingAddress(selectedAddress) == null ->
-                bindingResult.rejectValue(
-                    SelectAddressFormModel::address.name,
-                    "forms.selectAddress.error.invalidSelection",
-                )
+        selectAddressFormModel.address?.let { selectedAddress ->
+            when {
+                selectedAddress == MANUAL_ADDRESS_CHOSEN -> {}
+                state.getMatchingAddress(selectedAddress) == null ->
+                    bindingResult.rejectValue(
+                        SelectAddressFormModel::address.name,
+                        "forms.selectAddress.error.invalidSelection",
+                    )
+            }
         }
     }
 
