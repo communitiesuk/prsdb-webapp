@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class SummaryListRowViewModel(
@@ -46,6 +47,28 @@ data class SummaryListRowViewModel(
                         SummaryListRowActionViewModel(
                             actionValue,
                             "$it?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=$it",
+                        )
+                    },
+                valueUrl = valueUrl,
+                valueUrlOpensNewTab = valueUrlOpensNewTab,
+            )
+
+        fun forCheckYourAnswersStepConfig(
+            fieldHeading: String,
+            fieldValue: Any?,
+            destination: Destination,
+            valueUrl: String? = null,
+            actionValue: String = "forms.links.change",
+            valueUrlOpensNewTab: Boolean = false,
+        ): SummaryListRowViewModel =
+            SummaryListRowViewModel(
+                fieldHeading = fieldHeading,
+                fieldValue = fieldValue,
+                action =
+                    destination.toUrlStringOrNull()?.let {
+                        SummaryListRowActionViewModel(
+                            actionValue,
+                            it,
                         )
                     },
                 valueUrl = valueUrl,
