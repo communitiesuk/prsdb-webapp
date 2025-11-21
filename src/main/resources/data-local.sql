@@ -143,7 +143,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (64, '12/10/24', 0006001032, 0),
        (65, '2025-01-15 00:00:00+00', 83811499802, 0),
        (66, '2025-01-15 00:00:00+00', 40666195053, 0),
-       (67, '2025-01-15 00:00:00+00', 150242309330, 0);
+       (67, '2025-01-15 00:00:00+00', 150242309330, 0),
+       (68, '2025-01-15', 1502423330, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -190,7 +191,7 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA',
        (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2');
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode, building_name)
-VALUES (41, '09/13/24', '09/13/24', 1038, 'State House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'State House'),
+VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Registered House'),
        (42, '09/13/24', '09/13/24', 1039, 'Stage House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Stage House'),
        (43, '09/13/24', '09/13/24', 1040, 'Slate House, PRSDB Square, AA3 1AB ', 1, 'AA3 1AB ', 'Slate House'),
        (44, '09/13/24', '09/13/24', 1041, 'Grate House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Grate House'),
@@ -292,7 +293,8 @@ VALUES (1, true, 1, 1, 2, 6, 1, 6, '01/15/25', '02/02/25', null, 2, 1),
        (32, true, 1, 0, 0, 64, 1, 37, '05/02/25', '01/15/25', 8, null, 1),
        (33, true, 0, 0, 0, 65, 1, 38,'2025-01-15 00:00:00+00', null, null, 5, 1),
        (34, true, 0, 0, 0, 66, 1, 39,'2025-01-15 00:00:00+00', null, null, 6, 1),
-       (35, true, 0, 0, 0, 67, 1, 40,'2025-01-15 00:00:00+00', null, null, 7, 1);
+       (35, true, 0, 0, 0, 67, 1, 40,'2025-01-15 00:00:00+00', null, null, 7, 1),
+       (36, true, 0, 0, 0, 68, 1, 41,'2025-01-15', '01/15/25', null, null, 1);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
