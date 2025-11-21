@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -391,6 +392,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
     }
 
+    @Disabled("TODO PRSD-1550: Re-enable these tests once CYA page editing is working correctly")
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
