@@ -1,16 +1,16 @@
 DROP VIEW IF EXISTS local_authority_user_or_invitation;
 
 ALTER TABLE local_authority RENAME TO local_council;
+
 ALTER TABLE local_authority_invitation RENAME TO local_council_invitation;
+ALTER TABLE local_council_invitation RENAME COLUMN inviting_authority_id TO inviting_council_id;
+
 ALTER TABLE local_authority_user RENAME TO local_council_user;
+ALTER TABLE local_council_user RENAME COLUMN local_authority_id TO local_council_id;
 
 ALTER TABLE address RENAME COLUMN local_authority_id TO local_council_id;
 
 ALTER TABLE passcode RENAME COLUMN local_authority_id TO local_council_id;
-
-ALTER TABLE local_council_invitation RENAME COLUMN inviting_authority_id TO inviting_council_id;
-
-ALTER TABLE local_council_user RENAME COLUMN local_authority_id TO local_council_id;
 
 CREATE VIEW local_council_user_or_invitation AS
     SELECT u.id,
