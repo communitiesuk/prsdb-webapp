@@ -9,6 +9,7 @@ import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.view.RedirectView
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -27,10 +28,10 @@ class DestinationTests {
         // Act
         val destination = Destination(mockStep)
         val modelAndView = destination.toModelAndView()
+        val finalUrl = resolveModelAndViewToRedirectUrl(modelAndView)
 
         // Assert
-        assertEquals("redirect:$routeSegment", modelAndView.viewName)
-        assertEquals(journeyId, modelAndView.model["journeyId"])
+        assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
     }
 
     @Test
@@ -45,10 +46,10 @@ class DestinationTests {
         // Act
         val destination = Destination.VisitableStep(mockStep, journeyId)
         val modelAndView = destination.toModelAndView()
+        val finalUrl = resolveModelAndViewToRedirectUrl(modelAndView)
 
         // Assert
-        assertEquals("redirect:$routeSegment", modelAndView.viewName)
-        assertEquals(journeyId, modelAndView.model["journeyId"])
+        assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
     }
 
     @Test
@@ -193,5 +194,21 @@ class DestinationTests {
         // Assert
         assertTrue(visitableDestination is Destination.VisitableStep)
         assertTrue(notionalDestination is Destination.NavigationalStep)
+    }
+
+    private fun resolveModelAndViewToRedirectUrl(modelAndView: ModelAndView): String? {
+        val viewName = modelAndView.viewName
+        if (viewName == null) {
+            return null
+        }
+
+        if (!viewName.startsWith("redirect:")) {
+            return null
+        }
+
+        val redirectUrl = viewName.removePrefix("redirect:")
+        val redirectView = RedirectView(redirectUrl)
+        redirectView.setAttributesMap(modelAndView.model)
+        return redirectView.url
     }
 }
