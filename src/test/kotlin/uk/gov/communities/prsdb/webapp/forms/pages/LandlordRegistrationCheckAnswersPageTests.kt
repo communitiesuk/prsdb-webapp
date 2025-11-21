@@ -16,14 +16,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
 import java.time.LocalDate
 
 class LandlordRegistrationCheckAnswersPageTests {
     private lateinit var page: LandlordRegistrationCheckAnswersPage
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
     private lateinit var journeyDataService: JourneyDataService
     private lateinit var validator: Validator
     private lateinit var pageData: PageData
@@ -32,14 +32,14 @@ class LandlordRegistrationCheckAnswersPageTests {
 
     @BeforeEach
     fun setup() {
-        localAuthorityService = mock()
+        localCouncilService = mock()
         journeyDataService = mock()
         page = LandlordRegistrationCheckAnswersPage(journeyDataService, "/redirect")
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(localAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(localCouncilService)
     }
 
     private fun getSummaryListData(journeyData: JourneyData): List<SummaryListRowViewModel> {

@@ -1,0 +1,53 @@
+package uk.gov.communities.prsdb.webapp.forms.pages
+
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
+import uk.gov.communities.prsdb.webapp.helpers.LocalCouncilUserRegistrationJourneyDataHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+
+class LocalCouncilUserRegistrationCheckAnswersPage(
+    journeyDataService: JourneyDataService,
+    private val invitationService: LocalCouncilInvitationService,
+    missingAnswersRedirect: String,
+) : BasicCheckAnswersPage(
+        content =
+            mapOf(
+                "title" to "registerLocalCouncilUser.title",
+                "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
+                "submitButtonText" to "forms.buttons.confirm",
+            ),
+        journeyDataService = journeyDataService,
+        missingAnswersRedirect = missingAnswersRedirect,
+    ) {
+    override fun getSummaryList(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> {
+        val sessionToken = invitationService.getTokenFromSession()
+
+        val localCouncil =
+            if (sessionToken != null) {
+                invitationService.getAuthorityForToken(sessionToken)
+            } else {
+                throw PrsdbWebException("Local council not found for this invitation token")
+            }
+
+        return listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerLocalCouncilUser.checkAnswers.rowHeading.localCouncil",
+                localCouncil.name,
+                null,
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerLocalCouncilUser.checkAnswers.rowHeading.name",
+                LocalCouncilUserRegistrationJourneyDataHelper.getName(filteredJourneyData),
+                RegisterLocalCouncilUserStepId.Name.urlPathSegment,
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerLocalCouncilUser.checkAnswers.rowHeading.email",
+                LocalCouncilUserRegistrationJourneyDataHelper.getEmail(filteredJourneyData),
+                RegisterLocalCouncilUserStepId.Email.urlPathSegment,
+            ),
+        )
+    }
+}

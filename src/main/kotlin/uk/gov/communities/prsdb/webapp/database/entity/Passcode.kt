@@ -13,8 +13,8 @@ class Passcode() : ModifiableAuditableEntity() {
         private set
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "local_authority_id", nullable = false)
-    lateinit var localAuthority: LocalAuthority
+    @JoinColumn(name = "local_council_id", nullable = false)
+    lateinit var localCouncil: LocalCouncil
         private set
 
     @OneToOne(optional = true)
@@ -22,9 +22,9 @@ class Passcode() : ModifiableAuditableEntity() {
     var baseUser: OneLoginUser? = null
         private set
 
-    constructor(passcode: String, localAuthority: LocalAuthority, baseUser: OneLoginUser? = null) : this() {
+    constructor(passcode: String, localCouncil: LocalCouncil, baseUser: OneLoginUser? = null) : this() {
         this.passcode = passcode
-        this.localAuthority = localAuthority
+        this.localCouncil = localCouncil
         this.baseUser = baseUser
     }
 

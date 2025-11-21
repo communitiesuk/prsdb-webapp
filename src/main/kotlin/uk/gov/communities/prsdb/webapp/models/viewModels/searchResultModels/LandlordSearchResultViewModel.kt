@@ -32,7 +32,7 @@ data class LandlordSearchResultViewModel(
             listedPropertyCount = landlordWithListedPropertyCount.listedPropertyCount,
             recordLink =
                 LandlordDetailsController
-                    .getLandlordDetailsForLaUserPath(landlordWithListedPropertyCount.landlord.id)
+                    .getLandlordDetailsForLocalCouncilUserPath(landlordWithListedPropertyCount.landlord.id)
                     .overrideBackLinkForUrl(currentUrlKey),
         )
     }

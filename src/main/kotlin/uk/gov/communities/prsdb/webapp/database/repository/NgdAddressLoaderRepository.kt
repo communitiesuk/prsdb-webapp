@@ -32,7 +32,7 @@ class NgdAddressLoaderRepository(
                     locality,
                     town_name,
                     postcode,
-                    local_authority_id,
+                    local_council_id,
                     is_active,
                     created_date
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
@@ -46,7 +46,7 @@ class NgdAddressLoaderRepository(
                     locality            = EXCLUDED.locality,
                     town_name           = EXCLUDED.town_name,
                     postcode            = EXCLUDED.postcode,
-                    local_authority_id  = EXCLUDED.local_authority_id,
+                    local_council_id  = EXCLUDED.local_council_id,
                     is_active           = EXCLUDED.is_active,
                     last_modified_date  = current_timestamp
             """

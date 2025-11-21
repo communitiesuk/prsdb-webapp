@@ -38,7 +38,7 @@ class PropertyComplianceViewModelFactory(
             if (landlordView) {
                 "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
             } else {
-                "propertyDetails.complianceInformation.landlordResponsibilities.localAuthority.hintText"
+                "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
             }
         return PropertyComplianceViewModel(
             gasSafetySummaryList = gasSafetySummaryList,

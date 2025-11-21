@@ -32,8 +32,8 @@ SELECT
     COUNT(*) FILTER (WHERE created_date >= :reference_date - INTERVAL '14 DAYS' AND created_date < :reference_date) AS new_lc_users_last_2_weeks,
     COUNT(*) FILTER (WHERE last_modified_date >= :reference_date - INTERVAL '14 DAYS' AND last_modified_date < :reference_date) AS updated_lc_users_last_2_weeks
 FROM
-    local_authority_user
-WHERE local_authority_id != 2
+    local_council_user
+WHERE local_council_id != 2
 GROUP BY is_manager;
 
 -- Passcodes generated

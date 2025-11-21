@@ -39,7 +39,7 @@ class PropertyComplianceViewModelFactoryTests {
     fun `landlordResponsibilitiesHintText returns  returns correct message when landlord view is false`() {
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
-        val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.localAuthority.hintText"
+        val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
 
         val result = propertyComplianceViewModelFactory.create(propertyCompliance, landlordView = false)
 

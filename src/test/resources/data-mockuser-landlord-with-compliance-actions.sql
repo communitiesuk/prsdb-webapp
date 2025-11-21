@@ -8,7 +8,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (4, '3/26/25', 0006001008, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
         (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG'),
         (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 2, 'EG1 1EG'),

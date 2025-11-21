@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -10,7 +10,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class CheckAnswersPageLandlordRegistration(
     page: Page,
-) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}") {
+) : BasePage(
+        page,
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment}",
+    ) {
     fun confirmAndSubmit() = form.submit()
 
     val form = PostForm(page)

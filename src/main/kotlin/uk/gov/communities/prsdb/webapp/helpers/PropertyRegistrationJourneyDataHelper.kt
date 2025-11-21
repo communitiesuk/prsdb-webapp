@@ -27,7 +27,7 @@ class PropertyRegistrationJourneyDataHelper : JourneyDataHelper() {
                 getManualAddress(
                     journeyData,
                     RegisterPropertyStepId.ManualAddress.urlPathSegment,
-                    RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                    RegisterPropertyStepId.LocalCouncil.urlPathSegment,
                 )
             } else {
                 val selectedAddress = getSelectedAddress(journeyData)

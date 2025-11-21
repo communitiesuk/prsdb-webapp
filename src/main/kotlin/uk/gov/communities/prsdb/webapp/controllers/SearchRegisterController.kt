@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SEARCH_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
@@ -28,7 +28,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(SEARCH_ROUTE)
-@PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
+@PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
 class SearchRegisterController(
     private val landlordService: LandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -47,7 +47,7 @@ class SearchRegisterController(
 
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", LandlordFilterPanelViewModel(searchRequest, httpServletRequest))
-        model.addAttribute("backURL", LOCAL_AUTHORITY_DASHBOARD_URL)
+        model.addAttribute("backURL", LOCAL_COUNCIL_DASHBOARD_URL)
 
         if (searchRequest.searchTerm == null) {
             return "searchLandlord"
@@ -57,7 +57,7 @@ class SearchRegisterController(
             landlordService.searchForLandlords(
                 searchRequest.searchTerm!!,
                 principal.name,
-                searchRequest.restrictToLA ?: false,
+                searchRequest.restrictToLocalCouncil ?: false,
                 requestedPageIndex = page - 1,
             )
 
@@ -89,7 +89,7 @@ class SearchRegisterController(
 
         model.addAttribute("searchRequest", searchRequest)
         model.addAttribute("filterPanelViewModel", PropertyFilterPanelViewModel(searchRequest, httpServletRequest))
-        model.addAttribute("backURL", LOCAL_AUTHORITY_DASHBOARD_URL)
+        model.addAttribute("backURL", LOCAL_COUNCIL_DASHBOARD_URL)
 
         if (searchRequest.searchTerm == null) {
             return "searchProperty"
@@ -99,7 +99,7 @@ class SearchRegisterController(
             propertyOwnershipService.searchForProperties(
                 searchRequest.searchTerm!!,
                 principal.name,
-                searchRequest.restrictToLA ?: false,
+                searchRequest.restrictToLocalCouncil ?: false,
                 searchRequest.restrictToLicenses ?: LicensingType.entries,
                 requestedPageIndex = page - 1,
             )
@@ -129,7 +129,7 @@ class SearchRegisterController(
         }"
 
     companion object {
-        const val SEARCH_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$SEARCH_PATH_SEGMENT"
+        const val SEARCH_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$SEARCH_PATH_SEGMENT"
         const val SEARCH_LANDLORD_URL = "$SEARCH_ROUTE/$LANDLORD_PATH_SEGMENT"
         const val SEARCH_PROPERTY_URL = "$SEARCH_ROUTE/$PROPERTY_PATH_SEGMENT"
     }

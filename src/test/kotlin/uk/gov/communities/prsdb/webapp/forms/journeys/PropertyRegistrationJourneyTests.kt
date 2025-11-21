@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -31,7 +31,7 @@ class PropertyRegistrationJourneyTests {
     lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     @Mock
-    lateinit var localAuthorityService: LocalAuthorityService
+    lateinit var localCouncilService: LocalCouncilService
 
     @Mock
     lateinit var addressService: AddressService
@@ -42,7 +42,7 @@ class PropertyRegistrationJourneyTests {
     fun setup() {
         mockJourneyDataService = mock()
         mockPropertyRegistrationService = mock()
-        localAuthorityService = mock()
+        localCouncilService = mock()
         addressService = mock()
     }
 
@@ -73,7 +73,7 @@ class PropertyRegistrationJourneyTests {
                     journeyDataService = mockJourneyDataService,
                     addressService = addressService,
                     propertyRegistrationService = mockPropertyRegistrationService,
-                    localAuthorityService = localAuthorityService,
+                    localCouncilService = localCouncilService,
                 )
             JourneyTestHelper.setMockUser(principalName)
         }
@@ -83,7 +83,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withTenants(3, 7)
                     .withOccupiedSetToFalse()
                     .build()
@@ -111,7 +111,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withPropertyType(PropertyType.OTHER, "Bungalow")
                     .withPropertyType(PropertyType.FLAT)
                     .build()
@@ -139,7 +139,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withLicensing(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensing(
                         LicensingType.HMO_MANDATORY_LICENCE,
@@ -169,7 +169,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withLicensing(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensing(LicensingType.NO_LICENSING)
                     .build()

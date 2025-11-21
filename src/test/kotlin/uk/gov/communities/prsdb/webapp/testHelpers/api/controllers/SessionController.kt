@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvita
 @RequestMapping("/local")
 class SessionController(
     private val session: HttpSession,
-    private val invitationService: LocalAuthorityInvitationService,
+    private val invitationService: LocalCouncilInvitationService,
 ) {
     @PostMapping("/$SET_JOURNEY_DATA_PATH_SEGMENT", consumes = ["application/json"])
     fun setJourneyData(

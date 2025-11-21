@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.assertEquals
@@ -72,17 +72,17 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
     }
 
     @Nested
-    inner class LandlordDetailsLocalAuthorityView {
+    inner class LandlordDetailsLocalCouncilView {
         @Test
         fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
-            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
+            val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "personal-details")
         }
 
         @Test
         fun `the registered properties tab shows the landlord's registered properties table if they have properties`(page: Page) {
-            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
+            val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
             detailsPage.tabs.goToRegisteredProperties()
 
@@ -97,7 +97,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
         @Test
         fun `the registered properties table doesn't appear if the landlord has no properties`(page: Page) {
-            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(3)
+            val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(3)
 
             detailsPage.tabs.goToRegisteredProperties()
 
@@ -109,7 +109,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
         @Test
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
-            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(1)
+            val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
             assertThat(detailsPage.insetText).containsText("updated these details on")
         }
@@ -117,7 +117,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `in the registered properties table the property address link goes to the LA view of the property's details`(page: Page) {
             val propertyOwnershipId = 1
-            val detailsPage = navigator.goToLandlordDetailsAsALocalAuthorityUser(propertyOwnershipId.toLong())
+            val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(propertyOwnershipId.toLong())
             detailsPage.tabs.goToRegisteredProperties()
 
             detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
@@ -125,12 +125,12 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             val propertyDetailsView =
                 assertPageIs(
                     page,
-                    PropertyDetailsPageLocalAuthorityView::class,
+                    PropertyDetailsPageLocalCouncilView::class,
                     mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
                 )
 
             propertyDetailsView.backLink.clickAndWait()
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
+            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
         }
     }
 }

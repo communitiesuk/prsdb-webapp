@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 data class RegisteredPropertyLocalCouncilViewModel(
     val address: String,
     val registrationNumber: String,
-    val localAuthorityName: String,
+    val localCouncilName: String,
     val licenseTypeMessageKey: String,
     val isTenantedMessageKey: String,
     val recordLink: String,
@@ -27,8 +27,8 @@ data class RegisteredPropertyLocalCouncilViewModel(
                         .fromRegistrationNumber(
                             propertyOwnership.registrationNumber,
                         ).toString(),
-                localAuthorityName =
-                    propertyOwnership.address.localAuthority!!
+                localCouncilName =
+                    propertyOwnership.address.localCouncil!!
                         .name,
                 licenseTypeMessageKey =
                     MessageKeyConverter.convert(
@@ -37,7 +37,7 @@ data class RegisteredPropertyLocalCouncilViewModel(
                 isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.isOccupied),
                 recordLink =
                     PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
+                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }
@@ -62,7 +62,7 @@ data class RegisteredPropertyLandlordViewModel(
                         ).toString(),
                 recordLink =
                     PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLaView = false)
+                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }

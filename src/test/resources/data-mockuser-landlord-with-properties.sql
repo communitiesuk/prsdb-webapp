@@ -1,7 +1,7 @@
 INSERT INTO one_login_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24');
 
-INSERT INTO passcode (passcode, local_authority_id, subject_identifier)
+INSERT INTO passcode (passcode, local_council_id, subject_identifier)
 VALUES ('PRS23', 2, 'urn:fdc:gov.uk:2022:UVWXY');
 
 INSERT INTO registration_number (id, created_date, number, type)
@@ -11,7 +11,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (4, '3/26/25', 1001001003, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
         (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG'),
         (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 2, 'EG1 1EG'),

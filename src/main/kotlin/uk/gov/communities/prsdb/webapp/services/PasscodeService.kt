@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 @Profile("require-passcode")
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
-    private val localAuthorityRepository: LocalAuthorityRepository,
+    private val localCouncilRepository: LocalCouncilRepository,
     private val oneLoginUserService: OneLoginUserService,
     private val session: HttpSession,
 ) {
@@ -26,17 +26,17 @@ class PasscodeService(
     }
 
     @Transactional
-    fun generatePasscode(localAuthorityId: Long): Passcode {
+    fun generatePasscode(localCouncilId: Long): Passcode {
         // Check if passcode limit has been reached
         val currentPasscodeCount = passcodeRepository.count()
         if (currentPasscodeCount >= MAX_PASSCODES) {
             throw PasscodeLimitExceededException("Maximum number of passcodes ($MAX_PASSCODES) has been reached")
         }
 
-        val localAuthority =
-            localAuthorityRepository
-                .findById(localAuthorityId.toInt())
-                .orElseThrow { IllegalArgumentException("LocalAuthority with id $localAuthorityId not found") }
+        val localCouncil =
+            localCouncilRepository
+                .findById(localCouncilId.toInt())
+                .orElseThrow { IllegalArgumentException("LocalCouncil with id $localCouncilId not found") }
 
         var passcodeString: String
         do {
@@ -46,7 +46,7 @@ class PasscodeService(
         val passcode =
             Passcode(
                 passcode = passcodeString,
-                localAuthority = localAuthority,
+                localCouncil = localCouncil,
             )
 
         return passcodeRepository.save(passcode)
@@ -58,13 +58,13 @@ class PasscodeService(
         session.setAttribute(LAST_GENERATED_PASSCODE, passcode)
     }
 
-    fun generateAndStorePasscode(localAuthorityId: Long): String {
-        val generatedPasscode = generatePasscode(localAuthorityId)
+    fun generateAndStorePasscode(localCouncilId: Long): String {
+        val generatedPasscode = generatePasscode(localCouncilId)
         setLastGeneratedPasscode(generatedPasscode.passcode)
         return generatedPasscode.passcode
     }
 
-    fun getOrGeneratePasscode(localAuthorityId: Long): String = getLastGeneratedPasscode() ?: generateAndStorePasscode(localAuthorityId)
+    fun getOrGeneratePasscode(localCouncilId: Long): String = getLastGeneratedPasscode() ?: generateAndStorePasscode(localCouncilId)
 
     fun isValidPasscode(passcode: String): Boolean {
         val normalizedPasscode = normalizePasscode(passcode)

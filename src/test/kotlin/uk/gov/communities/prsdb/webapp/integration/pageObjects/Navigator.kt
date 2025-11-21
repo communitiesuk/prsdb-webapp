@@ -22,23 +22,23 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
@@ -48,40 +48,36 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLaAdminInvitationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLaAdminPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLaAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLaAdminPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLaUserPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaAdminsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLaUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.CheckAnswersPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.EmailFormPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.NameFormPageLaUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.laUserRegistrationJourneyPages.PrivacyNoticePageLaUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -95,6 +91,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.WhatYouNeedToRegisterStartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.CheckAnswersPageLocalCouncilUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.PrivacyNoticePageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAndSubmitPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckAutoMatchedEpcPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.CheckMatchedEpcPagePropertyCompliance
@@ -147,7 +147,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalAuthorityFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -165,14 +165,14 @@ class Navigator(
     private val page: Page,
     private val port: Int,
 ) {
-    fun goToManageLaUsers(authorityId: Int): ManageLaUsersPage {
-        navigate(getLaManageUsersRoute(authorityId))
-        return createValidPage(page, ManageLaUsersPage::class)
+    fun goToManageLocalCouncilUsers(councilId: Int): ManageLocalCouncilUsersPage {
+        navigate(getLocalCouncilManageUsersRoute(councilId))
+        return createValidPage(page, ManageLocalCouncilUsersPage::class)
     }
 
-    fun goToInviteNewLaUser(authorityId: Int): InviteNewLaUserPage {
-        navigate(getLaInviteNewUserRoute(authorityId))
-        return createValidPage(page, InviteNewLaUserPage::class)
+    fun goToInviteNewLocalCouncilUser(councilId: Int): InviteNewLocalCouncilUserPage {
+        navigate(getLocalCouncilInviteNewUserRoute(councilId))
+        return createValidPage(page, InviteNewLocalCouncilUserPage::class)
     }
 
     fun goToLandlordSearchPage(): SearchLandlordRegisterPage {
@@ -300,57 +300,76 @@ class Navigator(
         navigate("${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
-    fun navigateToLaUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+    fun navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(token: String) {
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
-    fun navigateToLaUserRegistrationLandingPage(token: UUID) {
+    fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.LandingPage.urlPathSegment}")
+        navigate(
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}",
+        )
     }
 
-    fun skipToLaUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLaUserRegistration {
+    fun skipToLocalCouncilUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
             JourneyDataBuilder().withLandingPageReached().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.PrivacyNotice.urlPathSegment}")
-        return createValidPage(page, PrivacyNoticePageLaUserRegistration::class)
+        navigate(
+            "${
+                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
+                }",
+        )
+        return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationNameFormPage(token: UUID): NameFormPageLaUserRegistration {
+    fun skipToLocalCouncilUserRegistrationNameFormPage(token: UUID): NameFormPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLaUserRegistrationName().build(),
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationName().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Name.urlPathSegment}")
-        return createValidPage(page, NameFormPageLaUserRegistration::class)
+        navigate(
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}",
+        )
+        return createValidPage(page, NameFormPageLocalCouncilUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationEmailFormPage(token: UUID): EmailFormPageLaUserRegistration {
+    fun skipToLocalCouncilUserRegistrationEmailFormPage(token: UUID): EmailFormPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLaUserRegistrationEmail().build(),
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationEmail().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.Email.urlPathSegment}")
-        return createValidPage(page, EmailFormPageLaUserRegistration::class)
+        navigate(
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}",
+        )
+        return createValidPage(page, EmailFormPageLocalCouncilUserRegistration::class)
     }
 
-    fun skipToLaUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLaUserRegistration {
+    fun skipToLocalCouncilUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
         setJourneyDataInSession(
-            LaUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLaUserRegistrationCheckAnswers().build(),
+            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
+            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationCheckAnswers().build(),
         )
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/${RegisterLaUserStepId.CheckAnswers.urlPathSegment}")
-        return createValidPage(page, CheckAnswersPageLaUserRegistration::class)
+        navigate(
+            "${
+                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+                "/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
+                }",
+        )
+        return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
     }
 
-    fun navigateToLaUserRegistrationConfirmationPage() {
-        navigate("${RegisterLAUserController.LA_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+    fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
@@ -388,13 +407,13 @@ class Navigator(
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationSelectLocalAuthorityPage(): SelectLocalAuthorityFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationSelectLocalCouncilPage(): SelectLocalCouncilFormPagePropertyRegistration {
         setJourneyDataInSession(
             PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalAuthority().build(),
+            JourneyPageDataBuilder.beforePropertyRegistrationSelectLocalCouncil().build(),
         )
-        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalAuthority.urlPathSegment}")
-        return createValidPage(page, SelectLocalAuthorityFormPagePropertyRegistration::class)
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LocalCouncil.urlPathSegment}")
+        return createValidPage(page, SelectLocalCouncilFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationPropertyTypePage(): PropertyTypeFormPagePropertyRegistration {
@@ -993,9 +1012,9 @@ class Navigator(
         return createValidPage(page, LandlordDetailsPage::class)
     }
 
-    fun goToLandlordDetailsAsALocalAuthorityUser(id: Long): LocalAuthorityViewLandlordDetailsPage {
-        navigate(LandlordDetailsController.getLandlordDetailsForLaUserPath(id))
-        return createValidPage(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
+    fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
+        navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(id))
+        return createValidPage(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
@@ -1021,7 +1040,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = false))
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = false))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -1029,11 +1048,11 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDetailsLocalAuthorityView(id: Long): PropertyDetailsPageLocalAuthorityView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLaView = true))
+    fun goToPropertyDetailsLocalCouncilView(id: Long): PropertyDetailsPageLocalCouncilView {
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = true))
         return createValidPage(
             page,
-            PropertyDetailsPageLocalAuthorityView::class,
+            PropertyDetailsPageLocalCouncilView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
     }
@@ -1189,9 +1208,9 @@ class Navigator(
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 
-    fun goToLocalAuthorityDashboard(): LocalAuthorityDashboardPage {
-        navigate(LOCAL_AUTHORITY_DASHBOARD_URL)
-        return createValidPage(page, LocalAuthorityDashboardPage::class)
+    fun goToLocalCouncilDashboard(): LocalCouncilDashboardPage {
+        navigate(LOCAL_COUNCIL_DASHBOARD_URL)
+        return createValidPage(page, LocalCouncilDashboardPage::class)
     }
 
     fun goToGeneratePasscodePage(): GeneratePasscodePage {
@@ -1243,29 +1262,29 @@ class Navigator(
         )
     }
 
-    fun goToInviteLaAdmin(): InviteLaAdminPage {
-        navigate(ManageLocalAuthorityAdminsController.INVITE_LA_ADMIN_ROUTE)
-        return createValidPage(page, InviteLaAdminPage::class)
+    fun goToInviteLocalCouncilAdmin(): InviteLocalCouncilAdminPage {
+        navigate(ManageLocalCouncilAdminsController.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
+        return createValidPage(page, InviteLocalCouncilAdminPage::class)
     }
 
-    fun goToManageLaAdminsPage(): ManageLaAdminsPage {
-        navigate(ManageLocalAuthorityAdminsController.MANAGE_LA_ADMINS_ROUTE)
-        return createValidPage(page, ManageLaAdminsPage::class)
+    fun goToManageLocalCouncilAdminsPage(): ManageLocalCouncilAdminsPage {
+        navigate(ManageLocalCouncilAdminsController.MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE)
+        return createValidPage(page, ManageLocalCouncilAdminsPage::class)
     }
 
-    fun goToEditAdminsPage(laAdminId: Long): EditLaAdminPage {
-        navigate("$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/$laAdminId")
-        return createValidPage(page, EditLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+    fun goToEditAdminsPage(localCouncilAdminId: Long): EditLocalCouncilAdminPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/$localCouncilAdminId")
+        return createValidPage(page, EditLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
     }
 
-    fun goToDeleteLaAdminPage(laAdminId: Long): DeleteLaAdminPage {
-        navigate("$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$laAdminId")
-        return createValidPage(page, DeleteLaAdminPage::class, mapOf("laAdminId" to laAdminId.toString()))
+    fun goToDeleteLocalCouncilAdminPage(localCouncilAdminId: Long): DeleteLocalCouncilAdminPage {
+        navigate("$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localCouncilAdminId")
+        return createValidPage(page, DeleteLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
     }
 
-    fun goToCancelAdminInvitePage(invitationId: Long): CancelLaAdminInvitationPage {
+    fun goToCancelAdminInvitePage(invitationId: Long): CancelLocalCouncilAdminInvitationPage {
         navigate("$SYSTEM_OPERATOR_ROUTE/$CANCEL_INVITATION_PATH_SEGMENT/$invitationId")
-        return createValidPage(page, CancelLaAdminInvitationPage::class, mapOf("invitationId" to invitationId.toString()))
+        return createValidPage(page, CancelLocalCouncilAdminInvitationPage::class, mapOf("invitationId" to invitationId.toString()))
     }
 
     fun goToCookiesPage(): CookiesPage {
@@ -1279,7 +1298,7 @@ class Navigator(
     }
 
     fun goToLocalCouncilBetaFeedbackPage(): LocalCouncilBetaFeedbackPage {
-        navigate(BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_URL)
+        navigate(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL)
         return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
     }
 

@@ -54,15 +54,15 @@ class Address() : ModifiableAuditableEntity() {
         private set
 
     @ManyToOne
-    @JoinColumn(name = "local_authority_id")
-    var localAuthority: LocalAuthority? = null
+    @JoinColumn(name = "local_council_id")
+    var localCouncil: LocalCouncil? = null
         private set
 
     @Column(nullable = false)
     var isActive: Boolean = true
         private set
 
-    constructor(addressDataModel: AddressDataModel, localAuthority: LocalAuthority? = null) : this() {
+    constructor(addressDataModel: AddressDataModel, localCouncil: LocalCouncil? = null) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
         this.organisation = addressDataModel.organisation
@@ -73,7 +73,7 @@ class Address() : ModifiableAuditableEntity() {
         this.locality = addressDataModel.locality
         this.townName = addressDataModel.townName
         this.postcode = addressDataModel.postcode
-        this.localAuthority = localAuthority
+        this.localCouncil = localCouncil
     }
 
     fun getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress

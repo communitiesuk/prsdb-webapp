@@ -44,7 +44,7 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.registrationNumber",
                 "propertyDetails.propertyRecord.address",
                 "propertyDetails.propertyRecord.uprn",
-                "propertyDetails.propertyRecord.localAuthority",
+                "propertyDetails.propertyRecord.localCouncil",
                 "propertyDetails.propertyRecord.propertyType",
                 "propertyDetails.propertyRecord.ownershipType",
                 "propertyDetails.propertyRecord.occupied",

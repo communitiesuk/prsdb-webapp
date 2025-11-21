@@ -14,7 +14,7 @@ class PropertyDetailsPageLandlordView(
         page,
         PropertyDetailsController.getPropertyDetailsPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            isLaView = false,
+            isLocalCouncilView = false,
         ),
     ) {
     val deleteButton = Button.byText(page, "Delete property")

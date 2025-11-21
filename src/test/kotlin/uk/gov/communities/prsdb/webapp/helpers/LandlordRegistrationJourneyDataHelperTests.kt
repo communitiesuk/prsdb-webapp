@@ -6,19 +6,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class LandlordRegistrationJourneyDataHelperTests {
-    private lateinit var mockLocalAuthorityService: LocalAuthorityService
+    private lateinit var mockLocalCouncilService: LocalCouncilService
     private lateinit var journeyDataBuilder: JourneyDataBuilder
 
     @BeforeEach
     fun setup() {
-        mockLocalAuthorityService = mock()
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockLocalAuthorityService)
+        mockLocalCouncilService = mock()
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockLocalCouncilService)
     }
 
     @Test
@@ -64,7 +64,7 @@ class LandlordRegistrationJourneyDataHelperTests {
     @Test
     fun `getAddress returns the corresponding selected address`() {
         val selectedAddress = "1 Example Address, EG1 2AB"
-        val mockJourneyData = journeyDataBuilder.withSelectedAddress(selectedAddress, localAuthority = null).build()
+        val mockJourneyData = journeyDataBuilder.withSelectedAddress(selectedAddress, localCouncil = null).build()
 
         val expectedAddressDataModel = AddressDataModel(selectedAddress)
 
