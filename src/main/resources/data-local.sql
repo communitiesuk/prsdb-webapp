@@ -190,11 +190,11 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA',
        (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2');
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode, building_name)
-VALUES (41, '09/13/24', '09/13/24', 1038, 'State House, PRSDB Road, EG1 2AA', 1, 'EG1 2AA', 'State House'),
-       (42, '09/13/24', '09/13/24', 1039, 'Stage House, PRSDB Road, EG1 2AA', 1, 'EG1 2AA', 'Stage House'),
-       (43, '09/13/24', '09/13/24', 1040, 'Slate House, PRSDB Square, EG1 2AA', 1, 'EG1 2AA', 'Slate House'),
-       (44, '09/13/24', '09/13/24', 1041, 'Grate House, PRSDB Road, EG1 2AB', 1, 'EG1 2AB', 'Grate House'),
-       (45, '09/13/24', '09/13/24', 1042, 'Slate House, PRSDB Road, EG1 2AB', 1, 'EG1 2AB', 'Slate House');
+VALUES (41, '09/13/24', '09/13/24', 1038, 'State House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'State House'),
+       (42, '09/13/24', '09/13/24', 1039, 'Stage House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Stage House'),
+       (43, '09/13/24', '09/13/24', 1040, 'Slate House, PRSDB Square, AA3 1AB ', 1, 'AA3 1AB ', 'Slate House'),
+       (44, '09/13/24', '09/13/24', 1041, 'Grate House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Grate House'),
+       (45, '09/13/24', '09/13/24', 1042, 'Slate House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Slate House');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
