@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.servlet.mvc.condition.RequestCondition
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagDisabled
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagEnabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.config.conditions.FeatureFlaggedRequestCondition
 import uk.gov.communities.prsdb.webapp.config.conditions.InverseFeatureFlaggedRequestCondition
 import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagConditionMappingTests.TestController.Companion.FLAG_NAME
@@ -23,10 +23,10 @@ class FeatureFlagConditionMappingTests {
     private val handlerMapping = FeatureFlagConditionMapping(mockFeatureFlagManager)
 
     class TestController {
-        @AvailableWhenFeatureFlagEnabled(FLAG_NAME)
+        @AvailableWhenFeatureEnabled(FLAG_NAME)
         fun enabledMethod() {}
 
-        @AvailableWhenFeatureFlagDisabled(FLAG_NAME)
+        @AvailableWhenFeatureDisabled(FLAG_NAME)
         fun disabledMethod() {}
 
         fun noAnnotationMethod() {}
