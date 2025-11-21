@@ -183,7 +183,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
         assertThat(addressLookupPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
-        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "1")
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
         val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
         // Select address - render page
