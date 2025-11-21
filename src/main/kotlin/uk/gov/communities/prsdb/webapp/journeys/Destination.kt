@@ -10,17 +10,14 @@ sealed class Destination {
 
     abstract fun toUrlStringOrNull(): String?
 
-    fun withModelContent(content: Map<String, Any?>): Destination =
-        when (this) {
-            is Template -> Template(templateName, this.content + content)
-            else -> this
-        }
+    open fun withModelContent(content: Map<String, Any?>): Destination = this
 
     class VisitableStep(
         val step: JourneyStep.RequestableStep<*, *, *>,
         val journeyId: String,
     ) : Destination() {
-        override fun toModelAndView() = ModelAndView("redirect:${step.routeSegment}", mapOf("journeyId" to journeyId))
+        override fun toModelAndView() =
+            ModelAndView("redirect:${JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId)}", mapOf<String, String>())
 
         override fun toUrlStringOrNull() =
             if (step.isStepReachable) JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId) else null
@@ -45,6 +42,8 @@ sealed class Destination {
         val content: Map<String, Any?> = mapOf(),
     ) : Destination() {
         override fun toModelAndView() = ModelAndView(templateName, content)
+
+        override fun withModelContent(content: Map<String, Any?>) = Template(templateName, this.content + content)
 
         override fun toUrlStringOrNull() = null
     }
