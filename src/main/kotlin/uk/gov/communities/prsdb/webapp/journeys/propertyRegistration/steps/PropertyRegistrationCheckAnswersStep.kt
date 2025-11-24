@@ -83,12 +83,12 @@ class PropertyRegistrationCyaStepConfig(
     private fun getAddressRows(state: AddressState) =
         state.getAddress().let { address ->
             listOf(
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
                     Destination(state.lookupStep),
                 ),
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localAuthority",
                     localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
                     Destination(state.localAuthorityStep),
@@ -99,7 +99,7 @@ class PropertyRegistrationCyaStepConfig(
     private fun getPropertyTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val propertyType = state.propertyTypeStep.formModel.propertyType
         val customType = state.propertyTypeStep.formModel.customPropertyType
-        return SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
             Destination(state.propertyTypeStep),
@@ -107,7 +107,7 @@ class PropertyRegistrationCyaStepConfig(
     }
 
     private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState) =
-        SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+        SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             state.ownershipTypeStep.formModel.ownershipType,
             Destination(state.ownershipTypeStep),
@@ -118,17 +118,17 @@ class PropertyRegistrationCyaStepConfig(
             val householdsStep = state.households
             val tenantsStep = state.tenants
             listOf(
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     true,
                     Destination(state.occupied),
                 ),
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.households",
                     householdsStep.formModel.numberOfHouseholds,
                     Destination(householdsStep),
                 ),
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.people",
                     tenantsStep.formModel.numberOfPeople,
                     Destination(tenantsStep),
@@ -136,7 +136,7 @@ class PropertyRegistrationCyaStepConfig(
             )
         } else {
             listOf(
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     false,
                     Destination(state.occupied),
@@ -147,7 +147,7 @@ class PropertyRegistrationCyaStepConfig(
     private fun getLicensingDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
         state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
             listOfNotNull(
-                SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     licensingType,
                     Destination(state.licensingTypeStep),
@@ -158,7 +158,7 @@ class PropertyRegistrationCyaStepConfig(
                     LicensingType.SELECTIVE_LICENCE -> (state.getLicenceNumber() to state.selectiveLicenceStep)
                     else -> null
                 }?.let { (licenceNumber, step) ->
-                    SummaryListRowViewModel.forCheckYourAnswersStepConfig(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
                         "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
                         licenceNumber,
                         Destination(step),

@@ -53,7 +53,7 @@ data class SummaryListRowViewModel(
                 valueUrlOpensNewTab = valueUrlOpensNewTab,
             )
 
-        fun forCheckYourAnswersStepConfig(
+        fun forCheckYourAnswersPage(
             fieldHeading: String,
             fieldValue: Any?,
             destination: Destination,
