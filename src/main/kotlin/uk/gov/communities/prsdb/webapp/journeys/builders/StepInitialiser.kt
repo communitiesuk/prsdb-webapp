@@ -22,6 +22,24 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
     fun nextUrl(nextUrlProvider: (mode: TMode) -> String): StepLikeInitialiser<TMode> =
         nextDestination { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
 
+    fun modifyNextDestination(
+        modify: (original: (mode: TMode) -> Destination) -> (mode: TMode) -> Destination,
+    ): StepLikeInitialiser<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> modify(originalProvider)(mode) }
+        return this
+    }
+
+    fun modifyNextDestination(merged: (mode: TMode, original: (mode: TMode) -> Destination) -> Destination): StepLikeInitialiser<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> merged(mode, originalProvider) }
+        return this
+    }
+
     fun nextDestination(destinationProvider: (mode: TMode) -> Destination): StepLikeInitialiser<TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
