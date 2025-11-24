@@ -44,7 +44,6 @@ To make an endpoint available only when a feature is disabled, annotate it with 
 
 Currently, we enforce that only one of these annotations can be used on a given endpoint (with the `FeatureFlagAnnotationValidator`).
 
-
 ### Implementation notes
 * Added two annotations that can be applied to endpoints: `AvailableWhenFeatureEnabled` and `AvailableWhenFeatureDisabled`.
     * This allows us to switch _off_ a particular endpoint (such as a placeholder) when a feature is enabled, as well as switching endpoints on.
@@ -55,26 +54,35 @@ Currently, we enforce that only one of these annotations can be used on a given 
     * There are combine and compareTo methods which may be useful for combining or prioritizing multiple conditions if we need to do that in future.
 * `FeatureFlagConditionMapping` - this checks every endpoint in the codebase, and applies the relevant request condition if one of the feature flag annotations is present.
 
-
 ## Feature flag group demo
 The enabled/disabled value of individual flags is effectively overridden by the group setting if the flag is in a group.
-`EXAMPLE_FEATURE_FLAG_TWO` and `EXAMPLE_FEATURE_FLAG_THREE` have been added to the `RELEASE_1_0` group.
+`EXAMPLE_GROUPED_FEATURE_FLAG_ONE` and `EXAMPLE_GROUPED_FEATURE_FLAG_TWO` have been added to the `RELEASE_1_0` group.
 
 The group behaviour is demonstrated by a set of endpoints in `ExampleFeatureFlagTestController` (which expose the value set by developers in config to the user)
-* `/feature-flagged-endpoint-test/grouped-features/example-feature-flag-two`
-  * Available when the `EXAMPLE_FEATURE_FLAG_TWO` feature is enabled
-* `/inverse-feature-flagged-endpoint-test/grouped-features/example-feature-flag-two`
-  * Available when the `EXAMPLE_FEATURE_FLAG_TWO` feature is disabled
-* `/feature-flagged-endpoint-test/grouped-features/example-feature-flag-three`
-  * Available when the `EXAMPLE_FEATURE_FLAG_THREE` feature is enabled
-* `/inverse-feature-flagged-endpoint-test/grouped-features/example-feature-flag-three`
-  * Available when the `EXAMPLE_FEATURE_FLAG_THREE` feature is disabled
+* `/feature-flagged-endpoint-test/grouped-features/example-grouped-feature-flag-one`
+  * Available when the `EXAMPLE_GROUPED_FEATURE_FLAG_ONE` feature is enabled
+* `/inverse-feature-flagged-endpoint-test/grouped-features/example-grouped-feature-flag-one`
+  * Available when the `EXAMPLE_GROUPED_FEATURE_FLAG_ONE` feature is disabled
+* `/feature-flagged-endpoint-test/grouped-features/example-grouped-feature-flag-two`
+  * Available when the `EXAMPLE_GROUPED_FEATURE_FLAG_TWO` feature is enabled
+* `/inverse-feature-flagged-endpoint-test/grouped-features/example-grouped-feature-flag-two`
+  * Available when the `EXAMPLE_GROUPED_FEATURE_FLAG_TWO` feature is disabled
 
 For a useful demo, check that in `featureFlags`
-* `EXAMPLE_FEATURE_FLAG_TWO` is set to enabled = true
-* `EXAMPLE_FEATURE_FLAG_THREE` is set to enabled = false
+* `EXAMPLE_GROUPED_FEATURE_FLAG_ONE` is set to enabled = true
+* `EXAMPLE_GROUPED_FEATURE_FLAG_TWO` is set to enabled = false
 
 Then toggle the `RELEASE_1_0` group enabled setting to see the endpoints become available or unavailable as appropriate.
+
+## Flipping strategies
+We can add a flipping strategy to a feature flag so that the feature will only be enabled if the strategy conditions are met.
+For example, we can add a strategy that only enables features after a certain release date.
+
+### Release date flipping strategy
+We can optionally add a release date to a `featureFlagGroup` in `FeatureFlagConfig`.
+The feature flag manager will then add a ReleaseDateFeatureFlip strategy to all flags in that group.
+This strategy will only enable the feature if the current date is after the release date (and the flag / group is enabled as normal).
+If the flag is disabled, the feature won't be enabled even if the release date has passed.
 
 ## Tests
 Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabled or disabled in particular tests as required.
