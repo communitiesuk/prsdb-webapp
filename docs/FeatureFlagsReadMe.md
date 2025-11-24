@@ -33,7 +33,7 @@ You can define a service which calls different versions of a function depending 
     * Add the `@Primary` annotation to the implementation that should be used be default (see `ExampleFeatureFlagServiceImplFlagOff`).
 * Annotate members in your interface with `@PrsdbFlip(name = "...", alterBean = "...")` where the `alterBean` value matches the name you gave to your second implementation (see `ExampleFeatureFlagServiceImplFlagOn.kt`)`.
 
-To use your feature flagged service, pass in the interface (see `ExampleFeatureFlagTestControlle`r) - it will automatically call the correct implementation based on the feature flag value.
+To use your feature flagged service, pass in the interface (see `ExampleFeatureFlagTestController`) - it will automatically call the correct implementation based on the feature flag value.
 
 ## Feature flagged endpoints
 To make an endpoint available only when a feature is enabled, annotate it with `@AvailableWhenFeatureEnabled("flag-name")`
