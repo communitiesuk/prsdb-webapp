@@ -84,6 +84,23 @@ The feature flag manager will then add a ReleaseDateFeatureFlip strategy to all 
 This strategy will only enable the feature if the current date is after the release date (and the flag / group is enabled as normal).
 If the flag is disabled, the feature won't be enabled even if the release date has passed.
 
+#### Demo
+The release date flip strategy behaviour is demonstrated by a set of endpoints in `ExampleFeatureFlagTestController`
+* `/feature-flagged-endpoint-test/grouped-features/example-flag-with-release-date-one`
+  * Available when the `EXAMPLE_FLAG_WITH_RELEASE_DATE_ONE` feature is enabled
+* `/inverse-feature-flagged-endpoint-test/grouped-features/example-flag-with-release-date-two`
+  * Available when the `EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO` feature is disabled.
+
+For a useful demo, check than in `featureGroups` in `FeatureFlagConfig`
+* For `RELEASE_2_0`, `enabled = true`
+  * You can toggle `/feature-flagged-endpoint-test/grouped-features/example-flag-with-release-date-one` on and off by changing the release date.
+* For `RELEASE_3_0`, `enabled = false`
+  * `/inverse-feature-flagged-endpoint-test/grouped-features/example-flag-with-release-date-two` should always show you a page, because the feature is always disabled even if the release date is in the past.
+
+Then toggle the `enabled` setting for the `RELEASE_2_0` group to see the endpoints become available or unavailable as appropriate.
+
+
+
 ## Tests
 Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabled or disabled in particular tests as required.
 
