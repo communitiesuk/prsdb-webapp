@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.config.managers
 
 import org.ff4j.FF4j
 import org.ff4j.core.Feature
+import org.ff4j.exception.GroupNotFoundException
 import org.ff4j.property.PropertyDate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagGroupModel
@@ -23,12 +24,21 @@ class FeatureFlagManager : FF4j() {
     }
 
     fun initialiseFeatureFlagGroups(featureFlagGroups: List<FeatureFlagGroupModel>) {
-        featureFlagGroups.forEach { group ->
-            if (group.enabled) {
-                this.enableFeatureGroup(group.name)
-            } else {
-                this.disableFeatureGroup(group.name)
+        try {
+            featureFlagGroups.forEach { group ->
+                if (group.enabled) {
+                    this.enableFeatureGroup(group.name)
+                } else {
+                    this.disableFeatureGroup(group.name)
+                }
             }
+        } catch (e: GroupNotFoundException) {
+            throw (
+                RuntimeException(
+                    e.message +
+                        ". Check that at least one feature in FeatureFlagConfig.featureFlags has this group's name set as flagGroup.",
+                )
+            )
         }
     }
 
