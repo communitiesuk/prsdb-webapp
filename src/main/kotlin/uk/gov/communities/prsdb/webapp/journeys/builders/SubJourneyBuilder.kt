@@ -74,6 +74,17 @@ open class SubJourneyBuilder<TState : JourneyState>(
             subJourney.buildSteps()
         }
 
+    fun configureTagged(
+        tag: String,
+        configuration: StepLikeInitialiser<*>.() -> Unit,
+    ) {
+        configureElements {
+            if (tags.contains(tag)) {
+                configuration()
+            }
+        }
+    }
+
     override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
         additionalStepsConfiguration = configuration
     }
