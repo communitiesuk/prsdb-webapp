@@ -12,7 +12,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
     @Test
     @WithMockUser
     fun `featureFlagEnabled endpoint is available when the flag is on`() {
-        featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
             .get(FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
@@ -21,7 +21,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
     @Test
     @WithMockUser
     fun `featureFlagEnabled endpoint is unavailable when the flag is off`() {
-        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
             .get(FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isNotFound() } }
@@ -30,7 +30,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
     @Test
     @WithMockUser
     fun `inverseFeatureFlagEnabled endpoint is available when the flag is off`() {
-        featureFlagManager.disable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
             .get(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
@@ -39,7 +39,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
     @Test
     @WithMockUser
     fun `inverseFeatureFlagEnabled endpoint is unavailable when the flag is on`() {
-        featureFlagManager.enable(EXAMPLE_FEATURE_FLAG_ONE)
+        featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_ONE)
         mvc
             .get(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isNotFound() } }

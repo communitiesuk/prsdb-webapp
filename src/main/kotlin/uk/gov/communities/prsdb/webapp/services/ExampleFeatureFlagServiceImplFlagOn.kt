@@ -9,5 +9,5 @@ class ExampleFeatureFlagServiceImplFlagOn : ExampleFeatureFlaggedService {
     override fun getFeatureFlagPageHeading() = "Using ExampleFeatureFlaggedService - Flag ON"
 
     // TODO PRSD-1683 - delete template when no longer needed
-    override fun getTemplateName(): String = "enabledFeature"
+    override fun getTemplateName(): String = "featureFlagExamples/enabledFeature"
 }
