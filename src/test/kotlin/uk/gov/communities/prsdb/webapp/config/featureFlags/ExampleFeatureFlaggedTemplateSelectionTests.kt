@@ -15,7 +15,7 @@ class ExampleFeatureFlaggedTemplateSelectionTests : FeatureFlagTestCallingEndpoi
         mvc
             .get(FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE)
             .andExpect {
-                view { name("enabledFeature") }
+                view { name("featureFlagExamples/enabledFeature") }
             }
     }
 
@@ -27,7 +27,7 @@ class ExampleFeatureFlaggedTemplateSelectionTests : FeatureFlagTestCallingEndpoi
         mvc
             .get(FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE)
             .andExpect {
-                view { name("disabledFeature") }
+                view { name("featureFlagExamples/disabledFeature") }
             }
     }
 }

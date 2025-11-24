@@ -5,11 +5,13 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import kotlin.system.exitProcess
 
 @Component
 @Profile("web-server-deactivated & scheduled-task & example-scheduled-task")
+@Order(1)
 class ExampleScheduledTaskApplicationRunner(
     private val context: ApplicationContext,
 ) : ApplicationRunner {
