@@ -117,6 +117,7 @@ class ExampleFeatureFlagTestController(
     @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO")
     fun flagWithReleaseDateDisabled(model: Model): String {
         populateModelForFeatureFlagReleaseDateTest(model, EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO)
+        model.addAttribute("ffTestHeading", "Inverse feature flagged controller endpoint - available when flag is DISABLED")
 
         return "featureFlagExamples/featureFlagReleaseDateTest"
     }
@@ -138,11 +139,11 @@ class ExampleFeatureFlagTestController(
             throw IllegalArgumentException("Feature flag $flagName is not part of a feature flag group")
         }
         val featureFlagGroupSetInConfig = getFeatureFlagGroupModelFromConfig(featureFlagSetInConfig.flagGroup)
-        val featureEnabledText =
+        val featureState =
             if (featureFlagManager.checkFeature(flagName)) {
-                "This feature is ENABLED"
+                "ENABLED"
             } else {
-                "This feature is DISABLED"
+                "DISABLED"
             }
 
         model.addAttribute("ffTestHeading", "Feature flagged controller endpoint - available when flag is ENABLED")
@@ -158,7 +159,7 @@ class ExampleFeatureFlagTestController(
             "Flag Group ${featureFlagSetInConfig.flagGroup} was initialised to " +
                 "${featureFlagGroupSetInConfig.enabled.toString().uppercase()} in FeatureFlagConfig",
         )
-        model.addAttribute("featureEnabled", featureEnabledText)
+        model.addAttribute("featureEnabled", "This feature is $featureState")
 
         return Pair(featureFlagSetInConfig, featureFlagGroupSetInConfig)
     }
