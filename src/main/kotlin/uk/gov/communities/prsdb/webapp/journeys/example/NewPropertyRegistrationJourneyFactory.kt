@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalAuthorityStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
@@ -97,7 +97,7 @@ class PropertyRegistrationJourneyState(
     override val alreadyRegisteredStep: AlreadyRegisteredStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
-    override val localAuthorityStep: LocalAuthorityStep,
+    override val localCouncilStep: LocalCouncilStep,
     private val journeyStateService: JourneyStateService,
     val addressTask: AddressTask,
     val propertyTypeStep: PropertyTypeStep,

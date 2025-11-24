@@ -47,7 +47,7 @@ BEGIN
     FROM (SELECT a.id
           FROM address a
           WHERE NOT exists(SELECT 1 FROM property_ownership po WHERE po.address_id = a.id)
-          AND a.local_authority_id IS NOT NULL
+          AND a.local_council_id IS NOT NULL
           LIMIT desiredCount
          ) ids
     INTO unusedAddressIds;

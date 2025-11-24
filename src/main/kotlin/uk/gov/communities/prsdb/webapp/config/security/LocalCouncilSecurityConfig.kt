@@ -1,0 +1,55 @@
+package uk.gov.communities.prsdb.webapp.config.security
+
+import org.springframework.context.annotation.Bean
+import org.springframework.core.annotation.Order
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import org.springframework.security.web.SecurityFilterChain
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
+
+@PrsdbWebConfiguration
+@EnableMethodSecurity
+class LocalCouncilSecurityConfig(
+    val userRolesService: UserRolesService,
+) {
+    @Bean
+    @Order(3)
+    fun localCouncilSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .securityMatcher("/$LOCAL_COUNCIL_PATH_SEGMENT/**")
+            .authorizeHttpRequests { requests ->
+                requests
+                    .requestMatchers(LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.oauth2Login { oauth ->
+                oauth.userInfoEndpoint { userInfo ->
+                    userInfo.oidcUserService(localCouncilOidcUserService())
+                }
+                oauth.redirectionEndpoint { redirection ->
+                    redirection.baseUri("/$LOCAL_COUNCIL_PATH_SEGMENT/login/oauth2/code/one-login")
+                }
+            }.csrf { }
+            .headers { headers ->
+                headers
+                    .permissionsPolicyHeader {
+                            permissions ->
+                        permissions
+                            .policy(PERMISSIONS_POLICY_DIRECTIVES)
+                    }
+            }
+
+        return http.build()
+    }
+
+    fun localCouncilOidcUserService(): OAuth2UserService<OidcUserRequest, OidcUser> =
+        UserServiceFactory.create(userRolesService::getLocalCouncilRolesForSubjectId)
+}

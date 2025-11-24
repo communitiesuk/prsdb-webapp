@@ -13,8 +13,8 @@ class PasscodeLimitExceededPage(
     val bodyTextTwo = page.locator("p.govuk-body").nth(1)
     val returnToDashboardButton = Button.byText(page, "Return to dashboard")
 
-    fun clickReturnToDashboard(): LocalAuthorityDashboardPage {
+    fun clickReturnToDashboard(): LocalCouncilDashboardPage {
         returnToDashboardButton.clickAndWait()
-        return createValidPage(page, LocalAuthorityDashboardPage::class)
+        return createValidPage(page, LocalCouncilDashboardPage::class)
     }
 }

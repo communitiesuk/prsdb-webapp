@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import kotlin.collections.plus
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper as DataHelper
 
 class PropertyRegistrationCheckAnswersPage(
     journeyDataService: JourneyDataService,
-    private val localAuthorityService: LocalAuthorityService,
+    private val localCouncilService: LocalCouncilService,
     missingAnswersRedirectUrl: String,
 ) : CheckAnswersPage(
         content =
@@ -62,8 +62,8 @@ class PropertyRegistrationCheckAnswersPage(
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
                 null,
             ),
         )
@@ -76,9 +76,9 @@ class PropertyRegistrationCheckAnswersPage(
                 RegisterPropertyStepId.LookupAddress.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
-                RegisterPropertyStepId.LocalAuthority.urlPathSegment,
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
+                RegisterPropertyStepId.LocalCouncil.urlPathSegment,
             ),
         )
 

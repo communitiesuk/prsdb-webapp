@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -28,7 +28,7 @@ class AddressServiceTests {
     private lateinit var mockAddressRepository: AddressRepository
 
     @Mock
-    private lateinit var mockLocalAuthorityService: LocalAuthorityService
+    private lateinit var mockLocalCouncilService: LocalCouncilService
 
     @InjectMocks
     private lateinit var addressService: AddressService
@@ -63,9 +63,9 @@ class AddressServiceTests {
         @MethodSource("uk.gov.communities.prsdb.webapp.services.AddressServiceTests#provideAddressDataModels")
         fun `findOrCreateAddress creates an address when given an AddressDataModel with no UPRN`(addressDataModel: AddressDataModel) {
             // Arrange
-            addressDataModel.localAuthorityId?.let {
-                whenever(mockLocalAuthorityService.retrieveLocalAuthorityById(it))
-                    .thenReturn(MockLocalAuthorityData.createLocalAuthority(id = it))
+            addressDataModel.localCouncilId?.let {
+                whenever(mockLocalCouncilService.retrieveLocalCouncilById(it))
+                    .thenReturn(MockLocalCouncilData.createLocalCouncil(id = it))
             }
 
             whenever(mockAddressRepository.save(any())).thenReturn(MockLandlordData.createAddress())
@@ -114,8 +114,8 @@ class AddressServiceTests {
         @JvmStatic
         private fun provideAddressDataModels() =
             listOf(
-                named("no local authority", AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = null)),
-                named("a local authority", AddressDataModel("1 Example Road, EG1 2AB", localAuthorityId = 1)),
+                named("no local council", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = null)),
+                named("a local council", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = 1)),
             )
     }
 }
