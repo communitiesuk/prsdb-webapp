@@ -19,6 +19,10 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
 
     fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode>
 
+    fun modifyNextDestination(modify: (original: (mode: TMode) -> Destination) -> (mode: TMode) -> Destination): ConfigurableElement<TMode>
+
+    fun modifyNextDestination(merged: (mode: TMode, original: (mode: TMode) -> Destination) -> Destination): ConfigurableElement<TMode>
+
     fun noNextDestination(): ConfigurableElement<TMode>
 
     fun parents(currentParentage: () -> Parentage): ConfigurableElement<TMode>
@@ -45,6 +49,26 @@ class ElementConfiguration<TMode : Enum<TMode>>(
 
     override fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
+
+    override fun modifyNextDestination(
+        modify: (original: (mode: TMode) -> Destination) -> (mode: TMode) -> Destination,
+    ): ConfigurableElement<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> modify(originalProvider)(mode) }
+        return this
+    }
+
+    override fun modifyNextDestination(
+        merged: (mode: TMode, original: (mode: TMode) -> Destination) -> Destination,
+    ): ConfigurableElement<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> merged(mode, originalProvider) }
+        return this
+    }
 
     override fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode> {
         if (nextDestinationProvider != null) {
