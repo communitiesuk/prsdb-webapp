@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.builders.StepCollectionBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
@@ -10,12 +11,11 @@ abstract class Task<in TState : JourneyState> {
     lateinit var subJourneyParentage: Parentage
     private lateinit var exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit
 
-    fun getTaskSteps(
+    fun getTaskSubJourneyBuilder(
         state: TState,
         entryPoint: Parentage,
         exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
-    ): List<StepInitialiser<*, TState, *>> {
-        // TODO: PRSDDon't auto contract
+    ): StepCollectionBuilder {
         this.subJourneyParentage = entryPoint
         this.exitInit = exitInit
         return makeSubJourney(state)
@@ -24,7 +24,7 @@ abstract class Task<in TState : JourneyState> {
     protected fun <TDslState : TState> subJourney(
         state: TDslState,
         init: SubJourneyBuilder<TDslState>.() -> Unit,
-    ): List<StepInitialiser<*, TDslState, *>> {
+    ): StepCollectionBuilder {
         if (::subJourneyBuilder.isInitialized) {
             throw JourneyInitialisationException("Task sub-journey has already been initialised")
         }
@@ -32,10 +32,11 @@ abstract class Task<in TState : JourneyState> {
         subJourneyBuilder = localSubJourneyBuilder
         localSubJourneyBuilder.subJourneyParent(subJourneyParentage)
         localSubJourneyBuilder.init()
-        return localSubJourneyBuilder.getSteps(exitInit)
+        localSubJourneyBuilder.exitInitialiser?.exitInit()
+        return localSubJourneyBuilder
     }
 
-    abstract fun makeSubJourney(state: TState): List<StepInitialiser<*, TState, *>>
+    abstract fun makeSubJourney(state: TState): StepCollectionBuilder
 
     fun taskStatus(): TaskStatus =
         when {

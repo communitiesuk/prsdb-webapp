@@ -7,25 +7,22 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockedConstruction
 import org.mockito.Mockito.mockConstruction
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 class TaskTests {
     class TestTask : Task<JourneyState>() {
-        override fun makeSubJourney(state: JourneyState): List<StepInitialiser<*, JourneyState, *>> = subJourney(state) { }
+        override fun makeSubJourney(state: JourneyState) = subJourney(state) { }
     }
 
     lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
     private val firstStepMock = mock<JourneyStep.RequestableStep<*, *, JourneyState>>()
     private val exitStepMock = mock<NavigationalStep>()
-    private val stepsMock = listOf<StepInitialiser<*, JourneyState, *>>()
 
     @BeforeEach
     fun setup() {
@@ -34,7 +31,6 @@ class TaskTests {
             mockConstruction(SubJourneyBuilder::class.java) { mock, context ->
                 whenever(mock.firstStep).thenReturn(firstStepMock)
                 whenever(mock.exitStep).thenReturn(exitStepMock)
-                whenever(mock.getSteps(anyOrNull())).thenReturn(stepsMock)
             }
     }
 
@@ -44,7 +40,7 @@ class TaskTests {
     }
 
     @Test
-    fun `getTaskSteps inits the sub journey builder and returns the steps from it`() {
+    fun `getTaskSubJourneyBuilder inits the sub journey builder and returns the steps from it`() {
         // Arrange
         val task = TestTask()
 
@@ -53,12 +49,11 @@ class TaskTests {
         val parent = NoParents()
 
         // Act
-        val taskSteps = task.getTaskSteps(state, parent) { nextDestination(nextDestinationLambda) }
+        val subJourneyBuilder = task.getTaskSubJourneyBuilder(state, parent) { nextDestination(nextDestinationLambda) }
 
         // Assert
-        val subJourneyBuilder = subJourneyConstruction.constructed().first()
-        verify(subJourneyBuilder).subJourneyParent(eq(parent))
-        verify(subJourneyBuilder).getSteps(anyOrNull())
+        assertSame(subJourneyConstruction.constructed().first(), subJourneyBuilder)
+        verify(subJourneyBuilder as SubJourneyBuilder<*>).subJourneyParent(eq(parent))
     }
 
     @Test
@@ -133,7 +128,7 @@ class TaskTests {
     private fun initialisedTask(): TestTask {
         val task = TestTask()
         task
-            .getTaskSteps(mock(), mock()) {
+            .getTaskSubJourneyBuilder(mock(), mock()) {
                 nextUrl { "example.com" }
             }
         return task
