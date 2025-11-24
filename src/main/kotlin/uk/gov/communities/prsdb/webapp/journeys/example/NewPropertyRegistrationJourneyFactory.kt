@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
@@ -57,22 +58,27 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
+                    taggedWith("checkable")
                 }
                 step("property-type", journey.propertyTypeStep) {
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
+                    taggedWith("checkable")
                 }
                 step("ownership-type", journey.ownershipTypeStep) {
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
+                    taggedWith("checkable")
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
+                    taggedWith("checkable")
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.cyaStep }
+                    taggedWith("checkable")
                 }
             }
             section {
@@ -80,6 +86,15 @@ class NewPropertyRegistrationJourneyFactory(
                 step("check-your-answers", journey.cyaStep) {
                     parents { journey.occupationTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
+                }
+            }
+            configureTagged("checkable") {
+                modifyNextDestination { originalDestinationProvider ->
+                    if (state.cyaStep.isStepReachable) {
+                        { Destination(state.cyaStep) }
+                    } else {
+                        originalDestinationProvider
+                    }
                 }
             }
         }

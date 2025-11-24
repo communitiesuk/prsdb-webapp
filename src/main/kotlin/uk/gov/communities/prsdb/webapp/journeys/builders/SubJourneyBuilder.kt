@@ -82,6 +82,17 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         }
         unreachableStepDestination = { Destination(getStep()) }
     }
+
+    fun configureTagged(
+        tag: String,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        configure {
+            if (tags.contains(tag)) {
+                configuration()
+            }
+        }
+    }
 }
 
 open class SubJourneyBuilder<TState : JourneyState>(
