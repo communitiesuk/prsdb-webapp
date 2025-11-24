@@ -36,7 +36,7 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:Y', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Z', '01/15/25');
 
-INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
+INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true);
 
@@ -108,7 +108,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (65, '12/10/24', 0006001033, 0);
 
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 1, 'AA1 1AA'),
        (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 1, 'AA1 1AB'),
        (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 1, 'AA1 1AC'),

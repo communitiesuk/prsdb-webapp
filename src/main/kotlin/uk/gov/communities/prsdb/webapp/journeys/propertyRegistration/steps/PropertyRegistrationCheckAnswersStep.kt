@@ -22,13 +22,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @Scope("prototype")
 @PrsdbWebComponent
 class PropertyRegistrationCyaStepConfig(
-    private val localAuthorityService: LocalAuthorityService,
+    private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
 ) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
@@ -89,9 +89,9 @@ class PropertyRegistrationCyaStepConfig(
                     Destination(state.lookupStep),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                    localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
-                    Destination(state.localAuthorityStep),
+                    "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                    localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
+                    Destination(state.localCouncilStep),
                 ),
             )
         }

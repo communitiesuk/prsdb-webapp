@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{addLocalCouncilUser.title}, ~{::main}, ${#fields.hasErrors('${confirmedEmailRequestModel.*}')})}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{addLocalCouncilUser.heading(${councilName})}"></h1>
+        </header>
+        <!--/*/ <th:block th:object="${confirmedEmailRequestModel}" th:if="confirmedEmailRequestModel != null"> /*/-->
+        <div th:replace="~{fragments/forms/errorSummary :: errorSummary }"></div>
+        <!--/*/ </th:block> /*/-->
+        <section id="explanation">
+            <p th:text="#{addLocalCouncilUser.paragraph.one}" class="govuk-body">
+                addLocalCouncilUser.paragraph.one
+            </p>
+            <p th:text="#{addLocalCouncilUser.paragraph.two}" class="govuk-body">
+                addLocalCouncilUser.paragraph.two
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{addLocalCouncilUser.paragraph.two.bullet.one}">
+                    addLocalCouncilUser.paragraph.two.bullet.one
+                </li>
+                <li th:text="#{addLocalCouncilUser.paragraph.two.bullet.two}">
+                    addLocalCouncilUser.paragraph.two.bullet.two
+                </li>
+            </ul>
+            <p th:if="${councilNameBeginsWithVowel}" th:text="#{addLocalCouncilUser.paragraph.three.an(${councilName})}" class="govuk-body">
+                addLocalCouncilUser.paragraph.three
+            </p>
+            <p th:unless="${councilNameBeginsWithVowel}" th:text="#{addLocalCouncilUser.paragraph.three.a(${councilName})}" class="govuk-body">
+                addLocalCouncilUser.paragraph.three
+            </p>
+        </section>
+        <form th:action="@{''}" class="form" id="email-form" method="post" th:object="${confirmedEmailRequestModel}"
+              novalidate>
+            <!--/*/ <th:block id="fieldset-content"
+                      th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'email', null, null)}"> /*/-->
+            <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLocalCouncilUser.form.primaryEmailLabel}, 'email', null)}">
+            <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLocalCouncilUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
+            <!--/*/ </th:block> /*/-->
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.submit})}"></button>
+        </form>
+    </div>
+</main>
+</html>

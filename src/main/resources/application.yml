@@ -72,7 +72,7 @@ aws:
 
 base-url:
   landlord: ${LANDLORD_BASE_URL}
-  local-authority: ${LOCAL_AUTHORITY_BASE_URL}
+  local-council: ${LOCAL_COUNCIL_BASE_URL}
 
 plausible:
   domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}

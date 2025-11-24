@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalAuthorityStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
@@ -18,7 +18,7 @@ interface AddressState : JourneyState {
     val alreadyRegisteredStep: AlreadyRegisteredStep
     val noAddressFoundStep: NoAddressFoundStep
     val manualAddressStep: ManualAddressStep
-    val localAuthorityStep: LocalAuthorityStep
+    val localCouncilStep: LocalCouncilStep
     var cachedAddresses: List<AddressDataModel>?
     var isAddressAlreadyRegistered: Boolean?
 
@@ -34,14 +34,14 @@ interface AddressState : JourneyState {
 
     private fun AddressDataModel.Companion.fromManualAddressDataOrNull() =
         manualAddressStep.formModelOrNull?.let { manualAddressData ->
-            localAuthorityStep.formModelOrNull?.let { localAuthorityData ->
+            localCouncilStep.formModelOrNull?.let { localCouncilData ->
                 AddressDataModel.fromManualAddressData(
                     addressLineOne = manualAddressData.notNullValue(ManualAddressFormModel::addressLineOne),
                     addressLineTwo = manualAddressData.addressLineTwo,
                     townOrCity = manualAddressData.notNullValue(ManualAddressFormModel::townOrCity),
                     county = manualAddressData.county,
                     postcode = manualAddressData.notNullValue(ManualAddressFormModel::postcode),
-                    localAuthorityId = localAuthorityData.localAuthorityId,
+                    localCouncilId = localCouncilData.localCouncilId,
                 )
             }
         }

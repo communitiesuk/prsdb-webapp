@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main}, false)}">
+<main class="govuk-main-wrapper">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <div th:replace="~{fragments/beforeYouRegister :: beforeYouRegister(#{registerLocalCouncilUser.journeyName})}"></div>
+            </header>
+            <section>
+                <p class="govuk-body" th:text="#{registerLocalCouncilUser.requirementsList.intro}">
+                    registerLocalCouncilUser.requirementsList.intro
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerLocalCouncilUser.requirementsList.personalDetails}">
+                        registerLocalCouncilUser.requirementsList.personalDetails
+                    </li>
+                    <li th:text="#{registerLocalCouncilUser.requirementsList.workDetails}">
+                        registerLocalCouncilUser.requirementsList.workDetails
+                    </li>
+                </ul>
+                <form th:action="@{''}" method="post">
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerLocalCouncilUser.beginButtonText})}"></button>
+                </form>
+            </section>
+        </div>
+    </div>
+</main>
+</html>

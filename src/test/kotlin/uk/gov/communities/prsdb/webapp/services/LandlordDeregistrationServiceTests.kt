@@ -12,7 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -62,7 +62,7 @@ class LandlordDeregistrationServiceTests {
         whenever(
             mockFormContextRepository.findAllByUser_IdAndJourneyType(baseUserId, JourneyType.PROPERTY_REGISTRATION),
         ).thenReturn(emptyList())
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LA_USER))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 

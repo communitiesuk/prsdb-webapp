@@ -49,7 +49,7 @@ class PropertyDetailsControllerTests(
     inner class GetPropertyDetailsLandlordViewTests {
         @Test
         fun `getPropertyDetails returns a redirect for an unauthenticated user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -57,23 +57,23 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getPropertyDetails returns 403 for an unauthorized user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
                 status { status { isForbidden() } }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `getPropertyDetails returns 403 for an unauthorized user with la admin role`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+        fun `getPropertyDetails returns 403 for an unauthorized user with local council admin role`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
                 status { status { isForbidden() } }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
-        fun `getPropertyDetails returns 403 for an unauthorized user with la user role`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = false)).andExpect {
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetails returns 403 for an unauthorized user with local council user role`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -88,40 +88,40 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { status { isOk() } }
             }
         }
     }
 
     @Nested
-    inner class GetPropertyDetailsLaViewTests {
+    inner class GetPropertyDetailsLocalCouncilViewTests {
         @Test
-        fun `getPropertyDetailsLaView returns a redirect for an unauthenticated user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
+        fun `getPropertyDetailsLocalCouncilView returns a redirect for an unauthenticated user`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { is3xxRedirection() }
             }
         }
 
         @Test
         @WithMockUser
-        fun `getPropertyDetailsLaView returns 403 for an unauthorized user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
+        fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isForbidden() } }
             }
         }
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetailsLaView returns 403 for an unauthorized user with only the landlord role`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
+        fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user with only the landlord role`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isForbidden() } }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
-        fun `getPropertyDetailsLaView returns 200 for a valid request from an LA user`() {
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView returns 200 for a valid request from an LocalCouncil user`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
@@ -129,14 +129,14 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
-        fun `getPropertyDetailsLaView returns 200 for a valid request from an LA admin`() {
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+        fun `getPropertyDetailsLocalCouncilView returns 200 for a valid request from an LocalCouncil admin`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
@@ -144,7 +144,7 @@ class PropertyDetailsControllerTests(
                     propertyOwnership,
                 )
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLaView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
             }
         }
