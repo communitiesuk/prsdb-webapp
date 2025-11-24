@@ -58,8 +58,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     var incompleteComplianceForm: FormContext? = null
 
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
-    lateinit var singleLineAddress: String
-        private set
+    private lateinit var singleLineAddress: String
+
+    @Column(nullable = false, insertable = false, updatable = false)
+    private var isInGistIndex: Boolean = false
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val propertyCompliance: PropertyCompliance? = null
