@@ -16,6 +16,9 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
     protected var parentageProvider: (() -> Parentage)? = null
     protected var unreachableStepDestination: (() -> Destination)? = null
 
+    var tags: Set<String> = emptySet()
+        private set
+
     fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): StepLikeInitialiser<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
 
@@ -79,6 +82,11 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
             return this
         }
         unreachableStepDestination = getDestination
+        return this
+    }
+
+    fun taggedWith(vararg stepTags: String): StepLikeInitialiser<TMode> {
+        tags = tags + stepTags
         return this
     }
 }
