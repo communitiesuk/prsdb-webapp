@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
 interface ConfigurableElement<TMode : Enum<TMode>> {
     val initialiserName: String
+    val tags: Set<String>
 
     fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode>
 
@@ -34,6 +35,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode>
 
     fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode>
+
+    fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -43,6 +46,9 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var parentageProvider: (() -> Parentage)? = null
     var unreachableStepDestination: (() -> Destination)? = null
     var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
+
+    override var tags: Set<String> = emptySet()
+        private set
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
@@ -114,6 +120,11 @@ class ElementConfiguration<TMode : Enum<TMode>>(
 
     override fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> {
         additionalContentProviders.add(getAdditionalContent)
+        return this
+    }
+
+    override fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode> {
+        tags = tags + stepTags
         return this
     }
 }
