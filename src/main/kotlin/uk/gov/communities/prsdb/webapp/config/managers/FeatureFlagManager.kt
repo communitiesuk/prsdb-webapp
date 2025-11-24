@@ -52,7 +52,7 @@ class FeatureFlagManager : FF4j() {
         }
     }
 
-    private fun addReleaseDateFlippingStrategyToFeaturesInGroup(
+    fun addReleaseDateFlippingStrategyToFeaturesInGroup(
         groupName: String,
         releaseDate: java.time.LocalDate,
     ) {
