@@ -52,7 +52,7 @@ class FeatureFlagManager : FF4j() {
         }
     }
 
-    fun addReleaseDateFlippingStrategyToFeaturesInGroup(
+    private fun addReleaseDateFlippingStrategyToFeaturesInGroup(
         groupName: String,
         releaseDate: java.time.LocalDate,
     ) {
@@ -72,4 +72,16 @@ class FeatureFlagManager : FF4j() {
     fun enableFeatureGroup(groupName: String) = super.enableGroup(groupName)
 
     fun disableFeatureGroup(groupName: String) = super.disableGroup(groupName)
+
+    fun updateReleaseDateOnFeaturesInFeatureGroup(
+        groupName: String,
+        releaseDate: java.time.LocalDate,
+    ) {
+        val featuresInGroup = this.getFeaturesByGroup(groupName)
+        featuresInGroup.forEach({ (_, feature) ->
+            if (feature.flippingStrategy is ReleaseDateFlipStrategy) {
+                (feature.flippingStrategy as ReleaseDateFlipStrategy).setReleaseDate(DateTimeHelper.getJavaDateFromLocalDate(releaseDate))
+            }
+        })
+    }
 }

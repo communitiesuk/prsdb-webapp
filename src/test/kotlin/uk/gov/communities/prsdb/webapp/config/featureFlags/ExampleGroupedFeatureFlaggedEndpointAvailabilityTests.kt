@@ -64,7 +64,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
                 java.time.LocalDate
                     .now()
                     .plusDays(10)
-            featureFlagManager.addReleaseDateFlippingStrategyToFeaturesInGroup(RELEASE_2_0, futureDate)
+            featureFlagManager.updateReleaseDateOnFeaturesInFeatureGroup(RELEASE_2_0, futureDate)
 
             mvc
                 .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
@@ -77,7 +77,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
             featureFlagManager.enableFeatureGroup(RELEASE_2_0)
             // Set release date to today
             val dateNow = java.time.LocalDate.now()
-            featureFlagManager.addReleaseDateFlippingStrategyToFeaturesInGroup(RELEASE_2_0, dateNow)
+            featureFlagManager.updateReleaseDateOnFeaturesInFeatureGroup(RELEASE_2_0, dateNow)
 
             mvc
                 .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
@@ -93,7 +93,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
                 java.time.LocalDate
                     .now()
                     .minusDays(1)
-            featureFlagManager.addReleaseDateFlippingStrategyToFeaturesInGroup(RELEASE_1_0, pastDate)
+            featureFlagManager.updateReleaseDateOnFeaturesInFeatureGroup(RELEASE_1_0, pastDate)
 
             mvc
                 .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
@@ -109,7 +109,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
                 java.time.LocalDate
                     .now()
                     .minusDays(1)
-            featureFlagManager.addReleaseDateFlippingStrategyToFeaturesInGroup(RELEASE_2_0, pastDate)
+            featureFlagManager.updateReleaseDateOnFeaturesInFeatureGroup(RELEASE_2_0, pastDate)
 
             mvc
                 .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
