@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
 import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 
 @Profile("local")
@@ -24,6 +25,16 @@ class SessionController(
         session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyData())
     }
 
+    @PostMapping("/$SET_JOURNEY_STATE_PATH_SEGMENT", consumes = ["application/json"])
+    fun setJourneyState(
+        @RequestBody requestBody: SetJourneyStateRequestModel,
+    ) {
+        val keyToUse = "test-journey-key"
+        session.setAttribute("journeyStateKeyStore", mapOf(requestBody.journeyId to keyToUse))
+        val state = requestBody.getJourneyState()
+        session.setAttribute(keyToUse, state)
+    }
+
     @PostMapping("/$STORE_INVITATION_TOKEN_PATH_SEGMENT", consumes = ["application/json"])
     fun storeInvitationToken(
         @RequestBody requestBody: StoreInvitationTokenRequestModel,
@@ -33,7 +44,9 @@ class SessionController(
 
     companion object {
         const val SET_JOURNEY_DATA_PATH_SEGMENT = "set-journey-data"
+        const val SET_JOURNEY_STATE_PATH_SEGMENT = "set-journey-state"
         const val SET_JOURNEY_DATA_ROUTE = "local/$SET_JOURNEY_DATA_PATH_SEGMENT"
+        const val SET_JOURNEY_STATE_ROUTE = "local/$SET_JOURNEY_STATE_PATH_SEGMENT"
 
         const val STORE_INVITATION_TOKEN_PATH_SEGMENT = "store-token"
         const val STORE_INVITATION_TOKEN_ROUTE = "local/$STORE_INVITATION_TOKEN_PATH_SEGMENT"
