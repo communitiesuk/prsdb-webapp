@@ -20,4 +20,7 @@ interface LicensingState : JourneyState {
             LicensingType.HMO_ADDITIONAL_LICENCE -> hmoAdditionalLicenceStep.formModelOrNull?.licenceNumber
             else -> null
         }
+
+    fun getLicenceNumber(): String =
+        getLicenceNumberOrNull() ?: throw IllegalStateException("Licence number is not available for the current licensing type")
 }
