@@ -10,7 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_SINGLE_FEATURE_FLAG
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
@@ -37,32 +37,32 @@ class ExampleFeatureFlagTestControllerTests(
     @WithMockUser
     @Test
     fun `featureFlaggedEndpointTest calls the featureFlagManager to check if the feature is enabled`() {
-        whenever(featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)).thenReturn(true)
 
         mvc
             .get(FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
 
-        verify(featureFlagManager).checkFeature(EXAMPLE_FEATURE_FLAG_ONE)
+        verify(featureFlagManager).checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)
     }
 
     @WithMockUser
     @Test
     fun `inverseFeatureFlaggedEndpointTest calls the featureFlagManager to check if the feature is enabled`() {
-        whenever(featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)).thenReturn(false)
 
         mvc
             .get(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE)
             .andExpect { status { isOk() } }
 
-        verify(featureFlagManager).checkFeature(EXAMPLE_FEATURE_FLAG_ONE)
+        verify(featureFlagManager).checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)
     }
 
     @WithMockUser
     @Test
     fun `featureFlaggedServiceTests shows different content depending on feature flag state`() {
         // When feature flag is enabled
-        whenever(featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)).thenReturn(true)
         mvc
             .get(FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE)
             .andExpect {
@@ -71,7 +71,7 @@ class ExampleFeatureFlagTestControllerTests(
             }
 
         // When feature flag is disabled
-        whenever(featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)).thenReturn(false)
         mvc
             .get(FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE)
             .andExpect {

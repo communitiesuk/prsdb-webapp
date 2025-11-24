@@ -8,9 +8,11 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FLAG_WITH_RELEASE_DATE_ONE
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_GROUPED_FEATURE_FLAG_ONE
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_GROUPED_FEATURE_FLAG_TWO
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_SINGLE_FEATURE_FLAG
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagGroupModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
@@ -26,7 +28,7 @@ class ExampleFeatureFlagTestController(
     @GetMapping(FEATURED_FLAGGED_SERVICE_TEST_URL_SEGMENT)
     fun featureFlaggedServiceTest(model: Model): String {
         val featureStatusText =
-            if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
+            if (featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)) {
                 "Feature Flag in FeatureFlagConfig is ON"
             } else {
                 "Feature Flag in FeatureFlagConfig is OFF"
@@ -41,11 +43,11 @@ class ExampleFeatureFlagTestController(
     @GetMapping(FEATURED_FLAGGED_TEMPLATE_TEST_URL_SEGMENT)
     fun featureFlaggedTemplateTest(): String = exampleFeatureFlaggedService.getTemplateName()
 
-    @AvailableWhenFeatureEnabled(EXAMPLE_FEATURE_FLAG_ONE)
+    @AvailableWhenFeatureEnabled(EXAMPLE_SINGLE_FEATURE_FLAG)
     @GetMapping(FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT)
     fun featureFlaggedEndpointTest(model: Model): String {
         val featureStatusText =
-            if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
+            if (featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)) {
                 "Feature Flag in FeatureFlagConfig is ON"
             } else {
                 throw IllegalStateException("Feature flag should be enabled to access this endpoint")
@@ -56,11 +58,11 @@ class ExampleFeatureFlagTestController(
         return "featureFlagExamples/featureFlagTest"
     }
 
-    @AvailableWhenFeatureDisabled(EXAMPLE_FEATURE_FLAG_ONE)
+    @AvailableWhenFeatureDisabled(EXAMPLE_SINGLE_FEATURE_FLAG)
     @GetMapping(INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT)
     fun inverseFeatureFlaggedEndpointTest(model: Model): String {
         val featureStatusText =
-            if (featureFlagManager.checkFeature(EXAMPLE_FEATURE_FLAG_ONE)) {
+            if (featureFlagManager.checkFeature(EXAMPLE_SINGLE_FEATURE_FLAG)) {
                 throw IllegalStateException("Feature flag should be disabled to access this endpoint")
             } else {
                 "Feature Flag in FeatureFlagConfig is OFF"
@@ -71,36 +73,52 @@ class ExampleFeatureFlagTestController(
         return "featureFlagExamples/featureFlagTest"
     }
 
-    @AvailableWhenFeatureEnabled(EXAMPLE_FEATURE_FLAG_TWO)
-    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_TWO")
+    @AvailableWhenFeatureEnabled(EXAMPLE_GROUPED_FEATURE_FLAG_ONE)
+    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_GROUPED_FEATURE_FLAG_ONE")
     fun groupedFeatureFlaggedEndpointFlagTwo(model: Model): String {
-        populateModelForFeatureFlagGroupTest(model, EXAMPLE_FEATURE_FLAG_TWO)
+        populateModelForFeatureFlagGroupTest(model, EXAMPLE_GROUPED_FEATURE_FLAG_ONE)
 
         return "featureFlagExamples/featureFlagGroupTest"
     }
 
-    @AvailableWhenFeatureDisabled(EXAMPLE_FEATURE_FLAG_TWO)
-    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_TWO")
+    @AvailableWhenFeatureDisabled(EXAMPLE_GROUPED_FEATURE_FLAG_ONE)
+    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_GROUPED_FEATURE_FLAG_ONE")
     fun groupedFeatureInverseFlaggedEndpointFlagTwo(model: Model): String {
-        populateModelForFeatureFlagGroupTest(model, EXAMPLE_FEATURE_FLAG_TWO)
+        populateModelForFeatureFlagGroupTest(model, EXAMPLE_GROUPED_FEATURE_FLAG_ONE)
 
         return "featureFlagExamples/featureFlagGroupTest"
     }
 
-    @AvailableWhenFeatureEnabled(EXAMPLE_FEATURE_FLAG_THREE)
-    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_THREE")
+    @AvailableWhenFeatureEnabled(EXAMPLE_GROUPED_FEATURE_FLAG_TWO)
+    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_GROUPED_FEATURE_FLAG_TWO")
     fun groupedFeatureFlaggedEndpointFlagThree(model: Model): String {
-        populateModelForFeatureFlagGroupTest(model, EXAMPLE_FEATURE_FLAG_THREE)
+        populateModelForFeatureFlagGroupTest(model, EXAMPLE_GROUPED_FEATURE_FLAG_TWO)
 
         return "featureFlagExamples/featureFlagGroupTest"
     }
 
-    @AvailableWhenFeatureDisabled(EXAMPLE_FEATURE_FLAG_THREE)
-    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_THREE")
+    @AvailableWhenFeatureDisabled(EXAMPLE_GROUPED_FEATURE_FLAG_TWO)
+    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_GROUPED_FEATURE_FLAG_TWO")
     fun groupedFeatureInverseFlaggedEndpointFlagThree(model: Model): String {
-        populateModelForFeatureFlagGroupTest(model, EXAMPLE_FEATURE_FLAG_THREE)
+        populateModelForFeatureFlagGroupTest(model, EXAMPLE_GROUPED_FEATURE_FLAG_TWO)
 
         return "featureFlagExamples/featureFlagGroupTest"
+    }
+
+    @AvailableWhenFeatureEnabled(EXAMPLE_FLAG_WITH_RELEASE_DATE_ONE)
+    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FLAG_WITH_RELEASE_DATE_ONE")
+    fun flagWithReleaseDateEnabled(model: Model): String {
+        populateModelForFeatureFlagReleaseDateTest(model, EXAMPLE_FLAG_WITH_RELEASE_DATE_ONE)
+
+        return "featureFlagExamples/featureFlagReleaseDateTest"
+    }
+
+    @AvailableWhenFeatureDisabled(EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO)
+    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO")
+    fun flagWithReleaseDateDisabled(model: Model): String {
+        populateModelForFeatureFlagReleaseDateTest(model, EXAMPLE_FLAG_WITH_RELEASE_DATE_TWO)
+
+        return "featureFlagExamples/featureFlagReleaseDateTest"
     }
 
     private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagModel =
@@ -114,7 +132,7 @@ class ExampleFeatureFlagTestController(
     private fun populateModelForFeatureFlagGroupTest(
         model: Model,
         flagName: String,
-    ) {
+    ): Pair<FeatureFlagModel, FeatureFlagGroupModel> {
         val featureFlagSetInConfig = getFeatureFlagModelFromConfig(flagName)
         if (featureFlagSetInConfig.flagGroup == null) {
             throw IllegalArgumentException("Feature flag $flagName is not part of a feature flag group")
@@ -141,6 +159,19 @@ class ExampleFeatureFlagTestController(
                 "${featureFlagGroupSetInConfig.enabled.toString().uppercase()} in FeatureFlagConfig",
         )
         model.addAttribute("featureEnabled", featureEnabledText)
+
+        return Pair(featureFlagSetInConfig, featureFlagGroupSetInConfig)
+    }
+
+    private fun populateModelForFeatureFlagReleaseDateTest(
+        model: Model,
+        flagName: String,
+    ) {
+        val (featureFlagConfig, featureFlagGroupConfig) = populateModelForFeatureFlagGroupTest(model, flagName)
+        model.addAttribute(
+            "flagGroupReleaseDateInConfig",
+            "Flag Group ${featureFlagConfig.flagGroup} has a release date of ${featureFlagGroupConfig.releaseDate}",
+        )
     }
 
     companion object {
@@ -155,9 +186,11 @@ class ExampleFeatureFlagTestController(
         const val INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT"
         const val FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_TEMPLATE_TEST_URL_SEGMENT"
-        const val FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_TWO"
-        const val FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_THREE"
+        const val FEATURE_FLAGGED_GROUPED_ENDPOINT_GROUPED_FLAG_ONE_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT" +
+                "/$EXAMPLE_GROUPED_FEATURE_FLAG_ONE"
+        const val FEATURE_FLAGGED_GROUPED_ENDPOINT_GROUPED_FLAG_TWO_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$GROUPED_FEATURES_URL_SEGMENT" +
+                "/$EXAMPLE_GROUPED_FEATURE_FLAG_TWO"
     }
 }
