@@ -120,7 +120,7 @@ class StepInitialiserTests {
     }
 
     @Test
-    fun `a redirectToUrl is passed to the step when built`() {
+    fun `a nextUrl is passed to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock, mock())
@@ -150,7 +150,7 @@ class StepInitialiserTests {
     }
 
     @Test
-    fun `a redirectToStep is passed to the step when built`() {
+    fun `a nextStep is passed to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
         val nextStepSegment = "nextStepSegment"
@@ -181,6 +181,98 @@ class StepInitialiserTests {
         with(result as Destination.VisitableStep) {
             assertEquals(nextStepMock, step)
         }
+    }
+
+    @Test
+    fun `modifyNextDestination replaces the current next destination lambda`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock, mock())
+        val originalUrl = "original"
+        builder.nextDestination { Destination.ExternalUrl(originalUrl) }
+        val newUrl = "modified"
+
+        // Act
+        builder.modifyNextDestination { { Destination.ExternalUrl(newUrl) } }
+        builder.parents { NoParents() }
+        builder.unreachableStepDestinationIfNotSet { mock() }
+        builder.build()
+
+        // Assert
+        val lambdaCaptor = argumentCaptor<(TestEnum) -> Destination>()
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            lambdaCaptor.capture(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+        )
+        val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
+        with(result as Destination.ExternalUrl) {
+            assertEquals("modified", externalUrl)
+        }
+    }
+
+    @Test
+    fun `modifyNextDestination cannot be called before a nextDestination is set`() {
+        // Arrange
+        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            builder.modifyNextDestination { { Destination.ExternalUrl("modified") } }
+        }
+    }
+
+    @Test fun `modifyNextDestination can be called more than once`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock, mock())
+        val originalUrl = "original"
+        val firstNewUrl = "firstModified"
+        val secondNewUrl = "secondModified"
+        builder.nextDestination { Destination.ExternalUrl(originalUrl) }
+
+        // Act
+        builder.modifyNextDestination { { Destination.ExternalUrl(firstNewUrl) } }
+        builder.modifyNextDestination { { Destination.ExternalUrl(secondNewUrl) } }
+        builder.parents { NoParents() }
+        builder.unreachableStepDestinationIfNotSet { mock() }
+        builder.build()
+
+        // Assert
+        val lambdaCaptor = argumentCaptor<(TestEnum) -> Destination>()
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            lambdaCaptor.capture(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+        )
+        val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
+        with(result as Destination.ExternalUrl) {
+            assertEquals(secondNewUrl, externalUrl)
+        }
+    }
+
+    @Test
+    fun `taggedWith adds all tags to the initialiser`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser("test", stepMock, mock())
+        val firstTags = setOf("tag1", "tag2")
+        val extraTag = "tag3"
+
+        // Act
+        builder.taggedWith(*firstTags.toTypedArray())
+        builder.taggedWith(extraTag)
+
+        // Assert
+        assertEquals(firstTags + extraTag, builder.tags)
     }
 
     @Test
