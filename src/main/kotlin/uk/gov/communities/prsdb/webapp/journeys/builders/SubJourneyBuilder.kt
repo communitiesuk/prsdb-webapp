@@ -58,20 +58,28 @@ open class SubJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalConfiguration: StepInitialiser<*, *, *>.() -> Unit = {}
+    private var additionalStepsConfiguration: StepInitialiser<*, *, *>.() -> Unit = {}
+    private var additionalElementConfiguration: StepLikeInitialiser<*>.() -> Unit = {}
 
     override fun buildSteps() =
         (stepCollectionsUnderConstruction + listOfNotNull(exitInitialiser)).flatMap { subJourney ->
             subJourney.configureSteps {
                 unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
-                additionalConfiguration()
+                additionalStepsConfiguration()
+            }
+            subJourney.configureElements {
+                additionalElementConfiguration()
             }
 
             subJourney.buildSteps()
         }
 
     override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
-        additionalConfiguration = configuration
+        additionalStepsConfiguration = configuration
+    }
+
+    override fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit) {
+        additionalElementConfiguration = configuration
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(

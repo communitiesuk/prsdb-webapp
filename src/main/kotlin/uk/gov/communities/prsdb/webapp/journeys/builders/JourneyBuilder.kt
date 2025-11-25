@@ -30,6 +30,8 @@ interface StepCollectionBuilder {
     fun buildSteps(): List<JourneyStep<*, *, *>>
 
     fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit)
+
+    fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit)
 }
 
 open class JourneyBuilder<TState : JourneyState>(

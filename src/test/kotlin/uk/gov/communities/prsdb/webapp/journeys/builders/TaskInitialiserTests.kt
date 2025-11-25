@@ -23,43 +23,43 @@ import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 
 class TaskInitialiserTests {
     @Test
-    fun `once a redirectToStep is set, the destinationProvider cannot be set again`() {
+    fun `once a nextStep is set, the destinationProvider cannot be set again`() {
         // Arrange
         val builder = TaskInitialiser(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
-        builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
+        builder.nextStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
 
         // Assert
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
+            builder.nextStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
         }
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToDestination { Destination.ExternalUrl("url") }
+            builder.nextDestination { Destination.ExternalUrl("url") }
         }
     }
 
     @Test
-    fun `once a redirectToDestination is set, the destinationProvider cannot be set again`() {
+    fun `once a nextDestination is set, the destinationProvider cannot be set again`() {
         // Arrange
         val builder = TaskInitialiser(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
-        builder.redirectToDestination { Destination.ExternalUrl("url") }
+        builder.nextDestination { Destination.ExternalUrl("url") }
 
         // Assert
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
+            builder.nextStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
         }
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToDestination { Destination.ExternalUrl("url") }
+            builder.nextDestination { Destination.ExternalUrl("url") }
         }
     }
 
     @Test
-    fun `a redirectToStep is passed to the task's exit when mapped to step initialisers`() {
+    fun `a nextStep is passed to the task's exit when mapped to step initialisers`() {
         // Arrange
         val taskMock = mockTask()
 
@@ -70,7 +70,7 @@ class TaskInitialiserTests {
 
         val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
-        builder.redirectToStep { _: NavigationComplete -> nextStepMock }
+        builder.nextStep { _: NavigationComplete -> nextStepMock }
 
         // Act
         builder.buildSteps()
@@ -98,7 +98,7 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `a redirectToDestination is passed to the task's exit when mapped to step initialisers`() {
+    fun `a nextDestination is passed to the task's exit when mapped to step initialisers`() {
         // Arrange
         val taskMock = mockTask()
 
@@ -107,7 +107,7 @@ class TaskInitialiserTests {
         val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
         val initiationDestination = Destination.ExternalUrl(nextStepSegment)
-        builder.redirectToDestination { _: NavigationComplete -> initiationDestination }
+        builder.nextDestination { _: NavigationComplete -> initiationDestination }
 
         // Act
         builder.buildSteps()
@@ -161,7 +161,7 @@ class TaskInitialiserTests {
         val taskMock = mockTask()
         val builder = TaskInitialiser(taskMock, mock())
         val parentage = NoParents()
-        builder.redirectToDestination { mock() }
+        builder.nextDestination { mock() }
         builder.parents { parentage }
 
         // Act
@@ -180,7 +180,7 @@ class TaskInitialiserTests {
         // Arrange
         val taskMock = mockTask()
         val builder = TaskInitialiser(taskMock, mock())
-        builder.redirectToDestination { mock() }
+        builder.nextDestination { mock() }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {

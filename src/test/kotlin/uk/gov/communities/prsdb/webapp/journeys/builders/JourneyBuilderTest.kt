@@ -451,13 +451,13 @@ class JourneyBuilderTest {
             // Act 1
             jb.task(uninitialisedTask) {
                 parents { NoParents() }
-                redirectToDestination { Destination.NavigationalStep(mock()) }
+                nextDestination { Destination.NavigationalStep(mock()) }
             }
 
             // Assert 1
             val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
             verify(mockTaskInitialiser).parents(any())
-            verify(mockTaskInitialiser).redirectToDestination(any())
+            verify(mockTaskInitialiser).nextDestination(any())
 
             // Act 2
             val map = jb.buildRoutingMap()
