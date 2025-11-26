@@ -80,7 +80,6 @@ class TaskInitialiserTests {
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
         verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
-            anyOrNull(),
             initCaptor.capture(),
         )
 
@@ -116,7 +115,6 @@ class TaskInitialiserTests {
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
         verify(taskMock).getTaskSubJourneyBuilder(
-            anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
         )
@@ -161,23 +159,27 @@ class TaskInitialiserTests {
         // Arrange
         val taskMock = mockTask()
         val builder = TaskInitialiser(taskMock, mock())
-        val parentage = NoParents()
+        val parentageProvider = { NoParents() }
         builder.nextDestination { mock() }
-        builder.parents { parentage }
+        builder.parents(parentageProvider)
+
+        val internalBuilder = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(internalBuilder)
 
         // Act
         builder.build()
 
         // Assert
-        verify(taskMock).getTaskSubJourneyBuilder(
-            anyOrNull(),
-            eq(parentage),
-            anyOrNull(),
-        )
+        val firstStepInitCaptor = argumentCaptor<StepLikeInitialiser<*>.() -> Unit>()
+        verify(internalBuilder).configureFirst(firstStepInitCaptor.capture())
+
+        val mockStep = mock<StepInitialiser<*, *, TestEnum>>()
+        firstStepInitCaptor.firstValue.invoke(mockStep)
+        verify(mockStep).parents(eq(parentageProvider))
     }
 
     @Test
-    fun `if no parentage is set, mapToStepInitialisers throws an exception`() {
+    fun `if no parentage is set, buildSteps throws an exception`() {
         // Arrange
         val taskMock = mockTask()
         val builder = TaskInitialiser(taskMock, mock())
@@ -265,7 +267,6 @@ class TaskInitialiserTests {
         mock<Task<JourneyState>>().apply {
             whenever(
                 getTaskSubJourneyBuilder(
-                    anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
                 ),

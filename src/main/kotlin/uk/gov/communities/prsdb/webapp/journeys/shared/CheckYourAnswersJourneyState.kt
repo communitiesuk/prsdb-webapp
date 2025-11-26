@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.shared
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
-import uk.gov.communities.prsdb.webapp.journeys.builders.StepLikeInitialiser
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 interface CheckYourAnswersJourneyState : JourneyState {
@@ -26,4 +26,4 @@ fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney
     }
 }
 
-fun StepLikeInitialiser<*>.checkable() = taggedWith("checkable")
+fun ConfigurableElement<*>.checkable() = taggedWith("checkable")

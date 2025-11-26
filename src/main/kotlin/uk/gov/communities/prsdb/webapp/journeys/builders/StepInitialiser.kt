@@ -37,6 +37,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode>
 
     fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode>
+
+    fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -46,9 +48,8 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var parentageProvider: (() -> Parentage)? = null
     var unreachableStepDestination: (() -> Destination)? = null
     var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
-
+    var backUrlOverride: (() -> String?)? = null
     override var tags: Set<String> = emptySet()
-        private set
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
@@ -89,6 +90,14 @@ class ElementConfiguration<TMode : Enum<TMode>>(
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
         }
         nextDestinationProvider = { throw PrsdbWebException("$initialiserName has no next destination so cannot be posted to") }
+        return this
+    }
+
+    override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> {
+        if (backUrlOverride != null) {
+            throw JourneyInitialisationException("$initialiserName already has an explicit backUrl defined")
+        }
+        backUrlOverride = backUrlProvider
         return this
     }
 
@@ -142,7 +151,6 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         }
     }
 
-    private var backUrlOverride: (() -> String?)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
 
     fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
@@ -153,17 +161,11 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
-    fun backUrl(backUrlProvider: () -> String?): StepInitialiser<TStep, TState, TMode> {
-        if (backUrlOverride != null) {
-            throw JourneyInitialisationException("$initialiserName already has an explicit backUrl defined")
-        }
-        backUrlOverride = backUrlProvider
-        return this
-    }
-
     override fun build(): List<JourneyStep<*, *, *>> = listOf(build(state))
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
+
+    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configure(configuration)
 
     private fun build(state: TState): JourneyStep<TMode, *, TState> {
         val parentage =
@@ -174,7 +176,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         step.initialize(
             segment,
             state,
-            backUrlOverride,
+            elementConfiguration.backUrlOverride,
             elementConfiguration.nextDestinationProvider
                 ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined"),
             parentage,

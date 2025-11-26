@@ -8,13 +8,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
 import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
 import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
 interface BuildableElement {
     fun build(): List<JourneyStep<*, *, *>>
 
     fun configure(configuration: ConfigurableElement<*>.() -> Unit)
+
+    fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit)
 }
 
 abstract class AbstractJourneyBuilder<TState : JourneyState>(
@@ -26,6 +27,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     private var unreachableStepDestination: (() -> Destination)? = null
 
     private var additionalConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
+    private var additionalFirstElementConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
     override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
 
@@ -34,11 +36,21 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
             unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
             additionalConfiguration.forEach { it() }
         }
+
         return build()
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
         additionalConfiguration.add(configuration)
+    }
+
+    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) {
+        val firstStep = journeyElements.firstOrNull()
+        if (firstStep == null) {
+            additionalFirstElementConfiguration.add(configuration)
+        } else {
+            firstStep.configureFirst(configuration)
+        }
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
@@ -48,6 +60,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     ) {
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, journey)
         stepInitialiser.init()
+        if (journeyElements.isEmpty()) {
+            stepInitialiser.configureFirst {
+                additionalFirstElementConfiguration.forEach { it() }
+            }
+        }
         journeyElements.add(stepInitialiser)
     }
 
@@ -57,6 +74,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     ) {
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep, journey)
         stepInitialiser.init()
+        if (journeyElements.isEmpty()) {
+            stepInitialiser.configureFirst {
+                additionalFirstElementConfiguration.forEach { it() }
+            }
+        }
         journeyElements.add(stepInitialiser)
     }
 
@@ -101,41 +123,20 @@ open class SubJourneyBuilder<TState : JourneyState>(
     var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
         private set
     val exitStep = NavigationalStep(NavigationalStepConfig())
+
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
-
-    private lateinit var subJourneyParentage: Parentage
 
     override fun build(): List<JourneyStep<*, *, *>> {
         notionalStep<NavigationComplete, NavigationalStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
-        return super.build()
+        val built = super.build()
+        firstStep = built.first()
+        return built
     }
 
     fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
         exitInits.add(init)
-    }
-
-    fun subJourneyParent(parentage: Parentage) {
-        if (::subJourneyParentage.isInitialized) {
-            throw JourneyInitialisationException("Sub-journey exit step parentage has already been defined")
-        }
-        subJourneyParentage = parentage
-    }
-
-    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> startingStep(
-        segment: String,
-        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-    ) {
-        firstStep = uninitialisedStep
-        if (!::subJourneyParentage.isInitialized) {
-            throw JourneyInitialisationException("Sub-journey parentage must be defined before the starting step")
-        }
-        return step<TMode, TStep>(segment, uninitialisedStep) {
-            parents { subJourneyParentage }
-            init()
-        }
     }
 }
