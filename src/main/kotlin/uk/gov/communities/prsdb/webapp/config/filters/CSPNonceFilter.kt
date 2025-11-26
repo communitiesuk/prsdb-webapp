@@ -30,11 +30,7 @@ class CSPNonceFilter() : Filter {
             wrappedResponseOrNull = CSPNonceResponseWrapper(response, nonce)
         }
 
-        try {
-            chain.doFilter(request, wrappedResponseOrNull)
-        } catch (e: Exception) {
-            throw e
-        }
+        chain.doFilter(request, wrappedResponseOrNull)
     }
 
     private fun getOrGenerateNonce(request: HttpServletRequest?): String {
