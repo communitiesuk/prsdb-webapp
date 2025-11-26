@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalAuthorityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalCouncilFormModel
 import java.time.LocalDate
 
 open class JourneyDataHelper {
@@ -29,7 +29,7 @@ open class JourneyDataHelper {
         fun getManualAddress(
             journeyData: JourneyData,
             manualAddressPathSegment: String,
-            selectLocalAuthorityPathSegment: String? = null,
+            selectLocalCouncilPathSegment: String? = null,
         ): AddressDataModel? {
             val addressLineOne =
                 getFieldStringValue(
@@ -66,12 +66,12 @@ open class JourneyDataHelper {
                     ManualAddressFormModel::county.name,
                 )
 
-            val localAuthorityId =
-                selectLocalAuthorityPathSegment?.let {
+            val localCouncilId =
+                selectLocalCouncilPathSegment?.let {
                     getFieldIntegerValue(
                         journeyData,
                         it,
-                        SelectLocalAuthorityFormModel::localAuthorityId.name,
+                        SelectLocalCouncilFormModel::localCouncilId.name,
                     ) ?: return null
                 }
 
@@ -81,7 +81,7 @@ open class JourneyDataHelper {
                 postcode,
                 addressLineTwo,
                 county,
-                localAuthorityId,
+                localCouncilId,
             )
         }
 

@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
@@ -23,13 +22,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @Scope("prototype")
 @PrsdbWebComponent
 class PropertyRegistrationCyaStepConfig(
-    private val localAuthorityService: LocalAuthorityService,
+    private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
 ) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
@@ -87,12 +86,12 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    JourneyStateService.urlToStep(state.lookupStep),
+                    Destination(state.lookupStep),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                    localAuthorityService.retrieveLocalAuthorityById(address.localAuthorityId!!).name,
-                    JourneyStateService.urlToStepIfReachable(state.localAuthorityStep),
+                    "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                    localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
+                    Destination(state.localCouncilStep),
                 ),
             )
         }
@@ -103,7 +102,7 @@ class PropertyRegistrationCyaStepConfig(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            JourneyStateService.urlToStep(state.propertyTypeStep),
+            Destination(state.propertyTypeStep),
         )
     }
 
@@ -111,7 +110,7 @@ class PropertyRegistrationCyaStepConfig(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             state.ownershipTypeStep.formModel.ownershipType,
-            JourneyStateService.urlToStep(state.ownershipTypeStep),
+            Destination(state.ownershipTypeStep),
         )
 
     private fun getTenancyRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> =
@@ -122,17 +121,17 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     true,
-                    JourneyStateService.urlToStep(state.occupied),
+                    Destination(state.occupied),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.households",
                     householdsStep.formModel.numberOfHouseholds,
-                    JourneyStateService.urlToStep(householdsStep),
+                    Destination(householdsStep),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.people",
                     tenantsStep.formModel.numberOfPeople,
-                    JourneyStateService.urlToStep(tenantsStep),
+                    Destination(tenantsStep),
                 ),
             )
         } else {
@@ -140,31 +139,33 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     false,
-                    JourneyStateService.urlToStep(state.occupied),
+                    Destination(state.occupied),
                 ),
             )
         }
 
     private fun getLicensingDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
-        listOfNotNull(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                state.licensingTypeStep.formModel.licensingType,
-                JourneyStateService.urlToStep(state.licensingTypeStep),
-            ),
-            state.getLicenceNumberOrNull()?.let { licenceNumber ->
+        state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
+            listOfNotNull(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
-                    licenceNumber,
-                    when (state.licensingTypeStep.formModel.licensingType) {
-                        LicensingType.HMO_MANDATORY_LICENCE -> JourneyStateService.urlToStep(state.hmoMandatoryLicenceStep)
-                        LicensingType.HMO_ADDITIONAL_LICENCE -> JourneyStateService.urlToStep(state.hmoAdditionalLicenceStep)
-                        LicensingType.SELECTIVE_LICENCE -> JourneyStateService.urlToStep(state.selectiveLicenceStep)
-                        else -> null
-                    },
-                )
-            },
-        )
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    licensingType,
+                    Destination(state.licensingTypeStep),
+                ),
+                when (licensingType) {
+                    LicensingType.HMO_MANDATORY_LICENCE -> (state.getLicenceNumber() to state.hmoMandatoryLicenceStep)
+                    LicensingType.HMO_ADDITIONAL_LICENCE -> (state.getLicenceNumber() to state.hmoAdditionalLicenceStep)
+                    LicensingType.SELECTIVE_LICENCE -> (state.getLicenceNumber() to state.selectiveLicenceStep)
+                    else -> null
+                }?.let { (licenceNumber, step) ->
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+                        licenceNumber,
+                        Destination(step),
+                    )
+                },
+            )
+        }
 
     override fun afterDetermineNextDestination(
         state: PropertyRegistrationJourneyState,

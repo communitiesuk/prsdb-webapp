@@ -28,8 +28,8 @@
                         propertyDetails.complianceInformation.noCompliance.landlordView.linkText
                     </a>
                 </p>
-                <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText}">
-                    propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText</p>
+                <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
+                    propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
             </div>
             <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
             <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{::#delete-record-button})}">
@@ -85,8 +85,8 @@
                                     propertyDetails.complianceInformation.noCompliance.landlordView.linkText
                                 </a>
                             </p>
-                            <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText}">
-                                propertyDetails.complianceInformation.noCompliance.localAuthorityView.mainText</p>
+                            <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
+                                propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
                         </div>
                     </div>
                 </div>

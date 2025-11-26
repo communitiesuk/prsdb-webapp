@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import java.time.LocalDate
@@ -60,12 +60,12 @@ class LandlordDetailsUpdateJourneyDataHelperTests {
     fun `getAddressIfPresent returns the selected address if the selected address in in journey data`() {
         val singleLineAddress = "address passed in"
         val uprn: Long = 44
-        val authority = LocalAuthority()
-        val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, authority).build()
+        val council = LocalCouncil()
+        val testJourneyData = journeyDataBuilder.withSelectedAddress(singleLineAddress, uprn, council).build()
 
         val addressUpdate = LandlordDetailsUpdateJourneyDataHelper.getAddressIfPresent(testJourneyData)
 
-        assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localAuthorityId = authority.id), addressUpdate)
+        assertEquals(AddressDataModel(singleLineAddress, uprn = uprn, localCouncilId = council.id), addressUpdate)
     }
 
     @Test

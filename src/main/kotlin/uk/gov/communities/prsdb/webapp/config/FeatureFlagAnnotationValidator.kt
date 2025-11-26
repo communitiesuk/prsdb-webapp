@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.config
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagDisabled
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureFlagEnabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 
 @PrsdbWebComponent
@@ -16,8 +16,8 @@ class FeatureFlagAnnotationValidator(
             requestMappingHandlerMapping.handlerMethods
                 .filter { (_, handlerMethod) ->
                     val method = handlerMethod.method
-                    val hasEnabled = method.getAnnotation(AvailableWhenFeatureFlagEnabled::class.java) != null
-                    val hasDisabled = method.getAnnotation(AvailableWhenFeatureFlagDisabled::class.java) != null
+                    val hasEnabled = method.getAnnotation(AvailableWhenFeatureEnabled::class.java) != null
+                    val hasDisabled = method.getAnnotation(AvailableWhenFeatureDisabled::class.java) != null
                     hasEnabled && hasDisabled
                 }.map { (mappingInfo, handlerMethod) ->
                     "${handlerMethod.beanType.name}#${handlerMethod.method.name} " +
