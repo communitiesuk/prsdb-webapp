@@ -16,11 +16,32 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
     protected var parentageProvider: (() -> Parentage)? = null
     protected var unreachableStepDestination: (() -> Destination)? = null
 
+    var tags: Set<String> = emptySet()
+        private set
+
     fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): StepLikeInitialiser<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
 
     fun nextUrl(nextUrlProvider: (mode: TMode) -> String): StepLikeInitialiser<TMode> =
         nextDestination { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
+
+    fun modifyNextDestination(
+        modify: (original: (mode: TMode) -> Destination) -> (mode: TMode) -> Destination,
+    ): StepLikeInitialiser<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> modify(originalProvider)(mode) }
+        return this
+    }
+
+    fun modifyNextDestination(merged: (mode: TMode, original: (mode: TMode) -> Destination) -> Destination): StepLikeInitialiser<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> merged(mode, originalProvider) }
+        return this
+    }
 
     fun nextDestination(destinationProvider: (mode: TMode) -> Destination): StepLikeInitialiser<TMode> {
         if (nextDestinationProvider != null) {
@@ -61,6 +82,11 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
             return this
         }
         unreachableStepDestination = getDestination
+        return this
+    }
+
+    fun taggedWith(vararg stepTags: String): StepLikeInitialiser<TMode> {
+        tags = tags + stepTags
         return this
     }
 }
