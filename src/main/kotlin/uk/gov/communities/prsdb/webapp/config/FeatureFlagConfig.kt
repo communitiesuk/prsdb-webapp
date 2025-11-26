@@ -14,13 +14,15 @@ import java.time.LocalDate
 
 @ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 @Configuration
-class FeatureFlagConfig {
+class FeatureFlagConfig(
+    private val featureFlagsFromConfig: FeatureFlagsFromApplicationConfig,
+) {
     @Bean
     fun featureFlagManager(): FeatureFlagManager {
         val featureFlagManager = FeatureFlagManager()
-        featureFlagManager.initializeFeatureFlags(featureFlags)
+        featureFlagManager.initializeFeatureFlags(featureFlagsFromConfig.featureFlags)
         // If a flag is in a flag group, the flag group's enabled value overrides the individual flag's enabled value
-        featureFlagManager.initialiseFeatureFlagGroups(featureGroups)
+        featureFlagManager.initialiseFeatureFlagGroups(featureFlagsFromConfig.featureGroups)
         return featureFlagManager
     }
 

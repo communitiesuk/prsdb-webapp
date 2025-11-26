@@ -83,6 +83,10 @@ google-analytics:
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
+
+feature-groups:
+  - name: "release-1-0"
+    enabled: true
 ---
 
 spring:
