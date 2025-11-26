@@ -18,7 +18,7 @@ import java.util.UUID
 data class JourneyMetadata(
     val dataKey: String,
     val baseJourneyId: String? = null,
-    val subJourneyName: String? = null,
+    val childJourneyName: String? = null,
 ) {
     companion object {
         fun withNewDataKey(): JourneyMetadata = JourneyMetadata(UUID.randomUUID().toString())
@@ -83,6 +83,23 @@ class JourneyStateService(
         }
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
         JourneyStateService(session, newJourneyId).stateInitialiser()
+    }
+
+    fun initialiseChildJourney(
+        newJourneyId: String,
+        subJourneyName: String,
+    ) {
+        val existingMetadata = journeyStateMetadataMap[newJourneyId]
+        if (existingMetadata != null) {
+            throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
+        }
+        val metadata =
+            JourneyMetadata(
+                dataKey = journeyMetadata.dataKey,
+                baseJourneyId = journeyId,
+                childJourneyName = subJourneyName,
+            )
+        journeyStateMetadataMap = journeyStateMetadataMap + (newJourneyId to metadata)
     }
 
     companion object {
