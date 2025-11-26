@@ -7,9 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.MockedConstruction
 import org.mockito.Mockito.mockConstruction
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
@@ -49,11 +47,10 @@ class TaskTests {
         val parent = NoParents()
 
         // Act
-        val subJourneyBuilder = task.getTaskSubJourneyBuilder(state, parent) { nextDestination(nextDestinationLambda) }
+        val subJourneyBuilder = task.getTaskSubJourneyBuilder(state) { nextDestination(nextDestinationLambda) }
 
         // Assert
         assertSame(subJourneyConstruction.constructed().first(), subJourneyBuilder)
-        verify(subJourneyBuilder as SubJourneyBuilder<*>).subJourneyParent(eq(parent))
     }
 
     @Test
@@ -127,10 +124,9 @@ class TaskTests {
 
     private fun initialisedTask(): TestTask {
         val task = TestTask()
-        task
-            .getTaskSubJourneyBuilder(mock(), mock()) {
-                nextUrl { "example.com" }
-            }
+        task.getTaskSubJourneyBuilder(mock()) {
+            nextUrl { "example.com" }
+        }
         return task
     }
 }

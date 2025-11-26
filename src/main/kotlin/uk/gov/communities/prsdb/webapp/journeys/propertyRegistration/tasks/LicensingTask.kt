@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 class LicensingTask : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
-            startingStep("licensing-type", journey.licensingTypeStep) {
+            step("licensing-type", journey.licensingTypeStep) {
                 nextStep { mode ->
                     when (mode) {
                         LicensingTypeMode.SELECTIVE_LICENCE -> journey.selectiveLicenceStep

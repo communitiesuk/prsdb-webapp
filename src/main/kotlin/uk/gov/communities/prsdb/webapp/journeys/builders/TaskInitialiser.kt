@@ -24,11 +24,9 @@ class TaskInitialiser<TStateInit : JourneyState>(
     override fun buildSteps(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             nextDestinationProvider ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
-        val taskParentage =
-            parentageProvider?.invoke() ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined")
 
         val taskSubJourney =
-            task.getTaskSubJourneyBuilder(state, taskParentage) {
+            task.getTaskSubJourneyBuilder(state) {
                 nextDestination(nonNullDestinationProvider)
             }
 
@@ -43,6 +41,10 @@ class TaskInitialiser<TStateInit : JourneyState>(
                 config()
             }
         }
+        taskSubJourney.configureFirstStep {
+            backUrlOverride?.let { backUrl(it) }
+            parents(parentageProvider ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined"))
+        }
 
         return taskSubJourney.buildSteps()
     }
@@ -54,5 +56,9 @@ class TaskInitialiser<TStateInit : JourneyState>(
     override fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit) {
         configuration()
         allElementsConfiguration.add(configuration)
+    }
+
+    override fun configureFirstStep(configuration: StepLikeInitialiser<*>.() -> Unit) {
+        configuration()
     }
 }
