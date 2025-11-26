@@ -16,7 +16,7 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
     protected var parentageProvider: (() -> Parentage)? = null
     protected var unreachableStepDestination: (() -> Destination)? = null
 
-    protected var backUrlOverride: (() -> String?)? = null
+    protected var backDestinationOverride: (() -> Destination)? = null
 
     var tags: Set<String> = emptySet()
         private set
@@ -61,11 +61,14 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
         return this
     }
 
-    fun backUrl(backUrlProvider: () -> String?): StepLikeInitialiser<TMode> {
-        if (backUrlOverride != null) {
+    fun backStep(backStepProvider: () -> JourneyStep<*, *, *>?): StepLikeInitialiser<TMode> =
+        backDestination { Destination(backStepProvider()) }
+
+    fun backDestination(backUrlProvider: () -> Destination): StepLikeInitialiser<TMode> {
+        if (backDestinationOverride != null) {
             throw JourneyInitialisationException("$initialiserName already has an explicit backUrl defined")
         }
-        backUrlOverride = backUrlProvider
+        backDestinationOverride = backUrlProvider
         return this
     }
 
@@ -148,7 +151,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         step.initialize(
             segment,
             state,
-            backUrlOverride,
+            backDestinationOverride,
             nextDestinationProvider ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined"),
             parentage,
             unreachableStepDestination

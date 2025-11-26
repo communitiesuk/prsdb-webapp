@@ -38,20 +38,20 @@ class StepInitialiserTests {
         val builder = StepInitialiser("test", mockInitialisableStep(), mock())
 
         // Act
-        builder.backUrl { "url1" }
+        builder.backDestination { Destination.ExternalUrl("url1") }
 
         // Assert
-        assertThrows<JourneyInitialisationException> { builder.backUrl { "url2" } }
+        assertThrows<JourneyInitialisationException> { builder.backDestination { Destination.ExternalUrl("url2") } }
     }
 
     @Test
     fun `a backUrlOverride is passed to the step when built`() {
         // Arrange
-        val expectedBackUrl = "expectedBackUrl"
+        val expectedBackUrl = Destination.ExternalUrl("expectedBackUrl")
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser("test", stepMock, mock())
         val backUrlLambda = { expectedBackUrl }
-        builder.backUrl(backUrlLambda)
+        builder.backDestination(backUrlLambda)
         builder.nextUrl { "next" }
         builder.parents { NoParents() }
         builder.unreachableStepDestinationIfNotSet { mock() }
