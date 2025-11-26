@@ -26,8 +26,7 @@ class CSPNonceFilter() : Filter {
         var wrappedResponseOrNull: CSPNonceResponseWrapper? = null
 
         if (response != null) {
-            val nonce = generateNonce()
-            setCSPNonceAttributeIfNotSet(request, nonce)
+            val nonce = getOrGenerateNonce(request)
             wrappedResponseOrNull = CSPNonceResponseWrapper(response, nonce)
         }
 
@@ -38,15 +37,24 @@ class CSPNonceFilter() : Filter {
         }
     }
 
-    private fun setCSPNonceAttributeIfNotSet(
+    private fun getOrGenerateNonce(request: HttpServletRequest?): String {
+        var nonce = getNonceFromRequestOrNull(request)
+        if (nonce == null) {
+            nonce = generateNonce()
+            setCSPNonceAttribute(request, nonce)
+        }
+        return nonce
+    }
+
+    private fun getNonceFromRequestOrNull(request: HttpServletRequest?): String? {
+        return request?.getAttribute(CSP_NONCE_ATTRIBUTE) as String?
+    }
+
+    private fun setCSPNonceAttribute(
         request: HttpServletRequest?,
         nonce: String,
     ) {
-        if (request?.getAttribute(CSP_NONCE_ATTRIBUTE) == null) {
-            request?.setAttribute(CSP_NONCE_ATTRIBUTE, nonce)
-        } else {
-            return
-        }
+        request?.setAttribute(CSP_NONCE_ATTRIBUTE, nonce)
     }
 
     private fun generateNonce(): String {
