@@ -8,7 +8,10 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
@@ -40,12 +43,16 @@ class LocalCouncilSecurityConfig(
             }.csrf { }
             .headers { headers ->
                 headers
+                    .contentSecurityPolicy { csp ->
+                        csp
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                    }
                     .permissionsPolicyHeader {
                             permissions ->
                         permissions
                             .policy(PERMISSIONS_POLICY_DIRECTIVES)
                     }
-            }
+            }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
 
         return http.build()
     }

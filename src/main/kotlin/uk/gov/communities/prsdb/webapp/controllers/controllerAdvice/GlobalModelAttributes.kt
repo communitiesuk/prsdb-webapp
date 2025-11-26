@@ -1,14 +1,20 @@
 package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControllerAdvice
+import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter.Companion.CSP_NONCE_ATTRIBUTE
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
+import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
+import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
@@ -36,6 +42,9 @@ class GlobalModelAttributes(
         model.addAttribute("googleAnalyticsMeasurementId", gaMeasurementId)
         model.addAttribute("googleAnalyticsCookieDomain", gaCookieDomain)
         model.addAttribute("plausibleDomainId", plausibleDomainId)
+        model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
+        model.addAttribute("googleTagManagerUrl", "$GOOGLE_TAG_MANAGER_URL/gtag/js?id=")
+        model.addAttribute("serverGeneratedNonce", getCurrentNonce())
 
         // Feedback banner attributes
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
@@ -50,5 +59,14 @@ class GlobalModelAttributes(
         model.addAttribute("mhclgUrl", MHCLG_URL)
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
+    }
+
+    private fun getCurrentNonce(): String {
+        val context = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?
+        if (context?.request is HttpServletRequest) {
+            val nonce = context.request.getAttribute(CSP_NONCE_ATTRIBUTE)
+            if (nonce != null) return nonce.toString()
+        }
+        return ""
     }
 }
