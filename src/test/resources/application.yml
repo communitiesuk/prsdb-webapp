@@ -40,3 +40,20 @@ os:
 ff4j:
   web-console:
     enabled: false
+
+feature-flags:
+  - name: "example-feature-flag-one"
+    enabled: true
+    expiry-date: "2030-01-12"
+  - name: "example-feature-flag-two"
+    enabled: true
+    expiry-date: "2030-01-07"
+    flagGroup: "release-1-0"
+  - name: "example-feature-flag-three"
+    enabled: false
+    expiry-date: "2030-01-07"
+    flagGroup: "release-1-0"
+
+feature-groups:
+  - name: "release-1-0"
+    enabled: false

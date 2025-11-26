@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromApplicationConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlagged
 class ExampleFeatureFlagTestController(
     private val exampleFeatureFlaggedService: ExampleFeatureFlaggedService,
     private val featureFlagManager: FeatureFlagManager,
+    private val featureFlagsFromConfig: FeatureFlagsFromApplicationConfig,
 ) {
     @GetMapping(FEATURED_FLAGGED_SERVICE_TEST_URL_SEGMENT)
     fun featureFlaggedServiceTest(model: Model): String {
@@ -104,11 +105,11 @@ class ExampleFeatureFlagTestController(
     }
 
     private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagModel =
-        FeatureFlagConfig.featureFlags.firstOrNull { it.name == featureName }
+        featureFlagsFromConfig.featureFlags.firstOrNull { it.name == featureName }
             ?: throw IllegalArgumentException("Feature flag $featureName not found in config")
 
     private fun getFeatureFlagGroupModelFromConfig(groupName: String): FeatureFlagGroupModel =
-        FeatureFlagConfig.featureGroups.firstOrNull { it.name == groupName }
+        featureFlagsFromConfig.featureGroups.firstOrNull { it.name == groupName }
             ?: throw IllegalArgumentException("Feature flag group $groupName not found in config")
 
     private fun populateModelForFeatureFlagGroupTest(

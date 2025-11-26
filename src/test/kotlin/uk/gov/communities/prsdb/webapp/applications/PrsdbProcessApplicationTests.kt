@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromApplicationConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
@@ -74,6 +75,7 @@ class PrsdbProcessApplicationTests {
                 TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
+                FeatureFlagsFromApplicationConfig::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
