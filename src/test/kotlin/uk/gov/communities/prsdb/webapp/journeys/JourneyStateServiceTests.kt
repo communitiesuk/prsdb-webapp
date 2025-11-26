@@ -2,7 +2,10 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
@@ -44,8 +47,8 @@ class JourneyStateServiceTests {
     fun `getJourneyStateMetadataMap retrieves the metadata map from the session, if present`() {
         // Arrange
         val session = MockHttpSession()
-        val expectedMetadataMap = mapOf("journey-1" to "data-key-1", "journey-2" to "data-key-2")
-        session.setAttribute("journeyStateKeyStore", expectedMetadataMap)
+        val expectedMetadataMap = mapOf("journey-1" to JourneyMetadata("data-key-1"), "journey-2" to JourneyMetadata("data-key-2"))
+        session.setJourneyStateMetadataMap(expectedMetadataMap)
         val service = JourneyStateService(session, "null")
 
         // Act
@@ -74,16 +77,16 @@ class JourneyStateServiceTests {
         // Arrange
         val session = MockHttpSession()
         val journeyId = "journey-1"
-        val expectedDataKey = "data-key-1"
-        val metadataMap = mapOf(journeyId to expectedDataKey)
-        session.setAttribute("journeyStateKeyStore", metadataMap)
+        val expectedMetadata = JourneyMetadata("data-key-1")
+        val metadataMap = mapOf(journeyId to expectedMetadata)
+        session.setJourneyStateMetadataMap(metadataMap)
         val service = JourneyStateService(session, journeyId)
 
         // Act
-        val actualDataKey = service.journeyDataKey
+        val actualDataKey = service.journeyMetadata
 
         // Assert
-        assertEquals(expectedDataKey, actualDataKey)
+        assertEquals(expectedMetadata, actualDataKey)
     }
 
     @Test
@@ -97,7 +100,7 @@ class JourneyStateServiceTests {
         val service = JourneyStateService(session, "journey-2")
 
         // Act & Assert
-        assertThrows<NoSuchJourneyException> { service.journeyDataKey }
+        assertThrows<NoSuchJourneyException> { service.journeyMetadata }
     }
 
     @Test
@@ -184,7 +187,7 @@ class JourneyStateServiceTests {
         service.addSingleStepData(newStepDataKey, newStepDataValue)
 
         // Assert
-        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyDataKey))!!
+        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyMetadata.dataKey))!!
         val stepData = objectToTypedStringKeyedMap<Map<String, String>>(updatedJourneyData["journeyData"])
 
         assertEquals("value1", stepData?.get("step-1")?.get("field1"))
@@ -205,7 +208,7 @@ class JourneyStateServiceTests {
 
         // Assert
 
-        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyDataKey))!!
+        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyMetadata.dataKey))!!
 
         assertEquals("existingValue", updatedJourneyData["existingKey"])
         assertEquals(17, updatedJourneyData["newKey"])
@@ -217,8 +220,8 @@ class JourneyStateServiceTests {
         val session = MockHttpSession()
         val journeyId = "journey-1"
         val dataKey = "data-key-1"
-        val metadataMap = mapOf(journeyId to dataKey, "journey-2" to "data-key-2")
-        session.setAttribute("journeyStateKeyStore", metadataMap)
+        val metadataMap = mapOf(journeyId to JourneyMetadata(dataKey), "journey-2" to JourneyMetadata("data-key-2"))
+        session.setJourneyStateMetadataMap(metadataMap)
         val service = JourneyStateService(session, journeyId)
 
         // Act
@@ -226,10 +229,11 @@ class JourneyStateServiceTests {
 
         // Assert
         assertNull(session.getAttribute(dataKey))
-        val updatedMetadataMap = objectToStringKeyedMap(session.getAttribute("journeyStateKeyStore"))!!
+        val updatedMetadataMap = session.getJourneyStateMetadataMap()
 
+        assertNotNull(updatedMetadataMap)
         assertNull(updatedMetadataMap[journeyId])
-        assertEquals("data-key-2", updatedMetadataMap["journey-2"])
+        assertEquals("data-key-2", updatedMetadataMap["journey-2"]?.dataKey)
     }
 
     @Test
@@ -245,9 +249,9 @@ class JourneyStateServiceTests {
         }
 
         // Assert
-        val updatedMetadataMap = objectToStringKeyedMap(session.getAttribute("journeyStateKeyStore"))
-        val newDataKey = (updatedMetadataMap?.get(newJourneyId) as? String)!!
-        val newJourneyData = objectToStringKeyedMap(session.getAttribute(newDataKey))
+        val updatedMetadataMap = session.getJourneyStateMetadataMap()
+        val newMetadata = (updatedMetadataMap?.get(newJourneyId) as? JourneyMetadata)!!
+        val newJourneyData = objectToStringKeyedMap(session.getAttribute(newMetadata.dataKey))
         assertEquals("initialValue", newJourneyData?.get("initialKey"))
     }
 
@@ -270,9 +274,16 @@ class JourneyStateServiceTests {
     ): JourneyStateService {
         val dataKey = "data-key"
         val journeyId = "journey"
-        val metadataMap = mapOf(journeyId to dataKey)
+        val metadataMap = mapOf(journeyId to JourneyMetadata(dataKey))
         session.setAttribute(dataKey, existingData)
-        session.setAttribute("journeyStateKeyStore", metadataMap)
+        session.setJourneyStateMetadataMap(metadataMap)
         return JourneyStateService(session, journeyId)
     }
+
+    private fun HttpSession.setJourneyStateMetadataMap(metadataMap: Map<String, JourneyMetadata>) {
+        setAttribute("journeyStateKeyStore", Json.encodeToString(serializer(), metadataMap))
+    }
+
+    private fun HttpSession.getJourneyStateMetadataMap(): Map<String, JourneyMetadata>? =
+        getAttribute("journeyStateKeyStore")?.toString()?.let { Json.decodeFromString(it) }
 }
