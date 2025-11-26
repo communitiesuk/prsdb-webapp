@@ -70,8 +70,15 @@ class JourneyStateService(
 
     fun deleteState() {
         session.removeAttribute(journeyMetadata.dataKey)
-        // TODO PRSD-1550 - Ensure other metadata keys referencing this journey are also cleaned up
-        journeyStateMetadataMap = journeyStateMetadataMap - journeyId
+
+        val journeyIdsToRemove =
+            journeyStateMetadataMap
+                .filter { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
+                .keys
+
+        journeyIdsToRemove.forEach { id ->
+            journeyStateMetadataMap -= id
+        }
     }
 
     fun initialiseJourneyWithId(
