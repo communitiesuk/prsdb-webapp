@@ -16,11 +16,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
 fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
     configureTagged("checkable") {
-        modifyNextDestination { originalDestinationProvider ->
-            if (journey.isCheckingAnswers) {
+        if (journey.isCheckingAnswers) {
+            modifyNextDestination {
                 { Destination.VisitableStep(journey.cyaStep, journey.baseJourneyId) }
-            } else {
-                originalDestinationProvider
+            }
+            backStep {
+                journey.cyaStep
             }
         }
     }

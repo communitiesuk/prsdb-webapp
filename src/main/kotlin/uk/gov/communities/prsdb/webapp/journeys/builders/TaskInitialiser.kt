@@ -30,7 +30,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
             }
         }
         taskSubJourney.configureFirst {
-            elementConfiguration.backUrlOverride?.let { backUrl(it) }
+            elementConfiguration.backDestinationOverride?.let { backDestination(it) }
             parents(
                 elementConfiguration.parentageProvider
                     ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined"),

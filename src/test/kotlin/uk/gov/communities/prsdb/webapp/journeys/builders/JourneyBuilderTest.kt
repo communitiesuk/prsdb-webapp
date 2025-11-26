@@ -294,13 +294,13 @@ class JourneyBuilderTest {
 
             // Act 1
             jb.step("segment", uninitialisedStep) {
-                backUrl { "back" }
+                backDestination { Destination.ExternalUrl("backLink") }
                 stepSpecificInitialisation { }
             }
 
             // Assert 1
             val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
-            verify(mockStepInitialiser).backUrl(any())
+            verify(mockStepInitialiser).backDestination(any())
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2
@@ -348,13 +348,13 @@ class JourneyBuilderTest {
 
             // Act 1
             jb.notionalStep(uninitialisedStep) {
-                backUrl { "back" }
+                backDestination { Destination.ExternalUrl("backLink") }
                 stepSpecificInitialisation { }
             }
 
             // Assert 1
             val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
-            verify(mockStepInitialiser).backUrl(any())
+            verify(mockStepInitialiser).backDestination(any())
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2

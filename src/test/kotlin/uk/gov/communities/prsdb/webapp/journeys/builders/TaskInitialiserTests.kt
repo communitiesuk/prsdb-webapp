@@ -170,7 +170,7 @@ class TaskInitialiserTests {
         builder.build()
 
         // Assert
-        val firstStepInitCaptor = argumentCaptor<StepLikeInitialiser<*>.() -> Unit>()
+        val firstStepInitCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
         verify(internalBuilder).configureFirst(firstStepInitCaptor.capture())
 
         val mockStep = mock<StepInitialiser<*, *, TestEnum>>()
@@ -185,9 +185,18 @@ class TaskInitialiserTests {
         val builder = TaskInitialiser(taskMock, mock())
         builder.nextDestination { mock() }
 
-        // Act & Assert
+        val internalBuilder = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(internalBuilder)
+
+        // Act
+        builder.build()
+
+        // Assert
+        val captor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
+        verify(internalBuilder).configureFirst(captor.capture())
         assertThrows<JourneyInitialisationException> {
-            builder.build()
+            val mockStep = mock<StepInitialiser<*, *, TestEnum>>()
+            captor.firstValue.invoke(mockStep)
         }
     }
 
@@ -196,7 +205,7 @@ class TaskInitialiserTests {
         // Arrange
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
-        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
 
         val builder = TaskInitialiser(taskMock, mock())
         val expectedKey = "testKey"
@@ -229,7 +238,6 @@ class TaskInitialiserTests {
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(
             taskMock.getTaskSubJourneyBuilder(
-                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
             ),

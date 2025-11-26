@@ -39,6 +39,10 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode>
 
     fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode>
+
+    fun backStep(backStepProvider: () -> JourneyStep<*, *, *>?): ConfigurableElement<TMode>
+
+    fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -48,7 +52,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var parentageProvider: (() -> Parentage)? = null
     var unreachableStepDestination: (() -> Destination)? = null
     var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
-    var backUrlOverride: (() -> String?)? = null
+    var backDestinationOverride: (() -> Destination)? = null
     override var tags: Set<String> = emptySet()
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
@@ -93,13 +97,19 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         return this
     }
 
-    override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> {
-        if (backUrlOverride != null) {
+    override fun backStep(backStepProvider: () -> JourneyStep<*, *, *>?): ConfigurableElement<TMode> =
+        backDestination { Destination(backStepProvider()) }
+
+    override fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode> {
+        if (backDestinationOverride != null) {
             throw JourneyInitialisationException("$initialiserName already has an explicit backUrl defined")
         }
-        backUrlOverride = backUrlProvider
+        backDestinationOverride = backUrlProvider
         return this
     }
+
+    override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> =
+        backDestination { backUrlProvider()?.let { Destination.ExternalUrl(it) } ?: Destination.Nowhere() }
 
     override fun parents(currentParentage: () -> Parentage): ConfigurableElement<TMode> {
         if (parentageProvider != null) {
@@ -176,7 +186,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         step.initialize(
             segment,
             state,
-            elementConfiguration.backUrlOverride,
+            elementConfiguration.backDestinationOverride,
             elementConfiguration.nextDestinationProvider
                 ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined"),
             parentage,
