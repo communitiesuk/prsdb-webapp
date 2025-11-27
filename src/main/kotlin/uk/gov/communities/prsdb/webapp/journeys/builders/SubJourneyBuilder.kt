@@ -11,11 +11,84 @@ import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
-open class SubJourneyBuilder<TState : JourneyState>(
+interface BuildableElement {
+    fun build(): List<JourneyStep<*, *, *>>
+
+    fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit)
+}
+
+abstract class AbstractJourneyBuilder<TState : JourneyState>(
     val journey: TState,
-) : StepCollectionBuilder,
+) : BuildableElement,
     JourneyBuilderDsl<TState> {
-    var exitInitialiser: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>? = null
+    private val journeyElements: MutableList<BuildableElement> = mutableListOf()
+
+    private var unreachableStepDestination: (() -> Destination)? = null
+
+    private var additionalConfiguration: StepInitialiser<*, *, *>.() -> Unit = {}
+
+    override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
+
+    protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
+        configureSteps {
+            unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
+            additionalConfiguration()
+        }
+
+        return build()
+    }
+
+    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
+        additionalConfiguration = configuration
+    }
+
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
+        segment: String,
+        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    ) {
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, journey)
+        stepInitialiser.init()
+        journeyElements.add(stepInitialiser)
+    }
+
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
+        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    ) {
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep, journey)
+        stepInitialiser.init()
+        journeyElements.add(stepInitialiser)
+    }
+
+    override fun task(
+        uninitialisedTask: Task<TState>,
+        init: TaskInitialiser<TState>.() -> Unit,
+    ) {
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, journey)
+        taskInitialiser.init()
+        journeyElements.add(taskInitialiser)
+    }
+
+    fun unreachableStepUrl(getUrl: () -> String) {
+        if (unreachableStepDestination != null) {
+            throw JourneyInitialisationException("unreachableStepDestination has already been set")
+        }
+        unreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
+    }
+
+    fun unreachableStepStep(getStep: () -> JourneyStep<*, *, *>) {
+        if (unreachableStepDestination != null) {
+            throw JourneyInitialisationException("unreachableStepDestination has already been set")
+        }
+        unreachableStepDestination = { Destination(getStep()) }
+    }
+}
+
+class SubJourneyBuilder<TState : JourneyState>(
+    journey: TState,
+) : AbstractJourneyBuilder<TState>(journey) {
+    var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
         private set
     val exitStep = NavigationalStep(NavigationalStepConfig())
     lateinit var firstStep: JourneyStep<*, *, *>
@@ -23,13 +96,15 @@ open class SubJourneyBuilder<TState : JourneyState>(
 
     private lateinit var subJourneyParentage: Parentage
 
-    fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
-        if (exitInitialiser != null) {
-            throw JourneyInitialisationException("Sub-journey already has an exit step defined")
+    override fun build(): List<JourneyStep<*, *, *>> {
+        notionalStep<NavigationComplete, NavigationalStepConfig>(exitStep) {
+            exitInits.forEach { it() }
         }
-        val stepInitialiser = StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>(null, exitStep, journey)
-        stepInitialiser.init()
-        exitInitialiser = stepInitialiser
+        return super.build()
+    }
+
+    fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
+        exitInits.add(init)
     }
 
     fun subJourneyParent(parentage: Parentage) {
@@ -52,67 +127,5 @@ open class SubJourneyBuilder<TState : JourneyState>(
             parents { subJourneyParentage }
             init()
         }
-    }
-
-    private val stepCollectionsUnderConstruction: MutableList<StepCollectionBuilder> = mutableListOf()
-
-    private var unreachableStepDestination: (() -> Destination)? = null
-
-    private var additionalConfiguration: StepInitialiser<*, *, *>.() -> Unit = {}
-
-    override fun buildSteps() =
-        (stepCollectionsUnderConstruction + listOfNotNull(exitInitialiser)).flatMap { subJourney ->
-            subJourney.configureSteps {
-                unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
-                additionalConfiguration()
-            }
-
-            subJourney.buildSteps()
-        }
-
-    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
-        additionalConfiguration = configuration
-    }
-
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        segment: String,
-        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-    ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, journey)
-        stepInitialiser.init()
-        stepCollectionsUnderConstruction.add(stepInitialiser)
-    }
-
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
-        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-    ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep, journey)
-        stepInitialiser.init()
-        stepCollectionsUnderConstruction.add(stepInitialiser)
-    }
-
-    override fun task(
-        uninitialisedTask: Task<TState>,
-        init: TaskInitialiser<TState>.() -> Unit,
-    ) {
-        val taskInitialiser = TaskInitialiser(uninitialisedTask, journey)
-        taskInitialiser.init()
-        stepCollectionsUnderConstruction.add(taskInitialiser)
-    }
-
-    fun unreachableStepUrl(getUrl: () -> String) {
-        if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("unreachableStepDestination has already been set")
-        }
-        unreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
-    }
-
-    fun unreachableStepStep(getStep: () -> JourneyStep<*, *, *>) {
-        if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("unreachableStepDestination has already been set")
-        }
-        unreachableStepDestination = { Destination(getStep()) }
     }
 }

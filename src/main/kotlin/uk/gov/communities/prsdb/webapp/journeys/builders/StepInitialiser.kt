@@ -14,7 +14,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
     private val state: TState,
-) : StepCollectionBuilder {
+) : BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $segment has already been initialised")
@@ -109,7 +109,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
-    override fun buildSteps(): List<JourneyStep<*, *, *>> = listOf(build(state))
+    override fun build(): List<JourneyStep<*, *, *>> = listOf(build(state))
 
     override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
         configuration()

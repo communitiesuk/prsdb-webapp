@@ -73,7 +73,7 @@ class TaskInitialiserTests {
         builder.redirectToStep { _: NavigationComplete -> nextStepMock }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
@@ -110,7 +110,7 @@ class TaskInitialiserTests {
         builder.redirectToDestination { _: NavigationComplete -> initiationDestination }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
@@ -140,7 +140,7 @@ class TaskInitialiserTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.buildSteps()
+            builder.build()
         }
     }
 
@@ -165,7 +165,7 @@ class TaskInitialiserTests {
         builder.parents { parentage }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         verify(taskMock).getTaskSubJourneyBuilder(
@@ -184,7 +184,7 @@ class TaskInitialiserTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.buildSteps()
+            builder.build()
         }
     }
 

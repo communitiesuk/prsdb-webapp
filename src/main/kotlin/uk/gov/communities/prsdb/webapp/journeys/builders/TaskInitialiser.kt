@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
-) : StepCollectionBuilder {
+) : BuildableElement {
     private val name: String
         get() = this::class.simpleName!!
 
@@ -49,7 +49,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return this
     }
 
-    override fun buildSteps(): List<JourneyStep<*, *, *>> {
+    override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             destinationProvider ?: throw JourneyInitialisationException("Task $name does not have a nextDestination defined")
         val taskParentage = parentage?.invoke() ?: throw JourneyInitialisationException("Task $name does not have parentage defined")
@@ -65,7 +65,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
             }
         }
 
-        return taskSubJourney.buildSteps()
+        return taskSubJourney.build()
     }
 
     override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {

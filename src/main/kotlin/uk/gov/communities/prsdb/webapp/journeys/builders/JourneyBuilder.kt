@@ -26,23 +26,15 @@ interface JourneyBuilderDsl<TState : JourneyState> {
     )
 }
 
-interface StepCollectionBuilder {
-    fun buildSteps(): List<JourneyStep<*, *, *>>
-
-    fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit)
-}
-
 open class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
     journey: TState,
-) : SubJourneyBuilder<TState>(journey),
-    JourneyBuilderDsl<TState>,
-    StepCollectionBuilder {
+) : AbstractJourneyBuilder<TState>(journey) {
     private val sections: MutableList<String> = mutableListOf()
 
     fun buildRoutingMap(): Map<String, StepLifecycleOrchestrator> =
         buildMap {
-            buildSteps().forEach { journeyStep ->
+            build().forEach { journeyStep ->
                 when (journeyStep) {
                     is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
                     is JourneyStep.InternalStep<*, *, *> -> {}
