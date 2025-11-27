@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriComponentsBuilder
 import kotlin.collections.component1
@@ -56,11 +58,18 @@ sealed class Destination {
         override fun toUrlStringOrNull() = if (step.isStepReachable) step.determineNextDestination().toUrlStringOrNull() else null
     }
 
+    class Nowhere : Destination() {
+        override fun toModelAndView(): ModelAndView = throw ResponseStatusException(HttpStatus.NOT_FOUND, "Navigated to Nowhere")
+
+        override fun toUrlStringOrNull(): String? = null
+    }
+
     companion object {
-        operator fun invoke(step: JourneyStep<*, *, *>): Destination =
+        operator fun invoke(step: JourneyStep<*, *, *>?): Destination =
             when (step) {
                 is JourneyStep.RequestableStep -> VisitableStep(step, step.currentJourneyId)
                 is JourneyStep.InternalStep -> NavigationalStep(step)
+                null -> Nowhere()
             }
     }
 }

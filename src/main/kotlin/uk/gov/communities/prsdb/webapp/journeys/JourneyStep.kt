@@ -135,7 +135,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 
-    private var backUrlOverride: (() -> String?)? = null
+    private var backUrlOverride: (() -> Destination)? = null
 
     private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
 
@@ -147,7 +147,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
                     is RequestableStep<*, *, *> -> Destination(singleParentStep).toUrlStringOrNull()
                     null -> null
                 }
-            val backUrlOverrideValue = this.backUrlOverride?.let { it() }
+            val backUrlOverrideValue = this.backUrlOverride?.let { it().toUrlStringOrNull() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
 
@@ -166,7 +166,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     fun initialize(
         segment: String?,
         state: TState,
-        backUrlOverride: (() -> String?)?,
+        backDestinationOverride: (() -> Destination)?,
         redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
         unreachableStepDestinationProvider: () -> Destination,
@@ -177,7 +177,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         }
         segment?.let { this.stepConfig.routeSegment = it }
         this.state = state
-        this.backUrlOverride = backUrlOverride
+        this.backUrlOverride = backDestinationOverride
         this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
         this.unreachableStepDestination = unreachableStepDestinationProvider

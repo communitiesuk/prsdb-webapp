@@ -142,7 +142,7 @@ class JourneyStepTests {
         step.initialize(
             "stepId",
             mock(),
-            { "backLink" },
+            { Destination.ExternalUrl("backLink") },
             { Destination.ExternalUrl("redirect") },
             mock(),
             { Destination.ExternalUrl("unreachable") },
@@ -167,7 +167,7 @@ class JourneyStepTests {
         step.initialize(
             "stepId",
             mock(),
-            { "backLink" },
+            { Destination.ExternalUrl("backLink") },
             { Destination.ExternalUrl("redirect") },
             mock(),
             { Destination.ExternalUrl("unreachable") },
@@ -192,7 +192,7 @@ class JourneyStepTests {
         step.initialize(
             "stepId",
             mock(),
-            { "backLink" },
+            { Destination.ExternalUrl("backLink") },
             { Destination.ExternalUrl("redirect") },
             mock(),
             { Destination.ExternalUrl("unreachable") },

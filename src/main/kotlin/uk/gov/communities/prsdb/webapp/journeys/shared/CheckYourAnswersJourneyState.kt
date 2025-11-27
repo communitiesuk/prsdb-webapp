@@ -1,0 +1,30 @@
+package uk.gov.communities.prsdb.webapp.journeys.shared
+
+import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
+import uk.gov.communities.prsdb.webapp.journeys.builders.StepLikeInitialiser
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+
+interface CheckYourAnswersJourneyState : JourneyState {
+    val cyaStep: JourneyStep.RequestableStep<Complete, CheckAnswersFormModel, *>
+    val baseJourneyId: String
+    val cyaChildJourneyId: String?
+    val isCheckingAnswers: Boolean
+}
+
+fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
+    configureTagged("checkable") {
+        if (journey.isCheckingAnswers) {
+            modifyNextDestination {
+                { Destination.VisitableStep(journey.cyaStep, journey.baseJourneyId) }
+            }
+            backStep {
+                journey.cyaStep
+            }
+        }
+    }
+}
+
+fun StepLikeInitialiser<*>.checkable() = taggedWith("checkable")
