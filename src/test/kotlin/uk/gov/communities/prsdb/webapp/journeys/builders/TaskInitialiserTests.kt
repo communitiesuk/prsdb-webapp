@@ -25,7 +25,7 @@ class TaskInitialiserTests {
     @Test
     fun `once a redirectToStep is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mock<Task<JourneyState>>())
+        val builder = TaskInitialiser(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
@@ -43,7 +43,7 @@ class TaskInitialiserTests {
     @Test
     fun `once a redirectToDestination is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mock<Task<JourneyState>>())
+        val builder = TaskInitialiser(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
@@ -61,23 +61,23 @@ class TaskInitialiserTests {
     @Test
     fun `a redirectToStep is passed to the task's exit when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
+        val taskMock = mockTask()
 
         val nextStepMock = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         val nextStepSegment = "nextStepSegment"
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
-        val builder = TaskInitialiser(taskMock)
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
         builder.redirectToStep { _: NavigationComplete -> nextStepMock }
 
         // Act
-        builder.mapToStepInitialisers(mock())
+        builder.build()
 
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
-        verify(taskMock).getTaskSteps(
+        verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
@@ -100,21 +100,21 @@ class TaskInitialiserTests {
     @Test
     fun `a redirectToDestination is passed to the task's exit when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
+        val taskMock = mockTask()
 
         val nextStepSegment = "nextStepSegment"
 
-        val builder = TaskInitialiser(taskMock)
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
         val initiationDestination = Destination.ExternalUrl(nextStepSegment)
         builder.redirectToDestination { _: NavigationComplete -> initiationDestination }
 
         // Act
-        builder.mapToStepInitialisers(mock())
+        builder.build()
 
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
-        verify(taskMock).getTaskSteps(
+        verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
@@ -133,22 +133,22 @@ class TaskInitialiserTests {
     @Test
     fun `if no destinationProvider is set, an exception is thrown when mapping to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
+        val taskMock = mockTask()
 
-        val builder = TaskInitialiser(taskMock)
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.mapToStepInitialisers(mock())
+            builder.build()
         }
     }
 
     @Test
     fun `a parentage cannot be set more than once`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
-        val builder = TaskInitialiser(taskMock)
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { NoParents() }
 
         // Act & Assert
@@ -158,17 +158,17 @@ class TaskInitialiserTests {
     @Test
     fun `a parentage is passed to the task when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
-        val builder = TaskInitialiser(taskMock)
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
         val parentage = NoParents()
         builder.redirectToDestination { mock() }
         builder.parents { parentage }
 
         // Act
-        builder.mapToStepInitialisers(mock())
+        builder.build()
 
         // Assert
-        verify(taskMock).getTaskSteps(
+        verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             eq(parentage),
             anyOrNull(),
@@ -178,13 +178,24 @@ class TaskInitialiserTests {
     @Test
     fun `if no parentage is set, mapToStepInitialisers throws an exception`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
-        val builder = TaskInitialiser(taskMock)
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
         builder.redirectToDestination { mock() }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.mapToStepInitialisers(mock())
+            builder.build()
         }
     }
+
+    private fun mockTask(): Task<JourneyState> =
+        mock<Task<JourneyState>>().apply {
+            whenever(
+                getTaskSubJourneyBuilder(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                ),
+            ).thenReturn(mock<SubJourneyBuilder<JourneyState>>())
+        }
 }

@@ -13,7 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
     val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
-) {
+    private val state: TState,
+) : BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $segment has already been initialised")
@@ -23,7 +24,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     private var backUrlOverride: (() -> String?)? = null
     private var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
 
-    private var parentage: (() -> Parentage)? = null
+    private var parentageProvider: (() -> Parentage)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
     private var unreachableStepDestination: (() -> Destination)? = null
 
@@ -62,10 +63,10 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     }
 
     fun parents(currentParentage: () -> Parentage): StepInitialiser<TStep, TState, TMode> {
-        if (parentage != null) {
+        if (parentageProvider != null) {
             throw JourneyInitialisationException("Step $segment already has parentage defined")
         }
-        parentage = currentParentage
+        parentageProvider = currentParentage
         return this
     }
 
@@ -95,23 +96,36 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
+    fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): StepInitialiser<TStep, TState, TMode> {
+        if (unreachableStepDestination != null) {
+            return this
+        }
+        unreachableStepDestination = getDestination
+        return this
+    }
+
     fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepInitialiser<TStep, TState, TMode> {
         additionalContentProviders.add(getAdditionalContent)
         return this
     }
 
-    fun build(
-        state: TState,
-        defaultUnreachableStepDestination: (() -> Destination)?,
-    ): JourneyStep<TMode, *, TState> {
+    override fun build(): List<JourneyStep<*, *, *>> = listOf(build(state))
+
+    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
+        configuration()
+    }
+
+    private fun build(state: TState): JourneyStep<TMode, *, TState> {
+        val parentage = parentageProvider?.invoke() ?: throw JourneyInitialisationException("Step $segment has no parentage defined")
+        checkForUninitialisedParents(parentage.potentialParents)
+
         step.initialize(
             segment,
             state,
             backUrlOverride,
             nextDestinationProvider ?: throw JourneyInitialisationException("Step $segment has no nextDestination defined"),
-            parentage?.invoke() ?: throw JourneyInitialisationException("Step $segment has no parentage defined"),
+            parentage,
             unreachableStepDestination
-                ?: defaultUnreachableStepDestination
                 ?: throw JourneyInitialisationException(
                     "Step $segment has no unreachableStepDestination defined, and there is no default set at the journey level either",
                 ),
@@ -132,12 +146,18 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return step
     }
 
-    val potentialParents: List<JourneyStep<*, *, *>>
-        get() {
-            if (step.initialisationStage != StepInitialisationStage.FULLY_INITIALISED) {
-                throw JourneyInitialisationException("Step $segment has not been initialised yet")
+    private fun checkForUninitialisedParents(potentialParents: List<JourneyStep<*, *, *>>) {
+        val uninitialisedParents =
+            potentialParents.filter {
+                it.initialisationStage != StepInitialisationStage.FULLY_INITIALISED
             }
 
-            return step.parentage.potentialParents
+        if (uninitialisedParents.any()) {
+            val parentNames = uninitialisedParents.joinToString { "\n- $it" }
+            throw JourneyInitialisationException(
+                "Step $segment has uninitialised potential parents on initialisation: $parentNames\n" +
+                    "This could imply a dependency loop, or that these two steps are declared in the wrong order.",
+            )
         }
+    }
 }

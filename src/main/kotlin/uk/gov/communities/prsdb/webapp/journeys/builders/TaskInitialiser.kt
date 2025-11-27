@@ -10,14 +10,15 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
-) {
+    private val state: TStateInit,
+) : BuildableElement {
     private val name: String
         get() = this::class.simpleName!!
 
     private var destinationProvider: ((mode: NavigationComplete) -> Destination)? = null
     private var parentage: (() -> Parentage)? = null
 
-    private var allStepsConfiguration: MutableList<StepInitialiser<*, TStateInit, *>.() -> Unit> = mutableListOf()
+    private var allStepsConfiguration: MutableList<StepInitialiser<*, *, *>.() -> Unit> = mutableListOf()
 
     fun redirectToStep(nextStepProvider: (mode: NavigationComplete) -> JourneyStep<*, *, *>): TaskInitialiser<TStateInit> {
         if (destinationProvider != null) {
@@ -43,26 +44,31 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return this
     }
 
-    fun withConfigurationForAllSteps(configuration: StepInitialiser<*, TStateInit, *>.() -> Unit): TaskInitialiser<TStateInit> {
+    fun withConfigurationForAllSteps(configuration: StepInitialiser<*, *, *>.() -> Unit): TaskInitialiser<TStateInit> {
         allStepsConfiguration.add(configuration)
         return this
     }
 
-    fun mapToStepInitialisers(state: TStateInit): List<StepInitialiser<*, TStateInit, *>> {
+    override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             destinationProvider ?: throw JourneyInitialisationException("Task $name does not have a nextDestination defined")
         val taskParentage = parentage?.invoke() ?: throw JourneyInitialisationException("Task $name does not have parentage defined")
 
-        val allStepInitialisers =
-            task.getTaskSteps(state, taskParentage) {
+        val taskSubJourney =
+            task.getTaskSubJourneyBuilder(state, taskParentage) {
                 nextDestination(nonNullDestinationProvider)
             }
 
-        allStepInitialisers.forEach { stepInitialiser ->
+        taskSubJourney.configureSteps {
             allStepsConfiguration.forEach { config ->
-                stepInitialiser.config()
+                config()
             }
         }
-        return allStepInitialisers
+
+        return taskSubJourney.build()
+    }
+
+    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
+        allStepsConfiguration.add(configuration)
     }
 }
