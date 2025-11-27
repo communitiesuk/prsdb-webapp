@@ -13,6 +13,7 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
@@ -72,4 +73,7 @@ class FeatureFlagTest {
 
     @Autowired
     lateinit var featureFlagManager: FeatureFlagManager
+
+    @Autowired
+    lateinit var featureFlagsFromConfig: FeatureFlagsFromConfig
 }

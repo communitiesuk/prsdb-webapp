@@ -1,0 +1,8 @@
+features:
+  feature-flags:
+    - name: "example-feature-flag-one"
+      enabled: true
+      expiry-date: "2030-01-12"
+  releases:
+    - name: "release-1-0"
+      enabled: true
