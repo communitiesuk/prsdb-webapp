@@ -121,14 +121,15 @@ class CookieBanner {
 
     #handleCookiesConsentButton(button, consentValue) {
         button.addEventListener('click', () => {
-            createConsentCookie(consentValue);
-            updateGaConsent(consentValue);
-
-            this.#cookieMessage.hidden = true;
-
-            const confirmationMessageText = consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText;
-            this.#cookieConfirmationMessage.hidden = false;
-            confirmationMessageText.hidden = false;
+            console.log("oops");
+            // createConsentCookie(consentValue);
+            // updateGaConsent(consentValue);
+            //
+            // this.#cookieMessage.hidden = true;
+            //
+            // const confirmationMessageText = !consentValue ? this.#cookiesAcceptedText : this.#cookiesRejectedText;
+            // this.#cookieConfirmationMessage.hidden = false;
+            // confirmationMessageText.hidden = false;
         });
     }
 }
