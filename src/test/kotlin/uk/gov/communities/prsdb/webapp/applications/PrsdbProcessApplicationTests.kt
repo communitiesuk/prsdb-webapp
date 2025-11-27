@@ -14,11 +14,11 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
-import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromApplicationConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManagerFactory
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
@@ -74,8 +74,8 @@ class PrsdbProcessApplicationTests {
                 NotifyIdService::class.scopedBeanName,
                 TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
-                FeatureFlagConfig::class.simpleBeanName,
-                FeatureFlagsFromApplicationConfig::class.simpleBeanName,
+                FeatureFlagManagerFactory::class.simpleBeanName,
+                FeatureFlagsFromConfig::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

@@ -9,7 +9,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromApplicationConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
@@ -36,7 +36,7 @@ class ExampleFeatureFlagTestControllerTests(
     private lateinit var exampleFeatureFlaggedService: ExampleFeatureFlaggedService
 
     @MockitoBean
-    private lateinit var featureFlagsFromConfig: FeatureFlagsFromApplicationConfig
+    private lateinit var featureFlagsFromConfig: FeatureFlagsFromConfig
 
     @WithMockUser
     @Test
