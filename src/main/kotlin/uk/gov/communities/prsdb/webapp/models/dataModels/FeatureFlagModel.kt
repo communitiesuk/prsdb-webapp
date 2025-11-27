@@ -6,5 +6,5 @@ data class FeatureFlagModel(
     val name: String,
     val enabled: Boolean,
     val expiryDate: LocalDate,
-    val flagGroup: String? = null,
+    val release: String? = null,
 )
