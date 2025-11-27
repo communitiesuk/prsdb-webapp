@@ -103,23 +103,31 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
 val frontendAssetsSpec: CopySpec =
     copySpec {
         from("dist")
         include("**/*")
     }
 
+tasks.register<Exec>("buildFrontendAssets") {
+    group = "build"
+    description = "Build frontend JavaScript and CSS assets using npm"
+    commandLine("cmd", "/c", "npm", "run", "build")
+}
+
 tasks.register<Copy>("copyBuiltAssets") {
+    dependsOn("buildFrontendAssets")
     into(layout.buildDirectory.dir("resources/main/static/assets"))
     with(frontendAssetsSpec)
     outputs.upToDateWhen { false }
 }
 
 tasks.withType<KotlinCompile> {
+    dependsOn("copyBuiltAssets")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
     dependsOn("copyBuiltAssets")
 }
 
