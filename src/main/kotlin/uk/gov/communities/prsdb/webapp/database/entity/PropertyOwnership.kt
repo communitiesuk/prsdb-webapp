@@ -60,8 +60,11 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String
 
+    @Column(insertable = false, updatable = false)
+    private val localCouncilId: Int? = null
+
     @Column(nullable = false, insertable = false, updatable = false)
-    private var isInGistIndex: Boolean = false
+    private val isInGistIndex: Boolean = false
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val propertyCompliance: PropertyCompliance? = null
