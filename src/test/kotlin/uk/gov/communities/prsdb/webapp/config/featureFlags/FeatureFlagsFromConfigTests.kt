@@ -53,7 +53,8 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
     @Nested
     inner class IntegrationProfileTests : FeatureFlagTest() {
         @Test
-        fun `loads features and releases from environment specific application yaml if environment profile is set`() {
+        fun `loads features and releases from environment specific application yaml if available and environment profile is set`() {
+            // This is only set in application.yml
             val expectedFeatureFlags =
                 listOf(
                     FeatureFlagModel(
@@ -63,6 +64,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                     ),
                 )
 
+            // This is set in application.yml with enabled=false and in application-integration.yml with enabled=true
             val expectedReleases =
                 listOf(
                     FeatureReleaseModel(
@@ -114,11 +116,11 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
         }
 
         @Test
-        fun `afterPropertiesSet throws for unknown feature name`() {
+        fun `afterPropertiesSet throws for a feature name that is not in the featureFlagNamesList`() {
             featureFlagsFromConfigWithMockAllowedValues.featureFlags =
                 listOf(
                     FeatureFlagModel(
-                        name = "unknown-feature",
+                        name = "unlisted-feature-name",
                         enabled = true,
                         expiryDate = LocalDate.now().plusWeeks(5),
                         null,
@@ -129,7 +131,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
         }
 
         @Test
-        fun `afterPropertiesSet throws for unknown release name`() {
+        fun `afterPropertiesSet throws for a release name that is not in the releaseNamesList`() {
             featureFlagsFromConfigWithMockAllowedValues.featureFlags =
                 listOf(
                     FeatureFlagModel(
@@ -142,7 +144,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
             featureFlagsFromConfigWithMockAllowedValues.releases =
                 listOf(
                     FeatureReleaseModel(
-                        name = "unknown-release",
+                        name = "unlisted-release-name",
                         enabled = true,
                     ),
                 )

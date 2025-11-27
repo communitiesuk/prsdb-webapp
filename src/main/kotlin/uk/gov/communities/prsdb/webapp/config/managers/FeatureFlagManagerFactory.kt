@@ -14,7 +14,6 @@ class FeatureFlagManagerFactory(
     fun featureFlagManager(): FeatureFlagManager {
         val featureFlagManager = FeatureFlagManager()
         featureFlagManager.initializeFeatureFlags(featureFlagsFromConfig.featureFlags)
-        // If a flag is in a flag group, the flag group's enabled value overrides the individual flag's enabled value
         featureFlagManager.initialiseFeatureReleases(featureFlagsFromConfig.releases)
         return featureFlagManager
     }
