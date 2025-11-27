@@ -14,29 +14,29 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
 import java.time.LocalDate
 
 class FeatureFlagsFromConfigTests : FeatureFlagTest() {
-    @Test
-    fun `loads features and releases from application yaml`() {
-        val expectedFeatureFlags =
-            listOf(
-                FeatureFlagModel(
-                    name = "example-feature-flag-one",
-                    enabled = true,
-                    expiryDate = LocalDate.of(2030, 1, 12),
-                ),
-                FeatureFlagModel(
-                    name = "example-feature-flag-two",
-                    enabled = true,
-                    expiryDate = LocalDate.of(2030, 1, 7),
-                    release = "release-1-0",
-                ),
-                FeatureFlagModel(
-                    name = "example-feature-flag-three",
-                    enabled = false,
-                    expiryDate = LocalDate.of(2030, 1, 7),
-                    release = "release-1-0",
-                ),
-            )
+    val expectedFeatureFlagsFromDefaultApplicationYaml =
+        listOf(
+            FeatureFlagModel(
+                name = "example-feature-flag-one",
+                enabled = true,
+                expiryDate = LocalDate.of(2030, 1, 12),
+            ),
+            FeatureFlagModel(
+                name = "example-feature-flag-two",
+                enabled = true,
+                expiryDate = LocalDate.of(2030, 1, 7),
+                release = "release-1-0",
+            ),
+            FeatureFlagModel(
+                name = "example-feature-flag-three",
+                enabled = false,
+                expiryDate = LocalDate.of(2030, 1, 7),
+                release = "release-1-0",
+            ),
+        )
 
+    @Test
+    fun `features and releases from application yaml are loaded`() {
         val expectedReleases =
             listOf(
                 FeatureReleaseModel(
@@ -45,7 +45,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                 ),
             )
 
-        assertTrue(featureFlagsFromConfig.featureFlags == expectedFeatureFlags)
+        assertTrue(featureFlagsFromConfig.featureFlags == expectedFeatureFlagsFromDefaultApplicationYaml)
         assertTrue(featureFlagsFromConfig.releases == expectedReleases)
     }
 
@@ -53,16 +53,9 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
     @Nested
     inner class IntegrationProfileTests : FeatureFlagTest() {
         @Test
-        fun `loads features and releases from environment specific application yaml if available and environment profile is set`() {
+        fun `features and releases from environment specific application yaml are loaded if available and environment profile is set`() {
             // This is only set in application.yml
-            val expectedFeatureFlags =
-                listOf(
-                    FeatureFlagModel(
-                        name = "example-feature-flag-one",
-                        enabled = true,
-                        expiryDate = LocalDate.of(2030, 1, 12),
-                    ),
-                )
+            val expectedFeatureFlags = expectedFeatureFlagsFromDefaultApplicationYaml
 
             // This is set in application.yml with enabled=false and in application-integration.yml with enabled=true
             val expectedReleases =
