@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
@@ -59,6 +60,23 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
     ): Page<PropertyOwnership>
 
     @Query(
+        "SELECT count(*) " +
+            "FROM (SELECT 1 " +
+            "      FROM property_ownership po " +
+            "      WHERE po.single_line_address %>> :searchTerm " +
+            "      AND  po.is_active " +
+            FILTERS +
+            "      LIMIT $MAX_ENTRIES_IN_PROPERTIES_SEARCH) subquery;",
+        nativeQuery = true,
+    )
+    fun countMatching(
+        @Param("searchTerm") searchTerm: String,
+        @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
+        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
+    ): Int
+
+    @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
             "WHERE po.single_line_address %>> :searchTerm " +
@@ -67,24 +85,39 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
             "ORDER BY po.single_line_address <->>> :searchTerm",
         nativeQuery = true,
     )
-    fun searchMatching(
+    fun searchMatchingGin(
         @Param("searchTerm") searchTerm: String,
         @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
         @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
         @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
         pageable: Pageable,
-    ): Page<PropertyOwnership>
+    ): List<PropertyOwnership>
+
+    @Query(
+        "SELECT po.* " +
+            "FROM property_ownership po " +
+            "WHERE po.single_line_address %>> :searchTerm " +
+            "AND po.is_in_gist_index " +
+            FILTERS +
+            "ORDER BY po.single_line_address <->>> :searchTerm",
+        nativeQuery = true,
+    )
+    fun searchMatchingGist(
+        @Param("searchTerm") searchTerm: String,
+        @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
+        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
+        pageable: Pageable,
+    ): List<PropertyOwnership>
 
     companion object {
         private const val NO_LICENCE_TYPE =
             "#{T(uk.gov.communities.prsdb.webapp.constants.enums.LicensingType).NO_LICENSING}"
 
-        // Determines whether the property's address is in the LA user's LA
+        // Determines whether the property's address is in the LC user's LC
         private const val LOCAL_COUNCIL_FILTER =
             """
-            AND ((SELECT a.local_council_id 
-                  FROM address a 
-                  WHERE po.address_id = a.id)
+            AND (po.local_council_id 
                  =
                  (SELECT lcu.local_council_id 
                   FROM local_council_user lcu
@@ -99,7 +132,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
                   WHERE po.license_id = l.id)
                  IN :restrictToLicenses
                  OR po.license_id IS NULL 
-                    AND :${NO_LICENCE_TYPE} IN :restrictToLicenses)
+                    AND :$NO_LICENCE_TYPE IN :restrictToLicenses)
             """
 
         private const val FILTERS = LOCAL_COUNCIL_FILTER + LICENSE_FILTER
