@@ -14,9 +14,9 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 interface BuildableElement {
     fun build(): List<JourneyStep<*, *, *>>
 
-    fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit)
+    fun configureSteps(configuration: StepConfigurer<*>.() -> Unit)
 
-    fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit)
+    fun configure(configuration: StepLikeInitialiser<*>.() -> Unit)
 }
 
 abstract class AbstractJourneyBuilder<TState : JourneyState>(
@@ -27,7 +27,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalStepsConfiguration: StepInitialiser<*, *, *>.() -> Unit = {}
+    private var additionalStepsConfiguration: StepConfigurer<*>.() -> Unit = {}
 
     private var additionalElementConfiguration: StepLikeInitialiser<*>.() -> Unit = {}
 
@@ -35,21 +35,21 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
         configureSteps {
-            unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
             this.additionalStepsConfiguration()
         }
 
-        configureElements {
+        configure {
+            unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
             additionalElementConfiguration()
         }
         return build()
     }
 
-    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
-        this@AbstractJourneyBuilder.additionalStepsConfiguration = configuration
+    override fun configureSteps(configuration: StepConfigurer<*>.() -> Unit) {
+        additionalStepsConfiguration = configuration
     }
 
-    override fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit) {
+    override fun configure(configuration: StepLikeInitialiser<*>.() -> Unit) {
         additionalElementConfiguration = configuration
     }
 

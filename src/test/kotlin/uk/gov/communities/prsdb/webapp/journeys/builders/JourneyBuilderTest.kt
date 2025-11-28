@@ -231,6 +231,7 @@ class JourneyBuilderTest {
                     whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
                     whenever((mock as StepInitialiser<*, *, *>).build()).thenReturn(listOf(mockedJourneyStep))
                     whenever(mock.configureSteps(any())).thenCallRealMethod()
+                    whenever(mock.configure(any())).thenCallRealMethod()
                 }
         }
 

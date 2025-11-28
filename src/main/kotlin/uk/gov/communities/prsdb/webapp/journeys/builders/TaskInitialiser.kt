@@ -13,13 +13,8 @@ class TaskInitialiser<TStateInit : JourneyState>(
     BuildableElement {
     override val initialiserName: String = "Task ${this::class.simpleName ?: this::class.qualifiedName}}"
 
-    private var allStepsConfiguration: MutableList<StepInitialiser<*, *, *>.() -> Unit> = mutableListOf()
+    private var allStepsConfiguration: MutableList<StepConfigurer<*>.() -> Unit> = mutableListOf()
     private var allElementsConfiguration: MutableList<StepLikeInitialiser<*>.() -> Unit> = mutableListOf()
-
-    fun withConfigurationForAllSteps(configuration: StepInitialiser<*, *, *>.() -> Unit): TaskInitialiser<TStateInit> {
-        allStepsConfiguration.add(configuration)
-        return this
-    }
 
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
@@ -33,12 +28,12 @@ class TaskInitialiser<TStateInit : JourneyState>(
             }
 
         taskSubJourney.configureSteps {
-            unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             allStepsConfiguration.forEach { config ->
                 config()
             }
         }
-        taskSubJourney.configureElements {
+        taskSubJourney.configure {
+            unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             allElementsConfiguration.forEach { config ->
                 config()
             }
@@ -47,11 +42,11 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return taskSubJourney.build()
     }
 
-    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
+    override fun configureSteps(configuration: StepConfigurer<*>.() -> Unit) {
         allStepsConfiguration.add(configuration)
     }
 
-    override fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit) {
+    override fun configure(configuration: StepLikeInitialiser<*>.() -> Unit) {
         configuration()
         allElementsConfiguration.add(configuration)
     }

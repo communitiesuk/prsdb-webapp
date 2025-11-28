@@ -65,11 +65,16 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
     }
 }
 
+interface StepConfigurer<TStep : AbstractStepConfig<*, *, *>> {
+    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepConfigurer<TStep>
+}
+
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
     val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
     private val state: TState,
 ) : StepLikeInitialiser<TMode>(),
+    StepConfigurer<TStep>,
     BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
@@ -83,7 +88,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     private var additionalConfig: (TStep.() -> Unit)? = null
     private var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
 
-    fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepLikeInitialiser<TMode> {
+    fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {
             throw JourneyInitialisationException("$initialiserName already has additional configuration defined")
         }
@@ -99,18 +104,16 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
-    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepInitialiser<TStep, TState, TMode> {
+    override fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepInitialiser<TStep, TState, TMode> {
         additionalContentProviders.add(getAdditionalContent)
         return this
     }
 
     override fun build(): List<JourneyStep<*, *, *>> = listOf(build(state))
 
-    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
-        configuration()
-    }
+    override fun configureSteps(configuration: StepConfigurer<*>.() -> Unit) = configuration()
 
-    override fun configureElements(configuration: StepLikeInitialiser<*>.() -> Unit) = configureSteps(configuration)
+    override fun configure(configuration: StepLikeInitialiser<*>.() -> Unit) = configuration()
 
     private fun build(state: TState): JourneyStep<TMode, *, TState> {
         val parentage = parentageProvider?.invoke() ?: throw JourneyInitialisationException("$initialiserName has no parentage defined")
