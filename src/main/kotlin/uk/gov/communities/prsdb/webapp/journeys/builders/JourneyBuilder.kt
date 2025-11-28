@@ -80,7 +80,7 @@ open class JourneyBuilder<TState : JourneyState>(
             init: TaskInitialiser<TState>.() -> Unit,
         ) = journeyBuilder.task(uninitialisedTask) {
             init()
-            withConfigurationForAllSteps {
+            configure {
                 withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
             }
         }
