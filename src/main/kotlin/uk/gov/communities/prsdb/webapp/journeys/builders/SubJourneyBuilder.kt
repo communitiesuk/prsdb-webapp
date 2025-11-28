@@ -25,20 +25,20 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalElementConfiguration: ConfigurableElement<*>.() -> Unit = {}
+    private var additionalConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
     override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
 
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
         configure {
             unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
-            additionalElementConfiguration()
+            additionalConfiguration.forEach { it() }
         }
         return build()
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
-        additionalElementConfiguration = configuration
+        additionalConfiguration.add(configuration)
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
