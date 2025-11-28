@@ -9,12 +9,11 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
-) : StepLikeInitialiser<NavigationComplete>(),
+) : ConfigurableElement<NavigationComplete>(),
     BuildableElement {
     override val initialiserName: String = "Task ${this::class.simpleName ?: this::class.qualifiedName}}"
 
-    private var allStepsConfiguration: MutableList<StepConfigurer<*>.() -> Unit> = mutableListOf()
-    private var allElementsConfiguration: MutableList<StepLikeInitialiser<*>.() -> Unit> = mutableListOf()
+    private var allElementsConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
@@ -26,12 +25,6 @@ class TaskInitialiser<TStateInit : JourneyState>(
             task.getTaskSubJourneyBuilder(state, taskParentage) {
                 nextDestination(nonNullDestinationProvider)
             }
-
-        taskSubJourney.configureSteps {
-            allStepsConfiguration.forEach { config ->
-                config()
-            }
-        }
         taskSubJourney.configure {
             unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             allElementsConfiguration.forEach { config ->
@@ -42,11 +35,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return taskSubJourney.build()
     }
 
-    override fun configureSteps(configuration: StepConfigurer<*>.() -> Unit) {
-        allStepsConfiguration.add(configuration)
-    }
-
-    override fun configure(configuration: StepLikeInitialiser<*>.() -> Unit) {
+    override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
         configuration()
         allElementsConfiguration.add(configuration)
     }

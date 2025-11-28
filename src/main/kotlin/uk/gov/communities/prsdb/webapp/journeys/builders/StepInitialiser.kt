@@ -10,19 +10,19 @@ import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
-abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
+abstract class ConfigurableElement<TMode : Enum<TMode>> {
     abstract val initialiserName: String
     protected var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
     protected var parentageProvider: (() -> Parentage)? = null
     protected var unreachableStepDestination: (() -> Destination)? = null
 
-    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): StepLikeInitialiser<TMode> =
+    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
 
-    fun nextUrl(nextUrlProvider: (mode: TMode) -> String): StepLikeInitialiser<TMode> =
+    fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
 
-    fun nextDestination(destinationProvider: (mode: TMode) -> Destination): StepLikeInitialiser<TMode> {
+    fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
         }
@@ -30,7 +30,7 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
         return this
     }
 
-    fun noNextDestination(): StepLikeInitialiser<TMode> {
+    fun noNextDestination(): ConfigurableElement<TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
         }
@@ -38,7 +38,7 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
         return this
     }
 
-    fun parents(currentParentage: () -> Parentage): StepLikeInitialiser<TMode> {
+    fun parents(currentParentage: () -> Parentage): ConfigurableElement<TMode> {
         if (parentageProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has parentage defined")
         }
@@ -46,9 +46,9 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
         return this
     }
 
-    fun initialStep(): StepLikeInitialiser<TMode> = parents { NoParents() }
+    fun initialStep(): ConfigurableElement<TMode> = parents { NoParents() }
 
-    fun unreachableStepUrl(getDestination: () -> String): StepLikeInitialiser<TMode> {
+    fun unreachableStepUrl(getDestination: () -> String): ConfigurableElement<TMode> {
         if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("$initialiserName already has an unreachableStepDestination defined")
         }
@@ -56,25 +56,27 @@ abstract class StepLikeInitialiser<TMode : Enum<TMode>> {
         return this
     }
 
-    fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): StepLikeInitialiser<TMode> {
+    fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode> {
         if (unreachableStepDestination != null) {
             return this
         }
         unreachableStepDestination = getDestination
         return this
     }
-}
 
-interface StepConfigurer<TStep : AbstractStepConfig<*, *, *>> {
-    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepConfigurer<TStep>
+    protected var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
+
+    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> {
+        additionalContentProviders.add(getAdditionalContent)
+        return this
+    }
 }
 
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
     val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
     private val state: TState,
-) : StepLikeInitialiser<TMode>(),
-    StepConfigurer<TStep>,
+) : ConfigurableElement<TMode>(),
     BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
@@ -86,7 +88,6 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
 
     private var backUrlOverride: (() -> String?)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
-    private var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
 
     fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {
@@ -104,16 +105,9 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
-    override fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): StepInitialiser<TStep, TState, TMode> {
-        additionalContentProviders.add(getAdditionalContent)
-        return this
-    }
-
     override fun build(): List<JourneyStep<*, *, *>> = listOf(build(state))
 
-    override fun configureSteps(configuration: StepConfigurer<*>.() -> Unit) = configuration()
-
-    override fun configure(configuration: StepLikeInitialiser<*>.() -> Unit) = configuration()
+    override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
     private fun build(state: TState): JourneyStep<TMode, *, TState> {
         val parentage = parentageProvider?.invoke() ?: throw JourneyInitialisationException("$initialiserName has no parentage defined")

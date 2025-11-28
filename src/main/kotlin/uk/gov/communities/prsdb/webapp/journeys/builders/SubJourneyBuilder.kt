@@ -14,9 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 interface BuildableElement {
     fun build(): List<JourneyStep<*, *, *>>
 
-    fun configureSteps(configuration: StepConfigurer<*>.() -> Unit)
-
-    fun configure(configuration: StepLikeInitialiser<*>.() -> Unit)
+    fun configure(configuration: ConfigurableElement<*>.() -> Unit)
 }
 
 abstract class AbstractJourneyBuilder<TState : JourneyState>(
@@ -27,17 +25,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalStepsConfiguration: StepConfigurer<*>.() -> Unit = {}
-
-    private var additionalElementConfiguration: StepLikeInitialiser<*>.() -> Unit = {}
+    private var additionalElementConfiguration: ConfigurableElement<*>.() -> Unit = {}
 
     override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
 
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
-        configureSteps {
-            this.additionalStepsConfiguration()
-        }
-
         configure {
             unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
             additionalElementConfiguration()
@@ -45,11 +37,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         return build()
     }
 
-    override fun configureSteps(configuration: StepConfigurer<*>.() -> Unit) {
-        additionalStepsConfiguration = configuration
-    }
-
-    override fun configure(configuration: StepLikeInitialiser<*>.() -> Unit) {
+    override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
         additionalElementConfiguration = configuration
     }
 
