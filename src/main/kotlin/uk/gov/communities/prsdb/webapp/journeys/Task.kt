@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.builders.StepCollectionBuilder
+import uk.gov.communities.prsdb.webapp.journeys.builders.BuildableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
@@ -15,7 +15,7 @@ abstract class Task<in TState : JourneyState> {
         state: TState,
         entryPoint: Parentage,
         exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
-    ): StepCollectionBuilder {
+    ): BuildableElement {
         this.subJourneyParentage = entryPoint
         this.exitInit = exitInit
         return makeSubJourney(state)
@@ -24,7 +24,7 @@ abstract class Task<in TState : JourneyState> {
     protected fun <TDslState : TState> subJourney(
         state: TDslState,
         init: SubJourneyBuilder<TDslState>.() -> Unit,
-    ): StepCollectionBuilder {
+    ): BuildableElement {
         if (::subJourneyBuilder.isInitialized) {
             throw JourneyInitialisationException("Task sub-journey has already been initialised")
         }
@@ -32,11 +32,11 @@ abstract class Task<in TState : JourneyState> {
         subJourneyBuilder = localSubJourneyBuilder
         localSubJourneyBuilder.subJourneyParent(subJourneyParentage)
         localSubJourneyBuilder.init()
-        localSubJourneyBuilder.exitInitialiser?.exitInit()
+        localSubJourneyBuilder.exitStep(exitInit)
         return localSubJourneyBuilder
     }
 
-    abstract fun makeSubJourney(state: TState): StepCollectionBuilder
+    abstract fun makeSubJourney(state: TState): BuildableElement
 
     fun taskStatus(): TaskStatus =
         when {

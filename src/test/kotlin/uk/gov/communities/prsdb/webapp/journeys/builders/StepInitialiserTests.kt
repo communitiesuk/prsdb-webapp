@@ -57,7 +57,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         verify(stepMock).initialize(
@@ -81,7 +81,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         verify(stepMock).initialize(
@@ -130,7 +130,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val lambdaCaptor = argumentCaptor<(TestEnum) -> Destination>()
@@ -164,7 +164,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val lambdaCaptor = argumentCaptor<(TestEnum) -> Destination>()
@@ -189,7 +189,7 @@ class StepInitialiserTests {
         val builder = StepInitialiser("test", mockInitialisableStep(), mock())
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.buildSteps() }
+        assertThrows<JourneyInitialisationException> { builder.build() }
     }
 
     @Test
@@ -213,7 +213,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         verify(stepMock).initialize(
@@ -236,7 +236,7 @@ class StepInitialiserTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.buildSteps()
+            builder.build()
         }
     }
 
@@ -250,7 +250,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         verify(stepMock).initialize(
@@ -291,7 +291,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         assertTrue(additionalConfigApplied)
@@ -320,7 +320,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet(defaultUnreachableRedirectLambda)
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val captor = argumentCaptor<() -> Destination>()
@@ -350,7 +350,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet(defaultUnreachableRedirectLambda)
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         verify(stepMock).initialize(
@@ -371,7 +371,7 @@ class StepInitialiserTests {
         builder.nextUrl { "next" }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.buildSteps() }
+        assertThrows<JourneyInitialisationException> { builder.build() }
     }
 
     @Test
@@ -384,7 +384,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val mapCaptor = argumentCaptor<() -> Map<String, Any>>()
@@ -414,7 +414,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val mapCaptor = argumentCaptor<() -> Map<String, Any>>()
@@ -447,7 +447,7 @@ class StepInitialiserTests {
         builder.unreachableStepDestinationIfNotSet { mock() }
 
         // Act
-        builder.buildSteps()
+        builder.build()
 
         // Assert
         val mapCaptor = argumentCaptor<() -> Map<String, Any>>()
@@ -477,7 +477,7 @@ class StepInitialiserTests {
         builder.parents { uninitialisedStepMock.hasOutcome(TestEnum.ENUM_VALUE) }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { builder.buildSteps() }
+        assertThrows<JourneyInitialisationException> { builder.build() }
     }
 
     companion object {

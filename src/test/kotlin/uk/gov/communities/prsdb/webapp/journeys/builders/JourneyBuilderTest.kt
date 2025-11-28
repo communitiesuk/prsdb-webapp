@@ -46,23 +46,24 @@ class SubJourneyBuilderTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            subJourneyBuilder.buildSteps()
+            subJourneyBuilder.build()
         }
     }
 
     @Test
-    fun `If an exitStep has already been set, then setting it again throws as exception`() {
+    fun `If an a configuration on exitStep has already been set, then setting it again throws as exception when built`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
+        subJourneyBuilder.exitStep {
+            parents { NoParents() }
+        }
         subJourneyBuilder.exitStep {
             parents { NoParents() }
         }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            subJourneyBuilder.exitStep {
-                parents { NoParents() }
-            }
+            subJourneyBuilder.build()
         }
     }
 
@@ -83,9 +84,11 @@ class SubJourneyBuilderTests {
             parents { parent }
         }
 
-        subJourneyBuilder.exitInitialiser?.nextUrl { "url" }
+        subJourneyBuilder.exitStep {
+            nextUrl { "url" }
+        }
         subJourneyBuilder.unreachableStepUrl { "url" }
-        val resultingStep = subJourneyBuilder.buildSteps().last()
+        val resultingStep = subJourneyBuilder.build().last()
 
         // Assert
         assertSame(exitStep, resultingStep)
@@ -101,7 +104,7 @@ class SubJourneyBuilderTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            subJourneyBuilder.buildSteps()
+            subJourneyBuilder.build()
         }
     }
 
@@ -226,7 +229,7 @@ class JourneyBuilderTest {
                     val mockedJourneyStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                     whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
-                    whenever((mock as StepInitialiser<*, *, *>).buildSteps()).thenReturn(listOf(mockedJourneyStep))
+                    whenever((mock as StepInitialiser<*, *, *>).build()).thenReturn(listOf(mockedJourneyStep))
                     whenever(mock.configureSteps(any())).thenCallRealMethod()
                 }
         }
@@ -283,8 +286,8 @@ class JourneyBuilderTest {
             val stepInitialiser1 = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
             val stepInitialiser2 = mockedStepBuilders.constructed().last() as StepInitialiser<*, JourneyState, *>
             val captor = argumentCaptor<() -> Destination>()
-            verify(stepInitialiser1).buildSteps()
-            verify(stepInitialiser2).buildSteps()
+            verify(stepInitialiser1).build()
+            verify(stepInitialiser2).build()
 
             captor.allValues.forEach {
                 val destination = it()
@@ -366,7 +369,7 @@ class JourneyBuilderTest {
             // Arrange 2
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(mockStepInitialiser.segment).thenReturn("segment")
-            whenever(mockStepInitialiser.buildSteps()).thenReturn(listOf(builtStep))
+            whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
             whenever(builtStep.routeSegment).thenReturn("segment")
 
             // Act 2
@@ -374,7 +377,7 @@ class JourneyBuilderTest {
 
             // Assert 2
             val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
-            verify(mockStepInitialiser).buildSteps()
+            verify(mockStepInitialiser).build()
             typedMap.entries.single().let {
                 assertSame(builtStep, it.value.journeyStep)
             }
@@ -391,7 +394,7 @@ class JourneyBuilderTest {
                 mockConstruction(StepInitialiser::class.java) { mock, context ->
                     val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
-                    whenever((mock as StepInitialiser<*, JourneyState, *>).buildSteps()).thenReturn(listOf(mockedJourneyStep))
+                    whenever((mock as StepInitialiser<*, JourneyState, *>).build()).thenReturn(listOf(mockedJourneyStep))
                 }
         }
 
@@ -419,14 +422,14 @@ class JourneyBuilderTest {
 
             // Arrange 2
             val builtStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
-            whenever(mockStepInitialiser.buildSteps()).thenReturn(listOf(builtStep))
+            whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
 
             // Act 2
             val map = jb.buildRoutingMap()
 
             // Assert 2
             val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
-            verify(mockStepInitialiser).buildSteps()
+            verify(mockStepInitialiser).build()
             assertTrue(typedMap.entries.isEmpty())
         }
     }
@@ -445,7 +448,7 @@ class JourneyBuilderTest {
             )
 
         mockConstruction(TaskInitialiser::class.java) { mock, context ->
-            whenever((mock as TaskInitialiser<JourneyState>).buildSteps()).thenReturn(builtSteps)
+            whenever((mock as TaskInitialiser<JourneyState>).build()).thenReturn(builtSteps)
         }.use { taskConstruction ->
 
             // Act 1
@@ -464,7 +467,7 @@ class JourneyBuilderTest {
 
             // Assert 2
             val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
-            verify(mockTaskInitialiser).buildSteps()
+            verify(mockTaskInitialiser).build()
 
             typedMap.values.forEachIndexed { index, orchestrator ->
                 assertSame(builtSteps[index], orchestrator.journeyStep)

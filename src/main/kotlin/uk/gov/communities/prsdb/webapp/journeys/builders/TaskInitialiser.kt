@@ -10,7 +10,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
 ) : StepLikeInitialiser<NavigationComplete>(),
-    StepCollectionBuilder {
+    BuildableElement {
     override val initialiserName: String = "Task ${this::class.simpleName ?: this::class.qualifiedName}}"
 
     private var allStepsConfiguration: MutableList<StepInitialiser<*, *, *>.() -> Unit> = mutableListOf()
@@ -21,7 +21,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return this
     }
 
-    override fun buildSteps(): List<JourneyStep<*, *, *>> {
+    override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             nextDestinationProvider ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
         val taskParentage =
@@ -44,7 +44,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
             }
         }
 
-        return taskSubJourney.buildSteps()
+        return taskSubJourney.build()
     }
 
     override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
