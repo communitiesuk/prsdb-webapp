@@ -10,19 +10,43 @@ import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
-abstract class ConfigurableElement<TMode : Enum<TMode>> {
-    abstract val initialiserName: String
-    protected var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
-    protected var parentageProvider: (() -> Parentage)? = null
-    protected var unreachableStepDestination: (() -> Destination)? = null
+interface ConfigurableElement<TMode : Enum<TMode>> {
+    val initialiserName: String
 
-    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
+    fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode>
+
+    fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode>
+
+    fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode>
+
+    fun noNextDestination(): ConfigurableElement<TMode>
+
+    fun parents(currentParentage: () -> Parentage): ConfigurableElement<TMode>
+
+    fun initialStep(): ConfigurableElement<TMode>
+
+    fun unreachableStepUrl(getDestination: () -> String): ConfigurableElement<TMode>
+
+    fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode>
+
+    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode>
+}
+
+class ElementConfiguration<TMode : Enum<TMode>>(
+    override val initialiserName: String,
+) : ConfigurableElement<TMode> {
+    var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
+    var parentageProvider: (() -> Parentage)? = null
+    var unreachableStepDestination: (() -> Destination)? = null
+    var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
+
+    override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
 
-    fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode> =
+    override fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
 
-    fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode> {
+    override fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
         }
@@ -30,7 +54,7 @@ abstract class ConfigurableElement<TMode : Enum<TMode>> {
         return this
     }
 
-    fun noNextDestination(): ConfigurableElement<TMode> {
+    override fun noNextDestination(): ConfigurableElement<TMode> {
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
         }
@@ -38,7 +62,7 @@ abstract class ConfigurableElement<TMode : Enum<TMode>> {
         return this
     }
 
-    fun parents(currentParentage: () -> Parentage): ConfigurableElement<TMode> {
+    override fun parents(currentParentage: () -> Parentage): ConfigurableElement<TMode> {
         if (parentageProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has parentage defined")
         }
@@ -46,9 +70,9 @@ abstract class ConfigurableElement<TMode : Enum<TMode>> {
         return this
     }
 
-    fun initialStep(): ConfigurableElement<TMode> = parents { NoParents() }
+    override fun initialStep(): ConfigurableElement<TMode> = parents { NoParents() }
 
-    fun unreachableStepUrl(getDestination: () -> String): ConfigurableElement<TMode> {
+    override fun unreachableStepUrl(getDestination: () -> String): ConfigurableElement<TMode> {
         if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("$initialiserName already has an unreachableStepDestination defined")
         }
@@ -56,7 +80,7 @@ abstract class ConfigurableElement<TMode : Enum<TMode>> {
         return this
     }
 
-    fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode> {
+    override fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode> {
         if (unreachableStepDestination != null) {
             return this
         }
@@ -64,9 +88,7 @@ abstract class ConfigurableElement<TMode : Enum<TMode>> {
         return this
     }
 
-    protected var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
-
-    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> {
+    override fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> {
         additionalContentProviders.add(getAdditionalContent)
         return this
     }
@@ -76,15 +98,14 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
     private val state: TState,
-) : ConfigurableElement<TMode>(),
+    val elementConfiguration: ElementConfiguration<TMode> = ElementConfiguration("Step ${segment ?: step::class.simpleName}"),
+) : ConfigurableElement<TMode> by elementConfiguration,
     BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("${segment ?: step::class.simpleName} has already been initialised")
         }
     }
-
-    override val initialiserName: String = "Step ${segment ?: step::class.simpleName}"
 
     private var backUrlOverride: (() -> String?)? = null
     private var additionalConfig: (TStep.() -> Unit)? = null
@@ -110,21 +131,24 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
     private fun build(state: TState): JourneyStep<TMode, *, TState> {
-        val parentage = parentageProvider?.invoke() ?: throw JourneyInitialisationException("$initialiserName has no parentage defined")
+        val parentage =
+            elementConfiguration.parentageProvider?.invoke()
+                ?: throw JourneyInitialisationException("$initialiserName has no parentage defined")
         checkForUninitialisedParents(parentage.potentialParents)
 
         step.initialize(
             segment,
             state,
             backUrlOverride,
-            nextDestinationProvider ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined"),
+            elementConfiguration.nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined"),
             parentage,
-            unreachableStepDestination
+            elementConfiguration.unreachableStepDestination
                 ?: throw JourneyInitialisationException(
                     "$initialiserName has no unreachableStepDestination defined, and there is no default set at the journey level either",
                 ),
         ) {
-            additionalContentProviders.associate { provider -> provider() }
+            elementConfiguration.additionalContentProviders.associate { provider -> provider() }
         }
 
         if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {

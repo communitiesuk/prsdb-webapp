@@ -9,6 +9,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
@@ -59,7 +60,7 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `a nextStep is passed to the task's exit when mapped to step initialisers`() {
+    fun `a nextStep is passed to the task's exit when built`() {
         // Arrange
         val taskMock = mockTask()
 
@@ -98,7 +99,7 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `a nextDestination is passed to the task's exit when mapped to step initialisers`() {
+    fun `a nextDestination is passed to the task's exit when built`() {
         // Arrange
         val taskMock = mockTask()
 
@@ -131,7 +132,7 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `if no destinationProvider is set, an exception is thrown when mapping to step initialisers`() {
+    fun `if no destinationProvider is set, an exception is thrown when built`() {
         // Arrange
         val taskMock = mockTask()
 
@@ -186,6 +187,78 @@ class TaskInitialiserTests {
         assertThrows<JourneyInitialisationException> {
             builder.build()
         }
+    }
+
+    @Test
+    fun `a single additional content provider is passed to the taskSubJourney when built`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        val expectedKey = "testKey"
+        val expectedValue = "testValue"
+        builder.withAdditionalContentProperty { expectedKey to expectedValue }
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        val configCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
+        verify(subJourneyBuilderMock).configure(configCaptor.capture())
+
+        val mockConfigurable = mock<ConfigurableElement<NavigationComplete>>()
+        configCaptor.firstValue.invoke(mockConfigurable)
+
+        val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
+        verify(mockConfigurable).withAdditionalContentProperty(contentCaptor.capture())
+
+        val content = contentCaptor.firstValue()
+        assertEquals(expectedKey to expectedValue, content)
+    }
+
+    @Test
+    fun `multiple additional content providers are passed to the taskSubJourney when built`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(
+            taskMock.getTaskSubJourneyBuilder(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            ),
+        ).thenReturn(subJourneyBuilderMock)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        val firstKey = "firstKey"
+        val firstValue = "firstValue"
+        val secondKey = "secondKey"
+        val secondValue = 177
+        builder.withAdditionalContentProperty { firstKey to firstValue }
+        builder.withAdditionalContentProperty { secondKey to secondValue }
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        val configCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
+        verify(subJourneyBuilderMock).configure(configCaptor.capture())
+
+        val mockConfigurable = mock<ConfigurableElement<NavigationComplete>>()
+        configCaptor.firstValue.invoke(mockConfigurable)
+
+        val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
+        verify(mockConfigurable, times(2)).withAdditionalContentProperty(contentCaptor.capture())
+
+        val allContent = contentCaptor.allValues.map { it() }
+        assertTrue(allContent.contains(firstKey to firstValue))
+        assertTrue(allContent.contains(secondKey to secondValue))
     }
 
     private fun mockTask(): Task<JourneyState> =

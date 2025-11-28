@@ -9,34 +9,31 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
-) : ConfigurableElement<NavigationComplete>(),
+    private val elementConfiguration: ElementConfiguration<NavigationComplete> =
+        ElementConfiguration("Task ${task::class.simpleName}}"),
+) : ConfigurableElement<NavigationComplete> by elementConfiguration,
     BuildableElement {
-    override val initialiserName: String = "Task ${this::class.simpleName ?: this::class.qualifiedName}}"
-
-    private var allElementsConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
-
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
-            nextDestinationProvider ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
+            elementConfiguration.nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
         val taskParentage =
-            parentageProvider?.invoke() ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined")
+            elementConfiguration.parentageProvider?.invoke()
+                ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined")
 
         val taskSubJourney =
             task.getTaskSubJourneyBuilder(state, taskParentage) {
                 nextDestination(nonNullDestinationProvider)
             }
         taskSubJourney.configure {
-            unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
-            allElementsConfiguration.forEach { config ->
-                config()
+            elementConfiguration.unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
+            elementConfiguration.additionalContentProviders.forEach { contentValueProvider ->
+                withAdditionalContentProperty(contentValueProvider)
             }
         }
 
         return taskSubJourney.build()
     }
 
-    override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
-        configuration()
-        allElementsConfiguration.add(configuration)
-    }
+    override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 }
