@@ -45,11 +45,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) {
-        val firstStep = journeyElements.firstOrNull()
-        if (firstStep == null) {
+        val firstElement = journeyElements.firstOrNull()
+        if (firstElement == null) {
             additionalFirstElementConfiguration.add(configuration)
         } else {
-            firstStep.configureFirst(configuration)
+            firstElement.configureFirst(configuration)
         }
     }
 
