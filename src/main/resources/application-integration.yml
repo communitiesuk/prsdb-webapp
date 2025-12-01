@@ -1,0 +1,4 @@
+features:
+  releases:
+    - name: "release-1-0"
+      enabled: true

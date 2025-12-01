@@ -1,59 +1,53 @@
 package uk.gov.communities.prsdb.webapp.config
 
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
-import uk.gov.communities.prsdb.webapp.constants.RELEASE_1_0
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagGroupModel
+import uk.gov.communities.prsdb.webapp.constants.featureFlagNames
+import uk.gov.communities.prsdb.webapp.constants.featureFlagReleaseNames
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
-import java.time.LocalDate
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
 
-@ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 @Configuration
-class FeatureFlagConfig {
+@ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
+@ConfigurationProperties(prefix = "features")
+class FeatureFlagConfig(
+    private val featureFlagNamesList: List<String> = featureFlagNames,
+    private val releaseNamesList: List<String> = featureFlagReleaseNames,
+) : InitializingBean {
+    var featureFlags: List<FeatureFlagModel> = emptyList()
+    var releases: List<FeatureReleaseModel> = emptyList()
+
     @Bean
     fun featureFlagManager(): FeatureFlagManager {
         val featureFlagManager = FeatureFlagManager()
         featureFlagManager.initializeFeatureFlags(featureFlags)
-        // If a flag is in a flag group, the flag group's enabled value overrides the individual flag's enabled value
-        featureFlagManager.initialiseFeatureFlagGroups(featureGroups)
+        featureFlagManager.initialiseFeatureReleases(releases)
         return featureFlagManager
     }
 
-    companion object {
-        val featureFlags =
-            listOf(
-                FeatureFlagModel(
-                    name = EXAMPLE_FEATURE_FLAG_ONE,
-                    enabled = true,
-                    expiryDate = LocalDate.of(2030, 2, 14),
-                ),
-                FeatureFlagModel(
-                    name = EXAMPLE_FEATURE_FLAG_TWO,
-                    // Please leave this flag enabled to demo the value being overridden by the flag group
-                    enabled = true,
-                    expiryDate = LocalDate.of(2030, 2, 14),
-                    flagGroup = RELEASE_1_0,
-                ),
-                FeatureFlagModel(
-                    name = EXAMPLE_FEATURE_FLAG_THREE,
-                    // Please leave this flag disabled to demo the value being overridden by the flag group
-                    enabled = false,
-                    expiryDate = LocalDate.of(2030, 2, 14),
-                    flagGroup = RELEASE_1_0,
-                ),
-            )
+    override fun afterPropertiesSet() {
+        var missingFlagOrReleaseMessage = ""
 
-        val featureGroups =
-            listOf(
-                FeatureFlagGroupModel(
-                    name = RELEASE_1_0,
-                    enabled = true,
-                ),
-            )
+        featureFlags.forEach { feature ->
+            if (feature.name !in featureFlagNamesList) {
+                missingFlagOrReleaseMessage +=
+                    "Feature flag name ${feature.name} must be added as a const val and included in featureFlagNames \n"
+            }
+        }
+
+        releases.forEach { release ->
+            if (release.name !in releaseNamesList) {
+                missingFlagOrReleaseMessage +=
+                    "Feature release name ${release.name} must be added as a const val and included in featureFlagReleaseNames \n"
+            }
+        }
+
+        if (missingFlagOrReleaseMessage.isNotEmpty()) {
+            throw IllegalStateException(missingFlagOrReleaseMessage.trim())
+        }
     }
 }
