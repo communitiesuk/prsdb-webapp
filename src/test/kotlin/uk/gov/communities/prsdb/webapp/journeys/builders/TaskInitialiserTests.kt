@@ -271,6 +271,41 @@ class TaskInitialiserTests {
         assertTrue(allContent.contains(secondKey to secondValue))
     }
 
+    @Test
+    fun `setting a backDestination on a task sets the back destination on the first step in the task`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(
+            taskMock.getTaskSubJourneyBuilder(
+                anyOrNull(),
+                anyOrNull(),
+            ),
+        ).thenReturn(subJourneyBuilderMock)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        val backDestination = Destination.ExternalUrl("backUrl")
+        builder.backDestination { backDestination }
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        val firstStepConfigCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
+        verify(subJourneyBuilderMock).configureFirst(firstStepConfigCaptor.capture())
+
+        val mockStepInitialiser = mock<StepInitialiser<*, *, NavigationComplete>>()
+        firstStepConfigCaptor.firstValue.invoke(mockStepInitialiser)
+
+        val backDestCaptor = argumentCaptor<() -> Destination>()
+        verify(mockStepInitialiser).backDestination(backDestCaptor.capture())
+
+        val capturedBackDestination = backDestCaptor.firstValue.invoke()
+        assertSame(backDestination, capturedBackDestination)
+    }
+
     private fun mockTask(): Task<JourneyState> =
         mock<Task<JourneyState>>().apply {
             whenever(

@@ -97,7 +97,7 @@ class SubJourneyBuilderTests {
     }
 
     @Test
-    fun `If no starting step is set, then getSteps throws as exception`() {
+    fun `If no steps is set, then getSteps throws as exception`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
         subJourneyBuilder.exitStep {
@@ -111,7 +111,7 @@ class SubJourneyBuilderTests {
     }
 
     @Test
-    fun `If a starting step has already been set, then setting it again throws as exception`() {
+    fun `If a step has already been configured, then setting it again throws as exception`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
         val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
@@ -124,13 +124,11 @@ class SubJourneyBuilderTests {
         }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> {
-            subJourneyBuilder.step(
-                "segment2",
-                mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>(),
-            ) {
-                nextUrl { "url" }
-            }
+        subJourneyBuilder.step(
+            "segment2",
+            step,
+        ) {
+            nextUrl { "url" }
         }
     }
 
@@ -492,6 +490,76 @@ class JourneyBuilderTest {
             assertTrue(capturedDestinationsOverwritten[0])
             assertFalse(capturedDestinationsOverwritten[1])
             assertTrue(capturedDestinationsOverwritten[2])
+        }
+
+        @Test
+        fun `configureFirst applies configuration to the first step only`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val step1 = StepInitialiserTests.mockInitialisableStep()
+            val step2 = StepInitialiserTests.mockInitialisableStep()
+            val step3 = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.step("segment1", step1) {
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step("segment2", step2) {
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step("segment3", step3) {
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+
+            jb.configureFirst {
+                modifyNextDestination { { Destination.ExternalUrl("configured") } }
+            }
+
+            jb.buildRoutingMap()
+
+            // Assert
+            val nextDestinationCaptor = argumentCaptor<(TestEnum) -> Destination>()
+            verify(step1).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step2).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step3).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+
+            val capturedDestinationsOverwritten =
+                nextDestinationCaptor.allValues.map {
+                    val destination = it(TestEnum.ENUM_VALUE)
+                    destination is Destination.ExternalUrl &&
+                        destination.externalUrl == "configured"
+                }
+            assertTrue(capturedDestinationsOverwritten[0])
+            assertFalse(capturedDestinationsOverwritten[1])
+            assertFalse(capturedDestinationsOverwritten[2])
         }
     }
 }
