@@ -138,16 +138,22 @@ class SubJourneyBuilderTests {
     fun `step sets the first step of the sub-journey`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
-        val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
-        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
+        val step = StepInitialiserTests.mockInitialisableStep()
 
         // Act
+        subJourneyBuilder.unreachableStepUrl { "url" }
         subJourneyBuilder.step(
             "segment",
             step,
         ) {
             nextUrl { "url" }
+            parents { NoParents() }
         }
+        subJourneyBuilder.exitStep {
+            parents { NoParents() }
+            noNextDestination()
+        }
+        subJourneyBuilder.build()
 
         // Assert
         assertSame(step, subJourneyBuilder.firstStep)
