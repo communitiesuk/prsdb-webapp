@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 interface BuildableElement {
     fun build(): List<JourneyStep<*, *, *>>
 
-    fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit)
+    fun configure(configuration: ConfigurableElement<*>.() -> Unit)
 }
 
 abstract class AbstractJourneyBuilder<TState : JourneyState>(
@@ -25,21 +25,20 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalConfiguration: StepInitialiser<*, *, *>.() -> Unit = {}
+    private var additionalConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
     override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
 
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
-        configureSteps {
+        configure {
             unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
-            additionalConfiguration()
+            additionalConfiguration.forEach { it() }
         }
-
         return build()
     }
 
-    override fun configureSteps(configuration: StepInitialiser<*, *, *>.() -> Unit) {
-        additionalConfiguration = configuration
+    override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
+        additionalConfiguration.add(configuration)
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
@@ -85,7 +84,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 }
 
-class SubJourneyBuilder<TState : JourneyState>(
+open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
 ) : AbstractJourneyBuilder<TState>(journey) {
     var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()

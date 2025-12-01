@@ -83,10 +83,10 @@ class SubJourneyBuilderTests {
         subJourneyBuilder.exitStep {
             parents { parent }
         }
+
         subJourneyBuilder.exitStep {
             nextUrl { "url" }
         }
-
         subJourneyBuilder.unreachableStepUrl { "url" }
         val resultingStep = subJourneyBuilder.build().last()
 
@@ -230,7 +230,7 @@ class JourneyBuilderTest {
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                     whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
                     whenever((mock as StepInitialiser<*, *, *>).build()).thenReturn(listOf(mockedJourneyStep))
-                    whenever(mock.configureSteps(any())).thenCallRealMethod()
+                    whenever(mock.configure(any())).thenCallRealMethod()
                 }
         }
 
@@ -454,13 +454,13 @@ class JourneyBuilderTest {
             // Act 1
             jb.task(uninitialisedTask) {
                 parents { NoParents() }
-                redirectToDestination { Destination.NavigationalStep(mock()) }
+                nextDestination { Destination.NavigationalStep(mock()) }
             }
 
             // Assert 1
             val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
             verify(mockTaskInitialiser).parents(any())
-            verify(mockTaskInitialiser).redirectToDestination(any())
+            verify(mockTaskInitialiser).nextDestination(any())
 
             // Act 2
             val map = jb.buildRoutingMap()
