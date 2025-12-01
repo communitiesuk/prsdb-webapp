@@ -268,6 +268,30 @@ class JourneyStateServiceTests {
         assertEquals("$baseUrl?journeyId=$journeyId", urlWithParam)
     }
 
+    @Test
+    fun `initialiseChildJourney sets up a child journey sharing the parent's data key`() {
+        // Arrange
+        val session = MockHttpSession()
+        val parentJourneyId = "parent-journey"
+        val dataKey = "shared-data-key"
+        val metadataMap = mapOf(parentJourneyId to JourneyMetadata(dataKey))
+        session.setJourneyStateMetadataMap(metadataMap)
+        val parentService = JourneyStateService(session, parentJourneyId)
+        val childJourneyId = "child-journey"
+        val subJourneyName = "sub-journey"
+
+        // Act
+        parentService.initialiseChildJourney(childJourneyId, subJourneyName)
+
+        // Assert
+        val updatedMetadataMap = session.getJourneyStateMetadataMap()
+        val childMetadata = updatedMetadataMap?.get(childJourneyId) as? JourneyMetadata
+        assertNotNull(childMetadata)
+        assertEquals(dataKey, childMetadata.dataKey)
+        assertEquals(parentJourneyId, childMetadata.baseJourneyId)
+        assertEquals(subJourneyName, childMetadata.childJourneyName)
+    }
+
     private fun createJourneyStateServiceWithMetadata(
         session: HttpSession,
         existingData: JourneyData?,
