@@ -70,25 +70,25 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
 
-    @Column(nullable = true)
+    @Column
     var numBedrooms: Int? = null
 
-    @Column(nullable = true, length = 255)
+    @Column(length = 255)
     var listBillsIncluded: String? = null
 
-    @Column(nullable = true, length = 255)
+    @Column(length = 255)
     var customBillsIncluded: String? = null
 
-    @Column(nullable = true)
+    @Column
     var furnishedStatus: FurnishedStatus? = null
 
-    @Column(nullable = true)
+    @Column
     var rentFrequency: RentFrequency? = null
 
-    @Column(nullable = true, length = 255)
+    @Column(length = 255)
     var customRentFrequency: String? = null
 
-    @Column(nullable = true, precision = 9, scale = 2)
+    @Column(precision = 9, scale = 2)
     var rentAmount: BigDecimal? = null
 
     constructor(
