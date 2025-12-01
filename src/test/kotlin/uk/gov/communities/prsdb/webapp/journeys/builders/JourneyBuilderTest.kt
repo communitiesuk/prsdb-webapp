@@ -507,10 +507,12 @@ class JourneyBuilderTest {
                 unreachableStepUrl { "unreachable" }
             }
             jb.step("segment2", step2) {
+                parents { NoParents() }
                 nextUrl { "url1" }
                 unreachableStepUrl { "unreachable" }
             }
             jb.step("segment3", step3) {
+                parents { NoParents() }
                 nextUrl { "url1" }
                 unreachableStepUrl { "unreachable" }
             }
