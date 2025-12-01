@@ -20,9 +20,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
                     modifyNextDestination {
                         { Destination.VisitableStep(journey.cyaStep, journey.baseJourneyId) }
                     }
-                    backStep {
-                        journey.cyaStep
-                    }
+                    backDestination { Destination.VisitableStep(journey.cyaStep, journey.baseJourneyId) }
                 }
             }
         }
