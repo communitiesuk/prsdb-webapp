@@ -22,6 +22,17 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         override fun getRouteSegmentOrNull(): String? = stepConfig.routeSegment
 
         override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
+
+        override fun initialiseRouteSegment(routeSegment: String?) {
+            if (isRouteSegmentInitialised()) {
+                throw JourneyInitialisationException("routeSegment is already initialised")
+            }
+            if (routeSegment == null) {
+                throw JourneyInitialisationException("routeSegment cannot be null for a requestable step")
+            }
+
+            stepConfig.routeSegment = routeSegment
+        }
     }
 
     open class InternalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
@@ -30,11 +41,21 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         override fun getRouteSegmentOrNull(): String? = null
 
         override fun isRouteSegmentInitialised(): Boolean = true
+
+        override fun initialiseRouteSegment(routeSegment: String?) {
+            routeSegment?.let {
+                throw JourneyInitialisationException(
+                    "route segment cannot be set for an internal step - was set to $routeSegment",
+                )
+            }
+        }
     }
 
     abstract fun getRouteSegmentOrNull(): String?
 
     abstract fun isRouteSegmentInitialised(): Boolean
+
+    abstract fun initialiseRouteSegment(routeSegment: String?)
 
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
     fun beforeIsStepReachable() {
@@ -175,7 +196,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
         }
-        segment?.let { this.stepConfig.routeSegment = it }
+        initialiseRouteSegment(segment)
         this.state = state
         this.backUrlOverride = backDestinationOverride
         this.nextDestination = redirectDestinationProvider
