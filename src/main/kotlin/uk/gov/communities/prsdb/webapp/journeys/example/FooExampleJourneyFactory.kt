@@ -46,14 +46,14 @@ class FooExampleJourneyFactory(
                 withHeadingMessageKey("tasks-section-part-1")
                 task(journey.occupationTask) {
                     parents { journey.taskListStep.always() }
-                    redirectToStep { journey.fooCheckYourAnswersStep }
+                    nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
             section {
                 withHeadingMessageKey("tasks-section-part-2")
                 task(journey.epcTask) {
                     parents { journey.occupationTask.isComplete() }
-                    redirectToStep { journey.fooCheckYourAnswersStep }
+                    nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
             step("check-your-answers", journey.fooCheckYourAnswersStep) {

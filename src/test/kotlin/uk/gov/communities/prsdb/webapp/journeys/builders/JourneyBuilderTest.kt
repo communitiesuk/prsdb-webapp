@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -12,6 +13,7 @@ import org.mockito.MockedConstruction
 import org.mockito.Mockito.mockConstruction
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -83,10 +85,10 @@ class SubJourneyBuilderTests {
         subJourneyBuilder.exitStep {
             parents { parent }
         }
+
         subJourneyBuilder.exitStep {
             nextUrl { "url" }
         }
-
         subJourneyBuilder.unreachableStepUrl { "url" }
         val resultingStep = subJourneyBuilder.build().last()
 
@@ -230,7 +232,7 @@ class JourneyBuilderTest {
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                     whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
                     whenever((mock as StepInitialiser<*, *, *>).build()).thenReturn(listOf(mockedJourneyStep))
-                    whenever(mock.configureSteps(any())).thenCallRealMethod()
+                    whenever(mock.configure(any())).thenCallRealMethod()
                 }
         }
 
@@ -454,13 +456,13 @@ class JourneyBuilderTest {
             // Act 1
             jb.task(uninitialisedTask) {
                 parents { NoParents() }
-                redirectToDestination { Destination.NavigationalStep(mock()) }
+                nextDestination { Destination.NavigationalStep(mock()) }
             }
 
             // Assert 1
             val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
             verify(mockTaskInitialiser).parents(any())
-            verify(mockTaskInitialiser).redirectToDestination(any())
+            verify(mockTaskInitialiser).nextDestination(any())
 
             // Act 2
             val map = jb.buildRoutingMap()
@@ -472,6 +474,83 @@ class JourneyBuilderTest {
             typedMap.values.forEachIndexed { index, orchestrator ->
                 assertSame(builtSteps[index], orchestrator.journeyStep)
             }
+        }
+    }
+
+    @Nested
+    inner class ConfigurationTests {
+        @Test
+        fun `configureTagged applies configuration to tagged steps only`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val step1 = StepInitialiserTests.mockInitialisableStep()
+            val step2 = StepInitialiserTests.mockInitialisableStep()
+            val step3 = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.step("segment1", step1) {
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+                taggedWith("tagged")
+            }
+            jb.step("segment2", step2) {
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step("segment3", step3) {
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+                taggedWith("tagged")
+            }
+
+            jb.configureTagged("tagged") {
+                modifyNextDestination { { Destination.ExternalUrl("configured") } }
+            }
+
+            jb.buildRoutingMap()
+
+            // Assert
+            val nextDestinationCaptor = argumentCaptor<(TestEnum) -> Destination>()
+            verify(step1).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step2).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step3).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+
+            val capturedDestinationsOverwritten =
+                nextDestinationCaptor.allValues.map {
+                    val destination = it(TestEnum.ENUM_VALUE)
+                    destination is Destination.ExternalUrl &&
+                        destination.externalUrl == "configured"
+                }
+            assertTrue(capturedDestinationsOverwritten[0])
+            assertFalse(capturedDestinationsOverwritten[1])
+            assertTrue(capturedDestinationsOverwritten[2])
         }
     }
 }
