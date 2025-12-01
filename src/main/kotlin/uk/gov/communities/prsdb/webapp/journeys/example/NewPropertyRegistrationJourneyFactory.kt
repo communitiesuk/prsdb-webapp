@@ -56,7 +56,7 @@ class NewPropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.register.heading")
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
-                    redirectToStep { journey.propertyTypeStep }
+                    nextStep { journey.propertyTypeStep }
                 }
                 step("property-type", journey.propertyTypeStep) {
                     parents { journey.addressTask.isComplete() }
@@ -68,11 +68,11 @@ class NewPropertyRegistrationJourneyFactory(
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
-                    redirectToStep { journey.occupationTask.firstStep }
+                    nextStep { journey.occupationTask.firstStep }
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    redirectToStep { journey.cyaStep }
+                    nextStep { journey.cyaStep }
                 }
             }
             section {

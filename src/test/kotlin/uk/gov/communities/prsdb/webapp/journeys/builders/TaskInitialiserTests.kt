@@ -9,6 +9,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
@@ -23,61 +24,61 @@ import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 
 class TaskInitialiserTests {
     @Test
-    fun `once a redirectToStep is set, the destinationProvider cannot be set again`() {
+    fun `once a nextStep is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mock<Task<JourneyState>>())
+        val builder = TaskInitialiser(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
-        builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
+        builder.nextStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
 
         // Assert
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
+            builder.nextStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
         }
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToDestination { Destination.ExternalUrl("url") }
+            builder.nextDestination { Destination.ExternalUrl("url") }
         }
     }
 
     @Test
-    fun `once a redirectToDestination is set, the destinationProvider cannot be set again`() {
+    fun `once a nextDestination is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mock<Task<JourneyState>>())
+        val builder = TaskInitialiser(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
-        builder.redirectToDestination { Destination.ExternalUrl("url") }
+        builder.nextDestination { Destination.ExternalUrl("url") }
 
         // Assert
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
+            builder.nextStep { mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>() }
         }
         assertThrows<JourneyInitialisationException> {
-            builder.redirectToDestination { Destination.ExternalUrl("url") }
+            builder.nextDestination { Destination.ExternalUrl("url") }
         }
     }
 
     @Test
-    fun `a redirectToStep is passed to the task's exit when mapped to step initialisers`() {
+    fun `a nextStep is passed to the task's exit when built`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
+        val taskMock = mockTask()
 
         val nextStepMock = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         val nextStepSegment = "nextStepSegment"
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
-        val builder = TaskInitialiser(taskMock)
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
-        builder.redirectToStep { _: NavigationComplete -> nextStepMock }
+        builder.nextStep { _: NavigationComplete -> nextStepMock }
 
         // Act
-        builder.mapToStepInitialisers(mock())
+        builder.build()
 
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
-        verify(taskMock).getTaskSteps(
+        verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
@@ -98,23 +99,23 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `a redirectToDestination is passed to the task's exit when mapped to step initialisers`() {
+    fun `a nextDestination is passed to the task's exit when built`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
+        val taskMock = mockTask()
 
         val nextStepSegment = "nextStepSegment"
 
-        val builder = TaskInitialiser(taskMock)
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
         val initiationDestination = Destination.ExternalUrl(nextStepSegment)
-        builder.redirectToDestination { _: NavigationComplete -> initiationDestination }
+        builder.nextDestination { _: NavigationComplete -> initiationDestination }
 
         // Act
-        builder.mapToStepInitialisers(mock())
+        builder.build()
 
         // Assert
         val initCaptor = argumentCaptor<StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit>()
-        verify(taskMock).getTaskSteps(
+        verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             anyOrNull(),
             initCaptor.capture(),
@@ -131,24 +132,24 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `if no destinationProvider is set, an exception is thrown when mapping to step initialisers`() {
+    fun `if no destinationProvider is set, an exception is thrown when built`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
+        val taskMock = mockTask()
 
-        val builder = TaskInitialiser(taskMock)
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.mapToStepInitialisers(mock())
+            builder.build()
         }
     }
 
     @Test
     fun `a parentage cannot be set more than once`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
-        val builder = TaskInitialiser(taskMock)
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
         builder.parents { NoParents() }
 
         // Act & Assert
@@ -158,17 +159,17 @@ class TaskInitialiserTests {
     @Test
     fun `a parentage is passed to the task when mapped to step initialisers`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
-        val builder = TaskInitialiser(taskMock)
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
         val parentage = NoParents()
-        builder.redirectToDestination { mock() }
+        builder.nextDestination { mock() }
         builder.parents { parentage }
 
         // Act
-        builder.mapToStepInitialisers(mock())
+        builder.build()
 
         // Assert
-        verify(taskMock).getTaskSteps(
+        verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             eq(parentage),
             anyOrNull(),
@@ -178,13 +179,96 @@ class TaskInitialiserTests {
     @Test
     fun `if no parentage is set, mapToStepInitialisers throws an exception`() {
         // Arrange
-        val taskMock = mock<Task<JourneyState>>()
-        val builder = TaskInitialiser(taskMock)
-        builder.redirectToDestination { mock() }
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.nextDestination { mock() }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            builder.mapToStepInitialisers(mock())
+            builder.build()
         }
     }
+
+    @Test
+    fun `a single additional content provider is passed to the taskSubJourney when built`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        val expectedKey = "testKey"
+        val expectedValue = "testValue"
+        builder.withAdditionalContentProperty { expectedKey to expectedValue }
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        val configCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
+        verify(subJourneyBuilderMock).configure(configCaptor.capture())
+
+        val mockConfigurable = mock<ConfigurableElement<NavigationComplete>>()
+        configCaptor.firstValue.invoke(mockConfigurable)
+
+        val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
+        verify(mockConfigurable).withAdditionalContentProperty(contentCaptor.capture())
+
+        val content = contentCaptor.firstValue()
+        assertEquals(expectedKey to expectedValue, content)
+    }
+
+    @Test
+    fun `multiple additional content providers are passed to the taskSubJourney when built`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(
+            taskMock.getTaskSubJourneyBuilder(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            ),
+        ).thenReturn(subJourneyBuilderMock)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        val firstKey = "firstKey"
+        val firstValue = "firstValue"
+        val secondKey = "secondKey"
+        val secondValue = 177
+        builder.withAdditionalContentProperty { firstKey to firstValue }
+        builder.withAdditionalContentProperty { secondKey to secondValue }
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        val configCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
+        verify(subJourneyBuilderMock).configure(configCaptor.capture())
+
+        val mockConfigurable = mock<ConfigurableElement<NavigationComplete>>()
+        configCaptor.firstValue.invoke(mockConfigurable)
+
+        val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
+        verify(mockConfigurable, times(2)).withAdditionalContentProperty(contentCaptor.capture())
+
+        val allContent = contentCaptor.allValues.map { it() }
+        assertTrue(allContent.contains(firstKey to firstValue))
+        assertTrue(allContent.contains(secondKey to secondValue))
+    }
+
+    private fun mockTask(): Task<JourneyState> =
+        mock<Task<JourneyState>>().apply {
+            whenever(
+                getTaskSubJourneyBuilder(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                ),
+            ).thenReturn(mock<SubJourneyBuilder<JourneyState>>())
+        }
 }
