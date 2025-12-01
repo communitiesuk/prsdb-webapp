@@ -2,20 +2,32 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Configuration
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.featureFlagNames
 import uk.gov.communities.prsdb.webapp.constants.featureFlagReleaseNames
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
 
-@Component
+@Configuration
+@ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
 @ConfigurationProperties(prefix = "features")
-class FeatureFlagsFromConfig(
+class FeatureFlagConfig(
     private val featureFlagNamesList: List<String> = featureFlagNames,
     private val releaseNamesList: List<String> = featureFlagReleaseNames,
 ) : InitializingBean {
     var featureFlags: List<FeatureFlagModel> = emptyList()
     var releases: List<FeatureReleaseModel> = emptyList()
+
+    @Bean
+    fun featureFlagManager(): FeatureFlagManager {
+        val featureFlagManager = FeatureFlagManager()
+        featureFlagManager.initializeFeatureFlags(featureFlags)
+        featureFlagManager.initialiseFeatureReleases(releases)
+        return featureFlagManager
+    }
 
     override fun afterPropertiesSet() {
         featureFlags.forEach { feature ->

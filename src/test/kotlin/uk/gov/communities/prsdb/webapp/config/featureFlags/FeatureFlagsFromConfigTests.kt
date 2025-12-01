@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.test.context.ActiveProfiles
-import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.RELEASE_1_0
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
@@ -45,8 +45,8 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                 ),
             )
 
-        assertTrue(featureFlagsFromConfig.featureFlags == expectedFeatureFlagsFromDefaultApplicationYaml)
-        assertTrue(featureFlagsFromConfig.releases == expectedReleases)
+        assertTrue(featureFlagConfig.featureFlags == expectedFeatureFlagsFromDefaultApplicationYaml)
+        assertTrue(featureFlagConfig.releases == expectedReleases)
     }
 
     @ActiveProfiles("integration")
@@ -66,8 +66,8 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                     ),
                 )
 
-            assertTrue(featureFlagsFromConfig.featureFlags == expectedFeatureFlags)
-            assertTrue(featureFlagsFromConfig.releases == expectedReleases)
+            assertTrue(featureFlagConfig.featureFlags == expectedFeatureFlags)
+            assertTrue(featureFlagConfig.releases == expectedReleases)
         }
     }
 
@@ -78,8 +78,8 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
         private val testReleaseName = "test-release-name"
         private val testReleaseNamesList = listOf(testReleaseName)
 
-        private val featureFlagsFromConfigWithMockAllowedValues =
-            FeatureFlagsFromConfig(
+        private val featureFlagConfigWithMockAllowedValues =
+            FeatureFlagConfig(
                 testFlagNamesList,
                 testReleaseNamesList,
             )
@@ -87,7 +87,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
         @Test
         fun `afterPropertiesSet does not throw for valid feature and release names`() {
             // Arrange
-            featureFlagsFromConfigWithMockAllowedValues.featureFlags =
+            featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
                     FeatureFlagModel(
                         name = testFlagName,
@@ -96,7 +96,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                         release = testReleaseName,
                     ),
                 )
-            featureFlagsFromConfigWithMockAllowedValues.releases =
+            featureFlagConfigWithMockAllowedValues.releases =
                 listOf(
                     FeatureReleaseModel(
                         name = testReleaseName,
@@ -105,12 +105,12 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                 )
 
             // Act & Assert
-            assertDoesNotThrow { featureFlagsFromConfigWithMockAllowedValues.afterPropertiesSet() }
+            assertDoesNotThrow { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }
         }
 
         @Test
         fun `afterPropertiesSet throws for a feature name that is not in the featureFlagNamesList`() {
-            featureFlagsFromConfigWithMockAllowedValues.featureFlags =
+            featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
                     FeatureFlagModel(
                         name = "unlisted-feature-name",
@@ -120,12 +120,12 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                     ),
                 )
 
-            assertThrows<IllegalStateException> { featureFlagsFromConfigWithMockAllowedValues.afterPropertiesSet() }
+            assertThrows<IllegalStateException> { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }
         }
 
         @Test
         fun `afterPropertiesSet throws for a release name that is not in the releaseNamesList`() {
-            featureFlagsFromConfigWithMockAllowedValues.featureFlags =
+            featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
                     FeatureFlagModel(
                         name = EXAMPLE_FEATURE_FLAG_ONE,
@@ -134,7 +134,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                         release = RELEASE_1_0,
                     ),
                 )
-            featureFlagsFromConfigWithMockAllowedValues.releases =
+            featureFlagConfigWithMockAllowedValues.releases =
                 listOf(
                     FeatureReleaseModel(
                         name = "unlisted-release-name",
@@ -142,7 +142,7 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                     ),
                 )
 
-            assertThrows<IllegalStateException> { featureFlagsFromConfigWithMockAllowedValues.afterPropertiesSet() }
+            assertThrows<IllegalStateException> { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }
         }
     }
 }

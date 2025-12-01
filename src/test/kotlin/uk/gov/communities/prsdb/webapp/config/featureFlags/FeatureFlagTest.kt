@@ -13,17 +13,16 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
-import uk.gov.communities.prsdb.webapp.config.FeatureFlagsFromConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManagerFactory
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.service.notify.NotificationClient
 
-@SpringBootTest(classes = [FeatureFlagManagerFactory::class])
+@SpringBootTest(classes = [FeatureFlagConfig::class])
 class FeatureFlagTest {
     @Autowired
     private var context: ConfigurableApplicationContext? = null
@@ -75,5 +74,5 @@ class FeatureFlagTest {
     lateinit var featureFlagManager: FeatureFlagManager
 
     @Autowired
-    lateinit var featureFlagsFromConfig: FeatureFlagsFromConfig
+    lateinit var featureFlagConfig: FeatureFlagConfig
 }
