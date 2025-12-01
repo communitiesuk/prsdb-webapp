@@ -12,19 +12,23 @@ interface CheckYourAnswersJourneyState : JourneyState {
     val baseJourneyId: String
     val cyaChildJourneyId: String?
     val isCheckingAnswers: Boolean
-}
 
-fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
-    configureTagged("checkable") {
-        if (journey.isCheckingAnswers) {
-            modifyNextDestination {
-                { Destination.VisitableStep(journey.cyaStep, journey.baseJourneyId) }
-            }
-            backStep {
-                journey.cyaStep
+    companion object {
+        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
+            configureTagged(CHECKABLE) {
+                if (journey.isCheckingAnswers) {
+                    modifyNextDestination {
+                        { Destination.VisitableStep(journey.cyaStep, journey.baseJourneyId) }
+                    }
+                    backStep {
+                        journey.cyaStep
+                    }
+                }
             }
         }
+
+        fun ConfigurableElement<*>.checkable() = taggedWith(CHECKABLE)
+
+        private const val CHECKABLE = "checkable"
     }
 }
-
-fun ConfigurableElement<*>.checkable() = taggedWith("checkable")
