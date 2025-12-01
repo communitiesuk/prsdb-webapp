@@ -30,20 +30,24 @@ class FeatureFlagConfig(
     }
 
     override fun afterPropertiesSet() {
+        var missingFlagOrReleaseMessage = ""
+
         featureFlags.forEach { feature ->
             if (feature.name !in featureFlagNamesList) {
-                throw IllegalStateException(
-                    "Feature flag name ${feature.name} must be added as a const val and included in featureFlagNames",
-                )
+                missingFlagOrReleaseMessage +=
+                    "Feature flag name ${feature.name} must be added as a const val and included in featureFlagNames \n"
             }
         }
 
         releases.forEach { release ->
             if (release.name !in releaseNamesList) {
-                throw IllegalStateException(
-                    "Feature release name ${release.name} must be added as a const val and included in featureFlagReleaseNames",
-                )
+                missingFlagOrReleaseMessage +=
+                    "Feature release name ${release.name} must be added as a const val and included in featureFlagReleaseNames \n"
             }
+        }
+
+        if (missingFlagOrReleaseMessage.isNotEmpty()) {
+            throw IllegalStateException(missingFlagOrReleaseMessage.trim())
         }
     }
 }

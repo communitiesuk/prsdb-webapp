@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
 import java.time.LocalDate
 
-class FeatureFlagsFromConfigTests : FeatureFlagTest() {
+class FeatureFlagConfigTests : FeatureFlagTest() {
     val expectedFeatureFlagsFromDefaultApplicationYaml =
         listOf(
             FeatureFlagModel(
@@ -143,6 +143,50 @@ class FeatureFlagsFromConfigTests : FeatureFlagTest() {
                 )
 
             assertThrows<IllegalStateException> { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }
+        }
+
+        @Test
+        fun `afterPropertiesSet includes all missing feature and release names in the error message`() {
+            featureFlagConfigWithMockAllowedValues.featureFlags =
+                listOf(
+                    FeatureFlagModel(
+                        name = "unlisted-feature-name",
+                        enabled = true,
+                        expiryDate = LocalDate.now().plusWeeks(5),
+                    ),
+                    FeatureFlagModel(
+                        name = "another-unlisted-feature-name",
+                        enabled = true,
+                        expiryDate = LocalDate.now().plusWeeks(5),
+                        release = "unlisted-release-name",
+                    ),
+                )
+            featureFlagConfigWithMockAllowedValues.releases =
+                listOf(
+                    FeatureReleaseModel(
+                        name = "unlisted-release-name",
+                        enabled = true,
+                    ),
+                )
+
+            val exception = assertThrows<IllegalStateException> { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }
+            val exceptionMessage = exception.message ?: ""
+
+            assertTrue(
+                exceptionMessage.contains(
+                    "Feature flag name unlisted-feature-name must be added as a const val and included in featureFlagNames",
+                ),
+            )
+            assertTrue(
+                exceptionMessage.contains(
+                    "Feature flag name another-unlisted-feature-name must be added as a const val and included in featureFlagNames",
+                ),
+            )
+            assertTrue(
+                exceptionMessage.contains(
+                    "Feature release name unlisted-release-name must be added as a const val and included in featureFlagReleaseNames",
+                ),
+            )
         }
     }
 }
