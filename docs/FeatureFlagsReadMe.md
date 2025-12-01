@@ -9,18 +9,21 @@ We are using an Aspect Oriented Programming (AOP) approach, using annotations to
 Flags should have expiry dates to prevent unintentionally leaving feature flags in our code for a long time.
 We are not stopping the flags from working when they expire, but we do have a test that checks whether each feature has a flag and whether it is in date.
 
-Feature flags can (optionally) be assigned to a group (each flag can only be in one group though).
-The "enabled" boolean on the group overrides the individual flag settings, allowing all features in the group to be switched on or off by changing one setting.
-This is most likely to be used for grouping features into a particular release.
+Feature flags can (optionally) be assigned to a release (each flag can only be in one release. This is using FF4J's Feature Group).
+The "enabled" boolean on the release overrides the individual flag settings, allowing all features in the release to be switched on or off by changing one setting.
+
 
 ## Adding/Modifying Feature Flags
 
-Feature flags are defined in the `FeatureFlagConfig.kt` file.
-Individual flags are set and enabled by adding a new `FeatureFlagModel` to the list in the `featureFlags` val.
-The expiry date for the flag is set in the `FeatureFlagModel`.
-Flags can (optionally) be assigned to a group setting `flagGroup` in the `FeatureFlagModel` to the group name.
+Default feature flags and releases  are defined in `application.yml` under `features`.
 
-To define a new group, add a new `FeatureFlagGroupModel` to the `featureGroups` list in `FeatureFlagConfig`.
+These can be overridden in `application-<environment-name>.yml` files as required.
+
+Note each `release` must be added to at least one `feature-flag` as empty releases are not allowed.
+
+In order to refer to feature flags and releases in code, we define constants for their names.
+Each feature flag name must be added as a `const val` in `FeatureFlagNames.kt` and the constant should be added to the `featureFlagNames` list in the same file.
+Similar, each release name must be added as a `const val` in `FeatureFlagGroupNames.kt` and the constant should be added to the `featureFlagGroupNames` list in the same file.
 
 (TODO PRSD-1647 - add information on flipping strategies here if we use them)
 
@@ -77,7 +80,7 @@ For a useful demo, check that in `featureFlags`
 Then toggle the `RELEASE_1_0` group enabled setting to see the endpoints become available or unavailable as appropriate.
 
 ## Tests
-Tests should inherit from FeatureFlagTest. This uses the real FeatureFlagConfig to get flag values, but they can be enabled or disabled in particular tests as required.
+Tests should inherit from FeatureFlagTest. This uses FeatureFlagConfig from test's version of application.yml to get flag values, but they also can be enabled or disabled in particular tests as required.
 
 See the following for example tests:
 * ExampleFeatureFlagServiceTest.kt
