@@ -12,12 +12,17 @@ import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 
 interface ConfigurableElement<TMode : Enum<TMode>> {
     val initialiserName: String
+    val tags: Set<String>
 
     fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode>
 
     fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode>
 
     fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode>
+
+    fun modifyNextDestination(modify: (original: (mode: TMode) -> Destination) -> (mode: TMode) -> Destination): ConfigurableElement<TMode>
+
+    fun modifyNextDestination(merged: (mode: TMode, original: (mode: TMode) -> Destination) -> Destination): ConfigurableElement<TMode>
 
     fun noNextDestination(): ConfigurableElement<TMode>
 
@@ -30,6 +35,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode>
 
     fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode>
+
+    fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -40,11 +47,34 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var unreachableStepDestination: (() -> Destination)? = null
     var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
 
+    override var tags: Set<String> = emptySet()
+        private set
+
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination(nextStepProvider(mode)) }
 
     override fun nextUrl(nextUrlProvider: (mode: TMode) -> String): ConfigurableElement<TMode> =
         nextDestination { mode -> Destination.ExternalUrl(nextUrlProvider(mode)) }
+
+    override fun modifyNextDestination(
+        modify: (original: (mode: TMode) -> Destination) -> (mode: TMode) -> Destination,
+    ): ConfigurableElement<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> modify(originalProvider)(mode) }
+        return this
+    }
+
+    override fun modifyNextDestination(
+        merged: (mode: TMode, original: (mode: TMode) -> Destination) -> Destination,
+    ): ConfigurableElement<TMode> {
+        val originalProvider =
+            nextDestinationProvider
+                ?: throw JourneyInitialisationException("$initialiserName has no nextDestination defined, so cannot be modified")
+        nextDestinationProvider = { mode -> merged(mode, originalProvider) }
+        return this
+    }
 
     override fun nextDestination(destinationProvider: (mode: TMode) -> Destination): ConfigurableElement<TMode> {
         if (nextDestinationProvider != null) {
@@ -90,6 +120,11 @@ class ElementConfiguration<TMode : Enum<TMode>>(
 
     override fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> {
         additionalContentProviders.add(getAdditionalContent)
+        return this
+    }
+
+    override fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode> {
+        tags = tags + stepTags
         return this
     }
 }
