@@ -56,7 +56,8 @@ class NewPropertyRegistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
-            step(TASK_LIST_PATH_SEGMENT, journey.taskListStep) {
+            step(journey.taskListStep) {
+                routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
                 noNextDestination()
             }
@@ -67,12 +68,14 @@ class NewPropertyRegistrationJourneyFactory(
                     nextStep { journey.propertyTypeStep }
                     checkable()
                 }
-                step("property-type", journey.propertyTypeStep) {
+                step(journey.propertyTypeStep) {
+                    routeSegment("property-type")
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
                     checkable()
                 }
-                step("ownership-type", journey.ownershipTypeStep) {
+                step(journey.ownershipTypeStep) {
+                    routeSegment("ownership-type")
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
                     checkable()
@@ -90,7 +93,8 @@ class NewPropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
-                step("check-your-answers", journey.cyaStep) {
+                step(journey.cyaStep) {
+                    routeSegment("check-your-answers")
                     parents { journey.occupationTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }

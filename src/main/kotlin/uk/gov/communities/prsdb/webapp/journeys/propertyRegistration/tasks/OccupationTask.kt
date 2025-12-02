@@ -14,7 +14,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class OccupationTask : Task<OccupationState>() {
     override fun makeSubJourney(state: OccupationState) =
         subJourney(state) {
-            step("occupied", journey.occupied) {
+            step(journey.occupied) {
+                routeSegment("occupied")
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.households
@@ -22,11 +23,13 @@ class OccupationTask : Task<OccupationState>() {
                     }
                 }
             }
-            step("households", journey.households) {
+            step(journey.households) {
+                routeSegment("households")
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.tenants }
             }
-            step("tenants", journey.tenants) {
+            step(journey.tenants) {
+                routeSegment("tenants")
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.bedrooms }
             }
