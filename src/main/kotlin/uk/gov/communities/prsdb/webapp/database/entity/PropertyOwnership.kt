@@ -63,13 +63,14 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String
 
-    @Column(insertable = false, updatable = false)
-    private val localCouncilId: Int? = null
-
-    // We use this generated duplicate of isActive to influence the query planner into using the GIST index (as opposed to the GIN index)
-    // for searches where it's likely to be more efficient
-    @Column(nullable = false, insertable = false, updatable = false)
-    private val isActiveDuplicateForGistIndex: Boolean = false
+    // TODO PRSD-1023: Uncomment when migration is re-added
+//    @Column(insertable = false, updatable = false)
+//    private val localCouncilId: Int? = null
+//
+//    // We use this generated duplicate of isActive to influence the query planner into using the GIST index (as opposed to the GIN index)
+//    // for searches where it's likely to be more efficient
+//    @Column(nullable = false, insertable = false, updatable = false)
+//    private val isActiveDuplicateForGistIndex: Boolean = false
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val propertyCompliance: PropertyCompliance? = null
