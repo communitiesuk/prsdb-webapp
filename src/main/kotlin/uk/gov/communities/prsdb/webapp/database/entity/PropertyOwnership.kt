@@ -70,22 +70,16 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
 
-    @Column
     var numBedrooms: Int? = null
 
-    @Column(length = 255)
-    var listBillsIncluded: String? = null
+    var billsIncludedList: String? = null
 
-    @Column(length = 255)
     var customBillsIncluded: String? = null
 
-    @Column
     var furnishedStatus: FurnishedStatus? = null
 
-    @Column
     var rentFrequency: RentFrequency? = null
 
-    @Column(length = 255)
     var customRentFrequency: String? = null
 
     @Column(precision = 9, scale = 2)
@@ -103,7 +97,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
         numBedrooms: Int? = null,
-        listBillsIncluded: String? = null,
+        billsIncludedList: String? = null,
         customBillsIncluded: String? = null,
         furnishedStatus: FurnishedStatus? = null,
         rentFrequency: RentFrequency? = null,
@@ -121,7 +115,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.incompleteComplianceForm = incompleteComplianceForm
         this.isActive = isActive
         this.numBedrooms = numBedrooms
-        this.listBillsIncluded = listBillsIncluded
+        this.billsIncludedList = billsIncludedList
         this.customBillsIncluded = customBillsIncluded
         this.furnishedStatus = furnishedStatus
         this.rentFrequency = rentFrequency

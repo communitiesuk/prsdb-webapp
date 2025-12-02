@@ -1,6 +1,6 @@
 ALTER TABLE property_ownership
     ADD num_bedrooms INTEGER,
-    ADD list_bills_included VARCHAR(255),
+    ADD bills_included_list VARCHAR(255),
     ADD custom_bills_included VARCHAR(255),
     ADD furnished_status SMALLINT,
     ADD rent_frequency SMALLINT,
