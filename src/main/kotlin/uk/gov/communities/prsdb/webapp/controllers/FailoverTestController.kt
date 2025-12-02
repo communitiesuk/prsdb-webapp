@@ -1,40 +1,47 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 
 @PrsdbController
-@RequestMapping(LandlordController.LANDLORD_BASE_URL)
+@RequestMapping
 class FailoverTestController {
-    @GetMapping("/failover-501")
-    fun failover501(response: HttpServletResponse): Unit =
+    @GetMapping(ERROR_501_URL_ROUTE)
+    fun failover501(): Unit =
         throw ResponseStatusException(
             HttpStatus.NOT_IMPLEMENTED,
-            "501 error",
+            "Endpoint should throw 501 error",
         )
 
-    @GetMapping("/failover-502")
-    fun failover502(response: HttpServletResponse): Unit =
+    @GetMapping(ERROR_502_URL_ROUTE)
+    fun failover502(): Unit =
         throw ResponseStatusException(
             HttpStatus.BAD_GATEWAY,
-            "502 error",
+            "Endpoint should throw 502 error",
         )
 
-    @GetMapping("/failover-503")
-    fun failover503(response: HttpServletResponse): Unit =
+    @GetMapping(ERROR_503_URL_ROUTE)
+    fun failover503(): Unit =
         throw ResponseStatusException(
             HttpStatus.SERVICE_UNAVAILABLE,
-            "503 error",
+            "Endpoint should throw 503 error",
         )
 
-    @GetMapping("/failover-504")
-    fun failover504(response: HttpServletResponse): Unit =
+    @GetMapping(ERROR_504_URL_ROUTE)
+    fun failover504(): Unit =
         throw ResponseStatusException(
             HttpStatus.GATEWAY_TIMEOUT,
-            "504 error",
+            "Endpoint should throw 504 error",
         )
+
+    companion object {
+        const val ERROR_501_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-501"
+        const val ERROR_502_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-502"
+        const val ERROR_503_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-503"
+        const val ERROR_504_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-504"
+    }
 }
