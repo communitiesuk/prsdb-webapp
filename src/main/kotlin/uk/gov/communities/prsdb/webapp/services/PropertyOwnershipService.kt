@@ -177,6 +177,8 @@ class PropertyOwnershipService(
         }
     }
 
+    // Searching using a GIN index is faster for small result sets, while GIST is quicker for large ones.
+    // Therefore, we count the number of matching entries, then use the result to choose which index to use.
     private fun searchMatching(
         searchTerm: String,
         laBaseUserId: String,

@@ -1,6 +1,6 @@
 ALTER TABLE property_ownership
     ADD local_council_id INTEGER,
-    ADD is_in_gist_index BOOLEAN NOT NULL GENERATED ALWAYS AS (is_active) STORED;
+    ADD is_active_duplicate_for_gist_index BOOLEAN NOT NULL GENERATED ALWAYS AS (is_active) STORED;
 
 DROP PROCEDURE update_property_ownership_single_line_addresses();
 
@@ -49,6 +49,6 @@ DROP INDEX property_ownership_single_line_address_idx;
 
 CREATE INDEX property_ownership_single_line_address_gin_idx ON property_ownership USING gin (single_line_address gin_trgm_ops) WHERE is_active;
 
-CREATE INDEX property_ownership_single_line_address_gist_idx ON property_ownership USING gist (single_line_address gist_trgm_ops) WHERE is_in_gist_index;
+CREATE INDEX property_ownership_single_line_address_gist_idx ON property_ownership USING gist (single_line_address gist_trgm_ops) WHERE is_active_duplicate_for_gist_index;
 
 CREATE INDEX ON property_ownership USING hash (local_council_id) WHERE is_active;
