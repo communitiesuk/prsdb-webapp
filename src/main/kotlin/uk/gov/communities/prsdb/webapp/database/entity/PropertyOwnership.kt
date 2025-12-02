@@ -9,9 +9,12 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
+import java.math.BigDecimal
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -74,6 +77,21 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
 
+    var numBedrooms: Int? = null
+
+    var billsIncludedList: String? = null
+
+    var customBillsIncluded: String? = null
+
+    var furnishedStatus: FurnishedStatus? = null
+
+    var rentFrequency: RentFrequency? = null
+
+    var customRentFrequency: String? = null
+
+    @Column(precision = 9, scale = 2)
+    var rentAmount: BigDecimal? = null
+
     constructor(
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
@@ -85,6 +103,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         license: License?,
         incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
+        numBedrooms: Int? = null,
+        billsIncludedList: String? = null,
+        customBillsIncluded: String? = null,
+        furnishedStatus: FurnishedStatus? = null,
+        rentFrequency: RentFrequency? = null,
+        customRentFrequency: String? = null,
+        rentAmount: BigDecimal? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
@@ -96,6 +121,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.license = license
         this.incompleteComplianceForm = incompleteComplianceForm
         this.isActive = isActive
+        this.numBedrooms = numBedrooms
+        this.billsIncludedList = billsIncludedList
+        this.customBillsIncluded = customBillsIncluded
+        this.furnishedStatus = furnishedStatus
+        this.rentFrequency = rentFrequency
+        this.customRentFrequency = customRentFrequency
+        this.rentAmount = rentAmount
     }
 
     val isOccupied: Boolean
