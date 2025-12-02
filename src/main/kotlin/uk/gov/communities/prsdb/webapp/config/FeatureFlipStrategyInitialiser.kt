@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.ff4j.core.FlippingStrategy
 import org.ff4j.strategy.time.ReleaseDateFlipStrategy
+import uk.gov.communities.prsdb.webapp.config.flipStrategies.CombinedFlipStrategy
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlipStrategyConfigModel
 
@@ -28,11 +29,7 @@ class FeatureFlipStrategyInitialiser {
         if (strategyList.isEmpty()) {
             return null
         }
-        if (strategyList.size == 1) {
-            return strategyList[0]
-        }
 
-        // TODO PRSD-1647 - can we return a combined strategy here?
-        return strategyList[0]
+        return CombinedFlipStrategy(strategyList)
     }
 }
