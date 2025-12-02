@@ -8,7 +8,7 @@ spring:
     password: ${RDS_PASSWORD}
 
     hikari:
-      connection-init-sql: SET pg_trgm.strict_word_similarity_threshold = 0.6;
+      connection-init-sql: SET pg_trgm.strict_word_similarity_threshold = 0.7;
 
     jpa:
       hibernate:
@@ -101,6 +101,9 @@ features:
       enabled: false
       expiry-date: "2030-01-07"
       release: "release-1-0"
+    - name: "failover-test-endpoints"
+      enabled: true
+      expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
       enabled: false
