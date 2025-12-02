@@ -94,7 +94,7 @@ features:
       enabled: true
       expiry-date: "2030-01-12"
       strategy-config:
-        release-date: "2026-01-12"
+        release-date: "2025-01-12"
     - name: "example-feature-flag-two"
       enabled: true
       expiry-date: "2030-01-07"
@@ -105,9 +105,9 @@ features:
       release: "release-1-0"
   releases:
     - name: "release-1-0"
-      enabled: false
+      enabled: true
       strategy-config:
-        release-date: "2026-02-12"
+        release-date: "2025-01-12"
 
 ---
 
