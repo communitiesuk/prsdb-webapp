@@ -12,11 +12,11 @@ class NumberOfHouseholdsFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.numberOfHouseholds.input.error.missing",
+                messageKey = "forms.numberOfHouseholds.input.error",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.numberOfHouseholds.input.error.invalidFormat",
+                messageKey = "forms.numberOfHouseholds.input.error",
                 validatorType = PositiveIntegerValidator::class,
             ),
         ],
