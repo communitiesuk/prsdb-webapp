@@ -93,6 +93,8 @@ features:
     - name: "example-feature-flag-one"
       enabled: true
       expiry-date: "2030-01-12"
+      strategy-config:
+        release-date: "2026-01-12"
     - name: "example-feature-flag-two"
       enabled: true
       expiry-date: "2030-01-07"
@@ -104,6 +106,8 @@ features:
   releases:
     - name: "release-1-0"
       enabled: false
+      strategy-config:
+        release-date: "2026-02-12"
 
 ---
 

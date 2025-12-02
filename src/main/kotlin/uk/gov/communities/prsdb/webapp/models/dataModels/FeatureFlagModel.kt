@@ -7,4 +7,5 @@ data class FeatureFlagModel(
     val enabled: Boolean,
     val expiryDate: LocalDate,
     val release: String? = null,
+    val strategyConfig: FeatureFlipStrategyConfigModel? = null,
 )
