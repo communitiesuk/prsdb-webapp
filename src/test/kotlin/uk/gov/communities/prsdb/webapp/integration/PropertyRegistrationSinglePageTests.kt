@@ -33,7 +33,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
-            assert(taskListPage.taskHasStatus("Add tenancy details for the property", "Not started"))
+            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Not started"))
         }
 
         @Test
@@ -44,7 +44,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add details about any property licensing", "In progress"))
-            assert(taskListPage.taskHasStatus("Add tenancy details for the property", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Cannot start"))
         }
     }
 
