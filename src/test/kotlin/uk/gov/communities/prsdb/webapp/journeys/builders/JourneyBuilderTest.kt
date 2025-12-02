@@ -162,7 +162,6 @@ class JourneyBuilderTest {
                 mockConstruction(StepInitialiser::class.java) { mock, context ->
                     val mockedJourneyStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
-                    whenever(mockedJourneyStep.routeSegment).thenReturn(context.arguments()[0] as String)
                     whenever((mock as StepInitialiser<*, *, *>).build()).thenReturn(listOf(mockedJourneyStep))
                     whenever(mock.configure(any())).thenCallRealMethod()
                 }
@@ -344,7 +343,7 @@ class JourneyBuilderTest {
             val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
 
             // Act 1
-            jb.notionalStep(uninitialisedStep) {
+            jb.step(uninitialisedStep) {
                 backDestination { Destination.ExternalUrl("backLink") }
                 stepSpecificInitialisation { }
             }

@@ -54,21 +54,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-    ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
-        stepInitialiser.init()
-        if (journeyElements.isEmpty()) {
-            stepInitialiser.configureFirst {
-                additionalFirstElementConfiguration.forEach { it() }
-            }
-        }
-        journeyElements.add(stepInitialiser)
-    }
-
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
-        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
         val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
@@ -127,7 +113,7 @@ open class SubJourneyBuilder<TState : JourneyState>(
         private set
 
     override fun build(): List<JourneyStep<*, *, *>> {
-        notionalStep<NavigationComplete, NavigationalStepConfig>(exitStep) {
+        step<NavigationComplete, NavigationalStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
         val built = super.build()
