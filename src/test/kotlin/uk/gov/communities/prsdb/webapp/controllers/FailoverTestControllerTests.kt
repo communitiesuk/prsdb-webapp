@@ -39,10 +39,10 @@ class FailoverTestControllerTests : FeatureFlagTestCallingEndpoints() {
                 FailoverTestController.ERROR_504_URL_ROUTE,
             )
 
-        for (i in statusCodes.indices) {
+        statusCodes.zip(urlRoutes).forEach { (code, url) ->
             mvc
-                .get(urlRoutes[i])
-                .andExpect { status { isEqualTo(statusCodes[i]) } }
+                .get(url)
+                .andExpect { status { isEqualTo(code) } }
         }
     }
 }
