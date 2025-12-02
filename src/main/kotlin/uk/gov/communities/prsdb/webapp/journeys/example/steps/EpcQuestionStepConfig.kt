@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -22,10 +23,7 @@ class EpcQuestionStepConfig(
     override fun getStepSpecificContent(state: EpcJourneyState) =
         mapOf(
             "formModel" to EpcFormModel(),
-            "address" to
-                propertyOwnershipService
-                    .getPropertyOwnership(state.propertyId)
-                    .property.address.singleLineAddress,
+            "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.epc.fieldSetHeading",
             "fieldSetHint" to "forms.epc.fieldSetHint",
@@ -51,10 +49,7 @@ class EpcQuestionStepConfig(
 
     override fun afterSubmitFormData(state: EpcJourneyState) {
         super.afterSubmitFormData(state)
-        val uprn =
-            propertyOwnershipService
-                .getPropertyOwnership(state.propertyId)
-                .property.address.uprn
+        val uprn = propertyOwnershipService.getPropertyOwnership(state.propertyId).address.uprn
         if (uprn != null) {
             val epc = epcLookupService.getEpcByUprn(uprn)
             state.automatchedEpc = epc
@@ -62,10 +57,16 @@ class EpcQuestionStepConfig(
     }
 
     override fun mode(state: EpcJourneyState) =
-        getFormModelFromState(state)?.hasCert?.let {
+        getFormModelFromStateOrNull(state)?.hasCert?.let {
             when (it) {
                 HasEpc.YES -> if (state.automatchedEpc != null) EpcStatus.AUTOMATCHED else EpcStatus.NOT_AUTOMATCHED
                 HasEpc.NO, HasEpc.NOT_REQUIRED -> EpcStatus.NO_EPC
             }
         }
 }
+
+@Scope("prototype")
+@PrsdbWebComponent
+final class EpcQuestionStep(
+    stepConfig: EpcQuestionStepConfig,
+) : RequestableStep<EpcStatus, EpcFormModel, EpcJourneyState>(stepConfig)

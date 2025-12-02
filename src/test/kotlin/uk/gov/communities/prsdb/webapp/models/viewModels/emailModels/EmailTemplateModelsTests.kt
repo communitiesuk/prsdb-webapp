@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
 import kotlin.String
 
@@ -17,21 +17,21 @@ class EmailTemplateModelsTests {
         private fun templateList() =
             listOf(
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationEmail(
-                        MockLocalAuthorityData.createLocalAuthority(),
+                    LocalCouncilInvitationEmail(
+                        MockLocalCouncilData.createLocalCouncil(),
                         URI("invitationUri"),
                         "prsdUrl",
                         ONE_LOGIN_INFO_URL,
                     ),
-                    "/emails/LocalAuthorityInvitation.md",
+                    "/emails/LocalCouncilInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationCancellationEmail(MockLocalAuthorityData.createLocalAuthority()),
-                    "/emails/LocalAuthorityInvitationCancellation.md",
+                    LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalCouncil()),
+                    "/emails/LocalCouncilInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityAdminInvitationEmail(MockLocalAuthorityData.createLocalAuthority(), URI("invitationUri")),
-                    "/emails/LocalAuthorityAdminInvitation.md",
+                    LocalCouncilAdminInvitationEmail(MockLocalCouncilData.createLocalCouncil(), URI("invitationUri")),
+                    "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
@@ -202,11 +202,11 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityUserDeletionEmail("councilName"),
+                    LocalCouncilUserDeletionEmail("councilName"),
                     "/emails/LocalCouncilUserDeletion.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityUserDeletionInformAdminEmail("councilName", "email", "userName", "prsdUrl"),
+                    LocalCouncilUserDeletionInformAdminEmail("councilName", "email", "userName", "prsdUrl"),
                     "/emails/LocalCouncilUserDeletionAdminEmail.md",
                 ),
                 EmailTemplateTestData(

@@ -8,7 +8,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (4, '3/26/25', 0006001008, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
         (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG'),
         (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 2, 'EG1 1EG'),
@@ -27,18 +27,10 @@ VALUES (1, current_date, current_date, 7, '{"gas-safety-certificate":{"hasCert":
                                           '"eicr-exemption-confirmation":{},"epc":{"hasCert":"NO"},"epc-missing":{}}','urn:fdc:gov.uk:2022:UVWXY'),
        (2, current_date, current_date, 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
 
-INSERT INTO property (id, status, is_active, property_build_type, address_id)
-VALUES (1, 1, true, 1, 2),
-       (2, 1, true, 1, 3),
-       (3, 1, true, 1, 4);
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households,
-                                current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 2, 1, 1, current_date, 1),
-       (2, true, 0, 1, 1, 2, 3, 1, 2, current_date, 2),
-       (3, true, 0, 1, 1, 2, 4, 1, 3, current_date, null);
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, incomplete_compliance_form_id, property_build_type)
+VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1, 1),
+       (2, true, 1, 1, 2, 3, 1, 3, current_date, 2, 1),
+       (3, true, 1, 1, 2, 4, 1, 4, current_date, null, 1);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,
                                  gas_safety_upload_id, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason,

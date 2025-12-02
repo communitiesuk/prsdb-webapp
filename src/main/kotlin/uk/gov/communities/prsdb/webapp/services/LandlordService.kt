@@ -114,7 +114,6 @@ class LandlordService(
         return landlordEntity
     }
 
-    @Transactional
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
         landlord.hasRespondedToFeedback = true
         return landlordRepository.save(landlord)
@@ -122,8 +121,8 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
-        laBaseUserId: String,
-        restrictToLA: Boolean = false,
+        localCouncilBaseUserId: String,
+        restrictToLocalCouncil: Boolean = false,
         requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultViewModel> {
@@ -132,9 +131,19 @@ class LandlordService(
 
         val landlordWithListedPropertyCountPage =
             if (lrn == null) {
-                landlordWithListedPropertyCountRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
+                landlordWithListedPropertyCountRepository.searchMatching(
+                    searchTerm,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
+                    pageRequest,
+                )
             } else {
-                landlordWithListedPropertyCountRepository.searchMatchingLRN(lrn.number, laBaseUserId, restrictToLA, pageRequest)
+                landlordWithListedPropertyCountRepository.searchMatchingLRN(
+                    lrn.number,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
+                    pageRequest,
+                )
             }
 
         return landlordWithListedPropertyCountPage.map {

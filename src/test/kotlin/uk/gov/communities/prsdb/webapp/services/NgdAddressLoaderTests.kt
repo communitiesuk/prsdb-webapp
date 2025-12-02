@@ -32,13 +32,13 @@ import org.mockito.kotlin.whenever
 import org.springframework.core.env.Environment
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH_SIZE
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.io.FileInputStream
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -57,7 +57,7 @@ class NgdAddressLoaderTests {
     private lateinit var mockOsDownloadsClient: OsDownloadsClient
 
     @Mock
-    private lateinit var mockLocalAuthorityRepository: LocalAuthorityRepository
+    private lateinit var mockLocalCouncilRepository: LocalCouncilRepository
 
     @Mock
     private lateinit var mockEnvironment: Environment
@@ -224,6 +224,32 @@ class NgdAddressLoaderTests {
     }
 
     @Test
+    fun `loadNewDataPackageVersions updates property ownership single line addresses after each data package is loaded`() {
+        // Arrange
+        setUpMockNgdAddressLoaderRepository { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
+        }
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
+            .thenReturn(initialVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID))
+            .thenReturn(secondVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID))
+            .thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        verify(mockNgdAddressLoaderRepository, times(2)).updatePropertyOwnershipSingleLineAddresses()
+    }
+
+    @Test
     fun `loadNewDataPackageVersions deletes unused inactive addresses after all data packages have been loaded`() {
         // Arrange
         setUpMockNgdAddressLoaderRepository { mock ->
@@ -283,8 +309,8 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalAuthorityData.createLocalAuthority(custodianCode = "1"))
-        whenever(mockLocalAuthorityRepository.findAll()).thenReturn(localAuthorities)
+        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -332,8 +358,8 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("largeCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalAuthorityData.createLocalAuthority(custodianCode = "1"))
-        whenever(mockLocalAuthorityRepository.findAll()).thenReturn(localAuthorities)
+        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -375,7 +401,7 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        whenever(mockLocalAuthorityRepository.findAll()).thenReturn(emptyList())
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(emptyList())
 
         // Act & Assert
         assertThrows<EntityNotFoundException> { ngdAddressLoader.loadNewDataPackageVersions() }

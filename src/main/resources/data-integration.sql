@@ -13,7 +13,7 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '2025-05-01 10:33:22.395944+00') ON CONFLICT DO NOTHING;
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
+VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localCouncilId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
        (2, '2024-10-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
        (3, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
        (4, '2025-01-15 00:00:00+00', null, 7, '{}','urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
@@ -21,7 +21,7 @@ VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
-INSERT INTO local_authority_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_authority_id, email, name, has_accepted_privacy_notice)
+INSERT INTO local_council_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_council_id, email, name, has_accepted_privacy_notice)
 VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao',true,2,'Team-PRSDB+laadmin@softwire.com','PRSDB LA Admin', true),
        (2,'2024-10-15 00:00:00+00','2025-02-21 16:12:51.530782+00','urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ',false,2,'Team-PRSDB+lauser@softwire.com','PRSDB La User', true),
        (3,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk',true,2,'travis.woodward@communities.gov.uk','Travis Woodward', true),
@@ -31,9 +31,9 @@ VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022
        (7,'2025-03-17 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU',true,2,'kiran.randhawakukar@softwire.com','Kiran Fake Name', true),
        (8,'2025-03-18 10:13:36.388805+00',null,'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 2, 'isobel.ibironke@softwire.com','Isobel Ibironke', true) ON CONFLICT DO NOTHING;
 
-SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
+SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, created_date)
+INSERT INTO local_council_invitation (invited_email, inviting_council_id, token, created_date)
 VALUES ('expired.invitation+1@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11111',  '05/05/2025'),
        ('expired.invitation+2@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11112',  '05/05/2025'),
        ('expired.invitation+3@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11113', '05/05/2025'),
@@ -45,7 +45,7 @@ VALUES ('expired.invitation+1@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1
        ('expired.invitation+9@example.com', 2, '1234abcd-5678-abcd-1234-567abcd11119',  '05/05/2025'),
        ('expired.invitation+a@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111a',  '05/05/2025') ON CONFLICT DO NOTHING;
 
-SELECT setval(pg_get_serial_sequence('local_authority_invitation', 'id'), (SELECT MAX(id) FROM local_authority_invitation));
+SELECT setval(pg_get_serial_sequence('local_council_invitation', 'id'), (SELECT MAX(id) FROM local_council_invitation));
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
@@ -80,29 +80,16 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO property (id, status, is_active, property_build_type, address_id, created_date, last_modified_date)
-VALUES (1, 1, true, 1, 1, '2024-10-15 00:00:00+00', null),
-       (2, 1, true, 1, 2, '2025-01-15 00:00:00+00', null),
-       (3, 1, true, 1, 3, '2025-01-15 00:00:00+00', null),
-       (4, 1, true, 1, 4, '2025-01-15 00:00:00+00', null),
-       (5, 1, true, 1, 5, '2024-10-15 00:00:00+00', null),
-       (6, 1, true, 1, 6, '2024-10-15 00:00:00+00', null),
-       (7, 1, true, 1, 7, '2024-10-15 00:00:00+00', null),
-       (8, 1, true, 1, 8, '2024-10-15 00:00:00+00', null),
-       (9, 1, true, 1, 9, '2025-07-24 00:00:00+00', null) ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2),
-       (2, true, 0, 0, 0, 0, 10, 1, 2,'2025-01-15 00:00:00+00', null, 3),
-       (3, true, 0, 0, 0, 0, 11, 1, 3,'2025-01-15 00:00:00+00', null, 4),
-       (4, true, 0, 0, 0, 0, 12, 1, 4,'2025-01-15 00:00:00+00', null, 5),
-       (5, true, 0, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null),
-       (6, true, 0, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null),
-       (7, true, 0, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null),
-       (8, true, 0, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null),
-       (9, true, 0, 1, 1, 2, 17, 1, 9, '2025-07-24 00:00:00+00', null, null) ON CONFLICT DO NOTHING;
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, last_modified_date, incomplete_compliance_form_id, property_build_type)
+VALUES (1, true, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2, 1),
+       (2, true, 0, 0, 0, 10, 1, 2,'2025-01-15 00:00:00+00', null, 3, 1),
+       (3, true, 0, 0, 0, 11, 1, 3,'2025-01-15 00:00:00+00', null, 4, 1),
+       (4, true, 0, 0, 0, 12, 1, 4,'2025-01-15 00:00:00+00', null, 5, 1),
+       (5, true, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null, 1),
+       (6, true, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null, 1),
+       (7, true, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null, 1),
+       (8, true, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null, 1),
+       (9, true, 1, 1, 2, 17, 1, 9, '2025-07-24 00:00:00+00', null, null, 1) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -150,7 +137,7 @@ VALUES (1, 5, '01/01/25', '01/01/25',
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
-INSERT INTO passcode (passcode, local_authority_id, created_date, last_modified_date, subject_identifier)
+INSERT INTO passcode (passcode, local_council_id, created_date, last_modified_date, subject_identifier)
 VALUES ('PRSD22', 2, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
        ('PRSD23', 2, current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
        ('PRSD24', 2, current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'),

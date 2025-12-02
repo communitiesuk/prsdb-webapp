@@ -12,9 +12,9 @@ class PropertyFilterPanelViewModel(
         filters =
             listOf(
                 FilterViewModel(
-                    headingMsgKey = "propertySearch.filter.la.heading",
-                    searchRequestProperty = "restrictToLA",
-                    options = listOf(CheckboxViewModel(value = true, labelMsgKey = "propertySearch.filter.la.label")),
+                    headingMsgKey = "propertySearch.filter.localCouncil.heading",
+                    searchRequestProperty = "restrictToLocalCouncil",
+                    options = listOf(CheckboxViewModel(value = true, labelMsgKey = "propertySearch.filter.localCouncil.label")),
                 ),
                 FilterViewModel(
                     headingMsgKey = "propertySearch.filter.licence.heading",

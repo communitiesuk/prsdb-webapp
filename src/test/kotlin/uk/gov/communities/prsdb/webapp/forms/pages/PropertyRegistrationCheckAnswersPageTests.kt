@@ -21,13 +21,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 
 class PropertyRegistrationCheckAnswersPageTests {
     private lateinit var page: PropertyRegistrationCheckAnswersPage
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
     private lateinit var journeyDataService: JourneyDataService
     private lateinit var validator: Validator
     private lateinit var pageData: PageData
@@ -36,14 +36,14 @@ class PropertyRegistrationCheckAnswersPageTests {
 
     @BeforeEach
     fun setup() {
-        localAuthorityService = mock()
+        localCouncilService = mock()
         journeyDataService = mock()
-        page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService, "/redirect")
+        page = PropertyRegistrationCheckAnswersPage(journeyDataService, localCouncilService, "/redirect")
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.propertyDefault(localAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(localCouncilService)
     }
 
     private fun getPropertyDetails(journeyData: JourneyData): List<SummaryListRowViewModel> {
@@ -61,8 +61,8 @@ class PropertyRegistrationCheckAnswersPageTests {
         // Arrange
         val addressName = "4, Example Road, EG"
         val uprn: Long = 1002001
-        val localAuthority = createLocalAuthority()
-        val journeyData = journeyDataBuilder.withSelectedAddress(addressName, uprn, localAuthority).build()
+        val localCouncil = createLocalCouncil()
+        val journeyData = journeyDataBuilder.withSelectedAddress(addressName, uprn, localCouncil).build()
 
         // Act
         val propertyDetails = getPropertyDetails(journeyData)
@@ -83,12 +83,12 @@ class PropertyRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                localAuthority.name,
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                localCouncil.name,
                 null,
             ),
             propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localCouncil"
             },
         )
     }
@@ -99,11 +99,11 @@ class PropertyRegistrationCheckAnswersPageTests {
         val addressLineOne = "3 Example Road"
         val townOrCity = "Townville"
         val postcode = "EG1 2AB"
-        val localAuthority = createLocalAuthority()
+        val localCouncil = createLocalCouncil()
 
         val journeyData =
             journeyDataBuilder
-                .withManualAddress(addressLineOne, townOrCity, postcode, localAuthority)
+                .withManualAddress(addressLineOne, townOrCity, postcode, localCouncil)
                 .build()
 
         // Act
@@ -116,8 +116,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode),
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.ManualAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.ManualAddress.urlPathSegment}",
+                    RegisterPropertyStepId.LookupAddress.urlPathSegment +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LookupAddress.urlPathSegment}",
                 ),
             ),
             propertyDetails.single {
@@ -126,16 +126,16 @@ class PropertyRegistrationCheckAnswersPageTests {
         )
         assertEquals(
             SummaryListRowViewModel(
-                "forms.checkPropertyAnswers.propertyDetails.localAuthority",
-                localAuthority.name,
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                localCouncil.name,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.LocalAuthority.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LocalAuthority.urlPathSegment}",
+                    RegisterPropertyStepId.LocalCouncil.urlPathSegment +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LocalCouncil.urlPathSegment}",
                 ),
             ),
             propertyDetails.single {
-                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localAuthority"
+                it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localCouncil"
             },
         )
 

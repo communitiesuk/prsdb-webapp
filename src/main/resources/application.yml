@@ -8,7 +8,7 @@ spring:
     password: ${RDS_PASSWORD}
 
     hikari:
-      connection-init-sql: SET pg_trgm.word_similarity_threshold = 0.2
+      connection-init-sql: SET pg_trgm.strict_word_similarity_threshold = 0.6;
 
     jpa:
       hibernate:
@@ -26,14 +26,6 @@ spring:
       mode: always
       platform: ${ENVIRONMENT_NAME}
       continue-on-error: true
-
-  data:
-    redis:
-      host: ${ELASTICACHE_URL}
-      port: ${ELASTICACHE_PORT}
-      password: ${ELASTICACHE_PASSWORD}
-      ssl:
-        enabled: true
 
   mvc.format.date: "d MMMM yyyy"
 
@@ -80,7 +72,7 @@ aws:
 
 base-url:
   landlord: ${LANDLORD_BASE_URL}
-  local-authority: ${LOCAL_AUTHORITY_BASE_URL}
+  local-council: ${LOCAL_COUNCIL_BASE_URL}
 
 plausible:
   domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
@@ -91,6 +83,28 @@ google-analytics:
 
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
+
+ff4j:
+  web-console:
+    enabled: false
+
+features:
+  feature-flags:
+    - name: "example-feature-flag-one"
+      enabled: true
+      expiry-date: "2030-01-12"
+    - name: "example-feature-flag-two"
+      enabled: true
+      expiry-date: "2030-01-07"
+      release: "release-1-0"
+    - name: "example-feature-flag-three"
+      enabled: false
+      expiry-date: "2030-01-07"
+      release: "release-1-0"
+  releases:
+    - name: "release-1-0"
+      enabled: false
+
 ---
 
 spring:
@@ -117,6 +131,14 @@ spring:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
+
+  data:
+    redis:
+      host: ${ELASTICACHE_URL}
+      port: ${ELASTICACHE_PORT}
+      password: ${ELASTICACHE_PASSWORD}
+      ssl:
+        enabled: true
 
 ---
 

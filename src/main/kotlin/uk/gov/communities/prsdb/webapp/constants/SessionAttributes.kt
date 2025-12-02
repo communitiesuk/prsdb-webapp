@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.constants
 
-const val LA_USER_INVITATION_TOKEN: String = "la-user-invitation-token"
+const val LOCAL_COUNCIL_USER_INVITATION_TOKEN: String = "local-council-user-invitation-token"
 
-const val LA_USER_ID = "la-user-id"
+const val LOCAL_COUNCIL_USER_ID = "local-council-user-id"
 
 const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
-const val PROPERTY_DEREGISTRATION_ENTITY_IDS = "propertyDeregistrationEntityIds"
+const val PROPERTIES_DEREGISTERED_THIS_SESSION = "propertiesDeregisteredThisSession"
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
@@ -30,6 +30,6 @@ const val LOCAL_COUNCIL_USERS_DELETED_THIS_SESSION = "localCouncilUsersDeletedTh
 
 const val LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION = "localCouncilInvitationsCancelledThisSession"
 
-const val LA_USERS_INVITED_THIS_SESSION = "laUsersInvitedThisSession"
+const val LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION = "localCouncilUsersInvitedThisSession"
 
 const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePropertyFormContextsDeletedThisSession"

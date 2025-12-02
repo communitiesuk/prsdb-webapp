@@ -47,12 +47,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
@@ -64,9 +62,6 @@ import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
-    @Mock
-    private lateinit var mockPropertyRepository: PropertyRepository
-
     @Mock
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
 
@@ -80,16 +75,13 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockRegisteredAddressCache: RegisteredAddressCache
 
     @Mock
-    private lateinit var mockPropertyService: PropertyService
+    private lateinit var mockAddressService: AddressService
 
     @Mock
     private lateinit var mockLicenceService: LicenseService
 
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
-
-    @Mock
-    private lateinit var mockLocalAuthorityService: LocalAuthorityService
 
     @Mock
     private lateinit var mockSession: HttpSession
@@ -106,74 +98,44 @@ class PropertyRegistrationServiceTests {
     @ParameterizedTest
     @CsvSource("true", "false")
     fun `getIsAddressRegistered returns the expected value when the given uprn is cached`(expectedValue: Boolean) {
+        // Arrange
         val uprn = 0L
-
         whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(expectedValue)
 
+        // Act
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
+        // Assert
         assertEquals(expectedValue, result)
-    }
-
-    @Test
-    fun `getIsAddressRegistered caches and returns false when there's no property associated with the given uprn`() {
-        val uprn = 0L
-
-        whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
-        whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(null)
-
-        val result = propertyRegistrationService.getIsAddressRegistered(uprn)
-
-        verify(mockRegisteredAddressCache).setCachedAddressRegisteredResult(uprn, false)
-        assertFalse(result)
-    }
-
-    @Test
-    fun `getIsAddressRegistered caches and returns false the property associated with the given uprn is inactive`() {
-        val uprn = 0L
-        val inactiveProperty = Property()
-
-        whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
-        whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(inactiveProperty)
-
-        val result = propertyRegistrationService.getIsAddressRegistered(uprn)
-
-        verify(mockRegisteredAddressCache).setCachedAddressRegisteredResult(uprn, false)
-        assertFalse(result)
     }
 
     @ParameterizedTest
     @CsvSource("true", "false")
-    fun `getAddressIsRegistered caches and returns the expected value when the given uprn is not cached or associated with a property`(
-        expectedValue: Boolean,
-    ) {
+    fun `getAddressIsRegistered caches and returns the expected value when the given uprn is not cached`(expectedValue: Boolean) {
+        // Arrange
         val uprn = 0L
-        val activeProperty = Property(id = 1, address = Address(), isActive = true)
-
         whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
-        whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(activeProperty)
-        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(activeProperty.id))
-            .thenReturn(expectedValue)
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)).thenReturn(expectedValue)
 
+        // Act
         val result = propertyRegistrationService.getIsAddressRegistered(uprn)
 
+        // Assert
         verify(mockRegisteredAddressCache).setCachedAddressRegisteredResult(uprn, result)
         assertEquals(expectedValue, result)
     }
 
     @Test
     fun `getAddressIsRegistered ignores the cache when ignoreCache is true`() {
-        val expectedValue = true
-
+        // Arrange
         val uprn = 0L
-        val activeProperty = Property(id = 1, address = Address(), isActive = true)
+        val expectedValue = true
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)).thenReturn(expectedValue)
 
-        whenever(mockPropertyRepository.findByAddress_Uprn(uprn)).thenReturn(activeProperty)
-        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(activeProperty.id))
-            .thenReturn(expectedValue)
-
+        // Act
         val result = propertyRegistrationService.getIsAddressRegistered(uprn, ignoreCache = true)
 
+        // Assert
         verify(mockRegisteredAddressCache, never()).getCachedAddressRegisteredResult(uprn)
         assertEquals(expectedValue, result)
     }
@@ -230,17 +192,17 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty registers the property if all fields are populated`() {
         // Arrange
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val propertyType = PropertyType.DETACHED_HOUSE
-        val licenceType = LicensingType.SELECTIVE_LICENCE
-        val licenceNumber = "L1234"
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
-        val property = Property()
-        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val propertyType = PropertyType.DETACHED_HOUSE
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val licenceType = LicensingType.SELECTIVE_LICENCE
+        val licenceNumber = "L1234"
         val licence = License(licenceType, licenceNumber)
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -248,15 +210,14 @@ class PropertyRegistrationServiceTests {
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 primaryLandlord = landlord,
-                property = property,
+                propertyBuildType = propertyType,
+                address = address,
                 license = licence,
                 registrationNumber = registrationNumber,
             )
 
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
-        whenever(mockPropertyService.activateOrCreateProperty(addressDataModel, propertyType)).thenReturn(
-            property,
-        )
         whenever(mockLicenceService.createLicense(licenceType, licenceNumber)).thenReturn(licence)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -264,7 +225,8 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
-                property = property,
+                propertyBuildType = propertyType,
+                address = address,
                 license = licence,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -290,7 +252,8 @@ class PropertyRegistrationServiceTests {
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             primaryLandlord = landlord,
-            property = property,
+            propertyBuildType = propertyType,
+            address = address,
             license = licence,
         )
     }
@@ -307,9 +270,8 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
+        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
-        whenever(mockPropertyService.activateOrCreateProperty(any(), any()))
-            .thenReturn(expectedPropertyOwnership.property)
         whenever(mockLicenceService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -317,10 +279,10 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 primaryLandlord = any(),
-                property = any(),
+                propertyBuildType = any(),
+                address = any(),
                 license = anyOrNull(),
                 isActive = any(),
-                occupancyType = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -329,7 +291,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            AddressDataModel.fromAddress(expectedPropertyOwnership.property.address),
+            AddressDataModel.fromAddress(expectedPropertyOwnership.address),
             PropertyType.DETACHED_HOUSE,
             LicensingType.SELECTIVE_LICENCE,
             "Licence",
@@ -343,10 +305,10 @@ class PropertyRegistrationServiceTests {
         verify(confirmationEmailSender).sendEmail(
             eq(landlord.email),
             argThat<PropertyRegistrationConfirmationEmail> { email ->
-                email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
-                email.singleLineAddress == expectedPropertyOwnership.property.address.singleLineAddress &&
-                    email.prsdUrl == dashboardUri.toString()
-                email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
+                email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString() &&
+                    email.singleLineAddress == expectedPropertyOwnership.address.singleLineAddress &&
+                    email.prsdUrl == dashboardUri.toString() &&
+                    email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
             },
         )
 
@@ -355,15 +317,15 @@ class PropertyRegistrationServiceTests {
 
     @Test
     fun `registerProperty registers the property if there is no license`() {
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val propertyType = PropertyType.DETACHED_HOUSE
-        val licenceType = LicensingType.NO_LICENSING
-        val licenceNumber = ""
+        // Arrange
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
-        val property = Property()
+        val propertyType = PropertyType.DETACHED_HOUSE
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val licenceType = LicensingType.NO_LICENSING
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
 
         val expectedPropertyOwnership =
@@ -372,22 +334,22 @@ class PropertyRegistrationServiceTests {
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 primaryLandlord = landlord,
-                property = property,
+                propertyBuildType = propertyType,
+                address = address,
                 license = null,
                 registrationNumber = registrationNumber,
             )
 
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
-        whenever(mockPropertyService.activateOrCreateProperty(addressDataModel, propertyType)).thenReturn(
-            property,
-        )
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
-                property = property,
+                propertyBuildType = propertyType,
+                address = address,
                 license = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -398,7 +360,7 @@ class PropertyRegistrationServiceTests {
                 addressDataModel,
                 propertyType,
                 licenceType,
-                licenceNumber,
+                licenceNumber = "",
                 ownershipType,
                 numberOfHouseholds,
                 numberOfPeople,
@@ -542,7 +504,7 @@ class PropertyRegistrationServiceTests {
             val context =
                 "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
                     "\"${NonStepJourneyDataKey.LookedUpAddresses.key}\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
-                    "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
+                    "\\\"localCouncilId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
                     "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"$address\"}}"
 
             val createdTodayDate = currentInstant.toJavaInstant()

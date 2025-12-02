@@ -9,4 +9,8 @@ interface JourneyState {
         key: String,
         value: PageData,
     )
+
+    val journeyId: String
+
+    fun deleteJourney()
 }

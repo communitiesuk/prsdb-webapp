@@ -8,7 +8,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (4, '3/26/25', 1001001003, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id, postcode)
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
         (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2,'EG1 1EG'),
         (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 2,'EG1 1EG'),
@@ -25,28 +25,20 @@ INSERT INTO form_context (id, created_date, last_modified_date, journey_type, co
 VALUES (1, current_date, current_date, 7, '{"gas-safety-certificate":{"hasCert":false},"gas-safety-certificate-exemption":{"hasExemption":false},' ||
                                           '"gas-safety-certificate-exemption-missing":{},"eicr":{"hasCert":false},"eicr-exemption":{"hasExemption":false},"eicr-exemption-missing":{}}','urn:fdc:gov.uk:2022:UVWXY'),
        (2, current_date, current_date,3, '{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW5 1tl"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, Example Road, EG\",' ||
-                                         '\"localAuthorityId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localAuthorityId\":2,\"uprn\":2123456,\"buildingNumber\"' ||
-                                         ':\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localAuthorityId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":' ||
-                                         '\"4, Example Road, EG\",\"localAuthorityId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localAuthorityId\":5,\"uprn\"' ||
+                                         '\"localCouncilId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localCouncilId\":2,\"uprn\":2123456,\"buildingNumber\"' ||
+                                         ':\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localCouncilId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":' ||
+                                         '\"4, Example Road, EG\",\"localCouncilId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localCouncilId\":5,\"uprn\"' ||
                                          ':5123456,\"buildingNumber\":\"5\",\"postcode\":\"EG\"}]","select-address":{"address":"4, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}}','urn:fdc:gov.uk:2022:UVWXY'),
        (3, current_date, current_date,3, '{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW5 1tl"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, Example Road, EG\",' ||
-                                         '\"localAuthorityId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localAuthorityId\":2,\"uprn\":2123456,\"buildingNumber\":' ||
-                                         '\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localAuthorityId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"4,' ||
-                                         ' Example Road, EG\",\"localAuthorityId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localAuthorityId\":5,\"uprn\":5123456,' ||
+                                         '\"localCouncilId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localCouncilId\":2,\"uprn\":2123456,\"buildingNumber\":' ||
+                                         '\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localCouncilId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"4,' ||
+                                         ' Example Road, EG\",\"localCouncilId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localCouncilId\":5,\"uprn\":5123456,' ||
                                          '\"buildingNumber\":\"5\",\"postcode\":\"EG\"}]","select-address":{"address":"5, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}}','urn:fdc:gov.uk:2022:UVWXY');
 
-INSERT INTO property (id, status, is_active, property_build_type, address_id)
-VALUES (1, 1, true, 1, 2),
-       (2, 1, true, 1, 3),
-       (3, 1, true, 1, 4);
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households,
-                                current_num_tenants,
-                                registration_number_id, primary_landlord_id, property_id, created_date, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 2, 1, 1, current_date, 1),
-       (2, true, 0, 1, 1, 2, 3, 1, 2, current_date, null),
-       (3, true, 0, 1, 1, 2, 4, 1, 3, current_date, null);
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, incomplete_compliance_form_id, property_build_type)
+VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1, 1),
+       (2, true, 1, 1, 2, 3, 1, 3, current_date, null, 1),
+       (3, true, 1, 1, 2, 4, 1, 4, current_date, null, 1);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,
                                  gas_safety_upload_id, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason,

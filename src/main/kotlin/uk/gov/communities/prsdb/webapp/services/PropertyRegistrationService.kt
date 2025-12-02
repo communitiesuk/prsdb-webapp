@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.database.repository.PropertyRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -31,14 +30,12 @@ import java.time.Instant
 
 @PrsdbWebService
 class PropertyRegistrationService(
-    private val propertyRepository: PropertyRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val formContextRepository: FormContextRepository,
     private val registeredAddressCache: RegisteredAddressCache,
-    private val propertyService: PropertyService,
+    private val addressService: AddressService,
     private val licenseService: LicenseService,
-    private val localAuthorityService: LocalAuthorityService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -53,20 +50,14 @@ class PropertyRegistrationService(
             if (cachedResult != null) return cachedResult
         }
 
-        val property = propertyRepository.findByAddress_Uprn(uprn)
-        if (property == null || !property.isActive) {
-            registeredAddressCache.setCachedAddressRegisteredResult(uprn, false)
-            return false
-        }
-
-        val databaseResult = propertyOwnershipRepository.existsByIsActiveTrueAndProperty_Id(property.id)
+        val databaseResult = propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)
         registeredAddressCache.setCachedAddressRegisteredResult(uprn, databaseResult)
         return databaseResult
     }
 
     @Transactional
     fun registerProperty(
-        address: AddressDataModel,
+        addressModel: AddressDataModel,
         propertyType: PropertyType,
         licenseType: LicensingType,
         licenceNumber: String,
@@ -75,15 +66,15 @@ class PropertyRegistrationService(
         numberOfPeople: Int,
         baseUserId: String,
     ): RegistrationNumber {
-        if (address.uprn != null && getIsAddressRegistered(address.uprn, ignoreCache = true)) {
+        if (addressModel.uprn != null && getIsAddressRegistered(addressModel.uprn, ignoreCache = true)) {
             throw EntityExistsException("Address already registered")
         }
+
+        val address = addressService.findOrCreateAddress(addressModel)
 
         val landlord =
             landlordRepository.findByBaseUser_Id(baseUserId)
                 ?: throw EntityNotFoundException("User not registered as a landlord")
-
-        val property = propertyService.activateOrCreateProperty(address, propertyType)
 
         val license =
             if (licenseType != LicensingType.NO_LICENSING) {
@@ -98,11 +89,12 @@ class PropertyRegistrationService(
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
-                property = property,
+                propertyBuildType = propertyType,
+                address = address,
                 license = license,
             )
 
-        address.uprn?.let { registeredAddressCache.setCachedAddressRegisteredResult(it, true) }
+        addressModel.uprn?.let { registeredAddressCache.setCachedAddressRegisteredResult(it, true) }
 
         setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
 
@@ -110,7 +102,7 @@ class PropertyRegistrationService(
             landlord.email,
             PropertyRegistrationConfirmationEmail(
                 RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                address.singleLineAddress,
+                addressModel.singleLineAddress,
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 propertyOwnership.currentNumTenants > 0,
             ),

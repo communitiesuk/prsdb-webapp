@@ -44,6 +44,7 @@ one-login:
     # files for local dev. In CI, however, we provide the data through env vars (from a secret store)
     public.key: ${ONE_LOGIN_PUBLIC_KEY:classpath:public_key.pem}
     private.key: ${ONE_LOGIN_PRIVATE_KEY:classpath:private_key.pem}
+  did.uri: https://identity.integration.account.gov.uk/.well-known/did.json
 
 
 notify:
@@ -66,7 +67,7 @@ local:
 
 base-url:
   landlord: http://localhost:8080/landlord
-  local-authority: http://localhost:8080/local-council
+  local-council: http://localhost:8080/local-council
 
 aws:
   s3:
@@ -82,6 +83,11 @@ google-analytics:
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
+
+features:
+  releases:
+    - name: "release-1-0"
+      enabled: true
 ---
 
 spring:

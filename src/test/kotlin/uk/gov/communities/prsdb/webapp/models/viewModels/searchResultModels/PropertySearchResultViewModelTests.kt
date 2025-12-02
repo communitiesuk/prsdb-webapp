@@ -15,21 +15,23 @@ class PropertySearchResultViewModelTests {
         val expectedPropertySearchResultViewModel =
             PropertySearchResultViewModel(
                 id = propertyOwnership.id,
-                address = propertyOwnership.property.address.singleLineAddress,
+                address = propertyOwnership.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(propertyOwnership.registrationNumber)
                         .toString(),
-                localAuthority =
-                    propertyOwnership.property.address.localAuthority
-                        ?.name,
+                localCouncil =
+                    propertyOwnership.address.localCouncil?.name,
                 landlord =
                     PropertySearchResultLandlordViewModel(
                         id = propertyOwnership.primaryLandlord.id,
                         name = propertyOwnership.primaryLandlord.name,
-                        recordLink = LandlordDetailsController.getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id),
+                        recordLink =
+                            LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(
+                                propertyOwnership.primaryLandlord.id,
+                            ),
                     ),
-                recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = true),
+                recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true),
             )
 
         val propertySearchResultViewModel = PropertySearchResultViewModel.fromPropertyOwnership(propertyOwnership)

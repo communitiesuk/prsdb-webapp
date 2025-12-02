@@ -123,12 +123,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
-    inner class SelectLocalAuthorityStep {
+    inner class SelectLocalCouncilStep {
         @Test
         fun `Submitting without selecting an LA return an error`(page: Page) {
-            val selectLocalAuthorityPage = navigator.skipToPropertyRegistrationSelectLocalAuthorityPage()
-            selectLocalAuthorityPage.form.submit()
-            assertThat(selectLocalAuthorityPage.form.getErrorMessage("localAuthorityId"))
+            val selectLocalCouncilPage = navigator.skipToPropertyRegistrationSelectLocalCouncilPage()
+            selectLocalCouncilPage.form.submit()
+            assertThat(selectLocalCouncilPage.form.getErrorMessage("localCouncilId"))
                 .containsText("Select a local council to continue")
         }
     }
@@ -397,14 +397,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `After changing an answer, submitting a full section returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            checkAnswersPage.form.summaryList.ownershipRow.actions.actionLink
+            checkAnswersPage.summaryList.ownershipRow.actions.actionLink
                 .clickAndWait()
             val ownershipPage = BasePage.assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
             ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
             checkAnswersPage = BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.form.summaryList.licensingRow.actions.actionLink
+            checkAnswersPage.summaryList.licensingRow.actions.actionLink
                 .clickAndWait()
             val licensingTypePage = BasePage.assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 

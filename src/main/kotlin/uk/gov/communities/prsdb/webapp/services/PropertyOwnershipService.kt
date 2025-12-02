@@ -9,13 +9,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
+import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
@@ -32,7 +31,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 class PropertyOwnershipService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val registrationNumberService: RegistrationNumberService,
-    private val localAuthorityDataService: LocalAuthorityDataService,
+    private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
     private val formContextService: FormContextService,
     private val backLinkService: BackUrlStorageService,
@@ -45,26 +44,26 @@ class PropertyOwnershipService(
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         primaryLandlord: Landlord,
-        property: Property,
+        propertyBuildType: PropertyType,
+        address: Address,
         license: License? = null,
         isActive: Boolean = true,
-        occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
-                isActive = isActive,
-                occupancyType = occupancyType,
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 registrationNumber = registrationNumber,
                 primaryLandlord = primaryLandlord,
-                property = property,
+                propertyBuildType = propertyBuildType,
+                address = address,
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
+                isActive = isActive,
             ),
         )
     }
@@ -75,11 +74,11 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
 
-        val isLocalAuthority = localAuthorityDataService.getIsLocalAuthorityUser(baseUserId)
+        val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
 
         val isPrimaryLandlord = propertyOwnership.primaryLandlord.baseUser.id == baseUserId
 
-        if (!isLocalAuthority && !isPrimaryLandlord) {
+        if (!isLocalCouncil && !isPrimaryLandlord) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "The current user is not authorised to view property ownership $propertyOwnershipId",
@@ -107,7 +106,7 @@ class PropertyOwnershipService(
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
     fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
-        retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId).map { propertyOwnership ->
+        retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
@@ -115,7 +114,7 @@ class PropertyOwnershipService(
         }
 
     fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyLocalCouncilViewModel> =
-        retrieveAllActiveRegisteredPropertiesForLandlord(landlordId).map { propertyOwnership ->
+        propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
@@ -131,8 +130,8 @@ class PropertyOwnershipService(
 
     fun searchForProperties(
         searchTerm: String,
-        laBaseUserId: String,
-        restrictToLA: Boolean = false,
+        localCouncilBaseUserId: String,
+        restrictToLocalCouncil: Boolean = false,
         restrictToLicenses: List<LicensingType> = LicensingType.entries,
         requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE,
@@ -145,24 +144,24 @@ class PropertyOwnershipService(
             if (prn != null) {
                 propertyOwnershipRepository.searchMatchingPRN(
                     prn.number,
-                    laBaseUserId,
-                    restrictToLA,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
                     restrictToLicenses,
                     pageRequest,
                 )
             } else if (uprn != null) {
                 propertyOwnershipRepository.searchMatchingUPRN(
                     uprn,
-                    laBaseUserId,
-                    restrictToLA,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
                     restrictToLicenses,
                     pageRequest,
                 )
             } else {
                 propertyOwnershipRepository.searchMatching(
                     searchTerm,
-                    laBaseUserId,
-                    restrictToLA,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
                     restrictToLicenses,
                     pageRequest,
                 )
@@ -200,6 +199,7 @@ class PropertyOwnershipService(
             propertyOwnership.license = updatedLicence
         }
 
+        propertyOwnershipRepository.save(propertyOwnership)
         sendUpdateConfirmationEmail(propertyOwnership, update, wasPropertyOccupied)
     }
 
@@ -225,7 +225,7 @@ class PropertyOwnershipService(
             updateConfirmationEmailService.sendEmail(
                 propertyOwnership.primaryLandlord.email,
                 PropertyUpdateConfirmation(
-                    singleLineAddress = propertyOwnership.property.address.singleLineAddress,
+                    singleLineAddress = propertyOwnership.address.singleLineAddress,
                     registrationNumber =
                         RegistrationNumberDataModel
                             .fromRegistrationNumber(propertyOwnership.registrationNumber)
@@ -237,23 +237,11 @@ class PropertyOwnershipService(
         }
     }
 
-    private fun retrieveAllActiveRegisteredPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_Status(
-            baseUserId,
-            RegistrationStatus.REGISTERED,
-        )
+    fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
-    private fun retrieveAllActiveRegisteredPropertiesForLandlord(landlordId: Long): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrueAndProperty_Status(
-            landlordId,
-            RegistrationStatus.REGISTERED,
-        )
-
-    fun retrieveAllPropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_Id(baseUserId)
-
-    fun deletePropertyOwnership(propertyOwnership: PropertyOwnership) {
-        propertyOwnershipRepository.delete(propertyOwnership)
+    fun deletePropertyOwnership(propertyOwnershipId: Long) {
+        propertyOwnershipRepository.deleteById(propertyOwnershipId)
     }
 
     fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {
@@ -266,20 +254,19 @@ class PropertyOwnershipService(
         propertyOwnership.incompleteComplianceForm?.let {
             formContextService.deleteFormContext(it)
             propertyOwnership.incompleteComplianceForm = null
+            propertyOwnershipRepository.save(propertyOwnership)
         }
     }
 
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
-        @Suppress("ktlint:standard:max-line-length")
         propertyOwnershipRepository
-            .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndProperty_StatusAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
+            .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
                 principalName,
-                RegistrationStatus.REGISTERED,
                 0,
-            ).toInt()
+            )
 
     fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
-        val propertyOwnerships = retrieveAllActiveRegisteredPropertiesForLandlord(principalName)
+        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
 
         return propertyOwnerships
             .filter { it.isOccupied && it.isComplianceIncomplete }

@@ -3,24 +3,21 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import java.time.Instant
 import java.time.LocalDate
 
@@ -28,9 +25,9 @@ class MockLandlordData {
     companion object {
         fun createAddress(
             singleLineAddress: String = "1 Example Road, EG1 2AB",
-            localAuthority: LocalAuthority? = createLocalAuthority(),
+            localCouncil: LocalCouncil? = createLocalCouncil(),
             uprn: Long? = null,
-        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
+        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localCouncil)
 
         fun createOneLoginUser(id: String = "") = OneLoginUser(id)
 
@@ -77,26 +74,14 @@ class MockLandlordData {
             )
         }
 
-        fun createProperty(
-            status: RegistrationStatus = RegistrationStatus.REGISTERED,
-            propertyType: PropertyType = PropertyType.FLAT,
-            address: Address = createAddress(),
-            isActive: Boolean = true,
-        ) = Property(
-            status = status,
-            propertyType = propertyType,
-            address = address,
-            isActive = isActive,
-        )
-
         fun createPropertyOwnership(
-            occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
-            property: Property = createProperty(),
+            propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
+            address: Address = createAddress(),
             license: License? = null,
             incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             id: Long = 1,
@@ -104,13 +89,13 @@ class MockLandlordData {
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
-                    occupancyType = occupancyType,
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     registrationNumber = registrationNumber,
                     primaryLandlord = primaryLandlord,
-                    property = property,
+                    propertyBuildType = propertyBuildType,
+                    address = address,
                     incompleteComplianceForm = incompleteComplianceForm,
                     license = license,
                 )
@@ -126,7 +111,7 @@ class MockLandlordData {
             context: String =
                 "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
                     "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
-                    "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
+                    "\\\"localCouncilId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
                     "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"2, Example Road, EG\"}}",
             user: OneLoginUser = createOneLoginUser(),
             createdDate: Instant = Instant.now(),
@@ -159,8 +144,8 @@ class MockLandlordData {
 
         fun createPasscode(
             code: String = "ABCDEF",
-            localAuthority: LocalAuthority = createLocalAuthority(),
+            localCouncil: LocalCouncil = createLocalCouncil(),
             baseUser: OneLoginUser? = createOneLoginUser(),
-        ) = Passcode(code, localAuthority, baseUser)
+        ) = Passcode(code, localCouncil, baseUser)
     }
 }

@@ -11,9 +11,31 @@ import kotlin.collections.plus
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
+    open class RequestableStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+        val routeSegment: String get() = stepConfig.routeSegment
+
+        override fun getRouteSegmentOrNull(): String? = stepConfig.routeSegment
+
+        override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
+    }
+
+    open class InternalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
+        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+        override fun getRouteSegmentOrNull(): String? = null
+
+        override fun isRouteSegmentInitialised(): Boolean = true
+    }
+
+    abstract fun getRouteSegmentOrNull(): String?
+
+    abstract fun isRouteSegmentInitialised(): Boolean
+
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
     fun beforeIsStepReachable() {
         stepConfig.beforeIsStepReachable(state)
@@ -27,21 +49,21 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
 
     fun afterValidateSubmittedData(bindingResult: BindingResult) = stepConfig.afterValidateSubmittedData(bindingResult, state)
 
-    fun beforeGetStepContent() {
+    fun beforeGetPageVisitContent() {
         stepConfig.beforeGetStepContent(state)
     }
 
-    fun chooseTemplate(): String = stepConfig.chooseTemplate(state)
+    fun chooseTemplate(): Destination = Destination.Template(stepConfig.chooseTemplate(state))
 
-    fun afterGetStepContent() {
+    fun afterGetPageVisitContent() {
         stepConfig.afterGetStepContent(state)
     }
 
-    fun beforeGetTemplate() {
+    fun beforeChooseTemplate() {
         stepConfig.beforeGetTemplate(state)
     }
 
-    fun afterGetTemplate() {
+    fun afterChooseTemplate() {
         stepConfig.afterGetTemplate(state)
     }
 
@@ -53,13 +75,11 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
         stepConfig.afterSubmitFormData(state)
     }
 
-    fun beforeDetermineRedirect() {
-        stepConfig.beforeDetermineRedirect(state)
+    fun beforeDetermineNextDestination() {
+        stepConfig.beforeDetermineNextDestination(state)
     }
 
-    fun afterDetermineRedirect() {
-        stepConfig.afterDetermineRedirect(state)
-    }
+    fun afterDetermineNextDestination(destination: Destination) = stepConfig.afterDetermineNextDestination(state, destination)
 
     val isStepReachable: Boolean
         get() = parentage.allowsChild()
@@ -75,53 +95,61 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
 
     fun getPageVisitContent() =
         stepConfig.getStepSpecificContent(state) +
+            additionalContentProvider() +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
-                "formModel" to (formModel ?: stepConfig.formModelClass.createInstance()),
+                "formModel" to (formModelOrNull ?: stepConfig.formModelClass.createInstance()),
             )
 
     fun getInvalidSubmissionContent(bindingResult: BindingResult) =
         stepConfig.getStepSpecificContent(state) +
+            additionalContentProvider() +
             mapOf(
                 BACK_URL_ATTR_NAME to backUrl,
                 BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult,
             )
 
     fun submitFormData(bindingResult: BindingResult) {
-        state.addStepData(stepConfig.routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
+        getRouteSegmentOrNull()?.let { state.addStepData(it, stepConfig.formModelClass.cast(bindingResult.target).toPageData()) }
     }
 
-    fun determineRedirect(): String = stepConfig.mode(state)?.let { redirectToUrl(it) } ?: routeSegment
+    fun determineNextDestination(): Destination =
+        stepConfig.mode(state)?.let { nextDestination(it) }
+            ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
 
-    private lateinit var unreachableStepRedirect: () -> String
+    private lateinit var unreachableStepDestination: () -> Destination
 
-    fun getUnreachableStepRedirect() = unreachableStepRedirect()
+    fun getUnreachableStepDestination() = unreachableStepDestination()
 
-    val formModel: TFormModel?
+    val formModelOrNull: TFormModel?
+        get() = stepConfig.getFormModelFromStateOrNull(state)
+
+    val formModel: TFormModel
         get() = stepConfig.getFormModelFromState(state)
 
     lateinit var parentage: Parentage
 
     private lateinit var state: TState
 
-    fun outcome(): TEnum? = if (isStepReachable)stepConfig.mode(state) else null
+    val outcome: TEnum? get() = if (isStepReachable)stepConfig.mode(state) else null
 
-    private lateinit var redirectToUrl: (mode: TEnum) -> String
+    private lateinit var nextDestination: (mode: TEnum) -> Destination
 
     private var backUrlOverride: (() -> String?)? = null
+
+    private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
 
     val backUrl: String?
         get() {
             val singleParentUrl =
-                parentage.allowingParentSteps
-                    .singleOrNull()
-                    ?.stepConfig
-                    ?.routeSegment
+                when (val singleParentStep = parentage.allowingParentSteps.singleOrNull()) {
+                    is InternalStep<*, *, *> -> singleParentStep.backUrl
+                    is RequestableStep<*, *, *> -> Destination(singleParentStep).toUrlStringOrNull()
+                    null -> null
+                }
             val backUrlOverrideValue = this.backUrlOverride?.let { it() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
-
-    val routeSegment: String get() = stepConfig.routeSegment
 
     val initialisationStage: StepInitialisationStage
         get() =
@@ -130,29 +158,34 @@ class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState
                 isBaseClassInitialised && !stepConfig.isSubClassInitialised() -> StepInitialisationStage.PARTIALLY_INITIALISED
                 else -> StepInitialisationStage.FULLY_INITIALISED
             }
+
     private val isBaseClassInitialised: Boolean
         get() =
-            stepConfig.isRouteSegmentInitialised() && ::state.isInitialized && ::redirectToUrl.isInitialized &&
-                ::parentage.isInitialized
+            isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized && ::parentage.isInitialized
 
     fun initialize(
-        segment: String,
+        segment: String?,
         state: TState,
         backUrlOverride: (() -> String?)?,
-        redirectToUrl: (mode: TEnum) -> String,
+        redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
-        unreachableStepRedirectProvider: () -> String,
+        unreachableStepDestinationProvider: () -> Destination,
+        additionalContentProvider: (() -> Map<String, Any>)? = null,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")
         }
-        this.stepConfig.routeSegment = segment
+        segment?.let { this.stepConfig.routeSegment = it }
         this.state = state
         this.backUrlOverride = backUrlOverride
-        this.redirectToUrl = redirectToUrl
+        this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
-        this.unreachableStepRedirect = unreachableStepRedirectProvider
+        this.unreachableStepDestination = unreachableStepDestinationProvider
+        additionalContentProvider?.let { this.additionalContentProvider = it }
     }
+
+    val currentJourneyId: String
+        get() = state.journeyId
 }
 
 enum class StepInitialisationStage {

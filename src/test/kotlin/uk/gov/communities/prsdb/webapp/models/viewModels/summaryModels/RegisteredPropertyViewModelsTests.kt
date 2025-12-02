@@ -9,11 +9,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createProperty
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class RegisteredPropertyViewModelsTests {
@@ -21,31 +20,29 @@ class RegisteredPropertyViewModelsTests {
     inner class RegisteredPropertyLocalCouncilViewModelTests {
         @Test
         fun `Returns a corresponding RegisteredPropertyViewModel from a PropertyOwnership`() {
-            val address = "11 Example Road, EG1 2AB"
             val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-            val localAuthority = LocalAuthority(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
-
-            val property = createProperty(address = createAddress(address, localAuthority))
+            val localCouncil = LocalCouncil(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
+            val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB", localCouncil)
 
             val propertyOwnership =
                 createPropertyOwnership(
-                    property = property,
+                    address = address,
                     registrationNumber = registrationNumber,
                     license = null,
                     currentNumTenants = 0,
                 )
 
-            val expectedLocalAuthority = localAuthority.name
+            val expectedLocalAuthority = localCouncil.name
             val expectedRegistrationNumber =
                 RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
             val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
             val expectedIsTenantedMessageKey = "commonText.no"
             val expectedRecordLink =
-                PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
+                PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
 
             val expectedRegisteredPropertyViewModel =
                 RegisteredPropertyLocalCouncilViewModel(
-                    address,
+                    address.singleLineAddress,
                     expectedRegistrationNumber,
                     expectedLocalAuthority,
                     expectedPropertyLicence,
@@ -113,7 +110,7 @@ class RegisteredPropertyViewModelsTests {
 
             val expectedRegisteredPropertyLandlordViewModel =
                 RegisteredPropertyLandlordViewModel(
-                    address = propertyOwnership.property.address.singleLineAddress,
+                    address = propertyOwnership.address.singleLineAddress,
                     registrationNumber =
                         RegistrationNumberDataModel
                             .fromRegistrationNumber(
