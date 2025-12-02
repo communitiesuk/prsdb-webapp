@@ -54,11 +54,10 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        segment: String,
         uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, journey)
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
         stepInitialiser.init()
         if (journeyElements.isEmpty()) {
             stepInitialiser.configureFirst {
@@ -72,7 +71,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep, journey)
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
         stepInitialiser.init()
         if (journeyElements.isEmpty()) {
             stepInitialiser.configureFirst {

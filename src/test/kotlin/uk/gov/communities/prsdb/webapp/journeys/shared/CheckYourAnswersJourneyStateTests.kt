@@ -29,11 +29,13 @@ class CheckYourAnswersJourneyStateTests {
         val step2 = StepInitialiserTests.mockInitialisableStep()
 
         // Act
-        jb.step("step1", step1) {
+        jb.step(step1) {
+            routeSegment("step1")
             nextUrl { "nextStep" }
             parents { NoParents() }
         }
-        jb.step("step2", step2) {
+        jb.step(step2) {
+            routeSegment("step2")
             nextUrl { "nextStep" }
             parents { NoParents() }
             checkable()

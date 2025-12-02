@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
 interface JourneyBuilderDsl<TState : JourneyState> {
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        segment: String,
         uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     )
@@ -59,10 +58,9 @@ open class JourneyBuilder<TState : JourneyState>(
         }
 
         override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-            segment: String,
             uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
             init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-        ) = journeyBuilder.step<TMode, TStep>(segment, uninitialisedStep) {
+        ) = journeyBuilder.step<TMode, TStep>(uninitialisedStep) {
             init()
             withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
         }
