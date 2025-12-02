@@ -12,7 +12,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
 import java.time.LocalDate
 
 class FeatureFlagManagerTests {
@@ -26,12 +26,12 @@ class FeatureFlagManagerTests {
 
         val featureFlagsFromConfig =
             listOf(
-                FeatureFlagModel(
+                FeatureFlagConfigModel(
                     name = "TEST_FEATURE_FLAG_1",
                     enabled = true,
                     expiryDate = LocalDate.of(2030, 2, 14),
                 ),
-                FeatureFlagModel(
+                FeatureFlagConfigModel(
                     name = "TEST_FEATURE_FLAG_2",
                     enabled = false,
                     expiryDate = LocalDate.of(2030, 6, 14),

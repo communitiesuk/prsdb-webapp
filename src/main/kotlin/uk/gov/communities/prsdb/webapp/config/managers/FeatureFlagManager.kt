@@ -5,17 +5,17 @@ import org.ff4j.core.Feature
 import org.ff4j.exception.GroupNotFoundException
 import org.ff4j.property.PropertyDate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
 
 class FeatureFlagManager : FF4j() {
-    fun initializeFeatureFlags(featureFlags: List<FeatureFlagModel>) {
+    fun initializeFeatureFlags(featureFlags: List<FeatureFlagConfigModel>) {
         featureFlags.forEach { flag ->
             initializeFeatureFlag(flag)
         }
     }
 
-    private fun initializeFeatureFlag(flag: FeatureFlagModel) {
+    private fun initializeFeatureFlag(flag: FeatureFlagConfigModel) {
         val feature = Feature(flag.name, flag.enabled)
         feature.addProperty(PropertyDate("expiryDate", DateTimeHelper.getJavaDateFromLocalDate(flag.expiryDate)))
         feature.group = flag.release
@@ -23,7 +23,7 @@ class FeatureFlagManager : FF4j() {
         this.createFeature(feature)
     }
 
-    fun initialiseFeatureReleases(featureReleases: List<FeatureReleaseModel>) {
+    fun initialiseFeatureReleases(featureReleases: List<FeatureReleaseConfigModel>) {
         try {
             featureReleases.forEach { group ->
                 if (group.enabled) {

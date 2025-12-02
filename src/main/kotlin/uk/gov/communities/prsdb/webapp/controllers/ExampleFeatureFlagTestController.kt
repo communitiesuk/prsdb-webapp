@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
 import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlaggedService
 
 // TODO PRSD-1683 - delete example feature flag implementation when no longer needed
@@ -104,11 +104,11 @@ class ExampleFeatureFlagTestController(
         return "featureFlagExamples/featureReleaseTest"
     }
 
-    private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagModel =
+    private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagConfigModel =
         featureFlagConfig.featureFlags.firstOrNull { it.name == featureName }
             ?: throw IllegalArgumentException("Feature flag $featureName not found in config")
 
-    private fun getFeatureReleaseModelFromConfig(releaseName: String): FeatureReleaseModel =
+    private fun getFeatureReleaseModelFromConfig(releaseName: String): FeatureReleaseConfigModel =
         featureFlagConfig.releases.firstOrNull { it.name == releaseName }
             ?: throw IllegalArgumentException("Feature release $releaseName not found in config")
 
