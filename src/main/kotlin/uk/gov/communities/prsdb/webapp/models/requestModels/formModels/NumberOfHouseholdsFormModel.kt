@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.PositiveIntegerValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
@@ -11,10 +10,6 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 class NumberOfHouseholdsFormModel : FormModel {
     @ValidatedBy(
         constraints = [
-            ConstraintDescriptor(
-                messageKey = "forms.numberOfHouseholds.input.error",
-                validatorType = NotBlankConstraintValidator::class,
-            ),
             ConstraintDescriptor(
                 messageKey = "forms.numberOfHouseholds.input.error",
                 validatorType = PositiveIntegerValidator::class,
