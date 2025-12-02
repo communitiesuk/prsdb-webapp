@@ -72,4 +72,7 @@ class FeatureFlagTest {
 
     @Autowired
     lateinit var featureFlagManager: FeatureFlagManager
+
+    @Autowired
+    lateinit var featureFlagConfig: FeatureFlagConfig
 }

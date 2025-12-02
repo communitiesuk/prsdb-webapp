@@ -14,7 +14,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
     @WithMockUser
     fun `groupedFeatureFlagEnabled endpoint is available when the individual flag is on and the group flag is on`() {
         featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_TWO)
-        featureFlagManager.enableFeatureGroup(RELEASE_1_0)
+        featureFlagManager.enableFeatureRelease(RELEASE_1_0)
         mvc
             .get(FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
             .andExpect { status { isOk() } }
@@ -24,7 +24,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
     @WithMockUser
     fun `groupedFeatureFlagEnabled endpoint is available when the individual flag is off and the group flag is on`() {
         featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_THREE)
-        featureFlagManager.enableFeatureGroup(RELEASE_1_0)
+        featureFlagManager.enableFeatureRelease(RELEASE_1_0)
         mvc
             .get(FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
             .andExpect { status { isOk() } }
@@ -34,7 +34,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
     @WithMockUser
     fun `groupedFeatureFlagEnabled endpoint is unavailable when the individual flag is on and the group flag is off`() {
         featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_TWO)
-        featureFlagManager.disableFeatureGroup(RELEASE_1_0)
+        featureFlagManager.disableFeatureRelease(RELEASE_1_0)
         mvc
             .get(FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
             .andExpect { status { isNotFound() } }
@@ -44,7 +44,7 @@ class ExampleGroupedFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCal
     @WithMockUser
     fun `groupedFeatureFlagEnabled endpoint is unavailable when the individual flag is off and the group flag is off`() {
         featureFlagManager.disableFeature(EXAMPLE_FEATURE_FLAG_THREE)
-        featureFlagManager.disableFeatureGroup(RELEASE_1_0)
+        featureFlagManager.disableFeatureRelease(RELEASE_1_0)
         mvc
             .get(FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
             .andExpect { status { isNotFound() } }

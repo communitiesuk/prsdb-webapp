@@ -5,8 +5,8 @@ import org.ff4j.core.Feature
 import org.ff4j.exception.GroupNotFoundException
 import org.ff4j.property.PropertyDate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagGroupModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
 
 class FeatureFlagManager : FF4j() {
     fun initializeFeatureFlags(featureFlags: List<FeatureFlagModel>) {
@@ -18,18 +18,18 @@ class FeatureFlagManager : FF4j() {
     private fun initializeFeatureFlag(flag: FeatureFlagModel) {
         val feature = Feature(flag.name, flag.enabled)
         feature.addProperty(PropertyDate("expiryDate", DateTimeHelper.getJavaDateFromLocalDate(flag.expiryDate)))
-        feature.group = flag.flagGroup
+        feature.group = flag.release
 
         this.createFeature(feature)
     }
 
-    fun initialiseFeatureFlagGroups(featureFlagGroups: List<FeatureFlagGroupModel>) {
+    fun initialiseFeatureReleases(featureReleases: List<FeatureReleaseModel>) {
         try {
-            featureFlagGroups.forEach { group ->
+            featureReleases.forEach { group ->
                 if (group.enabled) {
-                    this.enableFeatureGroup(group.name)
+                    this.enableFeatureRelease(group.name)
                 } else {
-                    this.disableFeatureGroup(group.name)
+                    this.disableFeatureRelease(group.name)
                 }
             }
         } catch (e: GroupNotFoundException) {
@@ -48,7 +48,7 @@ class FeatureFlagManager : FF4j() {
 
     fun disableFeature(flagName: String) = super.disable(flagName)
 
-    fun enableFeatureGroup(groupName: String) = super.enableGroup(groupName)
+    fun enableFeatureRelease(groupName: String) = super.enableGroup(groupName)
 
-    fun disableFeatureGroup(groupName: String) = super.disableGroup(groupName)
+    fun disableFeatureRelease(groupName: String) = super.disableGroup(groupName)
 }
