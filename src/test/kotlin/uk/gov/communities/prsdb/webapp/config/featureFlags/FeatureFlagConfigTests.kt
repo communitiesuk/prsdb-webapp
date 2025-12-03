@@ -33,6 +33,11 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 expiryDate = LocalDate.of(2030, 1, 7),
                 release = "release-1-0",
             ),
+            FeatureFlagModel(
+                name = "failover-test-endpoints",
+                enabled = true,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
         )
 
     @Test

@@ -224,7 +224,7 @@ class NgdAddressLoaderTests {
     }
 
     @Test
-    fun `loadNewDataPackageVersions updates property ownership single line addresses after each data package is loaded`() {
+    fun `loadNewDataPackageVersions updates property ownership addresses after each data package is loaded`() {
         // Arrange
         setUpMockNgdAddressLoaderRepository { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
@@ -246,7 +246,7 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        verify(mockNgdAddressLoaderRepository, times(2)).updatePropertyOwnershipSingleLineAddresses()
+        verify(mockNgdAddressLoaderRepository, times(2)).updatePropertyOwnershipAddresses()
     }
 
     @Test
