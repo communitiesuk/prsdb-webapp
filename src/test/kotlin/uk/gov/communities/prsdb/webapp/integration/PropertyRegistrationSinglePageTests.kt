@@ -289,7 +289,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with a blank numberOfHouseholds field returns an error`(page: Page) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.form.submit()
-            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter the number of households living in your property")
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter how many separate households, like 1 or 2")
         }
 
         @Test
@@ -297,7 +297,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("not-a-number")
             assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Number of households in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many separate households, like 1 or 2")
         }
 
         @Test
@@ -305,7 +305,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("2.3")
             assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Number of households in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many separate households, like 1 or 2")
         }
 
         @Test
@@ -313,7 +313,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(-2)
             assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Number of households in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many separate households, like 1 or 2")
         }
 
         @Test
@@ -321,7 +321,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(0)
             assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Number of households in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many separate households, like 1 or 2")
         }
     }
 
