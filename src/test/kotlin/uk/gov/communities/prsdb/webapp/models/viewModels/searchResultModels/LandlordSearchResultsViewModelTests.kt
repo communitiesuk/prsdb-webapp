@@ -2,16 +2,14 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
 class LandlordSearchResultsViewModelTests {
     @Test
-    fun `fromLandlordWithListedPropertyCount returns a corresponding LandlordSearchResultsViewModel`() {
-        val landlord = createLandlord()
-        val landlordWithListedPropertyCount = LandlordWithListedPropertyCount(landlord.id, landlord, 3)
+    fun `fromLandlord returns a corresponding LandlordSearchResultsViewModel`() {
+        val landlord = MockLandlordData.createLandlord()
         val expectedLandlordSearchResultViewModel =
             LandlordSearchResultViewModel(
                 id = landlord.id,
@@ -23,14 +21,29 @@ class LandlordSearchResultsViewModelTests {
                 contactAddress = landlord.address.singleLineAddress,
                 email = landlord.email,
                 phoneNumber = landlord.phoneNumber,
-                listedPropertyCount = 3,
+                propertyCount = 0,
                 recordLink = LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id),
             )
 
-        val landlordSearchResultViewModel =
-            LandlordSearchResultViewModel
-                .fromLandlordWithListedPropertyCount(landlordWithListedPropertyCount)
+        val landlordSearchResultViewModel = LandlordSearchResultViewModel.fromLandlord(landlord)
 
         assertEquals(expectedLandlordSearchResultViewModel, landlordSearchResultViewModel)
+    }
+
+    @Test
+    fun `fromLandlord only includes active properties in count`() {
+        val landlord =
+            MockLandlordData.createLandlord(
+                propertyOwnerships =
+                    setOf(
+                        MockLandlordData.createPropertyOwnership(isActive = false),
+                        MockLandlordData.createPropertyOwnership(),
+                        MockLandlordData.createPropertyOwnership(),
+                    ),
+            )
+
+        val landlordSearchResultViewModel = LandlordSearchResultViewModel.fromLandlord(landlord)
+
+        assertEquals(2, landlordSearchResultViewModel.propertyCount)
     }
 }

@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
@@ -23,7 +22,6 @@ import kotlin.String
 class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserService: OneLoginUserService,
-    private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
@@ -129,16 +127,16 @@ class LandlordService(
         val lrn = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
-        val landlordWithListedPropertyCountPage =
+        val landlordPage =
             if (lrn == null) {
-                landlordWithListedPropertyCountRepository.searchMatching(
+                landlordRepository.searchMatching(
                     searchTerm,
                     localCouncilBaseUserId,
                     restrictToLocalCouncil,
                     pageRequest,
                 )
             } else {
-                landlordWithListedPropertyCountRepository.searchMatchingLRN(
+                landlordRepository.searchMatchingLRN(
                     lrn.number,
                     localCouncilBaseUserId,
                     restrictToLocalCouncil,
@@ -146,16 +144,14 @@ class LandlordService(
                 )
             }
 
-        return landlordWithListedPropertyCountPage.map {
-            LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, backLinkService.storeCurrentUrlReturningKey())
-        }
+        return landlordPage.map { LandlordSearchResultViewModel.fromLandlord(it, backLinkService.storeCurrentUrlReturningKey()) }
     }
 
     fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean {
-        val landlordWithListedPropertyCount =
-            landlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId)
+        val landlord =
+            retrieveLandlordByBaseUserId(baseUserId)
                 ?: throw EntityNotFoundException("Landlord with baseUserId $baseUserId not found")
-        return landlordWithListedPropertyCount.listedPropertyCount > 0
+        return landlord.propertyOwnerships.isNotEmpty()
     }
 
     private fun sendUpdateConfirmationEmail(
