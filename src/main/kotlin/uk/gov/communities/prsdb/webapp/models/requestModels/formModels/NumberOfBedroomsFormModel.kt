@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.validation.PositiveIntegerValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class NumberOfBedroomsFormModel {
+class NumberOfBedroomsFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
