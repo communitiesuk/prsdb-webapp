@@ -97,8 +97,7 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
         "SELECT po.* " +
             "FROM property_ownership po " +
             "WHERE po.single_line_address %>> :searchTerm " +
-            // TODO PRSD-1023: Uncomment when migration is re-added
-//            "AND po.is_in_gist_index " +
+            "AND po.is_active_duplicate_for_gist_index " +
             FILTERS +
             "ORDER BY po.single_line_address <->>> :searchTerm",
         nativeQuery = true,
@@ -117,11 +116,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
 
         // Determines whether the property's address is in the LC user's LC
         private const val LOCAL_COUNCIL_FILTER =
-            // TODO PRSD-1023: Get local council id from property_ownership when migration is re-added
             """
-            AND ((SELECT a.local_council_id 
-                 FROM address a 
-                 WHERE po.address_id = a.id)
+            AND (po.local_council_id
                  =
                  (SELECT lcu.local_council_id 
                   FROM local_council_user lcu
