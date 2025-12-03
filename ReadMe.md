@@ -17,7 +17,7 @@ dependencies before starting the application.
 A running docker daemon is also required to run the integration tests, which make use
 of [testcontainers](https://testcontainers.com/).
 
-The application requires Java 17 - Gradle should automatically install this for you the first time you run the
+The application requires Java 21 - Gradle should automatically install this for you the first time you run the
 application locally.
 
 We are using Ktlint for linting, via the [ktlint-gradle plugin](https://github.com/jlleitschuh/ktlint-gradle) and the
