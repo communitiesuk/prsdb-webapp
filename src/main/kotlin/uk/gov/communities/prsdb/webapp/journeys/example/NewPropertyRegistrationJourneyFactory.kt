@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -124,6 +125,7 @@ class PropertyRegistrationJourneyState(
     override val occupied: OccupiedStep,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
+    override val bedrooms: BedroomsStep,
     val occupationTask: OccupationTask,
     val cyaStep: PropertyRegistrationCheckAnswersStep,
     private val journeyStateService: JourneyStateService,
