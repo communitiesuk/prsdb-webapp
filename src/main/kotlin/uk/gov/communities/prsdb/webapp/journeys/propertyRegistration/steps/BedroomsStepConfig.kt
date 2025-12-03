@@ -15,7 +15,8 @@ class BedroomsStepConfig : AbstractGenericStepConfig<Complete, NumberOfBedroomsF
 
     override fun getStepSpecificContent(state: OccupiedJourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.numberOfBedrooms.fieldSetHeading",
+            "title" to "registerProperty.title",
+            "fieldSetHeading" to "forms.numberOfBedrooms.fieldsetHeading",
         )
 
     override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfBedroomsForm"
