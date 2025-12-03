@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -145,13 +144,6 @@ class LandlordService(
             }
 
         return landlordPage.map { LandlordSearchResultViewModel.fromLandlord(it, backLinkService.storeCurrentUrlReturningKey()) }
-    }
-
-    fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean {
-        val landlord =
-            retrieveLandlordByBaseUserId(baseUserId)
-                ?: throw EntityNotFoundException("Landlord with baseUserId $baseUserId not found")
-        return landlord.propertyOwnerships.isNotEmpty()
     }
 
     private fun sendUpdateConfirmationEmail(
