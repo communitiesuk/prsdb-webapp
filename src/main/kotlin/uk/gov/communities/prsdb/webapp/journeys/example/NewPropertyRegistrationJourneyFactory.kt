@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -43,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyStateProxy
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -133,13 +135,20 @@ class PropertyRegistrationJourneyState(
     val occupationTask: OccupationTask,
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
     private val journeyStateService: JourneyStateService,
+    delegateProvider: JourneyStateDelegateProvider,
+    private val cyaProxy: CheckYourAnswersJourneyStateProxy =
+        CheckYourAnswersJourneyStateProxy(
+            delegateProvider = JourneyStateDelegateProvider(journeyStateService),
+            journeyStateService = journeyStateService,
+            cyaStep = cyaStep,
+        ),
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
     LicensingState,
     OccupationState,
-    CheckYourAnswersJourneyState {
-    override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
-    override var isAddressAlreadyRegistered: Boolean? by mutableDelegate("isAddressAlreadyRegistered", serializer())
+    CheckYourAnswersJourneyState by cyaProxy {
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses", serializer())
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered", serializer())
 
     final fun initializeJourneyState(user: Principal): String {
         val journeyId = generateJourneyId(user)
@@ -151,19 +160,10 @@ class PropertyRegistrationJourneyState(
 
     fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
-    override var cyaChildJourneyId: String? by mutableDelegate("cyaChildJourneyId", serializer())
-        private set
-
-    override val baseJourneyId: String
-        get() = journeyStateService.journeyMetadata.baseJourneyId ?: journeyStateService.journeyId
-
-    override val isCheckingAnswers: Boolean
-        get() = journeyStateService.journeyMetadata.childJourneyName != null
-
     fun initialiseCyaChildJourney() {
         val newId = generateJourneyId(SecurityContextHolder.getContext().authentication)
         journeyStateService.initialiseChildJourney(newId, "checkYourAnswers")
-        cyaChildJourneyId = newId
+        cyaProxy.cyaChildJourneyId = newId
     }
 
     companion object {
