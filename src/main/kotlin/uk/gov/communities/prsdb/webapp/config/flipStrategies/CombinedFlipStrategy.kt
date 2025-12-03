@@ -13,10 +13,8 @@ class CombinedFlipStrategy(
         store: FeatureStore?,
         executionContext: FlippingExecutionContext?,
     ): Boolean {
-        var result: Boolean
         for (strategy in strategyList) {
-            result = true && strategy.evaluate(featureName, store, executionContext)
-            if (!result) {
+            if (!strategy.evaluate(featureName, store, executionContext)) {
                 return false
             }
         }
