@@ -28,6 +28,10 @@ class OccupationTask : Task<OccupiedJourneyState>() {
             }
             step("tenants", journey.tenants) {
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
+                nextStep { journey.bedrooms }
+            }
+            step("bedrooms", journey.bedrooms) {
+                parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }
             exitStep {
