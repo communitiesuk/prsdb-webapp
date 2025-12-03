@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlipStrategyConfigModel
 
 @PrsdbWebComponent
-class ReleaseDateFlippingStrategyFactory() : FlippingStrategyFactory {
+class ReleaseDateFlippingStrategyFactory : FlippingStrategyFactory {
     override fun getStrategyOrNull(strategy: FeatureFlipStrategyConfigModel): FlippingStrategy? {
         if (strategy.releaseDate != null) {
             // Initialise feature flip strategy based on release date

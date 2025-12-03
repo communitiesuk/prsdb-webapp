@@ -22,8 +22,8 @@ class FeatureFlagConfig(
     var releases: List<FeatureReleaseConfigModel> = emptyList()
 
     @Bean
-    fun featureFlagManager(): FeatureFlagManager {
-        val featureFlagManager = FeatureFlagManager()
+    fun featureFlagManager(strategyInitialiser: FeatureFlipStrategyInitialiser): FeatureFlagManager {
+        val featureFlagManager = FeatureFlagManager(strategyInitialiser)
         featureFlagManager.initializeFeatureFlags(featureFlags)
         featureFlagManager.initialiseFeatureReleases(releases)
         return featureFlagManager

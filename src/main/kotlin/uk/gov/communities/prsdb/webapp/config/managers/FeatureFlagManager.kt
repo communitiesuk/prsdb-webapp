@@ -4,20 +4,16 @@ import org.ff4j.FF4j
 import org.ff4j.core.Feature
 import org.ff4j.exception.GroupNotFoundException
 import org.ff4j.property.PropertyDate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
-import uk.gov.communities.prsdb.webapp.config.factories.BooleanFlippingStrategyFactory
-import uk.gov.communities.prsdb.webapp.config.factories.ReleaseDateFlippingStrategyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
 
-class FeatureFlagManager() : FF4j() {
-    private val featureFlipStrategyInitialiser =
-        FeatureFlipStrategyInitialiser(
-            booleanFlipStrategyFactory = BooleanFlippingStrategyFactory(),
-            releaseDateFlipStrategyFactory = ReleaseDateFlippingStrategyFactory(),
-        )
-
+@PrsdbWebComponent
+class FeatureFlagManager(
+    private val featureFlipStrategyInitialiser: FeatureFlipStrategyInitialiser,
+) : FF4j() {
     fun initializeFeatureFlags(featureFlags: List<FeatureFlagConfigModel>) {
         featureFlags.forEach { flag ->
             initializeFeatureFlag(flag)
