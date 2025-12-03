@@ -16,8 +16,6 @@ BEGIN
 END;
 $$;
 
-CALL update_property_ownership_addresses();
-
 DROP TRIGGER insert_property_ownership_single_line_address ON property_ownership;
 
 DROP FUNCTION insert_property_ownership_single_line_address();
