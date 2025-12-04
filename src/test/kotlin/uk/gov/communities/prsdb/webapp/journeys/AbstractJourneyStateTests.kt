@@ -8,6 +8,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 
 class AbstractJourneyStateTests {
     @Test
@@ -156,5 +157,35 @@ class AbstractJourneyStateTests {
 
         // Assert
         assertEquals("testJourneyId", result)
+    }
+
+    @Test
+    fun `setting a mutable property with a key already in use throws an exception`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            val journeyState =
+                object : AbstractJourneyState(journeyStateService) {
+                    var testProperty1: String? by mutableDelegate("testProperty", serializer())
+                    var testProperty2: Int? by mutableDelegate("testProperty", serializer())
+                }
+        }
+    }
+
+    @Test
+    fun `setting a required property with a key already in use throws an exception`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            val journeyState =
+                object : AbstractJourneyState(journeyStateService) {
+                    var testProperty1: String? by mutableDelegate("testProperty", serializer())
+                    val testProperty2: Int by requiredDelegate("testProperty", serializer())
+                }
+        }
     }
 }

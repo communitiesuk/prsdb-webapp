@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class OccupationTask : Task<OccupationState>() {
     override fun makeSubJourney(state: OccupationState) =
         subJourney(state) {
-            startingStep("occupied", journey.occupied) {
+            step("occupied", journey.occupied) {
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.households
