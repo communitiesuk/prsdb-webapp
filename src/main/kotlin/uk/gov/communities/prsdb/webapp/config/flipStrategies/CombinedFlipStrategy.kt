@@ -6,7 +6,7 @@ import org.ff4j.core.FlippingStrategy
 import org.ff4j.strategy.AbstractFlipStrategy
 
 class CombinedFlipStrategy(
-    private val strategyList: List<FlippingStrategy>,
+    val strategyList: List<FlippingStrategy>,
 ) : AbstractFlipStrategy() {
     override fun evaluate(
         featureName: String?,

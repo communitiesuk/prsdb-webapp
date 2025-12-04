@@ -9,7 +9,5 @@ class BooleanFlipStrategy(
         featureName: String?,
         store: org.ff4j.core.FeatureStore?,
         executionContext: org.ff4j.core.FlippingExecutionContext?,
-    ): Boolean {
-        return enabledByStrategy
-    }
+    ): Boolean = enabledByStrategy
 }

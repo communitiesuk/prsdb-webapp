@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.config.flipStrategies.BooleanFlipStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlipStrategyConfigModel
 
 @PrsdbWebComponent
-class BooleanFlippingStrategyFactory : FlippingStrategyFactory {
+class BooleanFlipStrategyFactory : FlippingStrategyFactory {
     override fun getStrategyOrNull(strategy: FeatureFlipStrategyConfigModel): FlippingStrategy? {
         if (strategy.enabledByStrategy != null) {
             return BooleanFlipStrategy(strategy.enabledByStrategy)
