@@ -7,33 +7,30 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
-import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
-import uk.gov.communities.prsdb.webapp.constants.RELEASE_1_0
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import java.time.LocalDate
 
 class FeatureFlagConfigTests : FeatureFlagTest() {
     val expectedFeatureFlagsFromDefaultApplicationYaml =
         listOf(
-            FeatureFlagConfigModel(
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "example-feature-flag-one",
                 enabled = true,
                 expiryDate = LocalDate.of(2030, 1, 12),
             ),
-            FeatureFlagConfigModel(
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "example-feature-flag-two",
                 enabled = true,
                 expiryDate = LocalDate.of(2030, 1, 7),
                 release = "release-1-0",
             ),
-            FeatureFlagConfigModel(
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "example-feature-flag-three",
                 enabled = false,
                 expiryDate = LocalDate.of(2030, 1, 7),
                 release = "release-1-0",
             ),
-            FeatureFlagConfigModel(
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "failover-test-endpoints",
                 enabled = true,
                 expiryDate = LocalDate.of(2026, 12, 31),
@@ -44,7 +41,7 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
     fun `features and releases from application yaml are loaded`() {
         val expectedReleases =
             listOf(
-                FeatureReleaseConfigModel(
+                MockFeatureFlagConfig.createFeatureReleaseConfigModel(
                     name = "release-1-0",
                     enabled = false,
                 ),
@@ -65,7 +62,7 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             // This is set in application.yml with enabled=false and in application-integration.yml with enabled=true
             val expectedReleases =
                 listOf(
-                    FeatureReleaseConfigModel(
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
                         name = "release-1-0",
                         enabled = true,
                     ),
@@ -94,18 +91,15 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             // Arrange
             featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
-                    FeatureFlagConfigModel(
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(
                         name = testFlagName,
-                        enabled = true,
-                        expiryDate = LocalDate.now().plusWeeks(5),
                         release = testReleaseName,
                     ),
                 )
             featureFlagConfigWithMockAllowedValues.releases =
                 listOf(
-                    FeatureReleaseConfigModel(
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
                         name = testReleaseName,
-                        enabled = true,
                     ),
                 )
 
@@ -117,11 +111,8 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
         fun `afterPropertiesSet throws for a feature name that is not in the featureFlagNamesList`() {
             featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
-                    FeatureFlagConfigModel(
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(
                         name = "unlisted-feature-name",
-                        enabled = true,
-                        expiryDate = LocalDate.now().plusWeeks(5),
-                        null,
                     ),
                 )
 
@@ -131,19 +122,11 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
         @Test
         fun `afterPropertiesSet throws for a release name that is not in the releaseNamesList`() {
             featureFlagConfigWithMockAllowedValues.featureFlags =
-                listOf(
-                    FeatureFlagConfigModel(
-                        name = EXAMPLE_FEATURE_FLAG_ONE,
-                        enabled = true,
-                        expiryDate = LocalDate.now().plusWeeks(5),
-                        release = RELEASE_1_0,
-                    ),
-                )
+                listOf(MockFeatureFlagConfig.createFeatureFlagConfigModel())
             featureFlagConfigWithMockAllowedValues.releases =
                 listOf(
-                    FeatureReleaseConfigModel(
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
                         name = "unlisted-release-name",
-                        enabled = true,
                     ),
                 )
 
@@ -154,24 +137,15 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
         fun `afterPropertiesSet includes all missing feature and release names in the error message`() {
             featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
-                    FeatureFlagConfigModel(
-                        name = "unlisted-feature-name",
-                        enabled = true,
-                        expiryDate = LocalDate.now().plusWeeks(5),
-                    ),
-                    FeatureFlagConfigModel(
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(name = "unlisted-feature-name"),
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(
                         name = "another-unlisted-feature-name",
-                        enabled = true,
-                        expiryDate = LocalDate.now().plusWeeks(5),
                         release = "unlisted-release-name",
                     ),
                 )
             featureFlagConfigWithMockAllowedValues.releases =
                 listOf(
-                    FeatureReleaseConfigModel(
-                        name = "unlisted-release-name",
-                        enabled = true,
-                    ),
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(name = "unlisted-release-name"),
                 )
 
             val exception = assertThrows<IllegalStateException> { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }

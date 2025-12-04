@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import uk.gov.communities.prsdb.webapp.config.factories.BooleanFlipStrategyFactory
 import uk.gov.communities.prsdb.webapp.config.flipStrategies.BooleanFlipStrategy
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlipStrategyConfigModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -15,10 +15,7 @@ class BooleanFlipStrategyFactoryTests {
     @ValueSource(booleans = [true, false])
     fun `getStrategyOrNull returns BooleanFlipStrategy when enabledByStrategy is set in strategyConfig`(enabled: Boolean) {
         // Arrange
-        val strategyConfig =
-            FeatureFlipStrategyConfigModel(
-                enabledByStrategy = enabled,
-            )
+        val strategyConfig = MockFeatureFlagConfig.createFlipStrategyConfigModel(enabledByStrategy = enabled)
 
         // Act
         val strategy = BooleanFlipStrategyFactory().getStrategyOrNull(strategyConfig)
@@ -31,7 +28,7 @@ class BooleanFlipStrategyFactoryTests {
     @Test
     fun `getStrategyOrNull returns null if the strategyConfig has no enabledByStrategy value`() {
         // Arrange
-        val strategyConfig = FeatureFlipStrategyConfigModel()
+        val strategyConfig = MockFeatureFlagConfig.createFlipStrategyConfigModel()
 
         // Act, Assert
         assertNull(BooleanFlipStrategyFactory().getStrategyOrNull(strategyConfig))
