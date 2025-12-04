@@ -10,7 +10,10 @@ interface JourneyState {
         value: PageData,
     )
 
+    fun getSubmittedStepData(): Map<String, Any?>
+
     val journeyId: String
+    val journeyMetadata: JourneyMetadata
 
     fun deleteJourney()
 }
