@@ -93,9 +93,6 @@ features:
     - name: "example-feature-flag-one"
       enabled: true
       expiry-date: "2030-01-12"
-      strategy-config:
-        release-date: "2025-01-12"
-        enabled-by-strategy: true
     - name: "example-feature-flag-two"
       enabled: true
       expiry-date: "2030-01-07"
@@ -104,14 +101,20 @@ features:
       enabled: false
       expiry-date: "2030-01-07"
       release: "release-1-0"
+    - name: "example-feature-flag-four"
+      enabled: true
+      expiry-date: "2030-01-07"
+      release: "release-with-strategy"
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
       enabled: true
+    - name: "release-with-strategy"
+      enabled: true
       strategy-config:
-        release-date: "2025-01-12"
+          release-date: "2025-06-01"
 
 ---
 

@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_FOUR
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
@@ -104,6 +105,22 @@ class ExampleFeatureFlagTestController(
         return "featureFlagExamples/featureReleaseTest"
     }
 
+    @AvailableWhenFeatureEnabled(EXAMPLE_FEATURE_FLAG_FOUR)
+    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR")
+    fun featureReleaseStrategyFlaggedEndpointFlagFour(model: Model): String {
+        populateModelForFeatureReleaseTest(model, EXAMPLE_FEATURE_FLAG_FOUR)
+
+        return "featureFlagExamples/releaseWithReleaseStrategyTest"
+    }
+
+    @AvailableWhenFeatureDisabled(EXAMPLE_FEATURE_FLAG_FOUR)
+    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR")
+    fun featureReleaseStrategyInverseFlaggedEndpointFlagFour(model: Model): String {
+        populateModelForFeatureReleaseTest(model, EXAMPLE_FEATURE_FLAG_FOUR)
+
+        return "featureFlagExamples/releaseWithReleaseStrategyTest"
+    }
+
     private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagConfigModel =
         featureFlagConfig.featureFlags.firstOrNull { it.name == featureName }
             ?: throw IllegalArgumentException("Feature flag $featureName not found in config")
@@ -131,6 +148,9 @@ class ExampleFeatureFlagTestController(
                 "This feature is DISABLED"
             }
 
+        val releaseStrategyConfig = featureReleaseSetInConfig.strategyConfig
+        val releaseDate = releaseStrategyConfig?.releaseDate?.toString() ?: null
+
         model.addAttribute("ffTestHeading", "Feature flagged controller endpoint - available when flag is $endpointAvailableWhenFlagIs")
         model.addAttribute("flagGroupName", featureFlagSetInConfig.release)
         model.addAttribute("ffSubHeading", "Configuration for $flagName")
@@ -145,6 +165,8 @@ class ExampleFeatureFlagTestController(
                 "${featureReleaseSetInConfig.enabled.toString().uppercase()} in FeatureFlagConfig",
         )
         model.addAttribute("featureEnabled", featureEnabledText)
+
+        model.addAttribute("releaseDate", releaseDate)
     }
 
     companion object {
