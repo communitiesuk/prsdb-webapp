@@ -19,7 +19,12 @@ abstract class AbstractJourneyState(
     override val journeyId: String
         get() = journeyStateService.journeyId
 
+    override val journeyMetadata: JourneyMetadata
+        get() = journeyStateService.journeyMetadata
+
     override fun deleteJourney() = journeyStateService.deleteState()
+
+    override fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
     companion object {
         fun <T> decodeFromStringOrNull(
