@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import kotlinx.serialization.serializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
@@ -82,7 +81,7 @@ class JourneyStateDelegateProviderTests {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        var testProperty: String? by delegateProvider.mutableDelegate("testProperty", serializer())
+        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
 
         // Act
         testProperty = "testValue"
@@ -97,7 +96,7 @@ class JourneyStateDelegateProviderTests {
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        var testProperty: String? by delegateProvider.mutableDelegate("testProperty", serializer())
+        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
 
         // Act
         val result = testProperty
@@ -112,7 +111,7 @@ class JourneyStateDelegateProviderTests {
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        var testProperty: String? by delegateProvider.mutableDelegate("testProperty", serializer())
+        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
 
         // Act
         val result = testProperty
@@ -127,7 +126,7 @@ class JourneyStateDelegateProviderTests {
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        val testProperty: String by delegateProvider.requiredDelegate("testProperty", serializer())
+        val testProperty: String by delegateProvider.requiredDelegate("testProperty")
 
         // Act
         val result = testProperty
@@ -142,7 +141,7 @@ class JourneyStateDelegateProviderTests {
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        val testProperty: String by delegateProvider.requiredDelegate("testProperty", serializer())
+        val testProperty: String by delegateProvider.requiredDelegate("testProperty")
 
         // Act & Assert
         assertThrows<IllegalStateException> {
@@ -160,8 +159,8 @@ class JourneyStateDelegateProviderTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty", serializer())
-            var testProperty2: Int? by delegateProvider.mutableDelegate("testProperty", serializer())
+            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty")
+            var testProperty2: Int? by delegateProvider.mutableDelegate("testProperty")
         }
     }
 
@@ -173,8 +172,8 @@ class JourneyStateDelegateProviderTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty", serializer())
-            val testProperty2: Int by delegateProvider.requiredDelegate("testProperty", serializer())
+            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty")
+            val testProperty2: Int by delegateProvider.requiredDelegate("testProperty")
         }
     }
 }
