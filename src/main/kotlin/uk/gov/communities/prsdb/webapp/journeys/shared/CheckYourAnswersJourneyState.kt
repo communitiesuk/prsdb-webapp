@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -19,8 +18,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.childJourneyName == CHECK_ANSWERS_JOURNEY_NAME
 
     fun initialiseCyaChildJourney() {
-        val newId = generateJourneyId(SecurityContextHolder.getContext().authentication)
-        initializeChildState(newId, CHECK_ANSWERS_JOURNEY_NAME)
+        val newId = initializeChildState(CHECK_ANSWERS_JOURNEY_NAME)
         cyaChildJourneyId = newId
     }
 
