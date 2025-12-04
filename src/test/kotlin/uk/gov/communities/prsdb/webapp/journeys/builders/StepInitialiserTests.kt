@@ -572,6 +572,32 @@ class StepInitialiserTests {
         assertThrows<JourneyInitialisationException> { builder.build() }
     }
 
+    @Test
+    fun `a segment set on the step is passed to the step when built`() {
+        // Arrange
+        val expectedSegment = "expectedSegment"
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser(stepMock, mock())
+        builder.routeSegment(expectedSegment)
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+        builder.unreachableStepDestinationIfNotSet { mock() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        verify(stepMock).initialize(
+            eq(expectedSegment),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+        )
+    }
+
     companion object {
         fun mockInitialisableStep() =
             mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>().apply {

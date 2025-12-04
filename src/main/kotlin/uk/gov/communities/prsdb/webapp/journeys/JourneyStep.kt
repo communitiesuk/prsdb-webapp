@@ -55,7 +55,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     abstract fun isRouteSegmentInitialised(): Boolean
 
-    abstract fun initialiseRouteSegment(routeSegment: String?)
+    protected abstract fun initialiseRouteSegment(routeSegment: String?)
 
     // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
     fun beforeIsStepReachable() {

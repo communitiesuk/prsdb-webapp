@@ -425,4 +425,62 @@ class JourneyStepTests {
             )
         }
     }
+
+    @Test
+    fun `initialising the route segment for a RequestableStep with a null route segment throws`() {
+        // Arrange
+        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            step.initialize(
+                null,
+                mock(),
+                mock(),
+                { Destination.ExternalUrl("redirect") },
+                mock(),
+                { Destination.ExternalUrl("unreachable") },
+            )
+        }
+    }
+
+    @Test
+    fun `initialising the route segment for a RequestableStep sets it on the config`() {
+        // Arrange
+        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+
+        // Act
+        step.initialize(
+            "stepId",
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            mock(),
+            { Destination.ExternalUrl("unreachable") },
+        )
+
+        // Assert
+        verify(stepConfig).routeSegment = "stepId"
+    }
+
+    @Test
+    fun `initialising the route segment for an InternalStep with a non-null route segment throws`() {
+        // Arrange
+        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val step = JourneyStep.InternalStep(stepConfig)
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> {
+            step.initialize(
+                "stepId",
+                mock(),
+                mock(),
+                { Destination.ExternalUrl("redirect") },
+                mock(),
+                { Destination.ExternalUrl("unreachable") },
+            )
+        }
+    }
 }
