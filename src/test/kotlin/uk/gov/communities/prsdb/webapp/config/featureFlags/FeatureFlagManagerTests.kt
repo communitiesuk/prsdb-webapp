@@ -5,12 +5,16 @@ import org.ff4j.property.PropertyDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
 import java.time.LocalDate
@@ -19,10 +23,18 @@ class FeatureFlagManagerTests {
     @MockitoSpyBean
     lateinit var featureFlagManager: FeatureFlagManager
 
+    @MockitoBean
+    lateinit var featureFlipStrategyInitialiser: FeatureFlipStrategyInitialiser
+
+    @BeforeEach
+    fun setup() {
+        featureFlipStrategyInitialiser = mock()
+    }
+
     @Test
     fun `initialiseFeatureFlags creates features from the supplied FeatureFlagModel list`() {
         // Arrange
-        featureFlagManager = spy(FeatureFlagManager())
+        featureFlagManager = spy(FeatureFlagManager(featureFlipStrategyInitialiser))
 
         val featureFlagsFromConfig =
             listOf(
@@ -62,7 +74,7 @@ class FeatureFlagManagerTests {
     @Test
     fun `checkFeature calls super check method with correct feature name`() {
         // Arrange
-        featureFlagManager = spy(FeatureFlagManager())
+        featureFlagManager = spy(FeatureFlagManager(featureFlipStrategyInitialiser))
         val featureName = "SOME_FEATURE_FLAG"
         featureFlagManager.createFeature(featureName)
 
@@ -79,7 +91,7 @@ class FeatureFlagManagerTests {
     @Test
     fun `enableFeature calls super enable method with correct feature name`() {
         // Arrange
-        featureFlagManager = spy(FeatureFlagManager())
+        featureFlagManager = spy(FeatureFlagManager(featureFlipStrategyInitialiser))
         val featureName = "SOME_FEATURE_FLAG"
         featureFlagManager.createFeature(featureName)
 
@@ -96,7 +108,7 @@ class FeatureFlagManagerTests {
     @Test
     fun `disableFeature calls super disable method with correct feature name`() {
         // Arrange
-        featureFlagManager = spy(FeatureFlagManager())
+        featureFlagManager = spy(FeatureFlagManager(featureFlipStrategyInitialiser))
         val featureName = "SOME_FEATURE_FLAG"
         featureFlagManager.createFeature(featureName)
 

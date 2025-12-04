@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.config
 
 import org.ff4j.core.FlippingStrategy
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.config.factories.FlippingStrategyFactory
 import uk.gov.communities.prsdb.webapp.config.flipStrategies.CombinedFlipStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlipStrategyConfigModel
 
-@PrsdbWebComponent
+@Component
 class FeatureFlipStrategyInitialiser(
     private val flippingStrategyFactories: List<FlippingStrategyFactory> = emptyList(),
 ) {
