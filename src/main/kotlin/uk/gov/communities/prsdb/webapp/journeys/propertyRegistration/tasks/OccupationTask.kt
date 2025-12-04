@@ -33,7 +33,8 @@ class OccupationTask : Task<OccupationState>() {
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.bedrooms }
             }
-            step("bedrooms", journey.bedrooms) {
+            step(journey.bedrooms) {
+                routeSegment("bedrooms")
                 parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }
