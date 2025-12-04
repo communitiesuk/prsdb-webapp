@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
@@ -132,7 +133,7 @@ class PropertyRegistrationJourneyState(
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
     LicensingState,
-    OccupiedJourneyState {
+    OccupationState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
     override var isAddressAlreadyRegistered: Boolean? by mutableDelegate("isAddressAlreadyRegistered", serializer())
 

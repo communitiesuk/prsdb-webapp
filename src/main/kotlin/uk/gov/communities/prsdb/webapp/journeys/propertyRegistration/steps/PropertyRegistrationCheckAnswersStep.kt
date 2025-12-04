@@ -11,9 +11,9 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
@@ -113,7 +113,7 @@ class PropertyRegistrationCyaStepConfig(
             Destination(state.ownershipTypeStep),
         )
 
-    private fun getTenancyRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> =
+    private fun getTenancyRows(state: OccupationState): List<SummaryListRowViewModel> =
         if (state.occupied.formModel.occupied == true) {
             val householdsStep = state.households
             val tenantsStep = state.tenants

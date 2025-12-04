@@ -4,15 +4,15 @@ import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @PrsdbWebComponent
 @Scope("prototype")
-class OccupationTask : Task<OccupiedJourneyState>() {
-    override fun makeSubJourney(state: OccupiedJourneyState) =
+class OccupationTask : Task<OccupationState>() {
+    override fun makeSubJourney(state: OccupationState) =
         subJourney(state) {
             startingStep("occupied", journey.occupied) {
                 nextStep { mode ->
