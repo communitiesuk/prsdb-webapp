@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -9,13 +10,19 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnsw
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val cyaStep: JourneyStep.RequestableStep<Complete, CheckAnswersFormModel, *>
-    val cyaChildJourneyId: String?
+    var cyaChildJourneyId: String?
 
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     val isCheckingAnswers: Boolean
-        get() = journeyMetadata.childJourneyName != null
+        get() = journeyMetadata.childJourneyName == CHECK_ANSWERS_JOURNEY_NAME
+
+    fun initialiseCyaChildJourney() {
+        val newId = generateJourneyId(SecurityContextHolder.getContext().authentication)
+        initializeChildState(newId, CHECK_ANSWERS_JOURNEY_NAME)
+        cyaChildJourneyId = newId
+    }
 
     companion object {
         fun <T> JourneyBuilder<T>.checkYourAnswersJourney() where T : JourneyState, T : CheckYourAnswersJourneyState {
@@ -32,5 +39,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
         fun ConfigurableElement<*>.checkable() = taggedWith(CHECKABLE)
 
         private const val CHECKABLE = "checkable"
+        private const val CHECK_ANSWERS_JOURNEY_NAME = "checkYourAnswers"
     }
 }

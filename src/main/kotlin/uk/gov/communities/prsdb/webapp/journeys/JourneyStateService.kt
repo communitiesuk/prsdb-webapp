@@ -94,7 +94,7 @@ class JourneyStateService(
 
     fun initialiseChildJourney(
         newJourneyId: String,
-        subJourneyName: String,
+        childJourneyName: String,
     ) {
         val existingMetadata = journeyStateMetadataMap[newJourneyId]
         if (existingMetadata != null) {
@@ -104,7 +104,7 @@ class JourneyStateService(
             JourneyMetadata(
                 dataKey = journeyMetadata.dataKey,
                 baseJourneyId = journeyId,
-                childJourneyName = subJourneyName,
+                childJourneyName = childJourneyName,
             )
         journeyStateMetadataMap = journeyStateMetadataMap + (newJourneyId to metadata)
     }
