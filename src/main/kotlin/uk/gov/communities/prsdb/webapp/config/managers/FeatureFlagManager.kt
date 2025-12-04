@@ -34,24 +34,24 @@ class FeatureFlagManager(
 
     fun initialiseFeatureReleases(featureReleases: List<FeatureReleaseConfigModel>) {
         try {
-            featureReleases.forEach { group ->
-                setGroupEnabledState(group)
-                if (group.strategyConfig != null) {
-                    // This will override any flip strategies set at the feature level within this group
-                    setFlipStrategyForFeaturesInGroup(group)
+            featureReleases.forEach { release ->
+                setReleaseEnabledState(release)
+                if (release.strategyConfig != null) {
+                    // This will override any flip strategies set at the feature level within this release
+                    setFlipStrategyForFeaturesInRelease(release)
                 }
             }
         } catch (e: GroupNotFoundException) {
             throw (
                 RuntimeException(
                     e.message +
-                        ". Check that at least one feature in FeatureFlagConfig.featureFlags has this group's name set as flagGroup.",
+                        ". Check that at least one feature in the yaml config has this release's name set as release.",
                 )
             )
         }
     }
 
-    private fun setGroupEnabledState(group: FeatureReleaseConfigModel) {
+    private fun setReleaseEnabledState(group: FeatureReleaseConfigModel) {
         if (group.enabled) {
             this.enableFeatureRelease(group.name)
         } else {
@@ -59,7 +59,7 @@ class FeatureFlagManager(
         }
     }
 
-    private fun setFlipStrategyForFeaturesInGroup(group: FeatureReleaseConfigModel) {
+    private fun setFlipStrategyForFeaturesInRelease(group: FeatureReleaseConfigModel) {
         this.getFeaturesByGroup(group.name).forEach { (_, feature) ->
             feature.flippingStrategy =
                 group.strategyConfig?.let {
