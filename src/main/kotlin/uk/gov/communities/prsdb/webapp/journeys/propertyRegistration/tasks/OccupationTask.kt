@@ -34,6 +34,10 @@ class OccupationTask : Task<OccupationState>() {
                 parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }
+            step("rent-includes-bills", journey.rentIncludesBills) {
+                parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+            }
             exitStep {
                 parents {
                     OrParents(
