@@ -17,23 +17,30 @@ class TaskInitialiser<TStateInit : JourneyState>(
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
                 ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
-        val taskParentage =
-            elementConfiguration.parentageProvider?.invoke()
-                ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined")
 
         val taskSubJourney =
-            task.getTaskSubJourneyBuilder(state, taskParentage) {
+            task.getTaskSubJourneyBuilder(state) {
                 nextDestination(nonNullDestinationProvider)
             }
+
         taskSubJourney.configure {
             elementConfiguration.unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             elementConfiguration.additionalContentProviders.forEach { contentValueProvider ->
                 withAdditionalContentProperty(contentValueProvider)
             }
         }
+        taskSubJourney.configureFirst {
+            elementConfiguration.backDestinationOverride?.let { backDestination(it) }
+            parents(
+                elementConfiguration.parentageProvider
+                    ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined"),
+            )
+        }
 
         return taskSubJourney.build()
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
+
+    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 }
