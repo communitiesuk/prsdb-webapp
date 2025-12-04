@@ -9,14 +9,14 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
-interface CheckYourAnswersJourneyState {
+interface CheckYourAnswersPartialJourneyState {
     val cyaStep: JourneyStep.RequestableStep<Complete, CheckAnswersFormModel, *>
     val baseJourneyId: String
     val cyaChildJourneyId: String?
     val isCheckingAnswers: Boolean
 
     companion object {
-        fun <T> JourneyBuilder<T>.checkYourAnswersJourney() where T : JourneyState, T : CheckYourAnswersJourneyState {
+        fun <T> JourneyBuilder<T>.checkYourAnswersJourney() where T : JourneyState, T : CheckYourAnswersPartialJourneyState {
             configureTagged(CHECKABLE) {
                 if (journey.isCheckingAnswers) {
                     modifyNextDestination {
@@ -33,11 +33,11 @@ interface CheckYourAnswersJourneyState {
     }
 }
 
-class CheckYourAnswersJourneyStateProxy(
+class CheckYourAnswersPartialJourneyStateProxy(
     delegateProvider: JourneyStateDelegateProvider,
     private val journeyStateService: JourneyStateService,
     override val cyaStep: JourneyStep.RequestableStep<Complete, CheckAnswersFormModel, *>,
-) : CheckYourAnswersJourneyState {
+) : CheckYourAnswersPartialJourneyState {
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("cyaChildJourneyId")
 
     override val baseJourneyId: String

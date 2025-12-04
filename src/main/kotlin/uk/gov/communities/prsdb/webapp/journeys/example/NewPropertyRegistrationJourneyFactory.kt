@@ -40,10 +40,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyStateProxy
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersPartialJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersPartialJourneyState.Companion.checkYourAnswersJourney
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersPartialJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersPartialJourneyStateProxy
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -135,8 +135,8 @@ class PropertyRegistrationJourneyState(
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
     private val journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
-    private val cyaProxy: CheckYourAnswersJourneyStateProxy =
-        CheckYourAnswersJourneyStateProxy(
+    private val cyaProxy: CheckYourAnswersPartialJourneyStateProxy =
+        CheckYourAnswersPartialJourneyStateProxy(
             delegateProvider = JourneyStateDelegateProvider(journeyStateService),
             journeyStateService = journeyStateService,
             cyaStep = cyaStep,
@@ -145,7 +145,7 @@ class PropertyRegistrationJourneyState(
     AddressState,
     LicensingState,
     OccupationState,
-    CheckYourAnswersJourneyState by cyaProxy {
+    CheckYourAnswersPartialJourneyState by cyaProxy {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
 
