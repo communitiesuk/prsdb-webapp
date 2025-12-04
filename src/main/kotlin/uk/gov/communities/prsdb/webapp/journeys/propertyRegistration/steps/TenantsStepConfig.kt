@@ -5,16 +5,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 
 @Scope("prototype")
 @PrsdbWebComponent
-class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>() {
+class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleFormModel, OccupationState>() {
     override val formModelClass = NumberOfPeopleFormModel::class
 
-    override fun getStepSpecificContent(state: OccupiedJourneyState) =
+    override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
             "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
@@ -22,13 +22,13 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
             "label" to "forms.numberOfPeople.label",
         )
 
-    override fun chooseTemplate(state: OccupiedJourneyState): String = "forms/numberOfPeopleForm"
+    override fun chooseTemplate(state: OccupationState): String = "forms/numberOfPeopleForm"
 
-    override fun mode(state: OccupiedJourneyState) = getFormModelFromStateOrNull(state)?.numberOfPeople?.let { Complete.COMPLETE }
+    override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.numberOfPeople?.let { Complete.COMPLETE }
 
     override fun beforeValidateSubmittedData(
         formData: PageData,
-        state: OccupiedJourneyState,
+        state: OccupationState,
     ): PageData {
         super.beforeValidateSubmittedData(formData, state)
 
@@ -40,4 +40,4 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
 @PrsdbWebComponent
 final class TenantsStep(
     stepConfig: TenantsStepConfig,
-) : RequestableStep<Complete, NumberOfPeopleFormModel, OccupiedJourneyState>(stepConfig)
+) : RequestableStep<Complete, NumberOfPeopleFormModel, OccupationState>(stepConfig)
