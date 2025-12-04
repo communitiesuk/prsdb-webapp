@@ -75,14 +75,14 @@ open class JourneyStateSessionBuilder<SelfType : JourneyStateSessionBuilder<Self
         )
         if (wasFound) {
             withCachedAddresses(
-                listOf(AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localAuthorityId = 22, uprn = 44)),
+                listOf(AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)),
             )
         }
         return this as SelfType
     }
 
     fun withManualAddressSelected(isContactAddress: Boolean = false): SelfType {
-        withCachedAddresses(listOf(AddressDataModel("singleLineAddress", localAuthorityId = 22, uprn = 44)))
+        withCachedAddresses(listOf(AddressDataModel("singleLineAddress", localCouncilId = 22, uprn = 44)))
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         val selectAddressFormModel =
             SelectAddressFormModel().apply {
