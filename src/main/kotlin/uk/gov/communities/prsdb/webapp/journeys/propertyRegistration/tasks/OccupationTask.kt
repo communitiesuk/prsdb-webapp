@@ -32,7 +32,7 @@ class OccupationTask : Task<OccupationState>() {
             }
             step("bedrooms", journey.bedrooms) {
                 parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
-                nextStep { exitStep }
+                nextStep { journey.rentIncludesBills }
             }
             step("rent-includes-bills", journey.rentIncludesBills) {
                 parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
