@@ -129,7 +129,7 @@ class PropertyRegistrationJourneyState(
     override val bedrooms: BedroomsStep,
     val occupationTask: OccupationTask,
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
-    private val journeyStateService: JourneyStateService,
+    journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,

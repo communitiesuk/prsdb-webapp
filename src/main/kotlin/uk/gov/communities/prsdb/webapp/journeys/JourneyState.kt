@@ -19,7 +19,7 @@ interface JourneyState {
 
     fun initializeChildState(
         childJourneyName: String,
-        seed: Any?,
+        seed: Any? = null,
     ): String
 
     fun initializeState(seed: Any? = null): String
