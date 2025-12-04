@@ -26,6 +26,23 @@ abstract class AbstractJourneyState(
 
     override fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
+    override fun initializeState(seed: Any?): String {
+        val journeyId = generateJourneyId(seed)
+
+        journeyStateService.initialiseJourneyWithId(journeyId) {}
+        return journeyId
+    }
+
+    override fun initializeChildState(
+        childJourneyName: String,
+        seed: Any?,
+    ): String {
+        val newJourneyId = generateJourneyId(seed)
+
+        journeyStateService.initialiseChildJourney(newJourneyId, childJourneyName)
+        return newJourneyId
+    }
+
     companion object {
         fun <T> decodeFromStringOrNull(
             deserializer: KSerializer<T>,

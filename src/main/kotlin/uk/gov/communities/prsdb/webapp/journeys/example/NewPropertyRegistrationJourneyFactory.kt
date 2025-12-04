@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -104,7 +103,7 @@ class NewPropertyRegistrationJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeJourneyState(user)
+    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
 
 @PrsdbWebComponent
@@ -143,26 +142,13 @@ class PropertyRegistrationJourneyState(
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
 
-    final fun initializeJourneyState(user: Principal): String {
-        val journeyId = generateJourneyId(user)
+    override fun generateJourneyId(seed: Any?): String {
+        val user = seed as? Principal
 
-        journeyStateService.initialiseJourneyWithId(journeyId) {}
-        return journeyId
-    }
-
-    fun initialiseCyaChildJourney() {
-        val newId = generateJourneyId(SecurityContextHolder.getContext().authentication)
-        journeyStateService.initialiseChildJourney(newId, "checkYourAnswers")
-        cyaChildJourneyId = newId
+        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
     }
 
     companion object {
-        fun generateJourneyId(user: Principal): String =
-            "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
-                .hashCode()
-                .toUInt()
-                .times(111113111U)
-                .and(0x7FFFFFFFu)
-                .toString(36)
+        fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
 }
