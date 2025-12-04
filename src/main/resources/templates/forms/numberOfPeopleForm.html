@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
-    <h1 class="govuk-heading-l" th:text="#{forms.numberOfPeople.fieldSetHeading}">
+    <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}">
         forms.numberOfPeople.fieldSetHeading
     </h1>
     <p class="govuk-hint" th:text="#{forms.numberOfPeople.fieldSetHint}">
