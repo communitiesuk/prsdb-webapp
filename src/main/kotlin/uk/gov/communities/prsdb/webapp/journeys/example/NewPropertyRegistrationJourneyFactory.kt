@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
-import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.security.core.context.SecurityContextHolder
@@ -147,14 +146,13 @@ class PropertyRegistrationJourneyState(
     LicensingState,
     OccupationState,
     CheckYourAnswersJourneyState by cyaProxy {
-    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses", serializer())
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered", serializer())
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
 
     final fun initializeJourneyState(user: Principal): String {
         val journeyId = generateJourneyId(user)
 
-        journeyStateService
-            .initialiseJourneyWithId(journeyId) {}
+        journeyStateService.initialiseJourneyWithId(journeyId) {}
         return journeyId
     }
 

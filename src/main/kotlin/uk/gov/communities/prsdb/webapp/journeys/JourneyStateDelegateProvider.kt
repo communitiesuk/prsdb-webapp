@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
@@ -10,11 +11,11 @@ import kotlin.reflect.KProperty
 @PrsdbWebService
 @Scope("prototype")
 class JourneyStateDelegateProvider(
-    private val journeyStateService: JourneyStateService,
+    val journeyStateService: JourneyStateService,
 ) {
     private val propertyKeysInUse = mutableSetOf<String>()
 
-    private fun registerPropertyKey(propertyKey: String) {
+    fun registerPropertyKey(propertyKey: String) {
         if (propertyKeysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
         } else {
@@ -22,20 +23,18 @@ class JourneyStateDelegateProvider(
         }
     }
 
-    fun <TJourney, TProperty : Any> mutableDelegate(
+    final inline fun <TJourney, reified TProperty : Any> mutableDelegate(
         propertyKey: String,
-        serializer: KSerializer<TProperty>,
     ): MutableJourneyStateDelegate<TJourney, TProperty> {
         registerPropertyKey(propertyKey)
-        return MutableJourneyStateDelegate(journeyStateService, propertyKey, serializer)
+        return MutableJourneyStateDelegate(journeyStateService, propertyKey, serializer())
     }
 
-    fun <TJourney, TProperty : Any> requiredDelegate(
+    final inline fun <TJourney, reified TProperty : Any> requiredDelegate(
         propertyKey: String,
-        serializer: KSerializer<TProperty>,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
         registerPropertyKey(propertyKey)
-        return RequiredJourneyStateDelegate(journeyStateService, propertyKey, serializer)
+        return RequiredJourneyStateDelegate(journeyStateService, propertyKey, serializer())
     }
 
     class MutableJourneyStateDelegate<TJourney, TProperty : Any?>(
