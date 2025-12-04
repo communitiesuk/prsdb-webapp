@@ -8,7 +8,6 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 
-// TODO: PRSD-1647 - see if there is a better way to combine Controller tests and Feature Flag tests
 class FeatureFlagTestCallingEndpoints : FeatureFlagTest() {
     @Autowired
     lateinit var webContext: WebApplicationContext
