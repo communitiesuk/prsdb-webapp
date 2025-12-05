@@ -11,9 +11,8 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
@@ -33,8 +32,17 @@ class PropertyRegistrationCyaStepConfig(
 ) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) =
-        mapOf(
+    private lateinit var childJourneyId: String
+
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any> {
+        if (state.cyaChildJourneyId == null) {
+            state.initialiseCyaChildJourney()
+        }
+
+        childJourneyId = state.cyaChildJourneyId
+            ?: throw UnrecoverableJourneyStateException(state.journeyId, "CYA child journey ID should be initialised")
+
+        return mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
@@ -43,6 +51,7 @@ class PropertyRegistrationCyaStepConfig(
             "licensingDetails" to getLicensingDetailsSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
+    }
 
     override fun beforeValidateSubmittedData(
         formData: PageData,
@@ -80,18 +89,18 @@ class PropertyRegistrationCyaStepConfig(
             getOwnershipTypeRow(state) +
             getTenancyRows(state)
 
-    private fun getAddressRows(state: AddressState) =
+    private fun getAddressRows(state: PropertyRegistrationJourneyState) =
         state.getAddress().let { address ->
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination(state.lookupStep),
+                    Destination.VisitableStep(state.lookupStep, childJourneyId),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                     localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination(state.localCouncilStep),
+                    Destination.VisitableStep(state.localCouncilStep, childJourneyId),
                 ),
             )
         }
@@ -102,7 +111,7 @@ class PropertyRegistrationCyaStepConfig(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            Destination(state.propertyTypeStep),
+            Destination.VisitableStep(state.propertyTypeStep, childJourneyId),
         )
     }
 
@@ -110,10 +119,10 @@ class PropertyRegistrationCyaStepConfig(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             state.ownershipTypeStep.formModel.ownershipType,
-            Destination(state.ownershipTypeStep),
+            Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
         )
 
-    private fun getTenancyRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> =
+    private fun getTenancyRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
         if (state.occupied.formModel.occupied == true) {
             val householdsStep = state.households
             val tenantsStep = state.tenants
@@ -121,7 +130,7 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     true,
-                    Destination(state.occupied),
+                    Destination.VisitableStep(state.occupied, childJourneyId),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.households",
@@ -139,7 +148,7 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
                     false,
-                    Destination(state.occupied),
+                    Destination.VisitableStep(state.occupied, childJourneyId),
                 ),
             )
         }
@@ -150,7 +159,7 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     licensingType,
-                    Destination(state.licensingTypeStep),
+                    Destination.VisitableStep(state.licensingTypeStep, childJourneyId),
                 ),
                 when (licensingType) {
                     LicensingType.HMO_MANDATORY_LICENCE -> (state.getLicenceNumber() to state.hmoMandatoryLicenceStep)
@@ -172,7 +181,7 @@ class PropertyRegistrationCyaStepConfig(
         destination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
-            Destination(state.alreadyRegisteredStep)
+            Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
         } else {
             state.deleteJourney()
             destination
