@@ -331,7 +331,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with a blank numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.form.submit()
-            assertThat(peoplePage.form.getErrorMessage()).containsText("Enter the number of people living in your property")
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -339,7 +339,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("not-a-number")
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -347,7 +347,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("2.3")
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -355,7 +355,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("-2")
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -363,7 +363,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople(0)
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
