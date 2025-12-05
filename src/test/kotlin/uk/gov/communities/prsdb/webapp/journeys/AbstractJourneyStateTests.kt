@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import kotlinx.serialization.serializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
@@ -61,90 +60,6 @@ class AbstractJourneyStateTests {
     }
 
     @Test
-    fun `setting a var property implemented by mutableDelegate saves the value in the state`() {
-        // Arrange
-        val journeyStateService: JourneyStateService = mock()
-        val journeyState =
-            object : AbstractJourneyState(journeyStateService) {
-                var testProperty: String? by mutableDelegate("testProperty", serializer())
-            }
-
-        // Act
-        journeyState.testProperty = "testValue"
-
-        // Assert
-        verify(journeyStateService).setValue("testProperty", "\"testValue\"")
-    }
-
-    @Test
-    fun `getting a var property implemented by mutableDelegate retrieves the value from the state if present`() {
-        // Arrange
-        val journeyStateService: JourneyStateService = mock()
-        whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
-        val journeyState =
-            object : AbstractJourneyState(journeyStateService) {
-                var testProperty: String? by mutableDelegate("testProperty", serializer())
-            }
-
-        // Act
-        val result = journeyState.testProperty
-
-        // Assert
-        assertEquals("testValue", result)
-    }
-
-    @Test
-    fun `getting a var property implemented by mutableDelegate returns null if value not present in state`() {
-        // Arrange
-        val journeyStateService: JourneyStateService = mock()
-        whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
-        val journeyState =
-            object : AbstractJourneyState(journeyStateService) {
-                var testProperty: String? by mutableDelegate("testProperty", serializer())
-            }
-
-        // Act
-        val result = journeyState.testProperty
-
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `getting a val property implemented by requiredDelegate retrieves the value from the state if present`() {
-        // Arrange
-        val journeyStateService: JourneyStateService = mock()
-        whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
-        val journeyState =
-            object : AbstractJourneyState(journeyStateService) {
-                val testProperty: String by requiredDelegate("testProperty", serializer())
-            }
-
-        // Act
-        val result = journeyState.testProperty
-
-        // Assert
-        assertEquals("testValue", result)
-    }
-
-    @Test
-    fun `getting a val property implemented by requiredDelegate throws and deletes state if value not present in state`() {
-        // Arrange
-        val journeyStateService: JourneyStateService = mock()
-        whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
-        val journeyState =
-            object : AbstractJourneyState(journeyStateService) {
-                val testProperty: String by requiredDelegate("testProperty", serializer())
-            }
-        // Act & Assert
-        assertThrows<IllegalStateException> {
-            journeyState.testProperty
-        }
-
-        verify(journeyStateService).deleteState()
-    }
-
-    @Test
     fun `journeyId retrieves the journeyId from the JourneyStateService`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
@@ -158,19 +73,94 @@ class AbstractJourneyStateTests {
         // Assert
         assertEquals("testJourneyId", result)
     }
+}
+
+class JourneyStateDelegateProviderTests {
+    @Test
+    fun `setting a var property implemented by mutableDelegate saves the value in the state`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
+
+        // Act
+        testProperty = "testValue"
+
+        // Assert
+        verify(journeyStateService).setValue("testProperty", "\"testValue\"")
+    }
+
+    @Test
+    fun `getting a var property implemented by mutableDelegate retrieves the value from the state if present`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
+
+        // Act
+        val result = testProperty
+
+        // Assert
+        assertEquals("testValue", result)
+    }
+
+    @Test
+    fun `getting a var property implemented by mutableDelegate returns null if value not present in state`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
+
+        // Act
+        val result = testProperty
+
+        // Assert
+        assertNull(result)
+    }
+
+    @Test
+    fun `getting a val property implemented by requiredDelegate retrieves the value from the state if present`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+        val testProperty: String by delegateProvider.requiredDelegate("testProperty")
+
+        // Act
+        val result = testProperty
+
+        // Assert
+        assertEquals("testValue", result)
+    }
+
+    @Test
+    fun `getting a val property implemented by requiredDelegate throws and deletes state if value not present in state`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+        val testProperty: String by delegateProvider.requiredDelegate("testProperty")
+
+        // Act & Assert
+        assertThrows<IllegalStateException> {
+            testProperty
+        }
+
+        verify(journeyStateService).deleteState()
+    }
 
     @Test
     fun `setting a mutable property with a key already in use throws an exception`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            val journeyState =
-                object : AbstractJourneyState(journeyStateService) {
-                    var testProperty1: String? by mutableDelegate("testProperty", serializer())
-                    var testProperty2: Int? by mutableDelegate("testProperty", serializer())
-                }
+            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty")
+            var testProperty2: Int? by delegateProvider.mutableDelegate("testProperty")
         }
     }
 
@@ -178,14 +168,12 @@ class AbstractJourneyStateTests {
     fun `setting a required property with a key already in use throws an exception`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
+        val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            val journeyState =
-                object : AbstractJourneyState(journeyStateService) {
-                    var testProperty1: String? by mutableDelegate("testProperty", serializer())
-                    val testProperty2: Int by requiredDelegate("testProperty", serializer())
-                }
+            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty")
+            val testProperty2: Int by delegateProvider.requiredDelegate("testProperty")
         }
     }
 }
