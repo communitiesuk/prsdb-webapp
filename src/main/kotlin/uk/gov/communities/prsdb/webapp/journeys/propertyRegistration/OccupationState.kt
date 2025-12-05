@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 
 interface OccupationState : JourneyState {
@@ -11,4 +12,5 @@ interface OccupationState : JourneyState {
     val households: HouseholdStep
     val tenants: TenantsStep
     val bedrooms: BedroomsStep
+    val rentIncludesBills: RentIncludesBillsStep
 }
