@@ -272,4 +272,7 @@ class PropertyOwnershipService(
             .filter { it.isOccupied && it.isComplianceIncomplete }
             .map { ComplianceStatusDataModel.fromIncompleteComplianceForm(it) }
     }
+
+    fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
+        propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 }

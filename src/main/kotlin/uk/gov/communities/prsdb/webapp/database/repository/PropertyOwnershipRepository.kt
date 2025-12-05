@@ -22,4 +22,6 @@ interface PropertyOwnershipRepository :
     fun findByRegistrationNumber_Number(registrationNumber: Long): PropertyOwnership?
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
+
+    fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
 }
