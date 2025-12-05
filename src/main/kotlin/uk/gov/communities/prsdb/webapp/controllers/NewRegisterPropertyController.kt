@@ -53,7 +53,7 @@ class NewRegisterPropertyController(
             val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
+        } catch (e: NoSuchJourneyException) {
             val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
