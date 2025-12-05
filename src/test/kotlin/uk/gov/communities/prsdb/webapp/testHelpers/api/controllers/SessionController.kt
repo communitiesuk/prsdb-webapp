@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
@@ -36,6 +37,12 @@ class SessionController(
         session.setAttribute("journeyStateKeyStore", Json.encodeToString(mapOf(requestBody.journeyId to JourneyMetadata(keyToUse))))
         val state = requestBody.getJourneyState()
         session.setAttribute(keyToUse, state)
+
+        if (JourneyStateService(session, requestBody.journeyId).journeyMetadata.dataKey != keyToUse) {
+            throw IllegalStateException(
+                "Failed to set journey state correctly - this is likely because the attribute keys have changed in JourneyStateService",
+            )
+        }
     }
 
     @PostMapping("/$STORE_INVITATION_TOKEN_PATH_SEGMENT", consumes = ["application/json"])
