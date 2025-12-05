@@ -112,7 +112,11 @@ val frontendAssetsSpec: CopySpec =
 tasks.register<Exec>("buildFrontendAssets") {
     group = "build"
     description = "Build frontend JavaScript and CSS assets using npm"
-    commandLine("cmd", "/c", "npm", "run", "build")
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+        commandLine("cmd", "/c", "npm", "run", "build")
+    } else {
+        commandLine("npm", "run", "build")
+    }
 }
 
 tasks.register<Copy>("copyBuiltAssets") {
