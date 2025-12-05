@@ -27,6 +27,8 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
+    fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
+
     @Query(
         "SELECT po.* " +
             "FROM property_ownership po " +
