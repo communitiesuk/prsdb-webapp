@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
 import kotlinx.serialization.Serializable
@@ -7,8 +8,12 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
+import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
@@ -30,6 +35,9 @@ data class JourneyMetadata(
 class JourneyStateService(
     private val session: HttpSession,
     private val journeyIdOrNull: String?,
+    private val journeyRepository: SavedJourneyStateRepository,
+    private val oneLoginUserRepository: OneLoginUserRepository,
+    private val objectMapper: ObjectMapper,
 ) {
     val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()
 
@@ -37,16 +45,67 @@ class JourneyStateService(
     constructor(
         session: HttpSession,
         request: ServletRequest,
+        journeyRepository: SavedJourneyStateRepository,
+        oneLoginUserRepository: OneLoginUserRepository,
+        objectMapper: ObjectMapper,
     ) : this(
         session,
         request.getParameter(JOURNEY_ID_PARAM),
+        journeyRepository,
+        oneLoginUserRepository,
+        objectMapper,
     )
 
     var journeyStateMetadataMap: Map<String, JourneyMetadata>
         get() = session.getAttribute(JOURNEY_STATE_METADATA_STORE_KEY)?.let { it as? String }?.let { Json.decodeFromString(it) } ?: mapOf()
         set(value) = session.setAttribute(JOURNEY_STATE_METADATA_STORE_KEY, Json.encodeToString(value))
 
-    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
+    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: restoreJourney(journeyId)
+
+    fun saveJourney(state: SavableJourneyState): Long {
+        val savedId = state.savedId
+        val userPrincipal = SecurityContextHolder.getContext().authentication
+        val formContext =
+            if (savedId != null) {
+                // Update existing FormContext
+                val formContext =
+                    journeyRepository
+                        .findByIdAndUser_Id(savedId, userPrincipal.name)
+                        ?: throw UnrecoverableJourneyStateException(state.journeyId, "FormContext with ID $savedId not found")
+                formContext.serializedState = serializedJourneyState()
+                formContext
+            } else {
+                // Create a new FormContext if one does not exist
+                SavedJourneyState(
+                    serializedState = serializedJourneyState(),
+                    user = oneLoginUserRepository.getReferenceById(userPrincipal.name),
+                    journeyId = state.journeyId,
+                )
+            }
+        val savedState = journeyRepository.save(formContext)
+        state.savedId = savedState.id
+        return savedState.id
+    }
+
+    fun serializedJourneyState(): String {
+        val stateData = session.getAttribute(journeyMetadata.dataKey)
+        return objectMapper.writeValueAsString(stateData)
+    }
+
+    fun restoreJourney(journeyId: String): JourneyMetadata {
+        if (journeyStateMetadataMap.containsKey(journeyId)) {
+            throw JourneyInitialisationException("Journey with ID $journeyId already exists in session")
+        }
+        val stateToRestore =
+            journeyRepository.findByJourneyIdAndUser_Id(journeyId, SecurityContextHolder.getContext().authentication.name)
+                ?: throw NoSuchJourneyException(journeyId)
+
+        val metadata = JourneyMetadata.withNewDataKey()
+        journeyStateMetadataMap += (stateToRestore.journeyId to metadata)
+
+        session.setAttribute(metadata.dataKey, objectMapper.readValue(stateToRestore.toSessionState(), Any::class.java))
+        return metadata
+    }
 
     fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyMetadata.dataKey))?.get(key)
 
@@ -83,13 +142,15 @@ class JourneyStateService(
 
     fun initialiseJourneyWithId(
         newJourneyId: String,
-        stateInitialiser: JourneyStateService.() -> Unit = {},
+        stateInitialiser: (JourneyStateService.() -> Unit)? = null,
     ) {
         if (journeyStateMetadataMap.containsKey(newJourneyId)) {
             throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
         }
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
-        JourneyStateService(session, newJourneyId).stateInitialiser()
+        stateInitialiser?.let {
+            JourneyStateService(session, newJourneyId, journeyRepository, oneLoginUserRepository, objectMapper).it()
+        }
     }
 
     fun initialiseChildJourney(
