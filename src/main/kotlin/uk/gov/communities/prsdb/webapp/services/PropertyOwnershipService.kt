@@ -2,12 +2,10 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -160,7 +158,7 @@ class PropertyOwnershipService(
                     pageRequest,
                 )
             } else {
-                searchMatching(
+                propertyOwnershipRepository.searchMatching(
                     searchTerm,
                     localCouncilBaseUserId,
                     restrictToLocalCouncil,
@@ -175,28 +173,6 @@ class PropertyOwnershipService(
                 backLinkService.storeCurrentUrlReturningKey(),
             )
         }
-    }
-
-    // Searching using a GIN index is faster for small result sets, while GIST is quicker for large ones.
-    // Therefore, we count the number of matching entries, then use the result to choose which index to use.
-    private fun searchMatching(
-        searchTerm: String,
-        laBaseUserId: String,
-        restrictToLA: Boolean = false,
-        restrictToLicenses: List<LicensingType> = LicensingType.entries,
-        pageable: PageRequest,
-    ): Page<PropertyOwnership> {
-        val matchingPropertiesCount =
-            propertyOwnershipRepository.countMatching(searchTerm, laBaseUserId, restrictToLA, restrictToLicenses)
-
-        val matchingProperties =
-            if (matchingPropertiesCount == MAX_ENTRIES_IN_PROPERTIES_SEARCH) {
-                propertyOwnershipRepository.searchMatchingGist(searchTerm, laBaseUserId, restrictToLA, restrictToLicenses, pageable)
-            } else {
-                propertyOwnershipRepository.searchMatchingGin(searchTerm, laBaseUserId, restrictToLA, restrictToLicenses, pageable)
-            }
-
-        return PageImpl(matchingProperties, pageable, matchingPropertiesCount.toLong())
     }
 
     @Transactional
