@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.SavableJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -131,22 +132,26 @@ class PropertyRegistrationJourneyState(
     override val rentIncludesBills: RentIncludesBillsStep,
     val occupationTask: OccupationTask,
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
-    journeyStateService: JourneyStateService,
+    private val journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
     LicensingState,
     OccupationState,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    SavableJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
+    override var savedId: Long? by delegateProvider.mutableDelegate("savedId")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
     }
+
+    override fun save(): Long = journeyStateService.saveJourney(this)
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
