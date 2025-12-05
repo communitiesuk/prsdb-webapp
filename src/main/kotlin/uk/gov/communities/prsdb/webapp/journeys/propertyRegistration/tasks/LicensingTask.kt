@@ -14,7 +14,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 class LicensingTask : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
-            step("licensing-type", journey.licensingTypeStep) {
+            step(journey.licensingTypeStep) {
+                routeSegment("licensing-type")
                 nextStep { mode ->
                     when (mode) {
                         LicensingTypeMode.SELECTIVE_LICENCE -> journey.selectiveLicenceStep
@@ -24,15 +25,18 @@ class LicensingTask : Task<LicensingState>() {
                     }
                 }
             }
-            step("selective-licence", journey.selectiveLicenceStep) {
+            step(journey.selectiveLicenceStep) {
+                routeSegment("selective-licence")
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.SELECTIVE_LICENCE) }
                 nextStep { exitStep }
             }
-            step("hmo-mandatory-licence", journey.hmoMandatoryLicenceStep) {
+            step(journey.hmoMandatoryLicenceStep) {
+                routeSegment("hmo-mandatory-licence")
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_MANDATORY_LICENCE) }
                 nextStep { exitStep }
             }
-            step("hmo-additional-licence", journey.hmoAdditionalLicenceStep) {
+            step(journey.hmoAdditionalLicenceStep) {
+                routeSegment("hmo-additional-licence")
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_ADDITIONAL_LICENCE) }
                 nextStep { exitStep }
             }
