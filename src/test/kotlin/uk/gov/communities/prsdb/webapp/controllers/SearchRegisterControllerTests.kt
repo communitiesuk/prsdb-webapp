@@ -70,6 +70,7 @@ class SearchRegisterControllerTests(
                             "test@example.com",
                             "01223 123456",
                             "/landlord/123/details",
+                            0,
                         ),
                     ),
                     PageRequest.of(

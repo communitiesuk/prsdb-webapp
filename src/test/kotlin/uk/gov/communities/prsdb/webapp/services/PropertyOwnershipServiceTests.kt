@@ -23,12 +23,12 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -449,10 +449,9 @@ class PropertyOwnershipServiceTests {
         val lcBaseUserId = "id"
         val pageRequest = PageRequest.of(1, 10)
 
-        whenever(mockPropertyOwnershipRepository.countMatching(nonPropertyRegNum.toString(), lcBaseUserId)).thenReturn(0)
         whenever(
-            mockPropertyOwnershipRepository.searchMatchingGin(nonPropertyRegNum.toString(), lcBaseUserId, pageable = pageRequest),
-        ).thenReturn(emptyList())
+            mockPropertyOwnershipRepository.searchMatching(nonPropertyRegNum.toString(), lcBaseUserId, pageable = pageRequest),
+        ).thenReturn(Page.empty())
 
         val searchResults =
             propertyOwnershipService.searchForProperties(
@@ -499,7 +498,7 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `searchForProperties returns a collection of fuzzy matches when the search term is common and not a PRN or UPRN`() {
+    fun `searchForProperties returns a collection of fuzzy matches when the search term is not a PRN or UPRN`() {
         val searchTerm = "road"
         val lcBaseUserId = "id"
         val urlKey = 7
@@ -510,39 +509,9 @@ class PropertyOwnershipServiceTests {
         val expectedSearchResults =
             fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it, 7) }
 
-        whenever(mockPropertyOwnershipRepository.countMatching(searchTerm, lcBaseUserId)).thenReturn(MAX_ENTRIES_IN_PROPERTIES_SEARCH)
         whenever(
-            mockPropertyOwnershipRepository.searchMatchingGist(searchTerm, lcBaseUserId, pageable = pageRequest),
-        ).thenReturn(fuzzyMatchingPropertyOwnerships)
-        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey)
-
-        val searchResults =
-            propertyOwnershipService.searchForProperties(
-                searchTerm,
-                lcBaseUserId,
-                requestedPageIndex = pageRequest.pageNumber,
-                pageSize = pageRequest.pageSize,
-            )
-
-        assertEquals(expectedSearchResults, searchResults.content)
-    }
-
-    @Test
-    fun `searchForProperties returns a collection of fuzzy matches when the search term is uncommon and not a PRN or UPRN`() {
-        val searchTerm = "specific road"
-        val lcBaseUserId = "id"
-        val urlKey = 7
-        val pageRequest = PageRequest.of(1, 10)
-
-        val fuzzyMatchingPropertyOwnerships =
-            listOf(MockLandlordData.createPropertyOwnership(), MockLandlordData.createPropertyOwnership())
-        val expectedSearchResults =
-            fuzzyMatchingPropertyOwnerships.map { PropertySearchResultViewModel.fromPropertyOwnership(it, 7) }
-
-        whenever(mockPropertyOwnershipRepository.countMatching(searchTerm, lcBaseUserId)).thenReturn(20)
-        whenever(
-            mockPropertyOwnershipRepository.searchMatchingGin(searchTerm, lcBaseUserId, pageable = pageRequest),
-        ).thenReturn(fuzzyMatchingPropertyOwnerships)
+            mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest),
+        ).thenReturn(PageImpl(fuzzyMatchingPropertyOwnerships))
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey)
 
         val searchResults =
@@ -567,22 +536,18 @@ class PropertyOwnershipServiceTests {
         val urlKey1 = 37
         val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
         val matchingPropertiesPage1 = matchingProperties.subList(0, pageSize)
-        val expectedPage1SearchResults =
-            matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey1) }
+        val expectedPage1SearchResults = matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey1) }
 
         val pageIndex2 = 1
         val urlKey2 = 41
         val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
         val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
-        val expectedPage2SearchResults =
-            matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
+        val expectedPage2SearchResults = matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
 
-        whenever(mockPropertyOwnershipRepository.countMatching(searchTerm, laBaseUserId))
-            .thenReturn(matchingProperties.size)
-        whenever(mockPropertyOwnershipRepository.searchMatchingGin(searchTerm, laBaseUserId, pageable = pageRequest1))
-            .thenReturn(matchingPropertiesPage1)
-        whenever(mockPropertyOwnershipRepository.searchMatchingGin(searchTerm, laBaseUserId, pageable = pageRequest2))
-            .thenReturn(matchingPropertiesPage2)
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest1))
+            .thenReturn(PageImpl(matchingPropertiesPage1))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest2))
+            .thenReturn(PageImpl(matchingPropertiesPage2))
 
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey1)
         val searchResults1 =

@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -30,18 +28,15 @@ import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import java.net.URI
@@ -56,9 +51,6 @@ class LandlordServiceTests {
 
     @Mock
     private lateinit var mockOneLoginUserService: OneLoginUserService
-
-    @Mock
-    private lateinit var mockLandlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -87,7 +79,6 @@ class LandlordServiceTests {
             LandlordService(
                 mockLandlordRepository,
                 mockOneLoginUserService,
-                mockLandlordWithListedPropertyCountRepository,
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
@@ -251,16 +242,9 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            val matchingLandlordsWithListedPropertyCount =
-                mutableListOf<LandlordWithListedPropertyCount>().apply {
-                    for (i in 1..3) {
-                        val landlord = createLandlord()
-                        add(LandlordWithListedPropertyCount(landlord.id, landlord, 0))
-                    }
-                }
-
-            whenever(mockLandlordWithListedPropertyCountRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
-                .thenReturn(PageImpl(matchingLandlordsWithListedPropertyCount))
+            val matchingLandlords = listOf(createLandlord(), createLandlord(), createLandlord())
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
+                .thenReturn(PageImpl(matchingLandlords))
 
             val currentUrlKey = 77
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
@@ -270,10 +254,7 @@ class LandlordServiceTests {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
 
             // Assert
-            val expectedSearchResults =
-                matchingLandlordsWithListedPropertyCount.map {
-                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, currentUrlKey)
-                }
+            val expectedSearchResults = matchingLandlords.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
             assertEquals(expectedSearchResults, searchResults.content)
         }
 
@@ -287,11 +268,9 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            val matchingLandlord = createLandlord()
-            val matchingLandlordWithListedPropertyCount = listOf(LandlordWithListedPropertyCount(matchingLandlord.id, matchingLandlord, 0))
-
-            whenever(mockLandlordWithListedPropertyCountRepository.searchMatchingLRN(searchLRN, laUserBaseId, pageable = pageRequest))
-                .thenReturn(PageImpl(matchingLandlordWithListedPropertyCount))
+            val matchingLandlord = listOf(createLandlord())
+            whenever(mockLandlordRepository.searchMatchingLRN(searchLRN, laUserBaseId, pageable = pageRequest))
+                .thenReturn(PageImpl(matchingLandlord))
 
             val currentUrlKey = 79
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
@@ -301,10 +280,7 @@ class LandlordServiceTests {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
 
             // Assert
-            val expectedSearchResults =
-                matchingLandlordWithListedPropertyCount.map {
-                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, currentUrlKey)
-                }
+            val expectedSearchResults = matchingLandlord.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
             assertEquals(expectedSearchResults, searchResults.content)
         }
 
@@ -317,7 +293,7 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            whenever(mockLandlordWithListedPropertyCountRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
                 .thenReturn(Page.empty())
 
             // Act
@@ -327,7 +303,7 @@ class LandlordServiceTests {
             // Assert
             val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
             assertEquals(expectedSearchResults, searchResults.content)
-            verify(mockLandlordWithListedPropertyCountRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+            verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
         }
 
         @Test
@@ -339,7 +315,7 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            whenever(mockLandlordWithListedPropertyCountRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
                 .thenReturn(Page.empty())
 
             // Act
@@ -349,7 +325,7 @@ class LandlordServiceTests {
             // Assert
             val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
             assertEquals(expectedSearchResults, searchResults.content)
-            verify(mockLandlordWithListedPropertyCountRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+            verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
         }
 
         @Test
@@ -359,26 +335,24 @@ class LandlordServiceTests {
             val laUserBaseId = "laUserBaseId"
             val pageSize = 25
 
-            val matchingLandlordsWithListedPropertyCount =
-                mutableListOf<LandlordWithListedPropertyCount>().apply {
+            val matchingLandlords =
+                mutableListOf<Landlord>().apply {
                     for (i in 1..40) {
-                        val landlord = createLandlord()
-                        add(LandlordWithListedPropertyCount(landlord.id, landlord, i.mod(3)))
+                        add(createLandlord())
                     }
                 }
 
             val pageNumber1 = 0
             val pageRequest1 = PageRequest.of(pageNumber1, pageSize)
-            val matchingLandlordsWithListedPropertiesPage1 = matchingLandlordsWithListedPropertyCount.subList(0, pageSize)
-            whenever(mockLandlordWithListedPropertyCountRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest1))
-                .thenReturn(PageImpl(matchingLandlordsWithListedPropertiesPage1))
+            val matchingLandlordsPage1 = matchingLandlords.subList(0, pageSize)
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest1))
+                .thenReturn(PageImpl(matchingLandlordsPage1))
 
             val pageNumber2 = 1
             val pageRequest2 = PageRequest.of(pageNumber2, pageSize)
-            val matchingLandlordsWithListedPropertiesPage2 =
-                matchingLandlordsWithListedPropertyCount.subList(pageSize, matchingLandlordsWithListedPropertyCount.size)
-            whenever(mockLandlordWithListedPropertyCountRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest2))
-                .thenReturn(PageImpl(matchingLandlordsWithListedPropertiesPage2))
+            val matchingLandlordsPage2 = matchingLandlords.subList(pageSize, matchingLandlords.size)
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest2))
+                .thenReturn(PageImpl(matchingLandlordsPage2))
 
             val currentUrlKey = 77
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey).thenReturn(currentUrlKey)
@@ -391,16 +365,10 @@ class LandlordServiceTests {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = pageNumber2, pageSize = pageSize)
 
             // Assert
-            val expectedSearchResultsPage1 =
-                matchingLandlordsWithListedPropertiesPage1.map {
-                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, currentUrlKey)
-                }
+            val expectedSearchResultsPage1 = matchingLandlordsPage1.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
             assertEquals(expectedSearchResultsPage1, searchResults1.content)
 
-            val expectedSearchResultsPage2 =
-                matchingLandlordsWithListedPropertiesPage2.map {
-                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(it, currentUrlKey)
-                }
+            val expectedSearchResultsPage2 = matchingLandlordsPage2.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
             assertEquals(expectedSearchResultsPage2, searchResults2.content)
         }
     }
@@ -552,36 +520,6 @@ class LandlordServiceTests {
     @Test
     fun `updateLandlordForBaseUserId is annotated with @Transactional`() {
         assertTrue(landlordService::updateLandlordForBaseUserId.hasAnnotation<Transactional>())
-    }
-
-    @Test
-    fun `getLandlordHasRegisteredProperties throws an error if the landlord is not found`() {
-        val baseUserId = "one-login-id"
-        assertThrows<EntityNotFoundException> { landlordService.getLandlordHasRegisteredProperties(baseUserId) }
-    }
-
-    @Test
-    fun `getLandlordHasRegisteredProperties returns true if listedPropertyCount is greater than 0`() {
-        // Arrange
-        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(5)
-        val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
-            .thenReturn(landlordWithListedPropertyCount)
-
-        // Act, Assert
-        assertTrue(landlordService.getLandlordHasRegisteredProperties(baseUserId))
-    }
-
-    @Test
-    fun `getLandlordHasRegisteredProperties returns false true if listedPropertyCount is 0`() {
-        // Arrange
-        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(0)
-        val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
-            .thenReturn(landlordWithListedPropertyCount)
-
-        // Act, Assert
-        assertFalse(landlordService.getLandlordHasRegisteredProperties(baseUserId))
     }
 
     companion object {
