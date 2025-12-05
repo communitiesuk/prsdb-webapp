@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -53,6 +54,44 @@ class DestinationTests {
     }
 
     @Test
+    fun `VisitableStep Destination for an unreachable step returns null URL`() {
+        // Arrange
+        val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val journeyId = "test-journey-id"
+        val routeSegment = "test-segment"
+
+        whenever(mockStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockStep.routeSegment).thenReturn(routeSegment)
+        whenever(mockStep.isStepReachable).thenReturn(false)
+
+        // Act
+        val destination = Destination(mockStep)
+        val urlString = destination.toUrlStringOrNull()
+
+        // Assert
+        assertNull(urlString)
+    }
+
+    @Test
+    fun `VisitableStep Destination for a reachable step returns correct URL`() {
+        // Arrange
+        val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val journeyId = "test-journey-id"
+        val routeSegment = "test-segment"
+
+        whenever(mockStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockStep.routeSegment).thenReturn(routeSegment)
+        whenever(mockStep.isStepReachable).thenReturn(true)
+
+        // Act
+        val destination = Destination(mockStep)
+        val urlString = destination.toUrlStringOrNull()
+
+        // Assert
+        assertEquals("$routeSegment?journeyId=$journeyId", urlString)
+    }
+
+    @Test
     fun `ExternalUrl Destination returns a redirect to the specified URL with parameters`() {
         // Arrange
         val externalUrl = "http://example.com"
@@ -80,6 +119,20 @@ class DestinationTests {
         // Assert
         assertEquals("redirect:$externalUrl", modelAndView.viewName)
         assertTrue(modelAndView.model.isEmpty())
+    }
+
+    @Test
+    fun `ExternalUrl Destination returns correct URL string with parameters`() {
+        // Arrange
+        val externalUrl = "http://example.com"
+        val params = mapOf("param1" to "value1", "param2" to "value2")
+
+        // Act
+        val destination = Destination.ExternalUrl(externalUrl, params)
+        val urlString = destination.toUrlStringOrNull()
+
+        // Assert
+        assertEquals("http://example.com?param1=value1&param2=value2", urlString)
     }
 
     @Test
@@ -136,26 +189,41 @@ class DestinationTests {
     }
 
     @Test
+    fun `Template Destination converted to url returns null`() {
+        // Arrange
+        val templateName = "test-template"
+
+        // Act
+        val destination = Destination.Template(templateName)
+        val urlString = destination.toUrlStringOrNull()
+
+        // Assert
+        assertNull(urlString)
+    }
+
+    @Test
     fun `withModelContent on non-Template Destination returns the same Destination`() {
         // Arrange
         val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-        val journeyId = "test-journey-id"
-        val routeSegment = "test-segment"
+        val nonTemplateDestinations =
+            listOf(
+                Destination.VisitableStep(mockStep, "test-journey-id"),
+                Destination.ExternalUrl("http://example.com"),
+                Destination.NavigationalStep(mock()),
+                Destination.Nowhere(),
+            )
 
-        whenever(mockStep.currentJourneyId).thenReturn(journeyId)
-        whenever(mockStep.routeSegment).thenReturn(routeSegment)
-
-        val stepDestination = Destination(mockStep)
-        val externalUrlDestination = Destination.ExternalUrl("http://example.com")
         val contentToAdd = mapOf("key" to "value")
 
-        // Act
-        val updatedStepDestination = stepDestination.withModelContent(contentToAdd)
-        val updatedExternalUrlDestination = externalUrlDestination.withModelContent(contentToAdd)
+        // Act & Assert
+        nonTemplateDestinations.forEach { destination ->
+            val updatedDestination = destination.withModelContent(contentToAdd)
+            assertSame(destination, updatedDestination)
+        }
 
-        // Assert
-        assertSame(stepDestination, updatedStepDestination)
-        assertSame(externalUrlDestination, updatedExternalUrlDestination)
+        Destination::class.sealedSubclasses.all { type ->
+            type == Destination.Template::class || nonTemplateDestinations.any { type.isInstance(it) }
+        }
     }
 
     @Test
@@ -177,6 +245,39 @@ class DestinationTests {
             assertSame(modelAndView, result)
             assertSame(mockStep, capturedStep)
         }
+    }
+
+    @Test
+    fun `Nowhere Destination throws when converted to  a ModelAndView`() {
+        // Arrange
+        val destination = Destination.Nowhere()
+
+        // Act & Assert
+        assertThrows<Exception> {
+            destination.toModelAndView()
+        }
+    }
+
+    @Test
+    fun `Nowhere Destination withModelContent returns the same Nowhere Destination`() {
+        // Arrange
+        val contentToAdd = mapOf("key" to "value")
+        val destination = Destination.Nowhere()
+
+        // Act
+        val updatedDestination = destination.withModelContent(contentToAdd)
+
+        // Assert
+        assertSame(destination, updatedDestination)
+    }
+
+    @Test
+    fun `Nowhere Destination converted to url returns null`() {
+        // Act
+        val destinationString = Destination.Nowhere().toUrlStringOrNull()
+
+        // Assert
+        assertNull(destinationString)
     }
 
     @Test
