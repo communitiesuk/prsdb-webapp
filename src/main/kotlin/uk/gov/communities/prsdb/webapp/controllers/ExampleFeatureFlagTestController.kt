@@ -116,7 +116,7 @@ class ExampleFeatureFlagTestController(
     @AvailableWhenFeatureDisabled(EXAMPLE_FEATURE_FLAG_FOUR)
     @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR")
     fun featureReleaseStrategyInverseFlaggedEndpointFlagFour(model: Model): String {
-        populateModelForFeatureReleaseTest(model, EXAMPLE_FEATURE_FLAG_FOUR)
+        populateModelForFeatureReleaseTest(model, EXAMPLE_FEATURE_FLAG_FOUR, true)
 
         return "featureFlagExamples/releaseWithReleaseStrategyTest"
     }
