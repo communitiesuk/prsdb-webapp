@@ -123,7 +123,7 @@ The release date flipping strategy is demonstrated by the following endpoints in
 
 For a useful demo, change the `release-date` on `"`release-with-strategy` release between a date in the past and a date in the future, then check the endpoints become available or unavailable as appropriate.
 
-### Adding a new stratey type
+### Adding a new strategy type
 To add a new kind of flipping strategy to the codebase:
 * Add a fields for the strategy config to `FeatureFlagStrategyConfig` (see `releaseDate` and `enabledByStrategy` for examples)
 * If it is not an in-built FF4J strategy, create a new class implementing `AbstractFlippingStrategy` (see `BooleanFlipStrategy.kt` for an example)
