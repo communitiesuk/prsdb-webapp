@@ -51,7 +51,7 @@ class AddressTask : Task<AddressState>() {
                 parents { journey.selectAddressStep.hasOutcome(SelectAddressMode.ADDRESS_ALREADY_REGISTERED) }
                 noNextDestination()
             }
-            step("local-authority", journey.localCouncilStep) {
+            step("local-council", journey.localCouncilStep) {
                 parents { journey.manualAddressStep.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }

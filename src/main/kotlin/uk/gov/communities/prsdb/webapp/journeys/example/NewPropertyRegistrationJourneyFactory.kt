@@ -91,7 +91,7 @@ class NewPropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
-                step("check-your-answers", journey.cyaStep) {
+                step("check-answers", journey.cyaStep) {
                     parents { journey.occupationTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
