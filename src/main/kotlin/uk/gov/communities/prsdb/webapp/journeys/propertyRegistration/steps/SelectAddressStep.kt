@@ -4,9 +4,8 @@ import org.springframework.context.annotation.Scope
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -41,9 +40,7 @@ class SelectAddressStepConfig(
             "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
             "submitButtonText" to "forms.buttons.useThisAddress",
-            "searchAgainUrl" to
-                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
-                RegisterPropertyStepId.LookupAddress.urlPathSegment,
+            "searchAgainUrl" to Destination(state.lookupStep).toUrlStringOrNull(),
             "houseNameOrNumber" to lookUpDetails.houseNameOrNumber,
             "postcode" to lookUpDetails.postcode,
             "addressCount" to (state.cachedAddresses?.size ?: 0),
