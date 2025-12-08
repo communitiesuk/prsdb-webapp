@@ -1,14 +1,13 @@
-package uk.gov.communities.prsdb.webapp.integration
+package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyStateSessionBuilder
 
 class PropertyStateSessionBuilder : JourneyStateSessionBuilder<PropertyStateSessionBuilder>() {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
-        additionalDataMap["isAddressAlreadyRegistered"] = Json.encodeToString(serializer(), isRegistered)
+        additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
         return this
     }
 
