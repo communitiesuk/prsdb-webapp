@@ -67,7 +67,8 @@ class Landlord() : ModifiableAuditableEntity() {
     var hasRespondedToFeedback: Boolean = false
 
     @OneToMany(mappedBy = "primaryLandlord", orphanRemoval = true)
-    private val propertyOwnerships: MutableSet<PropertyOwnership> = mutableSetOf()
+    lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
+        private set
 
     constructor(
         baseUser: OneLoginUser,

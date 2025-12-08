@@ -145,7 +145,6 @@ class LandlordDashboardUrlTests(
             LandlordService(
                 repository,
                 oneLoginUserService,
-                mock(),
                 addressService,
                 registrationNumberService,
                 mock(),
