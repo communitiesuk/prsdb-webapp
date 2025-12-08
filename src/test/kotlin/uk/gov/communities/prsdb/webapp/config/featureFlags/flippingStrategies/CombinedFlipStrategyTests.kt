@@ -36,7 +36,7 @@ class CombinedFlipStrategyTests {
         val combinedFlipStrategy = CombinedFlipStrategy(strategyList)
 
         // Act, Assert
-        assertTrue(combinedFlipStrategy.evaluate(anyOrNull(), anyOrNull(), anyOrNull()))
+        assertTrue(combinedFlipStrategy.evaluate(null, null, null))
     }
 
     @Test
@@ -50,6 +50,6 @@ class CombinedFlipStrategyTests {
         val combinedFlipStrategy = CombinedFlipStrategy(strategyList)
 
         // Act, Assert
-        assertFalse(combinedFlipStrategy.evaluate(anyOrNull(), anyOrNull(), anyOrNull()))
+        assertFalse(combinedFlipStrategy.evaluate(null, null, null))
     }
 }

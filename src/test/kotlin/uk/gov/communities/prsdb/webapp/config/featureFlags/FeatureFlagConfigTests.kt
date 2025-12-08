@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import java.time.LocalDate
+import kotlin.test.assertEquals
 
 class FeatureFlagConfigTests : FeatureFlagTest() {
     val expectedFeatureFlagsFromDefaultApplicationYaml =
@@ -31,6 +32,12 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 release = "release-1-0",
             ),
             MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "example-feature-flag-four",
+                enabled = true,
+                expiryDate = LocalDate.of(2030, 1, 7),
+                release = "release-with-strategy",
+            ),
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "failover-test-endpoints",
                 enabled = true,
                 expiryDate = LocalDate.of(2026, 12, 31),
@@ -45,10 +52,15 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                     name = "release-1-0",
                     enabled = false,
                 ),
+                MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                    name = "release-with-strategy",
+                    enabled = true,
+                    strategyConfig = MockFeatureFlagConfig.createFlipStrategyConfigModel(releaseDate = LocalDate.of(2025, 6, 1)),
+                ),
             )
 
-        assertTrue(featureFlagConfig.featureFlags == expectedFeatureFlagsFromDefaultApplicationYaml)
-        assertTrue(featureFlagConfig.releases == expectedReleases)
+        assertEquals(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
+        assertEquals(expectedReleases, featureFlagConfig.releases)
     }
 
     @ActiveProfiles("integration")
@@ -68,8 +80,8 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                     ),
                 )
 
-            assertTrue(featureFlagConfig.featureFlags == expectedFeatureFlags)
-            assertTrue(featureFlagConfig.releases == expectedReleases)
+            assertEquals(expectedFeatureFlags, featureFlagConfig.featureFlags)
+            assertEquals(expectedReleases, featureFlagConfig.releases)
         }
     }
 
