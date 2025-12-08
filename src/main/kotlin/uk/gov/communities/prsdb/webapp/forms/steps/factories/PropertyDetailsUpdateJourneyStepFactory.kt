@@ -151,7 +151,7 @@ class PropertyDetailsUpdateJourneyStepFactory(
                 content =
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "heading" to fieldSetHeadingKey,
+                        "fieldSetHeading" to fieldSetHeadingKey,
                         "label" to "forms.numberOfHouseholds.label",
                     ).withBackUrlIfNotNullAndNotCheckingAnswers(backUrl, isCheckingAnswers),
             ),
@@ -171,7 +171,7 @@ class PropertyDetailsUpdateJourneyStepFactory(
                 content =
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "heading" to fieldSetHeadingKey,
+                        "fieldSetHeading" to fieldSetHeadingKey,
                         "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
                         "label" to "forms.numberOfPeople.label",
                     ).withBackUrlIfNotNullAndNotCheckingAnswers(backUrl, isCheckingAnswers),
