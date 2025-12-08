@@ -1,3 +1,5 @@
+DROP INDEX property_ownership_single_line_address_idx;
+
 ALTER TABLE property_ownership
     ADD local_council_id INTEGER,
     ADD is_active_duplicate_for_gist_index BOOLEAN NOT NULL GENERATED ALWAYS AS (is_active) STORED;
@@ -44,8 +46,6 @@ CREATE TRIGGER insert_property_ownership_address
 AFTER INSERT ON property_ownership
 FOR EACH ROW
 EXECUTE FUNCTION insert_property_ownership_address();
-
-DROP INDEX property_ownership_single_line_address_idx;
 
 CREATE INDEX property_ownership_single_line_address_gin_idx ON property_ownership USING gin (single_line_address gin_trgm_ops) WHERE is_active;
 
