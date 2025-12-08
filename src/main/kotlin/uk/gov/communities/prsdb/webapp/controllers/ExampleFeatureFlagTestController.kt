@@ -8,12 +8,13 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_FOUR
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
 import uk.gov.communities.prsdb.webapp.services.interfaces.ExampleFeatureFlaggedService
 
 // TODO PRSD-1683 - delete example feature flag implementation when no longer needed
@@ -104,11 +105,27 @@ class ExampleFeatureFlagTestController(
         return "featureFlagExamples/featureReleaseTest"
     }
 
-    private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagModel =
+    @AvailableWhenFeatureEnabled(EXAMPLE_FEATURE_FLAG_FOUR)
+    @GetMapping("$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR")
+    fun featureReleaseStrategyFlaggedEndpointFlagFour(model: Model): String {
+        populateModelForFeatureReleaseTest(model, EXAMPLE_FEATURE_FLAG_FOUR)
+
+        return "featureFlagExamples/releaseWithReleaseStrategyTest"
+    }
+
+    @AvailableWhenFeatureDisabled(EXAMPLE_FEATURE_FLAG_FOUR)
+    @GetMapping("$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR")
+    fun featureReleaseStrategyInverseFlaggedEndpointFlagFour(model: Model): String {
+        populateModelForFeatureReleaseTest(model, EXAMPLE_FEATURE_FLAG_FOUR, true)
+
+        return "featureFlagExamples/releaseWithReleaseStrategyTest"
+    }
+
+    private fun getFeatureFlagModelFromConfig(featureName: String): FeatureFlagConfigModel =
         featureFlagConfig.featureFlags.firstOrNull { it.name == featureName }
             ?: throw IllegalArgumentException("Feature flag $featureName not found in config")
 
-    private fun getFeatureReleaseModelFromConfig(releaseName: String): FeatureReleaseModel =
+    private fun getFeatureReleaseModelFromConfig(releaseName: String): FeatureReleaseConfigModel =
         featureFlagConfig.releases.firstOrNull { it.name == releaseName }
             ?: throw IllegalArgumentException("Feature release $releaseName not found in config")
 
@@ -131,6 +148,9 @@ class ExampleFeatureFlagTestController(
                 "This feature is DISABLED"
             }
 
+        val releaseStrategyConfig = featureReleaseSetInConfig.strategyConfig
+        val releaseDate = releaseStrategyConfig?.releaseDate?.toString() ?: null
+
         model.addAttribute("ffTestHeading", "Feature flagged controller endpoint - available when flag is $endpointAvailableWhenFlagIs")
         model.addAttribute("flagGroupName", featureFlagSetInConfig.release)
         model.addAttribute("ffSubHeading", "Configuration for $flagName")
@@ -145,6 +165,8 @@ class ExampleFeatureFlagTestController(
                 "${featureReleaseSetInConfig.enabled.toString().uppercase()} in FeatureFlagConfig",
         )
         model.addAttribute("featureEnabled", featureEnabledText)
+
+        model.addAttribute("releaseDate", releaseDate)
     }
 
     companion object {
@@ -161,7 +183,18 @@ class ExampleFeatureFlagTestController(
         const val FEATURED_FLAGGED_TEMPLATE_TEST_URL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_TEMPLATE_TEST_URL_SEGMENT"
         const val FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_TWO"
+        const val INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/" +
+                "$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_TWO"
         const val FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_THREE"
+        const val INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT" +
+                "/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_THREE"
+        const val FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE =
+            "/$LANDLORD_PATH_SEGMENT/$FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR"
+        const val INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE =
+            "/$LANDLORD_PATH_SEGMENT/$INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_SEGMENT" +
+                "/$FEATURE_RELEASE_URL_SEGMENT/$EXAMPLE_FEATURE_FLAG_FOUR"
     }
 }
