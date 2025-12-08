@@ -16,7 +16,7 @@ class HouseholdStepConfig : AbstractGenericStepConfig<Complete, NumberOfHousehol
     override fun getStepSpecificContent(state: OccupiedJourneyState) =
         mapOf(
             "title" to "propertyCompliance.title",
-            "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+            "heading" to "forms.numberOfHouseholds.heading",
             "label" to "forms.numberOfHouseholds.label",
         )
 
