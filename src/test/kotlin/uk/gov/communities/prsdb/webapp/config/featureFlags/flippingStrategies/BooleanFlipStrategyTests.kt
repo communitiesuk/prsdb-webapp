@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.config.featureFlags.flippingStrategies
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.kotlin.anyOrNull
 import uk.gov.communities.prsdb.webapp.config.flipStrategies.BooleanFlipStrategy
 import kotlin.test.assertEquals
 
@@ -16,11 +15,7 @@ class BooleanFlipStrategyTests {
         // Act, Assert
         assertEquals(
             enabledByStrategy,
-            strategy.evaluate(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-            ),
+            strategy.evaluate(null, null, null),
         )
     }
 }
