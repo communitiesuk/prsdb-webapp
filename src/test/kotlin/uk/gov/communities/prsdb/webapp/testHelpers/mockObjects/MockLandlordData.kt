@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -44,6 +43,7 @@ class MockLandlordData {
             nonEnglandOrWalesAddress: String? = null,
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),
+            propertyOwnerships: Set<PropertyOwnership> = emptySet(),
         ): Landlord {
             val landlord =
                 Landlord(
@@ -61,17 +61,9 @@ class MockLandlordData {
                 )
 
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
+            ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
 
             return landlord
-        }
-
-        fun createLandlordWithListedPropertyCount(listedPropertyCount: Int = 0): LandlordWithListedPropertyCount {
-            val landlord = createLandlord()
-            return LandlordWithListedPropertyCount(
-                landlord.id,
-                landlord,
-                listedPropertyCount,
-            )
         }
 
         fun createPropertyOwnership(
@@ -86,6 +78,7 @@ class MockLandlordData {
             incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             id: Long = 1,
             createdDate: Instant = Instant.now(),
+            isActive: Boolean = true,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -98,6 +91,7 @@ class MockLandlordData {
                     address = address,
                     incompleteComplianceForm = incompleteComplianceForm,
                     license = license,
+                    isActive = isActive,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)

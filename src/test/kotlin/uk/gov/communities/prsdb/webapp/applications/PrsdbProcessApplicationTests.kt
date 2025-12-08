@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
@@ -74,6 +75,7 @@ class PrsdbProcessApplicationTests {
                 TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
+                PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
