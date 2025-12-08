@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfB
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 
 interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
     val submittedValueMap: MutableMap<String, FormModel>
@@ -21,6 +22,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         submittedValueMap.remove(RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.NumberOfPeople.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
+        submittedValueMap.remove(RegisterPropertyStepId.RentIncludesBills.urlPathSegment)
         return withOccupiedSetToFalse()
     }
 
@@ -60,19 +62,35 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         return self()
     }
 
-    fun withTenants(
-        households: Int = 2,
-        people: Int = 4,
-        bedrooms: Int = 3,
-    ): SelfType {
-        withOccupancyStatus(true)
-        withHouseholds(households)
-        withPeople(people)
+    fun withBedrooms(bedrooms: Int = 3): SelfType {
         val numberOfBedroomsFormModel =
             NumberOfBedroomsFormModel().apply {
                 numberOfBedrooms = bedrooms.toString()
             }
         withSubmittedValue(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment, numberOfBedroomsFormModel)
+        return self()
+    }
+
+    fun withRentIncludesBills(rentIncludesBills: Boolean = true): SelfType {
+        val rentIncludesBillsFormModel =
+            RentIncludesBillsFormModel().apply {
+                this.rentIncludesBills = rentIncludesBills
+            }
+        withSubmittedValue(RegisterPropertyStepId.RentIncludesBills.urlPathSegment, rentIncludesBillsFormModel)
+        return self()
+    }
+
+    fun withTenants(
+        households: Int = 2,
+        people: Int = 4,
+        bedrooms: Int = 3,
+        includesBills: Boolean = true,
+    ): SelfType {
+        withOccupancyStatus(true)
+        withHouseholds(households)
+        withPeople(people)
+        withBedrooms(bedrooms)
+        withRentIncludesBills(includesBills)
         @Suppress("UNCHECKED_CAST")
         return self()
     }

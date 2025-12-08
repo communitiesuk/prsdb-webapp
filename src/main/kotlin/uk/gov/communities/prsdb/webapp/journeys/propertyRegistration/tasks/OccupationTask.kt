@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
@@ -22,19 +23,19 @@ class OccupationTask : Task<OccupationState>() {
                     }
                 }
             }
-            step("number-of-households", journey.households) {
+            step(RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment, journey.households) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.tenants }
             }
-            step("number-of-people", journey.tenants) {
+            step(RegisterPropertyStepId.NumberOfPeople.urlPathSegment, journey.tenants) {
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.bedrooms }
             }
-            step("number-of-bedrooms", journey.bedrooms) {
+            step(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment, journey.bedrooms) {
                 parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.rentIncludesBills }
             }
-            step("rent-includes-bills", journey.rentIncludesBills) {
+            step(RegisterPropertyStepId.RentIncludesBills.urlPathSegment, journey.rentIncludesBills) {
                 parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }

@@ -422,6 +422,16 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class RentIncludesBillsStep {
+        @Test
+        fun `Submitting with no rent included option selected returns an error`(page: Page) {
+            val rentIncludesBillsPage = navigator.skipToPropertyRegistrationRentIncludesBillsPage()
+            rentIncludesBillsPage.form.submit()
+            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select whether the rent includes bills")
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
