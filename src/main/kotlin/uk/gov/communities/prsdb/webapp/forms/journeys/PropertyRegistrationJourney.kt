@@ -524,7 +524,7 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "heading" to "forms.numberOfHouseholds.heading",
+                            "fieldSetHeading" to "forms.numberOfHouseholds.heading",
                             "label" to "forms.numberOfHouseholds.label",
                         ),
                     shouldDisplaySectionHeader = true,
