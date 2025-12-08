@@ -71,12 +71,19 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             // This is only set in application.yml
             val expectedFeatureFlags = expectedFeatureFlagsFromDefaultApplicationYaml
 
-            // This is set in application.yml with enabled=false and in application-integration.yml with enabled=true
             val expectedReleases =
                 listOf(
+                    // This is set in application.yml with enabled=false and in application-integration.yml with enabled=true
                     MockFeatureFlagConfig.createFeatureReleaseConfigModel(
                         name = "release-1-0",
                         enabled = true,
+                    ),
+                    // This is set in application.yml with enabled=true and in application-integration.yml with enabled=false.
+                    // The release dates are also set differently in each file.
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                        name = "release-with-strategy",
+                        enabled = false,
+                        strategyConfig = MockFeatureFlagConfig.createFlipStrategyConfigModel(releaseDate = LocalDate.of(2026, 6, 1)),
                     ),
                 )
 
@@ -146,6 +153,22 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
         }
 
         @Test
+        fun `afterPropertiesSet throws if names in featureFlagNamesList or releaseNamesList are missing from the YAML config`() {
+            val exception = assertThrows<IllegalStateException> { featureFlagConfigWithMockAllowedValues.afterPropertiesSet() }
+
+            assertTrue(
+                exception.message!!.contains(
+                    "Feature flag name $testFlagName must be included in the features.featureFlags list in the YAML config",
+                ),
+            )
+            assertTrue(
+                exception.message!!.contains(
+                    "Feature release name $testReleaseName must be included in the features.releases list in the YAML config",
+                ),
+            )
+        }
+
+        @Test
         fun `afterPropertiesSet includes all missing feature and release names in the error message`() {
             featureFlagConfigWithMockAllowedValues.featureFlags =
                 listOf(
@@ -176,6 +199,16 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             assertTrue(
                 exceptionMessage.contains(
                     "Feature release name unlisted-release-name must be added as a const val and included in featureFlagReleaseNames",
+                ),
+            )
+            assertTrue(
+                exception.message!!.contains(
+                    "Feature flag name $testFlagName must be included in the features.featureFlags list in the YAML config",
+                ),
+            )
+            assertTrue(
+                exception.message!!.contains(
+                    "Feature release name $testReleaseName must be included in the features.releases list in the YAML config",
                 ),
             )
         }

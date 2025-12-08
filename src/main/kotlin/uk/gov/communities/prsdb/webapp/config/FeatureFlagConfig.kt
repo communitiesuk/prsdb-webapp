@@ -32,22 +32,57 @@ class FeatureFlagConfig(
     override fun afterPropertiesSet() {
         var missingFlagOrReleaseMessage = ""
 
+        missingFlagOrReleaseMessage = addFeaturesMissingFromFeatureFlagNamesList(missingFlagOrReleaseMessage)
+        missingFlagOrReleaseMessage = addReleasesMissingFromReleaseNamesList(missingFlagOrReleaseMessage)
+        missingFlagOrReleaseMessage = addFeaturesMissingFromYamlConfig(missingFlagOrReleaseMessage)
+        missingFlagOrReleaseMessage = addReleasesMissingFromYamlConfig(missingFlagOrReleaseMessage)
+
+        if (missingFlagOrReleaseMessage.isNotEmpty()) {
+            throw IllegalStateException(missingFlagOrReleaseMessage.trim())
+        }
+    }
+
+    private fun addFeaturesMissingFromFeatureFlagNamesList(errorMessage: String): String {
+        var missingFlagOrReleaseMessage = errorMessage
         featureFlags.forEach { feature ->
             if (feature.name !in featureFlagNamesList) {
                 missingFlagOrReleaseMessage +=
                     "Feature flag name ${feature.name} must be added as a const val and included in featureFlagNames \n"
             }
         }
+        return missingFlagOrReleaseMessage
+    }
 
+    private fun addReleasesMissingFromReleaseNamesList(errorMessage: String): String {
+        var missingFlagOrReleaseMessage = errorMessage
         releases.forEach { release ->
             if (release.name !in releaseNamesList) {
                 missingFlagOrReleaseMessage +=
                     "Feature release name ${release.name} must be added as a const val and included in featureFlagReleaseNames \n"
             }
         }
+        return missingFlagOrReleaseMessage
+    }
 
-        if (missingFlagOrReleaseMessage.isNotEmpty()) {
-            throw IllegalStateException(missingFlagOrReleaseMessage.trim())
+    private fun addFeaturesMissingFromYamlConfig(errorMessage: String): String {
+        var missingFlagOrReleaseMessage = errorMessage
+        featureFlagNamesList.forEach { featureName ->
+            if (featureFlags.none { it.name == featureName }) {
+                missingFlagOrReleaseMessage +=
+                    "Feature flag name $featureName must be included in the features.featureFlags list in the YAML config \n"
+            }
         }
+        return missingFlagOrReleaseMessage
+    }
+
+    private fun addReleasesMissingFromYamlConfig(errorMessage: String): String {
+        var missingFlagOrReleaseMessage = errorMessage
+        releaseNamesList.forEach { releaseName ->
+            if (releases.none { it.name == releaseName }) {
+                missingFlagOrReleaseMessage +=
+                    "Feature release name $releaseName must be included in the features.releases list in the YAML config \n"
+            }
+        }
+        return missingFlagOrReleaseMessage
     }
 }
