@@ -21,7 +21,7 @@ abstract class NumberOfBedroomsFormBasePage(
 
     fun submitNumOfBedrooms(num: Int) = submitNumOfBedrooms(num.toString())
 
-    private fun submitNumOfBedrooms(num: String) {
+    fun submitNumOfBedrooms(num: String) {
         form.numberOfBedroomsInput.fill(num)
         form.submit()
     }
