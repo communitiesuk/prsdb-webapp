@@ -46,6 +46,8 @@ class BillsIncludedFormModel : FormModel {
     )
     var customBillsIncluded: String = ""
 
+    var billsIncluded: String = ""
+
     fun notAllFalse(): Boolean =
         !(
             gas || electricity || water || councilTax || contentsInsurance ||
