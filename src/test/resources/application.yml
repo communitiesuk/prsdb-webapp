@@ -71,3 +71,4 @@ features:
       enabled: true
       strategy-config:
         release-date: "2025-06-01"
+        enabled-by-strategy: true

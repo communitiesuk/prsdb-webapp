@@ -76,4 +76,26 @@ class FeatureFlagConfigUpdater(
         // Using reflection to update the private property 'enabledByStrategy'
         ReflectionTestUtils.setField(flippingStrategy, "enabledByStrategy", enabledByStrategy)
     }
+
+    fun updateReleaseReleaseDate(
+        releaseName: String,
+        newReleaseDate: LocalDate,
+    ) {
+        val featuresInRelease = featureFlagManager.getFeaturesByGroup(releaseName)
+
+        featuresInRelease.forEach { (_, feature) ->
+            updateFeatureReleaseDate(feature.uid, newReleaseDate)
+        }
+    }
+
+    fun updateReleaseEnabledByStrategy(
+        releaseName: String,
+        enabledByStrategy: Boolean,
+    ) {
+        val featuresInRelease = featureFlagManager.getFeaturesByGroup(releaseName)
+
+        featuresInRelease.forEach { (_, feature) ->
+            updateFeatureEnabledByStrategy(feature.uid, enabledByStrategy)
+        }
+    }
 }

@@ -80,6 +80,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFlaggedServiceTestPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFourDisabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFourEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeDisabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
@@ -1326,6 +1328,16 @@ class Navigator(
     fun goToFeatureFlagThreeDisabledPage(): FeatureThreeDisabledPage {
         navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
         return createValidPage(page, FeatureThreeDisabledPage::class)
+    }
+
+    fun goToFeatureFlagFourEnabledPage(): FeatureFourEnabledPage {
+        navigate(ExampleFeatureFlagTestController.FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
+        return createValidPage(page, FeatureFourEnabledPage::class)
+    }
+
+    fun goToFeatureFlagFourDisabledPage(): FeatureFourDisabledPage {
+        navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
+        return createValidPage(page, FeatureFourDisabledPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")

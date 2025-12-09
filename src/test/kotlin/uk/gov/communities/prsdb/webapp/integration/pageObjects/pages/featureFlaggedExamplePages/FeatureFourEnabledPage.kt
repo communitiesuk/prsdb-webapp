@@ -5,4 +5,4 @@ import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestControl
 
 class FeatureFourEnabledPage(
     page: Page,
-) : FeatureFlaggedEndpointBasePage(page, ExampleFeatureFlagTestController.FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+) : FeatureFlaggedEndpointBasePage(page, ExampleFeatureFlagTestController.FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)

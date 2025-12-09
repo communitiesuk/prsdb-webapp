@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
 import uk.gov.communities.prsdb.webapp.constants.RELEASE_1_0
+import uk.gov.communities.prsdb.webapp.constants.RELEASE_WITH_STRATEGY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import java.time.LocalDate
@@ -135,10 +136,68 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
 
     @Nested
     inner class FeatureReleaseWithFlipStrategyTests {
-        // TODO PRSD-1647 - add tests for one of the endpoints in a release with a flip strategy - updated releaseDate to past date and future date
-        //    - Can we write a helper that will get in and update the release date - the CombinedFlipStrategy includes the list of all strategies
-        //      so should be able to get into and do the setReleaseDate
-        //    - We might actually want to be able to update the whole config so we can see the interaction? Whole config is how it will be set for real...
+        @BeforeEach
+        fun resetFeatureFlagConfigToEnableRelease() {
+            featureFlagManager.enableFeatureRelease(RELEASE_WITH_STRATEGY)
+            featureFlagConfigUpdater.updateReleaseReleaseDate(
+                RELEASE_WITH_STRATEGY,
+                LocalDate.now().minusWeeks(5),
+            )
+            featureFlagConfigUpdater.updateReleaseEnabledByStrategy(
+                RELEASE_WITH_STRATEGY,
+                true,
+            )
+        }
+
+        @Test
+        fun `feature in release is enabled if the release date is in the past`() {
+            // Setup release configuration with flip strategy release date in the past
+            featureFlagConfigUpdater.updateReleaseReleaseDate(
+                RELEASE_WITH_STRATEGY,
+                LocalDate.now().minusWeeks(5),
+            )
+
+            val featureEnabledPage = navigator.goToFeatureFlagFourEnabledPage()
+
+            assertThat(featureEnabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is ENABLED")
+        }
+
+        @Test
+        fun `feature in release is disabled if the release date is in the future`() {
+            // Setup release configuration with flip strategy release date in the future
+            featureFlagConfigUpdater.updateReleaseReleaseDate(
+                RELEASE_WITH_STRATEGY,
+                LocalDate.now().plusWeeks(5),
+            )
+
+            val featureDisabledPage = navigator.goToFeatureFlagFourDisabledPage()
+
+            assertThat(featureDisabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is DISABLED")
+        }
+
+        @Test
+        fun `feature in release is enabled if enabled by the flip strategy`() {
+            featureFlagConfigUpdater.updateReleaseEnabledByStrategy(
+                RELEASE_WITH_STRATEGY,
+                true,
+            )
+
+            val featureEnabledPage = navigator.goToFeatureFlagFourEnabledPage()
+
+            assertThat(featureEnabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is ENABLED")
+        }
+
+        @Test
+        fun `feature in release is disabled if disabled by the flip strategy`() {
+            featureFlagConfigUpdater.updateReleaseEnabledByStrategy(
+                RELEASE_WITH_STRATEGY,
+                false,
+            )
+
+            val featureDisabledPage = navigator.goToFeatureFlagFourDisabledPage()
+
+            assertThat(featureDisabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is DISABLED")
+        }
     }
 
     @Nested
