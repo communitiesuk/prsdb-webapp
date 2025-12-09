@@ -42,6 +42,10 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.rentIncludesBills) {
                 routeSegment("rent-includes-bills")
                 parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
+                nextStep { journey.billsIncluded }
+            }
+            step("bills-included", journey.billsIncluded) {
+                parents { journey.rentIncludesBills.hasOutcome(YesOrNo.YES) }
                 nextStep { exitStep }
             }
             exitStep {
