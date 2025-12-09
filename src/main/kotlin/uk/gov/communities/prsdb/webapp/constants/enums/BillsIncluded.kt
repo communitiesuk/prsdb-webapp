@@ -11,4 +11,5 @@ enum class BillsIncluded {
     CABLE_OR_SATELLITE_TV,
     GARDENING,
     CLEANER_FOR_COMMUNAL_AREAS,
+    SOMETHING_ELSE,
 }
