@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
@@ -75,6 +76,7 @@ class PrsdbProcessApplicationTests {
                 TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
+                FeatureFlipStrategyInitialiser::class.simpleBeanName,
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
