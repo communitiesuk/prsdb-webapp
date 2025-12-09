@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
@@ -46,11 +47,22 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
     inner class IndividualFeatureWithFlipStrategyTests {
         // EXAMPLE_FEATURE_FLAG_TWO is part of RELEASE_1_0, so we need to enable the release first
         // RELEASE_1_0 has no other strategy configured, so the feature-specific flip strategy will be used
+        @BeforeEach
+        fun resetFeatureFlagConfigToEnableFeature() {
+            featureFlagManager.enableFeatureRelease(RELEASE_1_0)
+            featureFlagConfigUpdater.updateFeatureReleaseDate(
+                EXAMPLE_FEATURE_FLAG_TWO,
+                LocalDate.now().minusWeeks(5),
+            )
+        }
+
         @Test
         fun `feature is enabled if the release date is in the past`() {
             // Setup feature configuration with flip strategy release date in the past
-            featureFlagManager.enableFeatureRelease(RELEASE_1_0)
-            featureFlagConfigUpdater.updateFeatureReleaseDate(EXAMPLE_FEATURE_FLAG_TWO, LocalDate.now().minusWeeks(5))
+            featureFlagConfigUpdater.updateFeatureReleaseDate(
+                EXAMPLE_FEATURE_FLAG_TWO,
+                LocalDate.now().minusWeeks(5),
+            )
 
             val featureEnabledPage = navigator.goToFeatureFlagTwoEnabledPage()
 
@@ -60,8 +72,34 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
         @Test
         fun `feature is disabled if the release date is in the future`() {
             // Setup feature configuration with flip strategy release date in the future
-            featureFlagManager.enableFeatureRelease(RELEASE_1_0)
-            featureFlagConfigUpdater.updateFeatureReleaseDate(EXAMPLE_FEATURE_FLAG_TWO, LocalDate.now().plusWeeks(5))
+            featureFlagConfigUpdater.updateFeatureReleaseDate(
+                EXAMPLE_FEATURE_FLAG_TWO,
+                LocalDate.now().plusWeeks(5),
+            )
+
+            val featureDisabledPage = navigator.goToFeatureFlagTwoDisabledPage()
+
+            assertThat(featureDisabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is DISABLED")
+        }
+
+        @Test
+        fun `feature is enabled if enabled by the flip strategy`() {
+            featureFlagConfigUpdater.updateFeatureEnabledByStrategy(
+                EXAMPLE_FEATURE_FLAG_TWO,
+                true,
+            )
+
+            val featureEnabledPage = navigator.goToFeatureFlagTwoEnabledPage()
+
+            assertThat(featureEnabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is ENABLED")
+        }
+
+        @Test
+        fun `feature is disabled if disabled by the flip strategy`() {
+            featureFlagConfigUpdater.updateFeatureEnabledByStrategy(
+                EXAMPLE_FEATURE_FLAG_TWO,
+                false,
+            )
 
             val featureDisabledPage = navigator.goToFeatureFlagTwoDisabledPage()
 

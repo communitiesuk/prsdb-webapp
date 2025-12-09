@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.testHelpers
 
 import org.ff4j.core.FlippingStrategy
 import org.ff4j.strategy.time.ReleaseDateFlipStrategy
+import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.flipStrategies.BooleanFlipStrategy
 import uk.gov.communities.prsdb.webapp.config.flipStrategies.CombinedFlipStrategy
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -40,5 +42,38 @@ class FeatureFlagConfigUpdater(
             throw IllegalArgumentException("Provided flipping strategy is not a ReleaseDateFlipStrategy")
         }
         flippingStrategy.setReleaseDate(DateTimeHelper.getJavaDateFromLocalDate(newReleaseDate))
+    }
+
+    fun updateFeatureEnabledByStrategy(
+        featureName: String,
+        enabledByStrategy: Boolean,
+    ) {
+        val feature =
+            featureFlagManager.features.get(featureName)
+                ?: throw IllegalArgumentException("Feature flag '$featureName' not found")
+
+        if (feature.flippingStrategy is CombinedFlipStrategy) {
+            val combinedStrategy = feature.flippingStrategy as CombinedFlipStrategy
+            (combinedStrategy.strategyList.find { it is BooleanFlipStrategy })
+                ?.let { updateFlippingStrategyEnabledByStrategy(it, enabledByStrategy) }
+                ?: throw IllegalArgumentException(
+                    "Feature flag '$featureName' does not have a BooleanFlipStrategy in its CombinedFlipStrategy",
+                )
+        } else if (feature.flippingStrategy is BooleanFlipStrategy) {
+            updateFlippingStrategyEnabledByStrategy(feature.flippingStrategy, enabledByStrategy)
+        } else {
+            throw IllegalArgumentException("Feature flag '$featureName' does not have a BooleanFlipStrategy")
+        }
+    }
+
+    private fun updateFlippingStrategyEnabledByStrategy(
+        flippingStrategy: FlippingStrategy,
+        enabledByStrategy: Boolean,
+    ) {
+        if (flippingStrategy !is BooleanFlipStrategy) {
+            throw IllegalArgumentException("Provided flipping strategy is not a BooleanFlipStrategy")
+        }
+        // Using reflection to update the private property 'enabledByStrategy'
+        ReflectionTestUtils.setField(flippingStrategy, "enabledByStrategy", enabledByStrategy)
     }
 }
