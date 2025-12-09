@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class AddressTask : Task<AddressState>() {
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
-            startingStep("lookup-address", journey.lookupStep) {
+            step("lookup-address", journey.lookupStep) {
                 nextStep { mode ->
                     when (mode) {
                         LookupAddressMode.ADDRESSES_FOUND -> journey.selectAddressStep
@@ -51,7 +51,7 @@ class AddressTask : Task<AddressState>() {
                 parents { journey.selectAddressStep.hasOutcome(SelectAddressMode.ADDRESS_ALREADY_REGISTERED) }
                 noNextDestination()
             }
-            step("local-authority", journey.localCouncilStep) {
+            step("local-council", journey.localCouncilStep) {
                 parents { journey.manualAddressStep.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }

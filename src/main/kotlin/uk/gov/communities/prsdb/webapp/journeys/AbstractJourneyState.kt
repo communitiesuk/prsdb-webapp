@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import kotlin.reflect.KProperty
@@ -22,15 +23,27 @@ abstract class AbstractJourneyState(
 
     override fun deleteJourney() = journeyStateService.deleteState()
 
+    private val propertyKeysInUse = mutableSetOf<String>()
+
     fun <TJourney : AbstractJourneyState, TProperty : Any> mutableDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
-    ) = MutableJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
+    ) = if (propertyKeysInUse.contains(propertyKey)) {
+        throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
+    } else {
+        propertyKeysInUse.add(propertyKey)
+        MutableJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
+    }
 
     fun <TJourney : AbstractJourneyState, TProperty : Any> requiredDelegate(
         propertyKey: String,
         serializer: KSerializer<TProperty>,
-    ) = RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
+    ) = if (propertyKeysInUse.contains(propertyKey)) {
+        throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
+    } else {
+        propertyKeysInUse.add(propertyKey)
+        RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer)
+    }
 
     class MutableJourneyStateDelegate<TJourney : JourneyState, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,

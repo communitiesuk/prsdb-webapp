@@ -8,15 +8,13 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
 abstract class Task<in TState : JourneyState> {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
-    lateinit var subJourneyParentage: Parentage
+        private set
     private lateinit var exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit
 
     fun getTaskSubJourneyBuilder(
         state: TState,
-        entryPoint: Parentage,
         exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
     ): BuildableElement {
-        this.subJourneyParentage = entryPoint
         this.exitInit = exitInit
         return makeSubJourney(state)
     }
@@ -30,7 +28,6 @@ abstract class Task<in TState : JourneyState> {
         }
         val localSubJourneyBuilder = SubJourneyBuilder(state)
         subJourneyBuilder = localSubJourneyBuilder
-        localSubJourneyBuilder.subJourneyParent(subJourneyParentage)
         localSubJourneyBuilder.init()
         localSubJourneyBuilder.exitStep(exitInit)
         return localSubJourneyBuilder

@@ -22,8 +22,11 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -78,6 +81,8 @@ class FooJourneyState(
     override val occupied: OccupiedStep,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
+    override val bedrooms: BedroomsStep,
+    override val rentIncludesBills: RentIncludesBillsStep,
     override val epcQuestion: EpcQuestionStep,
     override val checkAutomatchedEpc: CheckEpcStep,
     override val searchForEpc: SearchEpcStep,
@@ -89,7 +94,7 @@ class FooJourneyState(
     val occupationTask: OccupationTask,
     val epcTask: EpcTask,
 ) : AbstractJourneyState(journeyStateService),
-    OccupiedJourneyState,
+    OccupationState,
     EpcJourneyState {
     override var automatchedEpc: EpcDataModel? by mutableDelegate("automatchedEpc", serializer())
     override var searchedEpc: EpcDataModel? by mutableDelegate("searchedEpc", serializer())

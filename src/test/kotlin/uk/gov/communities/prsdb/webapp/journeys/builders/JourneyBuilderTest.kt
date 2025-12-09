@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
-import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -38,8 +37,7 @@ class SubJourneyBuilderTests {
         val subJourneyBuilder = SubJourneyBuilder(mock())
         val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
-        subJourneyBuilder.subJourneyParent(NoParents())
-        subJourneyBuilder.startingStep(
+        subJourneyBuilder.step(
             "segment",
             step,
         ) {
@@ -74,10 +72,12 @@ class SubJourneyBuilderTests {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
         val exitStep = subJourneyBuilder.exitStep
-        subJourneyBuilder.subJourneyParent(NoParents())
 
         val step = StepInitialiserTests.mockInitialisableStep()
-        subJourneyBuilder.startingStep("segment", step) { nextUrl { "url" } }
+        subJourneyBuilder.step("segment", step) {
+            nextUrl { "url" }
+            parents { NoParents() }
+        }
 
         val parent = NoParents()
 
@@ -97,7 +97,7 @@ class SubJourneyBuilderTests {
     }
 
     @Test
-    fun `If no starting step is set, then getSteps throws as exception`() {
+    fun `If no steps is set, then getSteps throws as exception`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
         subJourneyBuilder.exitStep {
@@ -111,13 +111,12 @@ class SubJourneyBuilderTests {
     }
 
     @Test
-    fun `If a starting step has already been set, then setting it again throws as exception`() {
+    fun `If a step has already been configured, then setting it again throws as exception`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
         val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
-        subJourneyBuilder.subJourneyParent(NoParents())
-        subJourneyBuilder.startingStep(
+        subJourneyBuilder.step(
             "segment",
             step,
         ) {
@@ -125,97 +124,37 @@ class SubJourneyBuilderTests {
         }
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> {
-            subJourneyBuilder.startingStep(
-                "segment2",
-                mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>(),
-            ) {
-                nextUrl { "url" }
-            }
-        }
-    }
-
-    @Test
-    fun `startingStep sets the first step of the sub-journey`() {
-        // Arrange
-        val subJourneyBuilder = SubJourneyBuilder(mock())
-        val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
-        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
-        subJourneyBuilder.subJourneyParent(NoParents())
-
-        // Act
-        subJourneyBuilder.startingStep(
-            "segment",
+        subJourneyBuilder.step(
+            "segment2",
             step,
         ) {
             nextUrl { "url" }
         }
+    }
+
+    @Test
+    fun `step sets the first step of the sub-journey`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val step = StepInitialiserTests.mockInitialisableStep()
+
+        // Act
+        subJourneyBuilder.unreachableStepUrl { "url" }
+        subJourneyBuilder.step(
+            "segment",
+            step,
+        ) {
+            nextUrl { "url" }
+            parents { NoParents() }
+        }
+        subJourneyBuilder.exitStep {
+            parents { NoParents() }
+            noNextDestination()
+        }
+        subJourneyBuilder.build()
 
         // Assert
         assertSame(step, subJourneyBuilder.firstStep)
-    }
-
-    @Test
-    fun `subJourneyParent sets the parentage of the sub-journey first step`() {
-        // Arrange
-        val subJourneyBuilder = SubJourneyBuilder(mock())
-        val parentage = NoParents()
-
-        val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
-        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
-
-        mockConstruction(StepInitialiser::class.java) { mock, context ->
-        }.use { constructed ->
-            // Act
-            subJourneyBuilder.subJourneyParent(parentage)
-            subJourneyBuilder.startingStep(
-                "segment",
-                step,
-            ) {
-                nextUrl { "url" }
-            }
-
-            // Assert
-            constructed.constructed().first().let {
-                val captor = argumentCaptor<() -> Parentage>()
-                verify(it).parents(captor.capture())
-                assertSame(parentage, captor.firstValue())
-            }
-        }
-    }
-
-    @Test
-    fun `subJourneyParent cannot be called twice`() {
-        // Arrange
-        val subJourneyBuilder = SubJourneyBuilder(mock())
-        subJourneyBuilder.subJourneyParent(NoParents())
-
-        // Act & Assert
-        assertThrows<JourneyInitialisationException> {
-            subJourneyBuilder.subJourneyParent(NoParents())
-        }
-    }
-
-    @Test
-    fun `If no subJourneyParentage is set, then startingStep throws an exception`() {
-        // Arrange
-        val subJourneyBuilder = SubJourneyBuilder(mock())
-
-        val step = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
-        whenever(step.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
-
-        mockConstruction(StepInitialiser::class.java) { mock, context ->
-        }.use { constructed ->
-            // Act & Assert
-            assertThrows<JourneyInitialisationException> {
-                subJourneyBuilder.startingStep(
-                    "segment",
-                    step,
-                ) {
-                    nextUrl { "url" }
-                }
-            }
-        }
     }
 }
 
@@ -359,13 +298,13 @@ class JourneyBuilderTest {
 
             // Act 1
             jb.step("segment", uninitialisedStep) {
-                backUrl { "back" }
+                backDestination { Destination.ExternalUrl("backLink") }
                 stepSpecificInitialisation { }
             }
 
             // Assert 1
             val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
-            verify(mockStepInitialiser).backUrl(any())
+            verify(mockStepInitialiser).backDestination(any())
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2
@@ -413,13 +352,13 @@ class JourneyBuilderTest {
 
             // Act 1
             jb.notionalStep(uninitialisedStep) {
-                backUrl { "back" }
+                backDestination { Destination.ExternalUrl("backLink") }
                 stepSpecificInitialisation { }
             }
 
             // Assert 1
             val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
-            verify(mockStepInitialiser).backUrl(any())
+            verify(mockStepInitialiser).backDestination(any())
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2
@@ -551,6 +490,78 @@ class JourneyBuilderTest {
             assertTrue(capturedDestinationsOverwritten[0])
             assertFalse(capturedDestinationsOverwritten[1])
             assertTrue(capturedDestinationsOverwritten[2])
+        }
+
+        @Test
+        fun `configureFirst applies configuration to the first step only`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val step1 = StepInitialiserTests.mockInitialisableStep()
+            val step2 = StepInitialiserTests.mockInitialisableStep()
+            val step3 = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.step("segment1", step1) {
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step("segment2", step2) {
+                parents { NoParents() }
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step("segment3", step3) {
+                parents { NoParents() }
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+
+            jb.configureFirst {
+                modifyNextDestination { { Destination.ExternalUrl("configured") } }
+            }
+
+            jb.buildRoutingMap()
+
+            // Assert
+            val nextDestinationCaptor = argumentCaptor<(TestEnum) -> Destination>()
+            verify(step1).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step2).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step3).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+
+            val capturedDestinationsOverwritten =
+                nextDestinationCaptor.allValues.map {
+                    val destination = it(TestEnum.ENUM_VALUE)
+                    destination is Destination.ExternalUrl &&
+                        destination.externalUrl == "configured"
+                }
+            assertTrue(capturedDestinationsOverwritten[0])
+            assertFalse(capturedDestinationsOverwritten[1])
+            assertFalse(capturedDestinationsOverwritten[2])
         }
     }
 }

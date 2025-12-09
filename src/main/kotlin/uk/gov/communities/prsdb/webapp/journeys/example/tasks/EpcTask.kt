@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class EpcTask : Task<EpcJourneyState>() {
     override fun makeSubJourney(state: EpcJourneyState) =
         subJourney(state) {
-            startingStep("has-epc", journey.epcQuestion) {
+            step("has-epc", journey.epcQuestion) {
                 nextStep { mode ->
                     when (mode) {
                         EpcStatus.AUTOMATCHED -> journey.checkAutomatchedEpc

@@ -3,21 +3,24 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -28,16 +31,21 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Manua
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
+import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -58,45 +66,37 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
-                    taggedWith("checkable")
+                    checkable()
                 }
                 step("property-type", journey.propertyTypeStep) {
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
-                    taggedWith("checkable")
+                    checkable()
                 }
                 step("ownership-type", journey.ownershipTypeStep) {
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
-                    taggedWith("checkable")
+                    checkable()
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
-                    taggedWith("checkable")
+                    checkable()
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.cyaStep }
-                    taggedWith("checkable")
+                    checkable()
                 }
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
-                step("check-your-answers", journey.cyaStep) {
+                step("check-answers", journey.cyaStep) {
                     parents { journey.occupationTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
-            configureTagged("checkable") {
-                modifyNextDestination { originalDestinationProvider ->
-                    if (state.cyaStep.isStepReachable) {
-                        { Destination(state.cyaStep) }
-                    } else {
-                        originalDestinationProvider
-                    }
-                }
-            }
+            checkYourAnswersJourney()
         }
     }
 
@@ -124,13 +124,16 @@ class PropertyRegistrationJourneyState(
     override val occupied: OccupiedStep,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
+    override val bedrooms: BedroomsStep,
+    override val rentIncludesBills: RentIncludesBillsStep,
     val occupationTask: OccupationTask,
-    val cyaStep: PropertyRegistrationCheckAnswersStep,
+    override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
     private val journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
     LicensingState,
-    OccupiedJourneyState {
+    OccupationState,
+    CheckYourAnswersJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
     override var isAddressAlreadyRegistered: Boolean? by mutableDelegate("isAddressAlreadyRegistered", serializer())
 
@@ -143,6 +146,21 @@ class PropertyRegistrationJourneyState(
     }
 
     fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
+
+    override var cyaChildJourneyId: String? by mutableDelegate("cyaChildJourneyId", serializer())
+        private set
+
+    override val baseJourneyId: String
+        get() = journeyStateService.journeyMetadata.baseJourneyId ?: journeyStateService.journeyId
+
+    override val isCheckingAnswers: Boolean
+        get() = journeyStateService.journeyMetadata.childJourneyName != null
+
+    fun initialiseCyaChildJourney() {
+        val newId = generateJourneyId(SecurityContextHolder.getContext().authentication)
+        journeyStateService.initialiseChildJourney(newId, "checkYourAnswers")
+        cyaChildJourneyId = newId
+    }
 
     companion object {
         fun generateJourneyId(user: Principal): String =

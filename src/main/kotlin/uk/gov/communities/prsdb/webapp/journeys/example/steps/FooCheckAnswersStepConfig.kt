@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.example.OccupiedJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -28,7 +28,7 @@ class FooCheckAnswersStepConfig(
             "summaryListData" to getOccupationRows(state) + getEpcStatusRow(state),
         )
 
-    private fun getOccupationRows(state: OccupiedJourneyState): List<SummaryListRowViewModel> {
+    private fun getOccupationRows(state: OccupationState): List<SummaryListRowViewModel> {
         val occupiedStep = state.occupied
         return if (occupiedStep?.formModelOrNull?.occupied == true) {
             val householdsStep = state.households

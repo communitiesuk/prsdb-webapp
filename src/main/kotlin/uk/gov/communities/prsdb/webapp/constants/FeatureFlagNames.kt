@@ -16,6 +16,8 @@ const val EXAMPLE_FEATURE_FLAG_TWO = "example-feature-flag-two"
 
 const val EXAMPLE_FEATURE_FLAG_THREE = "example-feature-flag-three"
 
+const val EXAMPLE_FEATURE_FLAG_FOUR = "example-feature-flag-four"
+
 const val FAILOVER_TEST_ENDPOINTS = "failover-test-endpoints"
 
 val featureFlagNames =
@@ -23,5 +25,6 @@ val featureFlagNames =
         EXAMPLE_FEATURE_FLAG_ONE,
         EXAMPLE_FEATURE_FLAG_TWO,
         EXAMPLE_FEATURE_FLAG_THREE,
+        EXAMPLE_FEATURE_FLAG_FOUR,
         FAILOVER_TEST_ENDPOINTS,
     )
