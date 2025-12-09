@@ -63,7 +63,7 @@ features:
       release: "release-with-strategy"
     - name: "failover-test-endpoints"
       enabled: true
-      expiry-date: "2025-12-31"
+      expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
       enabled: false
