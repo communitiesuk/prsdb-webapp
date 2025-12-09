@@ -80,6 +80,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFlaggedServiceTestPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -1298,9 +1300,19 @@ class Navigator(
         return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
     }
 
-    fun goToFeatureFlaggedServiceTestUrlRoute(): FeatureFlaggedServiceTestPage {
+    fun goToFeatureFlaggedServiceTestPage(): FeatureFlaggedServiceTestPage {
         navigate(ExampleFeatureFlagTestController.FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE)
         return createValidPage(page, FeatureFlaggedServiceTestPage::class)
+    }
+
+    fun goToFeatureFlagTwoEnabledPage(): FeatureTwoEnabledPage {
+        navigate(ExampleFeatureFlagTestController.FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
+        return createValidPage(page, FeatureTwoEnabledPage::class)
+    }
+
+    fun goToFeatureFlagTwoDisabledPage(): FeatureTwoDisabledPage {
+        navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
+        return createValidPage(page, FeatureTwoDisabledPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
