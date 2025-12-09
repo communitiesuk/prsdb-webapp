@@ -7,6 +7,8 @@ import uk.gov.communities.prsdb.webapp.config.flipStrategies.BooleanFlipStrategy
 import uk.gov.communities.prsdb.webapp.config.flipStrategies.CombinedFlipStrategy
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
 import java.time.LocalDate
 
 class FeatureFlagConfigUpdater(
@@ -97,5 +99,14 @@ class FeatureFlagConfigUpdater(
         featuresInRelease.forEach { (_, feature) ->
             updateFeatureEnabledByStrategy(feature.uid, enabledByStrategy)
         }
+    }
+
+    fun reinitialiseFeatures(
+        featureFlags: List<FeatureFlagConfigModel>,
+        featureReleases: List<FeatureReleaseConfigModel> = emptyList(),
+    ) {
+        featureFlagManager.featureStore.clear()
+        featureFlagManager.initializeFeatureFlags(featureFlags)
+        featureFlagManager.initialiseFeatureReleases(featureReleases)
     }
 }

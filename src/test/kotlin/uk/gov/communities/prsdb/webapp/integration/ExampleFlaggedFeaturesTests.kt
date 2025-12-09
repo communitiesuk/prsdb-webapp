@@ -3,12 +3,16 @@ package uk.gov.communities.prsdb.webapp.integration
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_FOUR
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
+import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_THREE
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
+import uk.gov.communities.prsdb.webapp.constants.FAILOVER_TEST_ENDPOINTS
 import uk.gov.communities.prsdb.webapp.constants.RELEASE_1_0
 import uk.gov.communities.prsdb.webapp.constants.RELEASE_WITH_STRATEGY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import java.time.LocalDate
 import kotlin.test.Test
 
@@ -201,16 +205,50 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
     }
 
     @Nested
-    inner class MultipleFeaturesInteractionTests {
-        // TODO PRSD-1647 - add tests for interaction between multiple features
-        //  - e.g. feature flagged endpoint calling feature flagged service
-        //  - e.g. feature flagged service calling another feature flagged service
-        //  - e.g. feature flagged service calling another feature flagged service that's in a release with a flip strategy
-        //
-        // Do we want a helper file?
-        // Do we update the whole config for this?  Probably but don't necessarily want to pass in the whole config each time, maybe a helper can update either everything or one value...
-        // How - do we pass in the whole config? O
-        //
-        // May not actually need to add a complex example, but add an example of updating the whole config that can be used if needed.
+    inner class ReinitialiseConfigTests {
+        // If making several changes to the feature flag configuration compared to the default loaded from application.yml, it may be easier to
+        // reinitialise the whole config.
+        @BeforeEach
+        fun reinitialiseFeatureFlagConfig() {
+            val featureFlags =
+                listOf(
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(name = EXAMPLE_FEATURE_FLAG_ONE),
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(name = EXAMPLE_FEATURE_FLAG_TWO, release = RELEASE_1_0),
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(name = EXAMPLE_FEATURE_FLAG_THREE, release = RELEASE_1_0),
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(name = EXAMPLE_FEATURE_FLAG_FOUR, release = RELEASE_WITH_STRATEGY),
+                    MockFeatureFlagConfig.createFeatureFlagConfigModel(name = FAILOVER_TEST_ENDPOINTS),
+                )
+
+            val featureReleases =
+                listOf(
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(name = RELEASE_1_0, enabled = true),
+                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                        name = RELEASE_WITH_STRATEGY,
+                        enabled = true,
+                        strategyConfig =
+                            MockFeatureFlagConfig.createFlipStrategyConfigModel(
+                                releaseDate = LocalDate.now().plusWeeks(2),
+                            ),
+                    ),
+                )
+
+            featureFlagConfigUpdater.reinitialiseFeatures(featureFlags, featureReleases)
+        }
+
+        @Test
+        fun `Features in release-1-0 are enabled`() {
+            val featureTwoEnabledPage = navigator.goToFeatureFlagTwoEnabledPage()
+            assertThat(featureTwoEnabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is ENABLED")
+
+            val featureThreeEnabledPage = navigator.goToFeatureFlagThreeEnabledPage()
+            assertThat(featureThreeEnabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is ENABLED")
+        }
+
+        @Test
+        fun `Feature in release-with-strategy is disabled due to future release date`() {
+            val featureFourDisabledPage = navigator.goToFeatureFlagFourDisabledPage()
+            assertThat(featureFourDisabledPage.heading)
+                .containsText("Feature flagged controller endpoint - available when flag is DISABLED")
+        }
     }
 }
