@@ -14,10 +14,12 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.config.FF4JConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
+import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
@@ -31,7 +33,6 @@ import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.importedBeanName
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.scopedBeanName
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 
@@ -72,9 +73,11 @@ class PrsdbProcessApplicationTests {
                 VirusAlertSender::class.simpleBeanName,
                 OsDownloadsConfig::class.simpleBeanName,
                 NotifyIdService::class.scopedBeanName,
-                TestcontainersConfiguration::class.importedBeanName,
+                TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
-                FF4JConfig::class.simpleBeanName,
+                FeatureFlagConfig::class.simpleBeanName,
+                FeatureFlipStrategyInitialiser::class.simpleBeanName,
+                PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

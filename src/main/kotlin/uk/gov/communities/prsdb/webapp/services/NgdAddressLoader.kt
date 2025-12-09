@@ -10,7 +10,7 @@ import org.json.JSONObject
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
@@ -25,12 +25,12 @@ import java.util.zip.ZipInputStream
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
-    localAuthorityRepository: LocalAuthorityRepository,
+    localCouncilRepository: LocalCouncilRepository,
     environment: Environment,
 ) {
     private lateinit var ngdAddressLoaderRepository: NgdAddressLoaderRepository
 
-    private val localAuthorityCustodianCodeToId by lazy { localAuthorityRepository.findAll().associate { it.custodianCode to it.id } }
+    private val localCouncilCustodianCodeToId by lazy { localCouncilRepository.findAll().associate { it.custodianCode to it.id } }
 
     private val isLocalEnvironment by lazy { environment.activeProfiles.contains("local") }
 
@@ -154,6 +154,7 @@ class NgdAddressLoader(
                     }
                 }
             }
+            updatePropertyOwnershipAddresses()
             setStoredDataPackageVersionId(dataPackageVersionId)
             transaction.commit()
         } catch (exception: Exception) {
@@ -181,15 +182,15 @@ class NgdAddressLoader(
             }
 
         val custodianCode = csvRecord.get("localcustodiancode")
-        val localAuthorityId =
+        val localCouncilId =
             // We only keep English LA records
             // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LA
             if (country != "England" || custodianCode == "7655") {
                 null
             } else {
-                localAuthorityCustodianCodeToId[custodianCode]
+                localCouncilCustodianCodeToId[custodianCode]
                 // TODO PRSD-1643: Handle addresses in England with non-English custodian codes
-                // ?: throw EntityNotFoundException("No local authority with custodian code $custodianCode found")
+                // ?: throw EntityNotFoundException("No local council with custodian code $custodianCode found")
             }
 
         preparedStatement.setLong(1, csvRecord.get("uprn").toLong())
@@ -202,11 +203,17 @@ class NgdAddressLoader(
         preparedStatement.setStringOrNull(8, csvRecord.get("locality"))
         preparedStatement.setStringOrNull(9, csvRecord.get("townname"))
         preparedStatement.setString(10, csvRecord.get("postcode"))
-        preparedStatement.setIntOrNull(11, localAuthorityId)
+        preparedStatement.setIntOrNull(11, localCouncilId)
         preparedStatement.setBoolean(12, isAddressActive)
 
         preparedStatement.addBatch()
         return true
+    }
+
+    private fun updatePropertyOwnershipAddresses() {
+        log("Starting to update property ownership addresses")
+        ngdAddressLoaderRepository.updatePropertyOwnershipAddresses()
+        log("Property ownership addresses updated")
     }
 
     private fun deleteUnusedInactiveAddresses(session: StatelessSession) {

@@ -61,8 +61,8 @@ class PropertyDetailsViewModel(
                     addRow("propertyDetails.propertyRecord.uprn", "propertyDetails.propertyRecord.uprn.unavailable")
                 }
                 addRow(
-                    "propertyDetails.propertyRecord.localAuthority",
-                    propertyOwnership.address.localAuthority
+                    "propertyDetails.propertyRecord.localCouncil",
+                    propertyOwnership.address.localCouncil
                         ?.name,
                 )
                 addRow(

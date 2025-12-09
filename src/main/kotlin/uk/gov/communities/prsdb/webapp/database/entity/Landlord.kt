@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import java.time.LocalDate
@@ -64,6 +65,10 @@ class Landlord() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     var hasRespondedToFeedback: Boolean = false
+
+    @OneToMany(mappedBy = "primaryLandlord", orphanRemoval = true)
+    lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
+        private set
 
     constructor(
         baseUser: OneLoginUser,

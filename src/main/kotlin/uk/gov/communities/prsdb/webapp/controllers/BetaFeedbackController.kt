@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
@@ -39,16 +39,16 @@ class BetaFeedbackController(
         request: HttpServletRequest,
     ): String = renderFeedbackSuccess(model, request)
 
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
-    fun localAuthorityFeedback(
+    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
+    @GetMapping(LOCAL_COUNCIL_FEEDBACK_URL)
+    fun localCouncilFeedback(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedback(model, request)
 
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL)
-    fun localAuthorityFeedbackSuccess(
+    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
+    @GetMapping(LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL)
+    fun localCouncilFeedbackSuccess(
         model: Model,
         request: HttpServletRequest,
     ): String = renderFeedbackSuccess(model, request)
@@ -68,9 +68,9 @@ class BetaFeedbackController(
             LANDLORD_FEEDBACK_SUCCESS_URL,
         )
 
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @PostMapping(LOCAL_AUTHORITY_FEEDBACK_URL)
-    fun submitLocalAuthorityFeedback(
+    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
+    @PostMapping(LOCAL_COUNCIL_FEEDBACK_URL)
+    fun submitLocalCouncilFeedback(
         @Valid @ModelAttribute("formModel") betaFeedbackModel: BetaFeedbackModel,
         bindingResult: BindingResult,
         model: Model,
@@ -81,7 +81,7 @@ class BetaFeedbackController(
             bindingResult,
             model,
             request,
-            LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL,
+            LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL,
         )
 
     private fun renderFeedback(
@@ -134,9 +134,9 @@ class BetaFeedbackController(
     companion object {
         const val LANDLORD_FEEDBACK_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
         const val LANDLORD_FEEDBACK_SUCCESS_URL = "/${LANDLORD_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
-        const val LOCAL_AUTHORITY_FEEDBACK_URL = "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
-        const val LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL =
-            "/${LOCAL_AUTHORITY_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
+        const val LOCAL_COUNCIL_FEEDBACK_URL = "/${LOCAL_COUNCIL_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}"
+        const val LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL =
+            "/${LOCAL_COUNCIL_PATH_SEGMENT}/${FEEDBACK_PATH_SEGMENT}/${CONFIRMATION_PATH_SEGMENT}"
         const val FEEDBACK_URL = "/${FEEDBACK_PATH_SEGMENT}"
     }
 }

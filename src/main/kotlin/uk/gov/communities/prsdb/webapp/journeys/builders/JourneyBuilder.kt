@@ -4,60 +4,97 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.example.Destination
+import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
-class JourneyBuilder<TState : JourneyState>(
-    // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
-    val journey: TState,
-) {
-    private val stepsUnderConstruction: MutableList<StepInitialiser<*, TState, *>> = mutableListOf()
-    private var unreachableStepDestination: (() -> Destination)? = null
-
-    fun build(): Map<String, StepLifecycleOrchestrator> =
-        stepsUnderConstruction.associate { sb ->
-            sb.build(journey, unreachableStepDestination).let {
-                checkForUninitialisedParents(sb)
-                it.routeSegment to StepLifecycleOrchestrator(it)
-            }
-        }
-
+interface JourneyBuilderDsl<TState : JourneyState> {
     fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
         segment: String,
-        uninitialisedStep: JourneyStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-    ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep)
-        stepInitialiser.init()
-        stepsUnderConstruction.add(stepInitialiser)
-    }
+    )
 
-    fun unreachableStepUrl(getUrl: () -> String) {
-        if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("unreachableStepDestination has already been set")
-        }
-        unreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
-    }
+    fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
+        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
+        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    )
 
-    fun unreachableStepStep(getStep: () -> JourneyStep<*, *, *>) {
-        if (unreachableStepDestination != null) {
-            throw JourneyInitialisationException("unreachableStepDestination has already been set")
-        }
-        unreachableStepDestination = { Destination(getStep()) }
-    }
+    fun task(
+        uninitialisedTask: Task<TState>,
+        init: TaskInitialiser<TState>.() -> Unit,
+    )
+}
 
-    private fun checkForUninitialisedParents(stepInitialiser: StepInitialiser<*, *, *>) {
-        val uninitialisedParents =
-            stepInitialiser.potentialParents.filter {
-                it.initialisationStage != StepInitialisationStage.FULLY_INITIALISED
+open class JourneyBuilder<TState : JourneyState>(
+    // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
+    journey: TState,
+) : AbstractJourneyBuilder<TState>(journey) {
+    private val sections: MutableList<String> = mutableListOf()
+
+    fun buildRoutingMap(): Map<String, StepLifecycleOrchestrator> =
+        buildMap {
+            build().forEach { journeyStep ->
+                when (journeyStep) {
+                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
+                    is JourneyStep.InternalStep<*, *, *> -> {}
+                }
             }
-        if (uninitialisedParents.any()) {
-            val parentNames = uninitialisedParents.joinToString { "\n- $it" }
-            throw JourneyInitialisationException(
-                "Step ${stepInitialiser.segment} has uninitialised potential parents on initialisation: $parentNames\n" +
-                    "This could imply a dependency loop, or that these two steps are declared in the wrong order.",
-            )
+        }
+
+    fun section(init: SectionBuilder<TState>.() -> Unit) {
+        val sectionBuilder = SectionBuilder<TState>(this)
+        sectionBuilder.init()
+        sectionBuilder.validateHeadingSet()
+    }
+
+    class SectionBuilder<TState : JourneyState>(
+        private val journeyBuilder: JourneyBuilder<TState>,
+    ) : JourneyBuilderDsl<TState> {
+        private lateinit var headingMessageKey: String
+
+        fun withHeadingMessageKey(key: String) {
+            journeyBuilder.sections.add(key)
+            headingMessageKey = key
+        }
+
+        override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
+            segment: String,
+            uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
+            init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+        ) = journeyBuilder.step<TMode, TStep>(segment, uninitialisedStep) {
+            init()
+            withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
+        }
+
+        override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
+            uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
+            init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+        ) = journeyBuilder.notionalStep<TMode, TStep>(uninitialisedStep) {
+            init()
+            withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
+        }
+
+        override fun task(
+            uninitialisedTask: Task<TState>,
+            init: TaskInitialiser<TState>.() -> Unit,
+        ) = journeyBuilder.task(uninitialisedTask) {
+            init()
+            configure {
+                withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
+            }
+        }
+
+        private fun JourneyBuilder<*>.getSectionHeaderViewModel(headingMessageKey: String): SectionHeaderViewModel {
+            val sectionIndex = sections.indexOf(headingMessageKey) + 1
+            val totalSections = sections.size
+            return SectionHeaderViewModel(headingMessageKey, sectionIndex, totalSections)
+        }
+
+        fun validateHeadingSet() {
+            if (!::headingMessageKey.isInitialized || !journeyBuilder.sections.contains(headingMessageKey)) {
+                throw JourneyInitialisationException("Section heading message key must be set using withHeadingMessageKey")
+            }
         }
     }
 
@@ -68,7 +105,7 @@ class JourneyBuilder<TState : JourneyState>(
         ): Map<String, StepLifecycleOrchestrator> {
             val builder = JourneyBuilder(state)
             builder.init()
-            return builder.build()
+            return builder.buildRoutingMap()
         }
     }
 }

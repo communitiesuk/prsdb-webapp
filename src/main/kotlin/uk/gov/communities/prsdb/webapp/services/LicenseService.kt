@@ -20,21 +20,13 @@ class LicenseService(
             ),
         )
 
-    fun deleteLicense(license: License) {
-        licenseRepository.delete(license)
-    }
-
-    fun deleteLicenses(licenses: List<License>) {
-        licenseRepository.deleteAll(licenses)
-    }
-
     fun updateLicence(
         license: License?,
         updateLicenceType: LicensingType?,
         updateLicenceNumber: String?,
     ): License? =
         if (updateLicenceType == LicensingType.NO_LICENSING) {
-            license?.let { deleteLicense(license) }
+            license?.let { licenseRepository.delete(license) }
             null
         } else if (license == null) {
             createLicense(updateLicenceType!!, updateLicenceNumber!!)

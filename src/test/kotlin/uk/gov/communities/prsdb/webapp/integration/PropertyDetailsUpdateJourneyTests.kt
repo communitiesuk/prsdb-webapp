@@ -288,7 +288,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Update number of people
             val newNumberOfPeople = 3
-            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("How many people live in your property?")
+            assertThat(updateNumberOfPeoplePage.header).containsText("How many people live in your property?")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
             val checkOccupancyAnswersPage =
                 assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
@@ -325,7 +325,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Update number of people
             val newNumberOfPeople = 3
-            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
+            assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
             val checkOccupancyAnswersPage =
                 assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -353,7 +353,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Update number of people
             val newNumberOfPeople = 3
-            assertThat(updateNumberOfPeoplePage.form.fieldsetHeading).containsText("Update how many people live in your property")
+            assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
             val checkOccupancyAnswersPage =
                 assertPageIs(page, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)

@@ -2,16 +2,14 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusViewModel
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -28,16 +26,8 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
                     "propertyCompliance.taskList.upload.heading",
                     "upload-certificates",
                     listOf(
-                        TaskListItemViewModel(
-                            "OccupationTask",
-                            TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            url = JourneyStateService.urlWithJourneyState(state.occupied.routeSegment, state.journeyId),
-                        ),
-                        TaskListItemViewModel(
-                            "EpcTask",
-                            TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED),
-                            url = JourneyStateService.urlWithJourneyState(state.epcQuestion.routeSegment, state.journeyId),
-                        ),
+                        TaskListItemViewModel.fromTask("OccupationTask", state.occupationTask),
+                        TaskListItemViewModel.fromTask("OccupationTask", state.epcTask),
                     ),
                 ),
             )
@@ -59,4 +49,4 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
 @PrsdbWebComponent
 final class FooTaskListStep(
     stepConfig: FooTaskListStepConfig,
-) : JourneyStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)
+) : RequestableStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)

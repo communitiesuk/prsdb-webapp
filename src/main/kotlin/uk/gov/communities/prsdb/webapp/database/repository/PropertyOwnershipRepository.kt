@@ -1,16 +1,13 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.query.Param
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 // The underscore tells JPA to access fields relating to the referenced table
 @Suppress("ktlint:standard:function-naming")
-interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
+interface PropertyOwnershipRepository :
+    JpaRepository<PropertyOwnership, Long>,
+    PropertyOwnershipSearchRepository {
     fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 
     fun countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
@@ -26,83 +23,5 @@ interface PropertyOwnershipRepository : JpaRepository<PropertyOwnership, Long> {
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
-    @Query(
-        "SELECT po.* " +
-            "FROM property_ownership po " +
-            "JOIN registration_number r ON po.registration_number_id = r.id " +
-            "WHERE po.is_active AND r.number = :searchPRN " +
-            FILTERS,
-        nativeQuery = true,
-    )
-    fun searchMatchingPRN(
-        @Param("searchPRN") searchPRN: Long,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
-        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
-        pageable: Pageable,
-    ): Page<PropertyOwnership>
-
-    @Query(
-        "SELECT po.* " +
-            "FROM property_ownership po " +
-            "JOIN address a ON po.address_id = a.id " +
-            "WHERE po.is_active AND a.uprn = :searchUPRN " +
-            FILTERS,
-        nativeQuery = true,
-    )
-    fun searchMatchingUPRN(
-        @Param("searchUPRN") searchUPRN: Long,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
-        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
-        pageable: Pageable,
-    ): Page<PropertyOwnership>
-
-    @Query(
-        "SELECT po.* " +
-            "FROM property_ownership po " +
-            "JOIN address a ON po.address_id = a.id " +
-            "WHERE po.is_active AND a.single_line_address %> :searchTerm " +
-            FILTERS +
-            "ORDER BY a.single_line_address <->> :searchTerm",
-        nativeQuery = true,
-    )
-    fun searchMatching(
-        @Param("searchTerm") searchTerm: String,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
-        @Param("restrictToLicenses") restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
-        pageable: Pageable,
-    ): Page<PropertyOwnership>
-
-    companion object {
-        private const val NO_LICENCE_TYPE =
-            "#{T(uk.gov.communities.prsdb.webapp.constants.enums.LicensingType).NO_LICENSING}"
-
-        // Determines whether the property's address is in the LA user's LA
-        private const val LA_FILTER =
-            """
-            AND ((SELECT a.local_authority_id 
-                  FROM address a 
-                  WHERE po.address_id = a.id)
-                 =
-                 (SELECT la.id 
-                  FROM local_authority la
-                  JOIN local_authority_user lau ON la.id = lau.local_authority_id
-                  WHERE lau.subject_identifier = :laUserBaseId)
-                 OR NOT :restrictToLA) 
-            """
-
-        private const val LICENSE_FILTER =
-            """
-            AND ((SELECT l.license_type 
-                  FROM license l
-                  WHERE po.license_id = l.id)
-                 IN :restrictToLicenses
-                 OR po.license_id IS NULL 
-                    AND :${NO_LICENCE_TYPE} IN :restrictToLicenses)
-            """
-
-        private const val FILTERS = LA_FILTER + LICENSE_FILTER
-    }
+    fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
 }

@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -50,7 +50,7 @@ class LandlordControllerTests(
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
 
     @MockitoBean
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
