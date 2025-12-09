@@ -80,6 +80,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFlaggedServiceTestPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeDisabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
@@ -1300,6 +1302,7 @@ class Navigator(
         return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
     }
 
+    // TODO PRSD-1683 - delete example feature flag implementation when no longer needed
     fun goToFeatureFlaggedServiceTestPage(): FeatureFlaggedServiceTestPage {
         navigate(ExampleFeatureFlagTestController.FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE)
         return createValidPage(page, FeatureFlaggedServiceTestPage::class)
@@ -1313,6 +1316,16 @@ class Navigator(
     fun goToFeatureFlagTwoDisabledPage(): FeatureTwoDisabledPage {
         navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
         return createValidPage(page, FeatureTwoDisabledPage::class)
+    }
+
+    fun goToFeatureFlagThreeEnabledPage(): FeatureThreeEnabledPage {
+        navigate(ExampleFeatureFlagTestController.FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
+        return createValidPage(page, FeatureThreeEnabledPage::class)
+    }
+
+    fun goToFeatureFlagThreeDisabledPage(): FeatureThreeDisabledPage {
+        navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
+        return createValidPage(page, FeatureThreeDisabledPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")

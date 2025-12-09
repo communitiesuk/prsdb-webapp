@@ -54,6 +54,10 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
                 EXAMPLE_FEATURE_FLAG_TWO,
                 LocalDate.now().minusWeeks(5),
             )
+            featureFlagConfigUpdater.updateFeatureEnabledByStrategy(
+                EXAMPLE_FEATURE_FLAG_TWO,
+                true,
+            )
         }
 
         @Test
@@ -109,7 +113,24 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
 
     @Nested
     inner class FeatureReleaseTests {
-        // TODO PRSD-1647
+        // These endpoints have no strategy configured, either for their release or specifically for the feature
+        @Test
+        fun `feature in enabled release is enabled`() {
+            featureFlagManager.enableFeatureRelease(RELEASE_1_0)
+
+            val featureEnabledPage = navigator.goToFeatureFlagThreeEnabledPage()
+
+            assertThat(featureEnabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is ENABLED")
+        }
+
+        @Test
+        fun `feature in disabled release is disabled`() {
+            featureFlagManager.disableFeatureRelease(RELEASE_1_0)
+
+            val featureDisabledPage = navigator.goToFeatureFlagThreeDisabledPage()
+
+            assertThat(featureDisabledPage.heading).containsText("Feature flagged controller endpoint - available when flag is DISABLED")
+        }
     }
 
     @Nested
