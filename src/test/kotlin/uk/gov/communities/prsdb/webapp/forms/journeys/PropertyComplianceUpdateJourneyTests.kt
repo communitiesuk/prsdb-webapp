@@ -424,10 +424,7 @@ class PropertyComplianceUpdateJourneyTests {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = propertyOwnershipId,
-                    property =
-                        MockLandlordData.createProperty(
-                            address = MockLandlordData.createAddress(uprn = null),
-                        ),
+                    address = MockLandlordData.createAddress(uprn = null),
                 )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -450,10 +447,7 @@ class PropertyComplianceUpdateJourneyTests {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = propertyOwnershipId,
-                    property =
-                        MockLandlordData.createProperty(
-                            address = MockLandlordData.createAddress(uprn = uprn),
-                        ),
+                    address = MockLandlordData.createAddress(uprn = uprn),
                 )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -479,10 +473,7 @@ class PropertyComplianceUpdateJourneyTests {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = propertyOwnershipId,
-                    property =
-                        MockLandlordData.createProperty(
-                            address = MockLandlordData.createAddress(uprn = uprn),
-                        ),
+                    address = MockLandlordData.createAddress(uprn = uprn),
                 )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 

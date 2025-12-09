@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -53,6 +53,7 @@ class LandlordDetailsController(
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(principal.name)
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
+        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
 
@@ -84,8 +85,8 @@ class LandlordDetailsController(
             .create(principal.name, stepName)
             .completeStep(formData, principal)
 
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LANDLORD_DETAILS_FOR_LA_USER_ROUTE)
+    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
+    @GetMapping(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
     fun getLandlordDetails(
         @PathVariable id: Long,
         model: Model,
@@ -109,16 +110,16 @@ class LandlordDetailsController(
 
         model.addAttribute("backUrl", "/")
 
-        return "localAuthorityLandlordDetailsView"
+        return "localCouncilLandlordDetailsView"
     }
 
     companion object {
         const val LANDLORD_DETAILS_FOR_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT"
-        const val LANDLORD_DETAILS_FOR_LA_USER_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
+        const val LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        fun getLandlordDetailsForLaUserPath(landlordId: Long? = null): String =
-            UriTemplate(LANDLORD_DETAILS_FOR_LA_USER_ROUTE)
+        fun getLandlordDetailsForLocalCouncilUserPath(landlordId: Long? = null): String =
+            UriTemplate(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
                 .expand(landlordId)
                 .toASCIIString()
     }

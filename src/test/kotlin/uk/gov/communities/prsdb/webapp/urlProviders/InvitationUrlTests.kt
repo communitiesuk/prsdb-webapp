@@ -16,31 +16,31 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalAuthorityUsersController.Companion.getLaInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLAUserController
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.forms.journeys.LaUserRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LaUserRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLaUserStepId
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.forms.journeys.LocalCouncilUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalAuthorityInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityInvitationService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createdLoggedInUserModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createdLoggedInUserModel
 import java.net.URLEncoder
 import kotlin.test.Test
 
 @WebMvcTest(
-    controllers = [ManageLocalAuthorityUsersController::class, RegisterLAUserController::class],
-    properties = ["base-url.local-authority=http://localhost:8080/$LOCAL_AUTHORITY_PATH_SEGMENT"],
+    controllers = [ManageLocalCouncilUsersController::class, RegisterLocalCouncilUserController::class],
+    properties = ["base-url.local-council=http://localhost:8080/$LOCAL_COUNCIL_PATH_SEGMENT"],
 )
 @Import(AbsoluteUrlProvider::class)
 class InvitationUrlTests(
@@ -50,13 +50,13 @@ class InvitationUrlTests(
     lateinit var anyEmailNotificationService: EmailNotificationService<EmailTemplateModel>
 
     @MockitoBean
-    lateinit var localAuthorityInvitationService: LocalAuthorityInvitationService
+    lateinit var localCouncilInvitationService: LocalCouncilInvitationService
 
     @MockitoBean
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @MockitoBean
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
 
     @MockitoBean
     private lateinit var securityContextService: SecurityContextService
@@ -65,32 +65,32 @@ class InvitationUrlTests(
     private lateinit var journeyDataService: JourneyDataService
 
     @MockitoBean
-    private lateinit var laUserRegistrationJourneyFactory: LaUserRegistrationJourneyFactory
+    private lateinit var localCouncilUserRegistrationJourneyFactory: LocalCouncilUserRegistrationJourneyFactory
 
     @Mock
-    private lateinit var laUserRegistrationJourney: LaUserRegistrationJourney
+    private lateinit var localCouncilUserRegistrationJourney: LocalCouncilUserRegistrationJourney
 
     @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
     fun `The invitation URL generated when a new user is invited is routed to the accept invitation controller method`() {
         // Arrange
         val loggedInUser = createdLoggedInUserModel()
-        val localAuthority = createTestLocalAuthority()
+        val localCouncil = createTestLocalCouncil()
         val testToken = "test token"
         val testEmail = "test@example.com"
 
-        whenever(localAuthorityDataService.getUserAndLocalAuthorityIfAuthorizedUser(123, "user")).thenReturn(
+        whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(123, "user")).thenReturn(
             Pair(
                 loggedInUser,
-                localAuthority,
+                localCouncil,
             ),
         )
 
-        whenever(localAuthorityInvitationService.createInvitationToken(testEmail, localAuthority)).thenReturn(testToken)
-        whenever(localAuthorityInvitationService.getAuthorityForToken(testToken)).thenReturn(localAuthority)
-        whenever(localAuthorityInvitationService.tokenIsValid(testToken)).thenReturn(true)
+        whenever(localCouncilInvitationService.createInvitationToken(testEmail, localCouncil)).thenReturn(testToken)
+        whenever(localCouncilInvitationService.getAuthorityForToken(testToken)).thenReturn(localCouncil)
+        whenever(localCouncilInvitationService.tokenIsValid(testToken)).thenReturn(true)
 
-        val invitationCaptor = argumentCaptor<LocalAuthorityInvitationEmail>()
+        val invitationCaptor = argumentCaptor<LocalCouncilInvitationEmail>()
         Mockito
             .doNothing()
             .whenever(
@@ -99,12 +99,12 @@ class InvitationUrlTests(
 
         val encodedConfirmedEmailContent = urlEncodedConfirmedEmailDataModel(testEmail)
 
-        whenever(laUserRegistrationJourneyFactory.create(any())).thenReturn(laUserRegistrationJourney)
-        whenever(laUserRegistrationJourney.initialStepId).thenReturn(RegisterLaUserStepId.LandingPage)
+        whenever(localCouncilUserRegistrationJourneyFactory.create(any())).thenReturn(localCouncilUserRegistrationJourney)
+        whenever(localCouncilUserRegistrationJourney.initialStepId).thenReturn(RegisterLocalCouncilUserStepId.LandingPage)
 
         // Act
         mvc
-            .post(getLaInviteNewUserRoute(123)) {
+            .post(getLocalCouncilInviteNewUserRoute(123)) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 content = encodedConfirmedEmailContent
                 with(csrf())
@@ -115,7 +115,7 @@ class InvitationUrlTests(
             .andExpect { status { is3xxRedirection() } }
 
         // Assert
-        verify(localAuthorityInvitationService).getInvitationOrNull(testToken)
+        verify(localCouncilInvitationService).getInvitationOrNull(testToken)
     }
 
     @Suppress("SameParameterValue")
@@ -124,10 +124,10 @@ class InvitationUrlTests(
         return "email=$encodedTestEmail&confirmEmail=$encodedTestEmail"
     }
 
-    private fun createTestLocalAuthority(): LocalAuthority {
-        val localAuthority = LocalAuthority()
-        ReflectionTestUtils.setField(localAuthority, "id", 123)
-        ReflectionTestUtils.setField(localAuthority, "name", "Test Local Authority")
-        return localAuthority
+    private fun createTestLocalCouncil(): LocalCouncil {
+        val localCouncil = LocalCouncil()
+        ReflectionTestUtils.setField(localCouncil, "id", 123)
+        ReflectionTestUtils.setField(localCouncil, "name", "Test Local Council")
+        return localCouncil
     }
 }

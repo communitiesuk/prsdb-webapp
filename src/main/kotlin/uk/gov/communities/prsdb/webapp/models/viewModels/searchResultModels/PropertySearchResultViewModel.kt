@@ -10,7 +10,7 @@ data class PropertySearchResultViewModel(
     val id: Long,
     val address: String,
     val registrationNumber: String,
-    val localAuthority: String?,
+    val localCouncil: String?,
     val landlord: PropertySearchResultLandlordViewModel,
     val recordLink: String,
 ) {
@@ -20,13 +20,13 @@ data class PropertySearchResultViewModel(
             currentUrlKey: Int? = null,
         ) = PropertySearchResultViewModel(
             id = propertyOwnership.id,
-            address = propertyOwnership.property.address.singleLineAddress,
+            address = propertyOwnership.address.singleLineAddress,
             registrationNumber =
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
-            localAuthority =
-                propertyOwnership.property.address.localAuthority
+            localCouncil =
+                propertyOwnership.address.localCouncil
                     ?.name,
             landlord =
                 PropertySearchResultLandlordViewModel(
@@ -34,12 +34,12 @@ data class PropertySearchResultViewModel(
                     name = propertyOwnership.primaryLandlord.name,
                     recordLink =
                         LandlordDetailsController
-                            .getLandlordDetailsForLaUserPath(propertyOwnership.primaryLandlord.id)
+                            .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
                             .overrideBackLinkForUrl(currentUrlKey),
                 ),
             recordLink =
                 PropertyDetailsController
-                    .getPropertyDetailsPath(propertyOwnership.id, isLaView = true)
+                    .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
                     .overrideBackLinkForUrl(currentUrlKey),
         )
     }

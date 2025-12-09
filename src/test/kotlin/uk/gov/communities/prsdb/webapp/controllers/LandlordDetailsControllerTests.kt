@@ -167,7 +167,7 @@ class LandlordDetailsControllerTests(
 
         @Test
         fun `getLandlordDetails returns a redirect for an unauthenticated user`() {
-            mvc.get(LandlordDetailsController.getLandlordDetailsForLaUserPath(landlord.id)).andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -175,24 +175,24 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getLandlordDetails returns 403 for an unauthorized user`() {
-            mvc.get(LandlordDetailsController.getLandlordDetailsForLaUserPath(landlord.id)).andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isForbidden() }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_USER"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getLandlordDetails returns 200 for a valid request from an LA user`() {
-            mvc.get(LandlordDetailsController.getLandlordDetailsForLaUserPath(landlord.id)).andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }
             }
         }
 
         @Test
-        @WithMockUser(roles = ["LA_ADMIN"])
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `getLandlordDetails returns 200 for a valid request from an LA admin`() {
-            mvc.get(LandlordDetailsController.getLandlordDetailsForLaUserPath(landlord.id)).andExpect {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }
             }

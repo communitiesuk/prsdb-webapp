@@ -206,13 +206,7 @@ class PropertyComplianceJourneyTests {
                 MockLandlordData
                     .createPropertyOwnership(
                         id = propertyOwnershipId,
-                        property =
-                            MockLandlordData.createProperty(
-                                address =
-                                    MockLandlordData.createAddress(
-                                        uprn = uprn,
-                                    ),
-                            ),
+                        address = MockLandlordData.createAddress(uprn = uprn),
                     )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -244,13 +238,7 @@ class PropertyComplianceJourneyTests {
                 MockLandlordData
                     .createPropertyOwnership(
                         id = propertyOwnershipId,
-                        property =
-                            MockLandlordData.createProperty(
-                                address =
-                                    MockLandlordData.createAddress(
-                                        uprn = null,
-                                    ),
-                            ),
+                        address = MockLandlordData.createAddress(uprn = null),
                     )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -269,13 +257,7 @@ class PropertyComplianceJourneyTests {
                 MockLandlordData
                     .createPropertyOwnership(
                         id = propertyOwnershipId,
-                        property =
-                            MockLandlordData.createProperty(
-                                address =
-                                    MockLandlordData.createAddress(
-                                        uprn = uprn,
-                                    ),
-                            ),
+                        address = MockLandlordData.createAddress(uprn = uprn),
                     )
             whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -881,7 +863,7 @@ class PropertyComplianceJourneyTests {
 
             val expectedEmailModel =
                 FullPropertyComplianceConfirmationEmail(
-                    compliantPropertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                    compliantPropertyCompliance.propertyOwnership.address.singleLineAddress,
                     EmailBulletPointList(expectedCompliantMessages),
                     expectedLandlordDashboardUri.toString(),
                 )
@@ -907,7 +889,7 @@ class PropertyComplianceJourneyTests {
 
             val expectedEmailModel =
                 PartialPropertyComplianceConfirmationEmail(
-                    nonCompliantPropertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                    nonCompliantPropertyCompliance.propertyOwnership.address.singleLineAddress,
                     RegistrationNumberDataModel.fromRegistrationNumber(nonCompliantPropertyCompliance.propertyOwnership.registrationNumber),
                     EmailBulletPointList(expectedNonCompliantMessages),
                     expectedComplianceInfoUri.toString(),

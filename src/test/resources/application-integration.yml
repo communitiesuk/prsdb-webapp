@@ -1,0 +1,8 @@
+features:
+  releases:
+    - name: "release-1-0"
+      enabled: true
+    - name: "release-with-strategy"
+      enabled: false
+      strategy-config:
+        release-date: "2026-06-01"

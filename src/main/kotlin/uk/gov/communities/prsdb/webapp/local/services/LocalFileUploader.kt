@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.local.services
 import kotlinx.datetime.Clock
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.FileUploader

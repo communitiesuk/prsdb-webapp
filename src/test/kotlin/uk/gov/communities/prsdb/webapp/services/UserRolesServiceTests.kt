@@ -6,29 +6,29 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_ADMIN
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LA_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LocalAuthorityUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSystemOperatorData
 
 class UserRolesServiceTests {
     private lateinit var landlordRepository: LandlordRepository
-    private lateinit var localAuthorityUserRepository: LocalAuthorityUserRepository
+    private lateinit var localCouncilUserRepository: LocalCouncilUserRepository
     private lateinit var systemOperatorRepository: SystemOperatorRepository
     private lateinit var userRolesService: UserRolesService
 
     @BeforeEach
     fun setup() {
         landlordRepository = Mockito.mock(LandlordRepository::class.java)
-        localAuthorityUserRepository = Mockito.mock(LocalAuthorityUserRepository::class.java)
+        localCouncilUserRepository = Mockito.mock(LocalCouncilUserRepository::class.java)
         systemOperatorRepository = Mockito.mock(SystemOperatorRepository::class.java)
-        userRolesService = UserRolesService(landlordRepository, localAuthorityUserRepository, systemOperatorRepository)
+        userRolesService = UserRolesService(landlordRepository, localCouncilUserRepository, systemOperatorRepository)
     }
 
     @Test
@@ -48,12 +48,12 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getAllRolesForSubjectId returns ROLE_LA_ADMIN for a local authority manager`() {
+    fun `getAllRolesForSubjectId returns ROLE_LOCAL_COUNCIL_ADMIN for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -61,17 +61,17 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(2, roles.size)
-        Assertions.assertEquals(ROLE_LA_ADMIN, roles[0])
-        Assertions.assertEquals(ROLE_LA_USER, roles[1])
+        Assertions.assertEquals(ROLE_LOCAL_COUNCIL_ADMIN, roles[0])
+        Assertions.assertEquals(ROLE_LOCAL_COUNCIL_USER, roles[1])
     }
 
     @Test
-    fun `getAllRolesForSubjectId returns ROLE_LA_USER for a standard local authority user`() {
+    fun `getAllRolesForSubjectId returns ROLE_LOCAL_COUNCIL_USER for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -79,7 +79,7 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertEquals(ROLE_LA_USER, roles[0])
+        Assertions.assertEquals(ROLE_LOCAL_COUNCIL_USER, roles[0])
     }
 
     @Test
@@ -116,12 +116,12 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLandlordRolesForSubjectId returns no roles for a local authority manager`() {
+    fun `getLandlordRolesForSubjectId returns no roles for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -132,12 +132,12 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLandlordRolesForSubjectId returns no roles for a standard local authority user`() {
+    fun `getLandlordRolesForSubjectId returns no roles for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -164,7 +164,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLocalAuthorityRolesForSubjectId returns no roles for landlord user`() {
+    fun `getLocalCouncilRolesForSubjectId returns no roles for landlord user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLandlordData.createLandlord(baseUser)
@@ -172,49 +172,49 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertTrue(roles.isEmpty())
     }
 
     @Test
-    fun `getLocalAuthorityRolesForSubjectId returns ROLE_LA_ADMIN and ROLE_LA_USER for a local authority manager`() {
+    fun `getLocalCouncilRolesForSubjectId returns ROLE_LOCAL_COUNCIL_ADMIN and ROLE_LOCAL_COUNCIL_USER for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(2, roles.size)
-        Assertions.assertTrue(roles.contains(ROLE_LA_ADMIN))
-        Assertions.assertTrue(roles.contains(ROLE_LA_USER))
+        Assertions.assertTrue(roles.contains(ROLE_LOCAL_COUNCIL_ADMIN))
+        Assertions.assertTrue(roles.contains(ROLE_LOCAL_COUNCIL_USER))
     }
 
     @Test
-    fun `getLocalAuthorityRolesForSubjectId returns ROLE_LA_USER for a standard local authority user`() {
+    fun `getLocalCouncilRolesForSubjectId returns ROLE_LOCAL_COUNCIL_USER for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertTrue(roles.contains(ROLE_LA_USER))
+        Assertions.assertTrue(roles.contains(ROLE_LOCAL_COUNCIL_USER))
     }
 
     @Test
-    fun `getLocalAuthorityRolesForSubjectId returns ROLE_SYSTEM_OPERATOR for a system operator user`() {
+    fun `getLocalCouncilRolesForSubjectId returns ROLE_SYSTEM_OPERATOR for a system operator user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val systemOperator = MockSystemOperatorData.createSystemOperator(baseUser)
@@ -223,7 +223,7 @@ class UserRolesServiceTests {
             .thenReturn(systemOperator)
 
         // Act
-        val roles = userRolesService.getLocalAuthorityRolesForSubjectId(baseUser.id)
+        val roles = userRolesService.getLocalCouncilRolesForSubjectId(baseUser.id)
 
         // Assert
         Assertions.assertEquals(1, roles.size)
@@ -246,12 +246,12 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getHasLandlordUserRole returns false for a local authority manager`() {
+    fun `getHasLandlordUserRole returns false for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -262,12 +262,12 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getHasLandlordUserRole returns false for a standard local authority user`() {
+    fun `getHasLandlordUserRole returns false for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -290,39 +290,39 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getHasLocalAuthorityRole returns true for a standard local authority user`() {
+    fun `getHasLocalCouncilRole returns true for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
-        Assertions.assertTrue(hasLocalAuthorityUserRole)
+        Assertions.assertTrue(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityRole returns true for a local authority manager`() {
+    fun `getHasLocalCouncilRole returns true for a local council manager`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
-        Assertions.assertTrue(hasLocalAuthorityUserRole)
+        Assertions.assertTrue(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityRole returns false for a landlord user`() {
+    fun `getHasLocalCouncilRole returns false for a landlord user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLandlordData.createLandlord(baseUser)
@@ -330,58 +330,58 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
-        Assertions.assertFalse(hasLocalAuthorityUserRole)
+        Assertions.assertFalse(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityRole returns false for a user without roles`() {
+    fun `getHasLocalCouncilRole returns false for a user without roles`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilRole(baseUser.id)
 
         // Assert
-        Assertions.assertFalse(hasLocalAuthorityUserRole)
+        Assertions.assertFalse(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityAdminRole returns true for a local authority admin`() {
+    fun `getHasLocalCouncilAdminRole returns true for a local council admin`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = true)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
-        Assertions.assertTrue(hasLocalAuthorityUserRole)
+        Assertions.assertTrue(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityAdminRole returns false for a standard local authority user`() {
+    fun `getHasLocalCouncilAdminRole returns false for a standard local council user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
-        val user = MockLocalAuthorityData.createLocalAuthorityUser(baseUser, isManager = false)
+        val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
 
-        whenever(localAuthorityUserRepository.findByBaseUser_Id(baseUser.id))
+        whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
-        Assertions.assertFalse(hasLocalAuthorityUserRole)
+        Assertions.assertFalse(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityAdminRole returns false for a landlord user`() {
+    fun `getHasLocalCouncilAdminRole returns false for a landlord user`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
         val user = MockLandlordData.createLandlord(baseUser)
@@ -389,21 +389,21 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
-        Assertions.assertFalse(hasLocalAuthorityUserRole)
+        Assertions.assertFalse(hasLocalCouncilUserRole)
     }
 
     @Test
-    fun `getHasLocalAuthorityAdminRole returns false for a user without roles`() {
+    fun `getHasLocalCouncilAdminRole returns false for a user without roles`() {
         // Arrange
         val baseUser = MockOneLoginUserData.createOneLoginUser()
 
         // Act
-        val hasLocalAuthorityUserRole = userRolesService.getHasLocalAuthorityAdminRole(baseUser.id)
+        val hasLocalCouncilUserRole = userRolesService.getHasLocalCouncilAdminRole(baseUser.id)
 
         // Assert
-        Assertions.assertFalse(hasLocalAuthorityUserRole)
+        Assertions.assertFalse(hasLocalCouncilUserRole)
     }
 }

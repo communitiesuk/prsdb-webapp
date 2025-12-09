@@ -138,7 +138,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val gasSafeEngineerNumPage = navigator.skipToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
             gasSafeEngineerNumPage.form.submit()
             assertThat(gasSafeEngineerNumPage.form.getErrorMessage())
-                .containsText("You need to enter a Gas Safe engineer's registered number.")
+                .containsText("You need to enter a Gas Safe engineer’s registered number.")
         }
 
         @Test

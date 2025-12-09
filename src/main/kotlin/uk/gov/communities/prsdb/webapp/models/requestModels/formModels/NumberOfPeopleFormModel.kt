@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.PositiveIntegerValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
@@ -12,10 +11,6 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 class NumberOfPeopleFormModel(
     @ValidatedBy(
         constraints = [
-            ConstraintDescriptor(
-                messageKey = "forms.numberOfPeople.input.error.missing",
-                validatorType = NotBlankConstraintValidator::class,
-            ),
             ConstraintDescriptor(
                 messageKey = "forms.numberOfPeople.input.error.invalidFormat",
                 validatorType = PositiveIntegerValidator::class,

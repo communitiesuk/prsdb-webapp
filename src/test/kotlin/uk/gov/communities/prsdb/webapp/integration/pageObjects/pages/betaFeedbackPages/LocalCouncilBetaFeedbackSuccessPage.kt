@@ -6,4 +6,4 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class LocalCouncilBetaFeedbackSuccessPage(
     page: Page,
-) : BasePage(page, BetaFeedbackController.LOCAL_AUTHORITY_FEEDBACK_SUCCESS_URL)
+) : BasePage(page, BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_SUCCESS_URL)

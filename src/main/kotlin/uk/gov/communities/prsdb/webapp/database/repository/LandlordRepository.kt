@@ -18,47 +18,47 @@ interface LandlordRepository : JpaRepository<Landlord?, Long?> {
 
     @Query(
         "SELECT l.* " +
-            "FROM landlord l  " +
-            "WHERE (l.phone_number || ' ' || l.email || ' ' || l.name) %> :searchQuery " +
-            LA_FILTER +
-            "ORDER BY (l.phone_number || ' ' || l.email || ' ' || l.name) <->> :searchQuery",
+            "FROM landlord l " +
+            "JOIN registration_number r on l.registration_number_id = r.id " +
+            "WHERE r.number = :searchLRN " +
+            LOCAL_COUNCIL_FILTER,
         nativeQuery = true,
     )
-    fun searchMatching(
-        @Param("searchQuery") searchQuery: String,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
+    fun searchMatchingLRN(
+        @Param("searchLRN") searchLRN: Long,
+        @Param("localCouncilUserBaseId") localCouncilUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
         pageable: Pageable,
     ): Page<Landlord>
 
     @Query(
         "SELECT l.* " +
-            "FROM landlord l JOIN registration_number r on l.registration_number_id = r.id " +
-            "WHERE r.number = :searchLRN " +
-            LA_FILTER,
+            "FROM landlord l " +
+            "WHERE (l.phone_number || ' ' || l.email || ' ' || l.name) %> :searchQuery " +
+            LOCAL_COUNCIL_FILTER +
+            "ORDER BY (l.phone_number || ' ' || l.email || ' ' || l.name) <->> :searchQuery",
         nativeQuery = true,
     )
-    fun searchMatchingLRN(
-        @Param("searchLRN") searchLRN: Long,
-        @Param("laUserBaseId") laUserBaseId: String,
-        @Param("restrictToLA") restrictToLA: Boolean = false,
+    fun searchMatching(
+        @Param("searchQuery") searchQuery: String,
+        @Param("localCouncilUserBaseId") laUserBaseId: String,
+        @Param("restrictToLocalCouncil") restrictToLocalCouncil: Boolean = false,
         pageable: Pageable,
     ): Page<Landlord>
 
     companion object {
         // Determines if the landlord has an active property ownership in the LA user's LA
-        private const val LA_FILTER =
+        const val LOCAL_COUNCIL_FILTER =
             """
              AND (EXISTS (SELECT po.id 
                           FROM property_ownership po 
-                          JOIN property p ON po.property_id = p.id 
-                          JOIN address a ON p.address_id = a.id
-                          JOIN local_authority la ON a.local_authority_id = la.id
-                          JOIN local_authority_user lau ON la.id = lau.local_authority_id
+                          JOIN address a ON po.address_id = a.id
+                          JOIN local_council lc ON a.local_council_id = lc.id
+                          JOIN local_council_user lcu ON lc.id = lcu.local_council_id
                           WHERE l.id = po.primary_landlord_id 
                           AND po.is_active 
-                          AND lau.subject_identifier = :laUserBaseId)
-                  OR NOT :restrictToLA) 
+                          AND lcu.subject_identifier = :localCouncilUserBaseId)
+                  OR NOT :restrictToLocalCouncil) 
             """
     }
 }

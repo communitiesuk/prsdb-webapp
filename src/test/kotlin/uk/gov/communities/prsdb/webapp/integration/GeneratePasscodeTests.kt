@@ -8,7 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeLimitExceededPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.assertEquals
@@ -20,9 +20,9 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     lateinit var passcodeRepository: PasscodeRepository
 
     @Test
-    fun `local authority admin can access generate passcode page from dashboard and navigate back`(page: Page) {
+    fun `local council admin can access generate passcode page from dashboard and navigate back`(page: Page) {
         // Navigate to generate passcode page from LA dashboard
-        val dashboardPage = navigator.goToLocalAuthorityDashboard()
+        val dashboardPage = navigator.goToLocalCouncilDashboard()
         dashboardPage.generatePasscodeLink.clickAndWait()
         val generatePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
 
@@ -32,7 +32,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
 
         // Test return to dashboard link
         generatePasscodePage.returnToDashboardButton.clickAndWait()
-        assertPageIs(page, LocalAuthorityDashboardPage::class)
+        assertPageIs(page, LocalCouncilDashboardPage::class)
     }
 
     @Test
@@ -80,7 +80,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
         whenever(passcodeRepository.count()).thenReturn(1000L)
 
         // Try to reach the generate passcode page from the LA dashboard
-        val dashboardPage = navigator.goToLocalAuthorityDashboard()
+        val dashboardPage = navigator.goToLocalCouncilDashboard()
         dashboardPage.generatePasscodeLink.clickAndWait()
 
         // Verify we're redirected to the passcode limit error page
@@ -91,7 +91,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `exceeding maximum passcode limit when generating new passcode redirects to error page`(page: Page) {
         // Navigate to generate passcode page first (this should work normally)
-        val dashboardPage = navigator.goToLocalAuthorityDashboard()
+        val dashboardPage = navigator.goToLocalCouncilDashboard()
         dashboardPage.generatePasscodeLink.clickAndWait()
         val generatePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
 
