@@ -9,6 +9,9 @@
                    th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
                 Option Label
             </label>
+            <div th:if="${option.conditionalFragment}" class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" th:id="${conditionalFragmentID}" th:with="fragmentCall=|fragments/conditional/${option.conditionalFragment}|">
+                <th:block th:replace="~{__${fragmentCall}__ :: ${option.conditionalFragment}}"></th:block>
+            </div>
         </div>
     </div>
 </th:block>
