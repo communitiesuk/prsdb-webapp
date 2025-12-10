@@ -1,15 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
-import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.annotation.Scope
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -104,7 +103,7 @@ class NewPropertyRegistrationJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeJourneyState(user)
+    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
 
 @PrsdbWebComponent
@@ -132,47 +131,24 @@ class PropertyRegistrationJourneyState(
     override val rentIncludesBills: RentIncludesBillsStep,
     val occupationTask: OccupationTask,
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
-    private val journeyStateService: JourneyStateService,
+    journeyStateService: JourneyStateService,
+    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
     LicensingState,
     OccupationState,
     CheckYourAnswersJourneyState {
-    override var cachedAddresses: List<AddressDataModel>? by mutableDelegate("cachedAddresses", serializer())
-    override var isAddressAlreadyRegistered: Boolean? by mutableDelegate("isAddressAlreadyRegistered", serializer())
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
+    override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
 
-    final fun initializeJourneyState(user: Principal): String {
-        val journeyId = generateJourneyId(user)
+    override fun generateJourneyId(seed: Any?): String {
+        val user = seed as? Principal
 
-        journeyStateService
-            .initialiseJourneyWithId(journeyId) {}
-        return journeyId
-    }
-
-    fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
-
-    override var cyaChildJourneyId: String? by mutableDelegate("cyaChildJourneyId", serializer())
-        private set
-
-    override val baseJourneyId: String
-        get() = journeyStateService.journeyMetadata.baseJourneyId ?: journeyStateService.journeyId
-
-    override val isCheckingAnswers: Boolean
-        get() = journeyStateService.journeyMetadata.childJourneyName != null
-
-    fun initialiseCyaChildJourney() {
-        val newId = generateJourneyId(SecurityContextHolder.getContext().authentication)
-        journeyStateService.initialiseChildJourney(newId, "checkYourAnswers")
-        cyaChildJourneyId = newId
+        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
     }
 
     companion object {
-        fun generateJourneyId(user: Principal): String =
-            "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
-                .hashCode()
-                .toUInt()
-                .times(111113111U)
-                .and(0x7FFFFFFFu)
-                .toString(36)
+        fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
 }
