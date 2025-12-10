@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.springframework.context.annotation.Scope
@@ -47,7 +48,7 @@ class JourneyStateDelegateProvider(
             property: KProperty<*>,
         ): TProperty? =
             journeyStateService.getValue(innerKey)?.let {
-                AbstractJourneyState.Companion.decodeFromStringOrNull(
+                decodeFromStringOrNull(
                     serializer,
                     it as String,
                 )
@@ -58,7 +59,7 @@ class JourneyStateDelegateProvider(
             property: KProperty<*>,
             value: TProperty?,
         ) {
-            val encodedValue = value?.let { Json.Default.encodeToString(serializer, value) }
+            val encodedValue = value?.let { Json.encodeToString(serializer, value) }
             journeyStateService.setValue(innerKey, encodedValue)
         }
     }
@@ -74,7 +75,7 @@ class JourneyStateDelegateProvider(
         ): TProperty {
             val value =
                 journeyStateService.getValue(innerKey)?.let {
-                    AbstractJourneyState.Companion.decodeFromStringOrNull(
+                    decodeFromStringOrNull(
                         serializer,
                         it as String,
                     )
@@ -86,5 +87,19 @@ class JourneyStateDelegateProvider(
                 throw IllegalStateException("Property $innerKey not found in journey state - deleting state")
             }
         }
+    }
+
+    companion object {
+        private fun <T> decodeFromStringOrNull(
+            deserializer: KSerializer<T>,
+            json: String,
+        ): T? =
+            try {
+                Json.decodeFromString(deserializer, json)
+            } catch (_: IllegalArgumentException) {
+                null
+            } catch (_: SerializationException) {
+                null
+            }
     }
 }
