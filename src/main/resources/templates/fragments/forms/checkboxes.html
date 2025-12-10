@@ -2,9 +2,10 @@
           th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#checkboxes-content/content()}, ${hint})}">
     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
         <div class="govuk-checkboxes__item" th:each="option: ${options}"
-             th:with="checkboxInputID=|${fieldName}-${option.valueStr}|">
+             th:with="checkboxInputID=|${fieldName}-${option.valueStr}|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
             <input class="govuk-checkboxes__input" type="checkbox"
-                   th:field="*{__${fieldName}__}" th:value="${option.value}" th:id="${checkboxInputID}">
+                   th:field="*{__${fieldName}__}" th:value="${option.value}" th:id="${checkboxInputID}"
+                   th:attr="data-aria-controls=${option.conditionalFragment != null} ? ${conditionalFragmentID}">
             <label class="govuk-label govuk-checkboxes__label" th:for="${checkboxInputID}"
                    th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">
                 Option Label
