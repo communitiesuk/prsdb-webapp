@@ -4,8 +4,8 @@
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="question-content">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
     <h1 class="govuk-heading-l" th:text="#{forms.numberOfBedrooms.heading}">
         forms.numberOfBedrooms.heading
     </h1>
@@ -21,8 +21,6 @@
     <p class="govuk-body" th:text="#{forms.numberOfBedrooms.paragraph.two}">
         forms.numberOfBedrooms.paragraph.two
     </p>
-</th:block>
-<th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfBedrooms', #{${fieldSetHeading}}, null)}">
         <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfBedrooms', null, 2)}">

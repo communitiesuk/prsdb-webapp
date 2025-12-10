@@ -122,7 +122,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Number of households - render page
         assertThat(householdsPage.form.fieldsetLegend).containsText("How many households are in your property?")
-        assertThat(householdsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(householdsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         householdsPage.submitNumberOfHouseholds(2)
         val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
@@ -136,7 +136,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Number of bedrooms - render page
         assertThat(bedroomsPage.form.fieldsetLegend).containsText("How many bedrooms are in your property?")
-        assertThat(bedroomsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(bedroomsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         bedroomsPage.submitNumOfBedrooms(3)
         val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)

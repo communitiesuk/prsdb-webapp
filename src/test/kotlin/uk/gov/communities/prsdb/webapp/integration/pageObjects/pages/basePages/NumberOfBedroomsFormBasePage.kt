@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
 abstract class NumberOfBedroomsFormBasePage(
@@ -14,8 +13,6 @@ abstract class NumberOfBedroomsFormBasePage(
         urlSegment,
     ) {
     val backLink = BackLink.default(page)
-
-    val sectionHeader = FormWithSectionHeader.SectionHeader(page.locator("html"))
 
     val form = NumberOfBedroomsForm(page)
 
@@ -28,7 +25,7 @@ abstract class NumberOfBedroomsFormBasePage(
 
     class NumberOfBedroomsForm(
         page: Page,
-    ) : PostForm(page) {
+    ) : FormWithSectionHeader(page) {
         val numberOfBedroomsInput = TextInput.textByFieldName(locator, "numberOfBedrooms")
         val fieldsetLegend = FieldsetLegend(locator)
     }

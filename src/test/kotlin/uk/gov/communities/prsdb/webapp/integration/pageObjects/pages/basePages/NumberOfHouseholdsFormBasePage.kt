@@ -2,9 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form.FieldsetLegend
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
 abstract class NumberOfHouseholdsFormBasePage(
@@ -14,7 +12,6 @@ abstract class NumberOfHouseholdsFormBasePage(
     val backLink = BackLink.default(page)
 
     val form = NumOfHouseholdsForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
 
     fun submitNumberOfHouseholds(num: Int) = submitNumberOfHouseholds(num.toString())
 
