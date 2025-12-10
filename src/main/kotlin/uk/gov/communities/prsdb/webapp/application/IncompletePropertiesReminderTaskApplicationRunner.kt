@@ -23,9 +23,8 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     override fun run(args: ApplicationArguments?) {
         println("Executing incomplete properties reminder scheduled task")
 
-        // TODO - PRDS-1030 - retrieve incomplete properties older than 21 days
-
-        sendEmailToLandlord("jasmin.conterio@softwire.com", "HARDCODED ADDRESS")
+        // Separating into its own method to allow this to be tested without "exitProcess" being called
+        incompletePropertiesReminderTaskLogic()
 
         val code =
             SpringApplication.exit(context, { 0 }).also {
@@ -34,10 +33,11 @@ class IncompletePropertiesReminderTaskApplicationRunner(
         exitProcess(code)
     }
 
-    private fun sendEmailToLandlord(
-        emailAddress: String,
-        propertyAddress: String,
-    ) {
+    private fun incompletePropertiesReminderTaskLogic() {
+        // TODO - PRDS-1030 - retrieve incomplete properties older than 21 days
+        val emailAddress = "jasmin.conterio@softwire.com"
+        val propertyAddress = "HARDCODED ADDRESS"
+
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 
         emailSender.sendEmail(
@@ -47,5 +47,9 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                 prsdUrl = prsdUrl,
             ),
         )
+    }
+
+    companion object {
+        const val INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME = "incompletePropertiesReminderTaskLogic"
     }
 }
