@@ -1,7 +1,7 @@
 features:
   feature-flags:
     - name: "example-feature-flag-one"
-      enabled: true
+      enabled: false
       expiry-date: "2030-01-12"
     - name: "example-feature-flag-two"
       enabled: true
@@ -20,8 +20,8 @@ features:
       expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
-      enabled: true
+      enabled: false
     - name: "release-with-strategy"
       enabled: true
       strategy-config:
-        release-date: "2025-06-01"
+        release-date: "2027-06-01"
