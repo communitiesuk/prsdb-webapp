@@ -24,6 +24,11 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 enabled = true,
                 expiryDate = LocalDate.of(2030, 1, 7),
                 release = "release-1-0",
+                strategyConfig =
+                    MockFeatureFlagConfig.createFlipStrategyConfigModel(
+                        enabledByStrategy = true,
+                        releaseDate = LocalDate.of(2025, 6, 1),
+                    ),
             ),
             MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "example-feature-flag-three",
@@ -55,7 +60,11 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 MockFeatureFlagConfig.createFeatureReleaseConfigModel(
                     name = "release-with-strategy",
                     enabled = true,
-                    strategyConfig = MockFeatureFlagConfig.createFlipStrategyConfigModel(releaseDate = LocalDate.of(2025, 6, 1)),
+                    strategyConfig =
+                        MockFeatureFlagConfig.createFlipStrategyConfigModel(
+                            releaseDate = LocalDate.of(2025, 6, 1),
+                            enabledByStrategy = true,
+                        ),
                 ),
             )
 

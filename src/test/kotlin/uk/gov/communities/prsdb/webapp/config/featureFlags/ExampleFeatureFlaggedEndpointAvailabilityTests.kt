@@ -11,11 +11,11 @@ import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_TWO
 import uk.gov.communities.prsdb.webapp.constants.RELEASE_1_0
 import uk.gov.communities.prsdb.webapp.constants.RELEASE_WITH_STRATEGY
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE
+import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURED_FLAGGED_ENDPOINT_TEST_URL_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE
+import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController.Companion.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
@@ -159,7 +159,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
             initialiseReleaseWithReleaseDateStrategy(releaseDate = LocalDate.now().minusWeeks(5))
 
             mvc
-                .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+                .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
                 .andExpect { status { isOk() } }
         }
 
@@ -170,7 +170,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
             initialiseReleaseWithReleaseDateStrategy(releaseDate = LocalDate.now())
 
             mvc
-                .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+                .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
                 .andExpect { status { isOk() } }
         }
 
@@ -181,7 +181,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
             initialiseReleaseWithReleaseDateStrategy(releaseDate = LocalDate.now().plusWeeks(5))
 
             mvc
-                .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+                .get(FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
                 .andExpect { status { isNotFound() } }
         }
 
@@ -192,7 +192,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
             initialiseReleaseWithReleaseDateStrategy(releaseDate = LocalDate.now().minusWeeks(5))
 
             mvc
-                .get(INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+                .get(INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
                 .andExpect { status { isNotFound() } }
         }
 
@@ -203,7 +203,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
             initialiseReleaseWithReleaseDateStrategy(releaseDate = LocalDate.now())
 
             mvc
-                .get(INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+                .get(INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
                 .andExpect { status { isNotFound() } }
         }
 
@@ -213,7 +213,7 @@ class ExampleFeatureFlaggedEndpointAvailabilityTests : FeatureFlagTestCallingEnd
             featureFlagManager.enableFeature(EXAMPLE_FEATURE_FLAG_FOUR)
             initialiseReleaseWithReleaseDateStrategy(releaseDate = LocalDate.now().plusWeeks(5))
             mvc
-                .get(INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE)
+                .get(INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
                 .andExpect { status { isOk() } }
         }
 
