@@ -41,7 +41,8 @@ class FooExampleJourneyFactory(
 
         return journey(stateFactory.getObject()) {
             unreachableStepStep { journey.taskListStep }
-            step("task-list", journey.taskListStep) {
+            step(journey.taskListStep) {
+                routeSegment("task-list")
                 initialStep()
                 nextUrl { "task-list" }
             }
@@ -59,7 +60,8 @@ class FooExampleJourneyFactory(
                     nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
-            step("check-your-answers", journey.fooCheckYourAnswersStep) {
+            step(journey.fooCheckYourAnswersStep) {
+                routeSegment("check-your-answers")
                 parents {
                     AndParents(
                         journey.occupationTask.isComplete(),
