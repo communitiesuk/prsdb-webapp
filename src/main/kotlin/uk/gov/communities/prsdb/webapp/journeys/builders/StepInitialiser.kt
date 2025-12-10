@@ -46,7 +46,7 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
-    override val initialiserName: String,
+    override var initialiserName: String,
 ) : ConfigurableElement<TMode> {
     var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
     var parentageProvider: (() -> Parentage)? = null
@@ -149,19 +149,25 @@ class ElementConfiguration<TMode : Enum<TMode>>(
 }
 
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
-    val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
     private val state: TState,
-    val elementConfiguration: ElementConfiguration<TMode> = ElementConfiguration("Step ${segment ?: step::class.simpleName}"),
+    private val elementConfiguration: ElementConfiguration<TMode> = ElementConfiguration("Step ${step::class.simpleName}"),
 ) : ConfigurableElement<TMode> by elementConfiguration,
     BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
-            throw JourneyInitialisationException("${segment ?: step::class.simpleName} has already been initialised")
+            throw JourneyInitialisationException("$initialiserName has already been initialised")
         }
     }
 
     private var additionalConfig: (TStep.() -> Unit)? = null
+    private var segment: String? = null
+
+    fun routeSegment(segment: String): StepInitialiser<TStep, TState, TMode> {
+        this.segment = segment
+        elementConfiguration.initialiserName = "Step $segment (${step::class.simpleName})"
+        return this
+    }
 
     fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {
