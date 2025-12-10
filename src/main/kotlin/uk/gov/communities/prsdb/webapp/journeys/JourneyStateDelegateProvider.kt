@@ -13,27 +13,27 @@ import kotlin.reflect.KProperty
 class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
 ) {
-    private val propertyKeysInUse = mutableSetOf<String>()
+    private val keysInUse = mutableSetOf<String>()
 
-    fun registerPropertyKey(propertyKey: String) {
-        if (propertyKeysInUse.contains(propertyKey)) {
+    fun registerKey(propertyKey: String) {
+        if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
         } else {
-            propertyKeysInUse.add(propertyKey)
+            keysInUse.add(propertyKey)
         }
     }
 
     final inline fun <TJourney, reified TProperty : Any> mutableDelegate(
         propertyKey: String,
     ): MutableJourneyStateDelegate<TJourney, TProperty> {
-        registerPropertyKey(propertyKey)
+        registerKey(propertyKey)
         return MutableJourneyStateDelegate(journeyStateService, propertyKey, serializer())
     }
 
     final inline fun <TJourney, reified TProperty : Any> requiredDelegate(
         propertyKey: String,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
-        registerPropertyKey(propertyKey)
+        registerKey(propertyKey)
         return RequiredJourneyStateDelegate(journeyStateService, propertyKey, serializer())
     }
 
