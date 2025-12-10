@@ -128,8 +128,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
 
         // Number of people - render page
-        assertThat(peoplePage.form.fieldsetHeading).containsText("How many people live in your property?")
-        assertThat(peoplePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(peoplePage.header).containsText("How many people live in your property?")
+        assertThat(peoplePage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         peoplePage.submitNumOfPeople(2)
         val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
