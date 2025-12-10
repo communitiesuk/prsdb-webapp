@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
@@ -78,6 +79,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFlaggedServiceTestPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFourDisabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureFourEnabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeDisabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -1312,6 +1320,42 @@ class Navigator(
     fun goToLocalCouncilBetaFeedbackPage(): LocalCouncilBetaFeedbackPage {
         navigate(BetaFeedbackController.LOCAL_COUNCIL_FEEDBACK_URL)
         return createValidPage(page, LocalCouncilBetaFeedbackPage::class)
+    }
+
+    // TODO PRSD-1683 - delete example feature flag implementation when no longer needed
+    fun goToFeatureFlaggedServiceTestPage(): FeatureFlaggedServiceTestPage {
+        navigate(ExampleFeatureFlagTestController.FEATURED_FLAGGED_SERVICE_TEST_URL_ROUTE)
+        return createValidPage(page, FeatureFlaggedServiceTestPage::class)
+    }
+
+    fun goToFeatureFlagTwoEnabledPage(): FeatureTwoEnabledPage {
+        navigate(ExampleFeatureFlagTestController.FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
+        return createValidPage(page, FeatureTwoEnabledPage::class)
+    }
+
+    fun goToFeatureFlagTwoDisabledPage(): FeatureTwoDisabledPage {
+        navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_2_ROUTE)
+        return createValidPage(page, FeatureTwoDisabledPage::class)
+    }
+
+    fun goToFeatureFlagThreeEnabledPage(): FeatureThreeEnabledPage {
+        navigate(ExampleFeatureFlagTestController.FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
+        return createValidPage(page, FeatureThreeEnabledPage::class)
+    }
+
+    fun goToFeatureFlagThreeDisabledPage(): FeatureThreeDisabledPage {
+        navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_GROUPED_ENDPOINT_FLAG_3_ROUTE)
+        return createValidPage(page, FeatureThreeDisabledPage::class)
+    }
+
+    fun goToFeatureFlagFourEnabledPage(): FeatureFourEnabledPage {
+        navigate(ExampleFeatureFlagTestController.FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
+        return createValidPage(page, FeatureFourEnabledPage::class)
+    }
+
+    fun goToFeatureFlagFourDisabledPage(): FeatureFourDisabledPage {
+        navigate(ExampleFeatureFlagTestController.INVERSE_FEATURE_FLAGGED_ENDPOINT_WITH_RELEASE_DATE_ROUTE)
+        return createValidPage(page, FeatureFourDisabledPage::class)
     }
 
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")

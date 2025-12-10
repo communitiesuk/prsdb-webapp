@@ -138,9 +138,23 @@ It is currently set up to add a custom `CombinedFlipStrategy` to the features wh
 Tests should inherit from FeatureFlagTest. This uses FeatureFlagConfig from test's version of application.yml to get flag values, but they also can be enabled or disabled in particular tests as required.
 
 See the following for example tests:
-* ExampleFeatureFlagServiceTest.kt
-* ExampleFeatureFlaggedEndpointAvailabilityTest.kt
+* ExampleFeatureFlagServiceTests.kt
+* ExampleFeatureFlaggedTemplateSelectionTests.kt
+* ExampleFeatureFlaggedEndpointAvailabilityTests.kt
 
 ### Related tests
 We can add controller tests in the usual way - the endpoints are called whether the feature is enabled or not because @WebMvcTest doesn't check the WebMvcRegistrations
 * ExampleFeatureFlagTestControllerTests.kt
+
+### Integration tests
+By default, integration tests use the feature flag config from `application.yml` (or `application-<env>.yml` if it exists).
+But we can modify the configuration and run tests with different flag settings as required.
+
+* Simple updates (enable / disable an individual flag or release) can be done by calling the relevant `FeatureFlagManager` method before running the test
+* For more complex updates, there is a `FeatureFlagConfigUpdater` test helper which will update flipping strategies or re-initialize all flags and releases as required.
+
+See `ExampleFlaggedFeaturesTests` for examples of testing behaviour after
+* enabling / disabling individual flags
+* enabling / disabling a release
+* updating flipping strategies on flags and releases
+* re-initializing all flags and releases with new config
