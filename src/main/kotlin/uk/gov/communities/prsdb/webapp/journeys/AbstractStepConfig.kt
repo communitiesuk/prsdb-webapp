@@ -98,7 +98,5 @@ abstract class StateSavingStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TS
 }
 
 interface SavableJourneyState : JourneyState {
-    var savedId: Long?
-
     fun save(): Long
 }

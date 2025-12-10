@@ -132,7 +132,7 @@ class PropertyRegistrationJourneyState(
     override val rentIncludesBills: RentIncludesBillsStep,
     val occupationTask: OccupationTask,
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
-    private val journeyStateService: JourneyStateService,
+    journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     AddressState,
@@ -143,15 +143,12 @@ class PropertyRegistrationJourneyState(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
-    override var savedId: Long? by delegateProvider.mutableDelegate("savedId")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
     }
-
-    override fun save(): Long = journeyStateService.saveJourney(this)
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
