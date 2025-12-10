@@ -30,6 +30,8 @@ class BillsIncludedFormModel : FormModel {
     var communalAreasCleaner: Boolean = false
     var somethingElse: Boolean = false
 
+    var billsIncluded: MutableList<String> = mutableListOf()
+
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -46,18 +48,14 @@ class BillsIncludedFormModel : FormModel {
     )
     var customBillsIncluded: String = ""
 
-    var billsIncluded: String = ""
+    fun isSomethingElseSelected(): Boolean = billsIncluded.contains("SOMETHING_ELSE")
 
-    fun notAllFalse(): Boolean =
-        !(
-            gas || electricity || water || councilTax || contentsInsurance ||
-                broadband || tvLicence || cableSatelliteTv || gardening || communalAreasCleaner || somethingElse
-        )
+    fun notAllFalse(): Boolean = billsIncluded.isNotEmpty()
 
-    fun isCustomBillsIncludedValidNotBlank(): Boolean = !somethingElse || customBillsIncluded.isNotBlank()
+    fun isCustomBillsIncludedValidNotBlank(): Boolean = !isSomethingElseSelected() || customBillsIncluded.isNotBlank()
 
     fun isCustomBillsIncludedNotTooLong(): Boolean =
-        !somethingElse ||
+        !isSomethingElseSelected() ||
             LengthConstraintValidator("0", CUSTOM_BILLS_INCLUDED_MAX_LENGTH.toString()).isValid(customBillsIncluded)
 }
 
