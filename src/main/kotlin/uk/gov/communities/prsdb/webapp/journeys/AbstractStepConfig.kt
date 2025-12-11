@@ -93,10 +93,7 @@ abstract class StateSavingStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TS
 
     open fun afterSaveState(state: TState) {}
 
-    open fun saveState(state: TState): Long {
-        val id = state.save()
-        return id
-    }
+    open fun saveState(state: TState): Long = state.save()
 
     override fun afterSubmitFormData(state: TState) {
         super.afterSubmitFormData(state)

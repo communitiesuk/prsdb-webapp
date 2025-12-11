@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import java.util.UUID
@@ -36,7 +37,7 @@ class JourneyStateService(
 ) {
     val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()
 
-    private val persistenceService get() = persistenceServiceOrNull ?: throw Exception("No persistence service provided")
+    private val persistenceService get() = persistenceServiceOrNull ?: throw PrsdbWebException("No persistence service provided")
 
     @Autowired
     constructor(
@@ -71,8 +72,7 @@ class JourneyStateService(
 
     fun save(): Long {
         val journeyState = session.getAttribute(journeyMetadata.dataKey) ?: mapOf<String, Any?>()
-        return persistenceService?.saveJourneyStateData(journeyState, journeyId)
-            ?: throw Exception("Optional stateSaver not provided to restore journey state")
+        return persistenceService.saveJourneyStateData(journeyState, journeyId)
     }
 
     fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyMetadata.dataKey))?.get(key)
