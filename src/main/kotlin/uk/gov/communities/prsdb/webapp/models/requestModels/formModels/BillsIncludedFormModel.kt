@@ -37,7 +37,7 @@ class BillsIncludedFormModel : FormModel {
     )
     var customBillsIncluded: String = ""
 
-    fun isSomethingElseSelected(): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString())
+    private fun isSomethingElseSelected(): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString())
 
     fun notAllFalse(): Boolean = billsIncluded.isNotEmpty()
 
