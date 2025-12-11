@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.beans.MutablePropertyValues
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
@@ -88,15 +87,21 @@ abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel
     override fun isSubClassInitialised(): Boolean = true
 }
 
-@Component
-abstract class StateSavingStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : SavableJourneyState> :
-    AbstractGenericStepConfig<TEnum, TModel, TState>() {
+abstract class StateSavingStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
+    AbstractStepConfig<TEnum, TModel, TState>() {
+    open fun beforeSaveState(state: TState) {}
+
+    open fun afterSaveState(state: TState) {}
+
+    open fun saveState(state: TState): Long {
+        val id = state.save()
+        return id
+    }
+
     override fun afterSubmitFormData(state: TState) {
         super.afterSubmitFormData(state)
-        state.save()
+        beforeSaveState(state)
+        saveState(state)
+        afterSaveState(state)
     }
-}
-
-interface SavableJourneyState : JourneyState {
-    fun save(): Long
 }

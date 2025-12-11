@@ -72,6 +72,8 @@ class SelectAddressStepConfig(
         state.isAddressAlreadyRegistered = state.getAddressOrNull()?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) }
     }
 
+    override fun isSubClassInitialised(): Boolean = true
+
     override fun chooseTemplate(state: AddressState): String = "forms/selectAddressForm"
 
     override fun mode(state: AddressState): SelectAddressMode? =

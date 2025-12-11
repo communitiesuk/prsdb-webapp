@@ -30,7 +30,7 @@ abstract class AbstractJourneyState(
         return journeyId
     }
 
-    fun save(): Long = journeyStateService.save()
+    override fun save(): Long = journeyStateService.save()
 
     override fun initializeChildState(
         childJourneyName: String,
