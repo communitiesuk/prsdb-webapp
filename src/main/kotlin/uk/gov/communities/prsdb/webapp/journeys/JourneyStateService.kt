@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import java.util.UUID
-import kotlin.collections.plus
 
 @Serializable
 data class JourneyMetadata(
