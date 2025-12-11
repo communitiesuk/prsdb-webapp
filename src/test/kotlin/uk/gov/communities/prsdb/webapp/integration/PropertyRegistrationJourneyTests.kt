@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
@@ -146,6 +147,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(rentIncludesBillsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         rentIncludesBillsPage.submitIsIncluded()
+        val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
+
+        // Bills included - render page
+        assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Which of these do you include in the rent?")
+        assertThat(billsIncludedPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        // fill in and submit
+        billsIncludedPage.selectGasElectricityWater()
+        billsIncludedPage.selectSomethingElseCheckbox()
+        billsIncludedPage.fillCustomBills("Dog Grooming")
+        billsIncludedPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
