@@ -17,3 +17,6 @@ insert_final_newline = false
 
 [*.{scss,json,yml}]
 indent_size = 2
+
+[*.md]
+insert_final_newline = false
