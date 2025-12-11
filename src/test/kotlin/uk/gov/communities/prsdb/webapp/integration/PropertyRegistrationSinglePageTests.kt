@@ -331,7 +331,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with a blank numberOfPeople field returns an error`(page: Page) {
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.form.submit()
-            assertThat(peoplePage.form.getErrorMessage()).containsText("Enter the number of people living in your property")
+            assertThat(peoplePage.form.getErrorMessage()).containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -339,7 +339,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("not-a-number")
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -347,7 +347,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("2.3")
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -355,7 +355,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople("-2")
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -363,7 +363,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val peoplePage = navigator.skipToPropertyRegistrationPeoplePage()
             peoplePage.submitNumOfPeople(0)
             assertThat(peoplePage.form.getErrorMessage())
-                .containsText("Number of people in your property must be a positive, whole number, like 3")
+                .containsText("Enter how many people, like 2 or 5")
         }
 
         @Test
@@ -378,6 +378,56 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 .containsText(
                     "The number of people in the property must be the same as or higher than the number of households in the property",
                 )
+        }
+    }
+
+    @Nested
+    inner class NumberOfBedroomsStep {
+        val numberOfBedroomsErrorMessage = "Enter the number of bedrooms, like 3 or 8"
+
+        @Test
+        fun `Submitting with a blank numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.form.submit()
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a non-numerical value in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms("not-a-number")
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a non-integer number in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms("2.3")
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a negative integer in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms("-2")
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a zero integer in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms(0)
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class RentIncludesBillsStep {
+        @Test
+        fun `Submitting with no rent included option selected returns an error`(page: Page) {
+            val rentIncludesBillsPage = navigator.skipToPropertyRegistrationRentIncludesBillsPage()
+            rentIncludesBillsPage.form.submit()
+            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select whether the rent includes bills")
         }
     }
 

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(FlippingStrategy, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <h1 class="govuk-heading-l" th:text="${ffTestHeading}">ffTestHeading </h1>
+    <p class="govuk-body">
+        <span>The feature flag controlling whether this page is available is part of the Feature Release </span>
+        <span th:text="${flagGroupName}"> </span>
+    </p>
+    <p class="govuk-body">
+        <span>This release has an attached flipping strategy, so the feature should only be enabled after </span>
+        <span th:text="${releaseDate}"> </span>
+    </p>
+    <h1 class="govuk-heading-m" th:text="${ffSubHeading}">ffSubHeading </h1>
+    <p class="govuk-body" th:text="${flagValueInConfig}"></p>
+    <p class="govuk-body" th:text="${flagGroupValueInConfig}"></p>
+    <p class="govuk-body" th:text="${featureEnabled}"></p>
+</main>
+</html>

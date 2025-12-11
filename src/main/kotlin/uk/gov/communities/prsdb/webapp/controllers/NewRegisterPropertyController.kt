@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.example.NewPropertyRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -49,7 +48,6 @@ class NewRegisterPropertyController(
         principal: Principal,
     ): ModelAndView =
         try {
-            println("Getting step $stepName")
             val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
@@ -66,11 +64,11 @@ class NewRegisterPropertyController(
         principal: Principal,
     ): ModelAndView =
         try {
-            println("Posting step $stepName with data $formData")
-            propertyRegistrationJourneyFactory.createJourneySteps()[stepName]?.postStepModelAndView(formData)
+            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
+            journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = PropertyRegistrationJourneyState.generateJourneyId(principal)
+            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }

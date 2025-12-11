@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
-    <h1 class="govuk-heading-l" th:text="#{forms.numberOfHouseholds.heading}">
+    <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}">
         forms.numberOfHouseholds.heading
     </h1>
     <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.one}">
@@ -29,10 +29,13 @@
         <li th:text="#{forms.numberOfHouseholds.bullet.point.three}">forms.numberOfHouseholds.bullet.point.three</li>
         <li th:text="#{forms.numberOfHouseholds.bullet.point.four}">forms.numberOfHouseholds.bullet.point.four</li>
     </ul>
+    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.four}">
+        forms.numberOfHouseholds.paragraph.four
+    </p>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{forms.numberOfHouseholds.fieldSetHeading}, null)}">
         <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfHouseholds', null, 2)}">
         </div>
     </th:block>

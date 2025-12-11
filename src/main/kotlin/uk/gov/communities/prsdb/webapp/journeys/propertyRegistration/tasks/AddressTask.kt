@@ -16,7 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class AddressTask : Task<AddressState>() {
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
-            step("lookup-address", journey.lookupStep) {
+            step(journey.lookupStep) {
+                routeSegment("lookup-address")
                 nextStep { mode ->
                     when (mode) {
                         LookupAddressMode.ADDRESSES_FOUND -> journey.selectAddressStep
@@ -24,7 +25,8 @@ class AddressTask : Task<AddressState>() {
                     }
                 }
             }
-            step("select-address", journey.selectAddressStep) {
+            step(journey.selectAddressStep) {
+                routeSegment("select-address")
                 parents { journey.lookupStep.hasOutcome(LookupAddressMode.ADDRESSES_FOUND) }
                 nextStep { mode ->
                     when (mode) {
@@ -34,11 +36,13 @@ class AddressTask : Task<AddressState>() {
                     }
                 }
             }
-            step("no-address-found", journey.noAddressFoundStep) {
+            step(journey.noAddressFoundStep) {
+                routeSegment("no-address-found")
                 parents { journey.lookupStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { journey.manualAddressStep }
             }
-            step("manual-address", journey.manualAddressStep) {
+            step(journey.manualAddressStep) {
+                routeSegment("manual-address")
                 parents {
                     OrParents(
                         journey.selectAddressStep.hasOutcome(SelectAddressMode.MANUAL_ADDRESS),
@@ -47,11 +51,13 @@ class AddressTask : Task<AddressState>() {
                 }
                 nextStep { journey.localCouncilStep }
             }
-            step("already-registered", journey.alreadyRegisteredStep) {
+            step(journey.alreadyRegisteredStep) {
+                routeSegment("already-registered")
                 parents { journey.selectAddressStep.hasOutcome(SelectAddressMode.ADDRESS_ALREADY_REGISTERED) }
                 noNextDestination()
             }
-            step("local-authority", journey.localCouncilStep) {
+            step(journey.localCouncilStep) {
+                routeSegment("local-council")
                 parents { journey.manualAddressStep.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }

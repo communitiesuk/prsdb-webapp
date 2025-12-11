@@ -3,10 +3,10 @@
 <main class="govuk-main-wrapper" id="main-content">
     <h1 class="govuk-heading-l" th:text="${ffTestHeading}">ffTestHeading </h1>
     <p class="govuk-body">
-        <span>The feature flag controlling whether this page is available is part of the Feature Flag Group </span>
+        <span>The feature flag controlling whether this page is available is part of the Feature Release </span>
         <span th:text="${flagGroupName}"> </span>
     </p>
-    <p class="govuk-body">This is likely to be used to group features into a release.</p>
+    <p class="govuk-body">This is used to group features into a release.</p>
     <h1 class="govuk-heading-m" th:text="${ffSubHeading}">ffSubHeading </h1>
     <p class="govuk-body" th:text="${flagValueInConfig}"></p>
     <p class="govuk-body" th:text="${flagGroupValueInConfig}"></p>

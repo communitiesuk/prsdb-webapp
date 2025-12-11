@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -42,7 +43,8 @@ class FooExampleJourneyFactory(
 
         return journey(stateFactory.getObject()) {
             unreachableStepStep { journey.taskListStep }
-            step("task-list", journey.taskListStep) {
+            step(journey.taskListStep) {
+                routeSegment("task-list")
                 initialStep()
                 nextUrl { "task-list" }
             }
@@ -60,7 +62,8 @@ class FooExampleJourneyFactory(
                     nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
-            step("check-your-answers", journey.fooCheckYourAnswersStep) {
+            step(journey.fooCheckYourAnswersStep) {
+                routeSegment("check-your-answers")
                 parents {
                     AndParents(
                         journey.occupationTask.isComplete(),
@@ -95,12 +98,13 @@ class FooJourneyState(
     private val journeyStateService: JourneyStateService,
     val occupationTask: OccupationTask,
     val epcTask: EpcTask,
+    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     OccupationState,
     EpcJourneyState {
-    override var automatchedEpc: EpcDataModel? by mutableDelegate("automatchedEpc", serializer())
-    override var searchedEpc: EpcDataModel? by mutableDelegate("searchedEpc", serializer())
-    override val propertyId: Long by requiredDelegate("propertyId", serializer())
+    override var automatchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("automatchedEpc")
+    override var searchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("searchedEpc")
+    override val propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state
     final fun initializeJourneyState(propertyId: Long): String {

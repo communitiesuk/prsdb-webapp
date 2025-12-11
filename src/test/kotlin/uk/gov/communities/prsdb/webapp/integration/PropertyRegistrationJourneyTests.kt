@@ -25,11 +25,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfBedroomsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
@@ -119,17 +121,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
 
         // Number of households - render page
-        assertThat(householdsPage.form.fieldsetLegend).containsText("How many households are in your property?")
+        assertThat(householdsPage.header).containsText("Households in your property")
         assertThat(householdsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         householdsPage.submitNumberOfHouseholds(2)
         val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
 
         // Number of people - render page
-        assertThat(peoplePage.form.fieldsetHeading).containsText("How many people live in your property?")
-        assertThat(peoplePage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(peoplePage.header).containsText("How many people live in your property?")
+        assertThat(peoplePage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         peoplePage.submitNumOfPeople(2)
+        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
+
+        // Number of bedrooms - render page
+        assertThat(bedroomsPage.form.fieldsetLegend).containsText("How many bedrooms are in your property?")
+        assertThat(bedroomsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        // fill in and submit
+        bedroomsPage.submitNumOfBedrooms(3)
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+
+        // Does the rent include bills - render page
+        assertThat(rentIncludesBillsPage.form.fieldsetHeading).containsText("Does the rent include bills?")
+        assertThat(rentIncludesBillsPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        // fill in and submit
+        rentIncludesBillsPage.submitIsIncluded()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
