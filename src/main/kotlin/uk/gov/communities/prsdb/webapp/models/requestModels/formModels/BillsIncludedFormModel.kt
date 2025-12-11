@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.constants.CUSTOM_BILLS_INCLUDED_MAX_LENGTH
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -18,18 +19,6 @@ class BillsIncludedFormModel : FormModel {
             ),
         ],
     )
-    var gas: Boolean = false
-    var electricity: Boolean = false
-    var water: Boolean = false
-    var councilTax: Boolean = false
-    var contentsInsurance: Boolean = false
-    var broadband: Boolean = false
-    var tvLicence: Boolean = false
-    var cableSatelliteTv: Boolean = false
-    var gardening: Boolean = false
-    var communalAreasCleaner: Boolean = false
-    var somethingElse: Boolean = false
-
     var billsIncluded: MutableList<String> = mutableListOf()
 
     @ValidatedBy(
@@ -48,7 +37,7 @@ class BillsIncludedFormModel : FormModel {
     )
     var customBillsIncluded: String = ""
 
-    fun isSomethingElseSelected(): Boolean = billsIncluded.contains("SOMETHING_ELSE")
+    fun isSomethingElseSelected(): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString())
 
     fun notAllFalse(): Boolean = billsIncluded.isNotEmpty()
 
@@ -58,5 +47,3 @@ class BillsIncludedFormModel : FormModel {
         !isSomethingElseSelected() ||
             LengthConstraintValidator("0", CUSTOM_BILLS_INCLUDED_MAX_LENGTH.toString()).isValid(customBillsIncluded)
 }
-
-// TODO: PDJB-108 revist this once we can see it
