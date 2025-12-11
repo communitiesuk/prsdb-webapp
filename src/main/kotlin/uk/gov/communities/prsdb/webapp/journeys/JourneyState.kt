@@ -36,4 +36,6 @@ interface JourneyState {
                 .and(0x7FFFFFFFu)
                 .toString(36)
         }
+
+    fun save(): Long
 }
