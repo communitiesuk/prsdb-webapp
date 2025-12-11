@@ -12,13 +12,24 @@ abstract class BillsIncludedFormBasePage(
 ) : BasePage(page, urlSegment) {
     val form = BillsIncludedForm(page)
 
-    fun selectSomethingElse() {
+    fun selectGasElectricityWater() {
+        form.billsIncludedCheckboxes.checkCheckbox(
+            BillsIncluded.GAS.toString(),
+        )
+        form.billsIncludedCheckboxes.checkCheckbox(
+            BillsIncluded.ELECTRICITY.toString(),
+        )
+        form.billsIncludedCheckboxes.checkCheckbox(
+            BillsIncluded.WATER.toString(),
+        )
+    }
+
+    fun selectSomethingElseCheckbox() {
         form.billsIncludedCheckboxes.checkCheckbox(BillsIncluded.SOMETHING_ELSE.toString())
     }
 
-    fun submitCustomBillsIncludedDetails(details: String) {
+    fun fillCustomBills(details: String) {
         form.customBillsIncludedTextArea.fill(details)
-        form.submit()
     }
 
     class BillsIncludedForm(
