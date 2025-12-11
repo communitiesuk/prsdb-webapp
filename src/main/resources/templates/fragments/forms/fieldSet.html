@@ -1,3 +1,4 @@
+<!--TODO PDJB-108 the 'govuk-form-group--error' below is being added to the html - this should not be added for the customBillsIncluded errors -->
 <div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" class="govuk-form-group" th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
     <fieldset class="govuk-fieldset" th:attr="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint ' : ''}${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
         <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend govuk-fieldset__legend--l">
