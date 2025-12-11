@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderT
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
@@ -21,7 +21,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     private lateinit var context: ApplicationContext
 
     @Mock
-    lateinit var emailSender: NotifyEmailNotificationService<IncompletePropertyReminderEmail>
+    private lateinit var emailSender: EmailNotificationService<IncompletePropertyReminderEmail>
 
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
