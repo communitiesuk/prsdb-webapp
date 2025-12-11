@@ -35,6 +35,4 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
     }
 
     constructor(user: OneLoginUser, journeyId: String) : this(serializedState = "{}", user, journeyId)
-
-    fun toSessionState(): String = serializedState
 }

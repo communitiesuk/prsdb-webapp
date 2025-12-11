@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.junit.jupiter.api.Test
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -75,7 +78,7 @@ class JourneyStateServiceTests {
     }
 
     @Test
-    fun `getJourneyDataKey returns the corresponding value from the metadata map, if present`() {
+    fun `journeyMetadata returns the corresponding value from the metadata map, if present`() {
         // Arrange
         val session = MockHttpSession()
         val journeyId = "journey-1"
@@ -92,22 +95,54 @@ class JourneyStateServiceTests {
     }
 
     @Test
-    fun `getJourneyDataKey calls through to restore if the corresponding value is not in the metadata map`() {
+    fun `journeyMetadata restores the journey if possible, when the corresponding value is not in the metadata map`() {
         // Arrange
         val session = mock<HttpSession>()
         val journeyId = "journey-1"
-        val expectedDataKey = "data-key-1"
-        val metadataMap = mapOf(journeyId to expectedDataKey)
-        val stateSaver = mock<StateSaver>()
-        whenever(stateSaver.retrieveJourneyStateData(anyOrNull())).thenReturn(mapOf<String, Any?>())
-        whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(metadataMap)
-        val service = JourneyStateService(session, "journey-2", stateSaver)
+        val expectedMetadata = JourneyMetadata("data-key-1")
+        val metadataMap = mapOf(journeyId to expectedMetadata)
+        val journeyStatePersistenceService = mock<JourneyStatePersistenceService>()
+        val retrievedData = mapOf<String, Any?>("restoredKey" to "restoredValue")
+        whenever(journeyStatePersistenceService.retrieveJourneyStateData(anyOrNull())).thenReturn(retrievedData)
+        whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(Json.encodeToString(metadataMap))
+        val service = JourneyStateService(session, "journey-2", journeyStatePersistenceService)
 
         // Act
         service.journeyMetadata
 
         // Assert
-        verify(stateSaver).retrieveJourneyStateData("journey-2")
+        verify(journeyStatePersistenceService).retrieveJourneyStateData("journey-2")
+
+        val dataKeyCaptor = argumentCaptor<String>()
+        verify(session).setAttribute(dataKeyCaptor.capture(), eq(retrievedData))
+        verify(session).setAttribute(
+            "journeyStateKeyStore",
+            Json.encodeToString(
+                mapOf(
+                    "journey-1" to expectedMetadata,
+                    "journey-2" to JourneyMetadata(dataKeyCaptor.firstValue),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `journeyMetadata throws an exception, if the journey cannot be restored when the corresponding value is not in the metadata map`() {
+        // Arrange
+        val session = mock<HttpSession>()
+        val journeyId = "journey-1"
+        val expectedDataKey = "data-key-1"
+        val metadataMap = mapOf(journeyId to expectedDataKey)
+        val journeyStatePersistenceService = mock<JourneyStatePersistenceService>()
+        whenever(journeyStatePersistenceService.retrieveJourneyStateData(anyOrNull())).thenReturn(null)
+        whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(metadataMap)
+        val service = JourneyStateService(session, "journey-2", journeyStatePersistenceService)
+
+        // Act & Assert
+        assertThrows<NoSuchJourneyException> { service.journeyMetadata }
+
+        // Assert
+        verify(journeyStatePersistenceService).retrieveJourneyStateData("journey-2")
     }
 
     @Test
