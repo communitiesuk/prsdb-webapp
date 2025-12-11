@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import org.springframework.context.annotation.Scope
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
@@ -34,7 +35,7 @@ class OccupationTask : Task<OccupationState>() {
                 nextStep { journey.bedrooms }
             }
             step(journey.bedrooms) {
-                routeSegment("bedrooms")
+                routeSegment(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
                 parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.rentIncludesBills }
             }
