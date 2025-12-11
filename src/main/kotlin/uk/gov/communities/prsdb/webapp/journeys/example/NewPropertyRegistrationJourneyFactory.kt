@@ -67,28 +67,33 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
                     checkable()
+                    saveProgress()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment("property-type")
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
                     checkable()
+                    saveProgress()
                 }
                 step(journey.ownershipTypeStep) {
                     routeSegment("ownership-type")
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
                     checkable()
+                    saveProgress()
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     checkable()
+                    saveProgress()
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.cyaStep }
                     checkable()
+                    saveProgress()
                 }
             }
             section {

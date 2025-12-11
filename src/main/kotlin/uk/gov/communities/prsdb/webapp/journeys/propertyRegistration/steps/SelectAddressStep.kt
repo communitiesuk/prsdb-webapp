@@ -4,9 +4,9 @@ import org.springframework.context.annotation.Scope
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.StateSavingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 @PrsdbWebComponent
 class SelectAddressStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
-) : StateSavingStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
+) : AbstractGenericStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
     override val formModelClass = SelectAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressState): Map<String, Any?> {
@@ -71,8 +71,6 @@ class SelectAddressStepConfig(
         super.afterSubmitFormData(state)
         state.isAddressAlreadyRegistered = state.getAddressOrNull()?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) }
     }
-
-    override fun isSubClassInitialised(): Boolean = true
 
     override fun chooseTemplate(state: AddressState): String = "forms/selectAddressForm"
 

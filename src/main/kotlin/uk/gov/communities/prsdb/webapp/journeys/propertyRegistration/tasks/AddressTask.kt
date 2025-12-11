@@ -62,6 +62,7 @@ class AddressTask : Task<AddressState>() {
                 nextStep { exitStep }
             }
             exitStep {
+                savable()
                 parents {
                     OrParents(
                         journey.localCouncilStep.hasOutcome(Complete.COMPLETE),

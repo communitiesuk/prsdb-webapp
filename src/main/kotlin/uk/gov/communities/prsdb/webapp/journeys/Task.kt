@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.builders.BuildableElement
+import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
@@ -14,7 +14,7 @@ abstract class Task<in TState : JourneyState> {
     fun getTaskSubJourneyBuilder(
         state: TState,
         exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit,
-    ): BuildableElement {
+    ): SubJourneyBuilder<*> {
         this.exitInit = exitInit
         return makeSubJourney(state)
     }
@@ -22,7 +22,7 @@ abstract class Task<in TState : JourneyState> {
     protected fun <TDslState : TState> subJourney(
         state: TDslState,
         init: SubJourneyBuilder<TDslState>.() -> Unit,
-    ): BuildableElement {
+    ): SubJourneyBuilder<TDslState> {
         if (::subJourneyBuilder.isInitialized) {
             throw JourneyInitialisationException("Task sub-journey has already been initialised")
         }
@@ -33,7 +33,7 @@ abstract class Task<in TState : JourneyState> {
         return localSubJourneyBuilder
     }
 
-    abstract fun makeSubJourney(state: TState): BuildableElement
+    abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
 
     fun taskStatus(): TaskStatus =
         when {
@@ -45,4 +45,14 @@ abstract class Task<in TState : JourneyState> {
 
     val notionalExitStep: NavigationalStep get() = subJourneyBuilder.exitStep
     val firstStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstStep
+
+    protected fun ConfigurableElement<*>.savable() {
+        taggedWith(SAVABLE)
+    }
+
+    companion object {
+        fun SubJourneyBuilder<*>.configureSavable(init: ConfigurableElement<*>.() -> Unit) = configureTagged(SAVABLE, init)
+
+        private const val SAVABLE = "savable step"
+    }
 }

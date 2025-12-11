@@ -43,6 +43,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun backStep(backStepProvider: () -> JourneyStep<*, *, *>?): ConfigurableElement<TMode>
 
     fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
+
+    fun saveProgress(): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -53,6 +55,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var unreachableStepDestination: (() -> Destination)? = null
     var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
+    var shouldSaveProgress: Boolean = false
     override var tags: Set<String> = emptySet()
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
@@ -105,6 +108,11 @@ class ElementConfiguration<TMode : Enum<TMode>>(
             throw JourneyInitialisationException("$initialiserName already has an explicit backUrl defined")
         }
         backDestinationOverride = backUrlProvider
+        return this
+    }
+
+    override fun saveProgress(): ConfigurableElement<TMode> {
+        shouldSaveProgress = true
         return this
     }
 
@@ -200,6 +208,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
                 ?: throw JourneyInitialisationException(
                     "$initialiserName has no unreachableStepDestination defined, and there is no default set at the journey level either",
                 ),
+            elementConfiguration.shouldSaveProgress,
         ) {
             elementConfiguration.additionalContentProviders.associate { provider -> provider() }
         }

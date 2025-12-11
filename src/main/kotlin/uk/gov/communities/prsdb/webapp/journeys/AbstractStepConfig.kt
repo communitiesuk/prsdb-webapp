@@ -45,6 +45,12 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     open fun afterSubmitFormData(state: TState) {}
 
+    open fun beforeSaveState(state: TState) {}
+
+    open fun saveState(state: TState): Long = state.save()
+
+    open fun afterSaveState(state: TState) {}
+
     open fun beforeDetermineNextDestination(state: TState) {}
 
     open fun afterDetermineNextDestination(
@@ -85,20 +91,4 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
     AbstractStepConfig<TEnum, TModel, TState>() {
     override fun isSubClassInitialised(): Boolean = true
-}
-
-abstract class StateSavingStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
-    AbstractStepConfig<TEnum, TModel, TState>() {
-    open fun beforeSaveState(state: TState) {}
-
-    open fun afterSaveState(state: TState) {}
-
-    open fun saveState(state: TState): Long = state.save()
-
-    override fun afterSubmitFormData(state: TState) {
-        super.afterSubmitFormData(state)
-        beforeSaveState(state)
-        saveState(state)
-        afterSaveState(state)
-    }
 }

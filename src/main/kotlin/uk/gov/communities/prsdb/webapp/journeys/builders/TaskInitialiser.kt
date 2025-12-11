@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
 
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
@@ -35,6 +36,11 @@ class TaskInitialiser<TStateInit : JourneyState>(
                 elementConfiguration.parentageProvider
                     ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined"),
             )
+        }
+        if (elementConfiguration.shouldSaveProgress) {
+            taskSubJourney.configureSavable {
+                saveProgress()
+            }
         }
 
         return taskSubJourney.build()
