@@ -1,12 +1,13 @@
 package uk.gov.communities.prsdb.webapp.scheduledTaskRunners
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
@@ -14,22 +15,19 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import java.net.URI
 
+@ExtendWith(MockitoExtension::class)
 class IncompletePropertiesReminderTaskApplicationRunnerTests {
-    @MockitoBean
+    @Mock
     private lateinit var context: ApplicationContext
 
-    @MockitoBean
+    @Mock
     lateinit var emailSender: NotifyEmailNotificationService<IncompletePropertyReminderEmail>
 
-    @MockitoBean
+    @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @BeforeEach
-    fun setUp() {
-        context = mock()
-        emailSender = mock()
-        absoluteUrlProvider = mock()
-    }
+    @InjectMocks
+    private lateinit var runner: IncompletePropertiesReminderTaskApplicationRunner
 
     @Test
     fun `incompletePropertiesReminderTaskLogic sends email to landlord`() {
@@ -44,7 +42,6 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI(mockPrsdUrl))
 
-        val runner = IncompletePropertiesReminderTaskApplicationRunner(context, emailSender, absoluteUrlProvider)
         val method =
             IncompletePropertiesReminderTaskApplicationRunner::class.java
                 .getDeclaredMethod(INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME)
