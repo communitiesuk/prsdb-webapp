@@ -194,5 +194,12 @@
     "enumName": "LOCAL_COUNCIL_USER_INVITATION_INFORM_ADMIN_EMAIL",
     "subject": "GOV.UK - A user has been invited to register as a local council user on the PRS database",
     "bodyLocation": "/emails/LocalCouncilUserInvitationInformAdminEmail.md"
+  },
+  {
+    "test_id": "4d32e9f2-3c82-4ec4-a1d2-2037e76c2ad2",
+    "prod_id": "4c367b23-8797-4305-8e40-5d368a38940e",
+    "enumName": "INCOMPLETE_PROPERTY_REMINDER_EMAIL",
+    "subject": "GOV.UK - You have an incomplete property registration",
+    "bodyLocation": "/emails/IncompletePropertyReminder.md"
   }
 ]
