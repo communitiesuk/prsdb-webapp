@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -68,6 +69,9 @@ abstract class IntegrationTest {
 
     @MockitoBean
     lateinit var osDownloadsClient: OsDownloadsClient
+
+    @MockitoSpyBean
+    lateinit var featureFlagManager: FeatureFlagManager
 
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests

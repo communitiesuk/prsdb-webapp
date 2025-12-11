@@ -50,6 +50,9 @@ features:
       enabled: true
       expiry-date: "2030-01-07"
       release: "release-1-0"
+      strategy-config:
+        release-date: "2025-06-01"
+        enabled-by-strategy: true
     - name: "example-feature-flag-three"
       enabled: false
       expiry-date: "2030-01-07"
@@ -68,3 +71,4 @@ features:
       enabled: true
       strategy-config:
         release-date: "2025-06-01"
+        enabled-by-strategy: true
