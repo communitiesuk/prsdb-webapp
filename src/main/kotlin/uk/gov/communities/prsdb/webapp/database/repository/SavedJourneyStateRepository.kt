@@ -14,4 +14,9 @@ interface SavedJourneyStateRepository : JpaRepository<SavedJourneyState, Long> {
         id: Long,
         principalName: String,
     ): SavedJourneyState?
+
+    fun deleteByJourneyIdAndUser_Id(
+        journeyId: String,
+        principalName: String,
+    )
 }

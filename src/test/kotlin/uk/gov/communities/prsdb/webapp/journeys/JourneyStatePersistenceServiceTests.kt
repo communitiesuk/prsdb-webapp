@@ -185,6 +185,33 @@ class JourneyStatePersistenceServiceTests {
         assertEquals(null, retrievedState)
     }
 
+    @Test
+    fun `deleteJourneyStateData deletes a saved journey state`() {
+        // Arrange
+        val userName = "test-user"
+        val testJourneyId = "journey-123"
+
+        setSecurityContextWithUser(userName)
+        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
+        val oneLoginUser = OneLoginUser()
+        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+
+        val mockJourneyRepository = mock<SavedJourneyStateRepository>()
+
+        val underTest =
+            JourneyStatePersistenceService(
+                journeyRepository = mockJourneyRepository,
+                oneLoginUserRepository = mockOneLoginUserRepository,
+                objectMapper = ObjectMapper(),
+            )
+
+        // Act
+        underTest.deleteJourneyStateData(journeyId = testJourneyId)
+
+        // Assert
+        verify(mockJourneyRepository).deleteByJourneyIdAndUser_Id(testJourneyId, userName)
+    }
+
     private fun setSecurityContextWithUser(username: String) {
         val authentication = mock(org.springframework.security.core.Authentication::class.java)
         whenever(authentication.name).thenReturn(username)
