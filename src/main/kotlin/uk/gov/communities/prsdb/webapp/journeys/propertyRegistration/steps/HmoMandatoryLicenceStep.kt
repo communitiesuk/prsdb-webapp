@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -9,8 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoMandatoryLicenceFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class HmoMandatoryLicenceStepConfig : AbstractGenericStepConfig<Complete, HmoMandatoryLicenceFormModel, JourneyState>() {
     override val formModelClass = HmoMandatoryLicenceFormModel::class
 
@@ -37,8 +35,7 @@ class HmoMandatoryLicenceStepConfig : AbstractGenericStepConfig<Complete, HmoMan
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class HmoMandatoryLicenceStep(
     stepConfig: HmoMandatoryLicenceStepConfig,
 ) : RequestableStep<Complete, HmoMandatoryLicenceFormModel, JourneyState>(stepConfig)

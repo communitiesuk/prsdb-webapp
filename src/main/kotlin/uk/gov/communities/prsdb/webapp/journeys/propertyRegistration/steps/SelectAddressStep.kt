@@ -1,8 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
 import org.springframework.validation.BindingResult
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -13,8 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class SelectAddressStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
 ) : AbstractGenericStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
@@ -84,8 +82,7 @@ class SelectAddressStepConfig(
         }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class SelectAddressStep(
     stepConfig: SelectAddressStepConfig,
 ) : RequestableStep<SelectAddressMode, SelectAddressFormModel, AddressState>(stepConfig)

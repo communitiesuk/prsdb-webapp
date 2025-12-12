@@ -1,15 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class BedroomsStepConfig : AbstractGenericStepConfig<Complete, NumberOfBedroomsFormModel, OccupationState>() {
     override val formModelClass = NumberOfBedroomsFormModel::class
 
@@ -24,8 +22,7 @@ class BedroomsStepConfig : AbstractGenericStepConfig<Complete, NumberOfBedroomsF
     override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.numberOfBedrooms?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class BedroomsStep(
     stepConfig: BedroomsStepConfig,
 ) : RequestableStep<Complete, NumberOfBedroomsFormModel, OccupationState>(stepConfig)

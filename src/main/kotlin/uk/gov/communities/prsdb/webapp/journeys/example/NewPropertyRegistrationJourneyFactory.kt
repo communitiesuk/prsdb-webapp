@@ -1,8 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -110,8 +109,7 @@ class NewPropertyRegistrationJourneyFactory(
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
 
-@PrsdbWebComponent
-@Scope("prototype")
+@JourneyFrameworkComponent
 class PropertyRegistrationJourney(
     // Task list step
     override val taskListStep: PropertyRegistrationTaskListStep,

@@ -4,8 +4,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriComponentsBuilder
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 sealed class Destination {
     abstract fun toModelAndView(): ModelAndView
