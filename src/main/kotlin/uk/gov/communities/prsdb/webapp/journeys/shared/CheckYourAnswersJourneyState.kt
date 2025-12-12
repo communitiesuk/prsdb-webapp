@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared
 
+import uk.gov.communities.prsdb.webapp.constants.ReservedTagValues
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -36,7 +37,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
         fun ConfigurableElement<*>.checkable() = taggedWith(CHECKABLE)
 
-        private const val CHECKABLE = "checkable"
+        private const val CHECKABLE = ReservedTagValues.CHECKABLE
         private const val CHECK_ANSWERS_JOURNEY_NAME = "checkYourAnswers"
     }
 }
