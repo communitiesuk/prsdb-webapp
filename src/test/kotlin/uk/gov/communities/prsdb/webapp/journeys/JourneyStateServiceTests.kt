@@ -279,6 +279,51 @@ class JourneyStateServiceTests {
     }
 
     @Test
+    fun `deleteState calls persistenceService to delete the base journey state data`() {
+        // Arrange
+        val session = MockHttpSession()
+        val baseJourneyId = "journey-1"
+        val childJourneyId = "journey-2"
+        val dataKey = "data-key-2"
+        val metadataMap =
+            mapOf(
+                baseJourneyId to JourneyMetadata("data-key-1"),
+                childJourneyId to JourneyMetadata(dataKey, baseJourneyId = baseJourneyId),
+            )
+        session.setJourneyStateMetadataMap(metadataMap)
+        val mockPersistenceService = mock<JourneyStatePersistenceService>()
+        val service = JourneyStateService(session, childJourneyId, mockPersistenceService)
+
+        // Act
+        service.deleteState()
+
+        // Assert
+        verify(mockPersistenceService).deleteJourneyStateData(baseJourneyId)
+    }
+
+    @Test
+    fun `deleteState calls persistenceService to delete the current journey state data if there is no base journey`() {
+        // Arrange
+        val session = MockHttpSession()
+        val journeyId = "journey-1"
+        val dataKey = "data-key-1"
+        val metadataMap =
+            mapOf(
+                journeyId to JourneyMetadata(dataKey),
+                "journey-2" to JourneyMetadata("data-key-2"),
+            )
+        session.setJourneyStateMetadataMap(metadataMap)
+        val mockPersistenceService = mock<JourneyStatePersistenceService>()
+        val service = JourneyStateService(session, journeyId, mockPersistenceService)
+
+        // Act
+        service.deleteState()
+
+        // Assert
+        verify(mockPersistenceService).deleteJourneyStateData(journeyId)
+    }
+
+    @Test
     fun `initialiseJourneyWithId sets up a new journey in the session with the provided id`() {
         // Arrange
         val session = MockHttpSession()
