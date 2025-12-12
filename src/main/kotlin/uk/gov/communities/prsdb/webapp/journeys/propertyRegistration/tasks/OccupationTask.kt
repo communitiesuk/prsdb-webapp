@@ -28,11 +28,13 @@ class OccupationTask : Task<OccupationState>() {
                 routeSegment("number-of-households")
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.tenants }
+                savable()
             }
             step(journey.tenants) {
                 routeSegment("number-of-people")
                 parents { journey.households.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.bedrooms }
+                savable()
             }
             step(journey.bedrooms) {
                 routeSegment(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
@@ -45,6 +47,7 @@ class OccupationTask : Task<OccupationState>() {
                 nextStep { exitStep }
             }
             exitStep {
+                savable()
                 parents {
                     OrParents(
                         journey.tenants.hasOutcome(Complete.COMPLETE),

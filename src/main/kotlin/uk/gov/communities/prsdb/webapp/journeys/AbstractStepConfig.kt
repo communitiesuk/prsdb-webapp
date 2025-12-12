@@ -45,6 +45,12 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     open fun afterSubmitFormData(state: TState) {}
 
+    open fun beforeSaveState(state: TState) {}
+
+    open fun saveState(state: TState): Long = state.save()
+
+    open fun afterSaveState(state: TState) {}
+
     open fun beforeDetermineNextDestination(state: TState) {}
 
     open fun afterDetermineNextDestination(

@@ -96,6 +96,17 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         stepConfig.afterSubmitFormData(state)
     }
 
+    //  TODO PRSD-1550: Rename to clarify that these are safe to call even if the step should not be saved
+    fun beforeSaveState() {
+        if (shouldSaveOnCompletion) stepConfig.beforeSaveState(state)
+    }
+
+    fun saveState(): Long? = if (shouldSaveOnCompletion) stepConfig.saveState(state) else null
+
+    fun afterSaveState() {
+        if (shouldSaveOnCompletion) stepConfig.afterSaveState(state)
+    }
+
     fun beforeDetermineNextDestination() {
         stepConfig.beforeDetermineNextDestination(state)
     }
@@ -139,6 +150,8 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
             ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
 
     private lateinit var unreachableStepDestination: () -> Destination
+
+    private var shouldSaveOnCompletion: Boolean = false
 
     fun getUnreachableStepDestination() = unreachableStepDestination()
 
@@ -191,6 +204,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
         unreachableStepDestinationProvider: () -> Destination,
+        shouldSaveOnCompletion: Boolean,
         additionalContentProvider: (() -> Map<String, Any>)? = null,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
@@ -202,6 +216,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
         this.unreachableStepDestination = unreachableStepDestinationProvider
+        this.shouldSaveOnCompletion = shouldSaveOnCompletion
         additionalContentProvider?.let { this.additionalContentProvider = it }
     }
 

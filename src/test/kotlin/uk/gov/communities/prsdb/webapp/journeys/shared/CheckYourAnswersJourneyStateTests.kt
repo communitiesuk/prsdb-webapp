@@ -59,12 +59,14 @@ class CheckYourAnswersJourneyStateTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
         verify(step2).initialize(
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             destinationCaptor.capture(),
+            anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),

@@ -58,6 +58,10 @@ sealed class StepLifecycleOrchestrator(
                 journeyStep.submitFormData(bindingResult)
                 journeyStep.afterSubmitFormData()
 
+                journeyStep.beforeSaveState()
+                journeyStep.saveState()
+                journeyStep.afterSaveState()
+
                 journeyStep.beforeDetermineNextDestination()
                 val nextDestination = journeyStep.determineNextDestination()
                 val finalDestination = journeyStep.afterDetermineNextDestination(nextDestination)
@@ -77,6 +81,10 @@ sealed class StepLifecycleOrchestrator(
             journeyStep.beforeIsStepReachable()
             if (journeyStep.isStepReachable) {
                 journeyStep.afterIsStepReached()
+
+                journeyStep.beforeSaveState()
+                journeyStep.saveState()
+                journeyStep.afterSaveState()
 
                 journeyStep.beforeDetermineNextDestination()
                 val nextDestination = journeyStep.determineNextDestination()
