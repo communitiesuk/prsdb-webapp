@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import java.time.Instant
 import java.time.LocalDate
@@ -141,5 +142,23 @@ class MockLandlordData {
             localCouncil: LocalCouncil = createLocalCouncil(),
             baseUser: OneLoginUser? = createOneLoginUser(),
         ) = Passcode(code, localCouncil, baseUser)
+
+        fun createLandlordSearchResultDataModel(
+            id: Long = 1,
+            name: String = "landlord name",
+            email: String = "landlord@test.org",
+            phoneNumber: String = "01234567890",
+            registrationNumber: Long = 123456,
+            singleLineAddress: String = "123 Test Street, Test Town, TE1 1ST",
+            propertyCount: Long = 5,
+        ) = LandlordSearchResultDataModel(
+            id = id,
+            name = name,
+            email = email,
+            phoneNumber = phoneNumber,
+            registrationNumber = registrationNumber,
+            singleLineAddress = singleLineAddress,
+            propertyCount = propertyCount,
+        )
     }
 }

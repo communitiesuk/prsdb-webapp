@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
@@ -78,6 +79,7 @@ class PrsdbProcessApplicationTests {
                 FeatureFlagConfig::class.simpleBeanName,
                 FeatureFlipStrategyInitialiser::class.simpleBeanName,
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
+                LandlordSearchRepositoryImpl::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

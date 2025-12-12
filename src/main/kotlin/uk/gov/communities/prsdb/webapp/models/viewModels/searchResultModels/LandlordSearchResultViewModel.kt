@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class LandlordSearchResultViewModel(
@@ -16,23 +17,20 @@ data class LandlordSearchResultViewModel(
     val propertyCount: Int,
 ) {
     companion object {
-        fun fromLandlord(
-            landlord: Landlord,
+        fun fromDataModel(
+            dataModel: LandlordSearchResultDataModel,
             currentUrlKey: Int? = null,
         ) = LandlordSearchResultViewModel(
-            id = landlord.id,
-            name = landlord.name,
-            registrationNumber =
-                RegistrationNumberDataModel
-                    .fromRegistrationNumber(landlord.registrationNumber)
-                    .toString(),
-            contactAddress = landlord.address.singleLineAddress,
-            email = landlord.email,
-            phoneNumber = landlord.phoneNumber,
-            propertyCount = landlord.propertyOwnerships.count { it.isActive },
+            id = dataModel.id,
+            name = dataModel.name,
+            registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, dataModel.registrationNumber).toString(),
+            contactAddress = dataModel.singleLineAddress,
+            email = dataModel.email,
+            phoneNumber = dataModel.phoneNumber,
+            propertyCount = dataModel.propertyCount.toInt(),
             recordLink =
                 LandlordDetailsController
-                    .getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                    .getLandlordDetailsForLocalCouncilUserPath(dataModel.id)
                     .overrideBackLinkForUrl(currentUrlKey),
         )
     }

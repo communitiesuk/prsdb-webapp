@@ -143,7 +143,7 @@ class LandlordService(
                 )
             }
 
-        return landlordPage.map { LandlordSearchResultViewModel.fromLandlord(it, backLinkService.storeCurrentUrlReturningKey()) }
+        return landlordPage.map { LandlordSearchResultViewModel.fromDataModel(it, backLinkService.storeCurrentUrlReturningKey()) }
     }
 
     private fun sendUpdateConfirmationEmail(

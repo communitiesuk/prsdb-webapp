@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -39,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpd
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
 import java.net.URI
 import java.time.LocalDate
 import kotlin.reflect.full.hasAnnotation
@@ -242,7 +244,8 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            val matchingLandlords = listOf(createLandlord(), createLandlord(), createLandlord())
+            val matchingLandlords =
+                listOf(createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel())
             whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
                 .thenReturn(PageImpl(matchingLandlords))
 
@@ -254,7 +257,13 @@ class LandlordServiceTests {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
 
             // Assert
-            val expectedSearchResults = matchingLandlords.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
+            val expectedSearchResults =
+                matchingLandlords.map {
+                    LandlordSearchResultViewModel.fromDataModel(
+                        it,
+                        currentUrlKey,
+                    )
+                }
             assertEquals(expectedSearchResults, searchResults.content)
         }
 
@@ -268,7 +277,7 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            val matchingLandlord = listOf(createLandlord())
+            val matchingLandlord = listOf(createLandlordSearchResultDataModel())
             whenever(mockLandlordRepository.searchMatchingLRN(searchLRN, laUserBaseId, pageable = pageRequest))
                 .thenReturn(PageImpl(matchingLandlord))
 
@@ -280,7 +289,13 @@ class LandlordServiceTests {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
 
             // Assert
-            val expectedSearchResults = matchingLandlord.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
+            val expectedSearchResults =
+                matchingLandlord.map {
+                    LandlordSearchResultViewModel.fromDataModel(
+                        it,
+                        currentUrlKey,
+                    )
+                }
             assertEquals(expectedSearchResults, searchResults.content)
         }
 
@@ -336,9 +351,9 @@ class LandlordServiceTests {
             val pageSize = 25
 
             val matchingLandlords =
-                mutableListOf<Landlord>().apply {
+                mutableListOf<LandlordSearchResultDataModel>().apply {
                     for (i in 1..40) {
-                        add(createLandlord())
+                        add(createLandlordSearchResultDataModel())
                     }
                 }
 
@@ -365,10 +380,16 @@ class LandlordServiceTests {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = pageNumber2, pageSize = pageSize)
 
             // Assert
-            val expectedSearchResultsPage1 = matchingLandlordsPage1.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
+            val expectedSearchResultsPage1 =
+                matchingLandlordsPage1.map {
+                    LandlordSearchResultViewModel.fromDataModel(it, currentUrlKey)
+                }
             assertEquals(expectedSearchResultsPage1, searchResults1.content)
 
-            val expectedSearchResultsPage2 = matchingLandlordsPage2.map { LandlordSearchResultViewModel.fromLandlord(it, currentUrlKey) }
+            val expectedSearchResultsPage2 =
+                matchingLandlordsPage2.map {
+                    LandlordSearchResultViewModel.fromDataModel(it, currentUrlKey)
+                }
             assertEquals(expectedSearchResultsPage2, searchResults2.content)
         }
     }
