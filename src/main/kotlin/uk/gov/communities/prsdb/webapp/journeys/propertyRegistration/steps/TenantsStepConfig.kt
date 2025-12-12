@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 
 @Scope("prototype")
 @PrsdbWebComponent
@@ -31,21 +32,25 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NewNumberOfPeopleF
         bindingResult: BindingResult,
     ) {
         super.applyAdditionalValidation(state, bindingResult)
-
-        if (bindingResult.getFormModel().numberOfPeople.toInt() < state.numberOfHouseholds()) {
-            bindingResult.rejectValue(
-                NewNumberOfPeopleFormModel::numberOfPeople.name,
-                "forms.numberOfPeople.input.error.invalidNumber",
+        if (!bindingResult.hasErrors()) {
+            bindingResult.validateNumberOfPeople(
+                bindingResult.getFormModel(),
+                state.households.formModel,
             )
         }
     }
 
-    private fun OccupationState.numberOfHouseholds(): Int =
-        this
-            .households
-            .formModel
-            .numberOfHouseholds
-            .toInt()
+    private fun BindingResult.validateNumberOfPeople(
+        numberOfPeopleFormModel: NewNumberOfPeopleFormModel,
+        numberOfHouseholdsFormModel: NumberOfHouseholdsFormModel,
+    ) {
+        if (numberOfPeopleFormModel.numberOfPeople.toInt() < numberOfHouseholdsFormModel.numberOfHouseholds.toInt()) {
+            rejectValueWithMessageKey(
+                numberOfPeopleFormModel::numberOfPeople.name,
+                "forms.numberOfPeople.input.error.invalidNumber",
+            )
+        }
+    }
 }
 
 @Scope("prototype")
