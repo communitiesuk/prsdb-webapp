@@ -103,6 +103,8 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     @Autowired
     lateinit var validator: Validator
+
+    protected fun BindingResult.getFormModel() = formModelClass.cast(target)
 }
 
 // Generic step config should be used where the subclass does not need any additional initialisation
