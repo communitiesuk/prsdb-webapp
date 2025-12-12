@@ -26,13 +26,13 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NumberOfPeopleForm
 
     override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.numberOfPeople?.let { Complete.COMPLETE }
 
-    override fun beforeValidateSubmittedData(
-        formData: PageData,
+    override fun enrichSubmittedDataBeforeValidation(
         state: OccupationState,
+        formData: PageData,
     ): PageData {
-        super.beforeValidateSubmittedData(formData, state)
+        super.enrichSubmittedDataBeforeValidation(state, formData)
 
-        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households?.formModelOrNull?.numberOfHouseholds)
+        return formData + (NumberOfPeopleFormModel::numberOfHouseholds.name to state.households.formModelOrNull?.numberOfHouseholds)
     }
 }
 

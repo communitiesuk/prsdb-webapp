@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindingResult
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -19,44 +20,61 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     abstract val formModelClass: KClass<TFormModel>
 
-    open fun beforeIsStepReachable(state: TState) {}
+    open fun beforeAttemptingToReachStep(state: TState) {}
 
-    open fun afterIsStepReached(state: TState) {}
+    open fun afterStepIsReached(state: TState) {}
 
-    open fun beforeValidateSubmittedData(
-        formData: PageData,
+    open fun whenStepIsUnreachable(state: TState) {}
+
+    open fun enrichSubmittedDataBeforeValidation(
         state: TState,
+        formData: PageData,
     ): PageData = formData
 
-    open fun afterValidateSubmittedData(
-        bindingResult: BindingResult,
+    open fun applyAdditionalValidation(
         state: TState,
+        bindingResult: BindingResult,
     ) {}
 
-    open fun beforeGetStepContent(state: TState) {}
+    open fun resolvePageContent(
+        state: TState,
+        content: Map<String, Any?>,
+    ): Map<String, Any?> = content
 
-    open fun afterGetStepContent(state: TState) {}
+    open fun resolveChosenTemplate(
+        state: TState,
+        templateName: String,
+    ): Destination = Destination.Template(templateName)
 
-    open fun beforeGetTemplate(state: TState) {}
+    open fun beforeStepDataIsAdded(
+        state: TState,
+        data: PageData,
+    ) {}
 
-    open fun afterGetTemplate(state: TState) {}
-
-    open fun beforeSubmitFormData(state: TState) {}
-
-    open fun afterSubmitFormData(state: TState) {}
+    open fun afterStepDataIsAdded(state: TState) {}
 
     open fun beforeSaveState(state: TState) {}
 
-    open fun saveState(state: TState): Long = state.save()
+    open fun saveState(state: TState) = state.save()
 
-    open fun afterSaveState(state: TState) {}
+    open fun afterSaveState(
+        state: TState,
+        saveStateId: SavedJourneyState,
+    ) {}
 
-    open fun beforeDetermineNextDestination(state: TState) {}
+    open fun beforeChoosingNextDestination(state: TState) {}
 
-    open fun afterDetermineNextDestination(
+    open fun resolveNextDestination(
         state: TState,
         destination: Destination,
     ): Destination = destination
+
+    open fun beforeChosingUnreachableStepDestination(state: TState) {}
+
+    open fun resolveUnreachableStepDestination(
+        state: TState,
+        intendedDestination: Destination,
+    ): Destination = intendedDestination
 
     abstract fun isSubClassInitialised(): Boolean
 

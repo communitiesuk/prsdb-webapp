@@ -48,11 +48,11 @@ class SelectAddressStepConfig(
         )
     }
 
-    override fun afterValidateSubmittedData(
-        bindingResult: BindingResult,
+    override fun applyAdditionalValidation(
         state: AddressState,
+        bindingResult: BindingResult,
     ) {
-        super.afterValidateSubmittedData(bindingResult, state)
+        super.applyAdditionalValidation(state, bindingResult)
 
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
         selectAddressFormModel.address?.let { selectedAddress ->
@@ -67,8 +67,8 @@ class SelectAddressStepConfig(
         }
     }
 
-    override fun afterSubmitFormData(state: AddressState) {
-        super.afterSubmitFormData(state)
+    override fun afterStepDataIsAdded(state: AddressState) {
+        super.afterStepDataIsAdded(state)
         state.isAddressAlreadyRegistered = state.getAddressOrNull()?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) }
     }
 

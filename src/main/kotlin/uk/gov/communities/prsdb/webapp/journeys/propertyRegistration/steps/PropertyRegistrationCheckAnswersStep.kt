@@ -53,14 +53,14 @@ class PropertyRegistrationCyaStepConfig(
         )
     }
 
-    override fun beforeValidateSubmittedData(
-        formData: PageData,
+    override fun enrichSubmittedDataBeforeValidation(
         state: PropertyRegistrationJourneyState,
+        formData: PageData,
     ): PageData =
-        super.beforeValidateSubmittedData(formData, state) +
+        super.enrichSubmittedDataBeforeValidation(state, formData) +
             (CheckAnswersFormModel::storedJourneyData.name to state.getSubmittedStepData())
 
-    override fun afterSubmitFormData(state: PropertyRegistrationJourneyState) {
+    override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
@@ -176,7 +176,7 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
 
-    override fun afterDetermineNextDestination(
+    override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
         destination: Destination,
     ): Destination =
