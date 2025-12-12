@@ -28,8 +28,11 @@ abstract class Task<in TState : JourneyState> {
         }
         val localSubJourneyBuilder = SubJourneyBuilder(state)
         subJourneyBuilder = localSubJourneyBuilder
+        localSubJourneyBuilder.exitStep {
+            savable()
+            exitInit()
+        }
         localSubJourneyBuilder.init()
-        localSubJourneyBuilder.exitStep(exitInit)
         return localSubJourneyBuilder
     }
 

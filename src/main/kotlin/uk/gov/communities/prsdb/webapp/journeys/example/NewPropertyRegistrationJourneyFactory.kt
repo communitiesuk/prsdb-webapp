@@ -87,7 +87,6 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     checkable()
-                    saveProgress()
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 import java.util.UUID
@@ -32,11 +31,9 @@ class JourneyStateService(
     private val session: HttpSession,
     private val journeyIdOrNull: String?,
     // Optional persistence service allows simpler direct construction when persistence is not needed e.g. initialising new journeys
-    private val persistenceServiceOrNull: JourneyStatePersistenceService? = null,
+    private val persistenceService: JourneyStatePersistenceService,
 ) {
     val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()
-
-    private val persistenceService get() = persistenceServiceOrNull ?: throw PrsdbWebException("No persistence service provided")
 
     @Autowired
     constructor(
@@ -109,15 +106,13 @@ class JourneyStateService(
 
     fun initialiseJourneyWithId(
         newJourneyId: String,
-        stateInitialiser: (JourneyStateService.() -> Unit)? = null,
+        stateInitialiser: JourneyStateService.() -> Unit = { },
     ) {
         if (journeyStateMetadataMap.containsKey(newJourneyId)) {
             throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
         }
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
-        stateInitialiser?.let {
-            JourneyStateService(session, newJourneyId, persistenceService).it()
-        }
+        JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
     }
 
     fun initialiseChildJourney(

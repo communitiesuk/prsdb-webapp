@@ -54,7 +54,7 @@ class JourneyStateServiceTests {
         val session = MockHttpSession()
         val expectedMetadataMap = mapOf("journey-1" to JourneyMetadata("data-key-1"), "journey-2" to JourneyMetadata("data-key-2"))
         session.setJourneyStateMetadataMap(expectedMetadataMap)
-        val service = JourneyStateService(session, "null")
+        val service = JourneyStateService(session, "null", mock())
 
         // Act
         val actualMetadataMap = service.journeyStateMetadataMap
@@ -68,7 +68,7 @@ class JourneyStateServiceTests {
         // Arrange
         val session = mock<HttpSession>()
         whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(null)
-        val service = JourneyStateService(session, "null")
+        val service = JourneyStateService(session, "null", mock())
 
         // Act
         val actualMetadataMap = service.journeyStateMetadataMap
@@ -85,7 +85,7 @@ class JourneyStateServiceTests {
         val expectedMetadata = JourneyMetadata("data-key-1")
         val metadataMap = mapOf(journeyId to expectedMetadata)
         session.setJourneyStateMetadataMap(metadataMap)
-        val service = JourneyStateService(session, journeyId)
+        val service = JourneyStateService(session, journeyId, mock())
 
         // Act
         val actualDataKey = service.journeyMetadata

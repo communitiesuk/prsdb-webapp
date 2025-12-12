@@ -44,7 +44,7 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
 
     fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
 
-    fun saveProgress(): ConfigurableElement<TMode>
+    fun saveProgress(shouldSaveProgress: Boolean = true): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -111,8 +111,8 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         return this
     }
 
-    override fun saveProgress(): ConfigurableElement<TMode> {
-        shouldSaveProgress = true
+    override fun saveProgress(shouldSaveProgress: Boolean): ConfigurableElement<TMode> {
+        this.shouldSaveProgress = shouldSaveProgress
         return this
     }
 

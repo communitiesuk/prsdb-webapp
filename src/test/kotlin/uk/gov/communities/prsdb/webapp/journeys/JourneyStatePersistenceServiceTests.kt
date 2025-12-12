@@ -149,6 +149,42 @@ class JourneyStatePersistenceServiceTests {
         assertEquals(mapOf("key" to "value"), retrievedState)
     }
 
+    @Test
+    fun `retrieveJourneyStateData returns null when there is no matching journey state`() {
+        // Arrange
+        val userName = "test-user-without-journey"
+        val testJourneyId = "journey-123"
+
+        setSecurityContextWithUser(userName)
+
+        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
+        val oneLoginUser = OneLoginUser()
+        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+
+        val mockJourneyRepository = mock<SavedJourneyStateRepository>()
+        whenever(
+            mockJourneyRepository.findByJourneyIdAndUser_Id(
+                journeyId = testJourneyId,
+                principalName = userName,
+            ),
+        ).thenReturn(null)
+
+        val realObjectMapper = ObjectMapper()
+
+        val underTest =
+            JourneyStatePersistenceService(
+                journeyRepository = mockJourneyRepository,
+                oneLoginUserRepository = mockOneLoginUserRepository,
+                objectMapper = realObjectMapper,
+            )
+
+        // Act
+        val retrievedState = underTest.retrieveJourneyStateData(journeyId = testJourneyId)
+
+        // Assert
+        assertEquals(null, retrievedState)
+    }
+
     private fun setSecurityContextWithUser(username: String) {
         val authentication = mock(org.springframework.security.core.Authentication::class.java)
         whenever(authentication.name).thenReturn(username)
