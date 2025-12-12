@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.forms.PageData
 
 interface JourneyState {
@@ -37,5 +38,5 @@ interface JourneyState {
                 .toString(36)
         }
 
-    fun save(): Long
+    fun save(): SavedJourneyState
 }

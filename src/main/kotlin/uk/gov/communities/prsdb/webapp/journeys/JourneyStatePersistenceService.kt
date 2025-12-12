@@ -19,7 +19,7 @@ class JourneyStatePersistenceService(
     fun saveJourneyStateData(
         stateData: Any,
         journeyId: String,
-    ): Long {
+    ): SavedJourneyState {
         val serializedState = objectMapper.writeValueAsString(stateData)
         val formContext =
             journeyRepository
@@ -30,8 +30,7 @@ class JourneyStatePersistenceService(
                     user = oneLoginUserRepository.getReferenceById(user.name),
                     journeyId = journeyId,
                 )
-        val savedState = journeyRepository.save(formContext)
-        return savedState.id
+        return journeyRepository.save(formContext)
     }
 
     fun retrieveJourneyStateData(journeyId: String): Any? =

@@ -109,6 +109,8 @@ class JourneyStepTests {
             { Destination.ExternalUrl("unreachable") },
             false,
         )
+        whenever(step.stepConfig.enrichSubmittedDataBeforeValidation(anyOrNull(), any())).thenCallRealMethod()
+        whenever(step.stepConfig.applyAdditionalValidation(anyOrNull(), any())).thenCallRealMethod()
 
         // Act
         val bindingResult = step.validateSubmittedData(formData)
@@ -139,6 +141,9 @@ class JourneyStepTests {
             false,
         )
 
+        whenever(step.stepConfig.enrichSubmittedDataBeforeValidation(anyOrNull(), any())).thenCallRealMethod()
+        whenever(step.stepConfig.applyAdditionalValidation(anyOrNull(), any())).thenCallRealMethod()
+
         // Act
         val bindingResult = step.validateSubmittedData(formData)
 
@@ -166,6 +171,8 @@ class JourneyStepTests {
             false,
         )
 
+        whenever(step.stepConfig.resolvePageContent(anyOrNull(), any())).thenCallRealMethod()
+
         // Act
         val content = step.getPageVisitContent()
 
@@ -192,6 +199,7 @@ class JourneyStepTests {
             { Destination.ExternalUrl("unreachable") },
             false,
         )
+        whenever(step.stepConfig.resolvePageContent(anyOrNull(), any())).thenCallRealMethod()
 
         // Act
         val content = step.getPageVisitContent()
@@ -220,6 +228,7 @@ class JourneyStepTests {
             false,
         )
         val bindingResult: BindingResult = mock()
+        whenever(step.stepConfig.resolvePageContent(anyOrNull(), any())).thenCallRealMethod()
 
         // Act
         val content = step.getInvalidSubmissionContent(bindingResult)
@@ -362,9 +371,11 @@ class JourneyStepTests {
             { Destination.ExternalUrl("unreachable") },
             false,
         )
+        whenever(step.stepConfig.beforeChoosingNextDestination(any())).thenCallRealMethod()
+        whenever(step.stepConfig.resolveNextDestination(anyOrNull(), any())).thenCallRealMethod()
 
         // Act
-        val redirectDestination = step.determineNextDestination()
+        val redirectDestination = step.getNextDestination()
 
         // Assert
         assertTrue(redirectDestination is Destination.ExternalUrl)
@@ -399,7 +410,7 @@ class JourneyStepTests {
         // Act & Assert
         val exception =
             assertThrows<UnrecoverableJourneyStateException> {
-                journeyStep.determineNextDestination()
+                journeyStep.getNextDestination()
             }
 
         // Assert
