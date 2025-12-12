@@ -38,4 +38,8 @@ class JourneyStatePersistenceService(
         journeyRepository
             .findByJourneyIdAndUser_Id(journeyId, user.name)
             ?.let { objectMapper.readValue(it.serializedState, Any::class.java) }
+
+    fun deleteJourneyStateData(journeyId: String) {
+        journeyRepository.deleteByJourneyIdAndUser_Id(journeyId, user.name)
+    }
 }
