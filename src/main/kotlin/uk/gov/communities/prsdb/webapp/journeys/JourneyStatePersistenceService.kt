@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.transaction.Transactional
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -37,4 +38,9 @@ class JourneyStatePersistenceService(
         journeyRepository
             .findByJourneyIdAndUser_Id(journeyId, user.name)
             ?.let { objectMapper.readValue(it.serializedState, Any::class.java) }
+
+    @Transactional
+    fun deleteJourneyStateData(journeyId: String) {
+        journeyRepository.deleteByJourneyIdAndUser_Id(journeyId, user.name)
+    }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import uk.gov.communities.prsdb.webapp.constants.ReservedTagValues
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
@@ -56,6 +57,6 @@ abstract class Task<in TState : JourneyState> {
     companion object {
         fun SubJourneyBuilder<*>.configureSavable(init: ConfigurableElement<*>.() -> Unit) = configureTagged(SAVABLE, init)
 
-        private const val SAVABLE = "savable step"
+        private const val SAVABLE = ReservedTagValues.SAVABLE
     }
 }
