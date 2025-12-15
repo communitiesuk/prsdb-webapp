@@ -35,3 +35,23 @@ class NumberOfPeopleFormModel(
             }
     }
 }
+
+@IsValidPrioritised
+class NewNumberOfPeopleFormModel(
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                messageKey = "forms.numberOfPeople.input.error.invalidFormat",
+                validatorType = PositiveIntegerValidator::class,
+            ),
+        ],
+    )
+    var numberOfPeople: String = "",
+) : FormModel {
+    companion object {
+        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): NewNumberOfPeopleFormModel =
+            NewNumberOfPeopleFormModel().apply {
+                numberOfPeople = propertyOwnership.currentNumTenants.toString()
+            }
+    }
+}

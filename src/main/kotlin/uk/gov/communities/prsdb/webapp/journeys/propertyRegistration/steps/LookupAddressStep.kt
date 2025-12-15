@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -11,8 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressStat
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.AddressService
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class LookupAddressStepConfig(
     private val addressService: AddressService,
 ) : AbstractGenericStepConfig<LookupAddressMode, LookupAddressFormModel, AddressState>() {
@@ -33,8 +31,8 @@ class LookupAddressStepConfig(
 
     override fun chooseTemplate(state: AddressState): String = "forms/lookupAddressForm"
 
-    override fun afterSubmitFormData(state: AddressState) {
-        super.afterSubmitFormData(state)
+    override fun afterStepDataIsAdded(state: AddressState) {
+        super.afterStepDataIsAdded(state)
         val lookupInfo = getFormModelFromState(state)
         val houseNameOrNumber = lookupInfo.notNullValue(LookupAddressFormModel::houseNameOrNumber)
         val postcode = lookupInfo.notNullValue(LookupAddressFormModel::postcode)
@@ -62,8 +60,7 @@ class LookupAddressStepConfig(
         }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class LookupAddressStep(
     stepConfig: LookupAddressStepConfig,
 ) : RequestableStep<LookupAddressMode, LookupAddressFormModel, AddressState>(stepConfig)

@@ -34,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.scopedBeanName
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 
 @Import(TestcontainersConfiguration::class)
@@ -73,7 +72,7 @@ class PrsdbProcessApplicationTests {
                 AbsoluteUrlProvider::class.simpleBeanName,
                 VirusAlertSender::class.simpleBeanName,
                 OsDownloadsConfig::class.simpleBeanName,
-                NotifyIdService::class.scopedBeanName,
+                NotifyIdService::class.simpleBeanName,
                 TestcontainersConfiguration::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,

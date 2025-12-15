@@ -1,15 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class AlreadyRegisteredStepConfig : AbstractGenericStepConfig<Nothing, NoInputFormModel, AddressState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -25,8 +23,7 @@ class AlreadyRegisteredStepConfig : AbstractGenericStepConfig<Nothing, NoInputFo
     override fun mode(state: AddressState): Nothing? = null
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class AlreadyRegisteredStep(
     stepConfig: AlreadyRegisteredStepConfig,
 ) : RequestableStep<Nothing, NoInputFormModel, AddressState>(stepConfig)

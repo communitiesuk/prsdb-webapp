@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
@@ -66,7 +67,7 @@ class JourneyStateService(
         return metadata
     }
 
-    fun save(): Long {
+    fun save(): SavedJourneyState {
         val journeyState = session.getAttribute(journeyMetadata.dataKey) ?: mapOf<String, Any?>()
         return persistenceService.saveJourneyStateData(journeyState, journeyId)
     }
@@ -94,14 +95,9 @@ class JourneyStateService(
     fun deleteState() {
         session.removeAttribute(journeyMetadata.dataKey)
 
-        val journeyIdsToRemove =
-            journeyStateMetadataMap
-                .filter { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
-                .keys
+        persistenceService.deleteJourneyStateData(journeyMetadata.baseJourneyId ?: journeyId)
 
-        journeyIdsToRemove.forEach { id ->
-            journeyStateMetadataMap -= id
-        }
+        journeyStateMetadataMap = journeyStateMetadataMap.filterNot { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
     }
 
     fun initialiseJourneyWithId(

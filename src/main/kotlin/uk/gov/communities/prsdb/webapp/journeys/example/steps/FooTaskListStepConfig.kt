@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
@@ -11,8 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItem
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormModel, FooJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -45,8 +43,7 @@ class FooTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormMod
     override fun mode(state: FooJourneyState): Nothing? = null
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class FooTaskListStep(
     stepConfig: FooTaskListStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)
