@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJour
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -53,14 +53,14 @@ class PropertyRegistrationCyaStepConfig(
         )
     }
 
-    override fun beforeValidateSubmittedData(
-        formData: PageData,
+    override fun enrichSubmittedDataBeforeValidation(
         state: PropertyRegistrationJourneyState,
+        formData: PageData,
     ): PageData =
-        super.beforeValidateSubmittedData(formData, state) +
+        super.enrichSubmittedDataBeforeValidation(state, formData) +
             (CheckAnswersFormModel::storedJourneyData.name to state.getSubmittedStepData())
 
-    override fun afterSubmitFormData(state: PropertyRegistrationJourneyState) {
+    override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
@@ -74,7 +74,7 @@ class PropertyRegistrationCyaStepConfig(
                         ?.toInt() ?: 0,
                 numberOfPeople =
                     state.tenants.formModelOrNull
-                        ?.notNullValue(NumberOfPeopleFormModel::numberOfPeople)
+                        ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         ?.toInt() ?: 0,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
@@ -176,15 +176,15 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
 
-    override fun afterDetermineNextDestination(
+    override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
-        destination: Destination,
+        defaultDestination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
             Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
         } else {
             state.deleteJourney()
-            destination
+            defaultDestination
         }
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"

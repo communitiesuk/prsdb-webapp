@@ -33,8 +33,8 @@ class LookupAddressStepConfig(
 
     override fun chooseTemplate(state: AddressState): String = "forms/lookupAddressForm"
 
-    override fun afterSubmitFormData(state: AddressState) {
-        super.afterSubmitFormData(state)
+    override fun afterStepDataIsAdded(state: AddressState) {
+        super.afterStepDataIsAdded(state)
         val lookupInfo = getFormModelFromState(state)
         val houseNameOrNumber = lookupInfo.notNullValue(LookupAddressFormModel::houseNameOrNumber)
         val postcode = lookupInfo.notNullValue(LookupAddressFormModel::postcode)

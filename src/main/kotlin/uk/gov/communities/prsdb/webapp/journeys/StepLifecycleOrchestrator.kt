@@ -14,63 +14,32 @@ sealed class StepLifecycleOrchestrator(
         journeyStep: JourneyStep<*, *, *>,
     ) : StepLifecycleOrchestrator(journeyStep) {
         override fun getStepModelAndView(): ModelAndView {
-            journeyStep.beforeIsStepReachable()
-            if (journeyStep.isStepReachable) {
-                journeyStep.afterIsStepReached()
-
-                journeyStep.beforeGetPageVisitContent()
+            if (journeyStep.attemptToReachStep()) {
                 val content = journeyStep.getPageVisitContent()
-                journeyStep.afterGetPageVisitContent()
 
-                journeyStep.beforeChooseTemplate()
-                val destination = journeyStep.chooseTemplate().withModelContent(content)
-                journeyStep.afterChooseTemplate()
-
-                return destination.toModelAndView()
+                return journeyStep.chooseTemplate().withModelContent(content).toModelAndView()
             }
 
-            val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
-            return unreachableStepDestination.toModelAndView()
+            return journeyStep.getUnreachableStepDestination().toModelAndView()
         }
 
         override fun postStepModelAndView(formData: PageData): ModelAndView {
-            journeyStep.beforeIsStepReachable()
-            if (journeyStep.isStepReachable) {
-                journeyStep.afterIsStepReached()
+            if (journeyStep.attemptToReachStep()) {
+                val bindingResult = journeyStep.validateSubmittedData(formData)
 
-                val newFormData = journeyStep.beforeValidateSubmittedData(formData)
-                val bindingResult = journeyStep.validateSubmittedData(newFormData)
-                journeyStep.afterValidateSubmittedData(bindingResult)
+                if (!bindingResult.hasErrors()) {
+                    journeyStep.submitFormData(bindingResult)
 
-                if (bindingResult.hasErrors()) {
-                    journeyStep.beforeGetPageVisitContent()
-                    val content = journeyStep.getInvalidSubmissionContent(bindingResult)
-                    journeyStep.afterGetPageVisitContent()
-
-                    journeyStep.beforeChooseTemplate()
-                    val destination = journeyStep.chooseTemplate().withModelContent(content)
-                    journeyStep.afterChooseTemplate()
-
-                    return destination.toModelAndView()
+                    journeyStep.saveStateIfAllowed()
+                    return journeyStep.getNextDestination().toModelAndView()
                 }
 
-                journeyStep.beforeSubmitFormData()
-                journeyStep.submitFormData(bindingResult)
-                journeyStep.afterSubmitFormData()
+                val content = journeyStep.getInvalidSubmissionContent(bindingResult)
 
-                journeyStep.beforeSaveState()
-                journeyStep.saveState()
-                journeyStep.afterSaveState()
-
-                journeyStep.beforeDetermineNextDestination()
-                val nextDestination = journeyStep.determineNextDestination()
-                val finalDestination = journeyStep.afterDetermineNextDestination(nextDestination)
-
-                return finalDestination.toModelAndView()
+                return journeyStep.chooseTemplate().withModelContent(content).toModelAndView()
             }
 
-            val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
-            return unreachableStepDestination.toModelAndView()
+            return journeyStep.getUnreachableStepDestination().toModelAndView()
         }
     }
 
@@ -78,23 +47,12 @@ sealed class StepLifecycleOrchestrator(
         journeyStep: JourneyStep<*, *, *>,
     ) : StepLifecycleOrchestrator(journeyStep) {
         override fun getStepModelAndView(): ModelAndView {
-            journeyStep.beforeIsStepReachable()
-            if (journeyStep.isStepReachable) {
-                journeyStep.afterIsStepReached()
-
-                journeyStep.beforeSaveState()
-                journeyStep.saveState()
-                journeyStep.afterSaveState()
-
-                journeyStep.beforeDetermineNextDestination()
-                val nextDestination = journeyStep.determineNextDestination()
-                val finalDestination = journeyStep.afterDetermineNextDestination(nextDestination)
-
-                return finalDestination.toModelAndView()
+            if (journeyStep.attemptToReachStep()) {
+                journeyStep.saveStateIfAllowed()
+                return journeyStep.getNextDestination().toModelAndView()
             }
 
-            val unreachableStepDestination = journeyStep.getUnreachableStepDestination()
-            return unreachableStepDestination.toModelAndView()
+            return journeyStep.getUnreachableStepDestination().toModelAndView()
         }
 
         override fun postStepModelAndView(formData: PageData): ModelAndView = journeyStep.getUnreachableStepDestination().toModelAndView()
