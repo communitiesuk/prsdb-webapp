@@ -48,11 +48,11 @@ class SelectAddressStepConfig(
         )
     }
 
-    override fun applyAdditionalValidation(
+    override fun afterPrimaryValidation(
         state: AddressState,
         bindingResult: BindingResult,
     ) {
-        super.applyAdditionalValidation(state, bindingResult)
+        super.afterPrimaryValidation(state, bindingResult)
 
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
         selectAddressFormModel.address?.let { selectedAddress ->

@@ -27,11 +27,11 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NewNumberOfPeopleF
 
     override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.numberOfPeople?.let { Complete.COMPLETE }
 
-    override fun applyAdditionalValidation(
+    override fun afterPrimaryValidation(
         state: OccupationState,
         bindingResult: BindingResult,
     ) {
-        super.applyAdditionalValidation(state, bindingResult)
+        super.afterPrimaryValidation(state, bindingResult)
         if (!bindingResult.hasErrors()) {
             bindingResult.validateNumberOfPeople(
                 bindingResult.getFormModel(),

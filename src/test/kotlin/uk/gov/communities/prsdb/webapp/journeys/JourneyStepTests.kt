@@ -110,7 +110,7 @@ class JourneyStepTests {
             false,
         )
         whenever(step.stepConfig.enrichSubmittedDataBeforeValidation(anyOrNull(), any())).thenCallRealMethod()
-        whenever(step.stepConfig.applyAdditionalValidation(anyOrNull(), any())).thenCallRealMethod()
+        whenever(step.stepConfig.afterPrimaryValidation(anyOrNull(), any())).thenCallRealMethod()
 
         // Act
         val bindingResult = step.validateSubmittedData(formData)
@@ -142,7 +142,7 @@ class JourneyStepTests {
         )
 
         whenever(step.stepConfig.enrichSubmittedDataBeforeValidation(anyOrNull(), any())).thenCallRealMethod()
-        whenever(step.stepConfig.applyAdditionalValidation(anyOrNull(), any())).thenCallRealMethod()
+        whenever(step.stepConfig.afterPrimaryValidation(anyOrNull(), any())).thenCallRealMethod()
 
         // Act
         val bindingResult = step.validateSubmittedData(formData)

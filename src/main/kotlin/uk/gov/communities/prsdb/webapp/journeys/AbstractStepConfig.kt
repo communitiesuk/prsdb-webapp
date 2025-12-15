@@ -31,7 +31,7 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
         formData: PageData,
     ): PageData = formData
 
-    open fun applyAdditionalValidation(
+    open fun afterPrimaryValidation(
         state: TState,
         bindingResult: BindingResult,
     ) {}

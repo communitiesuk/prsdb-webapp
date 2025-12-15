@@ -98,7 +98,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         binder.bind(MutablePropertyValues(enrichedFormData))
         binder.validate()
 
-        stepConfig.applyAdditionalValidation(state, binder.bindingResult)
+        stepConfig.afterPrimaryValidation(state, binder.bindingResult)
         return binder.bindingResult
     }
 
