@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 
+// The search methods return LandlordSearchResultDataModels instead of Landlords as we need to include the property count in the results.
 interface LandlordSearchRepository {
     fun searchMatchingLRN(
         searchLRN: Long,
@@ -35,24 +36,26 @@ class LandlordSearchRepositoryImpl(
         restrictToLocalCouncil: Boolean,
         pageable: Pageable,
     ): Page<LandlordSearchResultDataModel> {
+        // The result of this will always be 0 or 1, but we do the count anyway so that we can return a Page object and therefore
+        // keep the interface consistent with the other search method.
         val countQuery =
             """
-            SELECT count(DISTINCT l.id)
+            SELECT count(*)
             FROM landlord l
             JOIN registration_number r ON l.registration_number_id = r.id
-            ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_JOIN else "" }
             WHERE r.number = :searchTerm
+            ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER else "" };
             """
         val countResult = entityManager.getCountResult(countQuery, searchLRN, localCouncilUserBaseId, restrictToLocalCouncil)
 
         val searchQuery =
             """
             WITH resulting_landlords AS (
-                SELECT DISTINCT l.id
+                SELECT l.id
                 FROM landlord l
                 JOIN registration_number r ON l.registration_number_id = r.id
-                ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_JOIN else "" }
                 WHERE r.number = :searchTerm
+                ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER else "" }
                 $PAGINATION
             )
             $SELECT_FROM_RESULTING_LANDLORDS;
@@ -108,6 +111,16 @@ class LandlordSearchRepositoryImpl(
 
     companion object {
         // Filters results to only landlords who have active property ownerships in LC user's LC
+        private const val LOCAL_COUNCIL_FILTER =
+            """
+            AND EXISTS (SELECT 1 
+                        FROM property_ownership po 
+                        JOIN local_council_user lcu 
+                        ON po.local_council_id = lcu.local_council_id AND lcu.subject_identifier = :localCouncilUserBaseId
+                        WHERE l.id = po.primary_landlord_id  
+                        AND po.is_active)
+            """
+
         private const val LOCAL_COUNCIL_FILTER_JOIN =
             """
             JOIN property_ownership po ON l.id = po.primary_landlord_id AND po.is_active
