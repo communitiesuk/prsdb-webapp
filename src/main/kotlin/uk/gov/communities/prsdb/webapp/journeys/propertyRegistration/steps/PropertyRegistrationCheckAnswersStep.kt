@@ -178,13 +178,13 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
-        destination: Destination,
+        defaultDestination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
             Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
         } else {
             state.deleteJourney()
-            destination
+            defaultDestination
         }
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"

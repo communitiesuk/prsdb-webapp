@@ -121,10 +121,10 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getNextDestination(): Destination {
         stepConfig.beforeChoosingNextDestination(state)
-        val intendedDestination =
+        val defaultDestination =
             stepConfig.mode(state)?.let { nextDestination(it) }
                 ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
-        return stepConfig.resolveNextDestination(state, intendedDestination)
+        return stepConfig.resolveNextDestination(state, defaultDestination)
     }
 
     fun getInvalidSubmissionContent(bindingResult: BindingResult): Map<String, Any?> {
@@ -140,8 +140,8 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     fun getUnreachableStepDestination(): Destination {
         stepConfig.beforeChosingUnreachableStepDestination(state)
-        val intendedDestination = unreachableStepDestination()
-        return stepConfig.resolveUnreachableStepDestination(state, intendedDestination)
+        val defaultDestination = unreachableStepDestination()
+        return stepConfig.resolveUnreachableStepDestination(state, defaultDestination)
     }
 
     private lateinit var unreachableStepDestination: () -> Destination

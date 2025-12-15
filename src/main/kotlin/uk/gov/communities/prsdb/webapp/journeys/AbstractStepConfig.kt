@@ -38,8 +38,8 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     open fun resolvePageContent(
         state: TState,
-        content: Map<String, Any?>,
-    ): Map<String, Any?> = content
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> = defaultContent
 
     open fun resolveChosenTemplate(
         state: TState,
@@ -66,15 +66,15 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
 
     open fun resolveNextDestination(
         state: TState,
-        destination: Destination,
-    ): Destination = destination
+        defaultDestination: Destination,
+    ): Destination = defaultDestination
 
     open fun beforeChosingUnreachableStepDestination(state: TState) {}
 
     open fun resolveUnreachableStepDestination(
         state: TState,
-        intendedDestination: Destination,
-    ): Destination = intendedDestination
+        defaultDestination: Destination,
+    ): Destination = defaultDestination
 
     abstract fun isSubClassInitialised(): Boolean
 
