@@ -11,7 +11,7 @@
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'lookupEpc',
-                            #{forms.epcLookup.fieldSetHeading}, #{forms.epcLookup.fieldSetHint})}">
+                            #{forms.epcLookup.fieldSetHeading}, #{forms.epcLookup.fieldSetHint}, null)}">
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{forms.epcLookup.certificateNumber.label}, 'certificateNumber', #{forms.epcLookup.certificateNumber.hint}, 20)}"></div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.epcLookup.searchButton.text})}"></button>

@@ -6,7 +6,7 @@
 <!--/*@thymesVar id="gasSafeRegisterURL" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <fieldset id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'engineerNumber', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+    <fieldset id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'engineerNumber', #{${fieldSetHeading}}, #{${fieldSetHint}}, null)}">
         <input th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'engineerNumber', null, 10)}">
     </fieldset>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>

@@ -14,7 +14,7 @@
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'manualAddress',
-                            #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
+                            #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, null)}">
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineOneLabel}}, 'addressLineOne', null)}"></div>
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineTwoLabel}}, 'addressLineTwo', null)}"></div>
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${townOrCityLabel}}, 'townOrCity', null, 20)}"></div>

@@ -34,7 +34,7 @@
         <form th:action="@{''}" class="form" id="email-form" method="post" th:object="${confirmedEmailRequestModel}"
               novalidate>
             <!--/*/ <th:block id="fieldset-content"
-                      th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'email', null, null)}"> /*/-->
+                      th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'email', null, null, null)}"> /*/-->
             <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLocalCouncilUser.form.primaryEmailLabel}, 'email', null)}">
             <input th:replace="~{fragments/forms/emailInput :: emailInput(#{addLocalCouncilUser.form.confirmEmailLabel}, 'confirmEmail', null)}">
             <!--/*/ </th:block> /*/-->

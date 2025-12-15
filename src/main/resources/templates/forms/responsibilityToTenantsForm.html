@@ -14,7 +14,7 @@
         <th:block th:replace="~{fragments/content/responsibilityToTenantsContent :: responsibilityToTenantsContent(${landlordResponsibilitiesUrl}, ${governmentApprovedDepositProtectionSchemeUrl}, ${howToRentGuideUrl})}"></th:block>
     </th:block>
     <th:block id="form-content">
-        <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', null, null)}">
+        <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', null, null, null)}">
             <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
         </th:block>
         <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndContinue})}"></button>

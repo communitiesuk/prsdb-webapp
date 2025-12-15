@@ -7,7 +7,7 @@
 <!--/*@thymesVar id="limit" type="java.lang.Integer"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-  <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'otherReason', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+  <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'otherReason', #{${fieldSetHeading}}, #{${fieldSetHint}}, null)}">
     <div th:replace="~{fragments/forms/textArea :: textArea(null, 'otherReason', null, ${limit})}"></div>
   </th:block>
   <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>

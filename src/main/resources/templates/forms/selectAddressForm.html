@@ -11,7 +11,7 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null)}">
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null, null)}">
         <div id="address-hint" class="govuk-hint">
             <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforePostcode(${addressCount})}">forms.selectAddress.fieldSetHint.beforePostcode</span>
             <strong th:text="${postcode}"></strong>

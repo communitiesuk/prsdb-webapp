@@ -10,7 +10,7 @@
 <th:block id="form-content"
           th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)}" >
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'reason', #{${fieldSetHeading}}, ${fieldSetHintMsg})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'reason', #{${fieldSetHeading}}, ${fieldSetHintMsg}, null)}">
         <div th:replace="~{fragments/forms/textArea :: textArea(null, 'reason', null, ${limit})}">
         </div>
     </th:block>

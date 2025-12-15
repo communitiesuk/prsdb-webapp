@@ -11,7 +11,7 @@
 <th:block id="form-content"
           th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)}" >
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'wantsToProceed', #{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${fieldSetHintMsg})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'wantsToProceed', #{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${fieldSetHintMsg}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>

@@ -9,7 +9,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <fieldset id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localCouncilId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localCouncilId', #{${fieldSetHeading}}, #{${fieldSetHint}}, null)}">
         <p class="govuk-body">
             <span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.one.beforeLink}">forms.selectLocalCouncil.paragraph.one.beforeLink</span>
             <a class="govuk-link" target="_blank" th:href="${findLocalCouncilUrl}" th:text="#{forms.selectLocalCouncil.paragraph.one.linkText}">forms.selectLocalCouncil.paragraph.one.linkText

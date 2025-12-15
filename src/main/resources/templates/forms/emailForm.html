@@ -9,7 +9,7 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'emailAddress', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'emailAddress', #{${fieldSetHeading}}, #{${fieldSetHint}}, null)}">
         <div th:replace="~{fragments/forms/emailInput :: emailInput(#{${label}}, 'emailAddress', null)}"></div>
     </th:block>
     <th:block th:if="${showWarning}">
