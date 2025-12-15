@@ -3,8 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
@@ -77,8 +76,7 @@ class FooExampleJourneyFactory(
     fun initializeJourneyState(propertyId: Long): String = stateFactory.getObject().initializeJourneyState(propertyId)
 }
 
-@PrsdbWebComponent
-@Scope("prototype")
+@JourneyFrameworkComponent
 class FooJourneyState(
     val taskListStep: FooTaskListStep,
     override val occupied: OccupiedStep,

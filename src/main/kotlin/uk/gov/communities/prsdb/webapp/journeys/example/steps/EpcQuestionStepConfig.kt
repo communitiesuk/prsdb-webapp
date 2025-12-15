@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -12,8 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDivide
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class EpcQuestionStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
@@ -65,8 +63,7 @@ class EpcQuestionStepConfig(
         }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class EpcQuestionStep(
     stepConfig: EpcQuestionStepConfig,
 ) : RequestableStep<EpcStatus, EpcFormModel, EpcJourneyState>(stepConfig)

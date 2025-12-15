@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.tasks
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
@@ -12,8 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
-@PrsdbWebComponent
-@Scope("prototype")
+@JourneyFrameworkComponent
 class EpcTask : Task<EpcJourneyState>() {
     override fun makeSubJourney(state: EpcJourneyState) =
         subJourney(state) {

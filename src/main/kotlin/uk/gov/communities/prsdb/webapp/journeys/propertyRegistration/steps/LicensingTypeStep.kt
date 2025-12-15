@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -10,8 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Licensing
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class LicensingTypeStepConfig : AbstractGenericStepConfig<LicensingTypeMode, LicensingTypeFormModel, JourneyState>() {
     override val formModelClass = LicensingTypeFormModel::class
 
@@ -58,8 +56,7 @@ class LicensingTypeStepConfig : AbstractGenericStepConfig<LicensingTypeMode, Lic
         }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class LicensingTypeStep(
     stepConfig: LicensingTypeStepConfig,
 ) : RequestableStep<LicensingTypeMode, LicensingTypeFormModel, JourneyState>(stepConfig)

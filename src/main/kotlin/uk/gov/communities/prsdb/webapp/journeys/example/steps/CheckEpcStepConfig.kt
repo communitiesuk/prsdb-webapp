@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
@@ -10,8 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatc
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class CheckEpcStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : AbstractStepConfig<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
@@ -60,8 +58,7 @@ class CheckEpcStepConfig(
     }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class CheckEpcStep(
     stepConfig: CheckEpcStepConfig,
 ) : RequestableStep<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>(stepConfig)
