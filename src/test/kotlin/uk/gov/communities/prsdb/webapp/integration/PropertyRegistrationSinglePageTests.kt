@@ -443,6 +443,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting with something else selected but no text entered returns an error`(page: Page) {
             val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            billsIncludedPage.selectGasElectricityWater()
             billsIncludedPage.selectSomethingElseCheckbox()
             billsIncludedPage.form.submit()
             assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Enter the bills and services you include in the rent")
@@ -451,6 +452,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting with a very long something else text returns an error`(page: Page) {
             val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            billsIncludedPage.selectGasElectricityWater()
             billsIncludedPage.selectSomethingElseCheckbox()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real description " +
