@@ -24,7 +24,11 @@ spring:
     locations: classpath:db/migrations
     validate-on-migrate: true
 
-
+  sql:
+    init:
+      mode: always
+      platform: local
+      continue-on-error: true
 
   data:
     redis:
@@ -143,16 +147,3 @@ spring:
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: local
-
-  sql:
-    init:
-      mode: always
-      platform: local
-      continue-on-error: true
