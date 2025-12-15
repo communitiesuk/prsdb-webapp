@@ -94,14 +94,9 @@ class JourneyStateService(
     fun deleteState() {
         session.removeAttribute(journeyMetadata.dataKey)
 
-        val journeyIdsToRemove =
-            journeyStateMetadataMap
-                .filter { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
-                .keys
+        persistenceService.deleteJourneyStateData(journeyMetadata.baseJourneyId ?: journeyId)
 
-        journeyIdsToRemove.forEach { id ->
-            journeyStateMetadataMap -= id
-        }
+        journeyStateMetadataMap = journeyStateMetadataMap.filterNot { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
     }
 
     fun initialiseJourneyWithId(
