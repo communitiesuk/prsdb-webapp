@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 
@@ -29,6 +30,8 @@ abstract class AbstractJourneyState(
         journeyStateService.initialiseJourneyWithId(journeyId) {}
         return journeyId
     }
+
+    override fun save(): SavedJourneyState = journeyStateService.save()
 
     override fun initializeChildState(
         childJourneyName: String,

@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import kotlin.collections.plus
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
@@ -33,6 +32,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
             stepConfig.routeSegment = routeSegment
         }
+
+        override fun submitFormData(bindingResult: BindingResult) =
+            addStepData(routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
     }
 
     open class InternalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
@@ -49,6 +51,8 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
                 )
             }
         }
+
+        override fun submitFormData(bindingResult: BindingResult) {}
     }
 
     abstract fun getRouteSegmentOrNull(): String?
@@ -57,90 +61,94 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     protected abstract fun initialiseRouteSegment(routeSegment: String?)
 
-    // TODO PRSD-1550: Review which lifecycle hooks are needed and update names based on use cases, especially if they have a return value
-    fun beforeIsStepReachable() {
-        stepConfig.beforeIsStepReachable(state)
-    }
+    abstract fun submitFormData(bindingResult: BindingResult)
 
-    fun afterIsStepReached() {
-        stepConfig.afterIsStepReached(state)
-    }
-
-    fun beforeValidateSubmittedData(formData: PageData): PageData = stepConfig.beforeValidateSubmittedData(formData, state)
-
-    fun afterValidateSubmittedData(bindingResult: BindingResult) = stepConfig.afterValidateSubmittedData(bindingResult, state)
-
-    fun beforeGetPageVisitContent() {
-        stepConfig.beforeGetStepContent(state)
-    }
-
-    fun chooseTemplate(): Destination = Destination.Template(stepConfig.chooseTemplate(state))
-
-    fun afterGetPageVisitContent() {
-        stepConfig.afterGetStepContent(state)
-    }
-
-    fun beforeChooseTemplate() {
-        stepConfig.beforeGetTemplate(state)
-    }
-
-    fun afterChooseTemplate() {
-        stepConfig.afterGetTemplate(state)
-    }
-
-    fun beforeSubmitFormData() {
-        stepConfig.beforeSubmitFormData(state)
-    }
-
-    fun afterSubmitFormData() {
-        stepConfig.afterSubmitFormData(state)
-    }
-
-    fun beforeDetermineNextDestination() {
-        stepConfig.beforeDetermineNextDestination(state)
-    }
-
-    fun afterDetermineNextDestination(destination: Destination) = stepConfig.afterDetermineNextDestination(state, destination)
-
-    val isStepReachable: Boolean
-        get() = parentage.allowsChild()
-
-    fun validateSubmittedData(formData: PageData): BindingResult =
-        formData.let {
-            val binder = WebDataBinder(stepConfig.formModelClass.createInstance())
-            binder.validator = stepConfig.validator
-            binder.bind(MutablePropertyValues(it))
-            binder.validate()
-            binder.bindingResult
+    fun attemptToReachStep(): Boolean {
+        stepConfig.beforeAttemptingToReachStep(state)
+        if (isStepReachable) {
+            stepConfig.afterStepIsReached(state)
+            return true
         }
-
-    fun getPageVisitContent() =
-        stepConfig.getStepSpecificContent(state) +
-            additionalContentProvider() +
-            mapOf(
-                BACK_URL_ATTR_NAME to backUrl,
-                "formModel" to (formModelOrNull ?: stepConfig.formModelClass.createInstance()),
-            )
-
-    fun getInvalidSubmissionContent(bindingResult: BindingResult) =
-        stepConfig.getStepSpecificContent(state) +
-            additionalContentProvider() +
-            mapOf(
-                BACK_URL_ATTR_NAME to backUrl,
-                BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult,
-            )
-
-    fun submitFormData(bindingResult: BindingResult) {
-        getRouteSegmentOrNull()?.let { state.addStepData(it, stepConfig.formModelClass.cast(bindingResult.target).toPageData()) }
+        stepConfig.whenStepIsUnreachable(state)
+        return false
     }
 
-    fun determineNextDestination(): Destination =
-        stepConfig.mode(state)?.let { nextDestination(it) }
-            ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
+    fun getPageVisitContent(): Map<String, Any?> {
+        val contentWithFormModel =
+            stepConfig.getStepSpecificContent(state) +
+                additionalContentProvider() +
+                mapOf(
+                    BACK_URL_ATTR_NAME to backUrl,
+                    "formModel" to (formModelOrNull ?: stepConfig.formModelClass.createInstance()),
+                )
+        return stepConfig.resolvePageContent(state, contentWithFormModel)
+    }
+
+    fun chooseTemplate(): Destination {
+        val templateName = stepConfig.chooseTemplate(state)
+        return stepConfig.resolveChosenTemplate(state, templateName)
+    }
+
+    fun validateSubmittedData(submittedData: PageData): BindingResult {
+        val enrichedFormData = stepConfig.enrichSubmittedDataBeforeValidation(state, submittedData)
+
+        val binder = WebDataBinder(stepConfig.formModelClass.createInstance())
+        binder.validator = stepConfig.validator
+        binder.bind(MutablePropertyValues(enrichedFormData))
+        binder.validate()
+
+        stepConfig.afterPrimaryValidation(state, binder.bindingResult)
+        return binder.bindingResult
+    }
+
+    protected fun addStepData(
+        routeSegment: String,
+        data: PageData,
+    ) {
+        stepConfig.beforeStepDataIsAdded(state, data)
+        state.addStepData(routeSegment, data)
+        stepConfig.afterStepDataIsAdded(state)
+    }
+
+    fun saveStateIfAllowed() {
+        if (shouldSaveOnCompletion) {
+            stepConfig.beforeSaveState(state)
+            val savedState = stepConfig.saveState(state)
+            stepConfig.afterSaveState(state, savedState)
+        }
+    }
+
+    fun getNextDestination(): Destination {
+        stepConfig.beforeChoosingNextDestination(state)
+        val defaultDestination =
+            stepConfig.mode(state)?.let { nextDestination(it) }
+                ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
+        return stepConfig.resolveNextDestination(state, defaultDestination)
+    }
+
+    fun getInvalidSubmissionContent(bindingResult: BindingResult): Map<String, Any?> {
+        val contentWithBindingResult =
+            stepConfig.getStepSpecificContent(state) +
+                additionalContentProvider() +
+                mapOf(
+                    BACK_URL_ATTR_NAME to backUrl,
+                    BindingResult.MODEL_KEY_PREFIX + "formModel" to bindingResult,
+                )
+        return stepConfig.resolvePageContent(state, contentWithBindingResult)
+    }
+
+    fun getUnreachableStepDestination(): Destination {
+        stepConfig.beforeChosingUnreachableStepDestination(state)
+        val defaultDestination = unreachableStepDestination()
+        return stepConfig.resolveUnreachableStepDestination(state, defaultDestination)
+    }
 
     private lateinit var unreachableStepDestination: () -> Destination
 
-    fun getUnreachableStepDestination() = unreachableStepDestination()
+    private var shouldSaveOnCompletion: Boolean = false
+
+    val isStepReachable: Boolean
+        get() = parentage.allowsChild()
 
     val formModelOrNull: TFormModel?
         get() = stepConfig.getFormModelFromStateOrNull(state)
@@ -191,6 +199,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         redirectDestinationProvider: (mode: TEnum) -> Destination,
         parentage: Parentage,
         unreachableStepDestinationProvider: () -> Destination,
+        shouldSaveOnCompletion: Boolean,
         additionalContentProvider: (() -> Map<String, Any>)? = null,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
@@ -202,6 +211,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         this.nextDestination = redirectDestinationProvider
         this.parentage = parentage
         this.unreachableStepDestination = unreachableStepDestinationProvider
+        this.shouldSaveOnCompletion = shouldSaveOnCompletion
         additionalContentProvider?.let { this.additionalContentProvider = it }
     }
 

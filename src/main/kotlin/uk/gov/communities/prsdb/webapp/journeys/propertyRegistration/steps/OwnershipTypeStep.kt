@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -10,8 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class OwnershipTypeStepConfig : AbstractGenericStepConfig<Complete, OwnershipTypeFormModel, JourneyState>() {
     override val formModelClass = OwnershipTypeFormModel::class
 
@@ -50,8 +48,7 @@ class OwnershipTypeStepConfig : AbstractGenericStepConfig<Complete, OwnershipTyp
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class OwnershipTypeStep(
     stepConfig: OwnershipTypeStepConfig,
 ) : RequestableStep<Complete, OwnershipTypeFormModel, JourneyState>(stepConfig)

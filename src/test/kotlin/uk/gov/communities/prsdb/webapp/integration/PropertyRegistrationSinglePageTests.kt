@@ -382,6 +382,56 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class NumberOfBedroomsStep {
+        val numberOfBedroomsErrorMessage = "Enter the number of bedrooms, like 3 or 8"
+
+        @Test
+        fun `Submitting with a blank numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.form.submit()
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a non-numerical value in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms("not-a-number")
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a non-integer number in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms("2.3")
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a negative integer in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms("-2")
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+
+        @Test
+        fun `Submitting with a zero integer in the numberOfBedrooms field returns an error`(page: Page) {
+            val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
+            bedroomsPage.submitNumOfBedrooms(0)
+            assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class RentIncludesBillsStep {
+        @Test
+        fun `Submitting with no rent included option selected returns an error`(page: Page) {
+            val rentIncludesBillsPage = navigator.skipToPropertyRegistrationRentIncludesBillsPage()
+            rentIncludesBillsPage.form.submit()
+            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select whether the rent includes bills")
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {

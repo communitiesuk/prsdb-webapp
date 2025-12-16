@@ -1,8 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -67,18 +66,21 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
                     checkable()
+                    saveProgress()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment("property-type")
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
                     checkable()
+                    saveProgress()
                 }
                 step(journey.ownershipTypeStep) {
                     routeSegment("ownership-type")
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
                     checkable()
+                    saveProgress()
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
@@ -89,6 +91,7 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.cyaStep }
                     checkable()
+                    saveProgress()
                 }
             }
             section {
@@ -106,38 +109,40 @@ class NewPropertyRegistrationJourneyFactory(
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
 
-@PrsdbWebComponent
-@Scope("prototype")
-class PropertyRegistrationJourneyState(
-    val taskListStep: PropertyRegistrationTaskListStep,
+@JourneyFrameworkComponent
+class PropertyRegistrationJourney(
+    // Task list step
+    override val taskListStep: PropertyRegistrationTaskListStep,
+    // Address task
+    override val addressTask: AddressTask,
     override val lookupStep: LookupAddressStep,
     override val selectAddressStep: SelectAddressStep,
     override val alreadyRegisteredStep: AlreadyRegisteredStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
     override val localCouncilStep: LocalCouncilStep,
-    val addressTask: AddressTask,
-    val propertyTypeStep: PropertyTypeStep,
-    val ownershipTypeStep: OwnershipTypeStep,
+    // Property details steps
+    override val propertyTypeStep: PropertyTypeStep,
+    override val ownershipTypeStep: OwnershipTypeStep,
+    // Licensing task
+    override val licensingTask: LicensingTask,
     override val licensingTypeStep: LicensingTypeStep,
     override val selectiveLicenceStep: SelectiveLicenceStep,
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
-    val licensingTask: LicensingTask,
+    // Occupation task
+    override val occupationTask: OccupationTask,
     override val occupied: OccupiedStep,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
-    val occupationTask: OccupationTask,
+    // Check your answers step
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
-    AddressState,
-    LicensingState,
-    OccupationState,
-    CheckYourAnswersJourneyState {
+    PropertyRegistrationJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
@@ -151,4 +156,18 @@ class PropertyRegistrationJourneyState(
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
+}
+
+interface PropertyRegistrationJourneyState :
+    AddressState,
+    LicensingState,
+    OccupationState,
+    CheckYourAnswersJourneyState {
+    val taskListStep: PropertyRegistrationTaskListStep
+    val addressTask: AddressTask
+    val propertyTypeStep: PropertyTypeStep
+    val ownershipTypeStep: OwnershipTypeStep
+    val licensingTask: LicensingTask
+    val occupationTask: OccupationTask
+    override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>
 }

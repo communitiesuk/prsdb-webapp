@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
@@ -9,8 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationS
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class RentIncludesBillsStepConfig : AbstractGenericStepConfig<YesOrNo, RentIncludesBillsFormModel, OccupationState>() {
     override val formModelClass = RentIncludesBillsFormModel::class
 
@@ -43,8 +41,7 @@ class RentIncludesBillsStepConfig : AbstractGenericStepConfig<YesOrNo, RentInclu
         }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class RentIncludesBillsStep(
     stepConfig: RentIncludesBillsStepConfig,
 ) : RequestableStep<YesOrNo, RentIncludesBillsFormModel, OccupationState>(stepConfig)

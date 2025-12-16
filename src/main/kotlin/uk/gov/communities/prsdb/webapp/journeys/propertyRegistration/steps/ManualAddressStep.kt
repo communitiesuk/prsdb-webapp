@@ -1,15 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
     override val formModelClass = ManualAddressFormModel::class
 
@@ -31,8 +29,7 @@ class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddres
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class ManualAddressStep(
     stepConfig: ManualAddressStepConfig,
 ) : RequestableStep<Complete, ManualAddressFormModel, JourneyState>(stepConfig)

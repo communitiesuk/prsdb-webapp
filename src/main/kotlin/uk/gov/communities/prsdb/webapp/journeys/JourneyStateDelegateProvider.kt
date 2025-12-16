@@ -4,13 +4,11 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import kotlin.reflect.KProperty
 
-@PrsdbWebService
-@Scope("prototype")
+@JourneyFrameworkComponent
 class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
 ) {

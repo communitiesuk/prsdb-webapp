@@ -456,6 +456,7 @@ class JourneyBuilderTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
             verify(step2).initialize(
                 anyOrNull(),
@@ -465,12 +466,14 @@ class JourneyBuilderTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
             verify(step3).initialize(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 nextDestinationCaptor.capture(),
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -531,6 +534,7 @@ class JourneyBuilderTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
             verify(step2).initialize(
                 anyOrNull(),
@@ -540,12 +544,14 @@ class JourneyBuilderTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
             verify(step3).initialize(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 nextDestinationCaptor.capture(),
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
