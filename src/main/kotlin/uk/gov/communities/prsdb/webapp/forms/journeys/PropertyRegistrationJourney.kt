@@ -45,13 +45,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDivide
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
     private val addressService: AddressService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationService: PropertyRegistrationMonolithicService,
     private val localCouncilService: LocalCouncilService,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
@@ -571,7 +571,7 @@ class PropertyRegistrationJourney(
 
     private fun selectAddressNextAction(
         filteredJourneyData: JourneyData,
-        propertyRegistrationService: PropertyRegistrationService,
+        propertyRegistrationService: PropertyRegistrationMonolithicService,
     ): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)

@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -28,7 +28,7 @@ class PropertyRegistrationJourneyTests {
     lateinit var mockJourneyDataService: JourneyDataService
 
     @Mock
-    lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+    lateinit var mockPropertyRegistrationService: PropertyRegistrationMonolithicService
 
     @Mock
     lateinit var localCouncilService: LocalCouncilService

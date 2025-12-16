@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistra
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyRegistrationFormContext
@@ -45,7 +45,7 @@ class RegisterPropertyControllerTests(
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
-    private lateinit var propertyRegistrationService: PropertyRegistrationService
+    private lateinit var propertyRegistrationService: PropertyRegistrationMonolithicService
 
     @MockitoBean
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory

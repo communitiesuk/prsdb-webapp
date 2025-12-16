@@ -33,10 +33,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Complianc
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
@@ -44,7 +45,8 @@ import java.security.Principal
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
     private val landlordService: LandlordService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationService: PropertyRegistrationConfirmationService,
+    private val incompletePropertyService: IncompletePropertyService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
@@ -67,8 +69,7 @@ class LandlordController(
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
-                numberOfIncompleteProperties =
-                    propertyRegistrationService.getNumberOfIncompletePropertyRegistrationsForLandlord(principal.name),
+                numberOfIncompleteProperties = incompletePropertyService.getIncompletePropertiesForLandlord(principal.name).size,
                 numberOfComplianceActions = numberOfComplianceActions,
             )
 
@@ -98,7 +99,7 @@ class LandlordController(
         principal: Principal,
     ): String {
         val incompleteProperties =
-            propertyRegistrationService.getIncompletePropertiesForLandlord(principal.name)
+            incompletePropertyService.getIncompletePropertiesForLandlord(principal.name)
 
         val incompletePropertyViewModels =
             incompleteProperties.mapIndexed { index, dataModel ->
@@ -148,7 +149,7 @@ class LandlordController(
         }
 
         if (formModel.wantsToProceed == true) {
-            propertyRegistrationService.deleteIncompleteProperty(contextId, principal.name)
+            incompletePropertyService.deleteIncompleteProperty(contextId, principal.name)
             propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId)
             return "redirect:${getDeleteIncompletePropertyConfirmationPath(contextId)}"
         }
@@ -168,7 +169,7 @@ class LandlordController(
             )
         }
 
-        if (propertyRegistrationService.isFormContextAvailable(contextId)) {
+        if (incompletePropertyService.isIncompletePropertyAvailable(contextId)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Incomplete property registration with id $contextId is still in the database",
@@ -208,12 +209,7 @@ class LandlordController(
         contextId: Long,
         principalName: String,
     ) {
-        val formContext =
-            propertyRegistrationService.getIncompletePropertyFormContextForLandlordIfNotExpired(
-                contextId,
-                principalName,
-            )
-        val singleLineAddress = propertyRegistrationService.getAddressData(formContext).singleLineAddress
+        val singleLineAddress = incompletePropertyService.getAddressData(contextId, principalName).singleLineAddress
 
         model.addAttribute(
             "radioOptions",

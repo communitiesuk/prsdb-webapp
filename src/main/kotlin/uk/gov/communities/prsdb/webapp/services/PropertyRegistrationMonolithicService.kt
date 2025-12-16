@@ -28,8 +28,47 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import java.time.Instant
 
+interface PropertyRegistrationService {
+    fun registerProperty(
+        addressModel: AddressDataModel,
+        propertyType: PropertyType,
+        licenseType: LicensingType,
+        licenceNumber: String,
+        ownershipType: OwnershipType,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        baseUserId: String,
+    ): RegistrationNumber
+}
+
+interface IncompletePropertyService {
+    fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel>
+
+    fun deleteIncompleteProperty(
+        incompletePropertyId: Long,
+        principalName: String,
+    )
+
+    fun getAddressData(
+        incompletePropertyId: Long,
+        principalName: String,
+    ): AddressDataModel
+
+    fun isIncompletePropertyAvailable(incompletePropertyId: Long): Boolean
+}
+
+interface PropertyRegistrationConfirmationService {
+    fun addIncompletePropertyFormContextsDeletedThisSession(formContextId: Long)
+
+    fun getIncompletePropertyWasDeletedThisSession(contextId: Long): Boolean
+
+    fun setLastPrnRegisteredThisSession(prn: Long)
+
+    fun getLastPrnRegisteredThisSession(): Long?
+}
+
 @PrsdbWebService
-class PropertyRegistrationService(
+class PropertyRegistrationMonolithicService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val formContextRepository: FormContextRepository,
@@ -40,7 +79,9 @@ class PropertyRegistrationService(
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
-) {
+) : PropertyRegistrationService,
+    IncompletePropertyService,
+    PropertyRegistrationConfirmationService {
     fun getIsAddressRegistered(
         uprn: Long,
         ignoreCache: Boolean = false,
@@ -56,7 +97,7 @@ class PropertyRegistrationService(
     }
 
     @Transactional
-    fun registerProperty(
+    override fun registerProperty(
         addressModel: AddressDataModel,
         propertyType: PropertyType,
         licenseType: LicensingType,
@@ -111,26 +152,11 @@ class PropertyRegistrationService(
         return propertyOwnership.registrationNumber
     }
 
-    fun setLastPrnRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
+    override fun setLastPrnRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
 
-    fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
+    override fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
 
-    fun getNumberOfIncompletePropertyRegistrationsForLandlord(principalName: String): Int {
-        val incompleteProperties =
-            formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
-
-        val filteredIncompleteProperties = filterIncompleteProperties(incompleteProperties)
-
-        return filteredIncompleteProperties.size
-    }
-
-    private fun filterIncompleteProperties(incompleteProperties: List<FormContext>): List<FormContext> =
-        incompleteProperties.filter { property ->
-            val completeByDate = getIncompletePropertyCompleteByDate(property.createdDate)
-            !DateTimeHelper().isDateInPast(completeByDate)
-        }
-
-    fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> {
+    override fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> {
         val formContexts = formContextRepository.findAllByUser_IdAndJourneyType(principalName, JourneyType.PROPERTY_REGISTRATION)
 
         val incompleteProperties = mutableListOf<IncompletePropertiesDataModel>()
@@ -149,7 +175,7 @@ class PropertyRegistrationService(
         formContext: FormContext,
         completeByDate: LocalDate,
     ): IncompletePropertiesDataModel {
-        val address = getAddressData(formContext)
+        val address = formContext.toAddressData()
 
         return IncompletePropertiesDataModel(
             contextId = formContext.id,
@@ -163,10 +189,15 @@ class PropertyRegistrationService(
         return DateTimeHelper.get28DaysFromDate(createdDateInUk)
     }
 
-    fun getAddressData(formContext: FormContext): AddressDataModel {
-        val formContextJourneyData = formContext.toJourneyData()
-        return PropertyRegistrationJourneyDataHelper.getAddress(formContextJourneyData)!!
+    override fun getAddressData(
+        incompletePropertyId: Long,
+        principalName: String,
+    ): AddressDataModel {
+        val incompletePropertyFormContext = getIncompletePropertyFormContextForLandlordIfNotExpired(incompletePropertyId, principalName)
+        return incompletePropertyFormContext.toAddressData()
     }
+
+    private fun FormContext.toAddressData(): AddressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(this.toJourneyData())!!
 
     fun getIncompletePropertyFormContextForLandlordIfNotExpired(
         contextId: Long,
@@ -195,26 +226,27 @@ class PropertyRegistrationService(
                     "${JourneyType.PROPERTY_REGISTRATION.name} not found for base user: $principalName",
             )
 
-    fun deleteIncompleteProperty(
-        contextId: Long,
+    override fun deleteIncompleteProperty(
+        incompletePropertyId: Long,
         principalName: String,
     ) {
-        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(contextId, principalName)
+        val formContext = getIncompletePropertyFormContextForLandlordOrThrowNotFound(incompletePropertyId, principalName)
         formContextRepository.delete(formContext)
     }
 
-    fun addIncompletePropertyFormContextsDeletedThisSession(formContextId: Long) {
+    override fun addIncompletePropertyFormContextsDeletedThisSession(formContextId: Long) {
         session.setAttribute(
             INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION,
             getIncompletePropertyFormContextsDeletedThisSession().plus(formContextId),
         )
     }
 
-    fun getIncompletePropertyWasDeletedThisSession(contextId: Long): Boolean =
+    override fun getIncompletePropertyWasDeletedThisSession(contextId: Long): Boolean =
         getIncompletePropertyFormContextsDeletedThisSession().contains(contextId)
 
     private fun getIncompletePropertyFormContextsDeletedThisSession(): MutableList<Long> =
         session.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION) as MutableList<Long>? ?: mutableListOf()
 
-    fun isFormContextAvailable(contextId: Long): Boolean = formContextRepository.findById(contextId).isPresent
+    override fun isIncompletePropertyAvailable(incompletePropertyId: Long): Boolean =
+        formContextRepository.findById(incompletePropertyId).isPresent
 }
