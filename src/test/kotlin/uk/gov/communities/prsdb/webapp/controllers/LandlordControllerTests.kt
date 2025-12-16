@@ -31,7 +31,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
@@ -43,7 +43,7 @@ class LandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @MockitoBean
-    private lateinit var propertyRegistrationService: PropertyRegistrationService
+    private lateinit var propertyRegistrationService: PropertyRegistrationMonolithicService
 
     @MockitoBean
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
@@ -277,7 +277,7 @@ class LandlordControllerTests(
             whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
                 .thenReturn(true)
 
-            whenever(propertyRegistrationService.isFormContextAvailable(defaultContextId)).thenReturn(true)
+            whenever(propertyRegistrationService.isIncompletePropertyAvailable(defaultContextId)).thenReturn(true)
 
             mvc
                 .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))

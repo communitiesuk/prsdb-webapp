@@ -52,7 +52,7 @@ import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -99,7 +99,7 @@ class LandlordDashboardUrlTests(
     private lateinit var mockLandlordService: LandlordService
 
     @MockitoBean
-    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+    private lateinit var mockPropertyRegistrationService: PropertyRegistrationMonolithicService
 
     @MockitoBean
     private lateinit var mockIdentityService: OneLoginIdentityService
@@ -196,7 +196,7 @@ class LandlordDashboardUrlTests(
         val propertyOwnership = createPropertyOwnership()
         val mockLandlordRepository = mock<LandlordRepository>()
         val propertyRegistrationService =
-            PropertyRegistrationService(
+            PropertyRegistrationMonolithicService(
                 propertyOwnershipRepository = mock(),
                 landlordRepository = mockLandlordRepository,
                 formContextRepository = mock(),

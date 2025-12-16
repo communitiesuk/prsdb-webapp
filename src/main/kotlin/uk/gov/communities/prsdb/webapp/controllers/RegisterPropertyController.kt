@@ -26,7 +26,8 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.security.Principal
 
@@ -36,7 +37,8 @@ import java.security.Principal
 class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationService: PropertyRegistrationMonolithicService,
+    private val propertyConfirmationService: PropertyRegistrationConfirmationService,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     @GetMapping
@@ -114,7 +116,7 @@ class RegisterPropertyController(
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(model: Model): String {
         val propertyRegistrationNumber =
-            propertyRegistrationService.getLastPrnRegisteredThisSession()
+            propertyConfirmationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "No registered property was found in the session",

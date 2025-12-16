@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebComponent
@@ -14,7 +14,7 @@ class PropertyRegistrationJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
     private val addressService: AddressService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationService: PropertyRegistrationMonolithicService,
     private val localCouncilService: LocalCouncilService,
 ) {
     fun create() =
