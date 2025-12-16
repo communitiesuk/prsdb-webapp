@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.getDeleteIncompletePropertyConfirmationPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.getDeleteIncompletePropertyPath
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -278,7 +277,7 @@ class LandlordControllerTests(
             whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
                 .thenReturn(true)
 
-            whenever(propertyRegistrationService.getFormContextByIdOrNull(defaultContextId)).thenReturn(FormContext())
+            whenever(propertyRegistrationService.isFormContextAvailable(defaultContextId)).thenReturn(true)
 
             mvc
                 .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))

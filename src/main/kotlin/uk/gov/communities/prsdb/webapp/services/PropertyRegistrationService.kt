@@ -216,5 +216,5 @@ class PropertyRegistrationService(
     private fun getIncompletePropertyFormContextsDeletedThisSession(): MutableList<Long> =
         session.getAttribute(INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION) as MutableList<Long>? ?: mutableListOf()
 
-    fun getFormContextByIdOrNull(contextId: Long): FormContext? = formContextRepository.findById(contextId).orElse(null)
+    fun isFormContextAvailable(contextId: Long): Boolean = formContextRepository.findById(contextId).isPresent
 }

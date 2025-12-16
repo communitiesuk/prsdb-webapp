@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -673,29 +672,25 @@ class PropertyRegistrationServiceTests {
         }
 
         @Test
-        fun `getFormContextByIdOrNull returns the form context when it exists`() {
+        fun `isFormContextAvailable returns true when the form context exists`() {
             // Arrange
             val formContextId = 1L
             val expectedFormContext = MockLandlordData.createPropertyRegistrationFormContext(id = formContextId)
             whenever(mockFormContextRepository.findById(formContextId))
                 .thenReturn(Optional.of(expectedFormContext))
 
-            // Act
-            val formContext =
-                propertyRegistrationService.getFormContextByIdOrNull(formContextId)
-
-            // Assert
-            assertEquals(expectedFormContext, formContext)
+            // Act, Assert
+            assertTrue(propertyRegistrationService.isFormContextAvailable(formContextId))
         }
 
         @Test
-        fun `getFormContextByIdOrNull returns null when the form context does not exist`() {
+        fun `getFormContextByIdOrNull returns false when the form context does not exist`() {
             // Arrange
             val formContextId = 1L
             whenever(mockFormContextRepository.findById(formContextId)).thenReturn(Optional.empty())
 
             // Act, Assert
-            assertNull(propertyRegistrationService.getFormContextByIdOrNull(formContextId))
+            assertFalse(propertyRegistrationService.isFormContextAvailable(formContextId))
         }
     }
 }

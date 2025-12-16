@@ -168,7 +168,7 @@ class LandlordController(
             )
         }
 
-        if (propertyRegistrationService.getFormContextByIdOrNull(contextId) != null) {
+        if (propertyRegistrationService.isFormContextAvailable(contextId)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Incomplete property registration with id $contextId is still in the database",
