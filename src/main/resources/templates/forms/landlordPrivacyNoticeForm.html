@@ -33,7 +33,7 @@
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content" th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'agreesToPrivacyNotice', #{registerAsALandlord.privacyNotice.checkBox.heading}, null)}">
-        <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null,'agreesToPrivacyNotice',null, ${options})}"></th:block>
+        <th:block th:replace="~{fragments/forms/singleCheckbox :: singleCheckbox(null,'agreesToPrivacyNotice',null, ${options})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>

@@ -1,11 +1,11 @@
-<th:block id="checkboxes-content" th:fragment="checkboxes(label, fieldName, hint, options)"
+<th:block id="checkboxes-content" th:fragment="multipleCheckboxes(label, fieldName, hint, options)"
           th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#checkboxes-content/content()}, ${hint})}"
           xmlns="http://www.w3.org/1999/html">
     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-        <th:block th:each="option: ${options}" th:with="checkboxInputID=|${fieldName}-${option.valueStr}|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
+        <th:block th:each="option, itemStat: ${options}" th:with="checkboxInputID=|${fieldName}-${option.valueStr}|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
         <div class="govuk-checkboxes__item">
             <input class="govuk-checkboxes__input" type="checkbox"
-                   th:field="*{__${fieldName}__}" th:value="${option.value}" th:id="${checkboxInputID}"
+                   th:field="*{__${fieldName}__[__${itemStat.index}__]}" th:value="${option.value}" th:id="${checkboxInputID}"
                    th:attr="data-aria-controls=${option.conditionalFragment != null} ? ${conditionalFragmentID}">
             <label class="govuk-label govuk-checkboxes__label" th:for="${checkboxInputID}"
                    th:text="${option.labelMsgKey != null ? #messages.msg(option.labelMsgKey) : option.value}">

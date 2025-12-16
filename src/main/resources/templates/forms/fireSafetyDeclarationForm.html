@@ -13,7 +13,7 @@
     </th:block>
     <th:block id="form-content">
         <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'hasDeclared', null , null)}">
-            <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'hasDeclared', null, ${options})}"></th:block>
+            <th:block th:replace="~{fragments/forms/singleCheckbox :: singleCheckbox(null, 'hasDeclared', null, ${options})}"></th:block>
         </th:block>
         <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
     </th:block>
