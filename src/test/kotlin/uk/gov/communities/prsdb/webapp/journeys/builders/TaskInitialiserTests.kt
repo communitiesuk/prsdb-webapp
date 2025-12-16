@@ -8,6 +8,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
+import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
 import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -304,6 +306,33 @@ class TaskInitialiserTests {
 
         val capturedBackDestination = backDestCaptor.firstValue.invoke()
         assertSame(backDestination, capturedBackDestination)
+    }
+
+    @Test
+    fun `setting a custom exit step on the task initialiser sets it on the task before building`() {
+        // Arrange
+        val taskMock = mockTask()
+        val inOrder = inOrder(taskMock)
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(
+            taskMock.getTaskSubJourneyBuilder(
+                anyOrNull(),
+                anyOrNull(),
+            ),
+        ).thenReturn(subJourneyBuilderMock)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        val customExitStepMock = mock<NavigationalStep>()
+        builder.customExitStep(customExitStepMock)
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        inOrder.verify(taskMock).setCustomExitStep(eq(customExitStepMock))
+        inOrder.verify(taskMock).getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())
     }
 
     private fun mockTask(): Task<JourneyState> =

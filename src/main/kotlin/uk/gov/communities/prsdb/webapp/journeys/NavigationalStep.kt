@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-class NavigationalStepConfig : AbstractGenericStepConfig<NavigationComplete, NoInputFormModel, JourneyState>() {
+open class NavigationalStepConfig : AbstractGenericStepConfig<NavigationComplete, NoInputFormModel, JourneyState>() {
     override fun chooseTemplate(state: JourneyState): String = ""
 
     override val formModelClass = NoInputFormModel::class
@@ -13,7 +13,7 @@ class NavigationalStepConfig : AbstractGenericStepConfig<NavigationComplete, NoI
     override fun getStepSpecificContent(state: JourneyState) = mapOf<String, String>()
 }
 
-class NavigationalStep(
+open class NavigationalStep(
     stepConfig: NavigationalStepConfig,
 ) : InternalStep<NavigationComplete, NoInputFormModel, JourneyState>(stepConfig)
 

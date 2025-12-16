@@ -11,6 +11,7 @@ abstract class Task<in TState : JourneyState> {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
     private lateinit var exitInit: StepInitialiser<NavigationalStepConfig, *, NavigationComplete>.() -> Unit
+    private var exitStepOverride: NavigationalStep? = null
 
     fun getTaskSubJourneyBuilder(
         state: TState,
@@ -27,7 +28,7 @@ abstract class Task<in TState : JourneyState> {
         if (::subJourneyBuilder.isInitialized) {
             throw JourneyInitialisationException("Task sub-journey has already been initialised")
         }
-        val localSubJourneyBuilder = SubJourneyBuilder(state)
+        val localSubJourneyBuilder = SubJourneyBuilder(state, exitStepOverride)
         subJourneyBuilder = localSubJourneyBuilder
         localSubJourneyBuilder.exitStep {
             savable()
@@ -35,6 +36,13 @@ abstract class Task<in TState : JourneyState> {
         }
         localSubJourneyBuilder.init()
         return localSubJourneyBuilder
+    }
+
+    fun setCustomExitStep(step: NavigationalStep) {
+        if (::subJourneyBuilder.isInitialized) {
+            throw JourneyInitialisationException("Cannot set custom exit step after sub-journey has been initialised")
+        }
+        this.exitStepOverride = step
     }
 
     abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
