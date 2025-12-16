@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -10,11 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressStat
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @JourneyFrameworkComponent
 class SelectAddressStepConfig(
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyOwnershipRepository: PropertyOwnershipRepository,
 ) : AbstractGenericStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
     override val formModelClass = SelectAddressFormModel::class
 
@@ -67,7 +67,8 @@ class SelectAddressStepConfig(
 
     override fun afterStepDataIsAdded(state: AddressState) {
         super.afterStepDataIsAdded(state)
-        state.isAddressAlreadyRegistered = state.getAddressOrNull()?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) }
+        state.isAddressAlreadyRegistered =
+            state.getAddressOrNull()?.uprn?.let { propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(it) }
     }
 
     override fun chooseTemplate(state: AddressState): String = "forms/selectAddressForm"
