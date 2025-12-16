@@ -13,8 +13,9 @@ class IncompletePropertyCreatingNavigationalStepConfig(
         saveStateId: SavedJourneyState,
     ) {
         super.afterSaveState(state, saveStateId)
-        landlordRepository.findByBaseUser_Id(saveStateId.user.id)?.let { landlordEntity ->
-            println("Custom action after saving state for landlord: ${landlordEntity.id}")
+        landlordRepository.findByBaseUser_Id(saveStateId.user.id)?.let { landlord ->
+            landlord.incompleteProperties.add(saveStateId)
+            landlordRepository.save(landlord)
         }
     }
 }
