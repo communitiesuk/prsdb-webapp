@@ -12,4 +12,4 @@ ALTER TABLE landlord_incomplete_properties
     ADD CONSTRAINT fk_lanincpro_on_landlord FOREIGN KEY (landlord_id) REFERENCES landlord (id);
 
 ALTER TABLE landlord_incomplete_properties
-    ADD CONSTRAINT fk_lanincpro_on_saved_journey_state FOREIGN KEY (saved_journey_state_id) REFERENCES saved_journey_state (id);
+    ADD CONSTRAINT fk_lanincpro_on_saved_journey_state FOREIGN KEY (saved_journey_state_id) REFERENCES saved_journey_state (id) ON DELETE CASCADE;
