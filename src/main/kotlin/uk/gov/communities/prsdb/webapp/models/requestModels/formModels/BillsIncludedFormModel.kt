@@ -19,7 +19,7 @@ class BillsIncludedFormModel : FormModel {
             ),
         ],
     )
-    var billsIncluded: List<String?>? = null
+    var billsIncluded: MutableList<String?> = mutableListOf()
 
     @ValidatedBy(
         constraints = [
@@ -37,9 +37,9 @@ class BillsIncludedFormModel : FormModel {
     )
     var customBillsIncluded: String = ""
 
-    private fun isSomethingElseSelected(): Boolean = billsIncluded?.contains(BillsIncluded.SOMETHING_ELSE.toString()) == true
+    private fun isSomethingElseSelected(): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString())
 
-    fun notAllFalse(): Boolean = billsIncluded?.isNotEmpty() == true
+    fun notAllFalse(): Boolean = billsIncluded.filterNotNull().isNotEmpty()
 
     fun isCustomBillsIncludedValidNotBlank(): Boolean = !isSomethingElseSelected() || customBillsIncluded.isNotBlank()
 
