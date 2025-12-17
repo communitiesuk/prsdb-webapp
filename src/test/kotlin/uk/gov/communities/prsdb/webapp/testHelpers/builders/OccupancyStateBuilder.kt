@@ -83,7 +83,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         return self()
     }
 
-    fun withBillsIncluded(billsIncluded: MutableList<String> = mutableListOf(BillsIncluded.ELECTRICITY.toString())): SelfType {
+    fun withBillsIncluded(billsIncluded: MutableList<String?> = mutableListOf(BillsIncluded.ELECTRICITY.toString())): SelfType {
         val billsIncludedFormModel =
             BillsIncludedFormModel().apply {
                 this.billsIncluded = billsIncluded
@@ -97,7 +97,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         people: Int = 4,
         bedrooms: Int = 3,
         includesBills: Boolean = true,
-        billsIncluded: MutableList<String> = mutableListOf(BillsIncluded.ELECTRICITY.toString()),
+        billsIncluded: MutableList<String?> = mutableListOf(BillsIncluded.ELECTRICITY.toString()),
     ): SelfType {
         withOccupancyStatus(true)
         withHouseholds(households)
