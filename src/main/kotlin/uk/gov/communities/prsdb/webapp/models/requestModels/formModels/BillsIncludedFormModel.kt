@@ -26,7 +26,7 @@ class BillsIncludedFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "forms.billsIncluded.error.somethingElse.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isCustomBillsIncludedValidNotBlank",
+                targetMethod = "isCustomBillsIncludedNotBlank",
             ),
             ConstraintDescriptor(
                 messageKey = "forms.billsIncluded.error.somethingElse.tooLong",
