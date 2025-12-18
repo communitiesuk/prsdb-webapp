@@ -41,7 +41,7 @@ class BillsIncludedFormModel : FormModel {
 
     fun notAllFalse(): Boolean = billsIncluded.filterNotNull().isNotEmpty()
 
-    fun isCustomBillsIncludedValidNotBlank(): Boolean = !isSomethingElseSelected() || customBillsIncluded.isNotBlank()
+    fun isCustomBillsIncludedNotBlank(): Boolean = !isSomethingElseSelected() || customBillsIncluded.isNotBlank()
 
     fun isCustomBillsIncludedNotTooLong(): Boolean =
         !isSomethingElseSelected() ||

@@ -18,14 +18,15 @@ class BillsIncludedFormModelTests {
     @Nested
     inner class NotAllFalseTests {
         @Test
-        fun `returns false when billsIncluded is empty`() {
-            billsIncludedFormModel.billsIncluded = mutableListOf()
+        fun `returns false when no bills are included`() {
+            billsIncludedFormModel.billsIncluded = mutableListOf(null, null, null, null, null, null, null, null, null, null, null)
             assertFalse(billsIncludedFormModel.notAllFalse())
         }
 
         @Test
-        fun `returns true when billsIncluded is not empty`() {
-            billsIncludedFormModel.billsIncluded = mutableListOf(BillsIncluded.WATER.toString())
+        fun `returns true when a bill is included`() {
+            billsIncludedFormModel.billsIncluded =
+                mutableListOf(BillsIncluded.WATER.toString(), null, null, null, null, null, null, null, null, null, null)
             assertTrue(billsIncludedFormModel.notAllFalse())
         }
     }
@@ -36,21 +37,21 @@ class BillsIncludedFormModelTests {
         fun `returns false when something else is selected and customBillsIncluded is blank`() {
             billsIncludedFormModel.billsIncluded = mutableListOf(BillsIncluded.SOMETHING_ELSE.toString())
             billsIncludedFormModel.customBillsIncluded = ""
-            assertFalse(billsIncludedFormModel.isCustomBillsIncludedValidNotBlank())
+            assertFalse(billsIncludedFormModel.isCustomBillsIncludedNotBlank())
         }
 
         @Test
         fun `returns true when something else is selected and customBillsIncluded is not blank`() {
             billsIncludedFormModel.billsIncluded = mutableListOf(BillsIncluded.SOMETHING_ELSE.toString())
             billsIncludedFormModel.customBillsIncluded = "Internet"
-            assertTrue(billsIncludedFormModel.isCustomBillsIncludedValidNotBlank())
+            assertTrue(billsIncludedFormModel.isCustomBillsIncludedNotBlank())
         }
 
         @Test
         fun `returns true when something else is not selected`() {
             billsIncludedFormModel.billsIncluded = mutableListOf(BillsIncluded.WATER.toString())
             billsIncludedFormModel.customBillsIncluded = ""
-            assertTrue(billsIncludedFormModel.isCustomBillsIncludedValidNotBlank())
+            assertTrue(billsIncludedFormModel.isCustomBillsIncludedNotBlank())
         }
     }
 

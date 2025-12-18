@@ -1,6 +1,5 @@
 <th:block id="checkboxes-content" th:fragment="checkboxes(label, fieldName, hint, options)"
-          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#checkboxes-content/content()}, ${hint})}"
-          xmlns="http://www.w3.org/1999/html">
+          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#checkboxes-content/content()}, ${hint})}">
     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
         <th:block th:each="option, itemStat: ${options}" th:with="checkboxInputID=|${fieldName}-${option.valueStr}|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
             <div class="govuk-checkboxes__item">

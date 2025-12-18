@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -10,8 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class BillsIncludedStepConfig : AbstractGenericStepConfig<Complete, BillsIncludedFormModel, OccupationState>() {
     override val formModelClass = BillsIncludedFormModel::class
 
@@ -75,8 +73,7 @@ class BillsIncludedStepConfig : AbstractGenericStepConfig<Complete, BillsInclude
     override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class BillsIncludedStep(
     stepConfig: BillsIncludedStepConfig,
 ) : RequestableStep<Complete, BillsIncludedFormModel, OccupationState>(stepConfig)
