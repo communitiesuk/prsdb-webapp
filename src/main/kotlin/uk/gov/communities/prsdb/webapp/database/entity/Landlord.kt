@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -68,6 +69,14 @@ class Landlord() : ModifiableAuditableEntity() {
 
     @OneToMany(mappedBy = "primaryLandlord", orphanRemoval = true)
     private lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
+
+    @OneToMany(orphanRemoval = true)
+    @JoinTable(
+        name = "landlord_incomplete_properties",
+        joinColumns = [JoinColumn(name = "landlord_id")],
+        inverseJoinColumns = [JoinColumn(name = "saved_journey_state_id")],
+    )
+    lateinit var incompleteProperties: MutableSet<SavedJourneyState>
 
     constructor(
         baseUser: OneLoginUser,
