@@ -47,45 +47,22 @@ class PropertyOwnershipSearchRepositoryImpl(
         restrictToLicenses: Collection<LicensingType>,
         pageable: Pageable,
     ): Page<PropertyOwnership> {
-        // The result of this will always be 0 or 1, but we do the count anyway so that we can return a Page object and therefore
-        // keep the interface consistent with the other search methods.
-        val countQuery =
-            """
-            SELECT count(*) 
-            FROM property_ownership po 
-            JOIN registration_number r ON po.registration_number_id = r.id 
-            WHERE po.is_active AND r.number = :searchTerm
-            $FILTERS;
-            """
-        val countResult =
-            entityManager.getCountResult(
-                countQuery,
-                searchPRN,
-                localCouncilUserBaseId,
-                restrictToLocalCouncil,
-                restrictToLicenses,
-            )
-
         val searchQuery =
             """
             SELECT po.* 
             FROM property_ownership po 
             JOIN registration_number r ON po.registration_number_id = r.id 
             WHERE po.is_active AND r.number = :searchTerm
-            $FILTERS
-            $PAGINATION;
+            $FILTERS;
             """
-        val searchResults =
-            entityManager.getSearchResults(
-                searchQuery,
-                searchPRN,
-                localCouncilUserBaseId,
-                restrictToLocalCouncil,
-                restrictToLicenses,
-                pageable,
-            )
-
-        return PageImpl(searchResults, pageable, countResult)
+        return entityManager.getUniqueSearchResult(
+            searchQuery,
+            searchPRN,
+            localCouncilUserBaseId,
+            restrictToLocalCouncil,
+            restrictToLicenses,
+            pageable,
+        )
     }
 
     override fun searchMatchingUPRN(
@@ -95,45 +72,22 @@ class PropertyOwnershipSearchRepositoryImpl(
         restrictToLicenses: Collection<LicensingType>,
         pageable: Pageable,
     ): Page<PropertyOwnership> {
-        // The result of this will always be 0 or 1, but we do the count anyway so that we can return a Page object and therefore
-        // keep the interface consistent with the other search methods.
-        val countQuery =
-            """
-            SELECT count(*) 
-            FROM property_ownership po 
-            JOIN address a ON po.address_id = a.id 
-            WHERE po.is_active AND a.uprn = :searchTerm
-            $FILTERS;
-            """
-        val countResult =
-            entityManager.getCountResult(
-                countQuery,
-                searchUPRN,
-                localCouncilUserBaseId,
-                restrictToLocalCouncil,
-                restrictToLicenses,
-            )
-
         val searchQuery =
             """
             SELECT po.* 
             FROM property_ownership po 
             JOIN address a ON po.address_id = a.id 
             WHERE po.is_active AND a.uprn = :searchTerm
-            $FILTERS
-            $PAGINATION;
+            $FILTERS;
             """
-        val searchResults =
-            entityManager.getSearchResults(
-                searchQuery,
-                searchUPRN,
-                localCouncilUserBaseId,
-                restrictToLocalCouncil,
-                restrictToLicenses,
-                pageable,
-            )
-
-        return PageImpl(searchResults, pageable, countResult)
+        return entityManager.getUniqueSearchResult(
+            searchQuery,
+            searchUPRN,
+            localCouncilUserBaseId,
+            restrictToLocalCouncil,
+            restrictToLicenses,
+            pageable,
+        )
     }
 
     // We have two partial indexes on the single_line_address column:
@@ -182,19 +136,17 @@ class PropertyOwnershipSearchRepositoryImpl(
             AND $isActiveFilter
             $FILTERS
             ORDER BY po.single_line_address <->>> :searchTerm
-            $PAGINATION;
+            LIMIT :limit OFFSET :offset;
             """
-        val searchResults =
-            entityManager.getSearchResults(
-                searchQuery,
-                searchTerm,
-                localCouncilUserBaseId,
-                restrictToLocalCouncil,
-                restrictToLicenses,
-                pageable,
-            )
-
-        return PageImpl(searchResults, pageable, countResult)
+        return entityManager.getSearchResults(
+            searchQuery,
+            searchTerm,
+            localCouncilUserBaseId,
+            restrictToLocalCouncil,
+            restrictToLicenses,
+            pageable,
+            countResult,
+        )
     }
 
     companion object {
@@ -220,8 +172,6 @@ class PropertyOwnershipSearchRepositoryImpl(
             """
 
         private const val FILTERS = LOCAL_COUNCIL_FILTER + LICENSE_FILTER
-
-        private const val PAGINATION = "LIMIT :limit OFFSET :offset"
 
         private fun Query.setFilterParameters(
             searchTerm: Any,
@@ -249,6 +199,27 @@ class PropertyOwnershipSearchRepositoryImpl(
                 .singleResult as Long
 
         @Suppress("Unchecked_Cast")
+        private fun EntityManager.getUniqueSearchResult(
+            query: String,
+            searchTerm: Any,
+            localCouncilUserBaseId: String,
+            restrictToLocalCouncil: Boolean,
+            restrictToLicenses: Collection<LicensingType>,
+            pageable: Pageable,
+        ): Page<PropertyOwnership> {
+            val searchResult =
+                this
+                    .createNativeQuery(query, PropertyOwnership::class.java)
+                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
+                    .resultList as List<PropertyOwnership>
+
+            // If the offset is greater than 0, any search result will be out of range
+            val pagedSearchResult = if (pageable.offset > 0) emptyList() else searchResult
+
+            return PageImpl(pagedSearchResult, pageable, searchResult.size.toLong())
+        }
+
+        @Suppress("Unchecked_Cast")
         private fun EntityManager.getSearchResults(
             query: String,
             searchTerm: Any,
@@ -256,12 +227,17 @@ class PropertyOwnershipSearchRepositoryImpl(
             restrictToLocalCouncil: Boolean,
             restrictToLicenses: Collection<LicensingType>,
             pageable: Pageable,
-        ): List<PropertyOwnership> =
-            this
-                .createNativeQuery(query, PropertyOwnership::class.java)
-                .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
-                .setParameter("limit", pageable.pageSize)
-                .setParameter("offset", pageable.offset)
-                .resultList as List<PropertyOwnership>
+            countResult: Long,
+        ): Page<PropertyOwnership> {
+            val searchResult =
+                this
+                    .createNativeQuery(query, PropertyOwnership::class.java)
+                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
+                    .setParameter("limit", pageable.pageSize)
+                    .setParameter("offset", pageable.offset)
+                    .resultList as List<PropertyOwnership>
+
+            return PageImpl(searchResult, pageable, countResult)
+        }
     }
 }
