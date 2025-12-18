@@ -643,7 +643,7 @@ class PropertyRegistrationServiceTests {
         }
 
         @Test
-        fun `getFormContextByIdOrNull returns false when the form context does not exist`() {
+        fun `isFormContextAvailable returns false when the form context does not exist`() {
             // Arrange
             val formContextId = 1L
             whenever(mockFormContextRepository.findById(formContextId)).thenReturn(Optional.empty())
