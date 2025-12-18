@@ -36,18 +36,6 @@ class LandlordSearchRepositoryImpl(
         restrictToLocalCouncil: Boolean,
         pageable: Pageable,
     ): Page<LandlordSearchResultDataModel> {
-        // The result of this will always be 0 or 1, but we do the count anyway so that we can return a Page object and therefore
-        // keep the interface consistent with the other search method.
-        val countQuery =
-            """
-            SELECT count(*)
-            FROM landlord l
-            JOIN registration_number r ON l.registration_number_id = r.id
-            WHERE r.number = :searchTerm
-            ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER else "" };
-            """
-        val countResult = entityManager.getCountResult(countQuery, searchLRN, localCouncilUserBaseId, restrictToLocalCouncil)
-
         val searchQuery =
             """
             WITH resulting_landlords AS (
@@ -56,14 +44,10 @@ class LandlordSearchRepositoryImpl(
                 JOIN registration_number r ON l.registration_number_id = r.id
                 WHERE r.number = :searchTerm
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER else "" }
-                $PAGINATION
             )
             $SELECT_FROM_RESULTING_LANDLORDS;
             """
-        val searchResults =
-            entityManager.getSearchResults(searchQuery, searchLRN, localCouncilUserBaseId, restrictToLocalCouncil, pageable)
-
-        return PageImpl(searchResults, pageable, countResult)
+        return entityManager.getUniqueSearchResult(searchQuery, searchLRN, localCouncilUserBaseId, restrictToLocalCouncil, pageable)
     }
 
     // We have two indexes on functions of the searchable columns:
@@ -87,7 +71,13 @@ class LandlordSearchRepositoryImpl(
                   LIMIT $MAX_ENTRIES_IN_LANDLORDS_SEARCH
                  ) subquery;
             """
-        val countResult = entityManager.getCountResult(countQuery, searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
+        val countResult =
+            entityManager.getCountResult(
+                countQuery,
+                searchTerm,
+                localCouncilUserBaseId,
+                restrictToLocalCouncil,
+            )
 
         val searchQuery =
             """
@@ -98,15 +88,19 @@ class LandlordSearchRepositoryImpl(
                 WHERE gist_landlord_details(l.phone_number, l.email, l.name) %> :searchTerm
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_GROUP_BY else "" }
                 ORDER BY gist_landlord_details(l.phone_number, l.email, l.name) <->> :searchTerm
-                $PAGINATION
+                LIMIT :limit OFFSET :offset
             )
             $SELECT_FROM_RESULTING_LANDLORDS
             ORDER BY gist_landlord_details(l.phone_number, l.email, l.name) <->> :searchTerm;
             """
-        val searchResults =
-            entityManager.getSearchResults(searchQuery, searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, pageable)
-
-        return PageImpl(searchResults, pageable, countResult)
+        return entityManager.getSearchResults(
+            searchQuery,
+            searchTerm,
+            localCouncilUserBaseId,
+            restrictToLocalCouncil,
+            pageable,
+            countResult,
+        )
     }
 
     companion object {
@@ -128,8 +122,6 @@ class LandlordSearchRepositoryImpl(
             """
 
         private const val LOCAL_COUNCIL_FILTER_GROUP_BY = "GROUP BY l.id"
-
-        private const val PAGINATION = "LIMIT :limit OFFSET :offset"
 
         private const val SELECT_FROM_RESULTING_LANDLORDS =
             """
@@ -163,18 +155,43 @@ class LandlordSearchRepositoryImpl(
                 .singleResult as Long
 
         @Suppress("Unchecked_Cast")
+        private fun EntityManager.getUniqueSearchResult(
+            query: String,
+            searchTerm: Any,
+            localCouncilUserBaseId: String,
+            restrictToLocalCouncil: Boolean,
+            pageable: Pageable,
+        ): Page<LandlordSearchResultDataModel> {
+            val searchResult =
+                this
+                    .createNativeQuery(query, LandlordSearchResultDataModel::class.java)
+                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
+                    .resultList as List<LandlordSearchResultDataModel>
+
+            // If the offset is greater than 0, any search result will be out of range
+            val pagedSearchResult = if (pageable.offset > 0) emptyList() else searchResult
+
+            return PageImpl(pagedSearchResult, pageable, searchResult.size.toLong())
+        }
+
+        @Suppress("Unchecked_Cast")
         private fun EntityManager.getSearchResults(
             query: String,
             searchTerm: Any,
             localCouncilUserBaseId: String,
             restrictToLocalCouncil: Boolean,
             pageable: Pageable,
-        ): List<LandlordSearchResultDataModel> =
-            this
-                .createNativeQuery(query, LandlordSearchResultDataModel::class.java)
-                .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
-                .setParameter("limit", pageable.pageSize)
-                .setParameter("offset", pageable.offset)
-                .resultList as List<LandlordSearchResultDataModel>
+            countResult: Long,
+        ): Page<LandlordSearchResultDataModel> {
+            val searchResult =
+                this
+                    .createNativeQuery(query, LandlordSearchResultDataModel::class.java)
+                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
+                    .setParameter("limit", pageable.pageSize)
+                    .setParameter("offset", pageable.offset)
+                    .resultList as List<LandlordSearchResultDataModel>
+
+            return PageImpl(searchResult, pageable, countResult)
+        }
     }
 }
