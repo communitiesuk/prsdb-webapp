@@ -104,10 +104,12 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
 open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
+    exitStepOverride: NavigationalStep? = null,
 ) : AbstractJourneyBuilder<TState>(journey) {
     var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
         private set
-    val exitStep = NavigationalStep(NavigationalStepConfig())
+
+    val exitStep = exitStepOverride ?: NavigationalStep(NavigationalStepConfig())
 
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
