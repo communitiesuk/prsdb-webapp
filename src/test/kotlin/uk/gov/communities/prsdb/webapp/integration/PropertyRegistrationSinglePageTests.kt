@@ -432,6 +432,42 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class BillsIncludedStep {
+        @Test
+        fun `Submitting with no bills included selected returns an error`(page: Page) {
+            val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            billsIncludedPage.form.submit()
+            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Select what you include in the rent")
+        }
+
+        @Test
+        fun `Submitting with something else selected but no text entered returns an error`(page: Page) {
+            val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            billsIncludedPage.selectGasElectricityWater()
+            billsIncludedPage.selectSomethingElseCheckbox()
+            billsIncludedPage.form.submit()
+            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Enter the bills and services you include in the rent")
+        }
+
+        @Test
+        fun `Submitting with a very long something else text returns an error`(page: Page) {
+            val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            billsIncludedPage.selectGasElectricityWater()
+            billsIncludedPage.selectSomethingElseCheckbox()
+            val aVeryLongString =
+                "This string is very long, so long that it is not feasible that it is a real description " +
+                    "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
+                    " It is actually quite difficult for a string to be long enough to trigger this error, because the" +
+                    " maximum length has been selected to be permissive of descriptions we do not expect while still having " +
+                    "a cap reachable with a little effort."
+            billsIncludedPage.fillCustomBills(aVeryLongString)
+            billsIncludedPage.form.submit()
+            assertThat(billsIncludedPage.form.getErrorMessage("customBillsIncluded"))
+                .containsText("The description of other bills and services must be 200 characters or fewer")
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
