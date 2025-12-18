@@ -25,7 +25,8 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao','2024-
        ('urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg','2025-10-17 14:14:00.484077+00'), -- Ned.FrederickCalas-Hathaway@softwire.com
        ('urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss','2025-10-30 10:59:39.724707+00'), -- dani.swift@communities.gov.uk
        ('urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI','2025-11-10 12:13:21.344193+00'), -- rebecca.coll@communities.gov.uk
-       ('urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8','2025-11-10 15:03:08.410190+00') -- shannon.okyemba-tsambou@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8','2025-11-10 15:03:08.410190+00'), -- shannon.okyemba-tsambou@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc','2025-05-01 10:33:22.395944+00') -- Lewis.Jones@communities.gov.uk
        ON CONFLICT DO NOTHING;
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
@@ -60,7 +61,8 @@ VALUES (1,'2024-10-15 00:00:00+00','2024-10-15 00:00:00+00','urn:fdc:gov.uk:2022
        (20,'2025-10-23 13:07:12.755421+00','2025-10-23 13:07:32.345208+00','urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg',true,2,'Ned.FrederickCalas-Hathaway@softwire.com','Ned Calas-Hathaway',true),
        (21, '2025-10-30 11:21:48.730479+00',null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', true, 2,'dani.swift@communities.gov.uk', 'Dani Swift', true),
        (22, '2025-11-10 12:13:21.344193+00', null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', true, 2,'rebecca.coll@communities.gov.uk','Rebecca Coll', true),
-       (23, '2025-11-10 17:00:00.000000+00', null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', true, 2,'shannon.okyemba-tsambou@communities.gov.uk','Shannon Okyemba-Tsambou', true)
+       (23, '2025-11-10 17:00:00.000000+00', null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', true, 2,'shannon.okyemba-tsambou@communities.gov.uk','Shannon Okyemba-Tsambou', true),
+       (24, '2025-05-01 10:33:22.395944+00', null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', true, 2,'Lewis.Jones@communities.gov.uk','Lewis Jones', true)
        ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
@@ -153,7 +155,8 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:_RNZomOzEjxF
        (17,'2025-10-09 12:44:47.460558+00',null,'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'),
        (18,'2025-10-23 13:07:12.755421+00',null,'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'),
        (19,'2025-11-10 16:02:36.605000+00',null,'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'),
-       (20,'2025-11-10 16:03:02.159000+00',null,'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI')
+       (20,'2025-11-10 16:03:02.159000+00',null,'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'),
+       (21,'2025-11-10 16:10:00.000000+00',null,'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc')
        ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
@@ -181,5 +184,6 @@ VALUES ('PRSD22', 1, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lV
        ('PRSD54', 1, current_date, null, 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'),
        ('PRSD55', 1, current_date, null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss'), -- Dani
        ('PRSD56', 1, current_date, null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- Shannon
-       ('PRSD57', 1, current_date, null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI')  -- Rebecca
+       ('PRSD57', 1, current_date, null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'),  -- Rebecca
+       ('PRSD58', 1, current_date, null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc')  -- Lewis
        ON CONFLICT DO NOTHING;
