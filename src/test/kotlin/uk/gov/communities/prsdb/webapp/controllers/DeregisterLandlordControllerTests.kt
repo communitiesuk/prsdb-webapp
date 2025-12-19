@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(DeregisterLandlordController::class)
@@ -37,6 +38,9 @@ class DeregisterLandlordControllerTests(
 
     @MockitoBean
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
+
+    @MockitoBean
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Test
     fun `checkForRegisteredProperties returns a redirect for an unauthenticated user`() {
@@ -62,7 +66,7 @@ class DeregisterLandlordControllerTests(
     fun `checkForRegisteredProperties caches userHasRegisteredProperties then returns a redirect to the are you sure step`() {
         landlordDeregistrationJourney = mock()
         whenever(landlordDeregistrationJourneyFactory.create()).thenReturn(landlordDeregistrationJourney)
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(false)
+        whenever(propertyOwnershipService.doesLandlordHaveRegisteredProperties(anyString())).thenReturn(false)
         whenever(
             landlordDeregistrationJourney
                 .completeStep(

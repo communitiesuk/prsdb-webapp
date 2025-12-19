@@ -6,14 +6,19 @@
 <!--/*@thymesVar id="electricalSafetyStandardsGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <header>
-        <h1 class="govuk-heading-l" th:text="#{forms.eicrOutdated.heading}">forms.eicrOutdated.heading</h1>
-    </header>
-    <section>
-        <p class="govuk-body" th:text="#{forms.eicrOutdated.paragraph.one}">forms.eicrOutdated.paragraph.one</p>
-        <p class="govuk-body" th:utext="#{forms.eicrOutdated.paragraph.two}">forms.eicrOutdated.paragraph.two</p>
-    </section>
-    <section th:replace="~{fragments/content/invalidEicrContent :: invalidEicrContent(${electricalSafetyStandardsInspectionUrl}, ${electricalSafetyStandardsGuideUrl})}"></section>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{forms.eicrOutdated.heading}">forms.eicrOutdated.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{forms.eicrOutdated.paragraph.one}">forms.eicrOutdated.paragraph.one</p>
+            <p class="govuk-body" th:utext="#{forms.eicrOutdated.paragraph.two}">forms.eicrOutdated.paragraph.two</p>
+        </section>
+        <section th:replace="~{fragments/content/invalidEicrContent :: invalidEicrContent(${electricalSafetyStandardsInspectionUrl}, ${electricalSafetyStandardsGuideUrl})}"></section>
+    </th:block>
+
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>

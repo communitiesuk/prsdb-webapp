@@ -20,9 +20,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
-import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
+import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
-import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
+import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -49,12 +50,6 @@ abstract class IntegrationTest {
     lateinit var notificationClient: NotificationClient
 
     @MockitoBean
-    lateinit var osPlacesConfig: OSPlacesConfig
-
-    @MockitoBean
-    lateinit var osPlacesClient: OSPlacesClient
-
-    @MockitoBean
     lateinit var identityService: OneLoginIdentityService
 
     @MockitoBean
@@ -68,6 +63,15 @@ abstract class IntegrationTest {
 
     @MockitoBean
     lateinit var s3client: S3Client
+
+    @MockitoBean
+    lateinit var osDownloadsConfig: OsDownloadsConfig
+
+    @MockitoBean
+    lateinit var osDownloadsClient: OsDownloadsClient
+
+    @MockitoSpyBean
+    lateinit var featureFlagManager: FeatureFlagManager
 
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests

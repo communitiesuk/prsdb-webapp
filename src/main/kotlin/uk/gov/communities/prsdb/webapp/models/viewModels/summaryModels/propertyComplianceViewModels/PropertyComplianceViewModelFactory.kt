@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -38,7 +38,7 @@ class PropertyComplianceViewModelFactory(
             if (landlordView) {
                 "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
             } else {
-                "propertyDetails.complianceInformation.landlordResponsibilities.localAuthority.hintText"
+                "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
             }
         return PropertyComplianceViewModel(
             gasSafetySummaryList = gasSafetySummaryList,

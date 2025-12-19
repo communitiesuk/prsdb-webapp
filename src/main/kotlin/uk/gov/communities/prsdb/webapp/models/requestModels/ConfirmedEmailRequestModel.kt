@@ -12,11 +12,11 @@ open class ConfirmedEmailRequestModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "addLAUser.error.missingEmail",
+                messageKey = "addLocalCouncilUser.error.missingEmail",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "addLAUser.error.notAnEmail",
+                messageKey = "addLocalCouncilUser.error.notAnEmail",
                 validatorType = EmailConstraintValidator::class,
             ),
         ],
@@ -25,11 +25,11 @@ open class ConfirmedEmailRequestModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "addLAUser.error.noConfirmation",
+                messageKey = "addLocalCouncilUser.error.noConfirmation",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "addLAUser.error.confirmationDoesNotMatch",
+                messageKey = "addLocalCouncilUser.error.confirmationDoesNotMatch",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isConfirmEmailSameAsEmail",
             ),

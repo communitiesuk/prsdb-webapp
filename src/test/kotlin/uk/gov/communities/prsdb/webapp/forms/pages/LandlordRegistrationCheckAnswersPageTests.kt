@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -17,14 +16,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder.Companion.DEFAULT_ADDRESS
 import java.time.LocalDate
 
 class LandlordRegistrationCheckAnswersPageTests {
     private lateinit var page: LandlordRegistrationCheckAnswersPage
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
     private lateinit var journeyDataService: JourneyDataService
     private lateinit var validator: Validator
     private lateinit var pageData: PageData
@@ -33,14 +32,14 @@ class LandlordRegistrationCheckAnswersPageTests {
 
     @BeforeEach
     fun setup() {
-        localAuthorityService = mock()
+        localCouncilService = mock()
         journeyDataService = mock()
         page = LandlordRegistrationCheckAnswersPage(journeyDataService, "/redirect")
         validator = mock()
         whenever(validator.supports(any<Class<*>>())).thenReturn(true)
         pageData = mock()
         prevStepUrl = "mock"
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(localAuthorityService)
+        journeyDataBuilder = JourneyDataBuilder.landlordDefault(localCouncilService)
     }
 
     private fun getSummaryListData(journeyData: JourneyData): List<SummaryListRowViewModel> {
@@ -221,146 +220,13 @@ class LandlordRegistrationCheckAnswersPageTests {
                 AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    "${LandlordRegistrationStepId.ManualAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
-                        LandlordRegistrationStepId.ManualAddress.urlPathSegment,
+                    "${LandlordRegistrationStepId.LookupAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
+                        LandlordRegistrationStepId.LookupAddress.urlPathSegment,
                 ),
             ),
             summaryListData.single {
                 it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
             },
-        )
-    }
-
-    @Test
-    fun `summaryListData has the correct non England or Wales and selected contact addresses`() {
-        val countryOfResidence = "Germany"
-        val nonEnglandOrWalesAddress = "test address"
-        val selectedAddress = "1 Example Road"
-        val journeyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndSelectedContactAddress(
-                    countryOfResidence,
-                    nonEnglandOrWalesAddress,
-                    selectedAddress,
-                ).build()
-
-        val summaryListData = getSummaryListData(journeyData)
-
-        assertEquals(
-            SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-                countryOfResidence,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
-                ),
-            ),
-            summaryListData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence"
-            },
-        )
-        assertEquals(
-            SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
-                nonEnglandOrWalesAddress,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
-                ),
-            ),
-            summaryListData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
-            },
-        )
-        assertEquals(
-            SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
-                selectedAddress,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LandlordRegistrationStepId.LookupContactAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.LookupContactAddress.urlPathSegment}",
-                ),
-            ),
-            summaryListData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
-            },
-        )
-    }
-
-    @Test
-    fun `summaryListData has the correct non England or Wales and manual contact addresses`() {
-        val countryOfResidence = "Germany"
-        val nonEnglandOrWalesAddress = "test address"
-        val addressLineOne = "1 Example Road"
-        val townOrCity = "Townville"
-        val postcode = "EG1 2BA"
-        val journeyData =
-            journeyDataBuilder
-                .withNonEnglandOrWalesAndManualContactAddress(
-                    countryOfResidence,
-                    nonEnglandOrWalesAddress,
-                    addressLineOne,
-                    townOrCity,
-                    postcode,
-                ).build()
-
-        val summaryListData = getSummaryListData(journeyData)
-
-        assertEquals(
-            SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-                countryOfResidence,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LandlordRegistrationStepId.CountryOfResidence.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.CountryOfResidence.urlPathSegment}",
-                ),
-            ),
-            summaryListData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence"
-            },
-        )
-        assertEquals(
-            SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
-                nonEnglandOrWalesAddress,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment}",
-                ),
-            ),
-            summaryListData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress"
-            },
-        )
-        assertEquals(
-            SummaryListRowViewModel(
-                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress",
-                AddressDataModel.fromManualAddressData(addressLineOne, townOrCity, postcode).singleLineAddress,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    "${LandlordRegistrationStepId.ManualContactAddress.urlPathSegment}?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=" +
-                        LandlordRegistrationStepId.ManualContactAddress.urlPathSegment,
-                ),
-            ),
-            summaryListData.single {
-                it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
-            },
-        )
-    }
-
-    @Test
-    fun `summaryListData does not contain country of residence for national landlords`() {
-        val journeyData = journeyDataBuilder.build()
-
-        val summaryListData = getSummaryListData(journeyData)
-
-        assertTrue(
-            summaryListData.none { it.fieldHeading == "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress" },
         )
     }
 }

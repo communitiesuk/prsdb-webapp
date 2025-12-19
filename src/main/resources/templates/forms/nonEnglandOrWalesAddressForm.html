@@ -1,20 +1,14 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
-<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
-<!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
-<!--/*@thymesVar id="label" type="java.lang.String"*/-->
-<!--/*@thymesVar id="hint" type="java.lang.String"*/-->
-<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="limit" type="java.lang.Integer"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="form-content">
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'nonEnglandOrWalesAddress', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
-        <div th:replace="~{fragments/forms/textArea :: textArea(#{${label}}, 'nonEnglandOrWalesAddress', null, ${limit})}">
-        </div>
+<html id="page" th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title}, ~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
+    <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+        <main class="govuk-main-wrapper" id="main-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{forms.nonEnglandOrWalesAddress.heading}">forms.nonEnglandOrWalesAddress.heading</h1>
+            </header>
+            <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.one}">forms.nonEnglandOrWalesAddress.paragraph.one</p>
+            <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two}">forms.nonEnglandOrWalesAddress.paragraph.two</p>
+        </main>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-</th:block>
 </html>

@@ -18,7 +18,7 @@ const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
         "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
         "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector#the-inspection"
 
-const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
+const val FIND_LOCAL_COUNCIL_URL = "https://www.gov.uk/find-local-council"
 
 const val FIND_EPC_URL = "https://www.gov.uk/find-energy-certificate"
 
@@ -95,3 +95,5 @@ const val CROWN_COPYRIGHT_URL =
 const val HSE_URL = "https://www.hse.gov.uk/"
 
 const val LANDLORD_GAS_SAFETY_URL = "https://www.hse.gov.uk/gas/domestic/faqlandlord.htm"
+
+const val SECURITY_TXT_REDIRECT = "https://vdp.cabinetoffice.gov.uk/.well-known/security.txt"

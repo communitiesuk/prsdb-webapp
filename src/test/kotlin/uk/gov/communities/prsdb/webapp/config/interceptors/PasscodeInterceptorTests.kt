@@ -16,7 +16,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
@@ -72,7 +72,7 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle allows non-landlord paths`() {
-        mockRequest.requestURI = LOCAL_AUTHORITY_DASHBOARD_URL
+        mockRequest.requestURI = LOCAL_COUNCIL_DASHBOARD_URL
 
         assertTrue(callPreHandle())
         verify(mockResponse, never()).sendRedirect(anyString())

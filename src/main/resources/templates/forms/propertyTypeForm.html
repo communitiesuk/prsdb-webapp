@@ -7,7 +7,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'propertyType', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='propertyType', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=null, conditionalFieldName='customPropertyType')}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'propertyType',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>

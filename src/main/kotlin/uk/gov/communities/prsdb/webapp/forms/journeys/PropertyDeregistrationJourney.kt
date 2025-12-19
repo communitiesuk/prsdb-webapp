@@ -118,7 +118,6 @@ class PropertyDeregistrationJourney(
     private fun getPropertySingleLineAddress() =
         propertyOwnershipService
             .retrievePropertyOwnershipById(propertyOwnershipId)
-            ?.property
             ?.address
             ?.singleLineAddress
             ?: throw ResponseStatusException(
@@ -132,11 +131,11 @@ class PropertyDeregistrationJourney(
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
-        val propertyAddress = propertyOwnership.property.address.singleLineAddress
+        val propertyAddress = propertyOwnership.address.singleLineAddress
 
         propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
-        propertyDeregistrationService.addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,

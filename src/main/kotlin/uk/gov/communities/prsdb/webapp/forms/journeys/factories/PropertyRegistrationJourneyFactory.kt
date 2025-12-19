@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.AddressService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
@@ -13,17 +13,17 @@ import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFact
 class PropertyRegistrationJourneyFactory(
     private val validator: Validator,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
-    private val addressLookupService: AddressLookupService,
+    private val addressService: AddressService,
     private val propertyRegistrationService: PropertyRegistrationService,
-    private val localAuthorityService: LocalAuthorityService,
+    private val localCouncilService: LocalCouncilService,
 ) {
     fun create() =
         PropertyRegistrationJourney(
             validator,
             journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
-            addressLookupService,
+            addressService,
             propertyRegistrationService,
-            localAuthorityService,
+            localCouncilService,
         )
 
     companion object {

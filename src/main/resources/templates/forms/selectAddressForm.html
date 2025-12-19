@@ -1,23 +1,26 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addressCount" type="java.lang.Integer"*/-->
+<!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
+<!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
-<th:block id="form-content">
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'address', #{${fieldSetHeading}}, null)}">
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null)}">
         <div id="address-hint" class="govuk-hint">
-            <span th:remove="tag"
-                  th:utext="#{forms.selectAddress.fieldSetHint.beforeLink(${addressCount},${postcode},${houseNameOrNumber})}">
-                forms.selectAddress.fieldSetHint.beforeLink
-            </span>
+            <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforePostcode(${addressCount})}">forms.selectAddress.fieldSetHint.beforePostcode</span>
+            <strong th:text="${postcode}"></strong>
+            <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeHouseNameOrNumber}">forms.selectAddress.fieldSetHint.beforeHouseNameOrNumber</span>
+            <strong th:text="${houseNameOrNumber}">
+            </strong><span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeLink}">forms.selectAddress.fieldSetHint.beforeLink</span>
             <a class=govuk-link th:href="@{${searchAgainUrl}}" th:text="#{forms.selectAddress.fieldSetHint.link}"></a>
         </div>
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'address',null, ${options})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-</th:block>
 </html>

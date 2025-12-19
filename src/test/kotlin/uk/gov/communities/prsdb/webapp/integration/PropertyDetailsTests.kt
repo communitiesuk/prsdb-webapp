@@ -7,11 +7,12 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalAuthorityViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalAuthorityView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEicrPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateEpcPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
@@ -150,6 +151,18 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
+            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
+                val propertyOwnershipId = 1
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText("This property does not have any compliance information. Add compliance information")
+            }
+
+            @Test
             fun `is not visible when all certs are compliant`(page: Page) {
                 val propertyOwnershipId = 11
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
@@ -221,22 +234,31 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                     assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "10"))
                 }
+
+                @Test
+                fun `add compliance information when no compliance information redirects to the compliance journey`(page: Page) {
+                    val propertyOwnershipId = 1
+                    val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
+                    detailsPage.notificationBanner.addComplianceInformationLink.clickAndWait()
+
+                    assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
+                }
             }
         }
     }
 
     @Nested
-    inner class PropertyDetailsLocalAuthorityView {
+    inner class PropertyDetailsLocalCouncilView {
         @Test
         fun `the property details page loads with the property details tab selected by default`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test
         fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "landlord-details")
@@ -244,7 +266,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `loading the landlord details page and clicking compliance information tab shows the compliance information tab`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToComplianceInformation()
 
             assertEquals(detailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
@@ -252,7 +274,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
             detailsPage.tabs.goToPropertyDetails()
@@ -261,40 +283,40 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `in the key details section the landlord name link goes the local authority view of landlord details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+        fun `in the key details section the landlord name link goes the local council view of landlord details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
 
-            assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
         }
 
         @Test
-        fun `in the landlord details section the landlord name link goes the local authority view of landlord details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+        fun `in the landlord details section the landlord name link goes the local council view of landlord details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
             detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
 
-            val landlordDetailsPage = assertPageIs(page, LocalAuthorityViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
 
             landlordDetailsPage.backLink.clickAndWait()
             assertPageIs(
                 page,
-                PropertyDetailsPageLocalAuthorityView::class,
+                PropertyDetailsPageLocalCouncilView::class,
                 mapOf("propertyOwnershipId" to "1"),
             )
         }
 
         @Test
         fun `the back link returns to the dashboard`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.backLink.clickAndWait()
-            assertPageIs(page, LocalAuthorityDashboardPage::class)
+            assertPageIs(page, LocalCouncilDashboardPage::class)
         }
 
         @Test
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.insetText).containsText("updated these details on")
         }
@@ -304,7 +326,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             @Test
             fun `is visible and includes correct messages when all certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
-                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
                 assertThat(detailsPage.notificationBanner.title).containsText("Important")
@@ -320,7 +342,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             @Test
             fun `is visible and includes correct messages when all certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
-                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
                 assertThat(detailsPage.notificationBanner.title).containsText("Important")
@@ -336,7 +358,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             @Test
             fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
-                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
                 assertThat(detailsPage.notificationBanner.title).containsText("Important")
@@ -348,9 +370,21 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
+            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
+                val propertyOwnershipId = 1
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.title).containsText("Important")
+                assertThat(
+                    detailsPage.notificationBanner.content,
+                ).containsText("The landlord has not added any compliance information for this property.")
+            }
+
+            @Test
             fun `is not visible when all certs are compliant`(page: Page) {
                 val propertyOwnershipId = 11
-                val detailsPage = navigator.goToPropertyDetailsLocalAuthorityView(propertyOwnershipId.toLong())
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }

@@ -21,10 +21,6 @@ enum class LandlordRegistrationStepId(
     SelectAddress("select-address", LandlordRegistrationGroupIdentifier.Address),
     ManualAddress("manual-address", LandlordRegistrationGroupIdentifier.Address),
     NonEnglandOrWalesAddress("neither-england-nor-wales-address", LandlordRegistrationGroupIdentifier.Address),
-    LookupContactAddress("lookup-contact-address", LandlordRegistrationGroupIdentifier.Address),
-    NoContactAddressFound("no-contact-address-found", LandlordRegistrationGroupIdentifier.Address),
-    SelectContactAddress("select-contact-address", LandlordRegistrationGroupIdentifier.Address),
-    ManualContactAddress("manual-contact-address", LandlordRegistrationGroupIdentifier.Address),
     CheckAnswers("check-answers", LandlordRegistrationGroupIdentifier.CheckYourAnswers),
 }
 

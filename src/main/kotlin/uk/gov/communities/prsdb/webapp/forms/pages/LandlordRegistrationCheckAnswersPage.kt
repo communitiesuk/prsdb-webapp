@@ -16,6 +16,7 @@ class LandlordRegistrationCheckAnswersPage(
                 "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndContinue",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         shouldDisplaySectionHeader = true,
@@ -57,65 +58,17 @@ class LandlordRegistrationCheckAnswersPage(
             ),
         )
 
-    private fun getAddressRows(filteredJourneyData: JourneyData) =
-        mutableListOf<SummaryListRowViewModel>().apply {
-            val livesInEnglandOrWales = LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(filteredJourneyData)!!
-            add(getLivesInEnglandOrWalesRow(livesInEnglandOrWales))
-            if (!livesInEnglandOrWales) addAll(getNonEnglandOrWalesAddressRows(filteredJourneyData))
-            add(getContactAddressRow(filteredJourneyData, livesInEnglandOrWales))
-        }
-
-    private fun getLivesInEnglandOrWalesRow(livesInEnglandOrWales: Boolean) =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
-            livesInEnglandOrWales,
-            LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
-        )
-
-    private fun getNonEnglandOrWalesAddressRows(journeyData: JourneyData): List<SummaryListRowViewModel> =
+    private fun getAddressRows(filteredJourneyData: JourneyData): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerAsALandlord.checkAnswers.rowHeading.countryOfResidence",
-                LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesCountryOfResidence(journeyData)!!,
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
+                LandlordRegistrationJourneyDataHelper.getLivesInEnglandOrWales(filteredJourneyData)!!,
                 LandlordRegistrationStepId.CountryOfResidence.urlPathSegment,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerAsALandlord.checkAnswers.rowHeading.nonEnglandOrWalesContactAddress",
-                LandlordRegistrationJourneyDataHelper.getNonEnglandOrWalesAddress(journeyData)!!,
-                LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment,
+                "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
+                LandlordRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!.singleLineAddress,
+                LandlordRegistrationStepId.LookupAddress.urlPathSegment,
             ),
         )
-
-    private fun getContactAddressRow(
-        journeyData: JourneyData,
-        livesInEnglandOrWales: Boolean,
-    ): SummaryListRowViewModel =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            if (livesInEnglandOrWales) {
-                "registerAsALandlord.checkAnswers.rowHeading.contactAddress"
-            } else {
-                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesContactAddress"
-            },
-            LandlordRegistrationJourneyDataHelper.getAddress(journeyData)!!.singleLineAddress,
-            getContactAddressChangeURLPathSegment(journeyData, livesInEnglandOrWales),
-        )
-
-    private fun getContactAddressChangeURLPathSegment(
-        journeyData: JourneyData,
-        livesInEnglandOrWales: Boolean,
-    ): String =
-        if (livesInEnglandOrWales) {
-            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData)) {
-                LandlordRegistrationStepId.ManualAddress.urlPathSegment
-            } else {
-                LandlordRegistrationStepId.LookupAddress.urlPathSegment
-            }
-        } else {
-            val isContactAddress = true
-            if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(journeyData, isContactAddress)) {
-                LandlordRegistrationStepId.ManualContactAddress.urlPathSegment
-            } else {
-                LandlordRegistrationStepId.LookupContactAddress.urlPathSegment
-            }
-        }
 }
