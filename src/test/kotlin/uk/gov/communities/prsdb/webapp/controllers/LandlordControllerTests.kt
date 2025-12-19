@@ -1,38 +1,26 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.getDeleteIncompletePropertyConfirmationPath
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.getDeleteIncompletePropertyPath
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
@@ -44,13 +32,7 @@ class LandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @MockitoBean
-    private lateinit var incompletePropertyService: IncompletePropertyService
-
-    @MockitoBean
     private lateinit var propertyRegistrationService: LegacyIncompletePropertyFormContextService
-
-    @MockitoBean
-    private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
 
     @MockitoBean
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
@@ -63,6 +45,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var strategy: NumberOfIncompletePropertiesFeatureStrategy
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -119,40 +104,6 @@ class LandlordControllerTests(
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
         mvc
             .get(LANDLORD_DASHBOARD_URL)
-            .andExpect {
-                status { isOk() }
-            }
-    }
-
-    @Test
-    fun `landlordIncompleteProperties returns a redirect for unauthenticated user`() {
-        mvc
-            .get(INCOMPLETE_PROPERTIES_URL)
-            .andExpect {
-                status { is3xxRedirection() }
-            }
-    }
-
-    @Test
-    @WithMockUser
-    fun `landlordIncompleteProperties returns 403 for unauthorized user`() {
-        mvc
-            .get(INCOMPLETE_PROPERTIES_URL)
-            .andExpect {
-                status { isForbidden() }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
-        whenever(
-            incompletePropertyService.getIncompletePropertiesForLandlord(
-                "user",
-            ),
-        ).thenReturn(emptyList())
-        mvc
-            .get(INCOMPLETE_PROPERTIES_URL)
             .andExpect {
                 status { isOk() }
             }
@@ -225,85 +176,5 @@ class LandlordControllerTests(
                     attribute("backUrl", LANDLORD_DASHBOARD_URL)
                 }
             }
-    }
-
-    @Nested
-    inner class DeleteIncompleteProperty {
-        private val defaultContextId = 1L
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `Posting Yes to AreYouSure deletes the form context, adds the id to the session and redirects to the confirmation page`() {
-            mvc
-                .post(getDeleteIncompletePropertyPath(defaultContextId)) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    content = "wantsToProceed=true"
-                    with(csrf())
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(getDeleteIncompletePropertyConfirmationPath((defaultContextId)))
-                }
-
-            verify(incompletePropertyService).deleteIncompleteProperty(eq("1"), anyString())
-            verify(propertyConfirmationService).addIncompletePropertyFormContextsDeletedThisSession(defaultContextId.toString())
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `Posting No to deleteIncompletePropertyAreYouSure redirects to Incomplete Properties page without deleting`() {
-            mvc
-                .post(getDeleteIncompletePropertyPath(defaultContextId)) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    content = "wantsToProceed=false"
-                    with(csrf())
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(INCOMPLETE_PROPERTIES_URL)
-                }
-
-            verify(incompletePropertyService, never()).deleteIncompleteProperty(anyString(), anyString())
-            verify(propertyConfirmationService, never()).addIncompletePropertyFormContextsDeletedThisSession(anyString())
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `deleteIncompletePropertyConfirmation returns 404 if the requested form context id is not in the session`() {
-            whenever(propertyConfirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId.toString()))
-                .thenReturn(false)
-
-            mvc
-                .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))
-                .andExpect {
-                    status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `deleteIncompletePropertyConfirmation returns 500 if the requested form context is still in the database`() {
-            whenever(propertyConfirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId.toString()))
-                .thenReturn(true)
-
-            whenever(incompletePropertyService.isIncompletePropertyAvailable(defaultContextId.toString(), "user")).thenReturn(true)
-
-            mvc
-                .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))
-                .andExpect {
-                    status { isInternalServerError() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `deleteIncompletePropertyConfirmation returns 200 if the requested form context was deleted in this session`() {
-            whenever(propertyConfirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId.toString()))
-                .thenReturn(true)
-
-            mvc
-                .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))
-                .andExpect {
-                    status { isOk() }
-                }
-        }
     }
 }
