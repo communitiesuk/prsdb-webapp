@@ -25,8 +25,9 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.security.Principal
 
@@ -36,7 +37,8 @@ import java.security.Principal
 class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationService: LegacyIncompletePropertyFormContextService,
+    private val propertyConfirmationService: PropertyRegistrationConfirmationService,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     @GetMapping
@@ -114,7 +116,7 @@ class RegisterPropertyController(
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(model: Model): String {
         val propertyRegistrationNumber =
-            propertyRegistrationService.getLastPrnRegisteredThisSession()
+            propertyConfirmationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "No registered property was found in the session",
@@ -145,7 +147,7 @@ class RegisterPropertyController(
             "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
-        fun getResumePropertyRegistrationPath(contextId: Long): String =
-            UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(contextId).toASCIIString()
+        fun getResumePropertyRegistrationPath(journeyId: String): String =
+            UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(journeyId).toASCIIString()
     }
 }

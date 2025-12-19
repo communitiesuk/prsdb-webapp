@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LegacyAddressCheckingService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
@@ -52,6 +53,7 @@ class PropertyRegistrationJourney(
     journeyDataService: JourneyDataService,
     private val addressService: AddressService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val addressCheckingService: LegacyAddressCheckingService,
     private val localCouncilService: LocalCouncilService,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
@@ -186,7 +188,7 @@ class PropertyRegistrationJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
-            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData, propertyRegistrationService) },
+            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData, addressCheckingService) },
             saveAfterSubmit = false,
         )
 
@@ -571,13 +573,13 @@ class PropertyRegistrationJourney(
 
     private fun selectAddressNextAction(
         filteredJourneyData: JourneyData,
-        propertyRegistrationService: PropertyRegistrationService,
+        addressCheckingService: LegacyAddressCheckingService,
     ): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
-            if (selectedAddress.uprn != null && propertyRegistrationService.getIsAddressRegistered(selectedAddress.uprn)) {
+            if (selectedAddress.uprn != null && addressCheckingService.getIsAddressRegistered(selectedAddress.uprn)) {
                 Pair(RegisterPropertyStepId.AlreadyRegistered, null)
             } else {
                 Pair(RegisterPropertyStepId.PropertyType, null)

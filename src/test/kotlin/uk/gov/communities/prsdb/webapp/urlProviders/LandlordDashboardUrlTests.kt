@@ -46,12 +46,15 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -99,7 +102,13 @@ class LandlordDashboardUrlTests(
     private lateinit var mockLandlordService: LandlordService
 
     @MockitoBean
-    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+    private lateinit var propertyRegistrationService: LegacyIncompletePropertyFormContextService
+
+    @MockitoBean
+    private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
+
+    @MockitoBean
+    private lateinit var incompletePropertyService: IncompletePropertyService
 
     @MockitoBean
     private lateinit var mockIdentityService: OneLoginIdentityService
@@ -199,14 +208,12 @@ class LandlordDashboardUrlTests(
             PropertyRegistrationService(
                 propertyOwnershipRepository = mock(),
                 landlordRepository = mockLandlordRepository,
-                formContextRepository = mock(),
-                registeredAddressCache = mock(),
                 addressService = mock(),
                 licenseService = mock(),
                 propertyOwnershipService = mockPropertyOwnershipService,
-                session = mock(),
                 absoluteUrlProvider = absoluteUrlProvider,
                 confirmationEmailSender = mockEmailNotificationService,
+                confirmationService = mock(),
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)

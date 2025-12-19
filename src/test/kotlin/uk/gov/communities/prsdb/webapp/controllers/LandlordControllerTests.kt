@@ -3,9 +3,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,14 +24,15 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.getDeleteIncompletePropertyConfirmationPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.getDeleteIncompletePropertyPath
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
@@ -44,7 +44,13 @@ class LandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @MockitoBean
-    private lateinit var propertyRegistrationService: PropertyRegistrationService
+    private lateinit var incompletePropertyService: IncompletePropertyService
+
+    @MockitoBean
+    private lateinit var propertyRegistrationService: LegacyIncompletePropertyFormContextService
+
+    @MockitoBean
+    private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
 
     @MockitoBean
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
@@ -141,7 +147,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
         whenever(
-            propertyRegistrationService.getIncompletePropertiesForLandlord(
+            incompletePropertyService.getIncompletePropertiesForLandlord(
                 "user",
             ),
         ).thenReturn(emptyList())
@@ -238,8 +244,8 @@ class LandlordControllerTests(
                     redirectedUrl(getDeleteIncompletePropertyConfirmationPath((defaultContextId)))
                 }
 
-            verify(propertyRegistrationService).deleteIncompleteProperty(eq(defaultContextId), anyString())
-            verify(propertyRegistrationService).addIncompletePropertyFormContextsDeletedThisSession(defaultContextId)
+            verify(incompletePropertyService).deleteIncompleteProperty(eq("1"), anyString())
+            verify(propertyConfirmationService).addIncompletePropertyFormContextsDeletedThisSession(defaultContextId.toString())
         }
 
         @Test
@@ -255,14 +261,14 @@ class LandlordControllerTests(
                     redirectedUrl(INCOMPLETE_PROPERTIES_URL)
                 }
 
-            verify(propertyRegistrationService, never()).deleteIncompleteProperty(any(), anyString())
-            verify(propertyRegistrationService, never()).addIncompletePropertyFormContextsDeletedThisSession(any())
+            verify(incompletePropertyService, never()).deleteIncompleteProperty(anyString(), anyString())
+            verify(propertyConfirmationService, never()).addIncompletePropertyFormContextsDeletedThisSession(anyString())
         }
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 404 if the requested form context id is not in the session`() {
-            whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
+            whenever(propertyConfirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId.toString()))
                 .thenReturn(false)
 
             mvc
@@ -275,10 +281,10 @@ class LandlordControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 500 if the requested form context is still in the database`() {
-            whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
+            whenever(propertyConfirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId.toString()))
                 .thenReturn(true)
 
-            whenever(propertyRegistrationService.getFormContextByIdOrNull(defaultContextId)).thenReturn(FormContext())
+            whenever(incompletePropertyService.isIncompletePropertyAvailable(defaultContextId.toString(), "user")).thenReturn(true)
 
             mvc
                 .get(getDeleteIncompletePropertyConfirmationPath(defaultContextId))
@@ -290,7 +296,7 @@ class LandlordControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 200 if the requested form context was deleted in this session`() {
-            whenever(propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(defaultContextId))
+            whenever(propertyConfirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId.toString()))
                 .thenReturn(true)
 
             mvc

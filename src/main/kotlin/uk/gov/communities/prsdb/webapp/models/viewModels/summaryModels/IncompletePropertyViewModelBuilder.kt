@@ -42,7 +42,10 @@ class IncompletePropertyViewModelBuilder {
                 .apply {
                     addAction(
                         "landlord.incompleteProperties.action.continue",
-                        RegisterPropertyController.getResumePropertyRegistrationPath(contextId).overrideBackLinkForUrl(currentUrlKey),
+                        RegisterPropertyController
+                            .getResumePropertyRegistrationPath(
+                                contextId.toString(),
+                            ).overrideBackLinkForUrl(currentUrlKey),
                     )
                     addAction(
                         "landlord.incompleteProperties.action.delete",
