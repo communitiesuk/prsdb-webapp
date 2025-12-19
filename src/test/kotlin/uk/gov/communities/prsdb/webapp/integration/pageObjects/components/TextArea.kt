@@ -7,6 +7,11 @@ class TextArea(
 ) : BaseComponent(locator),
     TextFillable {
     companion object {
+        fun textByFieldName(
+            parentLocator: Locator,
+            fieldName: String,
+        ) = TextArea(parentLocator.locator("textarea[name='$fieldName']"))
+
         fun default(parentLocator: Locator) = TextArea(parentLocator.locator("textarea"))
     }
 }

@@ -88,6 +88,12 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
 
+        fun beforePropertyRegistrationBedrooms() = beforePropertyRegistrationPeople().withPeople()
+
+        fun beforePropertyRegistrationRentIncludesBills() = beforePropertyRegistrationBedrooms().withBedrooms()
+
+        fun beforePropertyRegistrationBillsIncluded() = beforePropertyRegistrationRentIncludesBills().withRentIncludesBills(true)
+
         fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()

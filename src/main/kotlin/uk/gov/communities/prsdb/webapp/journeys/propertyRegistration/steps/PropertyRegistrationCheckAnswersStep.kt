@@ -1,9 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
-import org.springframework.context.annotation.Scope
 import org.springframework.security.core.context.SecurityContextHolder
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -16,16 +15,15 @@ import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJour
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
@@ -53,14 +51,14 @@ class PropertyRegistrationCyaStepConfig(
         )
     }
 
-    override fun beforeValidateSubmittedData(
-        formData: PageData,
+    override fun enrichSubmittedDataBeforeValidation(
         state: PropertyRegistrationJourneyState,
+        formData: PageData,
     ): PageData =
-        super.beforeValidateSubmittedData(formData, state) +
+        super.enrichSubmittedDataBeforeValidation(state, formData) +
             (CheckAnswersFormModel::storedJourneyData.name to state.getSubmittedStepData())
 
-    override fun afterSubmitFormData(state: PropertyRegistrationJourneyState) {
+    override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
@@ -74,7 +72,7 @@ class PropertyRegistrationCyaStepConfig(
                         ?.toInt() ?: 0,
                 numberOfPeople =
                     state.tenants.formModelOrNull
-                        ?.notNullValue(NumberOfPeopleFormModel::numberOfPeople)
+                        ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         ?.toInt() ?: 0,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
@@ -176,15 +174,15 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
 
-    override fun afterDetermineNextDestination(
+    override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
-        destination: Destination,
+        defaultDestination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
             Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
         } else {
             state.deleteJourney()
-            destination
+            defaultDestination
         }
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
@@ -192,8 +190,7 @@ class PropertyRegistrationCyaStepConfig(
     override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class PropertyRegistrationCheckAnswersStep(
     stepConfig: PropertyRegistrationCyaStepConfig,
 ) : RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>(stepConfig)

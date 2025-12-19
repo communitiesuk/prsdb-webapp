@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.tasks
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
@@ -12,12 +11,12 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
-@PrsdbWebComponent
-@Scope("prototype")
+@JourneyFrameworkComponent
 class EpcTask : Task<EpcJourneyState>() {
     override fun makeSubJourney(state: EpcJourneyState) =
         subJourney(state) {
-            step("has-epc", journey.epcQuestion) {
+            step(journey.epcQuestion) {
+                routeSegment("has-epc")
                 nextStep { mode ->
                     when (mode) {
                         EpcStatus.AUTOMATCHED -> journey.checkAutomatchedEpc
@@ -26,7 +25,8 @@ class EpcTask : Task<EpcJourneyState>() {
                     }
                 }
             }
-            step<YesOrNo, CheckEpcStepConfig>("check-automatched-epc", journey.checkAutomatchedEpc) {
+            step<YesOrNo, CheckEpcStepConfig>(journey.checkAutomatchedEpc) {
+                routeSegment("check-automatched-epc")
                 parents { journey.epcQuestion.hasOutcome(EpcStatus.AUTOMATCHED) }
                 nextStep { mode ->
                     when (mode) {
@@ -38,7 +38,8 @@ class EpcTask : Task<EpcJourneyState>() {
                     usingEpc { automatchedEpc }
                 }
             }
-            step("search-for-epc", journey.searchForEpc) {
+            step(journey.searchForEpc) {
+                routeSegment("search-for-epc")
                 parents {
                     OrParents(
                         journey.epcQuestion.hasOutcome(EpcStatus.NOT_AUTOMATCHED),
@@ -53,11 +54,13 @@ class EpcTask : Task<EpcJourneyState>() {
                     }
                 }
             }
-            step("superseded-epc", journey.epcSuperseded) {
+            step(journey.epcSuperseded) {
+                routeSegment("superseded-epc")
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.SUPERSEDED) }
                 nextStep { journey.checkSearchedEpc }
             }
-            step<YesOrNo, CheckEpcStepConfig>("check-found-epc", journey.checkSearchedEpc) {
+            step<YesOrNo, CheckEpcStepConfig>(journey.checkSearchedEpc) {
+                routeSegment("check-found-epc")
                 parents {
                     OrParents(
                         journey.searchForEpc.hasOutcome(EpcSearchResult.FOUND),
@@ -74,7 +77,8 @@ class EpcTask : Task<EpcJourneyState>() {
                     usingEpc { searchedEpc }
                 }
             }
-            step("epc-not-found", journey.epcNotFound) {
+            step(journey.epcNotFound) {
+                routeSegment("epc-not-found")
                 parents { journey.searchForEpc.hasOutcome(EpcSearchResult.NOT_FOUND) }
                 nextStep { exitStep }
             }

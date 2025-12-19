@@ -54,25 +54,10 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        segment: String,
-        uninitialisedStep: JourneyStep.RequestableStep<TMode, *, TState>,
+        uninitialisedStep: JourneyStep<TMode, *, TState>,
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(segment, uninitialisedStep, journey)
-        stepInitialiser.init()
-        if (journeyElements.isEmpty()) {
-            stepInitialiser.configureFirst {
-                additionalFirstElementConfiguration.forEach { it() }
-            }
-        }
-        journeyElements.add(stepInitialiser)
-    }
-
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> notionalStep(
-        uninitialisedStep: JourneyStep.InternalStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-    ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(null, uninitialisedStep, journey)
+        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
         stepInitialiser.init()
         if (journeyElements.isEmpty()) {
             stepInitialiser.configureFirst {
@@ -119,16 +104,18 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
 open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
+    exitStepOverride: NavigationalStep? = null,
 ) : AbstractJourneyBuilder<TState>(journey) {
     var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
         private set
-    val exitStep = NavigationalStep(NavigationalStepConfig())
+
+    val exitStep = exitStepOverride ?: NavigationalStep(NavigationalStepConfig())
 
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
 
     override fun build(): List<JourneyStep<*, *, *>> {
-        notionalStep<NavigationComplete, NavigationalStepConfig>(exitStep) {
+        step<NavigationComplete, NavigationalStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
         val built = super.build()

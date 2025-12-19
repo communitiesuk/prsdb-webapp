@@ -2,13 +2,18 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -24,7 +29,7 @@ class JourneyStateServiceTests {
         val expectedJourneyId = "test-journey-id"
         val request = mock<ServletRequest>()
         whenever(request.getParameter("journeyId")).thenReturn(expectedJourneyId)
-        val service = JourneyStateService(mock(), request)
+        val service = JourneyStateService(mock(), request, mock())
         // Act
         val actualJourneyId = service.journeyId
 
@@ -37,7 +42,7 @@ class JourneyStateServiceTests {
         // Arrange
         val request = mock<ServletRequest>()
         whenever(request.getParameter("journeyId")).thenReturn(null)
-        val service = JourneyStateService(mock(), request)
+        val service = JourneyStateService(mock(), request, mock())
 
         // Act & Assert
         assertThrows<NoSuchJourneyException> { service.journeyId }
@@ -49,7 +54,7 @@ class JourneyStateServiceTests {
         val session = MockHttpSession()
         val expectedMetadataMap = mapOf("journey-1" to JourneyMetadata("data-key-1"), "journey-2" to JourneyMetadata("data-key-2"))
         session.setJourneyStateMetadataMap(expectedMetadataMap)
-        val service = JourneyStateService(session, "null")
+        val service = JourneyStateService(session, "null", mock())
 
         // Act
         val actualMetadataMap = service.journeyStateMetadataMap
@@ -63,7 +68,7 @@ class JourneyStateServiceTests {
         // Arrange
         val session = mock<HttpSession>()
         whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(null)
-        val service = JourneyStateService(session, "null")
+        val service = JourneyStateService(session, "null", mock())
 
         // Act
         val actualMetadataMap = service.journeyStateMetadataMap
@@ -73,14 +78,14 @@ class JourneyStateServiceTests {
     }
 
     @Test
-    fun `getJourneyDataKey returns the corresponding value from the metadata map, if present`() {
+    fun `journeyMetadata returns the corresponding value from the metadata map, if present`() {
         // Arrange
         val session = MockHttpSession()
         val journeyId = "journey-1"
         val expectedMetadata = JourneyMetadata("data-key-1")
         val metadataMap = mapOf(journeyId to expectedMetadata)
         session.setJourneyStateMetadataMap(metadataMap)
-        val service = JourneyStateService(session, journeyId)
+        val service = JourneyStateService(session, journeyId, mock())
 
         // Act
         val actualDataKey = service.journeyMetadata
@@ -90,17 +95,54 @@ class JourneyStateServiceTests {
     }
 
     @Test
-    fun `getJourneyDataKey throws if the corresponding value is not in the metadata map`() {
+    fun `journeyMetadata restores the journey if possible, when the corresponding value is not in the metadata map`() {
+        // Arrange
+        val session = mock<HttpSession>()
+        val journeyId = "journey-1"
+        val expectedMetadata = JourneyMetadata("data-key-1")
+        val metadataMap = mapOf(journeyId to expectedMetadata)
+        val journeyStatePersistenceService = mock<JourneyStatePersistenceService>()
+        val retrievedData = mapOf<String, Any?>("restoredKey" to "restoredValue")
+        whenever(journeyStatePersistenceService.retrieveJourneyStateData(anyOrNull())).thenReturn(retrievedData)
+        whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(Json.encodeToString(metadataMap))
+        val service = JourneyStateService(session, "journey-2", journeyStatePersistenceService)
+
+        // Act
+        service.journeyMetadata
+
+        // Assert
+        verify(journeyStatePersistenceService).retrieveJourneyStateData("journey-2")
+
+        val dataKeyCaptor = argumentCaptor<String>()
+        verify(session).setAttribute(dataKeyCaptor.capture(), eq(retrievedData))
+        verify(session).setAttribute(
+            "journeyStateKeyStore",
+            Json.encodeToString(
+                mapOf(
+                    "journey-1" to expectedMetadata,
+                    "journey-2" to JourneyMetadata(dataKeyCaptor.firstValue),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `journeyMetadata throws an exception, if the journey cannot be restored when the corresponding value is not in the metadata map`() {
         // Arrange
         val session = mock<HttpSession>()
         val journeyId = "journey-1"
         val expectedDataKey = "data-key-1"
         val metadataMap = mapOf(journeyId to expectedDataKey)
+        val journeyStatePersistenceService = mock<JourneyStatePersistenceService>()
+        whenever(journeyStatePersistenceService.retrieveJourneyStateData(anyOrNull())).thenReturn(null)
         whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(metadataMap)
-        val service = JourneyStateService(session, "journey-2")
+        val service = JourneyStateService(session, "journey-2", journeyStatePersistenceService)
 
         // Act & Assert
         assertThrows<NoSuchJourneyException> { service.journeyMetadata }
+
+        // Assert
+        verify(journeyStatePersistenceService).retrieveJourneyStateData("journey-2")
     }
 
     @Test
@@ -222,7 +264,7 @@ class JourneyStateServiceTests {
         val dataKey = "data-key-1"
         val metadataMap = mapOf(journeyId to JourneyMetadata(dataKey), "journey-2" to JourneyMetadata("data-key-2"))
         session.setJourneyStateMetadataMap(metadataMap)
-        val service = JourneyStateService(session, journeyId)
+        val service = JourneyStateService(session, journeyId, mock())
 
         // Act
         service.deleteState()
@@ -237,10 +279,55 @@ class JourneyStateServiceTests {
     }
 
     @Test
+    fun `deleteState calls persistenceService to delete the base journey state data`() {
+        // Arrange
+        val session = MockHttpSession()
+        val baseJourneyId = "journey-1"
+        val childJourneyId = "journey-2"
+        val dataKey = "data-key-2"
+        val metadataMap =
+            mapOf(
+                baseJourneyId to JourneyMetadata("data-key-1"),
+                childJourneyId to JourneyMetadata(dataKey, baseJourneyId = baseJourneyId),
+            )
+        session.setJourneyStateMetadataMap(metadataMap)
+        val mockPersistenceService = mock<JourneyStatePersistenceService>()
+        val service = JourneyStateService(session, childJourneyId, mockPersistenceService)
+
+        // Act
+        service.deleteState()
+
+        // Assert
+        verify(mockPersistenceService).deleteJourneyStateData(baseJourneyId)
+    }
+
+    @Test
+    fun `deleteState calls persistenceService to delete the current journey state data if there is no base journey`() {
+        // Arrange
+        val session = MockHttpSession()
+        val journeyId = "journey-1"
+        val dataKey = "data-key-1"
+        val metadataMap =
+            mapOf(
+                journeyId to JourneyMetadata(dataKey),
+                "journey-2" to JourneyMetadata("data-key-2"),
+            )
+        session.setJourneyStateMetadataMap(metadataMap)
+        val mockPersistenceService = mock<JourneyStatePersistenceService>()
+        val service = JourneyStateService(session, journeyId, mockPersistenceService)
+
+        // Act
+        service.deleteState()
+
+        // Assert
+        verify(mockPersistenceService).deleteJourneyStateData(journeyId)
+    }
+
+    @Test
     fun `initialiseJourneyWithId sets up a new journey in the session with the provided id`() {
         // Arrange
         val session = MockHttpSession()
-        val service = JourneyStateService(session, null)
+        val service = JourneyStateService(session, null, mock())
         val newJourneyId = "new-journey"
 
         // Act
@@ -276,7 +363,7 @@ class JourneyStateServiceTests {
         val dataKey = "shared-data-key"
         val metadataMap = mapOf(parentJourneyId to JourneyMetadata(dataKey))
         session.setJourneyStateMetadataMap(metadataMap)
-        val parentService = JourneyStateService(session, parentJourneyId)
+        val parentService = JourneyStateService(session, parentJourneyId, mock())
         val childJourneyId = "child-journey"
         val subJourneyName = "sub-journey"
 
@@ -301,7 +388,7 @@ class JourneyStateServiceTests {
         val metadataMap = mapOf(journeyId to JourneyMetadata(dataKey))
         session.setAttribute(dataKey, existingData)
         session.setJourneyStateMetadataMap(metadataMap)
-        return JourneyStateService(session, journeyId)
+        return JourneyStateService(session, journeyId, mock())
     }
 
     private fun HttpSession.setJourneyStateMetadataMap(metadataMap: Map<String, JourneyMetadata>) {

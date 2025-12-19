@@ -7,6 +7,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
@@ -15,11 +16,15 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneySt
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
 
 class CheckYourAnswersJourneyStateTests {
+    interface TestableCheckYourAnswersJourneyState :
+        CheckYourAnswersJourneyState,
+        JourneyState
+
     @Test
     fun `checkYourAnswersJourney adds correct configuration to checkable steps when isCheckingAnswers is true`() {
         // Arrange
         val mockState =
-            mock<CheckYourAnswersJourneyState> {
+            mock<TestableCheckYourAnswersJourneyState> {
                 on { isCheckingAnswers } doReturn true
                 on { cyaStep } doReturn mock()
                 on { baseJourneyId } doReturn "baseJourneyId"
@@ -29,11 +34,13 @@ class CheckYourAnswersJourneyStateTests {
         val step2 = StepInitialiserTests.mockInitialisableStep()
 
         // Act
-        jb.step("step1", step1) {
+        jb.step(step1) {
+            routeSegment("step1")
             nextUrl { "nextStep" }
             parents { NoParents() }
         }
-        jb.step("step2", step2) {
+        jb.step(step2) {
+            routeSegment("step2")
             nextUrl { "nextStep" }
             parents { NoParents() }
             checkable()
@@ -52,12 +59,14 @@ class CheckYourAnswersJourneyStateTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
         verify(step2).initialize(
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             destinationCaptor.capture(),
+            anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),

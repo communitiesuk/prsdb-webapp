@@ -4,8 +4,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriComponentsBuilder
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 sealed class Destination {
     abstract fun toModelAndView(): ModelAndView
@@ -55,7 +53,7 @@ sealed class Destination {
     ) : Destination() {
         override fun toModelAndView() = StepLifecycleOrchestrator(step).getStepModelAndView()
 
-        override fun toUrlStringOrNull() = if (step.isStepReachable) step.determineNextDestination().toUrlStringOrNull() else null
+        override fun toUrlStringOrNull() = if (step.isStepReachable) step.getNextDestination().toUrlStringOrNull() else null
     }
 
     class Nowhere : Destination() {

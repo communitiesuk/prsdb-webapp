@@ -4,7 +4,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
+import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
 
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
@@ -17,6 +19,8 @@ class TaskInitialiser<TStateInit : JourneyState>(
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
                 ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
+
+        exitStepOverride?.let { task.setCustomExitStep(it) }
 
         val taskSubJourney =
             task.getTaskSubJourneyBuilder(state) {
@@ -36,6 +40,11 @@ class TaskInitialiser<TStateInit : JourneyState>(
                     ?: throw JourneyInitialisationException("$initialiserName does not have parentage defined"),
             )
         }
+        if (elementConfiguration.shouldSaveProgress) {
+            taskSubJourney.configureSavable {
+                saveProgress()
+            }
+        }
 
         return taskSubJourney.build()
     }
@@ -43,4 +52,14 @@ class TaskInitialiser<TStateInit : JourneyState>(
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
+
+    var exitStepOverride: NavigationalStep? = null
+        private set
+
+    fun customExitStep(step: NavigationalStep) {
+        if (exitStepOverride != null) {
+            throw JourneyInitialisationException("Exit step has already been initialised")
+        }
+        exitStepOverride = step
+    }
 }

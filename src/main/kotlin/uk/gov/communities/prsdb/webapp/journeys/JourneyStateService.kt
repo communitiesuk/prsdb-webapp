@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
@@ -30,6 +31,8 @@ data class JourneyMetadata(
 class JourneyStateService(
     private val session: HttpSession,
     private val journeyIdOrNull: String?,
+    // Optional persistence service allows simpler direct construction when persistence is not needed e.g. initialising new journeys
+    private val persistenceService: JourneyStatePersistenceService,
 ) {
     val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()
 
@@ -37,16 +40,37 @@ class JourneyStateService(
     constructor(
         session: HttpSession,
         request: ServletRequest,
+        persistenceService: JourneyStatePersistenceService,
     ) : this(
         session,
         request.getParameter(JOURNEY_ID_PARAM),
+        persistenceService,
     )
 
     var journeyStateMetadataMap: Map<String, JourneyMetadata>
         get() = session.getAttribute(JOURNEY_STATE_METADATA_STORE_KEY)?.let { it as? String }?.let { Json.decodeFromString(it) } ?: mapOf()
         set(value) = session.setAttribute(JOURNEY_STATE_METADATA_STORE_KEY, Json.encodeToString(value))
 
-    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: throw NoSuchJourneyException(journeyId)
+    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: restoreJourney()
+
+    private fun restoreJourney(): JourneyMetadata {
+        if (journeyStateMetadataMap.containsKey(journeyId)) {
+            throw JourneyInitialisationException("Journey with ID $journeyId already exists in session")
+        }
+
+        val stateToRestore = persistenceService.retrieveJourneyStateData(journeyId) ?: throw NoSuchJourneyException(journeyId)
+
+        val metadata = JourneyMetadata.withNewDataKey()
+        journeyStateMetadataMap += (journeyId to metadata)
+
+        session.setAttribute(metadata.dataKey, stateToRestore)
+        return metadata
+    }
+
+    fun save(): SavedJourneyState {
+        val journeyState = session.getAttribute(journeyMetadata.dataKey) ?: mapOf<String, Any?>()
+        return persistenceService.saveJourneyStateData(journeyState, journeyId)
+    }
 
     fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyMetadata.dataKey))?.get(key)
 
@@ -71,30 +95,25 @@ class JourneyStateService(
     fun deleteState() {
         session.removeAttribute(journeyMetadata.dataKey)
 
-        val journeyIdsToRemove =
-            journeyStateMetadataMap
-                .filter { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
-                .keys
+        persistenceService.deleteJourneyStateData(journeyMetadata.baseJourneyId ?: journeyId)
 
-        journeyIdsToRemove.forEach { id ->
-            journeyStateMetadataMap -= id
-        }
+        journeyStateMetadataMap = journeyStateMetadataMap.filterNot { (_, metadata) -> metadata.dataKey == journeyMetadata.dataKey }
     }
 
     fun initialiseJourneyWithId(
         newJourneyId: String,
-        stateInitialiser: JourneyStateService.() -> Unit = {},
+        stateInitialiser: JourneyStateService.() -> Unit = { },
     ) {
         if (journeyStateMetadataMap.containsKey(newJourneyId)) {
             throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
         }
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
-        JourneyStateService(session, newJourneyId).stateInitialiser()
+        JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
     }
 
     fun initialiseChildJourney(
         newJourneyId: String,
-        subJourneyName: String,
+        childJourneyName: String,
     ) {
         val existingMetadata = journeyStateMetadataMap[newJourneyId]
         if (existingMetadata != null) {
@@ -104,7 +123,7 @@ class JourneyStateService(
             JourneyMetadata(
                 dataKey = journeyMetadata.dataKey,
                 baseJourneyId = journeyId,
-                childJourneyName = subJourneyName,
+                childJourneyName = childJourneyName,
             )
         journeyStateMetadataMap = journeyStateMetadataMap + (newJourneyId to metadata)
     }

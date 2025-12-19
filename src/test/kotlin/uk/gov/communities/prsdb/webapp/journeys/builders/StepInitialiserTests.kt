@@ -29,13 +29,13 @@ class StepInitialiserTests {
         whenever(stepMock.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
 
         // Act & Assert
-        assertThrows<JourneyInitialisationException> { StepInitialiser("test", stepMock, mock()) }
+        assertThrows<JourneyInitialisationException> { StepInitialiser(stepMock, mock()) }
     }
 
     @Test
     fun `a back url override cannot be set more than once`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
 
         // Act
         builder.backDestination { Destination.ExternalUrl("url1") }
@@ -49,7 +49,7 @@ class StepInitialiserTests {
         // Arrange
         val expectedBackUrl = Destination.ExternalUrl("expectedBackUrl")
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val backUrlLambda = { expectedBackUrl }
         builder.backDestination(backUrlLambda)
         builder.nextUrl { "next" }
@@ -68,6 +68,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
@@ -75,7 +76,7 @@ class StepInitialiserTests {
     fun `if no backUrlOverride is set, the step's backUrlOverride remains null`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.nextUrl { "next" }
         builder.parents { NoParents() }
         builder.unreachableStepDestinationIfNotSet { mock() }
@@ -92,13 +93,14 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
     @Test
     fun `no next destination can be set after a next url`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
         builder.nextUrl { "url1" }
 
         // Act & Assert
@@ -110,7 +112,7 @@ class StepInitialiserTests {
     @Test
     fun `no next destination can be set after a next step`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
         builder.nextStep { mock() }
 
         // Act & Assert
@@ -123,7 +125,7 @@ class StepInitialiserTests {
     fun `a nextUrl is passed to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val redirectLambda = { _: TestEnum -> "expectedRedirect" }
         builder.nextUrl(redirectLambda)
         builder.parents { NoParents() }
@@ -139,6 +141,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             lambdaCaptor.capture(),
+            anyOrNull(),
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
@@ -158,7 +161,7 @@ class StepInitialiserTests {
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.nextStep { _: TestEnum -> nextStepMock }
         builder.parents { NoParents() }
         builder.unreachableStepDestinationIfNotSet { mock() }
@@ -176,6 +179,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
         val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
         with(result as Destination.VisitableStep) {
@@ -187,7 +191,7 @@ class StepInitialiserTests {
     fun `modifyNextDestination replaces the current next destination lambda`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val originalUrl = "original"
         builder.nextDestination { Destination.ExternalUrl(originalUrl) }
         val newUrl = "modified"
@@ -208,6 +212,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
         val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
         with(result as Destination.ExternalUrl) {
@@ -218,7 +223,7 @@ class StepInitialiserTests {
     @Test
     fun `modifyNextDestination cannot be called before a nextDestination is set`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
@@ -229,7 +234,7 @@ class StepInitialiserTests {
     @Test fun `modifyNextDestination can be called more than once`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val originalUrl = "original"
         val firstNewUrl = "firstModified"
         val secondNewUrl = "secondModified"
@@ -252,6 +257,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
         val result = lambdaCaptor.firstValue(TestEnum.ENUM_VALUE)
         with(result as Destination.ExternalUrl) {
@@ -263,7 +269,7 @@ class StepInitialiserTests {
     fun `taggedWith adds all tags to the initialiser`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val firstTags = setOf("tag1", "tag2")
         val extraTag = "tag3"
 
@@ -278,7 +284,7 @@ class StepInitialiserTests {
     @Test
     fun `a step must have a redirect destination`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.build() }
@@ -287,7 +293,7 @@ class StepInitialiserTests {
     @Test
     fun `a parentage cannot be set more than once`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
         builder.parents { NoParents() }
 
         // Act & Assert
@@ -298,7 +304,7 @@ class StepInitialiserTests {
     fun `a parentage is passed to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val parentage = NoParents()
         builder.parents { parentage }
         builder.nextUrl { "next" }
@@ -316,6 +322,7 @@ class StepInitialiserTests {
             same(parentage),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
@@ -323,7 +330,7 @@ class StepInitialiserTests {
     fun `if no parentage is set, building the step throws an exception`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.nextUrl { "next" }
 
         // Act & Assert
@@ -336,7 +343,7 @@ class StepInitialiserTests {
     fun `initialStep sets a step to have no parents`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.initialStep()
         builder.nextUrl { "next" }
         builder.unreachableStepDestinationIfNotSet { mock() }
@@ -353,13 +360,14 @@ class StepInitialiserTests {
             any<NoParents>(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
     @Test
     fun `additional configuration cannot be set more than once`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
         builder.stepSpecificInitialisation {}
 
         // Act & Assert
@@ -371,7 +379,7 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         whenever(stepMock.stepConfig).thenReturn(mock())
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         var additionalConfigApplied = false
         builder.stepSpecificInitialisation {
             if (this === stepMock.stepConfig) {
@@ -392,7 +400,7 @@ class StepInitialiserTests {
     @Test
     fun `a step unreachable url cannot be set more than once`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
         builder.unreachableStepUrl { "url1" }
 
         // Act & Assert
@@ -403,7 +411,7 @@ class StepInitialiserTests {
     fun `a step unreachable url is not changed when unreachableStepDestinationIfNotSet is called`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val stepUnreachableRedirectLambda = { "expectedRedirect" }
         builder.unreachableStepUrl(stepUnreachableRedirectLambda)
         builder.nextUrl { "next" }
@@ -424,6 +432,7 @@ class StepInitialiserTests {
             anyOrNull(),
             captor.capture(),
             anyOrNull(),
+            anyOrNull(),
         )
         val destination = captor.firstValue()
         with(destination as Destination.ExternalUrl) {
@@ -435,7 +444,7 @@ class StepInitialiserTests {
     fun `if no step unreachable redirect is set, the unreachableStepDestinationIfNotSet is used`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.nextUrl { "next" }
         val defaultUnreachableRedirectLambda = { Destination.ExternalUrl("expectedRedirect") }
         builder.parents { NoParents() }
@@ -453,13 +462,14 @@ class StepInitialiserTests {
             anyOrNull(),
             eq(defaultUnreachableRedirectLambda),
             anyOrNull(),
+            anyOrNull(),
         )
     }
 
     @Test
     fun `either a step unreachable redirect or a default unreachable step must be set`() {
         // Arrange
-        val builder = StepInitialiser("test", mockInitialisableStep(), mock())
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
         builder.nextUrl { "next" }
 
         // Act & Assert
@@ -470,7 +480,7 @@ class StepInitialiserTests {
     fun `if no additional content providers are set, an empty Map is passed`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.nextUrl { "next" }
         builder.parents { NoParents() }
         builder.unreachableStepDestinationIfNotSet { mock() }
@@ -487,6 +497,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
             mapCaptor.capture(),
         )
         val additionalContent = mapCaptor.firstValue()
@@ -497,7 +508,7 @@ class StepInitialiserTests {
     fun `a single additional content provider is passed to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val expectedKey = "testKey"
         val expectedValue = "testValue"
         builder.withAdditionalContentProperty { expectedKey to expectedValue }
@@ -517,6 +528,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
             mapCaptor.capture(),
         )
         val additionalContent = mapCaptor.firstValue()
@@ -527,7 +539,7 @@ class StepInitialiserTests {
     fun `multiple additional content providers are combined into a single Map`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         val firstKey = "firstKey"
         val firstValue = "firstValue"
         val secondKey = "secondKey"
@@ -550,6 +562,7 @@ class StepInitialiserTests {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
+            anyOrNull(),
             mapCaptor.capture(),
         )
         val additionalContent = mapCaptor.firstValue()
@@ -564,12 +577,39 @@ class StepInitialiserTests {
         whenever(uninitialisedStepMock.initialisationStage).thenReturn(StepInitialisationStage.UNINITIALISED)
         whenever(uninitialisedStepMock.outcome).thenReturn(null)
 
-        val builder = StepInitialiser("test", stepMock, mock())
+        val builder = StepInitialiser(stepMock, mock())
         builder.nextUrl { "next" }
         builder.parents { uninitialisedStepMock.hasOutcome(TestEnum.ENUM_VALUE) }
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> { builder.build() }
+    }
+
+    @Test
+    fun `a segment set on the step is passed to the step when built`() {
+        // Arrange
+        val expectedSegment = "expectedSegment"
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser(stepMock, mock())
+        builder.routeSegment(expectedSegment)
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+        builder.unreachableStepDestinationIfNotSet { mock() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        verify(stepMock).initialize(
+            eq(expectedSegment),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+        )
     }
 
     companion object {

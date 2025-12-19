@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared
 
+import uk.gov.communities.prsdb.webapp.constants.ReservedTagValues
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -9,12 +10,21 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnsw
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val cyaStep: JourneyStep.RequestableStep<Complete, CheckAnswersFormModel, *>
+    var cyaChildJourneyId: String?
+
     val baseJourneyId: String
-    val cyaChildJourneyId: String?
+        get() = journeyMetadata.baseJourneyId ?: journeyId
+
     val isCheckingAnswers: Boolean
+        get() = journeyMetadata.childJourneyName == CHECK_ANSWERS_JOURNEY_NAME
+
+    fun initialiseCyaChildJourney() {
+        val newId = initializeChildState(CHECK_ANSWERS_JOURNEY_NAME)
+        cyaChildJourneyId = newId
+    }
 
     companion object {
-        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
+        fun <T> JourneyBuilder<T>.checkYourAnswersJourney() where T : JourneyState, T : CheckYourAnswersJourneyState {
             configureTagged(CHECKABLE) {
                 if (journey.isCheckingAnswers) {
                     modifyNextDestination {
@@ -27,6 +37,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
         fun ConfigurableElement<*>.checkable() = taggedWith(CHECKABLE)
 
-        private const val CHECKABLE = "checkable"
+        private const val CHECKABLE = ReservedTagValues.CHECKABLE
+        private const val CHECK_ANSWERS_JOURNEY_NAME = "checkYourAnswers"
     }
 }

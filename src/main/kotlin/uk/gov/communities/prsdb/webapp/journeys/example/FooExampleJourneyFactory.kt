@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -41,7 +42,8 @@ class FooExampleJourneyFactory(
 
         return journey(stateFactory.getObject()) {
             unreachableStepStep { journey.taskListStep }
-            step("task-list", journey.taskListStep) {
+            step(journey.taskListStep) {
+                routeSegment("task-list")
                 initialStep()
                 nextUrl { "task-list" }
             }
@@ -59,7 +61,8 @@ class FooExampleJourneyFactory(
                     nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
-            step("check-your-answers", journey.fooCheckYourAnswersStep) {
+            step(journey.fooCheckYourAnswersStep) {
+                routeSegment("check-your-answers")
                 parents {
                     AndParents(
                         journey.occupationTask.isComplete(),
@@ -74,8 +77,7 @@ class FooExampleJourneyFactory(
     fun initializeJourneyState(propertyId: Long): String = stateFactory.getObject().initializeJourneyState(propertyId)
 }
 
-@PrsdbWebComponent
-@Scope("prototype")
+@JourneyFrameworkComponent
 class FooJourneyState(
     val taskListStep: FooTaskListStep,
     override val occupied: OccupiedStep,
@@ -83,6 +85,7 @@ class FooJourneyState(
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
+    override val billsIncluded: BillsIncludedStep,
     override val epcQuestion: EpcQuestionStep,
     override val checkAutomatchedEpc: CheckEpcStep,
     override val searchForEpc: SearchEpcStep,
@@ -93,12 +96,13 @@ class FooJourneyState(
     private val journeyStateService: JourneyStateService,
     val occupationTask: OccupationTask,
     val epcTask: EpcTask,
+    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     OccupationState,
     EpcJourneyState {
-    override var automatchedEpc: EpcDataModel? by mutableDelegate("automatchedEpc", serializer())
-    override var searchedEpc: EpcDataModel? by mutableDelegate("searchedEpc", serializer())
-    override val propertyId: Long by requiredDelegate("propertyId", serializer())
+    override var automatchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("automatchedEpc")
+    override var searchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("searchedEpc")
+    override val propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state
     final fun initializeJourneyState(propertyId: Long): String {

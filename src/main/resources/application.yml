@@ -21,12 +21,6 @@ spring:
   flyway:
     enabled: false
 
-  sql:
-    init:
-      mode: always
-      platform: ${ENVIRONMENT_NAME}
-      continue-on-error: true
-
   mvc.format.date: "d MMMM yyyy"
 
   thymeleaf:
@@ -150,6 +144,12 @@ spring:
       password: ${ELASTICACHE_PASSWORD}
       ssl:
         enabled: true
+
+  sql:
+    init:
+      mode: always
+      platform: ${ENVIRONMENT_NAME}
+      continue-on-error: true
 
 ---
 

@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
-import org.springframework.context.annotation.Scope
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
@@ -11,8 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class FooCheckAnswersStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : AbstractGenericStepConfig<Complete, NoInputFormModel, FooJourneyState>() {
@@ -93,8 +91,7 @@ class FooCheckAnswersStepConfig(
     override fun mode(state: FooJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class FooCheckAnswersStep(
     stepConfig: FooCheckAnswersStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, FooJourneyState>(stepConfig)

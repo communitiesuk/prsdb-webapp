@@ -1,8 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.context.annotation.Scope
 import org.springframework.validation.BindingResult
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -13,8 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 class SelectAddressStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
 ) : AbstractGenericStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
@@ -48,11 +46,11 @@ class SelectAddressStepConfig(
         )
     }
 
-    override fun afterValidateSubmittedData(
-        bindingResult: BindingResult,
+    override fun afterPrimaryValidation(
         state: AddressState,
+        bindingResult: BindingResult,
     ) {
-        super.afterValidateSubmittedData(bindingResult, state)
+        super.afterPrimaryValidation(state, bindingResult)
 
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
         selectAddressFormModel.address?.let { selectedAddress ->
@@ -67,8 +65,8 @@ class SelectAddressStepConfig(
         }
     }
 
-    override fun afterSubmitFormData(state: AddressState) {
-        super.afterSubmitFormData(state)
+    override fun afterStepDataIsAdded(state: AddressState) {
+        super.afterStepDataIsAdded(state)
         state.isAddressAlreadyRegistered = state.getAddressOrNull()?.uprn?.let { propertyRegistrationService.getIsAddressRegistered(it) }
     }
 
@@ -84,8 +82,7 @@ class SelectAddressStepConfig(
         }
 }
 
-@Scope("prototype")
-@PrsdbWebComponent
+@JourneyFrameworkComponent
 final class SelectAddressStep(
     stepConfig: SelectAddressStepConfig,
 ) : RequestableStep<SelectAddressMode, SelectAddressFormModel, AddressState>(stepConfig)

@@ -4,4 +4,5 @@ data class CheckboxViewModel<T>(
     val value: T,
     val valueStr: String = value.toString(),
     val labelMsgKey: String? = null,
+    val conditionalFragment: String? = null,
 )

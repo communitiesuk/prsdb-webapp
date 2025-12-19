@@ -43,16 +43,19 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun backStep(backStepProvider: () -> JourneyStep<*, *, *>?): ConfigurableElement<TMode>
 
     fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
+
+    fun saveProgress(shouldSaveProgress: Boolean = true): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
-    override val initialiserName: String,
+    override var initialiserName: String,
 ) : ConfigurableElement<TMode> {
     var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
     var parentageProvider: (() -> Parentage)? = null
     var unreachableStepDestination: (() -> Destination)? = null
     var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
+    var shouldSaveProgress: Boolean = false
     override var tags: Set<String> = emptySet()
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
@@ -108,6 +111,11 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         return this
     }
 
+    override fun saveProgress(shouldSaveProgress: Boolean): ConfigurableElement<TMode> {
+        this.shouldSaveProgress = shouldSaveProgress
+        return this
+    }
+
     override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> =
         backDestination { backUrlProvider()?.let { Destination.ExternalUrl(it) } ?: Destination.Nowhere() }
 
@@ -149,19 +157,25 @@ class ElementConfiguration<TMode : Enum<TMode>>(
 }
 
 class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : JourneyState, TMode : Enum<TMode>>(
-    val segment: String?,
     private val step: JourneyStep<TMode, *, TState>,
     private val state: TState,
-    val elementConfiguration: ElementConfiguration<TMode> = ElementConfiguration("Step ${segment ?: step::class.simpleName}"),
+    private val elementConfiguration: ElementConfiguration<TMode> = ElementConfiguration("Step ${step::class.simpleName}"),
 ) : ConfigurableElement<TMode> by elementConfiguration,
     BuildableElement {
     init {
         if (step.initialisationStage != StepInitialisationStage.UNINITIALISED) {
-            throw JourneyInitialisationException("${segment ?: step::class.simpleName} has already been initialised")
+            throw JourneyInitialisationException("$initialiserName has already been initialised")
         }
     }
 
     private var additionalConfig: (TStep.() -> Unit)? = null
+    private var segment: String? = null
+
+    fun routeSegment(segment: String): StepInitialiser<TStep, TState, TMode> {
+        this.segment = segment
+        elementConfiguration.initialiserName = "Step $segment (${step::class.simpleName})"
+        return this
+    }
 
     fun stepSpecificInitialisation(configure: TStep.() -> Unit): StepInitialiser<TStep, TState, TMode> {
         if (additionalConfig != null) {
@@ -194,6 +208,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
                 ?: throw JourneyInitialisationException(
                     "$initialiserName has no unreachableStepDestination defined, and there is no default set at the journey level either",
                 ),
+            elementConfiguration.shouldSaveProgress,
         ) {
             elementConfiguration.additionalContentProviders.associate { provider -> provider() }
         }
