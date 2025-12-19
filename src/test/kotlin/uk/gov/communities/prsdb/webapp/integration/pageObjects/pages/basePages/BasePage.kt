@@ -10,10 +10,6 @@ abstract class BasePage(
     val page: Page,
     private val urlSegment: String? = null,
 ) {
-    init {
-        println(urlSegment)
-    }
-
     companion object {
         fun <T : BasePage> createValidPage(
             page: Page,
