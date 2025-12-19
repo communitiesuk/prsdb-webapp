@@ -47,6 +47,7 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyRegistrationService: PropertyRegistrationConfirmationService,
     private val incompletePropertyService: IncompletePropertyService,
+    private val propertyConfirmationService: PropertyRegistrationConfirmationService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
@@ -149,8 +150,8 @@ class LandlordController(
         }
 
         if (formModel.wantsToProceed == true) {
-            incompletePropertyService.deleteIncompleteProperty(contextId, principal.name)
-            propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId)
+            incompletePropertyService.deleteIncompleteProperty(contextId.toString(), principal.name)
+            propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId.toString())
             return "redirect:${getDeleteIncompletePropertyConfirmationPath(contextId)}"
         }
 
@@ -161,15 +162,16 @@ class LandlordController(
     fun deleteIncompletePropertyConfirmation(
         model: Model,
         @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: Long,
+        principal: Principal,
     ): String {
-        if (!propertyRegistrationService.getIncompletePropertyWasDeletedThisSession(contextId)) {
+        if (!propertyConfirmationService.wasIncompletePropertyDeletedThisSession(contextId.toString())) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Invitation with id $contextId was not found in the list of cancelled incomplete property registrations in the session",
             )
         }
 
-        if (incompletePropertyService.isIncompletePropertyAvailable(contextId)) {
+        if (incompletePropertyService.isIncompletePropertyAvailable(contextId.toString(), principal.name)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Incomplete property registration with id $contextId is still in the database",
@@ -209,7 +211,7 @@ class LandlordController(
         contextId: Long,
         principalName: String,
     ) {
-        val singleLineAddress = incompletePropertyService.getAddressData(contextId, principalName).singleLineAddress
+        val singleLineAddress = incompletePropertyService.getAddressData(contextId.toString(), principalName)
 
         model.addAttribute(
             "radioOptions",

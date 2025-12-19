@@ -17,8 +17,9 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LegacyAddressCheckingService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationMonolithicService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -28,13 +29,16 @@ class PropertyRegistrationJourneyTests {
     lateinit var mockJourneyDataService: JourneyDataService
 
     @Mock
-    lateinit var mockPropertyRegistrationService: PropertyRegistrationMonolithicService
+    lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     @Mock
     lateinit var localCouncilService: LocalCouncilService
 
     @Mock
     lateinit var addressService: AddressService
+
+    @Mock
+    lateinit var addressCheckingService: LegacyAddressCheckingService
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
@@ -44,6 +48,7 @@ class PropertyRegistrationJourneyTests {
         mockPropertyRegistrationService = mock()
         localCouncilService = mock()
         addressService = mock()
+        addressCheckingService = mock()
     }
 
     @Nested
@@ -73,6 +78,7 @@ class PropertyRegistrationJourneyTests {
                     journeyDataService = mockJourneyDataService,
                     addressService = addressService,
                     propertyRegistrationService = mockPropertyRegistrationService,
+                    addressCheckingService = addressCheckingService,
                     localCouncilService = localCouncilService,
                 )
             JourneyTestHelper.setMockUser(principalName)
