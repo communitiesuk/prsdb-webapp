@@ -45,7 +45,6 @@ import java.security.Principal
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
     private val landlordService: LandlordService,
-    private val propertyRegistrationService: PropertyRegistrationConfirmationService,
     private val incompletePropertyService: IncompletePropertyService,
     private val propertyConfirmationService: PropertyRegistrationConfirmationService,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -151,7 +150,7 @@ class LandlordController(
 
         if (formModel.wantsToProceed == true) {
             incompletePropertyService.deleteIncompleteProperty(contextId.toString(), principal.name)
-            propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId.toString())
+            propertyConfirmationService.addIncompletePropertyFormContextsDeletedThisSession(contextId.toString())
             return "redirect:${getDeleteIncompletePropertyConfirmationPath(contextId)}"
         }
 
