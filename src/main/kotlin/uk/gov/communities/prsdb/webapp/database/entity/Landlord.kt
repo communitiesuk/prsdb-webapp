@@ -77,6 +77,7 @@ class Landlord() : ModifiableAuditableEntity() {
         inverseJoinColumns = [JoinColumn(name = "saved_journey_state_id")],
     )
     lateinit var incompleteProperties: MutableSet<SavedJourneyState>
+        private set
 
     constructor(
         baseUser: OneLoginUser,
