@@ -60,4 +60,4 @@ scripts/plausible/node_modules
 .local-uploads
 
 ### Copilot ###
-.github/copilot-instructions.md
+.github/personal-copilot-instructions.md
