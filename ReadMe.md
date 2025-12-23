@@ -5,8 +5,7 @@ This is the web app code for the Private Rental Sector Database (PRSDB).
 ## Development
 
 The prsdb-webapp is a Spring Boot application written in Kotlin. The following should allow you to get started
-developing
-functionality for prsdb-webapp.
+developing functionality for prsdb-webapp.
 
 ### Dependencies
 
@@ -25,6 +24,21 @@ We are using Ktlint for linting, via the [ktlint-gradle plugin](https://github.c
 
 To ensure that your code meets the linting and formatting rules install these pre-commit hooks by running the
 `addKtlintCheckGitPreCommitHook` and `addKtlintFormatGitPreCommitHook` tasks from Gradle tab in Intellij.
+
+To prevent you from accidentally committing secrets we are also using a precommit hook called `detect-secrets`. To install the pre-commit
+hook first ensure you have Python 3 and pip installed, then run the appropriate script from the `scripts` folder:
+
+**PowerShell (Windows):**
+
+```powershell
+.\scripts\install-detect-secrets.ps1
+```
+
+**Bash (Linux/macOS):**
+
+```bash
+./scripts/install-detect-secrets.sh
+```
 
 There are also some local secrets that will need to be set up if you need to test integrations with other services when
 running the project locally. Ask the team lead where these can be found.
@@ -113,10 +127,9 @@ Then run the utility script to generate the sql for some new migrations by:
 - run the sql statement in `/scripts/output/select_all_local_authorities_to_be_deleted.sql` on your local copy of the database to
   get a list of the local authorities that will be removed by the delete migration
 - write a custom migration to handle any changes that will need to be made before the delete migration can be run
-  - check for local authority users/admins that will need to be deleted/assigned to another local authority
-  - check for addresses that will now belong to a different local authority
+    - check for local authority users/admins that will need to be deleted/assigned to another local authority
+    - check for addresses that will now belong to a different local authority
 - create a migration using `/scripts/output/draft_delete_local_authorities_migration.sql` to delete any removed local authorities
-
 
 ### Mock One Login Oauth2
 
@@ -177,6 +190,7 @@ To set up `aws-vault` follow the instructions in the `prsdb-infra` repository.
 #### Setting up `aws-vault` as a profile server
 
 Run
+
 ```shell
 aws-vault exec <profile> --server
 ```
@@ -185,6 +199,7 @@ This starts a session with aws-vault acting as a credential server.
 You can add `-- bash` or `-- powershell` to enter the server using your shell of choice.
 
 Then run
+
 ```shell
 env | grep AWS_CONTAINER
 ```
@@ -192,6 +207,7 @@ env | grep AWS_CONTAINER
 This will return two lines giving you the `AWS_CONTAINER_CREDENTIALS_FULL_URI` and the
 `AWS_CONTAINER_AUTHORIZATION_TOKEN` for your server.
 Copy both of these lines into your `.env` file and add the line
+
 ```
 AWS_REGION=eu-west-2
 ```
@@ -213,7 +229,9 @@ changes are merged to the `test` branch. Merges into `test` should be made as no
 common git history between `main` and `test`.
 
 ### Release infra before webapp
-Before releasing the webapp, go to the [prsd-infra](https://github.com/communitiesuk/prsdb-infra) repo and release main to test (follow the same PR process below)
+
+Before releasing the webapp, go to the [prsd-infra](https://github.com/communitiesuk/prsdb-infra) repo and release main to test (follow the
+same PR process below)
 
 ### PR process
 
@@ -221,9 +239,11 @@ The normal process is simply to raise a PR merging `main` into `test`, name the 
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
 
-There may be an existing draft PR for the release including any extra release instructions (e.g. environment variables that need to be set), so check for this and make sure any actions have been completed.
+There may be an existing draft PR for the release including any extra release instructions (e.g. environment variables that need to be set),
+so check for this and make sure any actions have been completed.
 
-Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and can be ignored.
+Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and
+can be ignored.
 
 In the rare case that there are changes on `main` that we do not want to release to `test`:
 
@@ -246,6 +266,7 @@ releasing to `test` in the normal way). However, if this is needed:
   repo to temporarily allow normal merges into `main` to do this
 
 ## Licence
+
 Unless stated otherwise, the codebase is released under [the MIT License][mit].
 This covers both the codebase and any sample code in the documentation.
 
