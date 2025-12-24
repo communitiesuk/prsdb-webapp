@@ -1,0 +1,5 @@
+status:
+  cannotStart: Cannot start
+  completed: Completed
+  inProgress: In progress
+  notStarted: Not started

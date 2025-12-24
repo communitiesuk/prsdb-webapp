@@ -1,0 +1,17 @@
+buttonText: Send feedback
+emailLabel: If you’re happy for us to contact you about your feedback, enter your email address (optional)
+error:
+  invalidEmail: Enter a valid email address
+  missing: Enter your feedback about the service
+  tooLong: Your feedback must be 1,200 characters or fewer
+heading: Give feedback on the PRS Database
+heading.three: Email
+heading.two: Other ways to give feedback
+hint: >-
+  Do not include any personal or financial information, for example your National Insurance number or credit card
+  details.
+intro: Use this form to let us know if you’ve experienced any issues, or have ideas for how we can improve the service.
+label: Tell us about your experience with the PRS Database
+paragraph:
+  one: PRSDatabase@communities.gov.uk
+title: Beta feedback

@@ -1,0 +1,112 @@
+complianceInformation:
+  electricalSafety:
+    downloadEicr: Download EICR
+    downloadExpiredEicr: Download expired EICR
+    eicr: Electrical Installation Condition Report (EICR)
+    heading: Electrical safety
+  energyPerformance:
+    didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
+    energyRating: Energy rating
+    epc: Energy Performance Certificate (EPC)
+    expiryDate: Expiry date
+    heading: Energy performance
+    meesExemption: MEES exemption
+    viewEpcLinkText: View EPC (opens in new tab)
+    viewExpiredEpcLinkText: View expired EPC (opens in new tab)
+  exempt: Exempt
+  exemption: Exemption
+  expired: Expired
+  gasSafety:
+    downloadCertificate: Download certificate
+    downloadExpiredCertificate: Download expired certificate
+    gasSafeEngineerNumber: Gas safe engineer number
+    gasSafetyCertificate: Gas safety certificate
+    heading: Gas safety
+  heading: Compliance information
+  hintText: Gas safety, electrical safety and energy performance for this property
+  issueDate: Issue date
+  landlordResponsibilities:
+    fireSafety: Fire safety responsibilities
+    heading: Landlord responsibilities
+    keepPropertySafe: Health and safety in rental properties
+    landlord:
+      hintText: Information about your landlord responsibilities
+    localCouncil:
+      hintText: Their agreement to follow their responsibilities as a landlord
+    readAndConfirmed: Read and confirmed
+    responsibilityToTenants: Your responsibilities to your tenants
+  noCompliance:
+    landlordView:
+      linkText: Add compliance information
+      mainText: This property does not have any compliance information.
+    localCouncilView:
+      mainText: The landlord has not added any compliance information for this property.
+  noExemption: No exemption
+  notAdded: Not added
+  notRequired: Not required
+  notificationBanner:
+    asSoonAsPossible: as soon as possible.
+    eicr:
+      expired:
+        linkText: Upload a new EICR
+        mainText: The <strong>Electrical Installation Condition Report (EICR)</strong> for this property has expired.
+      missing:
+        linkText: Upload an EICR
+        mainText: This property is missing an <strong>Electrical Installation Condition Report (EICR)</strong>.
+    epc:
+      expired:
+        linkText: Add a new certificate
+        mainText: The <strong>energy performance certificate (EPC)</strong> for this property has expired.
+      lowRating:
+        afterLinkText: .
+        beforeLinkText: You must
+        linkText: add a new certificate or add a MEES exemption
+        mainText: This property’s <strong>energy performance certificate (EPC)</strong> is below E.
+      missing:
+        linkText: Add a new certificate
+        mainText: This property is missing an <strong>energy performance certificate (EPC)</strong>.
+    gasCert:
+      expired:
+        linkText: Upload a new certificate
+        mainText: The <strong>gas safety certificate</strong> for this property has expired.
+      missing:
+        linkText: Upload a certificate
+        mainText: This property is missing a <strong>gas safety certificate</strong>.
+    title: Important
+  validUntil: Valid until
+deleteRecordButton:
+  text: Delete property
+description: Details added for this property
+heading: Property record
+keyDetails:
+  isTenanted: Tenanted
+  registeredLandlord: Registered landlord
+landlordDetails:
+  addressNonEnglandOrWales: Address (outside England or Wales)
+  contactAddressInEnglandOrWales: Contact address in England or Wales
+  contactNumber: Contact number
+  heading: Landlord details
+  registeredLandlord:
+    heading: Registered landlord
+    hint: Details about the landlord who registered this property
+propertyDetails:
+  heading: Property details
+propertyRecord:
+  address: Property address
+  licensingInformation:
+    heading: Licensing information
+    licensingNumber: Licensing number
+    licensingType: Licensing type
+  localCouncil: Local council
+  numberOfHouseholds: Number of households
+  numberOfPeople: Number of people
+  occupied: Occupied by tenants
+  ownershipType: Ownership type
+  propertyType: Property type
+  registrationDate: Database registration date
+  registrationNumber: Property Registration Number
+  uprn: UPRN
+  uprn.unavailable: Not available
+title: Property record
+update:
+  title: Update property record

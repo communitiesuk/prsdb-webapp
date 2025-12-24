@@ -1,0 +1,178 @@
+confirmation:
+  addForAnotherProperty: Add compliance information for another property
+  compliant:
+    bullet:
+      eicr: electrical safety
+      epc: energy performance
+      gasSafety: gas safety
+      heading: 'You have added information about:'
+      responsibilities: your landlord responsibilities
+  nonCompliant:
+    bullet:
+      eicr:
+        expired: the Electrical Installation Condition Report (EICR) has expired
+        missing: you have not added an Electrical Installation Condition Report (EICR)
+      epc:
+        expired: the energy performance certificate (EPC) has expired
+        expiredAndLowRating: the energy performance certificate (EPC) has expired and has a rating below E
+        lowRating: you have not added a MEES exemption for your energy performance certificate (EPC) with a rating below E
+        missing: you have not added an energy performance certificate (EPC)
+      gasSafety:
+        expired: the gas safety certificate has expired
+        missing: you have not added a gas safety certificate
+    paragraph:
+      one: 'You must address these issues:'
+      two: Follow the guidance below to take action.
+  title: Property Compliance Confirmation
+fullyCompliantConfirmation:
+  banner:
+    text: You have added compliance information for this property
+  paragraph:
+    one: 'You’ve successfully added compliance information for:'
+    two: We’ve sent you a confirmation email.
+  upToDate:
+    heading: You must keep this information up to date
+    paragraph:
+      one: You are required to keep compliance information accurate and up to date on the database.
+      three: >-
+        Local councils can review this information and take action. For example, they might issue you a fine if anything
+        is missing or inaccurate.
+      two: You have 28 days from the date a certificate expires to add the new one to the database.
+heading: Add compliance information
+paragraph:
+  one: You need to add compliance certificates and confirm you understand your landlord responsibilities for this property.
+  two: This helps your local council check whether your property is safe for tenants.
+partiallyCompliantConfirmation:
+  heading: You have missing or expired compliance information for this property
+  howToEicr:
+    bullet:
+      four: >-
+        Give a copy of the certificate to existing tenants within 28 days of the check, and to new tenants before they
+        move in.
+      one:
+        afterLink: .
+        beforeLink: Get a new electrical inspection
+        link: by a qualified and competent person (opens in new tab)
+      three: Upload the EICR to the database.
+      two: Review and fix any problems the inspection finds.
+    heading: Get a valid Electrical Installation Condition Report (EICR)
+    paragraph:
+      one: >-
+        You must make sure the electrics in your rented property are safe. This means getting an Electrical Installation
+        Condition Report (EICR) every 5 years.
+  howToEpc:
+    bullet:
+      five:
+        afterLink: .
+        beforeLink: Return to the database to find and add this new EPC from the
+        link: Energy Performance of Buildings Register (opens in new tab)
+      four:
+        afterLink: .
+        beforeLink: If you can’t improve the rating to E or above, you might be able to
+        link: register an exemption (opens in new tab)
+      one:
+        afterLink: .
+        beforeLink: You must
+        link: get a new EPC (opens in new tab)
+      three:
+        afterLink: .
+        beforeLink: If your property’s energy rating is below ‘E’, you must improve it to meet the
+        link: Minimum Energy Efficiency Standard (opens in new tab)
+      two: You’ll need to pay an accredited assessor to carry out the assessment and issue the EPC.
+    heading: Get a valid EPC
+    paragraph:
+      one: You need to get a new EPC for your rented property.
+    subheading: 'Here’s what you need to do:'
+  howToGas:
+    bullet:
+      four: >-
+        Give a copy of the certificate to existing tenants within 28 days of the check, and to new tenants before they
+        move in.
+      heading: >-
+        To keep tenants safe, rented properties must have a valid gas safety certificate. You should never let a
+        property without one.
+      one:
+        afterLink: engineer.
+        beforeLink: Make sure gas equipment in the property is safely installed and maintained by a
+        link: Gas Safe registered (opens in new tab)
+      three: Upload the certificate to the database.
+      two: Get an updated, valid certificate.
+    heading: Get a valid gas safety certificate
+  nonCompliant:
+    heading: Missing or expired information
+  paragraph:
+    one: 'You’ve finished adding compliance information for this property:'
+  takeAction:
+    heading: Take action for this property
+  timeLimit:
+    bullet:
+      one: the date a certificate expires
+      two: the date you registered the property as occupied on the database if you have not added a certificate yet
+    heading: You have 28 days to take action
+    paragraph:
+      one: 'You have 28 days to add new certificates on the database, which starts from either:'
+  warning: >-
+    Local councils can review this information and take action. For example, they might issue you a fine if anything is
+    missing or inaccurate.
+taskList:
+  checkAndSubmit:
+    check: Check the compliance information is correct and submit
+    check.hint: You can review what you’ve added before submitting
+    heading: Submit compliance information
+  heading: Add compliance information for your property
+  landlordResponsibilities:
+    fireSafety: Confirm you understand fire safety regulations
+    heading: Confirm you understand your landlord responsibilities
+    keepPropertySafe: Confirm you understand health and safety in rental properties
+    tenants: Confirm you understand your responsibilities to your tenants
+  subtitle:
+    one: You’ll be guided through each step, explaining what information you need to add and why.
+    three: >-
+      If you’re inactive for an hour, you’ll be signed out. You can save your answers as you go and return to this page
+      at any point.
+    two: You can still complete the compliance information even if certificates are missing, unavailable, or expired.
+  upload:
+    eicr: Upload the Electrical Installation Condition Report (EICR)
+    epc: Confirm the energy performance certificate (EPC)
+    epc.hint: This will be automatically added for you to check
+    gasSafety: Upload the gas safety certificate
+    heading: Add compliance certificates
+title: Property compliance
+uploadedFile:
+  virusScanFailed: Not added (virus scan failed)
+  virusScanPending: Pending virus scan
+whatToKnow:
+  bullet:
+    heading: 'You’ll be asked to confirm you understand:'
+    one: fire safety in your property
+    three: your responsibilities to your tenants
+    two: health and safety hazards in rental properties
+  heading: Confirm you understand your landlord responsibilities
+  paragraph:
+    one:
+      afterLink: .
+      beforeLink: We’ll show you information about some of your
+      linkText: legal responsibilities as a landlord
+    two: You can refer back to this information at any time after you’ve added all compliance details.
+whatToUpload:
+  bullet:
+    heading: 'You’ll be asked to upload a photo or scan of:'
+    one: the gas safety certificate
+    two: the Electrical Installation Condition Report (EICR)
+  heading: Add compliance certificates
+  paragraph:
+    one:
+      afterLink: for you to check.
+      beforeLink: >-
+        You’ll then be asked to confirm your property’s Energy Performance Certificate (EPC). This will be taken from
+        the
+      linkText: Energy Performance of Buildings Register (opens in a new tab)
+    two: You can complete the compliance information even if certificates are missing, unavailable, or expired.
+whenToUpload:
+  bullet:
+    heading: 'You have <strong>28 days</strong> to do this from the day the occupied property is:'
+    one: registered on the database
+    two: or updated from ‘unoccupied’ to ‘occupied by tenants’ on the database
+  heading: When to add compliance information
+  paragraph:
+    one: You must add compliance information if the property is occupied by tenants.

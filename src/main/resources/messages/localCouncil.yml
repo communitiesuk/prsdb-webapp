@@ -1,0 +1,18 @@
+dashboard:
+  aboutTheDatabase:
+    heading: About the database
+  action:
+    privacyNotice:
+      descriptionText: How the database uses the data collected about landlords for local councils
+      linkText: Privacy notice
+    rentersRightsBill:
+      descriptionText: View the guidelines related to the database and the Renters’ Rights Bill
+      linkText: Renters’ Rights Bill
+  banner:
+    subheading: 'Local council:'
+  searchAndView:
+    heading: Search and view a landlord or property record
+  searchForLandlord:
+    button: Search for a landlord
+  searchForProperty:
+    button: Search for a property

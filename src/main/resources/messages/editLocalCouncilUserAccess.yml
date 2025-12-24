@@ -1,0 +1,13 @@
+deleteAccountButton: Remove this account
+radios:
+  heading: Access Level
+  option:
+    admin:
+      hint: Manage users within this local council and their user permissions
+      label: Admin access
+    basic:
+      hint: Access landlord and property information for this local council
+      label: Basic access
+saveButton: Save and return
+subHeading:
+  beforeEmail: 'Email:'

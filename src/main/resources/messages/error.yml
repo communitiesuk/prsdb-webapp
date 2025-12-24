@@ -1,0 +1,30 @@
+fileTooLarge:
+  body:
+    one: The action you were taking has been cancelled because the file you’ve uploaded was too large.
+    two: You can try another file by returning to the action you just tried.
+  cta: Return to your dashboard
+  header: The file you selected was too large
+  title: File too large - {0,,serviceName} - GOV.UK
+forbidden:
+  body:
+    one: If you typed the web address, check it is correct.
+    two: If you pasted the web address, check you copied the entire address.
+  header: You do not have permission to access this page
+  title: Access denied - {0,,serviceName} - GOV.UK
+notFound:
+  body:
+    one: If you typed the web address, check it is correct.
+    two: If you pasted the web address, check you copied the entire address.
+  header: Page not found
+  title: Page not found - {0,,serviceName} - GOV.UK
+passcodeLimit:
+  body:
+    one: You have reached the limit for the maximum number of passcodes that can be generated.
+    two: Contact the support team for assistance with generating additional passcodes.
+  cta: Return to dashboard
+  header: Maximum number of passcodes reached
+  title: Passcode limit reached - {0,,serviceName} - GOV.UK
+serviceProblem:
+  body: Try again later.
+  header: Sorry, there is a problem with the service
+  title: Sorry, there is a problem with the service - {0,,serviceName} - GOV.UK

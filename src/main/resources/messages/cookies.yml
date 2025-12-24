@@ -1,0 +1,65 @@
+analytics:
+  bullet:
+    heading: 'Google Analytics stores anonymised information about:'
+    one: how you got to the PRS Database
+    three: any errors you see while using the PRS Database
+    two: the pages you visit on the PRS Database and how long you spend on them
+  heading: Analytics cookies (optional)
+  paragraph:
+    one: >-
+      With your permission, we use Google Analytics to collect data about how you use the PRS Database. This information
+      helps us to improve our service.
+    two: Google is not allowed to use or share our analytics data with anyone.
+  table:
+    ga:
+      expires: 2 years
+      name: _ga
+      purpose: To remember information about your visit, like the pages you have visited on the PRS Database
+    gaId:
+      expires: 13 months
+      name: _ga_RGF9JJZX3P
+      purpose: Google Analytics container ID, used to track your journey across multiple pages and visits over time
+button: Save cookie settings
+essential:
+  heading: Essential cookies
+  paragraph: >-
+    Essential cookies keep your information secure while you use the PRS Database. We do not need to ask permission to
+    use them.
+  table:
+    consent:
+      expires: 1 year
+      name: cookie_consent
+      purpose: Saves your cookie consent settings
+    session:
+      expires: When you close your web browser
+      name: SESSION
+      purpose: Used to keep you signed in
+fieldSetHeading: Do you accept analytics cookies?
+heading: Cookies
+noScript:
+  bullet:
+    heading: >-
+      We cannot change your cookie settings at the moment because JavaScript is not running in your browser. To fix
+      this, try:
+    one: turning on JavaScript in your browser settings
+    two: reloading this page
+  heading: Change your cookie settings
+paragraph:
+  one: >-
+    Cookies are small files saved on your phone, tablet or computer when you visit a website. We use cookies to make the
+    PRS Database work.
+  three: Cookies are not used to identify you personally.
+  two: >-
+    With your permission, we also use analytics cookies to learn about how you use the PRS Database and help us improve
+    it.
+successBanner:
+  body: Other government services may set additional cookies and, if so, will have their own cookie policy and banner.
+  heading: Your cookie settings were saved
+  link: Go back to the page you were looking at
+  title: Success
+table:
+  heading:
+    expires: Expires
+    name: Name
+    purpose: Purpose
+title: Cookies

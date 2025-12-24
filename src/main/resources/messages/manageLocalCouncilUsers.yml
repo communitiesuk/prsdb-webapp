@@ -1,0 +1,9 @@
+contentHeader: Manage {0,,localCouncil}’s users
+inviteAnotherUserButtonText: Invite another user
+noUsersText: No local council users or admins were found.
+returnToDashboardButton: Return to dashboard
+table:
+  accessLevelHeading: Access level
+  admin: Admin
+  basic: Basic
+title: Manage Local Council Users
