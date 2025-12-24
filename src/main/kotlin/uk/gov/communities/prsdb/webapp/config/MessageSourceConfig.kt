@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.AbstractMessageSource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.yaml.snakeyaml.Yaml
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.text.MessageFormat
 import java.util.Locale
@@ -25,7 +26,12 @@ class YamlMessageSource(
         val result = mutableMapOf<String, String>()
         val keySources = mutableMapOf<String, String>()
         val resolver = PathMatchingResourcePatternResolver()
-        val resources = resolver.getResources("$messagesFolderPath/*.yml")
+        val resources =
+            try {
+                resolver.getResources("$messagesFolderPath/*.yml")
+            } catch (e: FileNotFoundException) {
+                return emptyMap()
+            }
 
         for (resource in resources) {
             val fileName = resource.filename?.removeSuffix(".yml") ?: continue
