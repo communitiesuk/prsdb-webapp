@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.S3Config
@@ -79,6 +80,7 @@ class PrsdbProcessApplicationTests {
                 FeatureFlipStrategyInitialiser::class.simpleBeanName,
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
+                MessageSourceConfig::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
