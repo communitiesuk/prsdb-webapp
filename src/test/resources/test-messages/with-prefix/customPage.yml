@@ -1,0 +1,7 @@
+title: Custom Page Title
+form:
+  label: Enter your name
+  error:
+    required: Name is required
+    tooLong: Name must be 100 characters or fewer
+
