@@ -1,0 +1,9 @@
+applyButton: Apply filters
+closeButton: Close filters panel
+heading: Filter panel
+selected:
+  clearLink: Clear filters
+  heading: Selected filters
+  noneSelectedText: No filters selected
+  remove: Remove this filter
+showButton: Show filters panel

@@ -1,0 +1,63 @@
+dashboard:
+  aboutTheDatabase:
+    heading: Useful information
+  action:
+    privacyNotice:
+      descriptionText: Read the privacy notice to understand how your information is used on the pilot
+      linkText: How your information is used
+    rentersRightsBill:
+      descriptionText: See how the Renters’ Rights Bill is progressing and what that means for the database
+      linkText: Renters’ Rights Bill
+    understandThisPrivateBeta:
+      descriptionText: View the start page for this private beta to understand how it will work and what you need to know
+      linkText: Understand this private beta
+  banner:
+    subheading: 'Landlord registration number:'
+  complianceActions:
+    button: Compliance actions
+  complianceInformation:
+    heading: Add compliance information for your properties
+  notificationBanner:
+    complianceActions:
+      linkText: View compliance actions
+      subheading: 'You have {0,,number} {1,,propertyMsg} awaiting compliance information:'
+    heading: You have {0,,number} outstanding property actions
+    incompleteProperties:
+      linkText: View incomplete property details
+      subheading: 'You have {0,,number} incomplete {1,,propertyMsg}:'
+    properties: properties
+    property: property
+    title: Important
+  registerProperties:
+    heading: Register your properties
+  registerProperty:
+    button: Register a property
+  viewAndUpdateRecords:
+    heading: View and update your information or properties
+  viewIncompleteProperties:
+    button: Incomplete property details
+  viewLandlordRecord:
+    button: View your landlord record
+  viewPropertyRecords:
+    button: View your property records
+incompleteProperties:
+  action:
+    continue: Continue
+    delete: Delete
+  heading: Incomplete property details
+  none:
+    hintText: You have no properties with missing or incomplete details.
+    registerANewProperty:
+      linkText: register a new property
+    text:
+      afterLinks: .
+      beforeLinks: You can either
+      betweenLinks: or
+    viewRegisteredProperties:
+      linkText: view registered properties
+  summaryCardTitle: Incomplete Property {0,,number}
+  summaryRow:
+    completeBy: Complete by
+    propertyAddress: Property address
+  text: Complete the missing details for these properties. After 28 days, incomplete properties are deleted.
+  title: Incomplete properties

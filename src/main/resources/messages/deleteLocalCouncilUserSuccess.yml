@@ -1,0 +1,9 @@
+banner:
+  body: You’ve removed {0,,deletedUserName}’s account from {1,,localCouncilName}
+  heading: User removed
+returnToManageUsers: Return to manage users
+title: User removed
+whatHappensNext:
+  paragraph:
+    one: The user account is removed and they can no longer access {0,,localCouncilName}’s dashboard.
+    two: You’ll need to invite this user again to give them access to {0,,localCouncilName} on the database.

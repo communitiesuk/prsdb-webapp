@@ -1,0 +1,19 @@
+builtBy:
+  beforeLink: Built by
+  link: Ministry of Housing, Communities, and Local Government (MHCLG)
+cookies:
+  link: Cookies
+crownCopyright: © Crown copyright
+email:
+  afterLink: .
+  beforeLink: 'If you need help using this private beta, get in touch by email:'
+  link: PRSDatabase@communities.gov.uk
+licence:
+  afterLink: ', except where otherwise stated'
+  beforeLink: All content is available under the
+  link: Open Government Licence v3.0
+privacyNotice:
+  link: Privacy notice
+rentersRightsBill:
+  link: Renters’ Rights Bill
+supportLinks: Support links

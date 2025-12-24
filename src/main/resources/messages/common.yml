@@ -1,0 +1,9 @@
+confirmationPage:
+  goToDashboard: Go to dashboard
+  returnToDashboard: Return to dashboard
+  whatHappensNext: What happens next
+userManagement:
+  accountStatus: Account status
+  accountStatus.active: ACTIVE
+  accountStatus.pending: PENDING
+  username: Username
