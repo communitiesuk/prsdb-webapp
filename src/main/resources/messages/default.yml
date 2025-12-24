@@ -1,0 +1,3298 @@
+addLocalCouncilUserSuccess:
+  banner:
+    body: You’ve sent {0,,invitedEmailAddress} an invite to the database
+    heading: Invite sent
+  inviteAnother: Invite another user
+  returnToDashboard: Return to dashboard
+  title: Invite sent
+  whatHappensNext:
+    paragraph:
+      one: They’ll receive a link in their email to register on the database.
+      two: Once they’ve registered, they can view property and landlord records
+        that fall under {0}’s local area.
+beforeYouRegister:
+  text: Before you register
+betaBanner:
+  afterLink: will help us to improve it.
+  beforeLink: This is a new service – your
+  link: feedback (opens in new tab)
+  tag: BETA
+betaBannerFeedback:
+  buttonText: Send feedback
+  emailLabel: If you’re happy for us to contact you about your feedback, enter your
+    email address (optional)
+  error:
+    invalidEmail: Enter a valid email address
+    missing: Enter your feedback about the service
+    tooLong: Your feedback must be 1,200 characters or fewer
+  heading: Give feedback on the PRS Database
+  heading.three: Email
+  heading.two: Other ways to give feedback
+  hint: Do not include any personal or financial information, for example your National
+    Insurance number or credit card details.
+  intro: Use this form to let us know if you’ve experienced any issues, or have
+    ideas for how we can improve the service.
+  label: Tell us about your experience with the PRS Database
+  paragraph:
+    one: PRSDatabase@communities.gov.uk
+  title: Beta feedback
+betaBannerFeedbackSuccess:
+  heading: Thank you for your feedback
+  paragraph: We’ve recieved your feedback and will use your comments to improve
+    this service.
+  paragraph.three: If you left a contact email, we may reach out to understand your
+    feedback better.
+  paragraph.two: We’ll review and consider all feedback as part of improving the
+    service, but we may not be able to respond to individual comments.
+  title: Feedback sent
+cancelLocalCouncilUserInvitation:
+  cancelButton: Cancel invite
+  emailLabel: Email
+  heading: Cancel registration invite
+  para:
+    one: Once the invitation is cancelled the user will not be able to register
+      to the database.
+    three: Make sure you are cancelling the right user invitation before you continue
+    two: You’ll need to invite this user again to allow them to register.
+  title: Cancel invitation
+cancelLocalCouncilUserInvitationSuccess:
+  banner:
+    body: You’ve cancelled {0,,deletedEmail}’s invitation from {1,,localCouncilName}
+  returnToManageUsers: Return to manage users
+  title: Invitation cancelled
+  whatHappensNext:
+    paragraph:
+      one: The user invitation is cancelled and they can no longer access {0,,localCouncilName}’s
+        invite to register.
+      two: You’ll need to invite this user again to give them access to {0,,localCouncilName}
+        on the database.
+common:
+  confirmationPage:
+    goToDashboard: Go to dashboard
+    returnToDashboard: Return to dashboard
+    whatHappensNext: What happens next
+  userManagement:
+    accountStatus: Account status
+    accountStatus.active: ACTIVE
+    accountStatus.pending: PENDING
+    username: Username
+commonText:
+  'no': 'No'
+  none: None
+  other: Other
+  'yes': 'Yes'
+complianceActions:
+  action:
+    continue: Continue
+    start: Start
+    update: Update expired or missing certificates
+  heading: Compliance actions
+  hintText: This is a list of properties missing some compliance information. Start
+    or continue to add compliance information for the property.
+  none:
+    hintText: You have no properties awaiting compliance information
+    paragraph:
+      one: You only need to add compliance information for properties occupied
+        by tenants.
+  status:
+    added: Added
+    expired: Expired
+    notAdded: Not added
+    notStarted: Not started
+  summaryRow:
+    electricalSafety: Electrical safety
+    energyPerformance: Energy performance
+    gasSafety: Gas safety
+    registrationNumber: Registration number
+  title: Compliance actions
+  updatePropertyOccupancy:
+    bullet:
+      five: Save your changes on the property record
+      four: Select ‘Change’ beside the ‘Occupied by tenants’ row
+      one:
+        afterLink: ’
+        beforeLink: Go to ‘
+        linkText: View your property records
+      three: Select ‘Edit record’
+      two: Select the property you want to update
+    heading: 'To update a property from unoccupied to occupied:'
+    paragraph:
+      one: You’ll then be asked to add compliance information for the property.
+cookieBanner:
+  acceptButton: Accept analytics cookies
+  body:
+    one: We use some essential cookies to make this service work.
+    two: We’d also like to use analytics cookies so we can understand how you
+      use the service and make improvements.
+  confirmation:
+    accepted:
+      beforeLink: You’ve accepted analytics cookies. You can
+    afterLink: at any time.
+    hideButton: Hide cookie message
+    link: change your cookie settings
+    rejected:
+      beforeLink: You’ve rejected analytics cookies. You can
+  heading: Cookies on the {0,,serviceName}
+  rejectButton: Reject analytics cookies
+  viewCookiesLink: View cookies
+cookies:
+  analytics:
+    bullet:
+      heading: 'Google Analytics stores anonymised information about:'
+      one: how you got to the PRS Database
+      three: any errors you see while using the PRS Database
+      two: the pages you visit on the PRS Database and how long you spend on
+        them
+    heading: Analytics cookies (optional)
+    paragraph:
+      one: With your permission, we use Google Analytics to collect data about
+        how you use the PRS Database. This information helps us to improve
+        our service.
+      two: Google is not allowed to use or share our analytics data with anyone.
+    table:
+      ga:
+        expires: 2 years
+        name: _ga
+        purpose: To remember information about your visit, like the pages
+          you have visited on the PRS Database
+      gaId:
+        expires: 13 months
+        name: _ga_RGF9JJZX3P
+        purpose: Google Analytics container ID, used to track your journey
+          across multiple pages and visits over time
+  button: Save cookie settings
+  essential:
+    heading: Essential cookies
+    paragraph: Essential cookies keep your information secure while you use the
+      PRS Database. We do not need to ask permission to use them.
+    table:
+      consent:
+        expires: 1 year
+        name: cookie_consent
+        purpose: Saves your cookie consent settings
+      session:
+        expires: When you close your web browser
+        name: SESSION
+        purpose: Used to keep you signed in
+  fieldSetHeading: Do you accept analytics cookies?
+  heading: Cookies
+  noScript:
+    bullet:
+      heading: 'We cannot change your cookie settings at the moment because
+                JavaScript is not running in your browser. To fix this, try:'
+      one: turning on JavaScript in your browser settings
+      two: reloading this page
+    heading: Change your cookie settings
+  paragraph:
+    one: Cookies are small files saved on your phone, tablet or computer when
+      you visit a website. We use cookies to make the PRS Database work.
+    three: Cookies are not used to identify you personally.
+    two: With your permission, we also use analytics cookies to learn about how
+      you use the PRS Database and help us improve it.
+  successBanner:
+    body: Other government services may set additional cookies and, if so, will
+      have their own cookie policy and banner.
+    heading: Your cookie settings were saved
+    link: Go back to the page you were looking at
+    title: Success
+  table:
+    heading:
+      expires: Expires
+      name: Name
+      purpose: Purpose
+  title: Cookies
+dashboard:
+  title: Dashboard
+deleteLocalCouncilUser:
+  deleteAccountButton: Remove this account
+  emailLabel: Email
+  heading: Before you remove this account
+  para:
+    one: Once removed, the user cannot access this local council on the database.
+    three: Make sure you are removing the correct user before you continue.
+    two: You will need to invite this user again to give them access.
+  title: Remove a user
+deleteLocalCouncilUserSuccess:
+  banner:
+    body: You’ve removed {0,,deletedUserName}’s account from {1,,localCouncilName}
+    heading: User removed
+  returnToManageUsers: Return to manage users
+  title: User removed
+  whatHappensNext:
+    paragraph:
+      one: The user account is removed and they can no longer access {0,,localCouncilName}’s
+        dashboard.
+      two: You’ll need to invite this user again to give them access to {0,,localCouncilName}
+        on the database.
+deregisterLandlord:
+  noProperties:
+    confirmation:
+      banner:
+        heading: You have deleted your account from the database
+      paragraph:
+        one: You have deleted your account from the database. You can no longer
+          use the database.
+        two: We’ve sent a confirmation to your email address.
+  title: Deregister Landlord
+  withProperties:
+    confirmation:
+      banner:
+        heading: You have deleted your account from the database
+      paragraph:
+        one: You have deleted your landlord information and all your properties
+          from the database.
+        three: We’ve sent a confirmation to your email address.
+        two: You can no longer use the database.
+deregisterProperty:
+  confirmation:
+    banner:
+      heading: You have deleted a property
+    whatHappensNext:
+      paragraph:
+        one: This property has been removed from the database and your landlord
+          record.
+        two: We’ve sent a confirmation email about the deleted property to
+          your email address.
+  title: Deregister a Property
+editLocalCouncilUserAccess:
+  deleteAccountButton: Remove this account
+  radios:
+    heading: Access Level
+    option:
+      admin:
+        hint: Manage users within this local council and their user permissions
+        label: Admin access
+      basic:
+        hint: Access landlord and property information for this local council
+        label: Basic access
+  saveButton: Save and return
+  subHeading:
+    beforeEmail: 'Email:'
+error:
+  fileTooLarge:
+    body:
+      one: The action you were taking has been cancelled because the file you’ve
+        uploaded was too large.
+      two: You can try another file by returning to the action you just tried.
+    cta: Return to your dashboard
+    header: The file you selected was too large
+    title: File too large - {0,,serviceName} - GOV.UK
+  forbidden:
+    body:
+      one: If you typed the web address, check it is correct.
+      two: If you pasted the web address, check you copied the entire address.
+    header: You do not have permission to access this page
+    title: Access denied - {0,,serviceName} - GOV.UK
+  notFound:
+    body:
+      one: If you typed the web address, check it is correct.
+      two: If you pasted the web address, check you copied the entire address.
+    header: Page not found
+    title: Page not found - {0,,serviceName} - GOV.UK
+  passcodeLimit:
+    body:
+      one: You have reached the limit for the maximum number of passcodes that
+        can be generated.
+      two: Contact the support team for assistance with generating additional
+        passcodes.
+    cta: Return to dashboard
+    header: Maximum number of passcodes reached
+    title: Passcode limit reached - {0,,serviceName} - GOV.UK
+  serviceProblem:
+    body: Try again later.
+    header: Sorry, there is a problem with the service
+    title: Sorry, there is a problem with the service - {0,,serviceName} - GOV.UK
+feedback:
+  afterSurvey:
+    heading: Once you complete this survey
+    paragraph:
+      one: You can continue to use the database during or after completing the
+        survey.
+      two: We’ll be in touch at the end of the private beta to ask for your
+        feedback on your overall experience.
+  completeLater:
+    buttonText: Complete survey later
+  continueCompliance:
+    buttonText: Continue to complete compliance
+  heading: Give feedback on the PRS Database so far
+  intro:
+    bullet:
+      one: register as a landlord
+      three: add compliance information
+      two: register a property
+    paragraph:
+      one: Tell us about your experience using the PRS Database so far.
+      two: 'We’d like to know how easy or difficult you found it to:'
+  startSurvey:
+    linkText: Start survey (opens in new tab)
+  survey:
+    paragraph:
+      one: This feedback will help us understand what’s working well and what
+        we need to improve.
+      three: You can skip the survey, or choose to complete it later. If you
+        choose to complete it later, we’ll email you a link.
+      two: The survey should only take a few minutes to complete and opens in
+        a new tab.
+  title: Give feedback on the PRS Database so far
+filter:
+  applyButton: Apply filters
+  closeButton: Close filters panel
+  heading: Filter panel
+  selected:
+    clearLink: Clear filters
+    heading: Selected filters
+    noneSelectedText: No filters selected
+    remove: Remove this filter
+  showButton: Show filters panel
+footer:
+  builtBy:
+    beforeLink: Built by
+    link: Ministry of Housing, Communities, and Local Government (MHCLG)
+  cookies:
+    link: Cookies
+  crownCopyright: © Crown copyright
+  email:
+    afterLink: .
+    beforeLink: 'If you need help using this private beta, get in touch by email:'
+    link: PRSDatabase@communities.gov.uk
+  licence:
+    afterLink: ', except where otherwise stated'
+    beforeLink: All content is available under the
+    link: Open Government Licence v3.0
+  privacyNotice:
+    link: Privacy notice
+  rentersRightsBill:
+    link: Renters’ Rights Bill
+  supportLinks: Support links
+form:
+  invalidEicr:
+    whatNext:
+      one:
+        link: by a qualified and competent person (opens in new tab)
+forms:
+  alreadyRegistered:
+    details:
+      paragraph:
+        one: The previous owner of the property may need to remove their association
+          with the property.
+        two:
+          beforeEmailLink: 'Contact the Ministry of Housing, Communities
+                        and Local Government by email:'
+          email: PRSDatabase@communities.gov.uk
+      summary:
+        text: I haven’t registered this property
+    heading: This property is registered on the database.
+    paragraph:
+      one: '{0,,address} is already registered on the database.'
+      two:
+        beforeLink: If you think this is an error, check the property address
+          and
+        link:
+          text: search again.
+  areYouSure:
+    landlordDeregistration:
+      hasProperties:
+        fieldSetHeading: Are you sure you want to delete your account and
+          all your properties on the database?
+        fieldSetHint: By deleting your account, you are also deleting your
+          properties on the database.
+      noProperties:
+        fieldSetHeading: Are you sure you want to delete your account from
+          the database?
+        radios:
+          error:
+            missing: Select whether you want to delete your account from
+              the database
+      withProperties:
+        radios:
+          error:
+            missing: Select whether you want to delete your landlord record
+              and properties
+    propertyDeregistration:
+      fieldSetHeading: Are you sure you want to delete {0,,address} from the
+        database?
+      radios:
+        error:
+          missing: Select whether you want to delete this property from
+            the database
+  billsIncluded:
+    checkbox:
+      broadband: Broadband
+      cableSatelliteTV: Cable or satellite TV
+      communalAreasCleaner: Cleaner for communal areas
+      contentsInsurance: Contents insurance
+      councilTax: Council Tax
+      electricity: Electricity
+      gardening: Gardening
+      gas: Gas
+      somethingElse: Something else
+      somethingElse.label: Add the bills and services included in the rent
+      tvLicence: TV licence
+      water: Water
+    error:
+      missing: Select what you include in the rent
+      somethingElse:
+        missing: Enter the bills and services you include in the rent
+        tooLong: The description of other bills and services must be 200 characters
+          or fewer
+    fieldSetHeading: Which of these do you include in the rent?
+    fieldSetHint: Select the bills and services included.
+  buttons:
+    back: Back
+    completeRegistration: Complete registration
+    confirm: Confirm
+    confirmAndCompleteRegistration: Confirm and complete registration
+    confirmAndContinue: Confirm and continue
+    confirmAndSubmitCompliance: Confirm and submit compliance information
+    confirmAndSubmitUpdate: Confirm and submit update
+    continue: Continue
+    continueToCheckEpc: Continue to check EPC
+    continueToSearch: Continue to search
+    returnToPropertyRecord: Return to property record
+    returnToTaskList: Return to task list
+    saveAndContinue: Save and continue
+    saveAndContinueToEICR: Save and continue to EICR
+    saveAndContinueToEPC: Save and continue to EPC
+    saveAndContinueToLandlordResponsibilities: Save and continue to landlord responsibilities
+    saveAndReturnToTaskList: Save and return to task list
+    searchAgain: Search again
+    startNow: Start Now
+    submit: Submit
+    uploadAndContinue: Upload and continue
+    useThisAddress: Use this address
+  checkAnswers:
+    heading: Check your answers
+  checkComplianceAnswers:
+    certificate:
+      exemption: Exemption
+      expired: Expired
+      issueDate: Issue date
+      notAdded: Not added
+      notRequired: Not required
+      validUntil: Valid until
+    eicr:
+      certificate: Electrical Installation Condition Report (EICR)
+      download: Download EICR
+      heading: Electrical safety
+    epc:
+      certificate: Energy Performance Certificate (EPC)
+      energyRating: Energy rating
+      exemption: EPC exemption
+      expiryCheck: Did the tenancy start before the EPC expired?
+      expiryDate: Expiry date
+      heading: Energy performance
+      meesExemption: MEES exemption
+      view: View EPC (opens in new tab)
+      viewExpired: View expired EPC (opens in new tab)
+    gasSafety:
+      certificate: Gas safety certificate
+      download: Download certificate
+      engineerNumber: Gas Safe engineer number
+      heading: Gas safety
+    heading: 'Check the compliance information for: {0,,address}'
+    summaryName: Details you provided
+  checkMatchedEpc:
+    error:
+      missing: Select Yes or No to continue
+    heading: Check if this is the correct EPC information for {0,,address}
+    insetText:
+      beforeLink: The EPC information is generated from the Energy Performance
+        of Buildings Register.
+      link: View the full EPC certificate (opens in new tab)
+    isThisTheCorrectEpc:
+      heading: Is this the correct EPC for the property?
+    radios:
+      'no':
+        label: No, search for the EPC using the certificate number
+    summaryList:
+      address:
+        heading: Address
+      energyRating:
+        heading: Energy rating
+      expiryDate:
+        heading: Expiry date
+  checkPropertyAnswers:
+    additionalLandlords:
+      heading: Additional landlords
+    headingPrefix: 'Check your answers for:'
+    interestedParties:
+      heading: Interested parties
+    propertyDetails:
+      address: Property address
+      detail:
+        summary: What is a UPRN?
+        text: Unique property reference numbers (UPRNs) are unique identifiers
+          for every address in Great Britain.
+      heading: Property details
+      hint: Check the property address is correct
+      households: Number of households
+      licensingNumber: Licensing number
+      licensingType: Licensing type
+      localCouncil: Local council
+      noLicensing: None
+      occupied: Occupied by tenants
+      ownership: Ownership type
+      people: Number of people
+      type: Property type
+  confirmDetails:
+    details:
+      oneLoginUrl: https://home.account.gov.uk/contact-gov-uk-one-login
+      summary: This information is incorrect
+      text:
+        link: GOV.UK One Login
+        one: Update your details in your One Login account or contact
+        two: .
+    heading: Confirm your name and date of birth
+    rowHeading:
+      dob: Date of birth
+      name: Name
+    summary: These are your details from GOV.UK One Login. Check the information
+      is correct.
+    title: Confirm your details
+  countryOfResidence:
+    fieldSetHeading: Do you live in England or Wales?
+    radios:
+      error:
+        missing: Select an option
+  date:
+    day:
+      label: Day
+    error:
+      invalidAll: Day must be a whole number between 1 and 31. Month must be
+        a whole number between 1 and 12. Year must be a whole number greater
+        than 1899
+      invalidD: Day must be a whole number between 1 and 31
+      invalidDM: Day must be a whole number between 1 and 31. Month must be
+        a whole number between 1 and 12
+      invalidDY: Day must be a whole number between 1 and 31. Year must be a
+        whole number greater than 1899
+      invalidFormat: You must enter a real date
+      invalidM: Month must be a whole number between 1 and 12
+      invalidMY: Month must be a whole number between 1 and 12. Year must be
+        a whole number greater than 1899
+      invalidY: Year must be a whole number greater than 1899
+      missingAll: Enter a date
+      missingD: You must include a day
+      missingDM: You must include a day and a month
+      missingDY: You must include a day and a year
+      missingM: You must include a month
+      missingMY: You must include a month and a year
+      missingY: You must include a year
+    month:
+      label: Month
+    year:
+      label: Year
+  dateOfBirth:
+    error:
+      invalidAge: The minimum age to register as a landlord is 18
+      invalidDateOfBirth: You must enter a valid date of birth
+    fieldSetHeading: What is your date of birth?
+    fieldSetHint: For example, 27 03 2008
+  declaration:
+    checkbox:
+      error:
+        missing: You must agree to the declaration to continue
+      label: I agree
+    confirm:
+      bullet:
+        one: all the information I have submitted is correct and my record
+          is accurate and up to date
+        two: I understand I may be fined if I provide false or misleading
+          information on the database
+      heading: 'By continuing, I confirm that:'
+    fieldSetHeading: Declaration
+    fines:
+      bullet:
+        one:
+          afterAmount: for knowingly giving false or misleading information
+            on the database
+          beforeAmount: up to £
+        two:
+          afterAmount: for repeated offences or continuing to provide false
+            information
+          beforeAmount: up to £
+      heading: 'The fines include:'
+      propertyRegistrationJourneyAmount: X
+    paragraph:
+      one: It’s an offence to provide false or misleading information on the
+        database.
+      three:
+        afterLink: .
+        beforeLink: Understand more about your legal responsibilities as a
+          landlord in the
+        link: guide to the database for landlords
+      two: If you do, you can be fined by a local council.
+    warning: By registering for this service, you agree that all the information
+      you’ve provided is accurate or you’ll be subject to fines.
+  eicr:
+    error:
+      missing: Select whether you have an EICR for this property
+    fieldSetHeading: Do you have an Electrical Installation Condition Report (EICR)
+      for {0,,address}?
+    fieldSetHint: You’re legally required to carry out an electrical safety assessment
+      every five years for a rented property
+  eicrExemption:
+    fieldSetHeading: Does this property have an exemption for an  Electrical Installation
+      Condition Report (EICR)?
+    missing: Select whether this property has an EICR exemption
+  eicrExemptionConfirmation:
+    heading: You’ve marked this property as exempt from needing an Electrical
+      Installation Condition Report (EICR)
+    paragraph:
+      one: Your local council can review your reason for not having a EICR and
+        check if it’s accurate.
+      two: If there are any issues, they can contact you.
+  eicrExemptionMissing:
+    heading: You must get a valid Electrical Installation Condition Report (EICR)
+      for this property
+    paragraph:
+      one: You must make sure the electrics in your rented property are safe.
+        This means getting an Electrical Installation Condition Report (EICR)
+        every 5 years.
+      three: You have <strong>28 days</strong> from the day you registered this
+        property as occupied to upload a new EICR to the database.
+      two: Without an EICR for this property, you are breaking the law.
+  eicrExemptionOtherReason:
+    error:
+      missing: Explain why your property is exempt from needing an EICR
+      tooLong: Explanation must be 200 characters or fewer
+    fieldSetHeading: Why is this property exempt from needing an Electrical Installation
+      Condition Report (EICR)?
+    fieldSetHint: Your local council can review your answer
+  eicrExemptionReason:
+    fieldSetHeading: What is the Electrical Installation Condition Report (EICR)
+      exemption?
+    missing: Select why this property has an EICR exemption
+    radios:
+      longLease:
+        hint: Tenants with a lease of 7 years or more are responsible for
+          gas safety checks and maintenance
+        label: The current tenancy lease has lasted 7 years or more
+      other:
+        hint: You’ll be asked to explain the exemption on the next page
+        label: Other exemption (not listed here)
+  eicrOutdated:
+    heading: This property’s Electrical Installation Condition Report (EICR) has
+      expired
+    paragraph:
+      one: You must make sure the electrics in your rented property are safe.
+        This means getting an Electrical Installation Condition Report (EICR)
+        every 5 years.
+      two: You have <strong>28 days</strong> from the day this EICR expired
+        to upload a new one to the database.
+  email:
+    error:
+      invalidFormat: Enter an email address in the right format
+      missing: Enter a valid email address to continue. An email is required
+        for contact purposes.
+    fieldSetHeading: What is your email address?
+    fieldSetHint: We’ll use this to send information and updates about your record.
+    label: Enter your email address
+  epc:
+    error:
+      missing: Select whether you have an EPC for this property
+    fieldSetHeading: Do you have an Energy Performance Certificate (EPC) for {0,,address}?
+    fieldSetHint: An EPC gives a property an energy efficiency rating from A (best)
+      to G (worst) and is valid for 10 years
+    radios:
+      option:
+        notRequired:
+          label: This property does not need an EPC
+  epcExemptionConfirmation:
+    heading: You’ve marked this property as not needing an energy performance
+      certificate (EPC)
+    paragraph:
+      one: A local council can check to make sure this is accurate.
+      three: If at any point your property requires an EPC, you should get one
+        and add it to the database.
+      two: If they have any issues, they can contact you.
+  epcExemptionReason:
+    fieldSetHeading: Why does this property not need an EPC?
+    missing: Select why your property does not need an EPC
+    paragraph:
+      one:
+        beforeLink: Check whether your property needs an EPC by
+        link: following this guide to energy performance certificates (opens
+          in new tab)
+    radios:
+      annualEnergyConsumptionLessThan25Percent:
+        label: The building is used or intended to be used for a limited time
+          in the year, with an expected energy use of less than 25% of what
+          it would be if used all year round
+      annualUseLessThan4Months:
+        label: The building will be used less than 4 months of the year
+      dueForDemolition:
+        label: You can demonstrate that the building is due to be demolished
+      standaloneSmallBuilding:
+        hint: For example, buildings entirely detached from any other building
+        label: Stand-alone building with a total useful floor area of less
+          than 50m²
+      temporaryBuilding:
+        label: Temporary building with a planned use for 2 years or less
+  epcExpired:
+    heading: This property’s energy performance certificate (EPC) has expired
+    paragraph:
+      one: Your property’s energy performance certificate (EPC) expired on {0,,expiryDate}.
+      three: You have <strong>28 days</strong> from the day this EPC expired
+        to add a new one to the database.
+      two: You need a new EPC for your rented property.
+  epcExpiredLowRating:
+    bullet:
+      heading: 'It’s against the law to:'
+      one: rent a property without a valid EPC
+      two: rent a property with an EPC rating below E, unless you have a valid
+        Minimum Energy Efficiency Standard (MEES) exemption
+    heading: The energy performance certificate (EPC) for this property has expired
+      and has a rating below E
+    paragraph:
+      one: Your property’s energy performance certificate (EPC) has expired
+        on {0,,expiryDate}. It also has an energy rating below E.
+      two:
+        afterLink: .
+        beforeLink: You must
+        link: get a new EPC for this property (opens in new tab)
+    whatNext:
+      heading: What you need to do next
+      one: Since this property’s EPC had an energy rating below E, you should
+        improve the property’s energy rating by doing remedial work.
+      two:
+        afterLink: .
+        beforeLink: If you cannot improve this property’s energy rating, register
+          a
+        link: MEES exemption (opens in new tab)
+  epcExpiryCheck:
+    heading: Your EPC expiry date
+    missing: Select Yes or No to continue
+    paragraph:
+      one: An EPC is valid for 10 years. After 10 years, you only need a new
+        EPC for the property if new tenants move in after the EPC expires.
+      three: To check if you need a new EPC, did the current tenancy start before
+        {0,,expiryDate}?
+      two: If the same tenants remain, the EPC is stays valid even after 10
+        years.
+  epcLookup:
+    certificateNumber:
+      hint: For example 9002-3775-9101-5482-3149
+      label: Enter the certificate number
+    error:
+      invalidFormat: Enter a 20 digit certificate number
+      missing: Enter your EPC certificate number
+    explanation:
+      heading: Find this property’s EPC number
+      paragraph:
+        one:
+          afterLink: .
+          beforeLink: The EPC number should be located on the certificate.
+            If you do not have your property’s energy certificate, go
+            to
+          link: find an energy certificate (opens in new tab)
+        two:
+          afterLink: .
+          beforeLink: If your property does not have an energy certificate,
+            you can
+          link: get a new energy certificate (opens in new tab)
+    fieldSetHeading: Search for the EPC using the certificate number
+    fieldSetHint: We’ll use this to upload the property’s certificate from the
+      Energy Performance of Buildings Register.
+    searchButton:
+      text: Search for this EPC
+  epcMissing:
+    heading: You must get a valid energy performance certificate (EPC) for this
+      property
+    ifNoEpc:
+      bullet:
+        heading: 'They can:'
+        one: issue a fine of up to £5,000
+        two: stop you serving a Section 21 eviction notice
+      heading: If you do not get a new EPC or register an exemption
+      paragraph:
+        one: Your local council can contact you if you do not have an EPC
+          or minimum energy efficient standard exemption for this property.
+        three: In the meantime, you can add other compliance information to
+          the database.
+        two:
+          afterLink: .
+          beforeLink: Find out more about
+          link: your responsibilities when it comes to energy efficiency
+            standards (opens in new tab)
+    paragraph:
+      one: You need an energy performance certificate (EPC) for your rented
+        property. This certificate shows how energy efficient your property
+        is.
+      two: It’s against the law to rent a property without a valid EPC.
+  epcNotAutoMatched:
+    heading: You must add this property’s EPC using the certificate number
+    paragraph:
+      one: We could not find this property’s EPC using its address or Unique
+        Property Reference Number (UPRN).
+      two: Search for the EPC using the certificate number to add it to the
+        database.
+  epcNotFound:
+    heading: This property’s EPC could not be found
+    paragraph:
+      four: In the meantime, you can add other compliance information to the
+        database.
+      one: 'There was no EPC found with the number: {0,,certificateNumber}.'
+      three:
+        afterLink: .
+        beforeLink: Or
+        link: get a new energy certificate (opens in new tab)
+      two:
+        afterLink: who evaluated the property.
+        beforeLink: To find the right EPC for your property,
+        link: contact the EPC assessor (opens in new tab)
+    subsection:
+      heading: How to find your EPC number
+  epcSuperseded:
+    heading: This property has a newer EPC available
+    paragraph:
+      one: The EPC number you entered is not the most recent one for this property.
+        This EPC is out of date.
+      three: You can check the newer certificate is correct on the next screen
+        before you save.
+      two: 'We’ve found the latest EPC with the certificate number: {0,,certificateNumber}.'
+  errorMessage:
+    prefix: 'Error:'
+  errorSummary:
+    heading: There is a problem
+  gasSafeEngineerNum:
+    detail:
+      summary: I cannot find the Gas Safe register number
+      text:
+        afterLink: .
+        beforeLink: This should be on the gas safety certificate. You can
+          also look up the engineer by name or address on the
+        link: Gas Safe Register (opens in new tab)
+    error:
+      invalidFormat: Enter a 7-digit number.
+      missing: You need to enter a Gas Safe engineer’s registered number.
+    fieldSetHeading: What is the Gas Safe engineer’s registered number?
+    fieldSetHint: This is the 7-digit licence number for the Gas Safe engineer
+      who carried out the inspection. You will find this on the engineer’s Gas
+      Safe ID card.
+  gasSafety:
+    error:
+      missing: Select whether you have a gas safety certificate
+    fieldSetHeading: Do you have a gas safety certificate for {0,,address}?
+    fieldSetHint: You’re legally required to carry out a gas safety assessment
+      every year for a rented property. This should be carried out by a registered
+      engineer.
+  gasSafetyExemption:
+    fieldSetHeading: Does this property have an exemption for a gas safety certificate?
+    missing: Select whether you have a gas safety certificate exemption
+  gasSafetyExemptionConfirmation:
+    heading: You’ve marked this property as not needing a gas safety certificate
+    paragraph:
+      one: Your local council can review your reason for not having a certificate
+        and check if it’s accurate.
+      two: If there are any issues, they can contact you.
+  gasSafetyExemptionMissing:
+    heading: You must get a valid gas safety certificate for this property
+    paragraph:
+      one: To keep tenants safe, rented properties must have a valid gas safety
+        certificate. This needs to be renewed every 12 months.
+      three: You have <strong>28 days</strong> from the day you registered this
+        property as occupied to upload a valid gas safety certificate to the
+        database.
+      two: Without a valid gas safety certificate for this property, you are
+        breaking the law. You should never let a property without one.
+  gasSafetyExemptionOtherReason:
+    error:
+      missing: Explain why your property is exempt from having a gas safety
+        certificate
+      tooLong: Explanation must be 200 characters or fewer
+    fieldSetHeading: Why is this property exempt from having a gas safety certificate?
+    fieldSetHint: A local council may check your answer
+  gasSafetyExemptionReason:
+    fieldSetHeading: Why is this property exempt from having a gas safety certificate?
+    missing: Select why this property is exempt from gas safety
+    radios:
+      longLease:
+        hint: Tenants with a lease of 7 years or more are responsible for
+          gas safety checks and maintenance
+        label: The current tenancy lease has lasted 7 years or more
+      noGas:
+        label: It does not have a gas supply
+      other:
+        hint: You must add a reason why
+        label: Other exemption (not listed here)
+  gasSafetyOutdated:
+    heading: This property’s gas safety certificate has expired
+    paragraph:
+      one: To keep tenants safe, you must have a valid gas safety certificate
+        for each rented property. You must renew it every 12 months.
+      three: You have <strong>28 days</strong> from the day this gas safety
+        certificate expired to upload a new one to the database.
+      two: Without a valid gas safety certificate for this property, you break
+        the law. You should never let a property without one.
+  hmoAdditionalLicence:
+    detail:
+      paragraph:
+        three: Contact the local council your property is in to understand
+          whether your property needs an HMO additional licence.
+        two: Some local council areas require licensing on different types
+          of HMOs in its area which are not subject to mandatory licensing.
+      summary: What’s a HMO additional licence?
+    error:
+      missing: Enter the HMO additional licence number
+    fieldSetHeading: What is your HMO additional licence number?
+    label: Enter the HMO additional licence number
+  hmoMandatoryLicence:
+    detail:
+      bullet:
+        one: it’s rented to 5 or more people who form more than 1 household
+        three: at least 1 tenant pays rent (or their employer pays it for
+          them)
+        two: some or all tenants share toilet, bathroom or kitchen facilities
+      paragraph:
+        three: 'You must have a HMO licence if you’re renting out a large
+                    HMO, which means:'
+        two: If you want to rent out your property as a house in multiple
+          occupation in England or Wales, you must contact your council
+          to check if you need a licence.
+      summary: What is a House in Multiple Occupation (HMO) licence?
+    error:
+      missing: Enter the HMO Mandatory licence number
+    fieldSetHeading: What is your HMO mandatory licence number?
+    label: Enter the HMO mandatory licence number
+  hmoShared:
+    detail:
+      bullet:
+        one: it’s rented to at least 3 tenants who are not from 1 ‘household’
+          (for example, a family)
+        two: tenants share toilet, bathroom or kitchen facilities
+      paragraph:
+        one:
+          afterLink: 'if both of the following apply:'
+          beforeLink: A property is a
+          link:
+            text: house in multiple occupation (HMO) (opens in new tab)
+  identityNotVerified:
+    heading: You have not proven your identity using GOV.UK One Login
+    paragraph:
+      one: You can return to GOV.UK One Login at any time to prove your identity.
+        You only need to do this once.
+      three: You can continue using the database as normal.
+      two: Proving your identity helps local councils understand who has registered
+        on the database.
+  invalidEicr:
+    ifNoEicr:
+      bullet:
+        heading: 'They can also:'
+        one: order you to fix any electrical problems
+        three: fine you up to £30,000
+        two: do remedial work on your property and charge you for it
+      heading: If you do not have a valid EICR
+      paragraph:
+        one: Your local council can contact you if you do not have a valid
+          EICR.
+        three: In the meantime, you can add other compliance information to
+          the database.
+    whatNext:
+      four: Give a copy of the certificate to existing tenants within 28 days
+        of the check, and to new tenants before they move in.
+      heading: What you need to do next
+      one:
+        afterLink: .
+        beforeLink: Get a new electrical inspection
+      paragraph:
+        afterLink: .
+        beforeLink: For full details, read the
+        link: electrical safety standards in the private rented sector (opens
+          in new tab)
+      three: Upload the new EICR to the database.
+      two: Review and fix any problems the inspection finds
+  invalidEpc:
+    ifNoEpc:
+      actions:
+        bullet:
+          heading: 'They can:'
+          one: issue fines up to £5,000
+          two: stop you serving a Section 21 eviction notice
+      conditions:
+        bullet:
+          heading: 'Your local council can take action if this property
+                        does not:'
+          one: have a valid EPC with an energy rating of E or above
+          two: have a registered MEES exemption for this property if the
+            energy rating is below E
+      heading: If you do not get a new EPC
+      paragraph:
+        one:
+          afterLink: .
+          beforeLink: Find out more about
+          link: your responsibilities when it comes to energy efficiency
+            standards (opens in new tab)
+        two: In the meantime, you can add other compliance information to
+          the database.
+    whatNext:
+      five:
+        afterLink: .
+        beforeLink: Return to the database to find and add this new EPC from
+          the
+        link: Energy Performance of Buildings Register (opens in new tab)
+      four:
+        afterLink: .
+        beforeLink: If you can’t improve the rating to E or above, you might
+          be able to
+        link: register an exemption (opens in new tab)
+      heading: What you need to do next
+      one:
+        afterLink: .
+        beforeLink: You must
+        link: get a new EPC (opens in new tab)
+      three:
+        afterLink: .
+        beforeLink: If your property’s energy rating is below ‘E’, you must
+          improve it to meet the
+        link: Minimum Energy Efficiency Standard (MEES) Regulations (opens
+          in new tab)
+      two: You’ll need to pay an accredited assessor to carry out the assessment
+        and issue the EPC.
+  invalidGasSafety:
+    ifNoCert:
+      bullet:
+        heading:
+          afterLink: 'can take enforcement action, which can lead to:'
+          beforeLink: Your local council or the
+          link: Health and Safety Executive (opens in new tab)
+        one: prosecution
+        three: imprisonment, in the most serious cases
+        two: unlimited fines
+      heading: If you do not have a valid certificate
+      paragraph:
+        one: If you do not have a valid certificate, you commit a criminal
+          offence under health and safety law.
+        three: In the meantime, you can add other compliance information to
+          the database.
+        two:
+          afterLink: to understand more about your responsibilities.
+          beforeLink: Read about
+          link: gas safety for landlords (opens in new tab)
+    whatNext:
+      four: Give a copy of the certificate to existing tenants within 28 days
+        of the check, and to new tenants before they move in.
+      heading: What you need to do next
+      one:
+        afterLink: engineer.
+        beforeLink: Make sure gas equipment in the property is safely installed
+          and maintained by a
+        link: Gas Safe registered (opens in new tab)
+      three: Upload the certificate to the database.
+      two: Get an updated, valid certificate.
+  inviteLocalCouncilAdminUser:
+    fieldSetHeading: Invite someone to be a Local Council Admin on the database.
+    fieldSetHint: This will allow them to view, edit, invite and delete local
+      council users in their local council as well as view landlord and property
+      records.
+    selectLabel: Select their local council
+    title: Invite Local Council Admin
+  inviteLocalCouncilAdminUserConfirmation:
+    banner:
+      body: You’ve sent {0,,invitedEmailAddress} an invite to be an admin for
+        {1,,localCouncilName}.
+    whatHappensNext:
+      paragraph:
+        three: They will also be able to add, edit and delete new local council
+          users for {0,,localCouncilName}.
+  landlordResponsibilities:
+    fireSafety:
+      bullet:
+        five: check any furniture or furnishings you supply meet fire safety
+          standards
+        four: check your tenants have access to escape routes
+        heading: 'This means you must:'
+        one: put a smoke alarm on each storey of the property
+        three: test these alarms when a new tenant moves in
+        two: put a carbon monoxide alarm in any room with a solid fuel burning
+          appliance (for example a coal fire or wood burning stove)
+      checkbox:
+        error:
+          missing: You must confirm that you have read and understood your
+            responsibilities
+        label: I confirm I have read this guidance and understand my responsibilities
+      heading: Fire safety in your property
+      largeHmos:
+        bullet:
+          heading: 'You must:'
+          one: install the right automatic fire detection system
+          two: provide the correct fire extinguishers
+        heading: Responsibilities for large HMOs
+        paragraph:
+          one:
+            afterLink: ', you have extra responsibilities.'
+            beforeLink: If your property is a
+            link: large house in multiple occupation (HMO)
+          two: Your local council might require other fire safety measures
+            not listed here. Check with the local council where the property
+            is located for any guidance around fire safety.
+      paragraph:
+        one: You must make sure your property and tenants are safe from fire.
+        two: There might be other fire safety rules depending on the type
+          of property.
+    fireSafetyRisk:
+      heading: Your property is at risk of fire
+      paragraph:
+        one: You must follow fire safety regulations in your property. A fire
+          can put your tenants’ lives in danger.
+        three: You can continue to confirm your other landlord responsibilities.
+        two: A local council may inspect your property if you have not met
+          your responsibilities as a landlord.
+    keepPropertySafe:
+      assessment:
+        action:
+          bullet:
+            heading: 'If a local council finds a Category 1 hazard, it
+                            means there is an immediate and serious risk to health
+                            or safety, they can then:'
+            one: tell you to make the necessary repairs
+            three: issue you with a fine or prosecute you
+            two: limit or ban the use of the property
+        hazard:
+          bullet:
+            five: accidents risks (such as falls and structural collapse)
+            four: poor hygiene, sanitation and water supply
+            heading: 'The HHSRS covers 29 types of hazards, including:'
+            one: damp, mould, and being too cold or too hot
+            three: not enough space, poor security, noise, and not enough
+              light
+            two: pollutants (like asbestos, lead, and carbon monoxide)
+        heading: How councils assess health and safety
+        paragraph:
+          one:
+            afterLink: to check housing conditions. They look at how serious
+              a hazard could be.
+            beforeLink: Your local council uses the
+            link: Housing Health and Safety Rating System (HHSRS) (opens
+              in new tab)
+          two: They can also take action for hazards such as damp or mould.
+      bullet:
+        heading: 'This means you must identify and fix any hazards. This includes
+                    checking and maintaining:'
+        one: the property’s structure
+        three: important systems, like heating and pipework
+        two: the exterior
+      checkbox:
+        error:
+          missing: You must confirm that you have read and understood your
+            responsibilities
+        label: I confirm I have read this guidance and understand my responsibilities
+      heading: Health and safety in rental properties
+      legalAction:
+        bullet:
+          heading: 'If the court agrees with your tenant, you might have
+                        to:'
+          one: carry out repairs or improvements
+          two: pay compensation to your tenant
+        heading: Tenants in dangerous or unhealthy conditions can take legal
+          action
+        paragraph:
+          one:
+            afterLink: .
+            beforeLink: Your tenants can take you to court if the property
+              is not fit to live in. This is covered in the
+            link: Homes (Fitness for Human Habitation) Act 2018 (opens
+              in new tab)
+          two: Reasons could include safety issues, health, pest problems,
+            or disrepair.
+      paragraph:
+        one: You’re responsible for your tenants’ health and safety in your
+          property.
+    responsibilityToTenants:
+      checkbox:
+        error:
+          missing: You must confirm that you have read and understood your
+            responsibilities
+        label: I confirm I have read this guidance and understand my responsibilities
+      deposit:
+        heading: Deposit
+        paragraph:
+          one:
+            afterLink: .
+            beforeLink: You must protect your tenant’s deposit in a
+            linkText: government approved deposit protection scheme (opens
+              in new tab)
+          two: The tenancy deposit cannot be more than 5 weeks rent, or
+            6 weeks rent if the annual rent is over £50,000.
+      documents:
+        bullet:
+          five: the energy performance certificate (EPC) for the property
+          four: the Electrical Installation Condition Report (EICR) for
+            the property
+          heading: 'You should give them a copy of:'
+          one:
+            beforeLink: the
+            link: ‘How to rent’ guide (opens in new tab)
+          six: any proof that the smoke and carbon monoxide alarms work
+            at the start of the tenancy
+          three: the gas safety certificate for the property
+          two: any deposit paperwork
+        heading: Important documents for renting
+        paragraph:
+          one: Your tenants should have your name and address (in England
+            or Wales) where they can send notices to you.
+      heading: Your responsibilities to your tenants
+      paragraph:
+        one:
+          afterLink: .
+          beforeLink: Before you let out a property, you must follow the
+            responsibilities listed in the
+          linkText: renting out your property guide (opens in new tab)
+  licenceNumber:
+    error:
+      tooLong: The licensing number is too long
+  licensingType:
+    fieldSetHeading: Select the type of licence you have for your property
+    fieldSetHint: Select which type of property licence applies to this property
+    radios:
+      error:
+        missing: Select the type of licensing for the property
+      option:
+        hmoAdditional:
+          hint: Some local councils require a licence for smaller HMOs that
+            are not covered by the mandatory licensing licence.
+          label: HMO additional licence
+        hmoMandatory:
+          hint: A House in Multiple Occupation (HMO) must have a licence
+            if it’s occupied by 5 or more people who form more than 1
+            household.
+          label: HMO mandatory licence
+        noLicensing:
+          label: This property does not need a licence
+        selectiveLicence:
+          hint: Some local councils require this licence for any privately
+            rented homes in specific areas.
+          label: Selective licence
+  links:
+    change: Change
+    view: View
+  lookupAddress:
+    houseNameOrNumber:
+      error:
+        missing: Enter a house name or number
+      hint: For example, 15 or Prospect Cottage
+      label: House name or number
+    landlordRegistration:
+      fieldSetHeading: What is your contact address?
+      fieldSetHint: This should be an address within England or Wales.
+    postcode:
+      error:
+        missing: Enter a postcode
+      hint: For example, AA3 1AB
+      label: Postcode
+    propertyRegistration:
+      fieldSetHeading: What is the property address?
+      fieldSetHint: This should be an address within England
+  lowEnergyRating:
+    heading: Your property’s energy rating is too low (below E)
+    paragraph:
+      one:
+        afterLink: .
+        beforeLink: You cannot let or continue to let this property if its
+          energy performance certificate (EPC) rating is below E, unless
+          you have a
+        link: valid MEES exemption (opens in new tab)
+      two: Your local council can review this information and follow up with
+        an inspection.
+    registerMees:
+      bullet:
+        heading:
+          afterLink: 'on the PRS Exemptions Register if your property:'
+          beforeLink: You can
+          link: register an exemption (opens in new tab)
+        one: cannot be improved to a rating of E or above
+        three: is let on a relevant tenancy type
+        two: is legally required to have an EPC
+      paragraph:
+        one: An exemption means your property does not need an energy rating
+          of E or above.
+      subheading: Register a MEES exemption
+    remedialWork:
+      paragraph:
+        one: If your property’s rating is below E, you must improve it. This
+          is usually called doing remedial work.
+        three: For new tenancies, you cannot enter into a new tenancy until
+          the rating is improved to E or above.
+        two: For current tenancies you must improve the rating to E or above.
+      subheading: Do remedial work on your property
+  manualAddress:
+    addressLineOne:
+      error:
+        missing: Enter the first line of an address, typically the building
+          and street
+      label: Address line 1
+    addressLineTwo:
+      label: Address line 2 (optional)
+    county:
+      label: County (optional)
+    fieldSetHint: This should be an address within England
+    landlordRegistration:
+      addressLineOne:
+        label: Address 1
+      addressLineTwo:
+        label: Address 2 (optional)
+      fieldSetHeading: What is your contact address?
+      fieldSetHint: This should be an address within England or Wales.
+    landlordRegistrationUpdate:
+      fieldSetHeading: What is your address?
+    postcode:
+      error:
+        missing: Enter postcode
+      label: Postcode
+    propertyRegistration:
+      fieldSetHeading: What is the property address?
+    townOrCity:
+      error:
+        missing: Enter town or city
+      label: Town or city
+  meesExemptionCheck:
+    doesThePropertyHaveAnExemption:
+      heading: Does {0,,address} have a registered MEES exemption?
+    error:
+      missing: Select Yes or No to continue
+    heading: This property is below the Minimum Energy Efficiency Standard (MEES)
+    paragraph:
+      one:
+        afterLink: if the property has an EPC rating below E, unless you have
+          a valid exemption.
+        beforeLink: You cannot let a property under
+        link: Minimum Energy Efficiency Standard (MEES) Regulations (opens
+          in new tab)
+  meesExemptionConfirmation:
+    bullet:
+      heading: 'If this happens, you should:'
+      one:
+        beforeLink: improve the property’s energy rating by doing remedial
+          work or register a new
+        link: Minimum Energy Efficient Standard (MEES) exemption (opens in
+          new tab)
+      two: return to the database to update this information
+    heading: You marked this property as having a MEES exemption
+    paragraph:
+      one: A local council can check to make sure this is accurate.
+      three: If at any point your property is no longer exempt, your property’s
+        energy certificate must meet the energy standard of E or higher.
+      two: If they have any issues, they can contact you.
+  meesExemptionReason:
+    error:
+      missing: Select which exemption applies to this property
+    fieldSetHeading: Which MEES exemption applies to this property?
+    radios:
+      allImprovementsMade:
+        hint: All possible improvements have been made, but the property remains
+          below EPC rating E
+        label: All improvements made exemption
+      highCost:
+        hint: The cost of improvements to reach EPC rating E exceeds £3,500
+          including VAT (supported by at least three quotes)
+        label: High cost exemption
+      newLandlord:
+        hint: You have a six-month exemption from the date of purchase or
+          lease to improve the property’s energy efficiency
+        label: New landlord exemption
+      propertyDevaluation:
+        hint: Improvements would devalue the property by more than 5%
+        label: Property devaluation exemption
+      thirdPartyConsent:
+        hint: Cannot get third-party consent for energy efficiency improvements
+        label: Third-party consent exemption
+      wallInsulation:
+        hint: Wall insulation is not suitable for the property, supported
+          by expert evidence
+        label: Wall insulation exemption
+  name:
+    error:
+      missing: You must enter your full name
+    fieldSetHeading: What is your full name?
+    fieldSetHint: Enter your name as it’s written on your passport or driving
+      licence.
+    label: Full name
+  noAddressFound:
+    button:
+      text: Enter address manually
+    english:
+      heading: No matching address in England found for {0,,postcode} and {1,,houseNameOrNumber}
+      paragraph:
+        one:
+          beforeLink: Check the property address is in England and
+    heading: No matching address in England or Wales found for {0,,postcode} and
+      {1,,houseNumber}
+    paragraph:
+      one:
+        beforeLink: Check the property address is in England or Wales and
+        linkText: search again.
+      two: Or you can enter the property address manually.
+  nonEnglandOrWalesAddress:
+    heading: This private beta is only available to landlords who live in England
+      or Wales
+    paragraph:
+      one: You cannot currently register without a contact address in England
+        or Wales.
+      two: In the future, landlords outside this area will be able to access
+        the database.
+  numberOfBedrooms:
+    fieldsetHeading: How many bedrooms are in your property?
+    heading: Bedrooms in your property
+    input:
+      error: Enter the number of bedrooms, like 3 or 8
+    paragraph:
+      one: A bedroom is a room for sleeping, separate from living areas, and
+        large enough for a bed. It still counts as a bedroom if used for another
+        purpose.
+      two: In a HMO, a bedroom is any room used for sleeping. It must have enough
+        space, light, and ventilation, and be for the tenant’s exclusive use
+        unless shared under the HMO licence.
+    subheading: Definition of a bedroom
+    subheading.two: House in Multiple Occupation (HMO)
+  numberOfHouseholds:
+    bullet:
+      point:
+        four: related (parents, children, siblings, aunts, uncles, cousins)
+        one: one person living alone
+        three: married or living together as a couple
+        two: a family living together
+    details:
+      summary:
+        text: What is a household?
+      text:
+        paragraph:
+          one: A household consists of either a single person or members
+            of the same family who live together. It includes people who
+            are married or living together and people in same-sex relationships.
+          two: Unrelated adults who are not a couple or part of a family
+            are separate households.
+    fieldSetHeading: How many households live in your property?
+    heading: Households in your property
+    heading.two: What is a household?
+    input:
+      error: Enter how many separate households, like 1 or 2
+    label: Enter the number of households living in your property
+    paragraph:
+      four: Unrelated adults who are not a couple are separate households.
+      one: The number of households in your property helps local authorities
+        understand if your property needs a House in Multiple Occupation (HMO)
+        licence.
+      three: 'A family includes people who are:'
+      two: 'A household is:'
+  numberOfPeople:
+    details:
+      summary: Why do I need to declare this?
+      text: Your council may use this information to check your property is
+        not overcrowded.
+    fieldSetHeading: How many people live in your property?
+    fieldSetHint: Include everyone who lives in the property permanently, whether
+      they are related or unrelated to each other.
+    fieldSetHint.two: Do not include anyone who is staying temporarily.
+    input:
+      error:
+        invalidFormat: Enter how many people, like 2 or 5
+        invalidNumber: The number of people in the property must be the same
+          as or higher than the number of households in the property
+    label: Enter the number of people living in your property
+  occupancy:
+    fieldSetHeading: Is your property occupied by tenants?
+    fieldSetHint: What you choose here decides which compliance and rent details
+      you need to add.
+    radios:
+      error:
+        missing: Select whether the property is occupied
+      option:
+        'no':
+          hint: There are no tenants living in the property
+        'yes':
+          hint: One or more tenants live in the property
+  ownershipType:
+    details:
+      summary:
+        text: Why do I need to select the type of ownership?
+      text: This helps local councils know who is responsible for repair work
+        on the property.
+    fieldSetHeading: Select the type of ownership you have for your property
+    radios:
+      error:
+        missing: Select the ownership type
+      option:
+        commonhold:
+          hint: You own your property for an indefinite time and share management
+            of the building or estate with other owners, following rules
+            in a Commonhold Community Statement.
+          label: Commonhold
+        freehold:
+          hint: You have ownership of a property for an indefinite time.
+          label: Freehold
+        leasehold:
+          hint: You have a legal agreement with a landlord (sometimes known
+            as the ‘freeholder’ for a fixed period of time) called a ‘lease’.
+            Most flats are leasehold.
+          label: Leasehold
+        shareOfFreehold:
+          hint: You have a lease and own some of the whole building with
+            other owners.
+          label: Share of freehold
+  phoneNumber:
+    error:
+      invalidFormat: Enter a phone number including the country code for international
+        numbers
+      missing: Enter a phone number
+    fieldSetHeading: What is your phone number?
+    fieldSetHint: We’ll use this to contact you about your record.
+    hint: For international numbers include the country code
+    label: Enter your phone number
+  propertyType:
+    fieldSetHeading: What type of property are you registering?
+    radios:
+      error:
+        missing: Select the type of property
+      option:
+        detachedHouse:
+          hint: A standalone house not connected to any other buildings
+          label: Detached house
+        flat:
+          hint: An individual home within a larger building of other homes,
+            often with shared entrances and facilities
+          label: Flat
+        other:
+          hint: The property type is not listed
+          input:
+            error:
+              missing: Enter the property type
+            label: Enter the property type
+          label: Other
+        semiDetachedHouse:
+          hint: A house connected to one other house
+          label: Semi-detached house
+        terracedHouse:
+          hint: A house in a row of similar houses, sharing walls with neighbours
+            on both sides
+          label: Terraced house
+  radios:
+    dividerText: or
+    option:
+      'no':
+        label: 'No'
+      'yes':
+        label: 'Yes'
+  reason:
+    landlordDeregistration:
+      error:
+        tooLong: Your reason for deleting your account must be 200 characters
+          or fewer.
+      fieldSetHeading: Why are you deleting your account? (optional)
+    propertyDeregistration:
+      error:
+        tooLong: Your reason for deleting this property must be 200 characters
+          or fewer.
+      fieldSetHeading: Why are you deleting this property? (optional)
+      fieldSetHint: This will help us understand why landlords might want to
+        remove a property from the database
+  rentIncludesBills:
+    fieldSetHeading: Does the rent include bills?
+    fieldSetHint: This could include gas, electricity, water, broadband, Council
+      Tax or cleaning.
+    radios:
+      error:
+        missing: Select whether the rent includes bills
+  selectAddress:
+    addAddressManually: I want to manually enter my address
+    error:
+      missing: Select an address
+    fieldSetHeading: Select an address
+    fieldSetHint:
+      beforeHouseNameOrNumber: and
+      beforeLink: .
+      beforePostcode: '{0,,addressCount} addresses found for'
+      link: Search again
+  selectLocalCouncil:
+    error:
+      missing: Select a local council to continue
+    fieldSetHeading: What local council area is your property in?
+    fieldSetHint: Select the local council that your property falls under.
+    paragraph:
+      one:
+        afterLink: .
+        beforeLink: You can
+        linkText: find your local council by searching using the property
+          postcode (opens in new tab)
+    select:
+      label: Select a local council
+  selectiveLicence:
+    detail:
+      summary: What is selective licensing?
+      text: Some local councils issue a selective licensing number for privately
+        rented housing in a local area.
+    error:
+      missing: Enter the selective licence number
+    fieldSetHeading: What is your selective licence number?
+    label: Enter the selective licence number
+  textArea:
+    infoText: You can enter up to {0,,limit} characters
+  todayOrPastDate:
+    eicr:
+      fieldSetHeading: What is the issue date on the  Electrical Installation
+        Condition Report (EICR)?
+      fieldSetHint: We’ll use this to calculate how long the report is valid
+        for
+    error:
+      invalidDate: The date must be today or in the past
+    gasSafetyCert:
+      fieldSetHeading: What is the issue date on the gas safety certificate?
+      fieldSetHint: We’ll use this to calculate how long the certificate is
+        valid for
+  update:
+    checkGasSafety:
+      summary: Update this property’s gas safety
+    checkLicensing:
+      remove:
+        summaryName: You have removed this property’s licence
+      update:
+        summaryName: You have updated the property licence
+    checkOccupancy:
+      numberOfHouseholds:
+        fieldSetHeading: Households in your property
+      summaryName: You have updated whether the property is occupied by tenants
+    cya:
+      insetText: Changes made in another tab will not show here. Make all changes
+        in one tab to continue.
+    dateOfBirth:
+      fieldSetHeading: Update your date of birth
+    eicr:
+      certificate: Add a new EICR
+      checkYourAnswers:
+        summary: Update this property’s electrical safety
+      error:
+        missing: Select whether you want to add a new EICR or exemption
+      exemption: Add an exemption
+      fieldSetHeading: Do you want to add a new Electrical Installation Condition
+        Report (EICR) or add an exemption?
+    email:
+      fieldSetHeading: What is your updated email address?
+    epc:
+      certificate: Add a new EPC
+      checkYourAnswers:
+        summary: Update this property’s energy performance
+      error:
+        missing: Select whether you want to add a new EPC for this property
+      exemption: This property does not need an EPC
+      fieldSetHeading: Do you want to add a new Energy Performance Certificate
+        (EPC) for this property?
+    gasSafetyType:
+      certificate: Add a new gas safety certificate
+      error:
+        missing: Select whether you want to add a new certificate or exemption
+      exemption: Add an exemption
+      fieldSetHeading: Do you want to add a new gas safety certificate or add
+        an exemption?
+    licensingType:
+      fieldSetHeading: Update the type of licensing you have for your property
+    lookupAddress:
+      fieldSetHeading: Update your contact address
+    name:
+      fieldSetHeading: Update your full name
+    numberOfHouseholds:
+      fieldSetHeading: Update how many households live in your property
+    numberOfPeople:
+      fieldSetHeading: Update how many people live in your property
+    occupancy:
+      occupied:
+        fieldSetHeading: Is your property still occupied by tenants?
+    ownershipType:
+      fieldSetHeading: Update the ownership type for your property
+    phoneNumber:
+      fieldSetHeading: What is your updated phone number?
+    warning: You must not provide any false or misleading information on the database.
+      By submitting this information, you agree it’s accurate to the best of
+      your knowledge at the time of updating.
+  uploadCertificate:
+    continueLink: Continue with existing file
+    details:
+      bullet:
+        heading: 'To make the file smaller, try these steps:'
+        one: Use an image editing tool or online file compressor to make the
+          file smaller
+        two: Save the file as a PDF with a smaller resolution size
+      heading: If your file is too big
+    eicr:
+      error:
+        missing: Select an EICR
+      fieldSetHeading: Upload the Electrical Installation Condition Report (EICR)
+    error:
+      tooBig: The selected file must be smaller than 15MB
+      unsuccessfulUpload: The selected file could not be uploaded - try again
+      wrongType: The selected file must be a PDF, PNG or JPG
+    fieldSetHint: Your file should be in PDF, JPG or PNG file format. The maximum
+      file size you can upload is 15MB.
+    gasSafety:
+      error:
+        missing: Select a gas safety certificate
+      fieldSetHeading: Upload the gas safety certificate
+    insetText: You have already uploaded a file. If you upload a new file, you
+      will replace the existing one.
+    label: Upload a file
+    noScript: You do not have JavaScript enabled.
+  uploadCertificateConfirmation:
+    heading: Your file is being scanned
+    paragraph: Your file will be scanned for viruses. It will upload automatically
+      if there are no issues found.
+    subsection:
+      heading: If the file fails to upload
+      paragraph: If there are any issues with the virus scan, you will get an
+        email letting you know what to do next.
+  warning: Do not provide any false or misleading information on the database. By
+    submitting this information, you confirm it’s accurate to the best of your
+    knowledge.
+generatePasscode:
+  banner:
+    body: The passcode is
+    heading: New passcode
+  generateAnother: Generate another passcode
+  paragraph:
+    one: This passcode allows you to invite a landlord to participate in the private
+      beta for this service.
+    three: Send it to the landlord you’d like to invite. Do not generate more
+      passcodes than you need.
+    two: They’ll be asked to enter the passcode to access the service.
+  returnToDashboard: Return to dashboard
+  title: Generate passcode
+invalidPasscode:
+  cta: Enter a passcode
+  heading: You cannot access the service with this passcode
+  paragraph:
+    one: The passcode you entered is either incorrect or already used by someone
+      else.
+    two: Check the passcode and try again. If it still does not work, contact
+      your local council to get a new one.
+  title: Invalid Passcode
+landlord:
+  dashboard:
+    aboutTheDatabase:
+      heading: Useful information
+    action:
+      privacyNotice:
+        descriptionText: Read the privacy notice to understand how your information
+          is used on the pilot
+        linkText: How your information is used
+      rentersRightsBill:
+        descriptionText: See how the Renters’ Rights Bill is progressing and
+          what that means for the database
+        linkText: Renters’ Rights Bill
+      understandThisPrivateBeta:
+        descriptionText: View the start page for this private beta to understand
+          how it will work and what you need to know
+        linkText: Understand this private beta
+    banner:
+      subheading: 'Landlord registration number:'
+    complianceActions:
+      button: Compliance actions
+    complianceInformation:
+      heading: Add compliance information for your properties
+    notificationBanner:
+      complianceActions:
+        linkText: View compliance actions
+        subheading: 'You have {0,,number} {1,,propertyMsg} awaiting compliance
+                    information:'
+      heading: You have {0,,number} outstanding property actions
+      incompleteProperties:
+        linkText: View incomplete property details
+        subheading: 'You have {0,,number} incomplete {1,,propertyMsg}:'
+      properties: properties
+      property: property
+      title: Important
+    registerProperties:
+      heading: Register your properties
+    registerProperty:
+      button: Register a property
+    viewAndUpdateRecords:
+      heading: View and update your information or properties
+    viewIncompleteProperties:
+      button: Incomplete property details
+    viewLandlordRecord:
+      button: View your landlord record
+    viewPropertyRecords:
+      button: View your property records
+  incompleteProperties:
+    action:
+      continue: Continue
+      delete: Delete
+    heading: Incomplete property details
+    none:
+      hintText: You have no properties with missing or incomplete details.
+      registerANewProperty:
+        linkText: register a new property
+      text:
+        afterLinks: .
+        beforeLinks: You can either
+        betweenLinks: or
+      viewRegisteredProperties:
+        linkText: view registered properties
+    summaryCardTitle: Incomplete Property {0,,number}
+    summaryRow:
+      completeBy: Complete by
+      propertyAddress: Property address
+    text: Complete the missing details for these properties. After 28 days, incomplete
+      properties are deleted.
+    title: Incomplete properties
+landlordDetails:
+  heading: Landlord record
+  personalDetails:
+    contactAddress: Contact address
+    country: Country of residence
+    dateOfBirth: Date of birth
+    emailAddress: Email address
+    englandOrWalesAddress: UK contact address
+    englandOrWalesResident: UK resident
+    heading: Personal details
+    lrn: Landlord Registration Number
+    name: Name
+    nonEnglandOrWalesAddress: Address (outside UK)
+    oneLoginVerified: Verified by GOV.UK One Login
+    registrationDate: Database registration date
+    telephoneNumber: Telephone number
+  registeredProperties:
+    heading: Registered properties
+    none:
+      beforeLink: No registered properties.
+      link: Register a property
+    notLicensed:
+      label: Not licensed
+    table:
+      addressHeading: Property address
+      licensingTypeHeading: Licensing type
+      localCouncilHeading: Local council
+      prnHeading: Property Registration Number
+      registrationNumberHeading: Registration number
+      tenantedHeading: Tenanted
+  removeRecord: Delete account
+  title: Landlord record
+  update:
+    title: Update Landlord record
+landlordSearch:
+  details:
+    body: If you can’t find a landlord record, they may not be registered. Local
+      councils can request the landlord registers with the database.
+    heading: Help find a landlord record
+  error:
+    heading: No landlord record found
+    hint:
+      beforeLink: There were no results for that search. Try a different search
+        or
+      link: search for a property
+  filter:
+    localCouncil:
+      heading: Show landlords operating in my council
+      label: Landlords in my council
+  heading: Search for a landlord
+  hint: Search for a specific landlord or use the filters to find a landlord’s record
+    on the database
+  searchBar:
+    hint: Search using a landlord’s name, registration number, email or phone
+    label: Find a landlord
+  table:
+    heading: Results
+    heading.address: Contact address
+    heading.info: Contact information
+    heading.landlord: Landlord
+    heading.listedProperties: Listed properties
+  title: Search for a landlord
+lastUpdated:
+  afterDate: .
+  afterName: updated these details on
+localCouncil:
+  dashboard:
+    aboutTheDatabase:
+      heading: About the database
+    action:
+      privacyNotice:
+        descriptionText: How the database uses the data collected about landlords
+          for local councils
+        linkText: Privacy notice
+      rentersRightsBill:
+        descriptionText: View the guidelines related to the database and the
+          Renters’ Rights Bill
+        linkText: Renters’ Rights Bill
+    banner:
+      subheading: 'Local council:'
+    searchAndView:
+      heading: Search and view a landlord or property record
+    searchForLandlord:
+      button: Search for a landlord
+    searchForProperty:
+      button: Search for a property
+localCouncilPrivacyNotice:
+  heading: Privacy notice for local councils
+  section:
+    eight:
+      heading: 8. Automated decision making
+      paragraph:
+        one: We will not use your data for any automated decision making.
+    five:
+      heading: 5. Retention period
+      paragraph:
+        one: Please be aware that the PRS Database private beta is a temporary
+          initiative designed to test and evaluate the functionality of
+          the future PRS Database service.
+        three: We will notify you in advance of the data deletion date, where
+          feasible, through the preferred email address you have provided.
+        two:
+          bold: All personal data collected from local council users will
+            be securely deleted no later than a month after the conclusion
+            of private beta.
+          normal: This means that you will need to re-register for the mandatory
+            service (and if participating in future private betas).
+    four:
+      heading: 4. With whom will we be sharing the data
+      paragraph:
+        one: 'Processor:'
+        two: We have employed an external organisation to provide service
+          desk support functionality during the private beta phase, on behalf
+          of MHCLG. We have a Data Processing Agreement in place to ensure
+          that the data is processed securely and in accordance with all
+          relevant data protection law. To assist with your enquiries, the
+          processing will involve using the details you have provided on
+          the PRS Database.
+    nine:
+      heading: 9. Storage, security and data management
+      paragraph:
+        one: Your personal data will be stored in a secure government IT system
+          with appropriate technical and organisational measures in place
+          to protect it from unauthorised access, use or disclosure.
+    one:
+      heading: 1. MHCLG’s role as data controller
+      paragraph:
+        one: This privacy notice explains how the Ministry of Housing, Communities
+          and Local Government (MHCLG), as the primary data controller,
+          collects, uses, and protects your personal data when you, as a
+          local council user, access and use the Private Rented Sector Database
+          (PRS Database) private beta.
+        two:
+          afterEmailLink: .
+          beforeEmailLink: MHCLG is the Data Controller as described in
+            the General Data Protection Regulation (UK GDPR) and the Data
+            Protection Act 2018 (DPA). Our Data Protection Officer can
+            be contacted at
+          emailLinkText: dpo@communities.gov.uk
+    seven:
+      heading: 7. Sending data overseas
+      paragraph:
+        one: Your personal data (your name, preferred email address, local
+          council, One Login Subject Identifier and usage data) collected
+          will be processed within the UK. During the private beta, we are
+          not sending personal data overseas. We do have default in-region
+          Amazon Web Services Relational Database Service (AWS RDS) copies
+          that will be manually deleted as part of deleting the database
+          records at the end of the private beta. MHCLG will ensure that
+          this complies with data protection law and that appropriate safeguards
+          are in place to protect your personal data.
+    six:
+      bullet:
+        five: In some circumstances, you may also have the right to withdraw
+          your consent to us having or using your optional analytics data,
+          to have all data about you deleted, or to object to particular
+          types of use of your data. We will tell you when these rights
+          apply. You will be able to withdraw your consent to collecting
+          GA4 analytics data via the cookie page.
+        four: complain to the Information Commissioner’s Office (see the ‘Complaints
+          and more information’ section, below)
+        one: know that we are using your personal data
+        three: ask to have your data corrected, and to ask how we check the
+          information we hold is accurate
+        two: see what data we have about you
+      heading: 6. Your rights (e.g. access, rectification, erasure)
+      paragraph:
+        one: 'The data we are collecting is your personal data, and you have
+                    rights that affect what happens to it. You have the right to:'
+    ten:
+      heading: 10. Complaints and more information
+      ico:
+        address:
+          line:
+            five: SK9 5AF
+            four: Wilmslow, Cheshire,
+            one: The Information Commissioner’s Office
+            three: Water Lane
+            two: Wycliffe House
+          title: 'Address:'
+        phone:
+          numberText: 0303 123 1113 or 01625 545 745
+          title: 'Telephone:'
+        website:
+          linkText: https://ico.org.uk/ (opens in new tab)
+          title: 'Website:'
+      paragraph:
+        four: 'If you still have a concern about the way in which MHCLG has
+                    handled your personal data or for independent advice about data
+                    protection, privacy and data sharing, you can contact:'
+        one: When we ask you for information, we will keep to the law, including
+          the Data Protection Act 2018 and UK General Data Protection Regulation.
+        three:
+          afterEmailLink: .
+          beforeEmailLink: If you want to make a request to access your
+            data or another request in relation to your rights, or if
+            you are not happy with how we are using your personal data,
+            you can contact
+          emailLinkText: dataprotection@communities.gov.uk
+        two:
+          afterLink: .
+          beforeLink: If you are unhappy with the way the Department has
+            acted, you can
+          linkText: make a complaint (opens in new tab)
+    three:
+      bullet:
+        one:
+          boldText: Article 6(1)(e) UK GDPR
+          normalText: – the performance of a task carried out in the public
+            interest or in the exercise of officiallCouncil under Article
+            6(1)(e)) of UK GDPR.
+        three:
+          boldText: Article 6(1)(a) UK GDPR
+          normalText: – your consent for usage data. We will obtain your
+            consent via a cookie banner when you first access the service,
+            allowing you to choose whether to enable the collection of
+            this type of usage data. You can withdraw your consent at
+            any time via the cookie settings on the PRSD website.
+          note: You can withdraw your consent at any time via the cookie
+            settings on the PRSD website.
+        two:
+          boldText: Data Protection Act 2018, Part 2, Chapter 2, section
+            8 (d)
+          normalText: – the exercise of a function of the Crown, a Minister
+            of the Crown or a government department. This specifically
+            involves providing you with access to the service during the
+            private beta so that MHCLG can test its functionality with
+            both the local council and private landlord users. In doing
+            so, MHCLG will administer, support, secure and develop the
+            core functionality required for the service.
+      heading: 3. Lawful basis for processing the data
+      paragraph:
+        one: 'The data protection legislation sets out when we are lawfully
+                    allowed to process your personal data. The lawful basis that applies
+                    to this processing is:'
+    two:
+      heading: 2. What personal data we are collecting and why
+      paragraph:
+        one: As a local council user participating in this private beta, you
+          will be invited to use the PRS Database service on a voluntary
+          basis.
+      subheading:
+        one: 2.1 What data we collect
+        two: 2.2 Why are we collecting your personal data
+      subsection:
+        one:
+          bullet:
+            five:
+              boldText: 'One Login subject identifier:'
+              normalText: One Login will generate a unique subject identifier
+                when you authenticate through it for the PRS Database
+                service. This will only be visible to this service,
+                and it allows us to link your PRS Database account
+                to your One Login authentication without receiving
+                any other personal data from One Login. We do not
+                receive your name or any other personal data directly
+                from the One Login service.
+            four:
+              boldText: 'Local council details:'
+              normalText: The name of the local council you work for.
+            one:
+              boldText: 'Your name:'
+              normalText: Your name, as provided by you during registration.
+            six:
+              boldText: 'Usage data (for service improvement):'
+              essential:
+                boldText: 'Essential operational usage data:'
+                normalText: Basic usage data necessary for the security,
+                  performance and core functionality of the PRS
+                  Database such as login and logout timestamps,
+                  system error logs and basic page load performance.
+                  This is collected regardless of your cookie banner
+                  choices, as it is essential for the operation
+                  of the service.
+              ga4:
+                boldText: 'Google Analytics 4 (GA4):'
+                normalText: This uses cookie banners and other persistent
+                  identifiers. As a result, we will use opt-in consent
+                  with the cookie banner to collect usage data.
+                  Please note that when using GA4 for this purpose,
+                  we do not log IP addresses. It collects usage
+                  data such as pages visited, session duration,
+                  user interactions (such as scrolling), browser
+                  & OS, geolocation.
+              normalText: 'We will collect data about your interactions
+                                with the PRS Database service through Google Analytics
+                                4. This helps us to understand how the service is
+                                being used and to identify how to improve it. The
+                                data is collected via:'
+            three:
+              boldText: 'Your preferred email address:'
+              normalText: The email address, as provided by you during
+                registration, which the PRS Database service will
+                use to contact you. This may be the same as your invited
+                email address, or it may be different.
+            two:
+              boldText: 'Invited email address:'
+              normalText: Your email address, as provided by your admin
+                when they invite you to the PRS Database. This is
+                only used for the invitation to the service.
+          important:
+            note: 'Important note: Any significant changes to the types
+                            of data collected, the purposes for which it is used,
+                            or the entities with whom it is shared during this private
+                            beta will be clearly communicated to you through updated
+                            privacy notices and direct notifications in advance of
+                            their implementation.'
+          paragraph:
+            one: 'To provide you with access to and use of the PRS Database,
+                            we will collect and process the following personal data:'
+        two:
+          bullet:
+            five:
+              boldText: 'Local council context:'
+              normalText: To help understand service usage patterns
+                across different local councils and tailor support
+                or communications where necessary.
+            four:
+              boldText: 'Security, performance, and core functionality
+                                (Mandatory):'
+              normalText: Essential operational usage data is collected
+                to ensure the security, stability, and effective functioning
+                of the PRS Database, detect and prevent fraudulent
+                activity, and assist in diagnosing and resolving technical
+                problems. This data is fundamental to providing the
+                service.
+            one:
+              boldText: 'Access and authentication to the PRS Database:'
+              normalText: We will use your data to verify your identity
+                and grant you secure access to the PRS Database service.
+                This enables you to perform tasks related to the private
+                beta of the PRS Database service.
+            three:
+              boldText: 'Service improvement (private beta phase - with
+                                consent for GA4):'
+              ga4:
+                note: GA4 data is processed only if you provide your
+                  consent via the cookie banner.
+              normalText: Your usage data is collected to help us understand
+                how the service performs, identify bugs, analyse user
+                behaviour, and gather insights to improve the PRS
+                Database’s functionality and user experience. This
+                data is crucial for the evaluation and refinement
+                of the pilot.
+            two:
+              boldText: 'Service administration and support:'
+              normalText: To administer your account, provide support,
+                and communicate with you about the PRS Database, including
+                any updates or changes to the service. This may involve
+                contacting you via your preferred email address.
+          note: We will not combine analytics information with other data
+            sets in a way that would directly identify who you are.
+          note.prefix: 'Note:'
+          paragraph:
+            one: 'Your personal data (your name, preferred email address,
+                            local council, One Login Subject Identifier and usage
+                            data) is being collected and processed for the following
+                            purposes directly related to your role as a local council
+                            user on the PRS Database:'
+  title: Privacy Notice
+manageLocalCouncilAdminUsers:
+  button:
+    inviteAnotherAdminUser: Invite another admin
+  header: Manage Local Council Admins
+  noAdminsText: No local council admins were found.
+  table:
+    heading:
+      localCouncil: Local council
+  title: Manage Local Council Admins
+manageLocalCouncilUsers:
+  contentHeader: Manage {0,,localCouncil}’s users
+  inviteAnotherUserButtonText: Invite another user
+  noUsersText: No local council users or admins were found.
+  returnToDashboardButton: Return to dashboard
+  table:
+    accessLevelHeading: Access level
+    admin: Admin
+    basic: Basic
+  title: Manage Local Council Users
+navLink:
+  generatePasscode:
+    title: Generate a passcode
+  manageUsers:
+    title: Manage users
+oneLoginHeader:
+  logout: Sign Out
+pagination:
+  nextText: Next
+  pageText: page
+  previousText: Previous
+passcodeEntry:
+  error:
+    invalidPasscode: Enter a valid passcode
+    missingPasscode: Enter a passcode
+  heading: Enter a passcode for the Private Rented Sector (PRS) Database
+  paragraph:
+    one: This is the private beta for the PRS Database. You can only access this
+      service if you have been invited to join by a participating local council.
+    three: If you cannot find your passcode, contact your local council.
+    two: To access the service, enter the passcode given to you by your local
+      council. This should be sent to you by email.
+  passcodeLabel: Enter your passcode
+  title: Enter your passcode
+privacyNotice:
+  heading: Privacy notice for landlords
+  heading.caption: Before you register
+  section:
+    eight:
+      heading: 8. Automated decision making
+      paragraph:
+        one: We will not use your data for any automated decision making.
+    eleven:
+      heading: Complaints and more information
+      ico:
+        address:
+          line:
+            five: SK9 5AF
+            four: Wilmslow, Cheshire,
+            one: The Information Commissioner’s Office
+            three: Water Lane
+            two: Wycliffe House
+          title: 'Address:'
+        phone:
+          numberText: 0303 123 1113 or 01625 545 745
+          title: 'Telephone:'
+        website:
+          linkText: https://ico.org.uk/ (opens in new tab)
+          title: 'Website:'
+      paragraph:
+        five:
+          afterLink: .
+          beforeLink: Further information about your data protection rights
+            can also be found on the
+          link: Information Commissioner’s website (opens in new tab)
+        four: 'If you still have concern about the way in which MHCLG has
+                    handled your personal data, or for independent advice about data
+                    protection, privacy and data sharing, you can contact:'
+        one: When we ask you for information, we will keep to the law, including
+          the Data Protection Act 2018 and UK General Data Protection Regulation.
+        three:
+          afterEmailLink: .
+          beforeEmailLink: If you want to make a request to access your
+            data or another request in relation to your rights, or if
+            you are not happy with how we are using your personal data,
+            you can contact
+          emailLinkText: dataprotection@communities.gov.uk
+        two:
+          afterLink: .
+          beforeLink: If you are unhappy with the way the Department has
+            acted, you can
+          linkText: make a complaint (opens in new tab)
+    five:
+      heading: 5. Retention period
+      paragraph:
+        one: Please be aware that the PRS Database private beta is a temporary
+          initiative designed to test and evaluate the functionality of
+          the future PRS Database service.
+        two: Your personal data will be securely deleted no more than a month
+          after the conclusion of this private beta.  This means that you
+          will need to re-register for the mandatory service (and if participating
+          in future private betas).
+    four:
+      heading: 4. With whom we will be sharing the data
+      paragraph:
+        one: 'This data will be made available to the following councils:
+                    Fenland, Birmingham, Leeds, Plymouth, Oxford, Ealing, Nottingham,
+                    Manchester, Trafford, Salford, Wigan and Gateshead local councils.
+                    The local councils will only use the data to test the functionality
+                    of the PRS Database.'
+        one.heading: '4.1 Controller:'
+        three: We are employing an external organisation to provide service
+          desk support functionality during the private beta on behalf of
+          MHCLG. We have a Data Processing Agreement in place to ensure
+          that the data is processed securely and in accordance with all
+          relevant data protection law. The processing will involve using
+          your personal details to assist with your enquiries.
+        three.heading: '4.2 Processor:'
+        two: Please remember that there isn’t currently a duty for landlords
+          to register to the PRS Database, meaning that this data will not
+          be used by councils for enforcement of future duties relating
+          to the PRS Database (such as the duty to keep information up to
+          date). Similarly, local councils have been told not to use the
+          information you provide on this private beta for enforcement purposes.
+    nine:
+      heading: 9. Storage, security and data management
+      paragraph:
+        one: Your personal data will be stored in a secure government IT system
+          with appropriate technical and organisational measures in place
+          to protect it from unauthorised access, use or disclosure.
+    one:
+      paragraph:
+        five: During the private beta, you can choose to de-register property(s)
+          and/or yourself from the service at any point. This would completely
+          delete that particular property record / your entire landlord
+          record from the PRS Database.
+        four: To help us effectively test the database’s functionality in
+          real-world scenarios, including how local councils might interact
+          with the data to identify and support compliance, we kindly ask
+          that you provide accurate and up-to-date information when you
+          register and manage your property details. Engaging with the service
+          in this way, as you will when it becomes mandatory, is crucial
+          for the success of this private beta.
+        one: The following is to explain your rights as a private landlord
+          under this Private Rented Sector Database (PRS Database) private
+          beta, and give you the information you are entitled to under UK
+          data protection legislation. It sets out what personal data and
+          non-personal data is collected as part of the landlord registration
+          process and how the data will be used.
+        seven: 'The information you will be asked to provide includes:'
+        six: MHCLG is committed to collecting only the personal data that
+          is necessary for the purposes specified in the why section below
+          and to using the data only for those specific purposes.
+        six.heading: '2.1. What information we collect about you:'
+        three: As a landlord participating in this private beta, you will
+          be asked to register on the PRS Database service on a voluntary
+          basis.
+        three.heading: '2. What information we collect and why during the
+                    private beta:'
+        two:
+          afterEmailLink: .
+          beforeEmailLink: To meet the obligations in the Renters’ Rights
+            Bill, the Ministry of Housing, Communities and Local Government
+            (MHCLG) is required to develop and maintain the PRS Database,
+            which allows for the collection of information from private
+            landlords in the private rented sector. MHCLG is the Data
+            Controller as described in the General Data Protection Regulation
+            (UK GDPR) and the Data Protection Act 2018 (DPA). Our Data
+            Protection Officer can be contacted at
+          emailLink: dpo@communities.gov.uk
+          heading: '1. MHCLG’s role as Data Controller:'
+    seven:
+      heading: 7. Sending data overseas
+      paragraph:
+        one: Your personal data (your name, date of birth, landlord address,
+          email address, phone number, landlord registration number and
+          usage data) collected will be processed within the UK. During
+          the private beta, we are not sending personal data overseas. We
+          do have default in-region Amazon Web Services Relational Database
+          Service (AWS RDS) copies that will be manually deleted as part
+          of deleting the database records at the end of the private beta.
+          MHCLG will ensure that this complies with data protection law
+          and that appropriate safeguards are in place to protect your personal
+          data.
+    six:
+      heading: 6. Your rights (e.g. access, rectification, erasure)
+      paragraph:
+        one: The data we are collecting is your personal data, and you have
+          rights that affect what happens to it.
+        two: 'You have the right to:'
+        two.bullet.five: in some circumstances, you may also have the right
+          to withdraw your consent to us having or using your optional analytics
+          data, to have all data about you deleted, or to object to particular
+          types of use of your data. We will tell you when these rights
+          apply. You will be able to withdraw your consent to collecting
+          GA4 analytics data via the cookie page.
+        two.bullet.four: complain to the ICO (Information Commissioners Office)
+          (see below)
+        two.bullet.one: know that we are using your personal data
+        two.bullet.three: ask to have your data corrected, and to ask how
+          we check the information we hold is accurate
+        two.bullet.two: see what data we have about you
+    ten:
+      heading: 10. Changes to this policy
+      paragraph:
+        one: We may change this privacy policy. In these cases, the ‘last
+          updated’ date at the top of this page will also change.
+        two: Any changes to this privacy policy will apply to you and your
+          data immediately. If these changes affect how your personal data
+          is processed, MHCLG will take reasonable steps to let you know.
+    three:
+      heading: 3. Lawful basis for processing the data
+      paragraph:
+        four: 'Ethnicity is classed as “special category data” under data
+                    protection law. We request this in the feedback survey (on an
+                    optional basis) so we can check whether our service works well
+                    for people from different backgrounds. Our lawful basis for collecting
+                    it is:'
+        four.bullet.one: <strong>Article 9(2)(g) UK GDPR</strong> – processing
+          is necessary for reasons of substantial public interest  (developing
+          an accessible government service).  This is supported by Schedule
+          1, Part 2, paragraph 8 of the Data Protection Act 2018 (equality
+          of opportunity or treatment).
+        one: 'The data protection legislation sets out when we are lawfully
+                    allowed to process your personal data. The lawful basis that applies
+                    to this processing is:'
+        three: In addition to the above, we will be relying on your consent
+          under Article 6(1)(a) of the UK GDPR for usage data we will collect
+          for service improvement through Google Analytics 4. We will obtain
+          your consent via a cookie banner when you first access the service,
+          allowing you to choose whether to enable the collection of this
+          type of usage data. You can withdraw your consent at any time
+          via the cookie settings on the PRS Database website.
+        two: 'For MHCLG, the lawful basis that applies to this processing
+                    is:'
+        two.bullet.one: <strong>Article 6(1)(e) UK GDPR</strong> - the performance
+          of a task carried out in the public interest or in the exercise
+          of official authority (developing an accessible government service).
+        two.bullet.two: <strong>DPA 2018, Part 2, Chapter 2, section 8 (d)</strong>
+          – the exercise of a function of the Crown, a Minister of the Crown
+          or a government department. This enables us to provide you with
+          access to the service, and to provide administration, support,
+          security and develop the core functionality required for the service.
+    two:
+      heading: '2.1.1 Landlord personal data:'
+      paragraph:
+        eight: 'Confirmation of whether the landlord understands the following:'
+        eight.bullet.one: fire safety responsibilities
+        eight.bullet.three: responsibilities to their tenants (such as protecting
+          the deposit in a Tenancy Deposit Scheme)
+        eight.bullet.two: responsibilities to keep the property safe and free
+          from hazards
+        eighteen: 'The data collected during the private beta is used to:'
+        eighteen.bullet.five: test policy assumptions and inform the development
+          of the PRS Database regulations
+        eleven: 'Important note: Any significant changes to the types of data
+                    collected, the purposes for which it is used, or the entities
+                    with whom it is shared during this private beta will be clearly
+                    communicated to you through updated privacy notices and direct
+                    notifications in advance of their implementation.'
+        fifteen: 'This includes:'
+        fifteen.bullet.one: <strong>Demographic information:</strong> Such
+          as your <strong>age range, sex, ethnicity, location, digital confidence
+          levels, and landlord experience level</strong>. This information
+          helps us understand the profile of our users and ensure our service
+          development is inclusive. Please note these are optional and you
+          may choose not to disclose them.
+        five: <strong>Property data:</strong>
+        five.bullet.eight: HMO additional licence details
+        five.bullet.five: ownership type
+        five.bullet.four: property build type
+        five.bullet.nine: property occupation status
+        five.bullet.seven: House in Multiple Occupation (HMO) licence details
+        five.bullet.ten: current number of residents living in the property
+        five.bullet.three: Unique Property Reference Number (UPRN)
+        five.bullet.twelve: PRS Database Property Registration Number (PRN,
+          assigned by the PRS Database)
+        five.bullet.two: local council of the address
+        four: This information related to the property you own and let. It
+          is not personal data and cannot be used to identify you.
+        four.heading: '2.1.2. Property information and compliance data (not
+                    personal data):'
+        fourteen: To ensure the database reflects the diverse needs of landlords,
+          we also collect certain personal data from you within the survey
+          for demographic understanding and to offer opportunities for further
+          research.
+        nine: <strong>Usage data (for service improvement):</strong>
+        one: This information directly identifies you as a landlord.
+        one.bullet.five: phone number
+        one.bullet.four: email address
+        one.bullet.one: landlord name
+        seven: <strong>Landlord responsibilities information:</strong>
+        seventeen:
+          bullet:
+            four: only using contact details if you have given consent
+              to be contacted for further research.
+            one: separating your general feedback from any personal data
+              you provide for the demographics segment of the survey
+              (by using separate files to store your contact details,
+              and any demographic information provided).
+            three: only allowing a select few people to access demographic
+              data.
+            two: only using demographic information for aggregated statistical
+              analysis.
+        six: <strong>Property certificate details:</strong>
+        six.bullet.four: Minimum energy efficiency (MEES) details
+        six.bullet.one: Gas safety certificate details
+        sixteen: 'We will take measures to ensure that your general feedback
+                    responses (such as open text comments on usability) are anonymous
+                    and cannot be used to identify you. We will do this, for example,
+                    by:'
+        ten: 'We will collect data about your interactions with the PRS Database
+                    service through Google Analytics 4. This helps us to understand
+                    how the service is being used and to identify how to improve it.
+                    The data is collected via:'
+        ten.bullet.one: <strong>Google Analytics 4 (GA4):</strong> This uses
+          cookie banners and other persistent identifiers. As a result,
+          we will use opt-in consent with the cookie banner to collect usage
+          data. Please note that when using GA4 for this purpose, we do
+          not log IP addresses. It collects usage data such as pages visited,
+          session duration, user interactions (such as scrolling), browser
+          & OS, geolocation.
+        thirteen: If you choose to participate in our private beta survey,
+          your responses are collected for research and statistical purposes
+          to help us improve the PRS Database service.
+        thirteen.heading: '2.1.3 Research and statistical purposes:'
+        three: We store your demographic data separately from your feedback
+          and contact details. It is only used in aggregated statistical
+          form to check the accessibility of our service, or for research
+          purposes if you have given consent to be contacted. Access to
+          this data is restricted to a small number of authorised team members.
+        twelve: Your responsibilities as a landlord, and what data is collected
+          may differ for the mandatory service to this private beta.
+        two: 'If you complete the end of journey survey, we will ask you to
+                    provide some optional demographic personal data.  This includes:'
+        two.bullet.five: digital confidence levels
+        two.bullet.four: location
+        two.bullet.six: your experience level as a landlord
+        two.bullet.three: ethnicity
+  title: Privacy Notice
+propertyCompliance:
+  confirmation:
+    addForAnotherProperty: Add compliance information for another property
+    compliant:
+      bullet:
+        eicr: electrical safety
+        epc: energy performance
+        gasSafety: gas safety
+        heading: 'You have added information about:'
+        responsibilities: your landlord responsibilities
+    nonCompliant:
+      bullet:
+        eicr:
+          expired: the Electrical Installation Condition Report (EICR) has
+            expired
+          missing: you have not added an Electrical Installation Condition
+            Report (EICR)
+        epc:
+          expired: the energy performance certificate (EPC) has expired
+          expiredAndLowRating: the energy performance certificate (EPC)
+            has expired and has a rating below E
+          lowRating: you have not added a MEES exemption for your energy
+            performance certificate (EPC) with a rating below E
+          missing: you have not added an energy performance certificate
+            (EPC)
+        gasSafety:
+          expired: the gas safety certificate has expired
+          missing: you have not added a gas safety certificate
+      paragraph:
+        one: 'You must address these issues:'
+        two: Follow the guidance below to take action.
+    title: Property Compliance Confirmation
+  fullyCompliantConfirmation:
+    banner:
+      text: You have added compliance information for this property
+    paragraph:
+      one: 'You’ve successfully added compliance information for:'
+      two: We’ve sent you a confirmation email.
+    upToDate:
+      heading: You must keep this information up to date
+      paragraph:
+        one: You are required to keep compliance information accurate and
+          up to date on the database.
+        three: Local councils can review this information and take action.
+          For example, they might issue you a fine if anything is missing
+          or inaccurate.
+        two: You have 28 days from the date a certificate expires to add the
+          new one to the database.
+  heading: Add compliance information
+  paragraph:
+    one: You need to add compliance certificates and confirm you understand your
+      landlord responsibilities for this property.
+    two: This helps your local council check whether your property is safe for
+      tenants.
+  partiallyCompliantConfirmation:
+    heading: You have missing or expired compliance information for this property
+    howToEicr:
+      bullet:
+        four: Give a copy of the certificate to existing tenants within 28
+          days of the check, and to new tenants before they move in.
+        one:
+          afterLink: .
+          beforeLink: Get a new electrical inspection
+          link: by a qualified and competent person (opens in new tab)
+        three: Upload the EICR to the database.
+        two: Review and fix any problems the inspection finds.
+      heading: Get a valid Electrical Installation Condition Report (EICR)
+      paragraph:
+        one: You must make sure the electrics in your rented property are
+          safe. This means getting an Electrical Installation Condition
+          Report (EICR) every 5 years.
+    howToEpc:
+      bullet:
+        five:
+          afterLink: .
+          beforeLink: Return to the database to find and add this new EPC
+            from the
+          link: Energy Performance of Buildings Register (opens in new tab)
+        four:
+          afterLink: .
+          beforeLink: If you can’t improve the rating to E or above, you
+            might be able to
+          link: register an exemption (opens in new tab)
+        one:
+          afterLink: .
+          beforeLink: You must
+          link: get a new EPC (opens in new tab)
+        three:
+          afterLink: .
+          beforeLink: If your property’s energy rating is below ‘E’, you
+            must improve it to meet the
+          link: Minimum Energy Efficiency Standard (opens in new tab)
+        two: You’ll need to pay an accredited assessor to carry out the assessment
+          and issue the EPC.
+      heading: Get a valid EPC
+      paragraph:
+        one: You need to get a new EPC for your rented property.
+      subheading: 'Here’s what you need to do:'
+    howToGas:
+      bullet:
+        four: Give a copy of the certificate to existing tenants within 28
+          days of the check, and to new tenants before they move in.
+        heading: To keep tenants safe, rented properties must have a valid
+          gas safety certificate. You should never let a property without
+          one.
+        one:
+          afterLink: engineer.
+          beforeLink: Make sure gas equipment in the property is safely
+            installed and maintained by a
+          link: Gas Safe registered (opens in new tab)
+        three: Upload the certificate to the database.
+        two: Get an updated, valid certificate.
+      heading: Get a valid gas safety certificate
+    nonCompliant:
+      heading: Missing or expired information
+    paragraph:
+      one: 'You’ve finished adding compliance information for this property:'
+    takeAction:
+      heading: Take action for this property
+    timeLimit:
+      bullet:
+        one: the date a certificate expires
+        two: the date you registered the property as occupied on the database
+          if you have not added a certificate yet
+      heading: You have 28 days to take action
+      paragraph:
+        one: 'You have 28 days to add new certificates on the database, which
+                    starts from either:'
+    warning: Local councils can review this information and take action. For example,
+      they might issue you a fine if anything is missing or inaccurate.
+  taskList:
+    checkAndSubmit:
+      check: Check the compliance information is correct and submit
+      check.hint: You can review what you’ve added before submitting
+      heading: Submit compliance information
+    heading: Add compliance information for your property
+    landlordResponsibilities:
+      fireSafety: Confirm you understand fire safety regulations
+      heading: Confirm you understand your landlord responsibilities
+      keepPropertySafe: Confirm you understand health and safety in rental properties
+      tenants: Confirm you understand your responsibilities to your tenants
+    subtitle:
+      one: You’ll be guided through each step, explaining what information you
+        need to add and why.
+      three: If you’re inactive for an hour, you’ll be signed out. You can save
+        your answers as you go and return to this page at any point.
+      two: You can still complete the compliance information even if certificates
+        are missing, unavailable, or expired.
+    upload:
+      eicr: Upload the Electrical Installation Condition Report (EICR)
+      epc: Confirm the energy performance certificate (EPC)
+      epc.hint: This will be automatically added for you to check
+      gasSafety: Upload the gas safety certificate
+      heading: Add compliance certificates
+  title: Property compliance
+  uploadedFile:
+    virusScanFailed: Not added (virus scan failed)
+    virusScanPending: Pending virus scan
+  whatToKnow:
+    bullet:
+      heading: 'You’ll be asked to confirm you understand:'
+      one: fire safety in your property
+      three: your responsibilities to your tenants
+      two: health and safety hazards in rental properties
+    heading: Confirm you understand your landlord responsibilities
+    paragraph:
+      one:
+        afterLink: .
+        beforeLink: We’ll show you information about some of your
+        linkText: legal responsibilities as a landlord
+      two: You can refer back to this information at any time after you’ve added
+        all compliance details.
+  whatToUpload:
+    bullet:
+      heading: 'You’ll be asked to upload a photo or scan of:'
+      one: the gas safety certificate
+      two: the Electrical Installation Condition Report (EICR)
+    heading: Add compliance certificates
+    paragraph:
+      one:
+        afterLink: for you to check.
+        beforeLink: You’ll then be asked to confirm your property’s Energy
+          Performance Certificate (EPC). This will be taken from the
+        linkText: Energy Performance of Buildings Register (opens in a new
+          tab)
+      two: You can complete the compliance information even if certificates
+        are missing, unavailable, or expired.
+  whenToUpload:
+    bullet:
+      heading: 'You have <strong>28 days</strong> to do this from the day the
+                occupied property is:'
+      one: registered on the database
+      two: or updated from ‘unoccupied’ to ‘occupied by tenants’ on the database
+    heading: When to add compliance information
+    paragraph:
+      one: You must add compliance information if the property is occupied by
+        tenants.
+propertyDetails:
+  complianceInformation:
+    electricalSafety:
+      downloadEicr: Download EICR
+      downloadExpiredEicr: Download expired EICR
+      eicr: Electrical Installation Condition Report (EICR)
+      heading: Electrical safety
+    energyPerformance:
+      didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC
+        expired?
+      energyRating: Energy rating
+      epc: Energy Performance Certificate (EPC)
+      expiryDate: Expiry date
+      heading: Energy performance
+      meesExemption: MEES exemption
+      viewEpcLinkText: View EPC (opens in new tab)
+      viewExpiredEpcLinkText: View expired EPC (opens in new tab)
+    exempt: Exempt
+    exemption: Exemption
+    expired: Expired
+    gasSafety:
+      downloadCertificate: Download certificate
+      downloadExpiredCertificate: Download expired certificate
+      gasSafeEngineerNumber: Gas safe engineer number
+      gasSafetyCertificate: Gas safety certificate
+      heading: Gas safety
+    heading: Compliance information
+    hintText: Gas safety, electrical safety and energy performance for this property
+    issueDate: Issue date
+    landlordResponsibilities:
+      fireSafety: Fire safety responsibilities
+      heading: Landlord responsibilities
+      keepPropertySafe: Health and safety in rental properties
+      landlord:
+        hintText: Information about your landlord responsibilities
+      localCouncil:
+        hintText: Their agreement to follow their responsibilities as a landlord
+      readAndConfirmed: Read and confirmed
+      responsibilityToTenants: Your responsibilities to your tenants
+    noCompliance:
+      landlordView:
+        linkText: Add compliance information
+        mainText: This property does not have any compliance information.
+      localCouncilView:
+        mainText: The landlord has not added any compliance information for
+          this property.
+    noExemption: No exemption
+    notAdded: Not added
+    notRequired: Not required
+    notificationBanner:
+      asSoonAsPossible: as soon as possible.
+      eicr:
+        expired:
+          linkText: Upload a new EICR
+          mainText: The <strong>Electrical Installation Condition Report
+            (EICR)</strong> for this property has expired.
+        missing:
+          linkText: Upload an EICR
+          mainText: This property is missing an <strong>Electrical Installation
+            Condition Report (EICR)</strong>.
+      epc:
+        expired:
+          linkText: Add a new certificate
+          mainText: The <strong>energy performance certificate (EPC)</strong>
+            for this property has expired.
+        lowRating:
+          afterLinkText: .
+          beforeLinkText: You must
+          linkText: add a new certificate or add a MEES exemption
+          mainText: This property’s <strong>energy performance certificate
+            (EPC)</strong> is below E.
+        missing:
+          linkText: Add a new certificate
+          mainText: This property is missing an <strong>energy performance
+            certificate (EPC)</strong>.
+      gasCert:
+        expired:
+          linkText: Upload a new certificate
+          mainText: The <strong>gas safety certificate</strong> for this
+            property has expired.
+        missing:
+          linkText: Upload a certificate
+          mainText: This property is missing a <strong>gas safety certificate</strong>.
+      title: Important
+    validUntil: Valid until
+  deleteRecordButton:
+    text: Delete property
+  description: Details added for this property
+  heading: Property record
+  keyDetails:
+    isTenanted: Tenanted
+    registeredLandlord: Registered landlord
+  landlordDetails:
+    addressNonEnglandOrWales: Address (outside England or Wales)
+    contactAddressInEnglandOrWales: Contact address in England or Wales
+    contactNumber: Contact number
+    heading: Landlord details
+    registeredLandlord:
+      heading: Registered landlord
+      hint: Details about the landlord who registered this property
+  propertyDetails:
+    heading: Property details
+  propertyRecord:
+    address: Property address
+    licensingInformation:
+      heading: Licensing information
+      licensingNumber: Licensing number
+      licensingType: Licensing type
+    localCouncil: Local council
+    numberOfHouseholds: Number of households
+    numberOfPeople: Number of people
+    occupied: Occupied by tenants
+    ownershipType: Ownership type
+    propertyType: Property type
+    registrationDate: Database registration date
+    registrationNumber: Property Registration Number
+    uprn: UPRN
+    uprn.unavailable: Not available
+  title: Property record
+  update:
+    title: Update property record
+propertySearch:
+  details:
+    body: If you can’t find a property record, the property may not be registered.
+      If you have the landlord’s details, contact them to register their property
+      on the database.
+    heading: Help find a property record
+  error:
+    heading: No property record found
+    hint:
+      beforeLink: There were no results for that search. Try a different search
+        or
+      link: search for a landlord.
+  filter:
+    licence:
+      heading: Property licence
+      hmoAdditional:
+        label: HMO additional licensing
+      hmoMandatory:
+        label: HMO mandatory licensing
+      not:
+        label: Not licensed
+      selective:
+        label: Selective licensing
+    localCouncil:
+      heading: Show properties in my council
+      label: Properties in my council
+  heading: Search for a property
+  hint: Use the search bar to find a property or the filters menu to narrow your
+    results.
+  searchBar:
+    hint: You can search by part of an address (like the postcode), the UPRN or
+      the Property Registration Number
+    label: Find a property
+  table:
+    heading: Results
+    heading.address: Property address
+    heading.prn: Registration number
+    heading.localCouncil: Local council
+    heading.landlord: Registered landlord
+  title: Search for a property
+registerAsALandlord:
+  about:
+    heading: About this service
+    heading.two: Who can use this private beta
+    paragraph:
+      four: 'With this private beta, you can:'
+      four.bullet.four: give feedback to help make the database better
+      four.bullet.one: register your personal details
+      four.bullet.three: add compliance information for your rental properties
+      four.bullet.two: register your rental properties
+      one:
+        afterLink: becomes law, the Private Rented Sector (PRS) Database will
+          collect information about private landlords and their rented properties
+          in England.
+        beforeLink: When the
+        link: Renters’ Rights Bill
+      three: 'You can use this private beta if you are a landlord who:'
+      three.bullet.one: has been invited by a local council to take part
+      three.bullet.three: has a contact address in England or Wales
+      two: 'The database aims to give:'
+      two.bullet.one: local councils accurate data about rental properties in
+        England
+      two.bullet.two: landlords guidance and information on new rules and responsibilities
+  access:
+    heading: Access the PRS Database
+    paragraph:
+      one: This is a private beta for the Private Rented Sector (PRS) Database.
+        The service is being developed and tested with a small group of users.
+      three:
+        afterLink: using photo ID like a passport or driving licence.
+        beforeLink: When you sign in, you may be asked to
+        link: prove your identity
+      two:
+        afterLink: to use this service. You can create a GOV.UK One Login
+          if you do not already have one.
+        beforeLink: You’ll need a
+        link: GOV.UK One Login
+  checkAnswers:
+    rowHeading:
+      contactAddress: Contact address
+      dateOfBirth: Date of birth
+      email: Email address
+      englandOrWalesResident: Resident in England or Wales
+      localCouncil: Local Council
+      name: Name
+      telephoneNumber: Telephone number
+    summaryName: Your details
+  confirmation:
+    banner:
+      body:
+        beforeRegistrationNumber: Landlord Registration Number
+      heading: We’ve saved your personal details
+    propertyRegistration:
+      bullet:
+        one: repeatedly break the rules
+        two: commit a serious offence, like providing false information to
+          the database
+      heading: You must register your properties
+      paragraph:
+        one: You’ve successfully registered as a landlord on the PRS Database.
+          You now need to register all of your private rented properties
+          on the database.
+        three: 'You could face fines or even criminal prosecution, if you:'
+        two: Your local council could fine you if you advertise or let a property
+          that is not registered
+    whatHappensNext:
+      bullet:
+        heading: 'You can now go to your dashboard where you can:'
+        one: register a property
+        three: add compliance information once you have registered a property
+        two: view and update your landlord information
+      paragraph: We’ve emailed you a copy of your answers and your <strong>Landlord
+        Registration Number</strong>.
+  futureRequirements:
+    heading: Future requirements for landlords
+    paragraph:
+      one: The Renters’ Rights Bill will introduce changes to how private properties
+        are let out.
+      three: 'Landlords will be expected to:'
+      three.bullet.one: add their personal and property details
+      two:
+        afterLink: .
+        beforeLink: Once the bill becomes law, all landlords of assured and
+          regulated tenancies must register on the
+        link: Private Rented Sector (PRS) Database (opens in new tab)
+  heading: Private Rented Sector (PRS) Database
+  howItWorks:
+    heading: How this private beta works
+    paragraph:
+      five: 'When this private beta ends:'
+      five.bullet.one: your account will be deleted
+      five.bullet.two: all information you’ve added will be permanently removed
+        from the system
+      four: 'You can choose if you want to:'
+      four.bullet.one: take part in this private beta
+      four.bullet.three: delete your account at any time
+      four.bullet.two: use real data or test data
+      one: This private beta gives you an early look at parts of the database.
+        The information is presented as if it’s the live service so you can
+        test and give feedback about how it might work in the future.
+      three: 'This means:'
+      three.bullet.one: local councils cannot use any information you add to
+        take enforcement action
+      three.bullet.two: there are no penalties if the information is wrong or
+        incomplete
+      two: The bill for this database has not become law yet, so there’s no
+        legal requirement for anyone to use or take part in this beta.
+  howYouCanHelp:
+    heading: How you can help shape this service
+    paragraph:
+      one: 'The aim of this private beta is to help landlords and local councils:'
+      one.bullet.one: test how the service might work
+      one.bullet.three: prepare for the future live service
+      one.bullet.two: give feedback to improve it
+      three: This service will change. Your feedback will be used to test and
+        shape new features as it develops.
+      two: Only selected local councils and the landlords they invite can take
+        part.
+  informationManagement:
+    heading: How information is used and managed
+    heading.three: Privacy notice
+    paragraph:
+      five:
+        afterLink: to understand how your data will be used and managed in
+          more detail.
+        beforeLink: Read the
+        link: privacy notice (opens in a new tab)
+      four: They may contact you if they are unclear about the information you
+        add.
+      one: 'If you choose to register for this private beta, you’ll be asked
+                for:'
+      one.bullet.one: your personal details
+      one.bullet.three: compliance information for your rental properties (for
+        example, gas safety certificates)
+      seven: You’ll get an email if the privacy notice changes.
+      six: You must read the privacy notice before registering. You’ll be asked
+        to confirm this during the registration process.
+      three: They cannot use this information to take enforcement action against
+        you, like issuing you a fine.
+      two: Local councils taking part in this private beta can view information
+        you’ve added. This helps them understand how the database might work.
+  intro: This service holds information about private landlords and their rented
+    properties. Private landlords in England are legally required to use this
+    service.
+  privacyNotice:
+    checkBox:
+      heading: Confirm you have read the privacy notice to continue
+      label: I confirm I have read the privacy notice for this private beta
+        of the Private Rented Sector Database
+    checkbox:
+      error:
+        missing: You must confirm you have read the privacy notice to continue
+    heading: Read and agree to the privacy notice
+    paragraph:
+      one:
+        afterLink: for this private beta to find out how it stores, processes,
+          and shares your personal information.
+        beforeLink: Read the
+        linkText: full Private Rented Sector Database privacy notice (opens
+          in new tab)
+      three:
+        numberedBullet:
+          one:
+            boldText: 'Do not delete your data for at least 2 weeks:'
+            normalText: Local councils need 2 weeks of data to test the
+              service.
+          two:
+            boldText: 'Use realistic property details:'
+            normalText: This helps us test how the database works in real
+              situations, including how local councils use the data
+              to check information.
+      two: 'As part of this private beta, we ask that you:'
+  section:
+    checkAndSubmit:
+      heading: Check and submit registration
+    privacyNotice:
+      heading: Privacy notice
+    yourDetails:
+      heading: Register your details
+  title: Register as a Landlord
+  whatYouNeedToRegister:
+    heading: What you need to register as a landlord
+    heading.caption: Before you register
+    section:
+      one:
+        bullet:
+          one: your personal details, like your full name and date of birth
+          three: a contact address in England or Wales
+          two: your contact details
+        paragraph:
+          one: 'When registering, you’ll be asked for:'
+          two: You’ll be asked to confirm the information you add is correct.
+            Your progress is saved as you go.
+      three:
+        bullet:
+          one: repeatedly break the rules
+          two: commit a serious offence, like adding false information to
+            the database
+        paragraph:
+          one: It’s an offence to provide false or misleading information
+            on the database. Make sure any information you add is accurate
+            and up to date.
+          two: 'You could face a fines or even criminal prosecution, if
+                        you:'
+        subheading: Do not add false or misleading information
+      two:
+        paragraph:
+          four: Your local council can fine you if you advertise or let
+            an unregistered property.
+          one: Once your register, you’ll get a <strong>Landlord Registration
+            Number</strong>. Local councils use this number to find your
+            information on the database.
+          three: You must include your Landlord Registration Number and
+            a Property Registration Number on any property adverts. We’ll
+            email you a copy of these numbers.
+          two: You can then register a property and get a Property Registration
+            Number.
+        subheading: Once you register your details
+  whoCanAccess:
+    heading: Who can access this service
+    landlord:
+      bullet: you are legally required to register with this service and give
+        up to date information about your properties
+      heading: 'If you are a landlord:'
+    onBehalf:
+      bullet:
+        one: you can get access to this service through your letting agent
+        two: a landlord can assign you properties to manage
+      heading: 'If you manage properties on behalf of a landlord:'
+registerLocalCouncilUser:
+  beginButtonText: Begin registration
+  checkAnswers:
+    rowHeading:
+      email: Email address
+      localCouncil: Local council
+      name: Name
+    summaryName: Your details
+  email:
+    fieldSetHeading: What is your work email address?
+    fieldSetHint: This is the email you use for work at the local council
+    label: Email address
+  invalidLink:
+    description: Contact the PRS Database admin user at your local council to
+      ask for another invite.
+    heading: This invite link is not valid
+    title: Invalid link
+  journeyName: Registering as a local council user
+  privacyNotice:
+    checkBox:
+      heading: You must confirm you’ve read the privacy notice to continue
+      label: I confirm I have read the privacy notice for this private beta
+        of the Private Rented Sector Database
+    checkbox:
+      error:
+        missing: You must confirm you’ve read the privacy notice to continue
+    heading: Read and agree to the privacy notice for local councils
+    paragraph:
+      one:
+        afterLink: for this private beta to find out what data we collect
+          and why.
+        beforeLink: Read the
+        linkText: full Private Rented Sector Database privacy notice (opens
+          in new tab)
+  requirementsList:
+    intro: 'When registering as a local council user, you’ll be asked for:'
+    personalDetails: your personal details, like your name
+    workDetails: your work details and contact details
+  success:
+    banner:
+      title: You’ve registered as a {0,,localCouncil} user
+    whatHappensNext:
+      bullet:
+        one: search and view property and landlord information
+        two: view compliance information for registered properties
+      paragraph:
+        one: You now have access to the database.
+        two: 'Head to your dashboard to:'
+  title: Register as a Local Council user
+registerProperty:
+  beforeYouBegin:
+    bullet:
+      five: whether the property is occupied by tenants
+      four: whether your property has a licence (and if so, the licensing number)
+      one: the property address
+      six: if occupied, the number of households and people in the property
+      three: how you own the property (for example, freehold)
+      two: the type of property you’re registering (for example, if it’s semi-detached)
+    heading: Before you begin
+    paragraph:
+      one: You can only register properties in England.
+      two: 'You must add information about:'
+  confirmation:
+    addCompliance: Add compliance for this property
+    banner:
+      heading: You have registered a property on the database
+    beforeYouLetThisProperty:
+      heading: Before you let this property
+      paragraph:
+        three: You can now return to your dashboard.
+        two: Once you let this property, you’ll need to return to the database
+          to mark it as occupied. You’ll then have 28 days to add compliance
+          information for the property.
+    common:
+      usePrnInAdverts:
+        paragraph: You need to include your Landlord Registration Number and
+          a Property Registration Number on any property advertisements.
+    table:
+      address:
+        heading: Property address
+      prn:
+        heading: Property Registration Number
+    whatHappensNext:
+      paragraph:
+        one: We’ve sent the <strong>Property Registration Number</strong>
+          to your email. Local councils use this number to find the property
+          on the database.
+        two:
+          occupied: If you have tenants in the property, you must add compliance
+            certificates within 28 days of registering your property.
+    youMustAddCompliance:
+      heading: You must add compliance information
+      paragraph:
+        one: As the property is occupied by tenants, you have 28 days to add
+          compliance information for this property.
+  deleteIncompleteProperties:
+    areYouSure:
+      heading: Are you sure you want to delete {0,,address} from the database?
+      radios:
+        error:
+          missing: Select whether you want to delete this property from
+            the database
+    confirmation:
+      banner:
+        heading: You have deleted an incomplete property
+      button:
+        text: Return to incomplete properties
+      paragraph:
+        one: You have deleted an incomplete property from the database.
+        two: If you want to register the property, you will need to add any
+          details about the property again.
+    incompleteProperties:
+      title: Delete incomplete property
+  doNotAddFalseInfo:
+    bullet:
+      one: repeatedly break the rules
+      two: commit a serious offence, like adding false information to the database
+    heading: Do not add false or misleading information
+    paragraph:
+      one: It’s an offence to provide false or misleading information on the
+        database. Make sure any information you add is accurate and up to
+        date.
+      two: 'You could face a fine or even criminal prosecution, if you:'
+  heading: Register a property
+  intro:
+    paragraph:
+      one: You’ll be asked to fill out information for one property at a time.
+      two: You can add more properties as you go. Your progress is saved as
+        you go, so you can leave and return at any time.
+  onceYouRegister:
+    heading: Once you register your properties
+    paragraph:
+      four: Your local council can fine you if you advertise or let an unregistered
+        property.
+      one: Once you register a property, you’ll get a <strong>Property Registration
+        Number</strong>.
+      three: You must include your Landlord Registration Number and Property
+        Registration Number on any property adverts. We’ll email you a copy
+        of these numbers.
+      two: Local councils use this number to find the property on the database.
+  taskList:
+    checkAndSubmit:
+      addAnotherProperty: Add another property
+      checkAnswers: Check and submit your answers
+      heading: Check and submit your property details
+      payForYourProperties: Pay for your properties
+    heading: Follow these steps to register your property
+    register:
+      addAddress: Enter the property address
+      addInterestedParties: Add any interested parties or additional landlords
+      addLicensing: Add details about any property licensing
+      addTenancyInfo: Add tenancy and rental information for the property
+      addTenancyInfo.hint: Tenant numbers, rent, bills, and furnishings
+      heading: Register your property details
+      selectOwnership: Tell us how you own the property
+      selectOwnership.hint: For example, whether you’re a freeholder or leaseholder
+      selectType: Select the type of property you’re registering
+    subtitle:
+      one: You’ll be guided through each step, explaining what information you
+        need to add and why.
+      two: If you’re inactive for an hour, you’ll be signed out. You can save
+        your answers as you go and return to this page at any point.
+  title: Register a Property
+searchButtonText: Search
+sectionHeader: Section {0,,sectionNumber} of {1,,totalSections} — {2,,sectionName}
+serviceName: Private Rented Sector Database
+signOut:
+  buttonText: Sign in
+  header: You have been signed out
+  title: Signed out
+startButtonText: Start
+taskList:
+  status:
+    cannotStart: Cannot start
+    completed: Completed
+    inProgress: In progress
+    notStarted: Not started
+warningText:
+  hiddenText: Warning
