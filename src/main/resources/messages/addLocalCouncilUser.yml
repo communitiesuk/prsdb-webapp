@@ -1,0 +1,19 @@
+error:
+  confirmationDoesNotMatch: Both email addresses should match
+  missingEmail: You must enter an email address
+  noConfirmation: You must enter and confirm their email address
+  notAnEmail: Enter an email address in the correct format
+  retryable: Please try again
+form:
+  confirmEmailLabel: Confirm their email address
+  primaryEmailLabel: Enter their email address
+heading: Invite someone from {0,,localCouncil} to the PRS Database
+paragraph:
+  one: Once you send an invite, this person can register an account on the database.
+  three:
+    a: They must have a {0,,localCouncil} email address to get an invite.
+    an: They must have an {0,,localCouncil} email address to get an invite.
+  two: 'They can view and edit information related to:'
+  two.bullet.one: landlords in the local area
+  two.bullet.two: properties in the local area
+title: Invite a new user
