@@ -1,7 +1,7 @@
 # Project context
 
 - This repository contains a Spring Boot web application for a register of landlords and properties in the private rented sector in England.
-- The application is built using Kotlin, the templating engine used is Thymeleaf and, and it is backed by a PostgreSQL database for data
+- The application is built using Kotlin, the templating engine used is Thymeleaf, and it is backed by a PostgreSQL database for data
   persistence and a Redis instance for caching.
 
 # Asking Instructions for GitHub Copilot
