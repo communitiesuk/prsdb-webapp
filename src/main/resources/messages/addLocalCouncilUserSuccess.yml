@@ -5,6 +5,6 @@ banner:
 whatHappensNext:
   paragraph:
     one: They’ll receive a link in their email to register on the database.
-    two: 'Once they’ve registered, they can view property and landlord records that fall under {0}’s local area.'
+    two: 'Once they’ve registered, they can view property and landlord records that fall under {0,,localCouncilName}’s local area.'
 inviteAnother: Invite another user
 returnToDashboard: Return to dashboard
