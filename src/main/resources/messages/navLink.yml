@@ -1,0 +1,4 @@
+manageUsers:
+  title: Manage users
+generatePasscode:
+  title: Generate a passcode

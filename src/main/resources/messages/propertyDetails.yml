@@ -1,0 +1,112 @@
+title: Property record
+heading: Property record
+description: Details added for this property
+propertyDetails:
+  heading: Property details
+landlordDetails:
+  heading: Landlord details
+  registeredLandlord:
+    heading: Registered landlord
+    hint: Details about the landlord who registered this property
+  contactNumber: Contact number
+  addressNonEnglandOrWales: Address (outside England or Wales)
+  contactAddressInEnglandOrWales: Contact address in England or Wales
+complianceInformation:
+  heading: Compliance information
+  hintText: 'Gas safety, electrical safety and energy performance for this property'
+  issueDate: Issue date
+  validUntil: Valid until
+  notAdded: Not added
+  exempt: Exempt
+  noExemption: No exemption
+  exemption: Exemption
+  expired: Expired
+  notRequired: Not required
+  gasSafety:
+    heading: Gas safety
+    gasSafetyCertificate: Gas safety certificate
+    downloadCertificate: Download certificate
+    downloadExpiredCertificate: Download expired certificate
+    gasSafeEngineerNumber: Gas safe engineer number
+  electricalSafety:
+    heading: Electrical safety
+    eicr: Electrical Installation Condition Report (EICR)
+    downloadEicr: Download EICR
+    downloadExpiredEicr: Download expired EICR
+  energyPerformance:
+    heading: Energy performance
+    epc: Energy Performance Certificate (EPC)
+    viewEpcLinkText: View EPC (opens in new tab)
+    viewExpiredEpcLinkText: View expired EPC (opens in new tab)
+    expiryDate: Expiry date
+    energyRating: Energy rating
+    didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
+    meesExemption: MEES exemption
+  landlordResponsibilities:
+    heading: Landlord responsibilities
+    landlord:
+      hintText: Information about your landlord responsibilities
+    readAndConfirmed: Read and confirmed
+    localCouncil:
+      hintText: Their agreement to follow their responsibilities as a landlord
+    fireSafety: Fire safety responsibilities
+    keepPropertySafe: Health and safety in rental properties
+    responsibilityToTenants: Your responsibilities to your tenants
+  notificationBanner:
+    title: Important
+    asSoonAsPossible: as soon as possible.
+    gasCert:
+      expired:
+        mainText: 'The <strong>gas safety certificate</strong> for this property has expired.'
+        linkText: Upload a new certificate
+      missing:
+        mainText: 'This property is missing a <strong>gas safety certificate</strong>.'
+        linkText: Upload a certificate
+    eicr:
+      expired:
+        mainText: 'The <strong>Electrical Installation Condition Report (EICR)</strong> for this property has expired.'
+        linkText: Upload a new EICR
+      missing:
+        mainText: 'This property is missing an <strong>Electrical Installation Condition Report (EICR)</strong>.'
+        linkText: Upload an EICR
+    epc:
+      expired:
+        mainText: 'The <strong>energy performance certificate (EPC)</strong> for this property has expired.'
+        linkText: Add a new certificate
+      lowRating:
+        mainText: 'This property’s <strong>energy performance certificate (EPC)</strong> is below E.'
+        beforeLinkText: You must
+        linkText: add a new certificate or add a MEES exemption
+        afterLinkText: .
+      missing:
+        mainText: 'This property is missing an <strong>energy performance certificate (EPC)</strong>.'
+        linkText: Add a new certificate
+  noCompliance:
+    landlordView:
+      mainText: This property does not have any compliance information.
+      linkText: Add compliance information
+    localCouncilView:
+      mainText: The landlord has not added any compliance information for this property.
+deleteRecordButton:
+  text: Delete property
+keyDetails:
+  registeredLandlord: Registered landlord
+  isTenanted: Tenanted
+propertyRecord:
+  registrationDate: Database registration date
+  registrationNumber: Property Registration Number
+  address: Property address
+  uprn: UPRN
+  'uprn.unavailable': Not available
+  localCouncil: Local council
+  propertyType: Property type
+  ownershipType: Ownership type
+  occupied: Occupied by tenants
+  numberOfHouseholds: Number of households
+  numberOfPeople: Number of people
+  licensingInformation:
+    heading: Licensing information
+    licensingType: Licensing type
+    licensingNumber: Licensing number
+update:
+  title: Update property record
