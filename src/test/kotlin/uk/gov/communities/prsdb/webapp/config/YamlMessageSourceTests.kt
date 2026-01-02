@@ -56,8 +56,8 @@ class YamlMessageSourceTests {
 
         @Test
         fun `formats message with multiple arguments`() {
-            val message = messageSource.getMessage("greeting", arrayOf("Test User"), Locale.ENGLISH)
-            assertEquals("Hello, Test User!", message)
+            val message = messageSource.getMessage("greetings", arrayOf("Test User 1", "Test User 2"), Locale.ENGLISH)
+            assertEquals("Hello, Test User 1 and Test User 2!", message)
         }
     }
 

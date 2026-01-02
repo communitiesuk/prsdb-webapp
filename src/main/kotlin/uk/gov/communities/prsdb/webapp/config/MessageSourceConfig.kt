@@ -2,16 +2,16 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.AbstractMessageSource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.yaml.snakeyaml.Yaml
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.text.MessageFormat
 import java.util.Locale
 
-@Configuration
+@PrsdbWebConfiguration
 class MessageSourceConfig {
     @Bean
     fun messageSource(): MessageSource = YamlMessageSource("classpath:messages")
