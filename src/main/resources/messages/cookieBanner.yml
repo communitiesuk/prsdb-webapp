@@ -1,15 +1,15 @@
-acceptButton: Accept analytics cookies
+heading: 'Cookies on the {0,,serviceName}'
 body:
   one: We use some essential cookies to make this service work.
   two: We’d also like to use analytics cookies so we can understand how you use the service and make improvements.
+acceptButton: Accept analytics cookies
+rejectButton: Reject analytics cookies
+viewCookiesLink: View cookies
 confirmation:
   accepted:
     beforeLink: You’ve accepted analytics cookies. You can
-  afterLink: at any time.
-  hideButton: Hide cookie message
-  link: change your cookie settings
   rejected:
     beforeLink: You’ve rejected analytics cookies. You can
-heading: Cookies on the {0,,serviceName}
-rejectButton: Reject analytics cookies
-viewCookiesLink: View cookies
+  link: change your cookie settings
+  afterLink: at any time.
+  hideButton: Hide cookie message

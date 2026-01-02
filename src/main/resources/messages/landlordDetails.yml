@@ -1,33 +1,33 @@
+title: Landlord record
 heading: Landlord record
+removeRecord: Delete account
 personalDetails:
-  contactAddress: Contact address
-  country: Country of residence
-  dateOfBirth: Date of birth
-  emailAddress: Email address
-  englandOrWalesAddress: UK contact address
-  englandOrWalesResident: UK resident
   heading: Personal details
   lrn: Landlord Registration Number
-  name: Name
-  nonEnglandOrWalesAddress: Address (outside UK)
-  oneLoginVerified: Verified by GOV.UK One Login
   registrationDate: Database registration date
+  name: Name
+  dateOfBirth: Date of birth
+  oneLoginVerified: Verified by GOV.UK One Login
+  emailAddress: Email address
   telephoneNumber: Telephone number
+  englandOrWalesResident: UK resident
+  contactAddress: Contact address
+  country: Country of residence
+  nonEnglandOrWalesAddress: Address (outside UK)
+  englandOrWalesAddress: UK contact address
 registeredProperties:
   heading: Registered properties
+  table:
+    addressHeading: Property address
+    prnHeading: Property Registration Number
+    localCouncilHeading: Local council
+    tenantedHeading: Tenanted
+    registrationNumberHeading: Registration number
+    licensingTypeHeading: Licensing type
+  notLicensed:
+    label: Not licensed
   none:
     beforeLink: No registered properties.
     link: Register a property
-  notLicensed:
-    label: Not licensed
-  table:
-    addressHeading: Property address
-    licensingTypeHeading: Licensing type
-    localCouncilHeading: Local council
-    prnHeading: Property Registration Number
-    registrationNumberHeading: Registration number
-    tenantedHeading: Tenanted
-removeRecord: Delete account
-title: Landlord record
 update:
   title: Update Landlord record

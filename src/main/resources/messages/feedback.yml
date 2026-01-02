@@ -1,28 +1,26 @@
+title: Give feedback on the PRS Database so far
+heading: Give feedback on the PRS Database so far
+intro:
+  paragraph:
+    one: Tell us about your experience using the PRS Database so far.
+    two: 'We’d like to know how easy or difficult you found it to:'
+  bullet:
+    one: register as a landlord
+    two: register a property
+    three: add compliance information
+survey:
+  paragraph:
+    one: This feedback will help us understand what’s working well and what we need to improve.
+    two: The survey should only take a few minutes to complete and opens in a new tab.
+    three: 'You can skip the survey, or choose to complete it later. If you choose to complete it later, we’ll email you a link.'
 afterSurvey:
   heading: Once you complete this survey
   paragraph:
     one: You can continue to use the database during or after completing the survey.
     two: We’ll be in touch at the end of the private beta to ask for your feedback on your overall experience.
+startSurvey:
+  linkText: Start survey (opens in new tab)
 completeLater:
   buttonText: Complete survey later
 continueCompliance:
   buttonText: Continue to complete compliance
-heading: Give feedback on the PRS Database so far
-intro:
-  bullet:
-    one: register as a landlord
-    three: add compliance information
-    two: register a property
-  paragraph:
-    one: Tell us about your experience using the PRS Database so far.
-    two: 'We’d like to know how easy or difficult you found it to:'
-startSurvey:
-  linkText: Start survey (opens in new tab)
-survey:
-  paragraph:
-    one: This feedback will help us understand what’s working well and what we need to improve.
-    three: >-
-      You can skip the survey, or choose to complete it later. If you choose to complete it later, we’ll email you a
-      link.
-    two: The survey should only take a few minutes to complete and opens in a new tab.
-title: Give feedback on the PRS Database so far

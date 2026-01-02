@@ -1,36 +1,34 @@
-details:
-  body: >-
-    If you can’t find a property record, the property may not be registered. If you have the landlord’s details, contact
-    them to register their property on the database.
-  heading: Help find a property record
+title: Search for a property
+heading: Search for a property
+hint: Use the search bar to find a property or the filters menu to narrow your results.
+searchBar:
+  label: Find a property
+  hint: 'You can search by part of an address (like the postcode), the UPRN or the Property Registration Number'
+filter:
+  localCouncil:
+    heading: Show properties in my council
+    label: Properties in my council
+  licence:
+    heading: Property licence
+    selective:
+      label: Selective licensing
+    hmoMandatory:
+      label: HMO mandatory licensing
+    hmoAdditional:
+      label: HMO additional licensing
+    not:
+      label: Not licensed
+table:
+  heading: Results
+  'heading.address': Property address
+  'heading.prn': Registration number
+  'heading.localCouncil': Local council
+  'heading.landlord': Registered landlord
 error:
   heading: No property record found
   hint:
     beforeLink: There were no results for that search. Try a different search or
     link: search for a landlord.
-filter:
-  licence:
-    heading: Property licence
-    hmoAdditional:
-      label: HMO additional licensing
-    hmoMandatory:
-      label: HMO mandatory licensing
-    not:
-      label: Not licensed
-    selective:
-      label: Selective licensing
-  localCouncil:
-    heading: Show properties in my council
-    label: Properties in my council
-heading: Search for a property
-hint: Use the search bar to find a property or the filters menu to narrow your results.
-searchBar:
-  hint: You can search by part of an address (like the postcode), the UPRN or the Property Registration Number
-  label: Find a property
-table:
-  heading: Results
-  heading.address: Property address
-  heading.prn: Registration number
-  heading.localCouncil: Local council
-  heading.landlord: Registered landlord
-title: Search for a property
+details:
+  heading: Help find a property record
+  body: 'If you can’t find a property record, the property may not be registered. If you have the landlord’s details, contact them to register their property on the database.'

@@ -1,146 +1,145 @@
-about:
-  heading: About this service
-  heading.two: Who can use this private beta
-  paragraph:
-    four: 'With this private beta, you can:'
-    four.bullet.four: give feedback to help make the database better
-    four.bullet.one: register your personal details
-    four.bullet.three: add compliance information for your rental properties
-    four.bullet.two: register your rental properties
-    one:
-      afterLink: >-
-        becomes law, the Private Rented Sector (PRS) Database will collect information about private landlords and their
-        rented properties in England.
-      beforeLink: When the
-      link: Renters’ Rights Bill
-    three: 'You can use this private beta if you are a landlord who:'
-    three.bullet.one: has been invited by a local council to take part
-    three.bullet.three: has a contact address in England or Wales
-    two: 'The database aims to give:'
-    two.bullet.one: local councils accurate data about rental properties in England
-    two.bullet.two: landlords guidance and information on new rules and responsibilities
+title: Register as a Landlord
+heading: Private Rented Sector (PRS) Database
+intro: This service holds information about private landlords and their rented properties. Private landlords in England are legally required to use this service.
+whoCanAccess:
+  heading: Who can access this service
+  landlord:
+    heading: 'If you are a landlord:'
+    bullet: you are legally required to register with this service and give up to date information about your properties
+  onBehalf:
+    heading: 'If you manage properties on behalf of a landlord:'
+    bullet:
+      one: you can get access to this service through your letting agent
+      two: a landlord can assign you properties to manage
 access:
   heading: Access the PRS Database
   paragraph:
-    one: >-
-      This is a private beta for the Private Rented Sector (PRS) Database. The service is being developed and tested
-      with a small group of users.
-    three:
-      afterLink: using photo ID like a passport or driving licence.
-      beforeLink: When you sign in, you may be asked to
-      link: prove your identity
+    one: This is a private beta for the Private Rented Sector (PRS) Database. The service is being developed and tested with a small group of users.
     two:
-      afterLink: to use this service. You can create a GOV.UK One Login if you do not already have one.
       beforeLink: You’ll need a
       link: GOV.UK One Login
-checkAnswers:
-  rowHeading:
-    contactAddress: Contact address
-    dateOfBirth: Date of birth
-    email: Email address
-    englandOrWalesResident: Resident in England or Wales
-    localCouncil: Local Council
-    name: Name
-    telephoneNumber: Telephone number
-  summaryName: Your details
-confirmation:
-  banner:
-    body:
-      beforeRegistrationNumber: Landlord Registration Number
-    heading: We’ve saved your personal details
-  propertyRegistration:
-    bullet:
-      one: repeatedly break the rules
-      two: commit a serious offence, like providing false information to the database
-    heading: You must register your properties
-    paragraph:
-      one: >-
-        You’ve successfully registered as a landlord on the PRS Database. You now need to register all of your private
-        rented properties on the database.
-      three: 'You could face fines or even criminal prosecution, if you:'
-      two: Your local council could fine you if you advertise or let a property that is not registered
-  whatHappensNext:
-    bullet:
-      heading: 'You can now go to your dashboard where you can:'
-      one: register a property
-      three: add compliance information once you have registered a property
-      two: view and update your landlord information
-    paragraph: We’ve emailed you a copy of your answers and your <strong>Landlord Registration Number</strong>.
+      afterLink: to use this service. You can create a GOV.UK One Login if you do not already have one.
+    three:
+      beforeLink: 'When you sign in, you may be asked to'
+      link: prove your identity
+      afterLink: using photo ID like a passport or driving licence.
+about:
+  heading: About this service
+  paragraph:
+    one:
+      beforeLink: When the
+      link: Renters’ Rights Bill
+      afterLink: 'becomes law, the Private Rented Sector (PRS) Database will collect information about private landlords and their rented properties in England.'
+    two: 'The database aims to give:'
+    'two.bullet.one': local councils accurate data about rental properties in England
+    'two.bullet.two': landlords guidance and information on new rules and responsibilities
+    three: 'You can use this private beta if you are a landlord who:'
+    'three.bullet.one': has been invited by a local council to take part
+    'three.bullet.two.beforeLink': rents out properties in England with an
+    'three.bullet.two.link': assured or regulated tenancy
+    'three.bullet.three': has a contact address in England or Wales
+    four: 'With this private beta, you can:'
+    'four.bullet.one': register your personal details
+    'four.bullet.two': register your rental properties
+    'four.bullet.three': add compliance information for your rental properties
+    'four.bullet.four': give feedback to help make the database better
+  'heading.two': Who can use this private beta
+howItWorks:
+  heading: How this private beta works
+  paragraph:
+    one: This private beta gives you an early look at parts of the database. The information is presented as if it’s the live service so you can test and give feedback about how it might work in the future.
+    two: 'The bill for this database has not become law yet, so there’s no legal requirement for anyone to use or take part in this beta.'
+    three: 'This means:'
+    'three.bullet.one': local councils cannot use any information you add to take enforcement action
+    'three.bullet.two': there are no penalties if the information is wrong or incomplete
+    four: 'You can choose if you want to:'
+    'four.bullet.one': take part in this private beta
+    'four.bullet.two': use real data or test data
+    'four.bullet.three': delete your account at any time
+    five: 'When this private beta ends:'
+    'five.bullet.one': your account will be deleted
+    'five.bullet.two': all information you’ve added will be permanently removed from the system
 futureRequirements:
   heading: Future requirements for landlords
   paragraph:
     one: The Renters’ Rights Bill will introduce changes to how private properties are let out.
-    three: 'Landlords will be expected to:'
-    three.bullet.one: add their personal and property details
     two:
-      afterLink: .
-      beforeLink: Once the bill becomes law, all landlords of assured and regulated tenancies must register on the
+      beforeLink: 'Once the bill becomes law, all landlords of assured and regulated tenancies must register on the'
       link: Private Rented Sector (PRS) Database (opens in new tab)
-heading: Private Rented Sector (PRS) Database
-howItWorks:
-  heading: How this private beta works
-  paragraph:
-    five: 'When this private beta ends:'
-    five.bullet.one: your account will be deleted
-    five.bullet.two: all information you’ve added will be permanently removed from the system
-    four: 'You can choose if you want to:'
-    four.bullet.one: take part in this private beta
-    four.bullet.three: delete your account at any time
-    four.bullet.two: use real data or test data
-    one: >-
-      This private beta gives you an early look at parts of the database. The information is presented as if it’s the
-      live service so you can test and give feedback about how it might work in the future.
-    three: 'This means:'
-    three.bullet.one: local councils cannot use any information you add to take enforcement action
-    three.bullet.two: there are no penalties if the information is wrong or incomplete
-    two: >-
-      The bill for this database has not become law yet, so there’s no legal requirement for anyone to use or take part
-      in this beta.
+      afterLink: .
+    three: 'Landlords will be expected to:'
+    'three.bullet.one': add their personal and property details
+    'three.bullet.two': keep this information up to date
+    'three.bullet.three': register a property before they advertise or let it out
 howYouCanHelp:
   heading: How you can help shape this service
   paragraph:
     one: 'The aim of this private beta is to help landlords and local councils:'
-    one.bullet.one: test how the service might work
-    one.bullet.three: prepare for the future live service
-    one.bullet.two: give feedback to improve it
-    three: This service will change. Your feedback will be used to test and shape new features as it develops.
+    'one.bullet.one': test how the service might work
+    'one.bullet.two': give feedback to improve it
+    'one.bullet.three': prepare for the future live service
     two: Only selected local councils and the landlords they invite can take part.
+    three: This service will change. Your feedback will be used to test and shape new features as it develops.
 informationManagement:
   heading: How information is used and managed
-  heading.three: Privacy notice
   paragraph:
+    one: 'If you choose to register for this private beta, you’ll be asked for:'
+    'one.bullet.one': your personal details
+    'one.bullet.two': details about your rental properties
+    'one.bullet.three': 'compliance information for your rental properties (for example, gas safety certificates)'
+    two: Local councils taking part in this private beta can view information you’ve added. This helps them understand how the database might work.
+    three: 'They cannot use this information to take enforcement action against you, like issuing you a fine.'
+    four: They may contact you if they are unclear about the information you add.
     five:
-      afterLink: to understand how your data will be used and managed in more detail.
       beforeLink: Read the
       link: privacy notice (opens in a new tab)
-    four: They may contact you if they are unclear about the information you add.
-    one: 'If you choose to register for this private beta, you’ll be asked for:'
-    one.bullet.one: your personal details
-    one.bullet.three: compliance information for your rental properties (for example, gas safety certificates)
+      afterLink: to understand how your data will be used and managed in more detail.
+    six: You must read the privacy notice before registering. You’ll be asked to confirm this during the registration process.
     seven: You’ll get an email if the privacy notice changes.
-    six: >-
-      You must read the privacy notice before registering. You’ll be asked to confirm this during the registration
-      process.
-    three: They cannot use this information to take enforcement action against you, like issuing you a fine.
-    two: >-
-      Local councils taking part in this private beta can view information you’ve added. This helps them understand how
-      the database might work.
-intro: >-
-  This service holds information about private landlords and their rented properties. Private landlords in England are
-  legally required to use this service.
+  'heading.two': How local councils can use your information
+  'heading.three': Privacy notice
+checkAnswers:
+  summaryName: Your details
+  rowHeading:
+    name: Name
+    dateOfBirth: Date of birth
+    email: Email address
+    telephoneNumber: Telephone number
+    englandOrWalesResident: Resident in England or Wales
+    contactAddress: Contact address
+    localCouncil: Local Council
+confirmation:
+  banner:
+    heading: We’ve saved your personal details
+    body:
+      beforeRegistrationNumber: Landlord Registration Number
+  whatHappensNext:
+    paragraph: 'We’ve emailed you a copy of your answers and your <strong>Landlord Registration Number</strong>.'
+    bullet:
+      heading: 'You can now go to your dashboard where you can:'
+      one: register a property
+      two: view and update your landlord information
+      three: add compliance information once you have registered a property
+  propertyRegistration:
+    heading: You must register your properties
+    paragraph:
+      one: You’ve successfully registered as a landlord on the PRS Database. You now need to register all of your private rented properties on the database.
+      two: Your local council could fine you if you advertise or let a property that is not registered
+      three: 'You could face fines or even criminal prosecution, if you:'
+    bullet:
+      one: repeatedly break the rules
+      two: 'commit a serious offence, like providing false information to the database'
 privacyNotice:
-  checkBox:
-    heading: Confirm you have read the privacy notice to continue
-    label: I confirm I have read the privacy notice for this private beta of the Private Rented Sector Database
   checkbox:
     error:
       missing: You must confirm you have read the privacy notice to continue
   heading: Read and agree to the privacy notice
   paragraph:
     one:
-      afterLink: for this private beta to find out how it stores, processes, and shares your personal information.
       beforeLink: Read the
       linkText: full Private Rented Sector Database privacy notice (opens in new tab)
+      afterLink: 'for this private beta to find out how it stores, processes, and shares your personal information.'
+    two: 'As part of this private beta, we ask that you:'
     three:
       numberedBullet:
         one:
@@ -148,58 +147,41 @@ privacyNotice:
           normalText: Local councils need 2 weeks of data to test the service.
         two:
           boldText: 'Use realistic property details:'
-          normalText: >-
-            This helps us test how the database works in real situations, including how local councils use the data to
-            check information.
-    two: 'As part of this private beta, we ask that you:'
+          normalText: 'This helps us test how the database works in real situations, including how local councils use the data to check information.'
+  checkBox:
+    heading: Confirm you have read the privacy notice to continue
+    label: I confirm I have read the privacy notice for this private beta of the Private Rented Sector Database
 section:
-  checkAndSubmit:
-    heading: Check and submit registration
   privacyNotice:
     heading: Privacy notice
   yourDetails:
     heading: Register your details
-title: Register as a Landlord
+  checkAndSubmit:
+    heading: Check and submit registration
 whatYouNeedToRegister:
   heading: What you need to register as a landlord
-  heading.caption: Before you register
+  'heading.caption': Before you register
   section:
     one:
-      bullet:
-        one: your personal details, like your full name and date of birth
-        three: a contact address in England or Wales
-        two: your contact details
       paragraph:
         one: 'When registering, you’ll be asked for:'
         two: You’ll be asked to confirm the information you add is correct. Your progress is saved as you go.
+      bullet:
+        one: 'your personal details, like your full name and date of birth'
+        two: your contact details
+        three: a contact address in England or Wales
+    two:
+      subheading: Once you register your details
+      paragraph:
+        one: 'Once your register, you’ll get a <strong>Landlord Registration Number</strong>. Local councils use this number to find your information on the database.'
+        two: You can then register a property and get a Property Registration Number.
+        three: You must include your Landlord Registration Number and a Property Registration Number on any property adverts. We’ll email you a copy of these numbers.
+        four: Your local council can fine you if you advertise or let an unregistered property.
     three:
+      subheading: Do not add false or misleading information
+      paragraph:
+        one: It’s an offence to provide false or misleading information on the database. Make sure any information you add is accurate and up to date.
+        two: 'You could face a fines or even criminal prosecution, if you:'
       bullet:
         one: repeatedly break the rules
-        two: commit a serious offence, like adding false information to the database
-      paragraph:
-        one: >-
-          It’s an offence to provide false or misleading information on the database. Make sure any information you add
-          is accurate and up to date.
-        two: 'You could face a fines or even criminal prosecution, if you:'
-      subheading: Do not add false or misleading information
-    two:
-      paragraph:
-        four: Your local council can fine you if you advertise or let an unregistered property.
-        one: >-
-          Once your register, you’ll get a <strong>Landlord Registration Number</strong>. Local councils use this number
-          to find your information on the database.
-        three: >-
-          You must include your Landlord Registration Number and a Property Registration Number on any property adverts.
-          We’ll email you a copy of these numbers.
-        two: You can then register a property and get a Property Registration Number.
-      subheading: Once you register your details
-whoCanAccess:
-  heading: Who can access this service
-  landlord:
-    bullet: you are legally required to register with this service and give up to date information about your properties
-    heading: 'If you are a landlord:'
-  onBehalf:
-    bullet:
-      one: you can get access to this service through your letting agent
-      two: a landlord can assign you properties to manage
-    heading: 'If you manage properties on behalf of a landlord:'
+        two: 'commit a serious offence, like adding false information to the database'

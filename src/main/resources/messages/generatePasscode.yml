@@ -1,10 +1,10 @@
+title: Generate passcode
 banner:
-  body: The passcode is
   heading: New passcode
-generateAnother: Generate another passcode
+  body: The passcode is
 paragraph:
   one: This passcode allows you to invite a landlord to participate in the private beta for this service.
-  three: Send it to the landlord you’d like to invite. Do not generate more passcodes than you need.
   two: They’ll be asked to enter the passcode to access the service.
+  three: Send it to the landlord you’d like to invite. Do not generate more passcodes than you need.
+generateAnother: Generate another passcode
 returnToDashboard: Return to dashboard
-title: Generate passcode

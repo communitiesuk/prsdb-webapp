@@ -1,8 +1,8 @@
-button:
-  inviteAnotherAdminUser: Invite another admin
+title: Manage Local Council Admins
 header: Manage Local Council Admins
-noAdminsText: No local council admins were found.
 table:
   heading:
     localCouncil: Local council
-title: Manage Local Council Admins
+button:
+  inviteAnotherAdminUser: Invite another admin
+noAdminsText: No local council admins were found.

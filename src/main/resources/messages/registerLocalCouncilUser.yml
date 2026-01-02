@@ -1,44 +1,44 @@
+title: Register as a Local Council user
+journeyName: Registering as a local council user
+requirementsList:
+  intro: 'When registering as a local council user, you’ll be asked for:'
+  personalDetails: 'your personal details, like your name'
+  workDetails: your work details and contact details
 beginButtonText: Begin registration
-checkAnswers:
-  rowHeading:
-    email: Email address
-    localCouncil: Local council
-    name: Name
-  summaryName: Your details
 email:
   fieldSetHeading: What is your work email address?
   fieldSetHint: This is the email you use for work at the local council
   label: Email address
 invalidLink:
-  description: Contact the PRS Database admin user at your local council to ask for another invite.
-  heading: This invite link is not valid
   title: Invalid link
-journeyName: Registering as a local council user
+  heading: This invite link is not valid
+  description: Contact the PRS Database admin user at your local council to ask for another invite.
+checkAnswers:
+  summaryName: Your details
+  rowHeading:
+    localCouncil: Local council
+    name: Name
+    email: Email address
+success:
+  banner:
+    title: 'You’ve registered as a {0,,localCouncil} user'
+  whatHappensNext:
+    paragraph:
+      one: You now have access to the database.
+      two: 'Head to your dashboard to:'
+    bullet:
+      one: search and view property and landlord information
+      two: view compliance information for registered properties
 privacyNotice:
+  heading: Read and agree to the privacy notice for local councils
+  paragraph:
+    one:
+      beforeLink: Read the
+      linkText: full Private Rented Sector Database privacy notice (opens in new tab)
+      afterLink: for this private beta to find out what data we collect and why.
   checkBox:
     heading: You must confirm you’ve read the privacy notice to continue
     label: I confirm I have read the privacy notice for this private beta of the Private Rented Sector Database
   checkbox:
     error:
       missing: You must confirm you’ve read the privacy notice to continue
-  heading: Read and agree to the privacy notice for local councils
-  paragraph:
-    one:
-      afterLink: for this private beta to find out what data we collect and why.
-      beforeLink: Read the
-      linkText: full Private Rented Sector Database privacy notice (opens in new tab)
-requirementsList:
-  intro: 'When registering as a local council user, you’ll be asked for:'
-  personalDetails: your personal details, like your name
-  workDetails: your work details and contact details
-success:
-  banner:
-    title: You’ve registered as a {0,,localCouncil} user
-  whatHappensNext:
-    bullet:
-      one: search and view property and landlord information
-      two: view compliance information for registered properties
-    paragraph:
-      one: You now have access to the database.
-      two: 'Head to your dashboard to:'
-title: Register as a Local Council user

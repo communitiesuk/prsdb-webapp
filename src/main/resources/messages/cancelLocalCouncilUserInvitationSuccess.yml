@@ -1,8 +1,8 @@
-banner:
-  body: You’ve cancelled {0,,deletedEmail}’s invitation from {1,,localCouncilName}
-returnToManageUsers: Return to manage users
 title: Invitation cancelled
+banner:
+  body: 'You’ve cancelled {0,,deletedEmail}’s invitation from {1,,localCouncilName}'
 whatHappensNext:
   paragraph:
-    one: The user invitation is cancelled and they can no longer access {0,,localCouncilName}’s invite to register.
-    two: You’ll need to invite this user again to give them access to {0,,localCouncilName} on the database.
+    one: 'The user invitation is cancelled and they can no longer access {0,,localCouncilName}’s invite to register.'
+    two: 'You’ll need to invite this user again to give them access to {0,,localCouncilName} on the database.'
+returnToManageUsers: Return to manage users

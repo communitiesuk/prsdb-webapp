@@ -1,36 +1,34 @@
-action:
-  continue: Continue
-  start: Start
-  update: Update expired or missing certificates
+title: Compliance actions
 heading: Compliance actions
-hintText: >-
-  This is a list of properties missing some compliance information. Start or continue to add compliance information for
-  the property.
+hintText: This is a list of properties missing some compliance information. Start or continue to add compliance information for the property.
+summaryRow:
+  registrationNumber: Registration number
+  gasSafety: Gas safety
+  electricalSafety: Electrical safety
+  energyPerformance: Energy performance
+action:
+  start: Start
+  continue: Continue
+  update: Update expired or missing certificates
+status:
+  notStarted: Not started
+  added: Added
+  notAdded: Not added
+  expired: Expired
 none:
   hintText: You have no properties awaiting compliance information
   paragraph:
     one: You only need to add compliance information for properties occupied by tenants.
-status:
-  added: Added
-  expired: Expired
-  notAdded: Not added
-  notStarted: Not started
-summaryRow:
-  electricalSafety: Electrical safety
-  energyPerformance: Energy performance
-  gasSafety: Gas safety
-  registrationNumber: Registration number
-title: Compliance actions
 updatePropertyOccupancy:
+  heading: 'To update a property from unoccupied to occupied:'
   bullet:
-    five: Save your changes on the property record
-    four: Select ‘Change’ beside the ‘Occupied by tenants’ row
     one:
-      afterLink: ’
       beforeLink: Go to ‘
       linkText: View your property records
-    three: Select ‘Edit record’
+      afterLink: ’
     two: Select the property you want to update
-  heading: 'To update a property from unoccupied to occupied:'
+    three: Select ‘Edit record’
+    four: Select ‘Change’ beside the ‘Occupied by tenants’ row
+    five: Save your changes on the property record
   paragraph:
     one: You’ll then be asked to add compliance information for the property.

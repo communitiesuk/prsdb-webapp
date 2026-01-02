@@ -1,4 +1,4 @@
-searchButtonText: Search
-sectionHeader: Section {0,,sectionNumber} of {1,,totalSections} — {2,,sectionName}
 serviceName: Private Rented Sector Database
 startButtonText: Start
+searchButtonText: Search
+sectionHeader: 'Section {0,,sectionNumber} of {1,,totalSections} — {2,,sectionName}'
