@@ -10,19 +10,19 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.NewRegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.example.NewPropertyRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -30,8 +30,10 @@ import java.security.Principal
 @RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class NewRegisterPropertyController(
     private val propertyRegistrationJourneyFactory: NewPropertyRegistrationJourneyFactory,
+    private val incompletePropertyService: IncompletePropertyService,
 ) {
     @GetMapping
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
@@ -42,7 +44,17 @@ class NewRegisterPropertyController(
         return "registerPropertyStartPage"
     }
 
+    @GetMapping("/$RESUME_PAGE_PATH_SEGMENT")
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
+    fun getResume(
+        @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) journeyId: String,
+    ): String {
+        val redirectUrl = JourneyStateService.urlWithJourneyState(TASK_LIST_PATH_SEGMENT, journeyId)
+        return "redirect:$redirectUrl"
+    }
+
     @GetMapping("/{stepName}")
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         principal: Principal,
@@ -58,6 +70,7 @@ class NewRegisterPropertyController(
         }
 
     @PostMapping("/{stepName}")
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
@@ -72,15 +85,4 @@ class NewRegisterPropertyController(
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
-
-    companion object {
-        const val PROPERTY_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/new/$REGISTER_PROPERTY_JOURNEY_URL"
-
-        const val RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE =
-            "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
-                "?$CONTEXT_ID_URL_PARAMETER={contextId}"
-
-        fun getResumePropertyRegistrationPath(contextId: Long): String =
-            UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(contextId).toASCIIString()
-    }
 }
