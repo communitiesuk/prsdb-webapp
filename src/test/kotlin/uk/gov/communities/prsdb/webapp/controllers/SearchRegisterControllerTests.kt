@@ -16,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Prop
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.util.concurrent.CompletionException
+import java.util.concurrent.TimeoutException
 import kotlin.test.Test
 
 @WebMvcTest(SearchRegisterController::class)
@@ -88,6 +90,19 @@ class SearchRegisterControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `searchForLandlords returns 200 for a valid page request that times out`() {
+        whenever(
+            landlordService.searchForLandlords("PRSDB", "user"),
+        ).thenThrow(CompletionException(TimeoutException()))
+
+        mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB").andExpect {
+            status { isOk() }
+            model { attribute("searchTimedOut", true) }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `searchForLandlords returns 404 if the requested page number is less than 1`() {
         mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB&page=0").andExpect {
             status { isNotFound() }
@@ -133,6 +148,19 @@ class SearchRegisterControllerTests(
 
         mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB&page=2").andExpect {
             status { isOk() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `searchForProperties returns 200 for a valid page request that times out`() {
+        whenever(
+            propertyOwnershipService.searchForProperties("PRSDB", "user"),
+        ).thenThrow(CompletionException(TimeoutException()))
+
+        mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB").andExpect {
+            status { isOk() }
+            model { attribute("searchTimedOut", true) }
         }
     }
 

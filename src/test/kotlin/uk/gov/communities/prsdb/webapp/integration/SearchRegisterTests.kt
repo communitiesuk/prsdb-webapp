@@ -5,6 +5,8 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
@@ -21,11 +23,23 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.util.concurrent.CompletionException
+import java.util.concurrent.TimeoutException
 import kotlin.collections.mapOf
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
 class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") {
+    @MockitoSpyBean
+    private lateinit var landlordService: LandlordService
+
+    @MockitoSpyBean
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    private val localCouncilUserBaseId = "urn:fdc:gov.uk:2022:UVWXY"
+
     @Nested
     inner class LandlordSearchTests {
         @Test
@@ -92,6 +106,17 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             searchLandlordRegisterPage.searchBar.search("non-matching searchTerm")
 
             assertContains(searchLandlordRegisterPage.errorMessageText!!, "No landlord record found")
+        }
+
+        @Test
+        fun `error shows if search times out`(page: Page) {
+            whenever(
+                landlordService.searchForLandlords("any term", localCouncilUserBaseId),
+            ).thenThrow(CompletionException(TimeoutException()))
+
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.searchBar.search("any term")
+            assertThat(searchLandlordRegisterPage.noResultErrorMessage).containsText("The search took too long to complete.")
         }
 
         @Test
@@ -288,6 +313,17 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             searchPropertyRegisterPage.searchBar.search("non-matching searchTerm")
 
             assertContains(searchPropertyRegisterPage.errorMessageText!!, "No property record found")
+        }
+
+        @Test
+        fun `error shows if search times out`(page: Page) {
+            whenever(
+                propertyOwnershipService.searchForProperties("any term", localCouncilUserBaseId),
+            ).thenThrow(CompletionException(TimeoutException()))
+
+            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
+            searchPropertyRegisterPage.searchBar.search("any term")
+            assertThat(searchPropertyRegisterPage.noResultErrorMessage).containsText("The search took too long to complete.")
         }
 
         @Test

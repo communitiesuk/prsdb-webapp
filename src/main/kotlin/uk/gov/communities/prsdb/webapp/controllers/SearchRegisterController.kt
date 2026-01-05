@@ -25,6 +25,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.Prope
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
+import java.util.concurrent.CompletionException
+import java.util.concurrent.TimeoutException
 
 @PrsdbController
 @RequestMapping(SEARCH_ROUTE)
@@ -54,22 +56,21 @@ class SearchRegisterController(
         }
 
         val pagedLandlordList =
-            landlordService.searchForLandlords(
-                searchRequest.searchTerm!!,
-                principal.name,
-                searchRequest.restrictToLocalCouncil ?: false,
-                requestedPageIndex = page - 1,
-            )
+            completeSearchOrHandleTimeout(model, "Landlord search with query '${searchRequest.searchTerm}' timed out") {
+                landlordService.searchForLandlords(
+                    searchRequest.searchTerm!!,
+                    principal.name,
+                    searchRequest.restrictToLocalCouncil ?: false,
+                    requestedPageIndex = page - 1,
+                )
+            }
 
         if (isPageOutOfBounds(pagedLandlordList, page)) {
             return getRedirectForPageOutOfBounds(httpServletRequest)
         }
 
         model.addAttribute("searchResults", pagedLandlordList.content)
-        model.addAttribute(
-            "paginationViewModel",
-            PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest),
-        )
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
         model.addAttribute("propertySearchURL", SEARCH_PROPERTY_URL)
 
         return "searchLandlord"
@@ -96,26 +97,41 @@ class SearchRegisterController(
         }
 
         val pagedSearchResults =
-            propertyOwnershipService.searchForProperties(
-                searchRequest.searchTerm!!,
-                principal.name,
-                searchRequest.restrictToLocalCouncil ?: false,
-                searchRequest.restrictToLicenses ?: LicensingType.entries,
-                requestedPageIndex = page - 1,
-            )
+            completeSearchOrHandleTimeout(model, "Property search with query '${searchRequest.searchTerm}' timed out") {
+                propertyOwnershipService.searchForProperties(
+                    searchRequest.searchTerm!!,
+                    principal.name,
+                    searchRequest.restrictToLocalCouncil ?: false,
+                    searchRequest.restrictToLicenses ?: LicensingType.entries,
+                    requestedPageIndex = page - 1,
+                )
+            }
 
         if (isPageOutOfBounds(pagedSearchResults, page)) {
             return getRedirectForPageOutOfBounds(httpServletRequest)
         }
 
         model.addAttribute("searchResults", pagedSearchResults.content)
-        model.addAttribute(
-            "paginationViewModel",
-            PaginationViewModel(page, pagedSearchResults.totalPages, httpServletRequest),
-        )
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedSearchResults.totalPages, httpServletRequest))
         model.addAttribute("landlordSearchURL", "landlord")
 
         return "searchProperty"
+    }
+
+    private fun <T> completeSearchOrHandleTimeout(
+        model: Model,
+        timeoutErrorMessage: String,
+        searchMethod: () -> Page<T>,
+    ) = try {
+        searchMethod()
+    } catch (e: CompletionException) {
+        if (e.cause is TimeoutException) {
+            println(timeoutErrorMessage)
+            model.addAttribute("searchTimedOut", true)
+            Page.empty()
+        } else {
+            throw e
+        }
     }
 
     private fun isPageOutOfBounds(

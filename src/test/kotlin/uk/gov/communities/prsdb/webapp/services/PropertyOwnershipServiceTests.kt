@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.mockConstruction
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -52,6 +53,10 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 import java.net.URI
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -559,6 +564,20 @@ class PropertyOwnershipServiceTests {
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
+    }
+
+    @Test
+    fun `searchForProperties throws an exception when fuzzy searching times out`() {
+        // Arrange
+        mockConstruction(CompletableFuture::class.java) { mock, _ ->
+            whenever(mock.orTimeout(PropertyOwnershipService.SEARCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)).thenReturn(mock)
+            whenever(mock.join()).thenThrow(CompletionException(TimeoutException()))
+        }.use {
+            // Act & Assert
+            assertThrows<CompletionException> {
+                propertyOwnershipService.searchForProperties("searchTerm", "laUserBaseId")
+            }
+        }
     }
 
     @Test

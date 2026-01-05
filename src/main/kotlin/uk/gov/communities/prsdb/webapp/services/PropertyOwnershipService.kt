@@ -26,6 +26,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpd
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -158,13 +160,17 @@ class PropertyOwnershipService(
                     pageRequest,
                 )
             } else {
-                propertyOwnershipRepository.searchMatching(
-                    searchTerm,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
+                CompletableFuture
+                    .supplyAsync {
+                        propertyOwnershipRepository.searchMatching(
+                            searchTerm,
+                            localCouncilBaseUserId,
+                            restrictToLocalCouncil,
+                            restrictToLicenses,
+                            pageRequest,
+                        )
+                    }.orTimeout(SEARCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .join()
             }
 
         return matchingProperties.map {
@@ -275,4 +281,8 @@ class PropertyOwnershipService(
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+
+    companion object {
+        const val SEARCH_TIMEOUT_SECONDS = 10L
+    }
 }
