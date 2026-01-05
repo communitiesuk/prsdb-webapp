@@ -527,7 +527,7 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    private fun navigateToPropertyRegistrationJourneyStep(segment: String? = null) =
+    private fun navigateToPropertyRegistrationJourneyStep(segment: String? = "") =
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$segment?journeyId=$TEST_JOURNEY_ID")
 
     fun navigateToPropertyRegistrationConfirmationPage() {
