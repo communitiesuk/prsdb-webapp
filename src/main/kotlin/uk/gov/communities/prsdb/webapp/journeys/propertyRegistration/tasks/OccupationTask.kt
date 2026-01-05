@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
@@ -42,11 +43,30 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.rentIncludesBills) {
                 routeSegment("rent-includes-bills")
                 parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
-                nextStep { journey.billsIncluded }
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.billsIncluded
+                        // TODO PDJB-103 make is property furnished next step when 'No'
+                        YesOrNo.NO -> journey.rentFrequency
+                    }
+                }
             }
             step(journey.billsIncluded) {
                 routeSegment(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
                 parents { journey.rentIncludesBills.hasOutcome(YesOrNo.YES) }
+                // TODO PDJB-103 make is property furnished next step
+                nextStep { journey.rentFrequency }
+            }
+            // TODO PDJB-103 make is property furnished step have rent frequency as next step
+            step(journey.rentFrequency) {
+                routeSegment(RegisterPropertyStepId.RentFrequency.urlPathSegment)
+                // TODO PDJB-103 make is property furnished step parent of this step
+                parents {
+                    OrParents(
+                        journey.rentIncludesBills.hasOutcome(YesOrNo.NO),
+                        journey.billsIncluded.isComplete(),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {
