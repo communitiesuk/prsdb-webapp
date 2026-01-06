@@ -46,7 +46,7 @@ class MockLandlordData {
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),
             propertyOwnerships: Set<PropertyOwnership> = emptySet(),
-            incompleteProperties: Set<SavedJourneyState> = emptySet(),
+            incompleteProperties: List<SavedJourneyState> = emptyList(),
         ): Landlord {
             val landlord =
                 Landlord(
