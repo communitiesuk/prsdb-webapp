@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -464,6 +465,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             billsIncludedPage.form.submit()
             assertThat(billsIncludedPage.form.getErrorMessage("customBillsIncluded"))
                 .containsText("The description of other bills and services must be 200 characters or fewer")
+        }
+    }
+
+    @Nested
+    inner class RentFrequencyStep {
+        @Test
+        fun `Submitting with no rentFrequency selected returns an error`(page: Page) {
+            val rentFrequencyPage = navigator.skipToPropertyRegistrationRentFrequencyPage()
+            rentFrequencyPage.form.submit()
+            assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Select how often you charge rent")
+        }
+
+        @Test
+        fun `Submitting with other rent frequency selected but no text entered returns an error`(page: Page) {
+            val rentFrequencyPage = navigator.skipToPropertyRegistrationRentFrequencyPage()
+            rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
+            rentFrequencyPage.form.submit()
+            assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Enter how often you charge rent")
         }
     }
 
