@@ -206,7 +206,7 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
     }
 
     @Nested
-    @Disabled
+    @Disabled("TODO: PDJB-245. Resolve feature flag changes bleeding between tests")
     inner class ReinitialiseConfigTests {
         // If making several changes to the feature flag configuration compared to the default loaded from application.yml, it may be easier to
         // reinitialise the whole config.
