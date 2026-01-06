@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -92,12 +94,22 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withFurnished(furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED): SelfType {
+        val furnishedFormModel =
+            FurnishedFormModel().apply {
+                this.furnishedStatus = furnishedStatus
+            }
+        withSubmittedValue(RegisterPropertyStepId.PropertyFurnished.urlPathSegment, furnishedFormModel)
+        return self()
+    }
+
     fun withTenants(
         households: Int = 2,
         people: Int = 4,
         bedrooms: Int = 3,
         includesBills: Boolean = true,
         billsIncluded: MutableList<String?> = mutableListOf(BillsIncluded.ELECTRICITY.toString()),
+        furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED,
     ): SelfType {
         withOccupancyStatus(true)
         withHouseholds(households)
@@ -105,6 +117,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         withBedrooms(bedrooms)
         withRentIncludesBills(includesBills)
         withBillsIncluded(billsIncluded)
+        withFurnished(furnishedStatus)
         @Suppress("UNCHECKED_CAST")
         return self()
     }

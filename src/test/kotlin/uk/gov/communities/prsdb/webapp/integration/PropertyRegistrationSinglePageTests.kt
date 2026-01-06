@@ -468,6 +468,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class FurnishedStep {
+        @Test
+        fun `Submitting with no furnished option selected returns an error`(page: Page) {
+            val furnishedPage = navigator.skipToPropertyRegistrationFurnishedPage()
+            furnishedPage.form.submit()
+            assertThat(
+                furnishedPage.form.getErrorMessage(),
+            ).containsText("Select whether the property is furnished, partly furnished or unfurnished")
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
