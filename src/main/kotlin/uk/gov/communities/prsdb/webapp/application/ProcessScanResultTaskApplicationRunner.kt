@@ -5,16 +5,14 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Component
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTask
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.system.exitProcess
 
-@Component
-@Profile("web-server-deactivated & scan-processor")
+@PrsdbTask("scan-processor")
 class ProcessScanResultTaskApplicationRunner(
     private val context: ApplicationContext,
     private val service: VirusScanProcessingService,
