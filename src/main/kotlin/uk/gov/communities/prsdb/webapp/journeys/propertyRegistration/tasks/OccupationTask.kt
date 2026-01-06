@@ -42,7 +42,12 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.rentIncludesBills) {
                 routeSegment("rent-includes-bills")
                 parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
-                nextStep { journey.billsIncluded }
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.billsIncluded
+                        YesOrNo.NO -> journey.furnished
+                    }
+                }
             }
             step(journey.billsIncluded) {
                 routeSegment(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
@@ -51,7 +56,12 @@ class OccupationTask : Task<OccupationState>() {
             }
             step(journey.furnished) {
                 routeSegment(RegisterPropertyStepId.PropertyFurnished.urlPathSegment)
-                parents { journey.billsIncluded.hasOutcome(Complete.COMPLETE) }
+                parents {
+                    OrParents(
+                        journey.billsIncluded.hasOutcome(Complete.COMPLETE),
+                        journey.rentIncludesBills.hasOutcome(YesOrNo.NO),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {
