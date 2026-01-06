@@ -358,7 +358,7 @@ billsIncluded:
     communalAreasCleaner: Cleaner for communal areas
     somethingElse: Something else
     'somethingElse.label': Add the bills and services included in the rent
-isThePropertyFurnished:
+furnishedStatus:
   radios:
     error:
       missing: Select whether the property is furnished, partly furnished or unfurnished

@@ -6,33 +6,33 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class FurnishedStepConfig : AbstractGenericStepConfig<Complete, FurnishedFormModel, OccupationState>() {
-    override val formModelClass = FurnishedFormModel::class
+class FurnishedStatusStepConfig : AbstractGenericStepConfig<Complete, FurnishedStatusFormModel, OccupationState>() {
+    override val formModelClass = FurnishedStatusFormModel::class
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
             "title" to "registerProperty.title",
-            "fieldSetHeading" to "forms.isThePropertyFurnished.fieldSetHeading",
+            "fieldSetHeading" to "forms.furnishedStatus.fieldSetHeading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = FurnishedStatus.FURNISHED,
-                        labelMsgKey = "forms.isThePropertyFurnished.radios.options.furnished.label",
-                        hintMsgKey = "forms.isThePropertyFurnished.radios.options.furnished.hint",
+                        labelMsgKey = "forms.furnishedStatus.radios.options.furnished.label",
+                        hintMsgKey = "forms.furnishedStatus.radios.options.furnished.hint",
                     ),
                     RadiosButtonViewModel(
                         value = FurnishedStatus.PART_FURNISHED,
-                        labelMsgKey = "forms.isThePropertyFurnished.radios.options.partFurnished.label",
-                        hintMsgKey = "forms.isThePropertyFurnished.radios.options.partFurnished.hint",
+                        labelMsgKey = "forms.furnishedStatus.radios.options.partFurnished.label",
+                        hintMsgKey = "forms.furnishedStatus.radios.options.partFurnished.hint",
                     ),
                     RadiosButtonViewModel(
                         value = FurnishedStatus.UNFURNISHED,
-                        labelMsgKey = "forms.isThePropertyFurnished.radios.options.unfurnished.label",
-                        hintMsgKey = "forms.isThePropertyFurnished.radios.options.unfurnished.hint",
+                        labelMsgKey = "forms.furnishedStatus.radios.options.unfurnished.label",
+                        hintMsgKey = "forms.furnishedStatus.radios.options.unfurnished.hint",
                     ),
                 ),
         )
@@ -43,6 +43,6 @@ class FurnishedStepConfig : AbstractGenericStepConfig<Complete, FurnishedFormMod
 }
 
 @JourneyFrameworkComponent
-final class FurnishedStep(
-    stepConfig: FurnishedStepConfig,
-) : RequestableStep<Complete, FurnishedFormModel, OccupationState>(stepConfig)
+final class FurnishedStatusStep(
+    stepConfig: FurnishedStatusStepConfig,
+) : RequestableStep<Complete, FurnishedStatusFormModel, OccupationState>(stepConfig)

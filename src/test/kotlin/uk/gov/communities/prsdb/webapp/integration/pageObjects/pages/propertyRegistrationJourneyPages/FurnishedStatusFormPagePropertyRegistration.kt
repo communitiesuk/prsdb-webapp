@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class FurnishedFormPagePropertyRegistration(
+class FurnishedStatusFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${NewRegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.PropertyFurnished.urlPathSegment}",
+        "${NewRegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.FurnishedStatus.urlPathSegment}",
     ) {
     val form = FurnishedForm(page)
 

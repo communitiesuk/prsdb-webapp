@@ -25,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -161,7 +161,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         billsIncludedPage.selectSomethingElseCheckbox()
         billsIncludedPage.fillCustomBills("Dog Grooming")
         billsIncludedPage.form.submit()
-        val furnishedPage = assertPageIs(page, FurnishedFormPagePropertyRegistration::class)
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
 
         // Furnished - render page
         assertThat(furnishedPage.form.fieldsetHeading).containsText("Is the property furnished, partly furnished or unfurnished?")

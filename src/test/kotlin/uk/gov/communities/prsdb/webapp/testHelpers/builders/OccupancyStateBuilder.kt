@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -30,6 +30,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         submittedValueMap.remove(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.RentIncludesBills.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
+        submittedValueMap.remove(RegisterPropertyStepId.FurnishedStatus.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.RentFrequency.urlPathSegment)
         return withOccupiedSetToFalse()
     }
@@ -98,11 +99,11 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
     }
 
     fun withFurnished(furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED): SelfType {
-        val furnishedFormModel =
-            FurnishedFormModel().apply {
+        val furnishedStatusFormModel =
+            FurnishedStatusFormModel().apply {
                 this.furnishedStatus = furnishedStatus
             }
-        withSubmittedValue(RegisterPropertyStepId.PropertyFurnished.urlPathSegment, furnishedFormModel)
+        withSubmittedValue(RegisterPropertyStepId.FurnishedStatus.urlPathSegment, furnishedStatusFormModel)
         return self()
     }
 

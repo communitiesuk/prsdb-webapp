@@ -6,12 +6,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
-class FurnishedFormModel : FormModel {
-    @NotNull(message = "forms.isThePropertyFurnished.radios.error.missing")
+class FurnishedStatusFormModel : FormModel {
+    @NotNull(message = "forms.furnishedStatus.radios.error.missing")
     var furnishedStatus: FurnishedStatus? = null
 
     companion object {
-        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): FurnishedFormModel =
-            FurnishedFormModel().apply { furnishedStatus = propertyOwnership.furnishedStatus }
+        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): FurnishedStatusFormModel =
+            FurnishedStatusFormModel().apply { furnishedStatus = propertyOwnership.furnishedStatus }
     }
 }
