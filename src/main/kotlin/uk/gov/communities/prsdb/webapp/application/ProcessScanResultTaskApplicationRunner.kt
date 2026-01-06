@@ -15,7 +15,7 @@ import kotlin.system.exitProcess
 
 @Component
 @Profile("web-server-deactivated & scan-processor")
-class ProcessScanResultApplicationRunner(
+class ProcessScanResultTaskApplicationRunner(
     private val context: ApplicationContext,
     private val service: VirusScanProcessingService,
 ) : ApplicationRunner {
