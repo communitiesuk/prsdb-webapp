@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.test.context.support.WithMockUser
@@ -16,8 +17,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Prop
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.util.concurrent.CompletionException
-import java.util.concurrent.TimeoutException
 import kotlin.test.Test
 
 @WebMvcTest(SearchRegisterController::class)
@@ -93,7 +92,7 @@ class SearchRegisterControllerTests(
     fun `searchForLandlords returns 200 for a valid page request that times out`() {
         whenever(
             landlordService.searchForLandlords("PRSDB", "user"),
-        ).thenThrow(CompletionException(TimeoutException()))
+        ).thenThrow(QueryTimeoutException("Query timed out"))
 
         mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB").andExpect {
             status { isOk() }
@@ -156,7 +155,7 @@ class SearchRegisterControllerTests(
     fun `searchForProperties returns 200 for a valid page request that times out`() {
         whenever(
             propertyOwnershipService.searchForProperties("PRSDB", "user"),
-        ).thenThrow(CompletionException(TimeoutException()))
+        ).thenThrow(QueryTimeoutException("Query timed out"))
 
         mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB").andExpect {
             status { isOk() }

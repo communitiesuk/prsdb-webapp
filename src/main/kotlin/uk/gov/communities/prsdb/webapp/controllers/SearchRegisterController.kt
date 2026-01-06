@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.constraints.Min
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
@@ -25,8 +26,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels.Prope
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
-import java.util.concurrent.CompletionException
-import java.util.concurrent.TimeoutException
 
 @PrsdbController
 @RequestMapping(SEARCH_ROUTE)
@@ -124,14 +123,10 @@ class SearchRegisterController(
         searchMethod: () -> Page<T>,
     ) = try {
         searchMethod()
-    } catch (e: CompletionException) {
-        if (e.cause is TimeoutException) {
-            println(timeoutErrorMessage)
-            model.addAttribute("searchTimedOut", true)
-            Page.empty()
-        } else {
-            throw e
-        }
+    } catch (e: QueryTimeoutException) {
+        println(timeoutErrorMessage)
+        model.addAttribute("searchTimedOut", true)
+        Page.empty()
     }
 
     private fun isPageOutOfBounds(

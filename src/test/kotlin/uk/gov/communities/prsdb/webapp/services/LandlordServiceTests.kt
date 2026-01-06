@@ -14,7 +14,6 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.mockConstruction
 import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
@@ -22,6 +21,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -44,10 +44,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
 import java.net.URI
 import java.time.LocalDate
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CompletionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import kotlin.reflect.full.hasAnnotation
 import kotlin.test.assertNull
 
@@ -401,14 +397,18 @@ class LandlordServiceTests {
         @Test
         fun `searchForLandlords throws an exception when fuzzy searching times out`() {
             // Arrange
-            mockConstruction(CompletableFuture::class.java) { mock, _ ->
-                whenever(mock.orTimeout(LandlordService.SEARCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)).thenReturn(mock)
-                whenever(mock.join()).thenThrow(CompletionException(TimeoutException()))
-            }.use {
-                // Act & Assert
-                assertThrows<CompletionException> {
-                    landlordService.searchForLandlords("searchTerm", "laUserBaseId")
-                }
+            val searchTerm = "searchTerm"
+            val laUserBaseId = "laUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
+
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
+                .thenThrow(QueryTimeoutException("Query timed out"))
+
+            // Act & Assert
+            assertThrows<QueryTimeoutException> {
+                landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
             }
         }
     }

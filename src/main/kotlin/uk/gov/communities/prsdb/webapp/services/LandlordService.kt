@@ -15,8 +15,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordReg
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import kotlin.String
 
 @PrsdbWebService
@@ -130,16 +128,12 @@ class LandlordService(
 
         val landlordPage =
             if (lrn == null) {
-                CompletableFuture
-                    .supplyAsync {
-                        landlordRepository.searchMatching(
-                            searchTerm,
-                            localCouncilBaseUserId,
-                            restrictToLocalCouncil,
-                            pageRequest,
-                        )
-                    }.orTimeout(SEARCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                    .join()
+                landlordRepository.searchMatching(
+                    searchTerm,
+                    localCouncilBaseUserId,
+                    restrictToLocalCouncil,
+                    pageRequest,
+                )
             } else {
                 landlordRepository.searchMatchingLRN(
                     lrn.number,
@@ -184,9 +178,5 @@ class LandlordService(
                 )
             }
         }
-    }
-
-    companion object {
-        const val SEARCH_TIMEOUT_SECONDS = 10L
     }
 }

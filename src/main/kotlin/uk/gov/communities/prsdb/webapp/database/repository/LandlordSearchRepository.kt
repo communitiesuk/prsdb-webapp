@@ -134,7 +134,7 @@ class LandlordSearchRepositoryImpl(
             GROUP BY l.id, l.name, l.email, l.phone_number, r.number, a.single_line_address
             """
 
-        private fun Query.setFilterParameters(
+        private fun Query.setFilterParametersAndTimeout(
             searchTerm: Any,
             localCouncilUserBaseId: String,
             restrictToLocalCouncil: Boolean,
@@ -142,6 +142,7 @@ class LandlordSearchRepositoryImpl(
             this
                 .setParameter("searchTerm", searchTerm)
                 .apply { if (restrictToLocalCouncil) this.setParameter("localCouncilUserBaseId", localCouncilUserBaseId) }
+                .setHint("jakarta.persistence.query.timeout", 5000)
 
         private fun EntityManager.getCountResult(
             query: String,
@@ -151,7 +152,7 @@ class LandlordSearchRepositoryImpl(
         ): Long =
             this
                 .createNativeQuery(query, Long::class.java)
-                .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
+                .setFilterParametersAndTimeout(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
                 .singleResult as Long
 
         @Suppress("Unchecked_Cast")
@@ -165,7 +166,7 @@ class LandlordSearchRepositoryImpl(
             val searchResult =
                 this
                     .createNativeQuery(query, LandlordSearchResultDataModel::class.java)
-                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
+                    .setFilterParametersAndTimeout(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
                     .resultList as List<LandlordSearchResultDataModel>
 
             // If the offset is greater than 0, any search result will be out of range
@@ -186,7 +187,7 @@ class LandlordSearchRepositoryImpl(
             val searchResult =
                 this
                     .createNativeQuery(query, LandlordSearchResultDataModel::class.java)
-                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
+                    .setFilterParametersAndTimeout(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil)
                     .setParameter("limit", pageable.pageSize)
                     .setParameter("offset", pageable.offset)
                     .resultList as List<LandlordSearchResultDataModel>
