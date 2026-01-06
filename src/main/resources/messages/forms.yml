@@ -358,6 +358,36 @@ billsIncluded:
     communalAreasCleaner: Cleaner for communal areas
     somethingElse: Something else
     'somethingElse.label': Add the bills and services included in the rent
+rentFrequency:
+  heading: When you charge rent
+  paragraph:
+    one: A rent charge refers to the actual amount your tenants pay, not the advertised rent price.
+    two: 'You must:'
+    three: 'You must not require a tenant to pay more than one month’s rent in advance:'
+  bullet:
+    one: only ask tenants to start paying rent after you both signed the tenancy agreement
+    two: collect rent on the date specifically set out in the tenancy agreement
+    three: 'if tenants pay monthly, the limit is no more than one month’s rent'
+    four: 'if tenants pay weekly, the limit is no more than 28 days’ rent'
+  fieldSetHeading: How often do you charge rent?
+  radios:
+    option:
+      monthly:
+        label: Monthly
+        hint: You collect rent on the same date each month. For example, 15 March, then 15 April
+      fourWeekly:
+        label: 4 weekly
+        hint: You collect rent every 28 days, 13 times a year. For example, 15 March, then 12 April
+      weekly:
+        label: Weekly
+      other:
+        label: Other
+        input:
+          label: How often do you charge rent?
+          error:
+            missing: Enter how often you charge rent
+    error:
+      missing: Select how often you charge rent
 declaration:
   fieldSetHeading: Declaration
   paragraph:
