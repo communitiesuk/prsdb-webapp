@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bills
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 
@@ -17,4 +18,5 @@ interface OccupationState : JourneyState {
     val rentIncludesBills: RentIncludesBillsStep
     val billsIncluded: BillsIncludedStep
     val furnished: FurnishedStep
+    val rentFrequency: RentFrequencyStep
 }

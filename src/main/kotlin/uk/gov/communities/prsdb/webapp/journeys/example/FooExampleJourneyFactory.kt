@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bills
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
@@ -88,6 +89,7 @@ class FooJourneyState(
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
     override val furnished: FurnishedStep,
+    override val rentFrequency: RentFrequencyStep,
     override val epcQuestion: EpcQuestionStep,
     override val checkAutomatchedEpc: CheckEpcStep,
     override val searchForEpc: SearchEpcStep,

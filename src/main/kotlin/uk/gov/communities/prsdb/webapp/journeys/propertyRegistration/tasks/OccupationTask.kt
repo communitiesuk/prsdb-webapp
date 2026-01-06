@@ -21,6 +21,7 @@ class OccupationTask : Task<OccupationState>() {
                         YesOrNo.NO -> exitStep
                     }
                 }
+                savable()
             }
             step(journey.households) {
                 routeSegment("number-of-households")
@@ -38,6 +39,7 @@ class OccupationTask : Task<OccupationState>() {
                 routeSegment(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
                 parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.rentIncludesBills }
+                savable()
             }
             step(journey.rentIncludesBills) {
                 routeSegment("rent-includes-bills")
@@ -48,6 +50,7 @@ class OccupationTask : Task<OccupationState>() {
                         YesOrNo.NO -> journey.furnished
                     }
                 }
+                savable()
             }
             step(journey.billsIncluded) {
                 routeSegment(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
@@ -62,7 +65,19 @@ class OccupationTask : Task<OccupationState>() {
                         journey.rentIncludesBills.hasOutcome(YesOrNo.NO),
                     )
                 }
+                // TODO PDJB-103 make is property furnished next step
+                nextStep { journey.rentFrequency }
+                savable()
+            }
+            // TODO PDJB-103 make is property furnished step have rent frequency as next step
+            step(journey.rentFrequency) {
+                routeSegment(RegisterPropertyStepId.RentFrequency.urlPathSegment)
+                // TODO PDJB-103 make is property furnished step parent of this step
+                parents {
+                    journey.furnished.hasOutcome(Complete.COMPLETE)
+                }
                 nextStep { exitStep }
+                savable()
             }
             exitStep {
                 savable()

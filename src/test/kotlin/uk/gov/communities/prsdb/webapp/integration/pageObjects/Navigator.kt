@@ -157,6 +157,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
@@ -533,6 +534,14 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.PropertyFurnished.urlPathSegment)
         return createValidPage(page, FurnishedFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationRentFrequencyPage(): RentFrequencyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationRentFrequency().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentFrequency.urlPathSegment)
+        return createValidPage(page, RentFrequencyFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {

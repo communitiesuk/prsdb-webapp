@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
@@ -166,6 +168,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(furnishedPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+        val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+
+        // Rent frequency - render page
+        assertThat(rentFrequencyPage.header).containsText("When you charge rent")
+        assertThat(rentFrequencyPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        // fill in and submit
+        rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
+        rentFrequencyPage.fillCustomRentFrequency("Fortnightly")
+        rentFrequencyPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page

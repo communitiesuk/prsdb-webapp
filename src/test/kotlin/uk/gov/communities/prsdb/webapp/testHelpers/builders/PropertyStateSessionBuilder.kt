@@ -96,6 +96,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationFurnished() = beforePropertyRegistrationBillsIncluded().withBillsIncluded()
 
+        fun beforePropertyRegistrationRentFrequency() = beforePropertyRegistrationFurnished().withFurnished()
+
         fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
