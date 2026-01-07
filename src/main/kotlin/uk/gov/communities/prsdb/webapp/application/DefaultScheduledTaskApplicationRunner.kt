@@ -4,15 +4,11 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
-import org.springframework.core.annotation.Order
-import org.springframework.stereotype.Component
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import kotlin.system.exitProcess
 
-@Component
-@Profile("web-server-deactivated & scheduled-task")
-@Order(Ordered.LOWEST_PRECEDENCE)
+@PrsdbScheduledTask(precedence = Ordered.LOWEST_PRECEDENCE)
 class DefaultScheduledTaskApplicationRunner(
     private val context: ApplicationContext,
 ) : ApplicationRunner {

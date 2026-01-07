@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.NumberOfIncompletePropertiesFeatureStrategy
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
@@ -46,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
@@ -108,9 +108,6 @@ class LandlordDashboardUrlTests(
     private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
 
     @MockitoBean
-    private lateinit var incompletePropertyService: IncompletePropertyService
-
-    @MockitoBean
     private lateinit var mockIdentityService: OneLoginIdentityService
 
     @MockitoBean
@@ -141,6 +138,9 @@ class LandlordDashboardUrlTests(
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
+
+    @MockitoBean
+    private lateinit var strategy: NumberOfIncompletePropertiesFeatureStrategy
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
