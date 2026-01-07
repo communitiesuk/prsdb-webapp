@@ -46,6 +46,16 @@ running the project locally. Ask the team lead where these can be found.
 When running your build against the integration environment of Gov.UK One Login you will be prompted for credentials to
 access the integration environment, ask your team lead where these can be found.
 
+#### Troubleshooting `detect-secrets` installation issues
+
+If you run into issues such as the one shown below, you can try the following:
+
+- check if the python scripts folder is in your PATH variable - if not add it and restart
+- if you installed Python a different way, try installing it directly from python.org
+- try installing python as an administrator
+
+![detect-secrets-error.png](detect-secrets-error.png)
+
 ### Testing
 
 The project uses a combination of unit tests and integration tests. The integration tests use a testcontainer to run a
