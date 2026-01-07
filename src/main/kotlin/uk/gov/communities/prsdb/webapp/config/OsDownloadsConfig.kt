@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
-import uk.gov.communities.prsdb.webapp.annotations.processAnnotations.PrsdbProcessConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import java.net.http.HttpClient
 
-@PrsdbProcessConfiguration
+@PrsdbTaskConfiguration
 class OsDownloadsConfig {
     @Value("\${os.downloads.base-url}")
     lateinit var baseURL: String
