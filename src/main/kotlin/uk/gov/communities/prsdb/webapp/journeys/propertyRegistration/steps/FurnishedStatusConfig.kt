@@ -37,7 +37,7 @@ class FurnishedStatusStepConfig : AbstractGenericStepConfig<Complete, FurnishedS
                 ),
         )
 
-    override fun chooseTemplate(state: OccupationState): String = "forms/propertyFurnishedForm"
+    override fun chooseTemplate(state: OccupationState): String = "forms/furnishedStatusForm"
 
     override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
