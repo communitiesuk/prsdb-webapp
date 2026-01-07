@@ -42,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
@@ -574,7 +575,7 @@ class PropertyOwnershipServiceTests {
         ).thenThrow(QueryTimeoutException("Query timed out"))
 
         // Act & Assert
-        assertThrows<QueryTimeoutException> {
+        assertThrows<RepositoryQueryTimeoutException> {
             propertyOwnershipService.searchForProperties(
                 searchTerm,
                 lcBaseUserId,

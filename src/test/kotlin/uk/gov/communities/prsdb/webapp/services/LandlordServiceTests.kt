@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -407,7 +408,7 @@ class LandlordServiceTests {
                 .thenThrow(QueryTimeoutException("Query timed out"))
 
             // Act & Assert
-            assertThrows<QueryTimeoutException> {
+            assertThrows<RepositoryQueryTimeoutException> {
                 landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
             }
         }

@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
-import org.springframework.dao.QueryTimeoutException
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
@@ -111,7 +111,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         fun `error shows if search times out`(page: Page) {
             whenever(
                 landlordService.searchForLandlords("any term", localCouncilUserBaseId),
-            ).thenThrow(QueryTimeoutException("Query timed out"))
+            ).thenThrow(RepositoryQueryTimeoutException("Query timed out"))
 
             val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
             searchLandlordRegisterPage.searchBar.search("any term")
@@ -318,7 +318,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
         fun `error shows if search times out`(page: Page) {
             whenever(
                 propertyOwnershipService.searchForProperties("any term", localCouncilUserBaseId),
-            ).thenThrow(QueryTimeoutException("Query timed out"))
+            ).thenThrow(RepositoryQueryTimeoutException("Query timed out"))
 
             val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
             searchPropertyRegisterPage.searchBar.search("any term")

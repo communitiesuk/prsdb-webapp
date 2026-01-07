@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.test.context.support.WithMockUser
@@ -12,6 +11,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -92,7 +92,7 @@ class SearchRegisterControllerTests(
     fun `searchForLandlords returns 200 for a valid page request that times out`() {
         whenever(
             landlordService.searchForLandlords("PRSDB", "user"),
-        ).thenThrow(QueryTimeoutException("Query timed out"))
+        ).thenThrow(RepositoryQueryTimeoutException("Query timed out"))
 
         mvc.get("${SearchRegisterController.SEARCH_LANDLORD_URL}?searchTerm=PRSDB").andExpect {
             status { isOk() }
@@ -155,7 +155,7 @@ class SearchRegisterControllerTests(
     fun `searchForProperties returns 200 for a valid page request that times out`() {
         whenever(
             propertyOwnershipService.searchForProperties("PRSDB", "user"),
-        ).thenThrow(QueryTimeoutException("Query timed out"))
+        ).thenThrow(RepositoryQueryTimeoutException("Query timed out"))
 
         mvc.get("${SearchRegisterController.SEARCH_PROPERTY_URL}?searchTerm=PRSDB").andExpect {
             status { isOk() }
