@@ -74,9 +74,7 @@ class DefaultSecurityConfig(
                     .contentSecurityPolicy { csp ->
                         csp
                             .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
-                    }
-                    .permissionsPolicyHeader {
-                            permissions ->
+                    }.permissionsPolicyHeader { permissions ->
                         permissions
                             .policy(PERMISSIONS_POLICY_DIRECTIVES)
                     }

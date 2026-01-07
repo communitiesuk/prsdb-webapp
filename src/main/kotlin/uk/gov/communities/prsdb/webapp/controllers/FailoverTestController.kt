@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.FAILOVER_TEST_ENDPOINTS
+import uk.gov.communities.prsdb.webapp.controllers.FailoverTestController.Companion.ERROR_429_URL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 
 @PrsdbController
@@ -44,10 +45,19 @@ class FailoverTestController {
             "Endpoint should throw 504 error",
         )
 
+    @GetMapping(ERROR_429_URL_ROUTE)
+    fun failover429(): Unit =
+        throw ResponseStatusException(
+            HttpStatus.TOO_MANY_REQUESTS,
+            "Endpoint should throw 429 error",
+        )
+
     companion object {
         const val ERROR_501_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-501"
         const val ERROR_502_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-502"
         const val ERROR_503_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-503"
         const val ERROR_504_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-504"
+
+        const val ERROR_429_URL_ROUTE = "${LANDLORD_BASE_URL}/throw-429"
     }
 }

@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Com
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
+import uk.gov.communities.prsdb.webapp.controllers.FailoverTestController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -61,6 +62,8 @@ class LandlordSecurityConfig(
                     .permitAll()
                     .requestMatchers("${BetaFeedbackController.LANDLORD_FEEDBACK_URL}/**")
                     .permitAll()
+                    .requestMatchers(FailoverTestController.ERROR_429_URL_ROUTE)
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
@@ -78,9 +81,7 @@ class LandlordSecurityConfig(
                     .contentSecurityPolicy { csp ->
                         csp
                             .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
-                    }
-                    .permissionsPolicyHeader {
-                            permissions ->
+                    }.permissionsPolicyHeader { permissions ->
                         permissions
                             .policy(PERMISSIONS_POLICY_DIRECTIVES)
                     }
