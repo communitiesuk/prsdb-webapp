@@ -11,4 +11,5 @@ import org.springframework.stereotype.Component
 @Retention(AnnotationRetention.RUNTIME)
 annotation class PrsdbTask(
     @get:AliasFor(annotation = TaskName::class, attribute = "value") val name: String = "",
+    @get:AliasFor(annotation = Component::class, attribute = "value") val beanName: String = "",
 )

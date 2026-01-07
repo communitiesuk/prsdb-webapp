@@ -14,4 +14,5 @@ import org.springframework.stereotype.Component
 annotation class PrsdbScheduledTask(
     @get:AliasFor(annotation = TaskName::class, attribute = "value") val name: String = "",
     @get:AliasFor(annotation = Order::class, attribute = "value") val precedence: Int = 1,
+    @get:AliasFor(annotation = Component::class, attribute = "value") val beanName: String = "",
 )
