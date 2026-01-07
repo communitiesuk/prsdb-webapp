@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.NewRegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -156,6 +155,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
@@ -386,21 +386,17 @@ class Navigator(
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {
-        navigate(NewRegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
+        navigateToPropertyRegistrationJourneyStep()
         return createValidPage(page, RegisterPropertyStartPage::class)
     }
 
     fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
-        navigate(
-            "${NewRegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
-                "$TASK_LIST_PATH_SEGMENT?" +
-                "journeyId=${TEST_JOURNEY_ID}",
-        )
+        navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
-        navigate("${NewRegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.LookupAddress.urlPathSegment}")
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.LookupAddress.urlPathSegment)
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
     }
 
@@ -526,14 +522,22 @@ class Navigator(
         return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationRentFrequencyPage(): RentFrequencyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationRentFrequency().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentFrequency.urlPathSegment)
+        return createValidPage(page, RentFrequencyFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().build())
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.CheckAnswers.urlPathSegment)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    private fun navigateToPropertyRegistrationJourneyStep(segment: String) =
-        navigate("${NewRegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$segment?journeyId=$TEST_JOURNEY_ID")
+    private fun navigateToPropertyRegistrationJourneyStep(segment: String? = "") =
+        navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$segment?journeyId=$TEST_JOURNEY_ID")
 
     fun navigateToPropertyRegistrationConfirmationPage() {
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
