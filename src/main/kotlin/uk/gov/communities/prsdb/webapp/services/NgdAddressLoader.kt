@@ -8,7 +8,7 @@ import org.hibernate.StatelessSession
 import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.core.env.Environment
-import uk.gov.communities.prsdb.webapp.annotations.processAnnotations.PrsdbProcessService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
@@ -20,7 +20,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.zip.ZipInputStream
 
-@PrsdbProcessService
+@PrsdbTaskService
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
