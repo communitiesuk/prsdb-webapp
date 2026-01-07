@@ -51,10 +51,10 @@ access the integration environment, ask your team lead where these can be found.
 If you run into issues such as the one shown below, you can try the following:
 
 - check if the python scripts folder is in your PATH variable - if not add it and restart
-- if you installed Python a different way, try installing it directly from python.org
+- if you installed Python a different way, try installing it directly from [python.org](https://www.python.org/downloads/)
 - try running the `install-detect-secrets` script as an administrator
 
-![detect-secrets-error.png](detect-secrets-error.png)
+![detect-secrets-error.png](readMeAssets/detect-secrets-error.png)
 
 ### Testing
 
