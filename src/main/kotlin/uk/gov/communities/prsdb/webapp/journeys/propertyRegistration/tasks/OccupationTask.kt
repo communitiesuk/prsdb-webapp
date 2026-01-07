@@ -73,6 +73,12 @@ class OccupationTask : Task<OccupationState>() {
                 parents {
                     journey.furnishedStatus.hasOutcome(Complete.COMPLETE)
                 }
+                nextStep { journey.rentAmount }
+                savable()
+            }
+            step(journey.rentAmount) {
+                routeSegment(RegisterPropertyStepId.RentAmount.urlPathSegment)
+                parents { journey.rentFrequency.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
                 savable()
             }
