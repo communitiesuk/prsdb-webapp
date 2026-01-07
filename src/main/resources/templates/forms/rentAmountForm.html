@@ -6,7 +6,9 @@
 <!--/*@thymesVar id="billsExplanationForRentFrequency" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showCalculationSection" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html
+    th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}"
+    xmlns:th="http://www.w3.org/1999/html">
 <th:block id="question-content">
     <h1 class="govuk-heading-l" th:text="#{${heading}}">
         heading
@@ -48,12 +50,7 @@
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()},'rentAmount', null, #{${fieldSetHint}})}">
-        <th:block th:replace="~{fragments/forms/inputGroup :: inputGroup(null, 'rentAmount', ~{::#input-wrapper}, null)}">
-            <div id="input-wrapper" class="govuk-input__wrapper">
-                <div class="govuk-input__prefix" aria-hidden="true">£</div>
-                <input class="govuk-input govuk-input--width-5" name="rentAmount" type="text" spellcheck="false">
-            </div>
-        </th:block>
+        <th:block th:replace="~{fragments/forms/currencyInput :: currencyInput(null, 'rentAmount', null)}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
