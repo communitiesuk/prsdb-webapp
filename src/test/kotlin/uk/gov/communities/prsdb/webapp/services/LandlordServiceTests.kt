@@ -21,6 +21,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -31,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -391,6 +393,24 @@ class LandlordServiceTests {
                     LandlordSearchResultViewModel.fromDataModel(it, currentUrlKey)
                 }
             assertEquals(expectedSearchResultsPage2, searchResults2.content)
+        }
+
+        @Test
+        fun `searchForLandlords throws an exception when fuzzy searching times out`() {
+            // Arrange
+            val searchTerm = "searchTerm"
+            val laUserBaseId = "laUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
+
+            whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest))
+                .thenThrow(QueryTimeoutException("Query timed out"))
+
+            // Act & Assert
+            assertThrows<RepositoryQueryTimeoutException> {
+                landlordService.searchForLandlords(searchTerm, laUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+            }
         }
     }
 

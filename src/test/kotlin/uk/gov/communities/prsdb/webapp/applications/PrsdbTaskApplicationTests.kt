@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Compani
 @ActiveProfiles("web-server-deactivated", "local")
 // These environment variables are required for the expected beans to be created - values aren't needed
 @TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY", "OS_API_KEY"])
-class PrsdbProcessApplicationTests {
+class PrsdbTaskApplicationTests {
     @Autowired
     private var context: ConfigurableApplicationContext? = null
 

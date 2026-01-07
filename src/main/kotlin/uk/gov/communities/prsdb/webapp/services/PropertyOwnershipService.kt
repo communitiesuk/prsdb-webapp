@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -141,30 +143,34 @@ class PropertyOwnershipService(
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val matchingProperties =
-            if (prn != null) {
-                propertyOwnershipRepository.searchMatchingPRN(
-                    prn.number,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
-            } else if (uprn != null) {
-                propertyOwnershipRepository.searchMatchingUPRN(
-                    uprn,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
-            } else {
-                propertyOwnershipRepository.searchMatching(
-                    searchTerm,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
+            try {
+                if (prn != null) {
+                    propertyOwnershipRepository.searchMatchingPRN(
+                        prn.number,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        restrictToLicenses,
+                        pageRequest,
+                    )
+                } else if (uprn != null) {
+                    propertyOwnershipRepository.searchMatchingUPRN(
+                        uprn,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        restrictToLicenses,
+                        pageRequest,
+                    )
+                } else {
+                    propertyOwnershipRepository.searchMatching(
+                        searchTerm,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        restrictToLicenses,
+                        pageRequest,
+                    )
+                }
+            } catch (_: QueryTimeoutException) {
+                throw RepositoryQueryTimeoutException("Property search with query '$searchTerm' timed out")
             }
 
         return matchingProperties.map {
