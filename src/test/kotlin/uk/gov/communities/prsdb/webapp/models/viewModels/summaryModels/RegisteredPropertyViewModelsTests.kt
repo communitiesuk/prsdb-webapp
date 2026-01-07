@@ -32,7 +32,7 @@ class RegisteredPropertyViewModelsTests {
                     currentNumTenants = 0,
                 )
 
-            val expectedLocalAuthority = localCouncil.name
+            val expectedLocalCouncil = localCouncil.name
             val expectedRegistrationNumber =
                 RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
             val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
@@ -44,7 +44,7 @@ class RegisteredPropertyViewModelsTests {
                 RegisteredPropertyLocalCouncilViewModel(
                     address.singleLineAddress,
                     expectedRegistrationNumber,
-                    expectedLocalAuthority,
+                    expectedLocalCouncil,
                     expectedPropertyLicence,
                     expectedIsTenantedMessageKey,
                     expectedRecordLink,

@@ -182,8 +182,8 @@ class NgdAddressLoader(
 
         val custodianCode = csvRecord.get("localcustodiancode")
         val localCouncilId =
-            // We only keep English LA records
-            // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LA
+            // We only keep English LC records
+            // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LC
             if (country != "England" || custodianCode == "7655") {
                 null
             } else {
