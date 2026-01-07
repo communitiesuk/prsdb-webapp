@@ -94,8 +94,9 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationBillsIncluded() = beforePropertyRegistrationRentIncludesBills().withRentIncludesBills(true)
 
-        // TODO PDJB-103 update this method to before is furnished step with value
-        fun beforePropertyRegistrationRentFrequency() = beforePropertyRegistrationBillsIncluded().withBillsIncluded()
+        fun beforePropertyRegistrationFurnished() = beforePropertyRegistrationBillsIncluded().withBillsIncluded()
+
+        fun beforePropertyRegistrationRentFrequency() = beforePropertyRegistrationFurnished().withFurnished()
 
         fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
 

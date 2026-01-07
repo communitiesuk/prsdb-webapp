@@ -358,6 +358,21 @@ billsIncluded:
     communalAreasCleaner: Cleaner for communal areas
     somethingElse: Something else
     'somethingElse.label': Add the bills and services included in the rent
+furnishedStatus:
+  radios:
+    error:
+      missing: Select whether the property is furnished, partly furnished or unfurnished
+    options:
+        furnished:
+            label: Furnished
+            hint: Includes furniture and appliances (for example, beds, tables, chairs, a sofa, a fridge, a cooker, microwave or a washing machine)
+        partFurnished:
+            label: Partly furnished
+            hint: Includes some furniture but not enough to fully furnish it
+        unfurnished:
+            label: Unfurnished
+            hint: Does not include furniture, but may have carpets or appliances (for example, a fridge, a cooker, microwave or a washing machine)
+  fieldSetHeading: Is the property furnished, partly furnished or unfurnished?
 rentFrequency:
   heading: When you charge rent
   paragraph:

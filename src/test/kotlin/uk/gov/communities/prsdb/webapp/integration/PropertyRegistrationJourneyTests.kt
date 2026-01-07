@@ -11,6 +11,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -159,6 +161,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         billsIncludedPage.selectSomethingElseCheckbox()
         billsIncludedPage.fillCustomBills("Dog Grooming")
         billsIncludedPage.form.submit()
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+
+        // Furnished - render page
+        assertThat(furnishedPage.form.fieldsetHeading).containsText("Is the property furnished, partly furnished or unfurnished?")
+        assertThat(furnishedPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        // fill in and submit
+        furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
         val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
 
         // Rent frequency - render page

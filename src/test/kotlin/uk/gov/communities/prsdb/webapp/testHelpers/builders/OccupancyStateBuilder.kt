@@ -1,10 +1,12 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -28,6 +30,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         submittedValueMap.remove(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.RentIncludesBills.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
+        submittedValueMap.remove(RegisterPropertyStepId.FurnishedStatus.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.RentFrequency.urlPathSegment)
         return withOccupiedSetToFalse()
     }
@@ -95,6 +98,15 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withFurnished(furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED): SelfType {
+        val furnishedStatusFormModel =
+            FurnishedStatusFormModel().apply {
+                this.furnishedStatus = furnishedStatus
+            }
+        withSubmittedValue(RegisterPropertyStepId.FurnishedStatus.urlPathSegment, furnishedStatusFormModel)
+        return self()
+    }
+
     fun withRentFrequency(rentFrequency: RentFrequency = RentFrequency.MONTHLY): SelfType {
         val rentFrequencyFormModel =
             RentFrequencyFormModel().apply {
@@ -110,6 +122,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         bedrooms: Int = 3,
         includesBills: Boolean = true,
         billsIncluded: MutableList<String?> = mutableListOf(BillsIncluded.ELECTRICITY.toString()),
+        furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED,
         rentFrequency: RentFrequency = RentFrequency.MONTHLY,
     ): SelfType {
         withOccupancyStatus(true)
@@ -118,6 +131,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         withBedrooms(bedrooms)
         withRentIncludesBills(includesBills)
         withBillsIncluded(billsIncluded)
+        withFurnished(furnishedStatus)
         withRentFrequency(rentFrequency)
         @Suppress("UNCHECKED_CAST")
         return self()
