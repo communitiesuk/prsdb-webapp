@@ -23,6 +23,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -41,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
@@ -559,6 +561,28 @@ class PropertyOwnershipServiceTests {
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
+    }
+
+    @Test
+    fun `searchForProperties throws an exception when fuzzy searching times out`() {
+        // Arrange
+        val searchTerm = "searchTerm"
+        val lcBaseUserId = "id"
+        val pageRequest = PageRequest.of(1, 10)
+
+        whenever(
+            mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest),
+        ).thenThrow(QueryTimeoutException("Query timed out"))
+
+        // Act & Assert
+        assertThrows<RepositoryQueryTimeoutException> {
+            propertyOwnershipService.searchForProperties(
+                searchTerm,
+                lcBaseUserId,
+                requestedPageIndex = pageRequest.pageNumber,
+                pageSize = pageRequest.pageSize,
+            )
+        }
     }
 
     @Test
