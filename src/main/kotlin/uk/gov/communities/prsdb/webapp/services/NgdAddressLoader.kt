@@ -8,7 +8,7 @@ import org.hibernate.StatelessSession
 import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.core.env.Environment
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.processAnnotations.PrsdbProcessService
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
@@ -20,8 +20,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.zip.ZipInputStream
 
-// TODO PRSD-1021: Change annotation to PrsdbProcessService when ExampleOsDownloadsController is deleted
-@Service
+@PrsdbProcessService
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,

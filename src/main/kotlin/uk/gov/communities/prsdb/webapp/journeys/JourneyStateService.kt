@@ -31,7 +31,6 @@ data class JourneyMetadata(
 class JourneyStateService(
     private val session: HttpSession,
     private val journeyIdOrNull: String?,
-    // Optional persistence service allows simpler direct construction when persistence is not needed e.g. initialising new journeys
     private val persistenceService: JourneyStatePersistenceService,
 ) {
     val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()

@@ -7,16 +7,20 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import kotlin.system.exitProcess
 
 @Component
-@Profile("web-server-deactivated & scheduled-task & example-scheduled-task")
+@Profile("web-server-deactivated & scheduled-task & ngd-address-update-scheduled-task")
 @Order(1)
-class ExampleScheduledTaskApplicationRunner(
+class NgdAddressUpdateTaskApplicationRunner(
     private val context: ApplicationContext,
+    private val ngdAddressLoader: NgdAddressLoader,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        println("Executing example scheduled task")
+        println("Executing NGD address update scheduled task")
+
+        ngdAddressLoader.loadNewDataPackageVersions()
 
         val code =
             SpringApplication.exit(context, { 0 }).also {

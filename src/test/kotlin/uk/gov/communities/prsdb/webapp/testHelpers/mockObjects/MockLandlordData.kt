@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
@@ -45,6 +46,7 @@ class MockLandlordData {
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),
             propertyOwnerships: Set<PropertyOwnership> = emptySet(),
+            incompleteProperties: List<SavedJourneyState> = emptyList(),
         ): Landlord {
             val landlord =
                 Landlord(
@@ -63,6 +65,7 @@ class MockLandlordData {
 
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
             ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
+            ReflectionTestUtils.setField(landlord, "incompleteProperties", incompleteProperties)
 
             return landlord
         }
