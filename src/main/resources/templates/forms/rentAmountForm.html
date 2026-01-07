@@ -20,12 +20,12 @@
     <ul class="govuk-list govuk-list--bullet">
         <li th:text="#{forms.rentAmount.bullet.one}">forms.rentAmount.bullet.one</li>
         <li th:text="#{forms.rentAmount.bullet.two}">forms.rentAmount.bullet.two</li>
-        <li th:text="#{forms.rentAmount.bullet.three.partOne} + ' ' + ${billsExplanationForRentFrequency}">forms.rentAmount.bullet.three.partOne</li>
+        <li th:text="#{forms.rentAmount.bullet.three.partOne} + ' ' + #{${billsExplanationForRentFrequency}}">forms.rentAmount.bullet.three.partOne</li>
     </ul>
     <th:block th:if="${showCalculationSection}">
-        <h1 class="govuk-heading-l" th:text="#{forms.rentAmount.conditionalSection.subheading}">
+        <h2 class="govuk-heading-m" th:text="#{forms.rentAmount.conditionalSection.subheading}">
             forms.rentAmount.conditionalSection.subheading
-        </h1>
+        </h2>
         <p class="govuk-body" th:text="#{forms.rentAmount.conditionalSection.paragraph.one}">
             forms.rentAmount.conditionalSection.paragraph.one
         </p>
@@ -37,9 +37,9 @@
             <li th:text="#{forms.rentAmount.conditionalSection.bullet.two}">forms.rentAmount.conditionalSection.bullet.two</li>
         </ul>
     </th:block>
-    <h1 class="govuk-heading-l" th:text="#{forms.rentAmount.subheading}">
+    <h2 class="govuk-heading-m" th:text="#{forms.rentAmount.subheading}">
         forms.rentAmount.subheading
-    </h1>
+    </h2>
     <ul class="govuk-list govuk-list--bullet">
         <li th:text="#{forms.rentAmount.bullet.four}">forms.rentAmount.bullet.four</li>
         <li th:text="#{forms.rentAmount.bullet.five}">forms.rentAmount.bullet.five</li>
@@ -48,10 +48,12 @@
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()},'rentAmount', null, #{${fieldSetHint}})}">
-        <div id="input-wrapper" class="govuk-input__wrapper">
-            <div class="govuk-input__prefix" aria-hidden="true">£</div>
-            <input class="govuk-input govuk-input--width-5" name="rentAmount" type="text" spellcheck="false">
-        </div>
+        <th:block th:replace="~{fragments/forms/inputGroup :: inputGroup(null, 'rentAmount', ~{::#input-wrapper}, null)}">
+            <div id="input-wrapper" class="govuk-input__wrapper">
+                <div class="govuk-input__prefix" aria-hidden="true">£</div>
+                <input class="govuk-input govuk-input--width-5" name="rentAmount" type="text" spellcheck="false">
+            </div>
+        </th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>

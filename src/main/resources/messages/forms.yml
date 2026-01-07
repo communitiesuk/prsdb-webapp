@@ -423,16 +423,16 @@ rentAmount:
         monthly: If the bills change every month, give an estimated amount.
     four: if the rent is a whole number, enter it without pence (for example, 705)
     five: if the rent includes pence, enter the amount to the nearest 2 decimal places (for example, 705.50)
-    conditionalSection:
-      subheading: How to calculate the rent charge
-      paragraph:
-        one: If you charge rent for a period other than a month (for example, quarterly or annually), work out the monthly equivalent.
-        two: 'To do this, divide your rent amount by the number of months it covers. For example:'
-      bullet:
-        one: if the rent is a whole number, enter it without pence (for example, 705)
-        two: if the rent includes pence, enter the amount to the nearest 2 decimal places (for example, 705.50)
-    fieldSetHint: Do not use the £ sign or commas.
-    error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
+  conditionalSection:
+    subheading: How to calculate the rent charge
+    paragraph:
+      one: If you charge rent for a period other than a month (for example, quarterly or annually), work out the monthly equivalent.
+      two: 'To do this, divide your rent amount by the number of months it covers. For example:'
+    bullet:
+      one: if the rent is a whole number, enter it without pence (for example, 705)
+      two: if the rent includes pence, enter the amount to the nearest 2 decimal places (for example, 705.50)
+  fieldSetHint: Do not use the £ sign or commas.
+  error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
 declaration:
   fieldSetHeading: Declaration
   paragraph:
