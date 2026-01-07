@@ -7,8 +7,7 @@
 <!--/*@thymesVar id="showCalculationSection" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html
-    th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}"
-    xmlns:th="http://www.w3.org/1999/html">
+    th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
     <h1 class="govuk-heading-l" th:text="#{${heading}}">
         heading
@@ -47,11 +46,10 @@
         <li th:text="#{forms.rentAmount.bullet.five}">forms.rentAmount.bullet.five</li>
     </ul>
 </th:block>
-<th:block id="form-content">
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()},'rentAmount', null, #{${fieldSetHint}})}">
-        <th:block th:replace="~{fragments/forms/currencyInput :: currencyInput(null, 'rentAmount', null)}"></th:block>
+    <th:block id="form-content">
+        <th:block id="fieldset-content" th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()},'rentAmount', null, #{${fieldSetHint}})}">
+            <th:block th:replace="~{fragments/forms/currencyInput :: currencyInput(null, 'rentAmount', null)}"></th:block>
+        </th:block>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
-</th:block>
 </html>
