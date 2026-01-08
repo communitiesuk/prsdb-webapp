@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
