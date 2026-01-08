@@ -156,7 +156,7 @@ class LandlordDetailsControllerTests(
     }
 
     @Nested
-    inner class GetLandlordDetailsAsLaUserTests {
+    inner class GetLandlordDetailsAsLcUserTests {
         private val landlord = MockLandlordData.createLandlord()
 
         @BeforeEach
@@ -182,7 +182,7 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getLandlordDetails returns 200 for a valid request from an LA user`() {
+        fun `getLandlordDetails returns 200 for a valid request from an LC user`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }
@@ -191,7 +191,7 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-        fun `getLandlordDetails returns 200 for a valid request from an LA admin`() {
+        fun `getLandlordDetails returns 200 for a valid request from an LC admin`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
                 model { attribute("name", landlord.name) }

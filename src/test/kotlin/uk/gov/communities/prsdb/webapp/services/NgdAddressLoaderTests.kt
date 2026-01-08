@@ -309,8 +309,8 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
-        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -321,24 +321,24 @@ class NgdAddressLoaderTests {
         val uprnCaptor = argumentCaptor<Long>()
         verify(mockPreparedStatement, times(3)).setLong(eq(1), uprnCaptor.capture())
 
-        val localAuthorityIndex = 11
+        val localCouncilIndex = 11
 
         val isActiveCaptor = argumentCaptor<Boolean>()
         verify(mockPreparedStatement, times(3)).setBoolean(eq(12), isActiveCaptor.capture())
 
         // 'Delete' change type and OS custodian code - deactivate
         assertEquals(10000490106, uprnCaptor.firstValue)
-        verify(mockPreparedStatement, times(2)).setNull(localAuthorityIndex, java.sql.Types.INTEGER)
+        verify(mockPreparedStatement, times(2)).setNull(localCouncilIndex, java.sql.Types.INTEGER)
         assertFalse(isActiveCaptor.firstValue)
 
         // 'Upsert' change type and invalid country - deactivate
         assertEquals(10000067954, uprnCaptor.secondValue)
-        verify(mockPreparedStatement, times(2)).setNull(localAuthorityIndex, java.sql.Types.INTEGER)
+        verify(mockPreparedStatement, times(2)).setNull(localCouncilIndex, java.sql.Types.INTEGER)
         assertFalse(isActiveCaptor.secondValue)
 
         // 'Upsert' change type - upsert
         assertEquals(10000071648, uprnCaptor.thirdValue)
-        verify(mockPreparedStatement).setInt(localAuthorityIndex, localAuthorities.first().id)
+        verify(mockPreparedStatement).setInt(localCouncilIndex, localCouncils.first().id)
         assertTrue(isActiveCaptor.thirdValue)
 
         // 'No' change type - ignore (fourth record isn't processed)
@@ -358,8 +358,8 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("largeCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
-        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 

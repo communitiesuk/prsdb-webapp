@@ -117,29 +117,29 @@ application start up. If you are using the `local` launch profile in IntelliJ, t
 before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
 populate the database with seed data.
 
-### Updating Local Authority Data
+### Updating Local Council Data
 
-The project uses migrations to populate the `local_authority` table with data from
-`src/main/resources/data/local_authorities/local_authorities.csv`.
+The project uses migrations to populate the `local_council` table with data from
+`src/main/resources/data/local_councils/local_councils.csv`.
 
-If the CSV file is updated, create a copy of it and call it `local_authorities_V<version number>.csv`,
-where `version number` is one more than the latest version in`src/main/resources/db/migrations/data/local_authorities`.
+If the CSV file is updated, create a copy of it and call it `local_councils_V<version number>.csv`,
+where `version number` is one more than the latest version in`src/main/resources/db/migrations/data/local_councils`.
 
 Then run the utility script to generate the sql for some new migrations by:
 
 - `cd`ing into the `/scripts` folder
-- running `node generate_update_local_authorities_migrations.js`
+- running `node generate_update_local_councils_migrations.js`
 - this will output some draft migrations in `/scripts/output/`
 
-#### Migration process for updating Local Authority Data
+#### Migration process for updating Local Council Data
 
-- create a migration using `/scripts/output/draft_upsert_local_authorities_migration.sql` to upsert and new/changed local authorities
-- run the sql statement in `/scripts/output/select_all_local_authorities_to_be_deleted.sql` on your local copy of the database to
-  get a list of the local authorities that will be removed by the delete migration
+- create a migration using `/scripts/output/draft_upsert_local_councils_migration.sql` to upsert and new/changed local councils
+- run the sql statement in `/scripts/output/select_all_local_councils_to_be_deleted.sql` on your local copy of the database to
+  get a list of the local councils that will be removed by the delete migration
 - write a custom migration to handle any changes that will need to be made before the delete migration can be run
-    - check for local authority users/admins that will need to be deleted/assigned to another local authority
-    - check for addresses that will now belong to a different local authority
-- create a migration using `/scripts/output/draft_delete_local_authorities_migration.sql` to delete any removed local authorities
+    - check for local council users/admins that will need to be deleted/assigned to another local council
+    - check for addresses that will now belong to a different local council
+- create a migration using `/scripts/output/draft_delete_local_councils_migration.sql` to delete any removed local councils
 
 ### Mock One Login Oauth2
 
@@ -164,15 +164,15 @@ When you run the app with the one login mock disabled and try to view pages, you
 One Login account.
 
 To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser,
-LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through
+LocalCouncilUser) for you to be able to see the page. It checks the database on login (you can step through
 `getRolesforSubjectId` in `UserRolesService` to test it), so you will need to log in again to see the change in
 permissions (if logging out is not yet implemented, try running in an incognito tab so you are prompted to log in
 again).
 
 For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the
 `one_login_user` database with a subject_identifier matching your real one login id (see below).
-Then you can add entries to any other user database that you need access to (e.g. landlord, local_authority_user
-with is_manager set to true to see local authority admin pages).
+Then you can add entries to any other user database that you need access to (e.g. landlord, local_council_user
+with is_manager set to true to see local council admin pages).
 
 #### Finding your One Login id
 

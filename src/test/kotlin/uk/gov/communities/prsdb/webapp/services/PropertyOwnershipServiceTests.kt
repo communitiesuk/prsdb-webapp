@@ -313,7 +313,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `throws not found error if user is not primary landlord or an la user`() {
+        fun `throws not found error if user is not primary landlord or an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -328,7 +328,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `returns property ownership when user is an la user`() {
+        fun `returns property ownership when user is an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val localCouncilUser =
                 MockLocalCouncilData.createLocalCouncilUser(
@@ -530,7 +530,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns the requested page of properties`() {
         val searchTerm = "searchTerm"
-        val laBaseUserId = "id"
+        val lcBaseUserId = "id"
         val pageSize = 25
         val matchingProperties = (1..40).map { MockLandlordData.createPropertyOwnership() }
 
@@ -546,18 +546,18 @@ class PropertyOwnershipServiceTests {
         val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
         val expectedPage2SearchResults = matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest1))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest1))
             .thenReturn(PageImpl(matchingPropertiesPage1))
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest2))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest2))
             .thenReturn(PageImpl(matchingPropertiesPage2))
 
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey1)
         val searchResults1 =
-            propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex1)
+            propertyOwnershipService.searchForProperties(searchTerm, lcBaseUserId, requestedPageIndex = pageIndex1)
 
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey2)
         val searchResults2 =
-            propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex2)
+            propertyOwnershipService.searchForProperties(searchTerm, lcBaseUserId, requestedPageIndex = pageIndex2)
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)

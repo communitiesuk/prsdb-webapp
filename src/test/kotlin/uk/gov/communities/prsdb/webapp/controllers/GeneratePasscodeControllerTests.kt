@@ -51,7 +51,7 @@ class GeneratePasscodeControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `generatePasscodeGet returns 200 and generates passcode for authorized LA admin`() {
+    fun `generatePasscodeGet returns 200 and generates passcode for authorized LC admin`() {
         val localCouncilUser = createLocalCouncilUser()
         val testPasscode = "ABC123"
 
