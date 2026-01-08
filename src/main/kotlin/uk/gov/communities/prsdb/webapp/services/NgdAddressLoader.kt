@@ -144,13 +144,14 @@ class NgdAddressLoader(
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
                         if (hasRecordBeenAdded) batchRecordCount++
 
-                        if (batchRecordCount >= BATCH_SIZE || !csvParser.iterator().hasNext()) {
+                        if (batchRecordCount >= BATCH_SIZE) {
                             preparedStatement.executeBatch()
                             batchRecordCount = 0
                         }
 
                         if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
+                    if (batchRecordCount > 0) preparedStatement.executeBatch()
                 }
             }
             updatePropertyOwnershipAddresses()
