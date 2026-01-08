@@ -532,7 +532,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
-        fun `Submitting a non-numerical rentAmountreturns an error`(page: Page) {
+        fun `Submitting a non-numerical rentAmount returns an error`(page: Page) {
             val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
             rentAmountPage.fillRentAmount("not-a-number")
             rentAmountPage.form.submit()
