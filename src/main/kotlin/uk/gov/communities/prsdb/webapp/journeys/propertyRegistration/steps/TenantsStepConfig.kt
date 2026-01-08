@@ -18,7 +18,7 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NewNumberOfPeopleF
             "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
-            "label" to "forms.numberOfPeople.label",
+            "hint" to "forms.numberOfPeople.hint",
         )
 
     override fun chooseTemplate(state: OccupationState): String = "forms/numberOfPeopleForm"

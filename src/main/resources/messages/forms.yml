@@ -317,7 +317,7 @@ numberOfPeople:
   fieldSetHeading: How many people live in your property?
   fieldSetHint: 'Include everyone who lives in the property permanently, whether they are related or unrelated to each other.'
   'fieldSetHint.two': Do not include anyone who is staying temporarily.
-  label: Enter the number of people living in your property
+  hint: Enter the number of people living in your property
   details:
     summary: Why do I need to declare this?
     text: Your council may use this information to check your property is not overcrowded.
