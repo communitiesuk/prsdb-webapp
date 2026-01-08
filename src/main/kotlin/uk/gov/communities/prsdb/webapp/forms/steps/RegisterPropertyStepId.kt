@@ -26,7 +26,7 @@ enum class RegisterPropertyStepId(
     HmoMandatoryLicence("hmo-mandatory-licence", RegisterPropertyGroupIdentifier.Licensing),
     HmoAdditionalLicence("hmo-additional-licence", RegisterPropertyGroupIdentifier.Licensing),
     HasJointLandlords("has-joint-landlords", RegisterPropertyGroupIdentifier.JointLandlords),
-    AddJointLandlord("joint-landlords", RegisterPropertyGroupIdentifier.JointLandlords),
+    AddJointLandlord("add-joint-landlord", RegisterPropertyGroupIdentifier.JointLandlords),
     CheckJointLandlords("check-joint-landlords", RegisterPropertyGroupIdentifier.JointLandlords),
     RemoveJointLandlord("remove-joint-landlord", RegisterPropertyGroupIdentifier.JointLandlords),
     CheckAnswers("check-answers", RegisterPropertyGroupIdentifier.CheckYourAnswers),
