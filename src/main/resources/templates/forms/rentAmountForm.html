@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="billsExplanationForRentFrequency" type="java.lang.String"*/-->
-<!--/*@thymesVar id="showCalculationSection" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showRentCalculationSection" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html
     th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -23,7 +23,7 @@
         <li th:text="#{forms.rentAmount.bullet.two}">forms.rentAmount.bullet.two</li>
         <li th:text="#{forms.rentAmount.bullet.three.partOne} + ' ' + #{${billsExplanationForRentFrequency}}">forms.rentAmount.bullet.three.partOne</li>
     </ul>
-    <th:block th:if="${showCalculationSection}">
+    <th:block th:if="${showRentCalculationSection}">
         <h2 class="govuk-heading-m" th:text="#{forms.rentAmount.conditionalSection.subheading}">
             forms.rentAmount.conditionalSection.subheading
         </h2>

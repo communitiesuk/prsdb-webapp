@@ -19,7 +19,7 @@ class RentAmountStepConfig : AbstractGenericStepConfig<Complete, RentAmountFormM
             "heading" to getHeading(rentFrequency),
             "fieldSetHint" to "forms.rentAmount.fieldSetHint",
             "billsExplanationForRentFrequency" to getBillsExplanationForRentFrequency(rentFrequency),
-            "showCalculationSection" to (rentFrequency == RentFrequency.OTHER),
+            "showRentCalculationSection" to (rentFrequency == RentFrequency.OTHER),
         )
     }
 
