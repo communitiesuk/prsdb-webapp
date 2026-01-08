@@ -140,17 +140,18 @@ class NgdAddressLoader(
             session.doWork { connection ->
                 ngdAddressLoaderRepository.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
                     var batchRecordCount = 0
-                    csvParser.forEachIndexed { record, index, isFinalRecord ->
+                    csvParser.forEachIndexed { index, record ->
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
                         if (hasRecordBeenAdded) batchRecordCount++
 
-                        if (batchRecordCount >= BATCH_SIZE || isFinalRecord) {
+                        if (batchRecordCount >= BATCH_SIZE) {
                             preparedStatement.executeBatch()
                             batchRecordCount = 0
                         }
 
                         if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
+                    if (batchRecordCount > 0) preparedStatement.executeBatch()
                 }
             }
             updatePropertyOwnershipAddresses()
@@ -231,17 +232,6 @@ class NgdAddressLoader(
     private fun log(message: String) {
         val messagePrefix = if (isLocalEnvironment) "${Instant.now().atZone(ZoneId.systemDefault())} " else ""
         println("$messagePrefix$message")
-    }
-
-    private fun CSVParser.forEachIndexed(action: (CSVRecord, Int, Boolean) -> Unit) {
-        val recordIterator = this.iterator()
-        var isFinalRecord: Boolean
-        var index = 0
-        recordIterator.forEach {
-            isFinalRecord = !recordIterator.hasNext()
-            action(it, index, isFinalRecord)
-            index++
-        }
     }
 
     companion object {
