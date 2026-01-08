@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
@@ -56,11 +56,13 @@ class SelectAddressStepConfig(
         selectAddressFormModel.address?.let { selectedAddress ->
             when {
                 selectedAddress == MANUAL_ADDRESS_CHOSEN -> {}
-                state.getMatchingAddress(selectedAddress) == null ->
+
+                state.getMatchingAddress(selectedAddress) == null -> {
                     bindingResult.rejectValue(
                         SelectAddressFormModel::address.name,
                         "forms.selectAddress.error.invalidSelection",
                     )
+                }
             }
         }
     }
