@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep

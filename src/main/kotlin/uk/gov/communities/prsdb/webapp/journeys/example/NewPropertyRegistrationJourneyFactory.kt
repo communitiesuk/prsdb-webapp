@@ -15,9 +15,9 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
