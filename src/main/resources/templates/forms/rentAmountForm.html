@@ -18,7 +18,7 @@
     <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.two}">
         forms.rentAmount.paragraph.two
     </p>
-    <ul class="govuk-list govuk-list--bullet">
+    <ul class="govuk-list govuk-list--bullet" data-testid="rent-includes-list">
         <li th:text="#{forms.rentAmount.bullet.one}">forms.rentAmount.bullet.one</li>
         <li th:text="#{forms.rentAmount.bullet.two}">forms.rentAmount.bullet.two</li>
         <li th:text="#{forms.rentAmount.bullet.three.partOne} + ' ' + #{${billsExplanationForRentFrequency}}">forms.rentAmount.bullet.three.partOne</li>

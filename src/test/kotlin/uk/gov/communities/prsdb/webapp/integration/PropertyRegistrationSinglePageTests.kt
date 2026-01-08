@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import kotlin.test.assertTrue
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -496,6 +497,99 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
             rentFrequencyPage.form.submit()
             assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Enter how often you charge rent")
+        }
+    }
+
+    @Nested
+    inner class RentAmountStep {
+        @Test
+        fun `Submitting no rentAmount returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.form.submit()
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a rentAmount greater than two decimals returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.fillRentAmount("400.123")
+            rentAmountPage.form.submit()
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a negative rentAmount returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.fillRentAmount("-400.12")
+            rentAmountPage.form.submit()
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a non-numerical rentAmountreturns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.fillRentAmount("not-a-number")
+            rentAmountPage.form.submit()
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Nested
+        inner class ConditionalContentPerRentFrequency {
+            @Test
+            fun `Page renders correctly for weekly rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
+                BaseComponent.assertThat(rentAmountPage.header)
+                    .containsText("How much is the weekly rent for your property?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                        .contains("If the bills change every week, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+            }
+
+            @Test
+            fun `Page renders correctly for four weekly rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
+                BaseComponent.assertThat(rentAmountPage.header)
+                    .containsText("How much is the rent for your property, charged every 4 weeks?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                        .contains("If the bills change every 4 weeks, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+            }
+
+            @Test
+            fun `Page renders correctly for monthly rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
+                BaseComponent.assertThat(rentAmountPage.header)
+                    .containsText("How much is the monthly rent for your property?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                        .contains("If the bills change every month, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+            }
+
+            @Test
+            fun `Page renders correctly for 'other' rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
+                BaseComponent.assertThat(rentAmountPage.header)
+                    .containsText("How much is the monthly rent for your property?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                        .contains("If the bills change every month, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
+            }
         }
     }
 
