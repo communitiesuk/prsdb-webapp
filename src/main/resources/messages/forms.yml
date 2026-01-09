@@ -547,13 +547,15 @@ checkPropertyAnswers:
     bedrooms: Number of bedrooms
     rentIncludesBills: Rent includes bills
     billsIncluded: Which bills are included
-    furnishedStatus: Furnished provided
+    furnishedStatus: Furniture provided
     rentFrequency: When rent is paid
     rentAmount: Rent amount
   additionalLandlords:
     heading: Additional landlords
   interestedParties:
     heading: Interested parties
+  tenancyDetails:
+    heading: Tenancy and rental information
 update:
   email:
     fieldSetHeading: What is your updated email address?

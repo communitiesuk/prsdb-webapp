@@ -3,7 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
@@ -48,6 +51,7 @@ class PropertyRegistrationCyaStepConfig(
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
             "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
+            "tenancyDetails" to getTenancyDetailsSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
     }
@@ -85,8 +89,7 @@ class PropertyRegistrationCyaStepConfig(
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
         getAddressRows(state) +
             getPropertyTypeRow(state) +
-            getOwnershipTypeRow(state) +
-            getTenancyRows(state)
+            getOwnershipTypeRow(state)
 
     private fun getAddressRows(state: PropertyRegistrationJourneyState) =
         state.getAddress().let { address ->
@@ -121,10 +124,16 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
         )
 
-    private fun getTenancyRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+// TODO where an option is in camelCase, e.g. partFurnished, .lowercase will convert to part_furnished
+    private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
         if (state.occupied.formModel.occupied == true) {
             val householdsStep = state.households
             val tenantsStep = state.tenants
+            val bedroomsStep = state.bedrooms
+            val rentIncludesBillsStep = state.rentIncludesBills
+            val billsIncludedStep = state.billsIncluded
+            val furnishedStatusStep = state.furnishedStatus
+            val rentFrequencyStep = state.rentFrequency
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.occupied",
@@ -140,6 +149,48 @@ class PropertyRegistrationCyaStepConfig(
                     "forms.checkPropertyAnswers.propertyDetails.people",
                     tenantsStep.formModel.numberOfPeople,
                     Destination(tenantsStep),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.bedrooms",
+                    bedroomsStep.formModel.numberOfBedrooms,
+                    Destination(bedroomsStep),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.rentIncludesBills",
+                    rentIncludesBillsStep.formModel.rentIncludesBills,
+                    Destination(rentIncludesBillsStep),
+                ),
+                // TODO currently the bills are displayed one per line, should be coma separated
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.billsIncluded",
+                    billsIncludedStep.formModel.billsIncluded
+                        .filterNotNull()
+                        .map { value ->
+                            if (value == BillsIncluded.SOMETHING_ELSE.toString()) {
+                                billsIncludedStep.formModel.customBillsIncluded
+                            } else {
+                                "forms.billsIncluded.checkbox.${value.lowercase()}"
+                            }
+                        },
+                    Destination(billsIncludedStep),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.furnishedStatus",
+                    furnishedStatusStep.formModel.furnishedStatus?.let {
+                        "forms.furnishedStatus.radios.options.${it.name.lowercase()}.label"
+                    },
+                    Destination(furnishedStatusStep),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.rentFrequency",
+                    rentFrequencyStep.formModel.rentFrequency?.let {
+                        if (it == RentFrequency.OTHER) {
+                            rentFrequencyStep.formModel.customRentFrequency
+                        } else {
+                            "forms.rentFrequency.radios.option.${it.name.lowercase()}.label"
+                        }
+                    },
+                    Destination(rentFrequencyStep),
                 ),
             )
         } else {
