@@ -48,12 +48,9 @@ class UpdateLicensingCyaStepConfig(
     }
 
     private fun isRemovingLicensing(state: UpdateLicensingJourneyState): Boolean {
-        val existingLicensingType = state.originalLicenseData?.licenseType
         val newLicensingType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType)
 
-        return existingLicensingType != null &&
-            existingLicensingType != LicensingType.NO_LICENSING &&
-            newLicensingType == LicensingType.NO_LICENSING
+        return state.hasOriginalLicense!! && newLicensingType == LicensingType.NO_LICENSING
     }
 
     override fun enrichSubmittedDataBeforeValidation(

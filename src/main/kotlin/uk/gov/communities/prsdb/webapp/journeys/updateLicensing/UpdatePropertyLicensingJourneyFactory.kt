@@ -32,15 +32,11 @@ class UpdateLicensingJourneyFactory(
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        // QQ  - properly init the state eventually
+        // TODO PRSD-1550 - properly init the state, make the property ID immutable and handle mismatched property IDs
         if (state.propertyId == null) {
             ownershipService.getPropertyOwnership(propertyId).let {
                 state.propertyId = propertyId
-                state.originalLicenseData =
-                    LicenseData(
-                        licenseType = it.license?.licenseType ?: LicensingType.NO_LICENSING,
-                        licenseNumber = it.license?.licenseNumber,
-                    )
+                state.hasOriginalLicense = it.license != null
             }
         } else if (state.propertyId != propertyId) {
             throw IllegalStateException("Journey state property ID ${state.propertyId} does not match provided property ID $propertyId")
@@ -81,7 +77,7 @@ class UpdateLicensingJourney(
     UpdateLicensingJourneyState {
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
 
-    override var originalLicenseData: LicenseData? by delegateProvider.mutableDelegate("originalLicenseData")
+    override var hasOriginalLicense: Boolean? by delegateProvider.mutableDelegate("hasOriginalLicense")
     override var propertyId: Long? by delegateProvider.mutableDelegate("propertyId")
 
     override fun generateJourneyId(seed: Any?): String {
@@ -100,7 +96,7 @@ interface UpdateLicensingJourneyState :
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
     override val cyaStep: UpdateLicensingCheckAnswersStep
-    val originalLicenseData: LicenseData?
+    val hasOriginalLicense: Boolean?
     val propertyId: Long?
 }
 
