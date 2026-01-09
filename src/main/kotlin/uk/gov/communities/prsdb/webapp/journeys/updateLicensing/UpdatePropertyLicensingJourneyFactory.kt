@@ -27,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 @PrsdbWebService
 class UpdateLicensingJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateLicensingJourney>,
-    private val ownershipService: PropertyOwnershipService,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -53,9 +52,9 @@ class UpdateLicensingJourneyFactory(
     }
 
     fun initializeJourneyState(propertyId: Long): String =
-        stateFactory.getObject().initializeOrRestoreState(propertyId) {
-            setValue("propertyId", "$propertyId")
-            setValue("hasOriginalLicense", "${ownershipService.getPropertyOwnership(propertyId).license != null}")
+        stateFactory.getObject().let {
+            val initializer = it.journeyStateInitialiser(propertyId)
+            it.initializeOrRestoreState(propertyId, initializer)
         }
 }
 
@@ -71,12 +70,19 @@ class UpdateLicensingJourney(
     override val cyaStep: UpdateLicensingCheckAnswersStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
+    private val ownershipService: PropertyOwnershipService,
 ) : AbstractJourneyState(journeyStateService),
     UpdateLicensingJourneyState {
     override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
     override val hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
 
     override val propertyId: Long by delegateProvider.requiredDelegate("propertyId")
+
+    fun journeyStateInitialiser(propertyId: Long): JourneyStateService.() -> Unit =
+        {
+            setValue("propertyId", "$propertyId")
+            setValue("hasOriginalLicense", "${ownershipService.getPropertyOwnership(propertyId).license != null}")
+        }
 
     override fun generateJourneyId(seed: Any?): String {
         val propertyId = seed as? Long
