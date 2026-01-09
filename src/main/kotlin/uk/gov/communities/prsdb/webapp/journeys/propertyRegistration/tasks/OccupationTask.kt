@@ -86,7 +86,7 @@ class OccupationTask : Task<OccupationState>() {
                 savable()
                 parents {
                     OrParents(
-                        journey.tenants.hasOutcome(Complete.COMPLETE),
+                        journey.rentAmount.hasOutcome(Complete.COMPLETE),
                         journey.occupied.hasOutcome(YesOrNo.NO),
                     )
                 }

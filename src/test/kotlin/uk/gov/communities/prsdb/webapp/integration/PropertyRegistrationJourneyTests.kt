@@ -187,8 +187,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Rent amount - render page
         assertThat(rentAmountPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
-        rentAmountPage.fillRentAmount("400")
-        rentAmountPage.form.submit()
+        rentAmountPage.submitRentAmount("400")
 
         // TODO PDJB-112, PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormPagePropertyRegistration::class)

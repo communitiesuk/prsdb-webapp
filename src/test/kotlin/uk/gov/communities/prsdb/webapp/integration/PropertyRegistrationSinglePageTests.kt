@@ -514,8 +514,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting a rentAmount greater than two decimals returns an error`(page: Page) {
             val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
-            rentAmountPage.fillRentAmount("400.123")
-            rentAmountPage.form.submit()
+            rentAmountPage.submitRentAmount("400.123")
             assertThat(
                 rentAmountPage.form.getErrorMessage(),
             ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
@@ -524,8 +523,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting a negative rentAmount returns an error`(page: Page) {
             val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
-            rentAmountPage.fillRentAmount("-400.12")
-            rentAmountPage.form.submit()
+            rentAmountPage.submitRentAmount("-400.12")
             assertThat(
                 rentAmountPage.form.getErrorMessage(),
             ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
@@ -534,8 +532,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting a non-numerical rentAmount returns an error`(page: Page) {
             val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
-            rentAmountPage.fillRentAmount("not-a-number")
-            rentAmountPage.form.submit()
+            rentAmountPage.submitRentAmount("not-a-number")
             assertThat(
                 rentAmountPage.form.getErrorMessage(),
             ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")

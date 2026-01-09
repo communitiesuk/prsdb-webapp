@@ -21,8 +21,9 @@ abstract class RentAmountFormBasePage(
 
     val form = RentAmountForm(page)
 
-    fun fillRentAmount(rentAmount: String) {
+    fun submitRentAmount(rentAmount: String) {
         form.rentAmountInput.fill(rentAmount)
+        form.submit()
     }
 
     class RentAmountForm(
