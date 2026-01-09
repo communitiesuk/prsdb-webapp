@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - chore/PRSD-1021-more-selective-property-address-updates
 
 jobs:
   build-and-deploy-integration:
