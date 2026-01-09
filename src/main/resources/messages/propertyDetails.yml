@@ -101,12 +101,20 @@ propertyRecord:
   localCouncil: Local council
   propertyType: Property type
   ownershipType: Ownership type
-  occupied: Occupied by tenants
-  numberOfHouseholds: Number of households
-  numberOfPeople: Number of people
   licensingInformation:
     heading: Licensing information
     licensingType: Licensing type
     licensingNumber: Licensing number
+  tenancyAndRentalInformation:
+    heading: Tenancy and rental information
+    occupied: Occupied by tenants
+    numberOfHouseholds: Number of households
+    numberOfPeople: Number of tenants
+    numberOfBedrooms: Number of bedrooms
+    rentIncludesBills: Which bills are included
+    billsIncluded: Which bills are included
+    furnishedStatus: Furniture provided
+    rentFrequency: When rent is paid
+    rentAmount: Rent amount
 update:
   title: Update property record

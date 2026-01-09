@@ -76,29 +76,6 @@ class PropertyDetailsViewModel(
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
                     withChangeLinks,
                 )
-                addRow(
-                    "propertyDetails.propertyRecord.occupied",
-                    isTenantedKey,
-                    changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
-                    withChangeLinks,
-                )
-                if (propertyOwnership.isOccupied) {
-                    addRow(
-                        "propertyDetails.propertyRecord.numberOfHouseholds",
-                        propertyOwnership.currentNumHouseholds,
-                        changeLinkMessageKey,
-                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
-                        withChangeLinks,
-                    )
-                    addRow(
-                        "propertyDetails.propertyRecord.numberOfPeople",
-                        propertyOwnership.currentNumTenants,
-                        changeLinkMessageKey,
-                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
-                        withChangeLinks,
-                    )
-                }
             }.toList()
 
     val licensingInformation: List<SummaryListRowViewModel> =
@@ -117,6 +94,86 @@ class PropertyDetailsViewModel(
                     addRow(
                         "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
                         propertyOwnership.license!!.licenseNumber,
+                    )
+                }
+            }.toList()
+
+    val tenancyAndRentalInformation: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                    isTenantedKey,
+                    changeLinkMessageKey,
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+                    withChangeLinks,
+                )
+                if (propertyOwnership.isOccupied) {
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
+                        propertyOwnership.currentNumHouseholds,
+                        changeLinkMessageKey,
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
+                        propertyOwnership.currentNumTenants,
+                        changeLinkMessageKey,
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
+                        propertyOwnership.numBedrooms,
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                        MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    if (propertyOwnership.rentIncludesBills) {
+                        addRow(
+                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
+                            // TODO PDJB-197 is there a better way to format this?
+                            propertyOwnership.billsIncludedList + propertyOwnership.customBillsIncluded,
+                            changeLinkMessageKey,
+                            // TODO PDJB-105: Add link when update step is created
+                            null,
+                            withChangeLinks,
+                        )
+                    }
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                        MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
+                        // TODO PDJB-197 find out how to display custom frequency
+                        propertyOwnership.customRentFrequency ?: MessageKeyConverter.convert(propertyOwnership.rentFrequency!!),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
+                        "£" + propertyOwnership.rentAmount.toString(),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
                     )
                 }
             }.toList()
