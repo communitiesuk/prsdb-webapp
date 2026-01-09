@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -13,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val licensingHelper: LicensingDetailsHelper,
 ) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
@@ -46,7 +47,7 @@ class PropertyRegistrationCyaStepConfig(
             "insetText" to true,
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
-            "licensingDetails" to getLicensingDetailsSummaryList(state),
+            "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
     }
@@ -148,29 +149,6 @@ class PropertyRegistrationCyaStepConfig(
                     false,
                     Destination.VisitableStep(state.occupied, childJourneyId),
                 ),
-            )
-        }
-
-    private fun getLicensingDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
-        state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
-            listOfNotNull(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    licensingType,
-                    Destination.VisitableStep(state.licensingTypeStep, childJourneyId),
-                ),
-                when (licensingType) {
-                    LicensingType.HMO_MANDATORY_LICENCE -> (state.getLicenceNumber() to state.hmoMandatoryLicenceStep)
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> (state.getLicenceNumber() to state.hmoAdditionalLicenceStep)
-                    LicensingType.SELECTIVE_LICENCE -> (state.getLicenceNumber() to state.selectiveLicenceStep)
-                    else -> null
-                }?.let { (licenceNumber, step) ->
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
-                        licenceNumber,
-                        Destination(step),
-                    )
-                },
             )
         }
 
