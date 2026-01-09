@@ -3,10 +3,10 @@ const csv = require('csv-parser');
 
 const outputDirectory = './output';
 const results = [];
-const inputFilePath = '../src/main/resources/data/local_authorities/local_authorities.csv';
-const outputUpsertMigrationFilePath = `${outputDirectory}/draft_upsert_local_authorities_migration.sql`;
-const outputSelectLAsToBeDeletedFilePath = `${outputDirectory}/select_all_local_authorities_to_be_deleted.sql`;
-const outputDeleteMigrationFilePath = `${outputDirectory}/draft_delete_local_authorities_migration.sql`;
+const inputFilePath = '../src/main/resources/data/local_councils/local_councils.csv';
+const outputUpsertMigrationFilePath = `${outputDirectory}/draft_upsert_local_councils_migration.sql`;
+const outputSelectLAsToBeDeletedFilePath = `${outputDirectory}/select_all_local_councils_to_be_deleted.sql`;
+const outputDeleteMigrationFilePath = `${outputDirectory}/draft_delete_local_councils_migration.sql`;
 
 fs.createReadStream(inputFilePath)
     .pipe(csv())
@@ -35,13 +35,13 @@ fs.createReadStream(inputFilePath)
                 return `'${custodianCode}'`;
             });
 
-        const insertStatement = "INSERT INTO local_authority (custodian_code, name)\n"
+        const insertStatement = "INSERT INTO local_council (custodian_code, name)\n"
             + `VALUES ${insertValues.join(',\n       ')}\n` // Indent the resulting file nicely
             + "ON CONFLICT (custodian_code) DO UPDATE SET name = EXCLUDED.name;";
 
-        const selectStatement = `SELECT * FROM local_authority WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
+        const selectStatement = `SELECT * FROM local_council WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
 
-        const deleteStatement = `DELETE FROM local_authority WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
+        const deleteStatement = `DELETE FROM local_council WHERE custodian_code NOT IN (${retainValues.join(', ')});`;
 
         if (!fs.existsSync(outputDirectory)) {
             fs.mkdirSync(outputDirectory);

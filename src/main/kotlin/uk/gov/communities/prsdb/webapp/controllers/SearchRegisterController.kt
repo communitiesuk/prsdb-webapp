@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.SEARCH_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
@@ -54,22 +55,25 @@ class SearchRegisterController(
         }
 
         val pagedLandlordList =
-            landlordService.searchForLandlords(
-                searchRequest.searchTerm!!,
-                principal.name,
-                searchRequest.restrictToLocalCouncil ?: false,
-                requestedPageIndex = page - 1,
-            )
+            try {
+                landlordService.searchForLandlords(
+                    searchRequest.searchTerm!!,
+                    principal.name,
+                    searchRequest.restrictToLocalCouncil ?: false,
+                    requestedPageIndex = page - 1,
+                )
+            } catch (queryTimeoutException: RepositoryQueryTimeoutException) {
+                println(queryTimeoutException.message)
+                model.addAttribute("searchTimedOut", true)
+                Page.empty()
+            }
 
         if (isPageOutOfBounds(pagedLandlordList, page)) {
             return getRedirectForPageOutOfBounds(httpServletRequest)
         }
 
         model.addAttribute("searchResults", pagedLandlordList.content)
-        model.addAttribute(
-            "paginationViewModel",
-            PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest),
-        )
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedLandlordList.totalPages, httpServletRequest))
         model.addAttribute("propertySearchURL", SEARCH_PROPERTY_URL)
 
         return "searchLandlord"
@@ -96,23 +100,26 @@ class SearchRegisterController(
         }
 
         val pagedSearchResults =
-            propertyOwnershipService.searchForProperties(
-                searchRequest.searchTerm!!,
-                principal.name,
-                searchRequest.restrictToLocalCouncil ?: false,
-                searchRequest.restrictToLicenses ?: LicensingType.entries,
-                requestedPageIndex = page - 1,
-            )
+            try {
+                propertyOwnershipService.searchForProperties(
+                    searchRequest.searchTerm!!,
+                    principal.name,
+                    searchRequest.restrictToLocalCouncil ?: false,
+                    searchRequest.restrictToLicenses ?: LicensingType.entries,
+                    requestedPageIndex = page - 1,
+                )
+            } catch (queryTimeoutException: RepositoryQueryTimeoutException) {
+                println(queryTimeoutException.message)
+                model.addAttribute("searchTimedOut", true)
+                Page.empty()
+            }
 
         if (isPageOutOfBounds(pagedSearchResults, page)) {
             return getRedirectForPageOutOfBounds(httpServletRequest)
         }
 
         model.addAttribute("searchResults", pagedSearchResults.content)
-        model.addAttribute(
-            "paginationViewModel",
-            PaginationViewModel(page, pagedSearchResults.totalPages, httpServletRequest),
-        )
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedSearchResults.totalPages, httpServletRequest))
         model.addAttribute("landlordSearchURL", "landlord")
 
         return "searchProperty"

@@ -15,12 +15,17 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -33,11 +38,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
@@ -68,7 +77,6 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
                     checkable()
-                    saveProgress()
                     customExitStep(journey.addressExitStep)
                 }
                 step(journey.propertyTypeStep) {
@@ -89,9 +97,16 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     checkable()
+                    saveProgress()
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
+                    nextStep { journey.jointLandlordsTask.firstStep }
+                    checkable()
+                    saveProgress()
+                }
+                task(journey.jointLandlordsTask) {
+                    parents { journey.occupationTask.isComplete() }
                     nextStep { journey.cyaStep }
                     checkable()
                     saveProgress()
@@ -101,7 +116,7 @@ class NewPropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment("check-answers")
-                    parents { journey.occupationTask.isComplete() }
+                    parents { journey.jointLandlordsTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -142,6 +157,15 @@ class PropertyRegistrationJourney(
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
+    override val furnishedStatus: FurnishedStatusStep,
+    override val rentFrequency: RentFrequencyStep,
+    override val rentAmount: RentAmountStep,
+    // Joint landlords task
+    override val jointLandlordsTask: JointLandlordsTask,
+    override val hasJointLandlordsStep: HasJointLandlordsStep,
+    override val addJointLandlordStep: AddJointLandlordStep,
+    override val removeJointLandlordStep: RemoveJointLandlordStep,
+    override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>,
     journeyStateService: JourneyStateService,
@@ -167,6 +191,7 @@ interface PropertyRegistrationJourneyState :
     AddressState,
     LicensingState,
     OccupationState,
+    JointLandlordsState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: AddressTask
@@ -175,5 +200,6 @@ interface PropertyRegistrationJourneyState :
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask
     val occupationTask: OccupationTask
+    val jointLandlordsTask: JointLandlordsTask
     override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>
 }

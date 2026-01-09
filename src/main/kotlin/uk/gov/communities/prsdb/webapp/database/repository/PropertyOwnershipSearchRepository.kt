@@ -173,7 +173,7 @@ class PropertyOwnershipSearchRepositoryImpl(
 
         private const val FILTERS = LOCAL_COUNCIL_FILTER + LICENSE_FILTER
 
-        private fun Query.setFilterParameters(
+        private fun Query.setFilterParametersAndTimeout(
             searchTerm: Any,
             localCouncilUserBaseId: String,
             restrictToLocalCouncil: Boolean,
@@ -185,6 +185,7 @@ class PropertyOwnershipSearchRepositoryImpl(
                 .setParameter("restrictToLocalCouncil", restrictToLocalCouncil)
                 .setParameter("restrictToLicenses", restrictToLicenses)
                 .setParameter("noLicenceType", LicensingType.NO_LICENSING)
+                .setHint("jakarta.persistence.query.timeout", 5000)
 
         private fun EntityManager.getCountResult(
             query: String,
@@ -195,7 +196,7 @@ class PropertyOwnershipSearchRepositoryImpl(
         ): Long =
             this
                 .createNativeQuery(query, Long::class.java)
-                .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
+                .setFilterParametersAndTimeout(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
                 .singleResult as Long
 
         @Suppress("Unchecked_Cast")
@@ -210,7 +211,7 @@ class PropertyOwnershipSearchRepositoryImpl(
             val searchResult =
                 this
                     .createNativeQuery(query, PropertyOwnership::class.java)
-                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
+                    .setFilterParametersAndTimeout(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
                     .resultList as List<PropertyOwnership>
 
             // If the offset is greater than 0, any search result will be out of range
@@ -232,7 +233,7 @@ class PropertyOwnershipSearchRepositoryImpl(
             val searchResult =
                 this
                     .createNativeQuery(query, PropertyOwnership::class.java)
-                    .setFilterParameters(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
+                    .setFilterParametersAndTimeout(searchTerm, localCouncilUserBaseId, restrictToLocalCouncil, restrictToLicenses)
                     .setParameter("limit", pageable.pageSize)
                     .setParameter("offset", pageable.offset)
                     .resultList as List<PropertyOwnership>
