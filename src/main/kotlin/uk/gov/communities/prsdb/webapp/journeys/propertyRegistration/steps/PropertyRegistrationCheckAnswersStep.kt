@@ -161,6 +161,7 @@ class PropertyRegistrationCyaStepConfig(
                     Destination(rentIncludesBillsStep),
                 ),
                 // TODO currently the bills are displayed one per line, should be coma separated
+                // TODO make conditional based on rentIncludesBillsStep
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.billsIncluded",
                     billsIncludedStep.formModel.billsIncluded
