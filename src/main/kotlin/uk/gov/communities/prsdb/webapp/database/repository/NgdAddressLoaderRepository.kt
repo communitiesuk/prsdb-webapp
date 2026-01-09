@@ -50,11 +50,15 @@ class NgdAddressLoaderRepository(
                         local_council_id    = EXCLUDED.local_council_id,
                         is_active           = EXCLUDED.is_active,
                         last_modified_date  = current_timestamp
-                    RETURNING id, single_line_address
+                    RETURNING id, single_line_address, local_council_id
                 )
-                UPDATE property_ownership 
-                SET single_line_address = (SELECT single_line_address FROM upserted_address)
-                WHERE address_id = (SELECT id FROM upserted_address);
+                UPDATE property_ownership
+                SET single_line_address = new.single_line_address, 
+                    local_council_id = new.local_council_id
+                FROM upserted_address new
+                WHERE property_ownership.address_id = new.id
+                      AND (property_ownership.single_line_address != new.single_line_address
+                      OR property_ownership.local_council_id != new.local_council_id);
             """
         return connection.prepareStatement(query)
     }
