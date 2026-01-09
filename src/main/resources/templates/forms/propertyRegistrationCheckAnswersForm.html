@@ -5,6 +5,7 @@
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="tenancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
@@ -22,6 +23,8 @@
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">
