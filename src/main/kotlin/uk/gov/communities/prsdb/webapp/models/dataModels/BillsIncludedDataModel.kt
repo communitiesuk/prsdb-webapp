@@ -7,6 +7,7 @@ data class BillsIncludedDataModel(
     val billsIncluded: MutableList<String?>,
     val customBillsIncluded: String?,
 ) {
+    // TODO add customBillsIncluded to comaSeparatedBills string
     val commaSeparatedBills: String
         get() = billsIncluded?.filterNotNull()?.map { MessageKeyConverter.convert(BillsIncluded.valueOf(it!!)) }?.joinToString(", ") ?: ""
 
