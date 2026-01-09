@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Proposed
 
-Date of decision: TBC {yyyy-MM-dd}
+Date of decision: 2026-01-09
 
 ## Context and Problem Statement
 
@@ -21,6 +21,8 @@ For the purposes of this ADR, we define the following types of tests:
 - spike tests - simulating sudden spikes in usage, and ensuring the system can handle them without significant degradation of performance
 - soak tests - simulating sustained 'normal' usage over a long period of time, ensuring the system can handle it without degradation of
   performance
+  In all cases, the tests would measure maximum response times, average response times, and error rates against defined thresholds, and
+  would only pass if those thresholds are met.
 - breaking point tests - gradually increasing load until the system breaks, to determine its maximum capacity
 
 ## Considered Options
@@ -32,11 +34,13 @@ For the purposes of this ADR, we define the following types of tests:
 
 ## Decision Outcome
 
-Full suite minus breaking point tests, as this ensures that we have a good understanding of the performance of the system under expected and
-high loads, as well as its ability to handle sudden spikes and sustained usage, without the complexity and cost of breaking point tests.
+Basic tests, average use tests, and spike tests, as this ensures that we have a good understanding of the performance of the system under
+expected and
+high loads, as well as its ability to handle sudden spikes, without the complexity and cost of breaking point tests or endurance tests.
 
-We recommend initially focusing on basic, load, and spike tests, which should be run routinely, and then adding soak and stress tests which
-should only be run infrequently vs the other tests.
+This should be coupled with monitoring in production for performance degredation over time and automations to restart services if
+performance
+degrades beyond acceptable levels.
 
 If we wish to observe the failure mode of the system under extreme loads we can consider running breaking point tests as a one-off in the
 future.
@@ -58,7 +62,8 @@ know exactly how much performance headroom we have and what impact changes have 
 * Good, because it would allow us to run different types of tests at different frequencies or on different triggers.
 * Bad, because the full suite would take a long time to run, making it less likely we'd do so very often.
 * Bad, because it would be expensive to run the full suite of tests, particularly the breaking point tests.
-* Bad, because we might need to give advanced notice to MHCLG (and maybe AWS) before running the breaking point tests.
+* Bad, because we might need to give advanced notice to other MHCLG Teams e.g. Cloud Ops (and maybe AWS) before running the breaking point
+  tests.
 
 ### Full suite minus breaking point tests
 
