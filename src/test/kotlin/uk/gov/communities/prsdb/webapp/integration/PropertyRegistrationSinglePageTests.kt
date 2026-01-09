@@ -54,6 +54,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
+            lookupAddressPage.clearForm() // There may be form answers in the journey state
             lookupAddressPage.form.submit()
             assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
             assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
