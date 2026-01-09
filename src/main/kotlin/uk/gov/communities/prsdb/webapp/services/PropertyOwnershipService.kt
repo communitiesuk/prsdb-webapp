@@ -182,6 +182,23 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateLicensing(
+        id: Long,
+        licensingType: LicensingType,
+        licenceNumber: String?,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        val updatedLicence =
+            licenseService.updateLicence(
+                propertyOwnership.license,
+                licensingType,
+                licenceNumber,
+            )
+        propertyOwnership.license = updatedLicence
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,

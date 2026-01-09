@@ -4,13 +4,11 @@ import kotlinx.serialization.Serializable
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -23,8 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Licen
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -60,7 +56,7 @@ class UpdateLicensingJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment("check-licensing-answers")
                 parents { journey.licensingTask.isComplete() }
-                nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
+                nextUrl { LANDLORD_PROPERTY_DETAILS_ROUTE }
             }
             checkYourAnswersJourney()
         }
@@ -78,7 +74,7 @@ class UpdateLicensingJourney(
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     // Check your answers step
-    override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>,
+    override val cyaStep: UpdateLicensingCheckAnswersStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
@@ -103,7 +99,7 @@ interface UpdateLicensingJourneyState :
     LicensingState,
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
-    override val cyaStep: RequestableStep<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>
+    override val cyaStep: UpdateLicensingCheckAnswersStep
     val originalLicenseData: LicenseData?
     val propertyId: Long?
 }

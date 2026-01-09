@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.updateLicensing
 
-import jakarta.persistence.EntityExistsException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -13,9 +12,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class UpdateLicensingCyaStepConfig : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
+class UpdateLicensingCyaStepConfig(
+    private val propertyOwnershipService: PropertyOwnershipService,
+) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
     private lateinit var childJourneyId: String
@@ -61,10 +63,11 @@ class UpdateLicensingCyaStepConfig : AbstractGenericStepConfig<Complete, CheckAn
             (CheckAnswersFormModel::storedJourneyData.name to state.getSubmittedStepData())
 
     override fun afterStepDataIsAdded(state: UpdateLicensingJourneyState) {
-        try {
-            TODO("Implement updating the licensing details in the property registration service")
-        } catch (_: EntityExistsException) {
-        }
+        propertyOwnershipService.updateLicensing(
+            state.propertyId!!,
+            state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+            state.getLicenceNumberOrNull(),
+        )
     }
 
     // QQ -  we should extract this to a shared helper with the registration CYA page
