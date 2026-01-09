@@ -76,7 +76,6 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
                     checkable()
-                    saveProgress()
                     customExitStep(journey.addressExitStep)
                 }
                 step(journey.propertyTypeStep) {
