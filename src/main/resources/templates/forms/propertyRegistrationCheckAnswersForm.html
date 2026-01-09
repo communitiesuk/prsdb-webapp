@@ -20,6 +20,7 @@
         <th:block th:if="${insetText == true}">
             <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
         </th:block>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
