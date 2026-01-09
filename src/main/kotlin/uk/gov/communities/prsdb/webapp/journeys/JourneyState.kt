@@ -23,7 +23,15 @@ interface JourneyState {
         seed: Any? = null,
     ): String
 
-    fun initializeState(seed: Any? = null): String
+    fun initializeState(
+        seed: Any? = null,
+        init: JourneyStateService.() -> Unit = {},
+    ): String
+
+    fun initializeOrRestoreState(
+        seed: Any? = null,
+        init: JourneyStateService.() -> Unit = {},
+    ): String
 
     fun generateJourneyId(seed: Any? = null): String =
         if (seed == null) {

@@ -24,10 +24,23 @@ abstract class AbstractJourneyState(
 
     override fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
-    override fun initializeState(seed: Any?): String {
+    override fun initializeState(
+        seed: Any?,
+        init: JourneyStateService.() -> Unit,
+    ): String {
         val journeyId = generateJourneyId(seed)
 
-        journeyStateService.initialiseJourneyWithId(journeyId) {}
+        journeyStateService.initialiseJourneyWithId(journeyId, init)
+        return journeyId
+    }
+
+    override fun initializeOrRestoreState(
+        seed: Any?,
+        init: JourneyStateService.() -> Unit,
+    ): String {
+        val journeyId = generateJourneyId(seed)
+
+        journeyStateService.initialiseOrRestoreJourneyWithId(journeyId, init)
         return journeyId
     }
 
