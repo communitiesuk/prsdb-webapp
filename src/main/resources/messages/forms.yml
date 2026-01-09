@@ -529,7 +529,7 @@ hmoShared:
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
   propertyDetails:
-    heading: Property details
+    heading: Property record
     hint: Check the property address is correct
     detail:
       summary: What is a UPRN?
