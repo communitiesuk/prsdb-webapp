@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.updateLicensing
 
-import kotlinx.serialization.Serializable
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
@@ -12,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
@@ -99,9 +97,3 @@ interface UpdateLicensingJourneyState :
     val hasOriginalLicense: Boolean?
     val propertyId: Long?
 }
-
-@Serializable
-data class LicenseData(
-    val licenseType: LicensingType,
-    val licenseNumber: String?,
-)
