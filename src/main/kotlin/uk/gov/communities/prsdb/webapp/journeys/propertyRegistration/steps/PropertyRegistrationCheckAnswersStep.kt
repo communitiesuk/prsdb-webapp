@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -16,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateExcepti
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
@@ -124,7 +124,6 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
         )
 
-// TODO where an option is in camelCase, e.g. partFurnished, .lowercase will convert to part_furnished
     private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
         if (state.occupied.formModel.occupied == true) {
             val householdsStep = state.households
@@ -160,35 +159,29 @@ class PropertyRegistrationCyaStepConfig(
                     rentIncludesBillsStep.formModel.rentIncludesBills,
                     Destination(rentIncludesBillsStep),
                 ),
-                // TODO currently the bills are displayed one per line, should be coma separated
+                // TODO deal with customBillsIncluded
                 // TODO make conditional based on rentIncludesBillsStep
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.billsIncluded",
-                    billsIncludedStep.formModel.billsIncluded
-                        .filterNotNull()
-                        .map { value ->
-                            if (value == BillsIncluded.SOMETHING_ELSE.toString()) {
-                                billsIncludedStep.formModel.customBillsIncluded
-                            } else {
-                                "forms.billsIncluded.checkbox.${value.lowercase()}"
-                            }
-                        },
+                    BillsIncludedDataModel
+                        .fromFormData(
+                            billsIncludedStep.formModel.billsIncluded,
+                            billsIncludedStep.formModel.customBillsIncluded,
+                        ).commaSeparatedBills,
                     Destination(billsIncludedStep),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.furnishedStatus",
-                    furnishedStatusStep.formModel.furnishedStatus?.let {
-                        "forms.furnishedStatus.radios.options.${it.name.lowercase()}.label"
-                    },
+                    furnishedStatusStep.formModel.furnishedStatus,
                     Destination(furnishedStatusStep),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.rentFrequency",
                     rentFrequencyStep.formModel.rentFrequency?.let {
                         if (it == RentFrequency.OTHER) {
-                            rentFrequencyStep.formModel.customRentFrequency
+                            listOf(it, rentFrequencyStep.formModel.customRentFrequency)
                         } else {
-                            "forms.rentFrequency.radios.option.${it.name.lowercase()}.label"
+                            it
                         }
                     },
                     Destination(rentFrequencyStep),
