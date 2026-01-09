@@ -1,4 +1,4 @@
-<div th:fragment="lastModifiedInsetText(lastModifiedBy, lastModifiedDate)" th:if="${lastModifiedDate != null}" class="govuk-inset-text prsd-warning">
+<div th:fragment="lastModifiedInsetText(lastModifiedBy, lastModifiedDate)" th:if="${lastModifiedDate != null}" class="govuk-inset-text">
     <strong th:text="${lastModifiedBy}"></strong>
     <span th:remove="tag" th:text="#{lastUpdated.afterName}">lastUpdated.afterName</span>
     <strong th:text="${lastModifiedDate}">
