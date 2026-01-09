@@ -403,6 +403,36 @@ rentFrequency:
             missing: Enter how often you charge rent
     error:
       missing: Select how often you charge rent
+rentAmount:
+  heading:
+    weekly: How much is the weekly rent for your property?
+    fourWeekly: How much is the rent for your property, charged every 4 weeks?
+    monthly: How much is the monthly rent for your property?
+  subheading: How to enter the amount
+  paragraph:
+    one: Do not include rent arrears or rent in advance payments for new tenants.
+    two: 'You must include:'
+  bullet:
+    one: the agreed rent, not the advertised or asking price
+    two: the rent for the whole property, not for individual rooms if the property is a HMO
+    three:
+      partOne: any bills or services included in the rent, such as gas, electricity, water and cleaning services.
+      partTwo:
+        weekly: If the bills change every week, give an estimated amount.
+        fourWeekly: If the bills change every 4 weeks, give an estimated amount.
+        monthly: If the bills change every month, give an estimated amount.
+    four: if the rent is a whole number, enter it without pence (for example, 705)
+    five: if the rent includes pence, enter the amount to the nearest 2 decimal places (for example, 705.50)
+  conditionalSection:
+    subheading: How to calculate the rent charge
+    paragraph:
+      one: If you charge rent for a period other than a month (for example, quarterly or annually), work out the monthly equivalent.
+      two: 'To do this, divide your rent amount by the number of months it covers. For example:'
+    bullet:
+      one: if you charge a 6-monthly amount of £3,000, divide £3,000 by 6.
+      two: the equivalent monthly amount is £500
+  fieldSetHint: Do not use the £ sign or commas.
+  error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
 declaration:
   fieldSetHeading: Declaration
   paragraph:

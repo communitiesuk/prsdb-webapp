@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfB
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 
@@ -32,6 +33,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         submittedValueMap.remove(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.FurnishedStatus.urlPathSegment)
         submittedValueMap.remove(RegisterPropertyStepId.RentFrequency.urlPathSegment)
+        submittedValueMap.remove(RegisterPropertyStepId.RentAmount.urlPathSegment)
         return withOccupiedSetToFalse()
     }
 
@@ -116,6 +118,15 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withRentAmount(rentAmount: String = "400"): SelfType {
+        val rentAmountFormModel =
+            RentAmountFormModel().apply {
+                this.rentAmount = rentAmount
+            }
+        withSubmittedValue(RegisterPropertyStepId.RentAmount.urlPathSegment, rentAmountFormModel)
+        return self()
+    }
+
     fun withTenants(
         households: Int = 2,
         people: Int = 4,
@@ -124,6 +135,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         billsIncluded: MutableList<String?> = mutableListOf(BillsIncluded.ELECTRICITY.toString()),
         furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED,
         rentFrequency: RentFrequency = RentFrequency.MONTHLY,
+        rentAmount: String = "400",
     ): SelfType {
         withOccupancyStatus(true)
         withHouseholds(households)
@@ -133,6 +145,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         withBillsIncluded(billsIncluded)
         withFurnished(furnishedStatus)
         withRentFrequency(rentFrequency)
+        withRentAmount(rentAmount)
         @Suppress("UNCHECKED_CAST")
         return self()
     }

@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
