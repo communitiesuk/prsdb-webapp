@@ -9,13 +9,14 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class UpdateLicensingCyaStepConfig(
+    private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
@@ -35,7 +36,7 @@ class UpdateLicensingCyaStepConfig(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to getLicensingDetailsSummaryList(state),
+            "summaryListData" to licensingDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to
                 if (isRemovingLicensing(state)) {
@@ -69,30 +70,6 @@ class UpdateLicensingCyaStepConfig(
             state.getLicenceNumberOrNull(),
         )
     }
-
-    // QQ -  we should extract this to a shared helper with the registration CYA page
-    private fun getLicensingDetailsSummaryList(state: UpdateLicensingJourneyState): List<SummaryListRowViewModel> =
-        state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
-            listOfNotNull(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    licensingType,
-                    Destination.VisitableStep(state.licensingTypeStep, childJourneyId),
-                ),
-                when (licensingType) {
-                    LicensingType.HMO_MANDATORY_LICENCE -> (state.getLicenceNumber() to state.hmoMandatoryLicenceStep)
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> (state.getLicenceNumber() to state.hmoAdditionalLicenceStep)
-                    LicensingType.SELECTIVE_LICENCE -> (state.getLicenceNumber() to state.selectiveLicenceStep)
-                    else -> null
-                }?.let { (licenceNumber, step) ->
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
-                        licenceNumber,
-                        Destination(step),
-                    )
-                },
-            )
-        }
 
     override fun resolveNextDestination(
         state: UpdateLicensingJourneyState,
