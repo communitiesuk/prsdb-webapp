@@ -24,11 +24,14 @@ table:
   'heading.prn': Registration number
   'heading.localCouncil': Local council
   'heading.landlord': Registered landlord
-error:
+noResults:
   heading: No property record found
   hint:
     beforeLink: There were no results for that search. Try a different search or
     link: search for a landlord.
+timeout:
+  heading: There was a problem with your search
+  hint: The search took too long to complete. Try again using more specific information, such as a postcode.
 details:
   heading: Help find a property record
   body: 'If you can’t find a property record, the property may not be registered. If you have the landlord’s details, contact them to register their property on the database.'

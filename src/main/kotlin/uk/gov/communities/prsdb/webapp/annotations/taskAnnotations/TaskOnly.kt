@@ -1,10 +1,10 @@
-package uk.gov.communities.prsdb.webapp.annotations.processAnnotations
+package uk.gov.communities.prsdb.webapp.annotations.taskAnnotations
 
 import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.core.type.AnnotatedTypeMetadata
 
-class ProcessOnly : Condition {
+class TaskOnly : Condition {
     override fun matches(
         context: ConditionContext,
         metadata: AnnotatedTypeMetadata,

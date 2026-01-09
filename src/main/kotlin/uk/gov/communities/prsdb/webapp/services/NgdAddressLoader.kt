@@ -8,7 +8,7 @@ import org.hibernate.StatelessSession
 import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.core.env.Environment
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
@@ -20,8 +20,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.zip.ZipInputStream
 
-// TODO PRSD-1021: Change annotation to PrsdbProcessService when ExampleOsDownloadsController is deleted
-@Service
+@PrsdbTaskService
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
@@ -145,13 +144,14 @@ class NgdAddressLoader(
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
                         if (hasRecordBeenAdded) batchRecordCount++
 
-                        if (batchRecordCount >= BATCH_SIZE || !csvParser.iterator().hasNext()) {
+                        if (batchRecordCount >= BATCH_SIZE) {
                             preparedStatement.executeBatch()
                             batchRecordCount = 0
                         }
 
                         if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
+                    if (batchRecordCount > 0) preparedStatement.executeBatch()
                 }
             }
             updatePropertyOwnershipAddresses()
@@ -183,8 +183,8 @@ class NgdAddressLoader(
 
         val custodianCode = csvRecord.get("localcustodiancode")
         val localCouncilId =
-            // We only keep English LA records
-            // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LA
+            // We only keep English LC records
+            // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LC
             if (country != "England" || custodianCode == "7655") {
                 null
             } else {
