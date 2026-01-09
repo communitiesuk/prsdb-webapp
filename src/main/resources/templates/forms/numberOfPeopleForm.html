@@ -19,7 +19,7 @@
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfPeople', null, null)}">
-        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfPeople', null, 2)}"></div>
+        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null , 'numberOfPeople', #{${hint}}, 2)}"></div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
     <details  id="details" th:replace="~{fragments/details :: details(#{forms.numberOfPeople.details.summary}, ~{::#details/content()})}" >
