@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateExcepti
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
@@ -125,77 +124,97 @@ class PropertyRegistrationCyaStepConfig(
         )
 
     private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
-        if (state.occupied.formModel.occupied == true) {
-            val householdsStep = state.households
-            val tenantsStep = state.tenants
-            val bedroomsStep = state.bedrooms
-            val rentIncludesBillsStep = state.rentIncludesBills
-            val billsIncludedStep = state.billsIncluded
-            val furnishedStatusStep = state.furnishedStatus
-            val rentFrequencyStep = state.rentFrequency
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.occupied",
-                    true,
-                    Destination.VisitableStep(state.occupied, childJourneyId),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.households",
-                    householdsStep.formModel.numberOfHouseholds,
-                    Destination(householdsStep),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.people",
-                    tenantsStep.formModel.numberOfPeople,
-                    Destination(tenantsStep),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.bedrooms",
-                    bedroomsStep.formModel.numberOfBedrooms,
-                    Destination(bedroomsStep),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.rentIncludesBills",
-                    rentIncludesBillsStep.formModel.rentIncludesBills,
-                    Destination(rentIncludesBillsStep),
-                ),
-                // TODO deal with customBillsIncluded
-                // TODO make conditional based on rentIncludesBillsStep
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.billsIncluded",
-                    BillsIncludedDataModel
-                        .fromFormData(
-                            billsIncludedStep.formModel.billsIncluded,
-                            billsIncludedStep.formModel.customBillsIncluded,
-                        ).commaSeparatedBills,
-                    Destination(billsIncludedStep),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.furnishedStatus",
-                    furnishedStatusStep.formModel.furnishedStatus,
-                    Destination(furnishedStatusStep),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.rentFrequency",
-                    rentFrequencyStep.formModel.rentFrequency?.let {
-                        if (it == RentFrequency.OTHER) {
-                            listOf(it, rentFrequencyStep.formModel.customRentFrequency)
-                        } else {
-                            it
-                        }
-                    },
-                    Destination(rentFrequencyStep),
-                ),
-            )
-        } else {
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.occupied",
-                    false,
-                    Destination.VisitableStep(state.occupied, childJourneyId),
-                ),
-            )
-        }
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val isOccupied = state.occupied.formModel.occupied ?: false
+                add(getOccupancyStatusRow(isOccupied, state.occupied))
+                if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state))
+            }
+
+    private fun getOccupancyStatusRow(
+        isOccupied: Boolean,
+        occupiedStep: RequestableStep<*, *, *>,
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.propertyDetails.occupied",
+            isOccupied,
+            Destination.VisitableStep(occupiedStep, childJourneyId),
+        )
+
+    private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val householdsStep = state.households
+                val tenantsStep = state.tenants
+                val bedroomsStep = state.bedrooms
+                val rentIncludesBillsStep = state.rentIncludesBills
+                val billsIncludedStep = state.billsIncluded
+                val furnishedStatusStep = state.furnishedStatus
+                val rentFrequencyStep = state.rentFrequency
+                val rentAmountStep = state.rentAmount
+                val rentIncludesBills = rentIncludesBillsStep.formModel.rentIncludesBills ?: false
+                val rentFrequency = rentFrequencyStep.formModel.rentFrequency
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.households",
+                        householdsStep.formModel.numberOfHouseholds,
+                        Destination(householdsStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.people",
+                        tenantsStep.formModel.numberOfPeople,
+                        Destination(tenantsStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.bedrooms",
+                        bedroomsStep.formModel.numberOfBedrooms,
+                        Destination(bedroomsStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.rentIncludesBills",
+                        rentIncludesBills,
+                        Destination(rentIncludesBillsStep),
+                    ),
+                )
+                if (rentIncludesBills) {
+                    add(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "forms.checkPropertyAnswers.propertyDetails.billsIncluded",
+                            state.getBillsIncluded().allBillsIncludedList,
+                            Destination(billsIncludedStep),
+                            enforceListAsSingleLineDisplay = true,
+                        ),
+                    )
+                }
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.furnishedStatus",
+                        furnishedStatusStep.formModel.furnishedStatus,
+                        Destination(furnishedStatusStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.rentFrequency",
+                        if (rentFrequency == RentFrequency.OTHER) rentFrequencyStep.formModel.customRentFrequency else rentFrequency,
+                        Destination(rentFrequencyStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.propertyDetails.rentAmount",
+                        state.getRentAmount().formattedRentAmount,
+                        Destination(rentAmountStep),
+                        enforceListAsSingleLineDisplay = true,
+                    ),
+                )
+            }
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,

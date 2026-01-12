@@ -51,17 +51,17 @@ class MessageKeyConverter {
 
         private fun convertBillsIncluded(billsIncluded: BillsIncluded): String =
             when (billsIncluded) {
-                BillsIncluded.GAS -> "gas"
-                BillsIncluded.ELECTRICITY -> "electricity"
-                BillsIncluded.WATER -> "water"
-                BillsIncluded.BROADBAND -> "broadband"
-                BillsIncluded.COUNCIL_TAX -> "council tax"
-                BillsIncluded.CLEANER_FOR_COMMUNAL_AREAS -> "cleaner for communal areas"
-                BillsIncluded.GARDENING -> "gardening"
-                BillsIncluded.CONTENTS_INSURANCE -> "contents insurance"
-                BillsIncluded.CABLE_OR_SATELLITE_TV -> "cable or satellite TV"
-                BillsIncluded.TV_LICENCE -> "tv licence"
-                BillsIncluded.SOMETHING_ELSE -> "other"
+                BillsIncluded.GAS -> "forms.billsIncluded.checkbox.gas"
+                BillsIncluded.ELECTRICITY -> "forms.billsIncluded.checkbox.electricity"
+                BillsIncluded.WATER -> "forms.billsIncluded.checkbox.water"
+                BillsIncluded.COUNCIL_TAX -> "forms.billsIncluded.checkbox.councilTax"
+                BillsIncluded.CONTENTS_INSURANCE -> "forms.billsIncluded.checkbox.contentsInsurance"
+                BillsIncluded.BROADBAND -> "forms.billsIncluded.checkbox.broadband"
+                BillsIncluded.TV_LICENCE -> "forms.billsIncluded.checkbox.tvLicence"
+                BillsIncluded.CABLE_OR_SATELLITE_TV -> "forms.billsIncluded.checkbox.cableSatelliteTV"
+                BillsIncluded.GARDENING -> "forms.billsIncluded.checkbox.gardening"
+                BillsIncluded.CLEANER_FOR_COMMUNAL_AREAS -> "forms.billsIncluded.checkbox.communalAreasCleaner"
+                BillsIncluded.SOMETHING_ELSE -> ""
             }
 
         private fun convertRentFrequency(rentFrequency: RentFrequency): String =

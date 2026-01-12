@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -10,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RentAmountDataModel
 
 interface OccupationState : JourneyState {
     val occupied: OccupiedStep
@@ -21,4 +25,27 @@ interface OccupationState : JourneyState {
     val furnishedStatus: FurnishedStatusStep
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
+
+    fun getBillsIncluded(): BillsIncludedDataModel =
+        BillsIncludedDataModel.fromFormDataOrNull()
+            ?: throw NotNullFormModelValueIsNullException(("No bills included found in OccupationState"))
+
+    fun getRentAmount(): RentAmountDataModel =
+        RentAmountDataModel.fromFormDataOrNull() ?: throw NotNullFormModelValueIsNullException("No rent amount found in OccupationState")
+
+    private fun BillsIncludedDataModel.Companion.fromFormDataOrNull() =
+        billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->
+            BillsIncludedDataModel.fromFormData(
+                billsIncluded = billsIncludedFormModel.billsIncluded,
+                customBillsIncluded = billsIncludedFormModel.customBillsIncluded,
+            )
+        }
+
+    private fun RentAmountDataModel.Companion.fromFormDataOrNull(): RentAmountDataModel? =
+        rentAmount.formModelOrNull?.let { rentAmountFormModel ->
+            RentAmountDataModel.fromFormData(
+                rentAmount = rentAmountFormModel.rentAmount,
+                isCustomRentFrequency = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER,
+            )
+        }
 }
