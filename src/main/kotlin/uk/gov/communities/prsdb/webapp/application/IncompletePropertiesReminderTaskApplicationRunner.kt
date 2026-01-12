@@ -33,6 +33,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
         // TODO - PRSD-1030 - retrieve incomplete properties older than 21 days
         val emailAddress = "jasmin.conterio@softwire.com"
         val propertyAddress = "HARDCODED ADDRESS"
+        val daysToComplete = 7
 
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 
@@ -40,6 +41,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
             emailAddress,
             IncompletePropertyReminderEmail(
                 singleLineAddress = propertyAddress,
+                daysToComplete = daysToComplete,
                 prsdUrl = prsdUrl,
             ),
         )
