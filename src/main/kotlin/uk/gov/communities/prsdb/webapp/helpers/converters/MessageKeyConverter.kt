@@ -23,27 +23,16 @@ class MessageKeyConverter {
         fun convert(enum: Enum<*>): String =
             when (enum) {
                 is PropertyType -> convertPropertyType(enum)
-
                 is OwnershipType -> convertOwnershipType(enum)
-
                 is LicensingType -> convertLicensingType(enum)
-
                 is FurnishedStatus -> convertFurnishedStatus(enum)
-
                 is RentFrequency -> convertRentFrequency(enum)
-
                 is BillsIncluded -> convertBillsIncluded(enum)
-
                 is GasSafetyExemptionReason -> convertGasSafetyExemptionReason(enum)
-
                 is EicrExemptionReason -> convertEicrExemptionReason(enum)
-
                 is EpcExemptionReason -> convertEpcExemptionReason(enum)
-
                 is MeesExemptionReason -> convertMeesExemptionReason(enum)
-
                 is ComplianceCertStatus -> convertComplianceCertStatus(enum)
-
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
@@ -122,19 +111,15 @@ class MessageKeyConverter {
                 EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS -> {
                     "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
                 }
-
                 EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT -> {
                     "forms.epcExemptionReason.radios.annualEnergyConsumptionLessThan25Percent.label"
                 }
-
                 EpcExemptionReason.TEMPORARY_BUILDING -> {
                     "forms.epcExemptionReason.radios.temporaryBuilding.label"
                 }
-
                 EpcExemptionReason.STANDALONE_SMALL_BUILDING -> {
                     "forms.epcExemptionReason.radios.standaloneSmallBuilding.label"
                 }
-
                 EpcExemptionReason.DUE_FOR_DEMOLITION -> {
                     "forms.epcExemptionReason.radios.dueForDemolition.label"
                 }
