@@ -21,42 +21,52 @@ class NgdAddressLoaderRepository(
     fun getLoadAddressPreparedStatement(connection: Connection): PreparedStatement {
         val query =
             """
-                WITH upserted_address AS (
-                    INSERT INTO address (
-                        uprn,
-                        single_line_address,
-                        organisation,
-                        sub_building,
-                        building_name,
-                        building_number,
-                        street_name,
-                        locality,
-                        town_name,
-                        postcode,
-                        local_council_id,
-                        is_active,
-                        created_date
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
-                    ON CONFLICT (uprn) DO UPDATE SET
-                        single_line_address = EXCLUDED.single_line_address,
-                        organisation        = EXCLUDED.organisation,
-                        sub_building        = EXCLUDED.sub_building,
-                        building_name       = EXCLUDED.building_name,
-                        building_number     = EXCLUDED.building_number,
-                        street_name         = EXCLUDED.street_name,
-                        locality            = EXCLUDED.locality,
-                        town_name           = EXCLUDED.town_name,
-                        postcode            = EXCLUDED.postcode,
-                        local_council_id    = EXCLUDED.local_council_id,
-                        is_active           = EXCLUDED.is_active,
-                        last_modified_date  = current_timestamp
-                    RETURNING id, single_line_address
-                )
-                UPDATE property_ownership 
-                SET single_line_address = (SELECT single_line_address FROM upserted_address)
-                WHERE address_id = (SELECT id FROM upserted_address);
+                INSERT INTO address (
+                    uprn,
+                    single_line_address,
+                    organisation,
+                    sub_building,
+                    building_name,
+                    building_number,
+                    street_name,
+                    locality,
+                    town_name,
+                    postcode,
+                    local_council_id,
+                    is_active,
+                    created_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+                ON CONFLICT (uprn) DO UPDATE SET
+                    single_line_address = EXCLUDED.single_line_address,
+                    organisation        = EXCLUDED.organisation,
+                    sub_building        = EXCLUDED.sub_building,
+                    building_name       = EXCLUDED.building_name,
+                    building_number     = EXCLUDED.building_number,
+                    street_name         = EXCLUDED.street_name,
+                    locality            = EXCLUDED.locality,
+                    town_name           = EXCLUDED.town_name,
+                    postcode            = EXCLUDED.postcode,
+                    local_council_id    = EXCLUDED.local_council_id,
+                    is_active           = EXCLUDED.is_active,
+                    last_modified_date  = current_timestamp
             """
         return connection.prepareStatement(query)
+    }
+
+    fun updatePropertyOwnershipAddresses(upsertedAddressUprns: Set<Long>) {
+        val query =
+            """
+                UPDATE property_ownership po
+                SET
+                    single_line_address = a.single_line_address,
+                    local_council_id = a.local_council_id
+                FROM address a
+                WHERE po.address_id = a.id AND a.uprn IN (:upsertedAddressUprns);
+            """
+        session
+            .createNativeMutationQuery(query)
+            .setParameter("upsertedAddressUprns", upsertedAddressUprns)
+            .executeUpdate()
     }
 
     fun deleteUnusedInactiveAddresses() {
