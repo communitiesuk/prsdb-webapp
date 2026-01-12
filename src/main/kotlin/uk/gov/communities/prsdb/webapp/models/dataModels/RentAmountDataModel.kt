@@ -16,8 +16,8 @@ data class RentAmountDataModel(
             rentAmount: String,
             isCustomRentFrequency: Boolean,
         ): List<String> {
-            val formattedRentAmount = mutableListOf("£", "$rentAmount ")
-            if (isCustomRentFrequency) formattedRentAmount.add(" per month")
+            val formattedRentAmount = mutableListOf("commonText.poundSign", "$rentAmount ")
+            if (isCustomRentFrequency) formattedRentAmount.add("forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
             return formattedRentAmount
         }
     }

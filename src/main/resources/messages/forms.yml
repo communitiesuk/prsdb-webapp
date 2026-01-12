@@ -541,6 +541,12 @@ checkPropertyAnswers:
     licensingType: Licensing type
     licensingNumber: Licensing number
     noLicensing: None
+  additionalLandlords:
+    heading: Additional landlords
+  interestedParties:
+    heading: Interested parties
+  tenancyDetails:
+    heading: Tenancy and rental information
     occupied: Occupied by tenants
     households: Number of households
     people: Number of tenants
@@ -550,12 +556,7 @@ checkPropertyAnswers:
     furnishedStatus: Furniture provided
     rentFrequency: When rent is paid
     rentAmount: Rent amount
-  additionalLandlords:
-    heading: Additional landlords
-  interestedParties:
-    heading: Interested parties
-  tenancyDetails:
-    heading: Tenancy and rental information
+    customFrequencyRentAmountSuffix:  per month
 update:
   email:
     fieldSetHeading: What is your updated email address?

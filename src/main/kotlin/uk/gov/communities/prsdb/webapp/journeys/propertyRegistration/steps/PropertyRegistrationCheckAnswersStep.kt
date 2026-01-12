@@ -136,7 +136,7 @@ class PropertyRegistrationCyaStepConfig(
         occupiedStep: RequestableStep<*, *, *>,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.propertyDetails.occupied",
+            "forms.checkPropertyAnswers.tenancyDetails.occupied",
             isOccupied,
             Destination.VisitableStep(occupiedStep, childJourneyId),
         )
@@ -156,28 +156,28 @@ class PropertyRegistrationCyaStepConfig(
                 val rentFrequency = rentFrequencyStep.formModel.rentFrequency
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.households",
+                        "forms.checkPropertyAnswers.tenancyDetails.households",
                         householdsStep.formModel.numberOfHouseholds,
                         Destination(householdsStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.people",
+                        "forms.checkPropertyAnswers.tenancyDetails.people",
                         tenantsStep.formModel.numberOfPeople,
                         Destination(tenantsStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.bedrooms",
+                        "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
                         bedroomsStep.formModel.numberOfBedrooms,
                         Destination(bedroomsStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.rentIncludesBills",
+                        "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
                         rentIncludesBills,
                         Destination(rentIncludesBillsStep),
                     ),
@@ -185,7 +185,7 @@ class PropertyRegistrationCyaStepConfig(
                 if (rentIncludesBills) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.propertyDetails.billsIncluded",
+                            "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
                             state.getBillsIncluded().allBillsIncludedList,
                             Destination(billsIncludedStep),
                             enforceListAsSingleLineDisplay = true,
@@ -194,21 +194,21 @@ class PropertyRegistrationCyaStepConfig(
                 }
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.furnishedStatus",
+                        "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
                         furnishedStatusStep.formModel.furnishedStatus,
                         Destination(furnishedStatusStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.rentFrequency",
+                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
                         if (rentFrequency == RentFrequency.OTHER) rentFrequencyStep.formModel.customRentFrequency else rentFrequency,
                         Destination(rentFrequencyStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.propertyDetails.rentAmount",
+                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
                         state.getRentAmount().formattedRentAmount,
                         Destination(rentAmountStep),
                         enforceListAsSingleLineDisplay = true,
