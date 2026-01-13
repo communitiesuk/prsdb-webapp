@@ -81,6 +81,7 @@ class NgdAddressLoaderRepository(
                     BEGIN
                         CREATE TEMP TABLE tmp_used_inactive_address_ids (id BIGINT) ON COMMIT DROP;
                 
+                        -- This only supports single-column foreign keys that reference address.id
                         FOR fk IN
                             SELECT c.conrelid::regclass AS tbl, a.attname AS col
                             FROM pg_constraint c
@@ -99,10 +100,7 @@ class NgdAddressLoaderRepository(
                             -- Create index on each foreign key column to speed up deletes
                             fkIndexName := format('tmp_%s_%s_idx', fk.tbl, fk.col);
                             fkIndexNames := array_append(fkIndexNames, fkIndexName);
-                            sql := format(
-                                'CREATE INDEX %I ON %I (%I);',
-                                fkIndexName, fk.tbl, fk.col
-                               );
+                            sql := format('CREATE INDEX %I ON %I (%I);', fkIndexName, fk.tbl, fk.col);
                             EXECUTE sql;
                         END LOOP;
                 
