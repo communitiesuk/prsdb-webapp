@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Accepted
 
-Date of decision: {yyyy-MM-dd}
+Date of decision: 2026-01-13
 
 ## Context and Problem Statement
 
@@ -58,7 +58,8 @@ Full performance tests would be run on a regular schedule.
 
 ### Run full performance tests on a schedule (e.g., nightly or weekly)
 
-Full performance tests would be executed on a regular schedule.
+Full performance tests would be executed on a regular schedule. Depending on the frequency, a check could be made to see if there were any
+merges since the last run to avoid unnecessary test runs.
 
 * Good, because it would be less time-consuming and costly compared to running tests on every merge.
 * Good, because we would not need to worry about overlapping test runs due to frequent merges.
