@@ -14,14 +14,14 @@ class LandlordIncompletePropertiesService(
     fun getIncompletePropertiesOlderThanDays(days: Int): List<IncompletePropertiesForReminderDataModel> {
         val incompleteProperties =
             landlordIncompletePropertiesRepository.findBySavedJourneyState_CreatedDateBefore(
-                DateTimeHelper.Companion.getJavaInstantFromLocalDate(LocalDate.now().minusDays(days.toLong())),
+                DateTimeHelper.getJavaInstantFromLocalDate(LocalDate.now().minusDays(days.toLong())),
             )
 
         return incompleteProperties.map { incompleteProperty ->
             IncompletePropertiesForReminderDataModel(
                 incompleteProperty.landlord.email,
                 incompleteProperty.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
-                CompleteByDateHelper.Companion.getIncompletePropertyCompleteByDate(incompleteProperty.savedJourneyState),
+                CompleteByDateHelper.getIncompletePropertyCompleteByDate(incompleteProperty.savedJourneyState),
             )
         }
     }
