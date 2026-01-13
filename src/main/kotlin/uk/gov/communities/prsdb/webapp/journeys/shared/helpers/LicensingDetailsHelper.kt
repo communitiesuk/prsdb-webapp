@@ -30,7 +30,7 @@ class LicensingDetailsHelper {
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
                         licenceNumber,
-                        Destination(step),
+                        Destination.VisitableStep(step, childJourneyId),
                     )
                 },
             )

@@ -586,6 +586,32 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `updateLicensing updates the property's license`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
+            )
+        val newLicensingType = LicensingType.HMO_MANDATORY_LICENCE
+        val newLicenceNumber = "newLicenceNumber"
+        val updatedLicence = License(newLicensingType, newLicenceNumber)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, newLicensingType, newLicenceNumber),
+        ).thenReturn(updatedLicence)
+
+        // Act
+        propertyOwnershipService.updateLicensing(propertyOwnership.id, newLicensingType, newLicenceNumber)
+
+        // Assert
+        assertEquals(updatedLicence, propertyOwnership.license)
+    }
+
+    @Test
     fun `updatePropertyOwnership does not change the fields associated with the given update model's null values`() {
         // Arrange
         val propertyOwnership =
