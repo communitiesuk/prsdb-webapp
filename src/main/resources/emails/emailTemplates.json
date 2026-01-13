@@ -196,8 +196,8 @@
     "bodyLocation": "/emails/LocalCouncilUserInvitationInformAdminEmail.md"
   },
   {
-    "test_id": "4d32e9f2-3c82-4ec4-a1d2-2037e76c2ad2",
-    "prod_id": "4c367b23-8797-4305-8e40-5d368a38940e",
+    "test_id": "9013fb3f-d3b3-4f46-8d76-46f0dcb47ec5",
+    "prod_id": "7cd893b9-46f3-4649-845a-45823e5f088b",
     "enumName": "INCOMPLETE_PROPERTY_REMINDER_EMAIL",
     "subject": "GOV.UK - You have an incomplete property registration",
     "bodyLocation": "/emails/IncompletePropertyReminder.md"
