@@ -21,6 +21,7 @@ enum class RegisterPropertyStepId(
     BillsIncluded("bills-included", RegisterPropertyGroupIdentifier.Occupancy),
     FurnishedStatus("property-furnished", RegisterPropertyGroupIdentifier.Occupancy),
     RentFrequency("rent-frequency", RegisterPropertyGroupIdentifier.Occupancy),
+    RentAmount("rent-amount", RegisterPropertyGroupIdentifier.Occupancy),
     LicensingType("licensing-type", RegisterPropertyGroupIdentifier.Licensing),
     SelectiveLicence("selective-licence", RegisterPropertyGroupIdentifier.Licensing),
     HmoMandatoryLicence("hmo-mandatory-licence", RegisterPropertyGroupIdentifier.Licensing),
