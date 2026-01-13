@@ -6,7 +6,7 @@ import kotlinx.datetime.toKotlinInstant
 import kotlinx.serialization.json.Json
 import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -41,7 +41,7 @@ interface IncompletePropertyService {
     ): Boolean
 }
 
-@PrsdbWebService("newIncompletePropertyService")
+@PrsdbService("newIncompletePropertyService")
 class IncompletePropertyServiceImpl(
     private val repository: SavedJourneyStateRepository,
     private val objectMapper: ObjectMapper,
@@ -105,7 +105,7 @@ class IncompletePropertyServiceImpl(
     }
 }
 
-@PrsdbWebService("legacyIncompletePropertyService")
+@PrsdbService("legacyIncompletePropertyService")
 @Primary
 class LegacyIncompletePropertyService(
     private val propertyRegistrationService: LegacyIncompletePropertyFormContextService,

@@ -19,7 +19,15 @@ spring:
       defer-datasource-initialization: true
 
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migrations
+    validate-on-migrate: true
+
+  sql:
+    init:
+      mode: always
+      platform: local
+      continue-on-error: true
 
   mvc.format.date: "d MMMM yyyy"
 

@@ -4,14 +4,14 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbService
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.repository.FormContextRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.Instant
 
-@PrsdbWebService
+@PrsdbService
 class LegacyIncompletePropertyFormContextService(
     private val formContextRepository: FormContextRepository,
 ) {
