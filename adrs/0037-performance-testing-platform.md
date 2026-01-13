@@ -34,7 +34,7 @@ The tests would be run on a developer's own machine, either in a container or na
 * Good, because it is easy to set up and run.
 * Good, because it incurs no additional cost.
 * Good, because it requires no additional time to set up vs. creating the tests themselves.
-* Good, because all requests must travel over the public internet, so we can test real-world network conditions.
+* Good, because all requests must travel over the public internet, and not from a datacenter, so we can test real-world network conditions.
 * Bad, because results may vary significantly between different developers' machines.
 * Bad, because external factors (e.g. the developer's Wi-Fi connection) may affect results.
 * Bad, because the tests can only be run manually, so cannot be integrated into CI/CD pipelines or scheduled.
@@ -46,7 +46,7 @@ The tests would be run on a standard GitHub Actions runner, either in a containe
 * Good, because it is easy to set up and run.
 * Good, because it incurs no additional cost.
 * Good, because it can be integrated into CI/CD pipelines and scheduled extremely easily.
-* Good, because all requests must travel over the public internet, so we can test real-world network conditions.
+* Good, because requests would travel over the public internet, and so would be closer to real-world network conditions.
 * Neutral, because we can't currently know whether the resources available on the runner will be sufficient for our tests.
 * Bad, because GitHub Actions are time-limited (6 hours for public repos per job) meaning that we could not run long endurance tests.
 * Bad, because we would have to find a way for the runner to bypass our IP allowlisting in order to access nft.
@@ -60,7 +60,7 @@ have more CPU and RAM than standard runners and can be assigned a static IP addr
 * Good, because it can be integrated into CI/CD pipelines and scheduled extremely easily.
 * Good, because we can assign a static IP address to the runner, allowing it to be allowlisted in nft.
 * Good, because we can specify more CPU and RAM than standard runners if needed.
-* Good, because all requests must travel over the public internet, so we can test real-world network conditions.
+* Good, because requests would travel over the public internet, and so would be closer to real-world network conditions.
 * Bad, because it incurs additional cost.
 * Bad, because GitHub Actions are time-limited (6 hours for public repos per job) meaning that we could not run long endurance tests.
 * Bad, because no established approval process to be able to use large runners, so it may take time to get permission and set up billing.
@@ -77,8 +77,8 @@ environments (e.g. test).
 * Good, because we can use some of our existing terraform modules to create the infrastructure.
 * Good, because we can trigger tests from our CI/CD pipelines and schedule them as needed.
 * Bad, because it incurs additional cost.
-* Bad, because requests __might__ travel over the public internet (as they are going from one AWS IP address to another), so we could not
-  guarantee that we're testing real world network conditions.
+* Bad, because requests __might not__ travel over the public internet (as they are going from one AWS IP address to another), so we could
+  not guarantee that we're testing real world network conditions.
 * Bad, because it would take time and effort to set up the infrastructure.
 
 ### A different cloud provider (e.g. GCP, Azure)
@@ -90,7 +90,7 @@ The tests would be run on a container service on a different cloud provider, e.g
 * Good, because we can use a static IP and so would not need to find a way for the tests to bypass our IP allowlisting in order to access
   nft.
 * Good, because we can trigger tests from our CI/CD pipelines and schedule them as needed.
-* Good, because requests would travel over the public internet, so we could test real-world network conditions.
+* Good, because requests would travel over the public internet, and so would be closer to real-world network conditions.
 * Bad, because it incurs additional cost.
 * Bad, because it would take significant time and effort to set up the infrastructure.
 * Bad, because we would be setting up infrastructure on a new cloud provider, which we have little experience with.
