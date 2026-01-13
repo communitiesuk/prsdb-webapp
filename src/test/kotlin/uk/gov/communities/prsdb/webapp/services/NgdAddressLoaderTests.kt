@@ -38,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.UPRN_BATCH_SIZE
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.io.FileInputStream
 import java.sql.Connection
@@ -224,6 +225,30 @@ class NgdAddressLoaderTests {
     }
 
     @Test
+    fun `loadNewDataPackageVersions updates property ownership addresses in batches during data package loads`() {
+        // Arrange
+        setUpMockNgdAddressLoaderRepository { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
+        }
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+            .thenReturn(getNgdFileInputStream("largeCsv.zip"))
+
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        val expectedBatchCount = ceil(LARGE_CSV_LINE_COUNT / UPRN_BATCH_SIZE).toInt()
+        verify(mockNgdAddressLoaderRepository, times(expectedBatchCount)).updatePropertyOwnershipAddresses(any())
+    }
+
+    @Test
     fun `loadNewDataPackageVersions deletes unused inactive addresses after all data packages have been loaded`() {
         // Arrange
         setUpMockNgdAddressLoaderRepository { mock ->
@@ -341,8 +366,7 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        val largeCsvLineCount = 10001f
-        val expectedBatchCount = ceil(largeCsvLineCount / BATCH_SIZE).toInt()
+        val expectedBatchCount = ceil(LARGE_CSV_LINE_COUNT / BATCH_SIZE).toInt()
         verify(mockPreparedStatement, times(expectedBatchCount)).executeBatch()
     }
 
@@ -557,6 +581,8 @@ class NgdAddressLoaderTests {
               ]
             }
             """.trimIndent()
+
+        private const val LARGE_CSV_LINE_COUNT = 10001f
 
         fun getNgdFileInputStream(fileName: String) = FileInputStream(ResourceUtils.getFile("classpath:data/ngd/$fileName"))
 

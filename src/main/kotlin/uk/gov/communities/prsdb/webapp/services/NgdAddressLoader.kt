@@ -140,18 +140,29 @@ class NgdAddressLoader(
             session.doWork { connection ->
                 ngdAddressLoaderRepository.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
                     var batchRecordCount = 0
+                    val upsertedAddressUprns = mutableSetOf<Long>()
                     csvParser.forEachIndexed { index, record ->
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
-                        if (hasRecordBeenAdded) batchRecordCount++
+                        if (hasRecordBeenAdded) {
+                            batchRecordCount++
+                            val uprn = record.get("uprn").toLong()
+                            upsertedAddressUprns.add(uprn)
+                        }
 
                         if (batchRecordCount >= BATCH_SIZE) {
                             preparedStatement.executeBatch()
                             batchRecordCount = 0
                         }
 
+                        if (upsertedAddressUprns.size >= UPRN_BATCH_SIZE) {
+                            ngdAddressLoaderRepository.updatePropertyOwnershipAddresses(upsertedAddressUprns)
+                            upsertedAddressUprns.clear()
+                        }
+
                         if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
                     if (batchRecordCount > 0) preparedStatement.executeBatch()
+                    if (upsertedAddressUprns.isNotEmpty()) ngdAddressLoaderRepository.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                 }
             }
             setStoredDataPackageVersionId(dataPackageVersionId)
@@ -234,6 +245,7 @@ class NgdAddressLoader(
         const val DATA_PACKAGE_FILE_NAME = "add_gb_builtaddress"
 
         const val BATCH_SIZE = 5000
+        const val UPRN_BATCH_SIZE = 20000
 
         private val deleteChangeTypes =
             listOf("End Of Life", "Moved To A Different Feature Type")
