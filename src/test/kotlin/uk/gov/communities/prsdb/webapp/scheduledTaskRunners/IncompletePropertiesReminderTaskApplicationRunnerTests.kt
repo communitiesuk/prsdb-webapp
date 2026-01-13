@@ -36,6 +36,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         val expectedEmailModel =
             IncompletePropertyReminderEmail(
                 singleLineAddress = "HARDCODED ADDRESS",
+                daysToComplete = 7,
                 prsdUrl = mockPrsdUrl,
             )
 
