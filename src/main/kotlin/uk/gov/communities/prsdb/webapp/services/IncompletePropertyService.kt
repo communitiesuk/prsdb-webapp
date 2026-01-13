@@ -1,15 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
-import kotlinx.serialization.json.Json
 import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
-import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -41,10 +38,9 @@ interface IncompletePropertyService {
     ): Boolean
 }
 
-@PrsdbService("newIncompletePropertyService")
+@PrsdbWebService("newIncompletePropertyService")
 class IncompletePropertyServiceImpl(
     private val repository: SavedJourneyStateRepository,
-    private val objectMapper: ObjectMapper,
     private val landlordRepository: LandlordRepository,
 ) : IncompletePropertyService {
     override fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> =
@@ -78,34 +74,9 @@ class IncompletePropertyServiceImpl(
         incompletePropertyId: String,
         principalName: String,
     ): Boolean = repository.existsByJourneyIdAndUser_Id(incompletePropertyId, principalName)
-
-    private fun SavedJourneyState.getPropertyRegistrationSingleLineAddress(): String {
-        val stateDataMap = objectMapper.readValue(serializedState, Map::class.java)
-        val submittedJourneyData = stateDataMap["journeyData"] as Map<*, *>
-        val selectedAddressData = submittedJourneyData["select-address"] as? Map<*, *>
-        val selectedAddress = selectedAddressData?.get("address") as? String
-        val serializedCachedAddressData = stateDataMap["cachedAddresses"] as String
-        val cachedAddressData: List<AddressDataModel> = Json.decodeFromString(serializedCachedAddressData)
-
-        return if (cachedAddressData.any { it.singleLineAddress == selectedAddress }) {
-            selectedAddress!!
-        } else {
-            val manualAddressData = submittedJourneyData["manual-address"] as Map<*, *>
-            val localCouncilData = submittedJourneyData["local-council"] as Map<*, *>
-            AddressDataModel
-                .fromManualAddressData(
-                    addressLineOne = manualAddressData["addressLineOne"] as String,
-                    addressLineTwo = manualAddressData["addressLineTwo"] as String?,
-                    townOrCity = manualAddressData["townOrCity"] as String,
-                    county = manualAddressData["county"] as String?,
-                    postcode = manualAddressData["postcode"] as String,
-                    localCouncilId = localCouncilData["localCouncilId"] as Int?,
-                ).singleLineAddress
-        }
-    }
 }
 
-@PrsdbService("legacyIncompletePropertyService")
+@PrsdbWebService("legacyIncompletePropertyService")
 @Primary
 class LegacyIncompletePropertyService(
     private val propertyRegistrationService: LegacyIncompletePropertyFormContextService,

@@ -8,14 +8,12 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesForReminderDataModel
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
 import java.time.LocalDate
 
 @PrsdbService
 class IncompletePropertiesService(
     private val landlordRepository: LandlordRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
-    private val incompletePropertyService: IncompletePropertyService,
 ) {
     fun addIncompletePropertyToLandlord(state: SavedJourneyState) {
         landlordRepository.findByBaseUser_Id(state.user.id)?.let { landlord ->
@@ -37,10 +35,7 @@ class IncompletePropertiesService(
         return incompleteProperties.map { incompleteProperty ->
             IncompletePropertiesForReminderDataModel(
                 incompleteProperty.landlord.email,
-                incompletePropertyService.getAddressData(
-                    incompleteProperty.savedJourneyState.journeyId,
-                    incompleteProperty.landlord.baseUser.id,
-                ),
+                incompleteProperty.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
                 // TODO PRSD-1030 - get real complete by date
                 LocalDate.now().plusDays(7L).toKotlinLocalDate(),
             )
