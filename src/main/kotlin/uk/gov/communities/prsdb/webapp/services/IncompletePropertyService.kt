@@ -7,6 +7,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -36,12 +39,16 @@ interface IncompletePropertyService {
         incompletePropertyId: String,
         principalName: String,
     ): Boolean
+
+    @PrsdbFlip(name = MIGRATE_PROPERTY_REGISTRATION, alterBean = "newIncompletePropertyService")
+    fun addIncompletePropertyToLandlord(state: SavedJourneyState)
 }
 
 @PrsdbWebService("newIncompletePropertyService")
 class IncompletePropertyServiceImpl(
     private val repository: SavedJourneyStateRepository,
     private val landlordRepository: LandlordRepository,
+    private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
 ) : IncompletePropertyService {
     override fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> =
         landlordRepository.findByBaseUser_Id(principalName)?.let { landlord ->
@@ -74,6 +81,17 @@ class IncompletePropertyServiceImpl(
         incompletePropertyId: String,
         principalName: String,
     ): Boolean = repository.existsByJourneyIdAndUser_Id(incompletePropertyId, principalName)
+
+    override fun addIncompletePropertyToLandlord(state: SavedJourneyState) {
+        landlordRepository.findByBaseUser_Id(state.user.id)?.let { landlord ->
+            val newEntry =
+                LandlordIncompleteProperties(
+                    landlord = landlord,
+                    savedJourneyState = state,
+                )
+            landlordIncompletePropertiesRepository.save(newEntry)
+        }
+    }
 }
 
 @PrsdbWebService("legacyIncompletePropertyService")
@@ -139,4 +157,8 @@ class LegacyIncompletePropertyService(
     }
 
     private fun FormContext.toAddressData(): AddressDataModel = PropertyRegistrationJourneyDataHelper.getAddress(this.toJourneyData())!!
+
+    override fun addIncompletePropertyToLandlord(state: SavedJourneyState) {
+        // Not used for legacy service
+    }
 }
