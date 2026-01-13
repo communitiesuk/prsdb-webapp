@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys
+package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -14,14 +14,14 @@ class LandlordIncompletePropertiesService(
     fun getIncompletePropertiesOlderThanDays(days: Int): List<IncompletePropertiesForReminderDataModel> {
         val incompleteProperties =
             landlordIncompletePropertiesRepository.findBySavedJourneyState_CreatedDateBefore(
-                DateTimeHelper.getJavaInstantFromLocalDate(LocalDate.now().minusDays(days.toLong())),
+                DateTimeHelper.Companion.getJavaInstantFromLocalDate(LocalDate.now().minusDays(days.toLong())),
             )
 
         return incompleteProperties.map { incompleteProperty ->
             IncompletePropertiesForReminderDataModel(
                 incompleteProperty.landlord.email,
                 incompleteProperty.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
-                CompleteByDateHelper.getIncompletePropertyCompleteByDate(incompleteProperty.savedJourneyState),
+                CompleteByDateHelper.Companion.getIncompletePropertyCompleteByDate(incompleteProperty.savedJourneyState),
             )
         }
     }
