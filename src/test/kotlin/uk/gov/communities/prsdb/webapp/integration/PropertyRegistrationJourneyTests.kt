@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
@@ -181,6 +182,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
         rentFrequencyPage.fillCustomRentFrequency("Fortnightly")
         rentFrequencyPage.form.submit()
+        val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+
+        // Rent amount - render page
+        assertThat(rentAmountPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        // fill in and submit
+        rentAmountPage.submitRentAmount("400")
 
         // TODO PDJB-112, PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormPagePropertyRegistration::class)

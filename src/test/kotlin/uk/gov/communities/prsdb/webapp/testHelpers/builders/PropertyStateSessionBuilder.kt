@@ -6,6 +6,7 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
@@ -97,6 +98,11 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationFurnished() = beforePropertyRegistrationBillsIncluded().withBillsIncluded()
 
         fun beforePropertyRegistrationRentFrequency() = beforePropertyRegistrationFurnished().withFurnished()
+
+        fun beforePropertyRegistrationRentAmount(rentFrequency: RentFrequency) =
+            beforePropertyRegistrationRentFrequency().withRentFrequency(
+                rentFrequency,
+            )
 
         fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
 
