@@ -214,7 +214,7 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilUserInvitationInformAdminEmail.md",
                 ),
                 EmailTemplateTestData(
-                    IncompletePropertyReminderEmail("propertyAddress", "prsdUrl"),
+                    IncompletePropertyReminderEmail("propertyAddress", 7, "prsdUrl"),
                     "/emails/IncompletePropertyReminder.md",
                 ),
             )
