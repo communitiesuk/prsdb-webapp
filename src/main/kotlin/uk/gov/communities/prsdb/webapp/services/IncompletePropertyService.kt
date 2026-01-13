@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -12,11 +11,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
-import kotlin.time.Duration.Companion.days
 
 interface IncompletePropertyService {
     @PrsdbFlip(name = MIGRATE_PROPERTY_REGISTRATION, alterBean = "newIncompletePropertyService")
@@ -56,7 +55,7 @@ class IncompletePropertyServiceImpl(
                 IncompletePropertiesDataModel(
                     journeyId = savedState.journeyId,
                     singleLineAddress = savedState.getPropertyRegistrationSingleLineAddress(),
-                    completeByDate = DateTimeHelper.getDateInUK(savedState.createdDate.toKotlinInstant().plus(28.days)),
+                    completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDate(savedState),
                 )
             }
         } ?: throw IllegalArgumentException("Landlord not found for principal: $principalName")
