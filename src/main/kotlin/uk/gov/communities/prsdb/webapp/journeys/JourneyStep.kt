@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
@@ -37,9 +38,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
             addStepData(routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
     }
 
-    open class InternalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
-        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
-    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+    open class InternalStep<out TEnum : Enum<out TEnum>, in TState : JourneyState>(
+        stepConfig: AbstractInternalStepConfig<TEnum, TState>,
+    ) : JourneyStep<TEnum, NoInputFormModel, TState>(stepConfig) {
         override fun getRouteSegmentOrNull(): String? = null
 
         override fun isRouteSegmentInitialised(): Boolean = true
@@ -160,7 +161,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private lateinit var state: TState
 
-    val outcome: TEnum? get() = if (isStepReachable)stepConfig.mode(state) else null
+    val outcome: TEnum? get() = if (isStepReachable) stepConfig.mode(state) else null
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 
@@ -172,7 +173,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         get() {
             val singleParentUrl =
                 when (val singleParentStep = parentage.allowingParentSteps.singleOrNull()) {
-                    is InternalStep<*, *, *> -> singleParentStep.backUrl
+                    is InternalStep<*, *> -> singleParentStep.backUrl
                     is RequestableStep<*, *, *> -> Destination(singleParentStep).toUrlStringOrNull()
                     null -> null
                 }

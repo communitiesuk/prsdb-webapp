@@ -1,12 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertSame
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.mockConstruction
+import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.web.servlet.ModelAndView
@@ -32,7 +29,7 @@ class DestinationTests {
         val finalUrl = resolveModelAndViewToRedirectUrl(modelAndView)
 
         // Assert
-        assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
+        Assertions.assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
     }
 
     @Test
@@ -50,7 +47,7 @@ class DestinationTests {
         val finalUrl = resolveModelAndViewToRedirectUrl(modelAndView)
 
         // Assert
-        assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
+        Assertions.assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
     }
 
     @Test
@@ -69,7 +66,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        assertNull(urlString)
+        Assertions.assertNull(urlString)
     }
 
     @Test
@@ -88,7 +85,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        assertEquals("$routeSegment?journeyId=$journeyId", urlString)
+        Assertions.assertEquals("$routeSegment?journeyId=$journeyId", urlString)
     }
 
     @Test
@@ -102,9 +99,9 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        assertEquals("redirect:$externalUrl", modelAndView.viewName)
-        assertEquals("value1", modelAndView.model["param1"])
-        assertEquals("value2", modelAndView.model["param2"])
+        Assertions.assertEquals("redirect:$externalUrl", modelAndView.viewName)
+        Assertions.assertEquals("value1", modelAndView.model["param1"])
+        Assertions.assertEquals("value2", modelAndView.model["param2"])
     }
 
     @Test
@@ -117,8 +114,8 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        assertEquals("redirect:$externalUrl", modelAndView.viewName)
-        assertTrue(modelAndView.model.isEmpty())
+        Assertions.assertEquals("redirect:$externalUrl", modelAndView.viewName)
+        Assertions.assertTrue(modelAndView.model.isEmpty())
     }
 
     @Test
@@ -132,7 +129,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        assertEquals("http://example.com?param1=value1&param2=value2", urlString)
+        Assertions.assertEquals("http://example.com?param1=value1&param2=value2", urlString)
     }
 
     @Test
@@ -146,9 +143,9 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        assertEquals(templateName, modelAndView.viewName)
-        assertEquals("value1", modelAndView.model["key1"])
-        assertEquals("value2", modelAndView.model["key2"])
+        Assertions.assertEquals(templateName, modelAndView.viewName)
+        Assertions.assertEquals("value1", modelAndView.model["key1"])
+        Assertions.assertEquals("value2", modelAndView.model["key2"])
     }
 
     @Test
@@ -161,8 +158,8 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        assertEquals(templateName, modelAndView.viewName)
-        assertTrue(modelAndView.model.isEmpty())
+        Assertions.assertEquals(templateName, modelAndView.viewName)
+        Assertions.assertTrue(modelAndView.model.isEmpty())
     }
 
     @Test
@@ -179,13 +176,13 @@ class DestinationTests {
         val oldModelAndView = destination.toModelAndView()
 
         // Assert
-        assertEquals(templateName, updatedModelAndView.viewName)
-        assertEquals("value1", updatedModelAndView.model["key1"])
-        assertEquals("value2", updatedModelAndView.model["key2"])
+        Assertions.assertEquals(templateName, updatedModelAndView.viewName)
+        Assertions.assertEquals("value1", updatedModelAndView.model["key1"])
+        Assertions.assertEquals("value2", updatedModelAndView.model["key2"])
 
-        assertEquals(templateName, oldModelAndView.viewName)
-        assertEquals("value1", oldModelAndView.model["key1"])
-        assertNull(oldModelAndView.model["key2"])
+        Assertions.assertEquals(templateName, oldModelAndView.viewName)
+        Assertions.assertEquals("value1", oldModelAndView.model["key1"])
+        Assertions.assertNull(oldModelAndView.model["key2"])
     }
 
     @Test
@@ -198,7 +195,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        assertNull(urlString)
+        Assertions.assertNull(urlString)
     }
 
     @Test
@@ -218,7 +215,7 @@ class DestinationTests {
         // Act & Assert
         nonTemplateDestinations.forEach { destination ->
             val updatedDestination = destination.withModelContent(contentToAdd)
-            assertSame(destination, updatedDestination)
+            Assertions.assertSame(destination, updatedDestination)
         }
 
         Destination::class.sealedSubclasses.all { type ->
@@ -230,21 +227,22 @@ class DestinationTests {
     fun `NavigationalStep Destination calls through to a navigation step lifecycle orchestrator for that step`() {
         // Arrange
         val modelAndView = ModelAndView()
-        lateinit var capturedStep: JourneyStep.InternalStep<*, *, *>
-        mockConstruction(StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator::class.java) { mock, context ->
-            whenever(mock.getStepModelAndView()).thenReturn(modelAndView)
-            capturedStep = context.arguments()[0] as JourneyStep.InternalStep<*, *, *>
-        }.use {
-            val mockStep = mock<JourneyStep.InternalStep<*, *, *>>()
+        lateinit var capturedStep: JourneyStep.InternalStep<*, *>
+        Mockito
+            .mockConstruction(StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator::class.java) { mock, context ->
+                whenever(mock.getStepModelAndView()).thenReturn(modelAndView)
+                capturedStep = context.arguments()[0] as JourneyStep.InternalStep<*, *>
+            }.use {
+                val mockStep = mock<JourneyStep.InternalStep<*, *>>()
 
-            // Act
-            val destination = Destination.NavigationalStep(mockStep)
-            val result = destination.toModelAndView()
+                // Act
+                val destination = Destination.NavigationalStep(mockStep)
+                val result = destination.toModelAndView()
 
-            // Assert
-            assertSame(modelAndView, result)
-            assertSame(mockStep, capturedStep)
-        }
+                // Assert
+                Assertions.assertSame(modelAndView, result)
+                Assertions.assertSame(mockStep, capturedStep)
+            }
     }
 
     @Test
@@ -268,7 +266,7 @@ class DestinationTests {
         val updatedDestination = destination.withModelContent(contentToAdd)
 
         // Assert
-        assertSame(destination, updatedDestination)
+        Assertions.assertSame(destination, updatedDestination)
     }
 
     @Test
@@ -277,7 +275,7 @@ class DestinationTests {
         val destinationString = Destination.Nowhere().toUrlStringOrNull()
 
         // Assert
-        assertNull(destinationString)
+        Assertions.assertNull(destinationString)
     }
 
     @Test
@@ -286,15 +284,15 @@ class DestinationTests {
         val mockRequestableStep = mock<JourneyStep.RequestableStep<*, *, *>>()
         whenever(mockRequestableStep.currentJourneyId).thenReturn("journeyId")
 
-        val mockInternalStep = mock<JourneyStep.InternalStep<*, *, *>>()
+        val mockInternalStep = mock<JourneyStep.InternalStep<*, *>>()
 
         // Act
         val visitableDestination = Destination(mockRequestableStep)
         val notionalDestination = Destination(mockInternalStep)
 
         // Assert
-        assertTrue(visitableDestination is Destination.VisitableStep)
-        assertTrue(notionalDestination is Destination.NavigationalStep)
+        Assertions.assertTrue(visitableDestination is Destination.VisitableStep)
+        Assertions.assertTrue(notionalDestination is Destination.NavigationalStep)
     }
 
     private fun resolveModelAndViewToRedirectUrl(modelAndView: ModelAndView): String? {

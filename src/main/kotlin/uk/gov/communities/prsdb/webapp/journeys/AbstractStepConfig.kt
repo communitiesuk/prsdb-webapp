@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
@@ -112,8 +113,22 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
     ) = rejectValue(fieldName, "RejectValueWithMessageKey", messageKey)
 }
 
+abstract class AbstractInternalStepConfig<out TEnum : Enum<out TEnum>, in TState : JourneyState> :
+    AbstractStepConfig<TEnum, NoInputFormModel, TState>() {
+    override fun getStepSpecificContent(state: TState) = mapOf<String, String>()
+
+    override fun chooseTemplate(state: TState): String = ""
+
+    final override val formModelClass = NoInputFormModel::class
+}
+
 // Generic step config should be used where the subclass does not need any additional initialisation
 abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
     AbstractStepConfig<TEnum, TModel, TState>() {
+    override fun isSubClassInitialised(): Boolean = true
+}
+
+abstract class AbstractGenericInternalStepConfig<TEnum : Enum<TEnum>, TState : JourneyState> :
+    AbstractInternalStepConfig<TEnum, TState>() {
     override fun isSubClassInitialised(): Boolean = true
 }

@@ -17,6 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysFalseValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import kotlin.test.assertEquals
@@ -31,9 +32,10 @@ class JourneyStepTests {
         @JvmStatic
         fun journeyStepProvider(): List<Arguments?> {
             val stepConfig: AbstractStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
+            val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
             return listOf(
                 Arguments.argumentSet("Requestable Step", JourneyStep.RequestableStep(stepConfig), "stepId"),
-                Arguments.argumentSet("Internal Step", JourneyStep.InternalStep(stepConfig), null),
+                Arguments.argumentSet("Internal Step", JourneyStep.InternalStep(internalStepConfig), null),
             )
         }
     }
@@ -269,9 +271,9 @@ class JourneyStepTests {
     @Test
     fun `submitFormData saves does nothing for a NotionalStep`() {
         // Arrange
-        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
-        val step = JourneyStep.InternalStep(stepConfig)
-        whenever(step.stepConfig.formModelClass).thenReturn(TestFormModel::class)
+        val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
+        val step = JourneyStep.InternalStep(internalStepConfig)
+        whenever(step.stepConfig.formModelClass).thenReturn(NoInputFormModel::class)
         whenever(step.stepConfig.routeSegment).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
@@ -496,8 +498,8 @@ class JourneyStepTests {
     @Test
     fun `initialising the route segment for an InternalStep with a non-null route segment throws`() {
         // Arrange
-        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
-        val step = JourneyStep.InternalStep(stepConfig)
+        val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
+        val step = JourneyStep.InternalStep(internalStepConfig)
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {

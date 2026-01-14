@@ -13,7 +13,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when used like a naive constructor, StepLifecycleOrchestrator returns a corresponding orchestrator`() {
         // Arrange
-        val internalStep = mock<JourneyStep.InternalStep<*, *, *>>()
+        val internalStep = mock<JourneyStep.InternalStep<*, *>>()
         val requestableStep = mock<JourneyStep.RequestableStep<*, *, *>>()
 
         // Act
@@ -153,7 +153,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when notional step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.InternalStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.InternalStep<*, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.attemptToReachStep()).thenReturn(false)
@@ -175,7 +175,7 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when notional step is reachable, getStepModelAndView calls all step methods in the correct order and returns the next destination`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.InternalStep<*, *, *>>()
+        val stepConfig = mock<JourneyStep.InternalStep<*, *>>()
         val myInOrder = inOrder(stepConfig)
         val orchestrator = StepLifecycleOrchestrator(stepConfig)
         whenever(stepConfig.attemptToReachStep()).thenReturn(true)

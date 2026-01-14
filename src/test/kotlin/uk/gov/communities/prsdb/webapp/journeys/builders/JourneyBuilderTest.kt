@@ -325,7 +325,7 @@ class JourneyBuilderTest {
         fun setup() {
             mockedStepBuilders =
                 mockConstruction(StepInitialiser::class.java) { mock, context ->
-                    val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+                    val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                     whenever((mock as StepInitialiser<*, JourneyState, *>).build()).thenReturn(listOf(mockedJourneyStep))
                 }
@@ -340,7 +340,7 @@ class JourneyBuilderTest {
         fun `notionalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
             // Arrange 1
             val jb = JourneyBuilder(mock())
-            val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+            val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
 
             // Act 1
             jb.step(uninitialisedStep) {
@@ -354,7 +354,7 @@ class JourneyBuilderTest {
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2
-            val builtStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+            val builtStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
             whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
 
             // Act 2
@@ -375,9 +375,9 @@ class JourneyBuilderTest {
 
         val builtSteps =
             listOf(
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
             )
 
         mockConstruction(TaskInitialiser::class.java) { mock, context ->

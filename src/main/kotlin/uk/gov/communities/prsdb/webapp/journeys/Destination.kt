@@ -49,7 +49,7 @@ sealed class Destination {
     }
 
     class NavigationalStep(
-        val step: JourneyStep.InternalStep<*, *, *>,
+        val step: JourneyStep.InternalStep<*, *>,
     ) : Destination() {
         override fun toModelAndView() = StepLifecycleOrchestrator(step).getStepModelAndView()
 
