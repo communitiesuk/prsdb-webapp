@@ -111,12 +111,12 @@ class TaskTests {
     }
 
     @Test
-    fun `notionalExitStep return a Navigational Step from the internal task builder`() {
+    fun `exitStep returns a TaskExitStep from the internal task builder`() {
         // Arrange
         val task = initialisedTask()
 
         // Act
-        val step = task.notionalExitStep
+        val step = task.exitStep
 
         // Assert
         assertSame(exitStepMock, step)

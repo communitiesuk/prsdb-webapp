@@ -269,7 +269,7 @@ class JourneyStepTests {
     }
 
     @Test
-    fun `submitFormData saves does nothing for a NotionalStep`() {
+    fun `submitFormData saves does nothing for a InternalStep`() {
         // Arrange
         val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
         val step = JourneyStep.InternalStep(internalStepConfig)

@@ -320,7 +320,7 @@ class JourneyBuilderTest {
     }
 
     @Nested
-    inner class NotionalStepTests {
+    inner class InternalStepTests {
         lateinit var mockedStepBuilders: MockedConstruction<StepInitialiser<*, *, *>>
 
         @BeforeEach
@@ -339,7 +339,7 @@ class JourneyBuilderTest {
         }
 
         @Test
-        fun `notionalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
+        fun `internalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
             // Arrange 1
             val jb = JourneyBuilder(mock())
             val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()

@@ -138,7 +138,7 @@ class StepLifecycleOrchestratorTest {
     }
 
     @Test
-    fun `when notional step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
+    fun `when internal step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
         // Arrange
         val step = mock<JourneyStep.InternalStep<*, *>>()
         val myInOrder = inOrder(step)
@@ -160,7 +160,7 @@ class StepLifecycleOrchestratorTest {
 
     @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `when notional step is reachable, getStepModelAndView calls all step methods in the correct order and returns the next destination`() {
+    fun `when internal step is reachable, getStepModelAndView calls all step methods in the correct order and returns the next destination`() {
         // Arrange
         val step = mock<JourneyStep.InternalStep<*, *>>()
         val myInOrder = inOrder(step)

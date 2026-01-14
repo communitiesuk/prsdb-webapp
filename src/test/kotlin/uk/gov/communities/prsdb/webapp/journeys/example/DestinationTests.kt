@@ -282,11 +282,11 @@ class DestinationTests {
 
         // Act
         val visitableDestination = Destination(mockRequestableStep)
-        val notionalDestination = Destination(mockInternalStep)
+        val navigationalDestination = Destination(mockInternalStep)
 
         // Assert
         Assertions.assertTrue(visitableDestination is Destination.VisitableStep)
-        Assertions.assertTrue(notionalDestination is Destination.NavigationalStep)
+        Assertions.assertTrue(navigationalDestination is Destination.NavigationalStep)
     }
 
     private fun resolveModelAndViewToRedirectUrl(modelAndView: ModelAndView): String? {

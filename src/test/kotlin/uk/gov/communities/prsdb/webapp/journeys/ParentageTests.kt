@@ -197,7 +197,7 @@ class ParentageTests {
         // Arrange
         val task = mock<Task<*>>()
         val step = mock<TaskExitStep>()
-        whenever(task.notionalExitStep).thenReturn(step)
+        whenever(task.exitStep).thenReturn(step)
 
         // Act
         val parent = task.isComplete()

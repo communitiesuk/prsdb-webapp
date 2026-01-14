@@ -49,13 +49,13 @@ abstract class Task<in TState : JourneyState> {
 
     fun taskStatus(): TaskStatus =
         when {
-            notionalExitStep.isStepReachable -> TaskStatus.COMPLETED
+            exitStep.isStepReachable -> TaskStatus.COMPLETED
             firstStep.outcome != null -> TaskStatus.IN_PROGRESS
             firstStep.isStepReachable -> TaskStatus.NOT_STARTED
             else -> TaskStatus.CANNOT_START
         }
 
-    val notionalExitStep: TaskExitStep get() = subJourneyBuilder.exitStep
+    val exitStep: TaskExitStep get() = subJourneyBuilder.exitStep
     val firstStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstStep
 
     protected fun ConfigurableElement<*>.savable() {
