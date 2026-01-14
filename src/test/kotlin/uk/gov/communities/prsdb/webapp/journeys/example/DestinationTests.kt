@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.example
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.web.servlet.ModelAndView
@@ -226,23 +225,18 @@ class DestinationTests {
     @Test
     fun `NavigationalStep Destination calls through to a navigation step lifecycle orchestrator for that step`() {
         // Arrange
+        val mockStep = mock<JourneyStep.InternalStep<*, *>>()
+        val mockLifecycleOrchestrator = mock<StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator>()
         val modelAndView = ModelAndView()
-        lateinit var capturedStep: JourneyStep.InternalStep<*, *>
-        Mockito
-            .mockConstruction(StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator::class.java) { mock, context ->
-                whenever(mock.getStepModelAndView()).thenReturn(modelAndView)
-                capturedStep = context.arguments()[0] as JourneyStep.InternalStep<*, *>
-            }.use {
-                val mockStep = mock<JourneyStep.InternalStep<*, *>>()
+        whenever(mockStep.lifecycleOrchestrator).thenReturn(mockLifecycleOrchestrator)
+        whenever(mockLifecycleOrchestrator.getStepModelAndView()).thenReturn(modelAndView)
 
-                // Act
-                val destination = Destination.NavigationalStep(mockStep)
-                val result = destination.toModelAndView()
+        // Act
+        val destination = Destination.NavigationalStep(mockStep)
+        val result = destination.toModelAndView()
 
-                // Assert
-                Assertions.assertSame(modelAndView, result)
-                Assertions.assertSame(mockStep, capturedStep)
-            }
+        // Assert
+        Assertions.assertSame(modelAndView, result)
     }
 
     @Test

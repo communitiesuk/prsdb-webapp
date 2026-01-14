@@ -15,7 +15,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
     open class RequestableStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
-        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+        stepConfig: AbstractRequestableStepConfig<TEnum, TFormModel, TState>,
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val routeSegment: String get() = stepConfig.routeSegment
 
@@ -147,6 +147,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     private lateinit var unreachableStepDestination: () -> Destination
 
     private var shouldSaveOnCompletion: Boolean = false
+
+    val lifecycleOrchestrator: StepLifecycleOrchestrator
+        get() = stepConfig.getStepLifecycleOrchestrator(this)
 
     val isStepReachable: Boolean
         get() = parentage.allowsChild()

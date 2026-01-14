@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 @JourneyFrameworkComponent
 class SearchEpcStepConfig(
     private val epcLookupService: EpcLookupService,
-) : AbstractGenericStepConfig<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
+) : AbstractGenericRequestableStepConfig<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
     override val formModelClass = EpcLookupFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =

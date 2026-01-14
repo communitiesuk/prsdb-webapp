@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class FooCheckAnswersStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractGenericStepConfig<Complete, NoInputFormModel, FooJourneyState>() {
+) : AbstractGenericRequestableStepConfig<Complete, NoInputFormModel, FooJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: FooJourneyState) =

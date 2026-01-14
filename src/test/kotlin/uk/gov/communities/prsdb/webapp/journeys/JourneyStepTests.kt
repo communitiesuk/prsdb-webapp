@@ -31,10 +31,10 @@ class JourneyStepTests {
     companion object {
         @JvmStatic
         fun journeyStepProvider(): List<Arguments?> {
-            val stepConfig: AbstractStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
+            val requestableStepConfig: AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState> = mock()
             val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
             return listOf(
-                Arguments.argumentSet("Requestable Step", JourneyStep.RequestableStep(stepConfig), "stepId"),
+                Arguments.argumentSet("Requestable Step", JourneyStep.RequestableStep(requestableStepConfig), "stepId"),
                 Arguments.argumentSet("Internal Step", JourneyStep.InternalStep(internalStepConfig), null),
             )
         }
@@ -243,7 +243,7 @@ class JourneyStepTests {
     @Test
     fun `submitFormData saves bindingResult target as form data in journey state for a VisitableStep`() {
         // Arrange
-        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(stepConfig.routeSegment).thenReturn("stepId")
@@ -457,7 +457,7 @@ class JourneyStepTests {
     @Test
     fun `initialising the route segment for a RequestableStep with a null route segment throws`() {
         // Arrange
-        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
         val step = JourneyStep.RequestableStep(stepConfig)
 
         // Act & Assert
@@ -477,7 +477,7 @@ class JourneyStepTests {
     @Test
     fun `initialising the route segment for a RequestableStep sets it on the config`() {
         // Arrange
-        val stepConfig = mock<AbstractStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
         val step = JourneyStep.RequestableStep(stepConfig)
 
         // Act

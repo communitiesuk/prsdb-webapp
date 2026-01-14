@@ -17,7 +17,7 @@ class StepConfigTests {
         var otherField: Long? = null
     }
 
-    class TestStepConfig : AbstractStepConfig<TestEnum, TestFormModel, JourneyState>() {
+    class TestStepConfig : AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>() {
         override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> = mapOf()
 
         override fun chooseTemplate(state: JourneyState): String = "template"

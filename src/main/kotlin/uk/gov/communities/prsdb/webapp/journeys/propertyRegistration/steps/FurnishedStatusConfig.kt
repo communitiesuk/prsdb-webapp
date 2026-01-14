@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Furnished
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class FurnishedStatusStepConfig : AbstractGenericStepConfig<Complete, FurnishedStatusFormModel, OccupationState>() {
+class FurnishedStatusStepConfig : AbstractGenericRequestableStepConfig<Complete, FurnishedStatusFormModel, OccupationState>() {
     override val formModelClass = FurnishedStatusFormModel::class
 
     override fun getStepSpecificContent(state: OccupationState) =

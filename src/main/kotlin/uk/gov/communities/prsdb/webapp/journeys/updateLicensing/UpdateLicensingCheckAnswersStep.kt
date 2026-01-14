@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class UpdateLicensingCyaStepConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractGenericStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
+) : AbstractGenericRequestableStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
     private lateinit var childJourneyId: String

@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditi
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 
 @JourneyFrameworkComponent
-class HmoAdditionalLicenceStepConfig : AbstractGenericStepConfig<Complete, HmoAdditionalLicenceFormModel, JourneyState>() {
+class HmoAdditionalLicenceStepConfig : AbstractGenericRequestableStepConfig<Complete, HmoAdditionalLicenceFormModel, JourneyState>() {
     override val formModelClass = HmoAdditionalLicenceFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =

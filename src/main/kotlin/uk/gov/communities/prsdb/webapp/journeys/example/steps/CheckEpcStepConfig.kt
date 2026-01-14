@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class CheckEpcStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractStepConfig<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
+) : AbstractRequestableStepConfig<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
     override val formModelClass = CheckMatchedEpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =

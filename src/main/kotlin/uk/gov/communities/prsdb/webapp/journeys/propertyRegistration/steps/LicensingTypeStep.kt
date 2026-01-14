@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 
 @JourneyFrameworkComponent
-class LicensingTypeStepConfig : AbstractGenericStepConfig<LicensingTypeMode, LicensingTypeFormModel, JourneyState>() {
+class LicensingTypeStepConfig : AbstractGenericRequestableStepConfig<LicensingTypeMode, LicensingTypeFormModel, JourneyState>() {
     override val formModelClass = LicensingTypeFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =

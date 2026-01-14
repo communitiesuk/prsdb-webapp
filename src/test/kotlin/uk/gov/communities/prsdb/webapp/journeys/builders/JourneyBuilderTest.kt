@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -304,6 +305,7 @@ class JourneyBuilderTest {
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
             whenever(builtStep.routeSegment).thenReturn("segment")
+            whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             // Act 2
             val map = jb.buildRoutingMap()

@@ -8,13 +8,17 @@ import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
-abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> {
+sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> {
+    abstract fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>): StepLifecycleOrchestrator
+
     abstract fun getStepSpecificContent(state: TState): Map<String, Any?>
 
     abstract fun chooseTemplate(state: TState): String
@@ -113,8 +117,15 @@ abstract class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : Form
     ) = rejectValue(fieldName, "RejectValueWithMessageKey", messageKey)
 }
 
+abstract class AbstractRequestableStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> :
+    AbstractStepConfig<TEnum, TFormModel, TState>() {
+    override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = VisitableStepLifecycleOrchestrator(journeyStep)
+}
+
 abstract class AbstractInternalStepConfig<out TEnum : Enum<out TEnum>, in TState : JourneyState> :
     AbstractStepConfig<TEnum, NoInputFormModel, TState>() {
+    final override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = RedirectingStepLifecycleOrchestrator(journeyStep)
+
     override fun getStepSpecificContent(state: TState) = mapOf<String, String>()
 
     override fun chooseTemplate(state: TState): String = ""
@@ -123,8 +134,8 @@ abstract class AbstractInternalStepConfig<out TEnum : Enum<out TEnum>, in TState
 }
 
 // Generic step config should be used where the subclass does not need any additional initialisation
-abstract class AbstractGenericStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
-    AbstractStepConfig<TEnum, TModel, TState>() {
+abstract class AbstractGenericRequestableStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
+    AbstractRequestableStepConfig<TEnum, TModel, TState>() {
     override fun isSubClassInitialised(): Boolean = true
 }
 

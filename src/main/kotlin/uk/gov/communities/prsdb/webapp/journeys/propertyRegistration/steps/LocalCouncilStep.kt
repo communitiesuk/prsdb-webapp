@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_COUNCIL_URL
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 @JourneyFrameworkComponent
 class LocalCouncilStepConfig(
     private val localCouncilService: LocalCouncilService,
-) : AbstractGenericStepConfig<Complete, SelectLocalCouncilFormModel, JourneyState>() {
+) : AbstractGenericRequestableStepConfig<Complete, SelectLocalCouncilFormModel, JourneyState>() {
     override val formModelClass = SelectLocalCouncilFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> {
