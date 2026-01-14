@@ -45,7 +45,6 @@ class IncompletePropertiesReminderTaskApplicationRunner(
 
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 
-        val errors = mutableListOf<Exception>()
         incompleteProperties.forEach { property ->
             try {
                 emailSender.sendEmail(
@@ -59,13 +58,9 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                 println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
             } catch (ex: Exception) {
                 println("Task failed for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
-                errors.add(ex)
+                println("Exception message: ${ex.message}")
+                println("Stack trace: ${ex.stackTraceToString()}")
             }
-        }
-        if (errors.isNotEmpty()) {
-            val re = RuntimeException("Failed to send ${errors.size} reminder email(s)")
-            errors.forEach { re.addSuppressed(it) }
-            throw re
         }
     }
 
