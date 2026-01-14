@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.example
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
@@ -28,7 +31,7 @@ class DestinationTests {
         val finalUrl = resolveModelAndViewToRedirectUrl(modelAndView)
 
         // Assert
-        Assertions.assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
+        assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
     }
 
     @Test
@@ -46,7 +49,7 @@ class DestinationTests {
         val finalUrl = resolveModelAndViewToRedirectUrl(modelAndView)
 
         // Assert
-        Assertions.assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
+        assertEquals(finalUrl, "$routeSegment?journeyId=$journeyId")
     }
 
     @Test
@@ -65,7 +68,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        Assertions.assertNull(urlString)
+        assertNull(urlString)
     }
 
     @Test
@@ -84,7 +87,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        Assertions.assertEquals("$routeSegment?journeyId=$journeyId", urlString)
+        assertEquals("$routeSegment?journeyId=$journeyId", urlString)
     }
 
     @Test
@@ -98,9 +101,9 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        Assertions.assertEquals("redirect:$externalUrl", modelAndView.viewName)
-        Assertions.assertEquals("value1", modelAndView.model["param1"])
-        Assertions.assertEquals("value2", modelAndView.model["param2"])
+        assertEquals("redirect:$externalUrl", modelAndView.viewName)
+        assertEquals("value1", modelAndView.model["param1"])
+        assertEquals("value2", modelAndView.model["param2"])
     }
 
     @Test
@@ -113,8 +116,8 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        Assertions.assertEquals("redirect:$externalUrl", modelAndView.viewName)
-        Assertions.assertTrue(modelAndView.model.isEmpty())
+        assertEquals("redirect:$externalUrl", modelAndView.viewName)
+        assertTrue(modelAndView.model.isEmpty())
     }
 
     @Test
@@ -128,7 +131,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        Assertions.assertEquals("http://example.com?param1=value1&param2=value2", urlString)
+        assertEquals("http://example.com?param1=value1&param2=value2", urlString)
     }
 
     @Test
@@ -142,9 +145,9 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        Assertions.assertEquals(templateName, modelAndView.viewName)
-        Assertions.assertEquals("value1", modelAndView.model["key1"])
-        Assertions.assertEquals("value2", modelAndView.model["key2"])
+        assertEquals(templateName, modelAndView.viewName)
+        assertEquals("value1", modelAndView.model["key1"])
+        assertEquals("value2", modelAndView.model["key2"])
     }
 
     @Test
@@ -157,8 +160,8 @@ class DestinationTests {
         val modelAndView = destination.toModelAndView()
 
         // Assert
-        Assertions.assertEquals(templateName, modelAndView.viewName)
-        Assertions.assertTrue(modelAndView.model.isEmpty())
+        assertEquals(templateName, modelAndView.viewName)
+        assertTrue(modelAndView.model.isEmpty())
     }
 
     @Test
@@ -175,13 +178,13 @@ class DestinationTests {
         val oldModelAndView = destination.toModelAndView()
 
         // Assert
-        Assertions.assertEquals(templateName, updatedModelAndView.viewName)
-        Assertions.assertEquals("value1", updatedModelAndView.model["key1"])
-        Assertions.assertEquals("value2", updatedModelAndView.model["key2"])
+        assertEquals(templateName, updatedModelAndView.viewName)
+        assertEquals("value1", updatedModelAndView.model["key1"])
+        assertEquals("value2", updatedModelAndView.model["key2"])
 
-        Assertions.assertEquals(templateName, oldModelAndView.viewName)
-        Assertions.assertEquals("value1", oldModelAndView.model["key1"])
-        Assertions.assertNull(oldModelAndView.model["key2"])
+        assertEquals(templateName, oldModelAndView.viewName)
+        assertEquals("value1", oldModelAndView.model["key1"])
+        assertNull(oldModelAndView.model["key2"])
     }
 
     @Test
@@ -194,7 +197,7 @@ class DestinationTests {
         val urlString = destination.toUrlStringOrNull()
 
         // Assert
-        Assertions.assertNull(urlString)
+        assertNull(urlString)
     }
 
     @Test
@@ -214,7 +217,7 @@ class DestinationTests {
         // Act & Assert
         nonTemplateDestinations.forEach { destination ->
             val updatedDestination = destination.withModelContent(contentToAdd)
-            Assertions.assertSame(destination, updatedDestination)
+            assertSame(destination, updatedDestination)
         }
 
         Destination::class.sealedSubclasses.all { type ->
@@ -236,7 +239,7 @@ class DestinationTests {
         val result = destination.toModelAndView()
 
         // Assert
-        Assertions.assertSame(modelAndView, result)
+        assertSame(modelAndView, result)
     }
 
     @Test
@@ -260,7 +263,7 @@ class DestinationTests {
         val updatedDestination = destination.withModelContent(contentToAdd)
 
         // Assert
-        Assertions.assertSame(destination, updatedDestination)
+        assertSame(destination, updatedDestination)
     }
 
     @Test
@@ -269,7 +272,7 @@ class DestinationTests {
         val destinationString = Destination.Nowhere().toUrlStringOrNull()
 
         // Assert
-        Assertions.assertNull(destinationString)
+        assertNull(destinationString)
     }
 
     @Test
@@ -285,8 +288,8 @@ class DestinationTests {
         val navigationalDestination = Destination(mockInternalStep)
 
         // Assert
-        Assertions.assertTrue(visitableDestination is Destination.VisitableStep)
-        Assertions.assertTrue(navigationalDestination is Destination.NavigationalStep)
+        assertTrue(visitableDestination is Destination.VisitableStep)
+        assertTrue(navigationalDestination is Destination.NavigationalStep)
     }
 
     private fun resolveModelAndViewToRedirectUrl(modelAndView: ModelAndView): String? {
