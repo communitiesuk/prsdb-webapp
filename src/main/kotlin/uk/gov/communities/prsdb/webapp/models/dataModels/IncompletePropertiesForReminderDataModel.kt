@@ -6,4 +6,5 @@ data class IncompletePropertiesForReminderDataModel(
     val landlordEmail: String,
     val propertySingleLineAddress: String,
     val completeByDate: LocalDate,
+    val savedJourneyStateId: String,
 )

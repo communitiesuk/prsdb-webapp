@@ -22,6 +22,7 @@ class LandlordIncompletePropertiesService(
                 incompleteProperty.landlord.email,
                 incompleteProperty.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
                 CompleteByDateHelper.getIncompletePropertyCompleteByDate(incompleteProperty.savedJourneyState),
+                incompleteProperty.savedJourneyState.journeyId,
             )
         }
     }
