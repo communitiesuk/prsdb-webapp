@@ -20,7 +20,7 @@ class TaskTests {
 
     lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
     private val firstStepMock = mock<JourneyStep.RequestableStep<*, *, JourneyState>>()
-    private val exitStepMock = mock<NavigationalStep>()
+    private val exitStepMock = mock<TaskExitStep>()
 
     @BeforeEach
     fun setup() {
@@ -42,7 +42,7 @@ class TaskTests {
         // Arrange
         val task = TestTask()
 
-        val nextDestinationLambda = { _: NavigationComplete -> Destination.ExternalUrl("example.com") }
+        val nextDestinationLambda = { _: TaskComplete -> Destination.ExternalUrl("example.com") }
         val state = mock<JourneyState>()
         val parent = NoParents()
 

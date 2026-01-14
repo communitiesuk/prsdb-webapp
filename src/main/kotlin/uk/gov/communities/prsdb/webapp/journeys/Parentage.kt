@@ -75,7 +75,7 @@ fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnu
 
 fun Task<*>.isComplete() =
     SingleParent(notionalExitStep) {
-        notionalExitStep.outcome == NavigationComplete.COMPLETE
+        notionalExitStep.outcome == TaskComplete.COMPLETE
     }
 
 fun JourneyStep<Complete, *, *>.isComplete() = this.hasOutcome(Complete.COMPLETE)

@@ -3,17 +3,17 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
+import uk.gov.communities.prsdb.webapp.journeys.TaskComplete
+import uk.gov.communities.prsdb.webapp.journeys.TaskExitStep
 
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
-    private val elementConfiguration: ElementConfiguration<NavigationComplete> =
+    private val elementConfiguration: ElementConfiguration<TaskComplete> =
         ElementConfiguration("Task ${task::class.simpleName}}"),
-) : ConfigurableElement<NavigationComplete> by elementConfiguration,
+) : ConfigurableElement<TaskComplete> by elementConfiguration,
     BuildableElement {
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
@@ -53,10 +53,10 @@ class TaskInitialiser<TStateInit : JourneyState>(
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
-    var exitStepOverride: NavigationalStep? = null
+    var exitStepOverride: TaskExitStep? = null
         private set
 
-    fun customExitStep(step: NavigationalStep) {
+    fun customExitStep(step: TaskExitStep) {
         if (exitStepOverride != null) {
             throw JourneyInitialisationException("Exit step has already been initialised")
         }

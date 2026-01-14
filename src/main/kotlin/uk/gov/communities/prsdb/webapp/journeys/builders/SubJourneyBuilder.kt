@@ -5,10 +5,10 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.TaskComplete
+import uk.gov.communities.prsdb.webapp.journeys.TaskExitStep
+import uk.gov.communities.prsdb.webapp.journeys.TaskExitStepConfig
 
 interface BuildableElement {
     fun build(): List<JourneyStep<*, *, *>>
@@ -104,18 +104,18 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
 open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
-    exitStepOverride: NavigationalStep? = null,
+    exitStepOverride: TaskExitStep? = null,
 ) : AbstractJourneyBuilder<TState>(journey) {
-    var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
+    var exitInits: MutableList<StepInitialiser<TaskExitStepConfig, TState, TaskComplete>.() -> Unit> = mutableListOf()
         private set
 
-    val exitStep = exitStepOverride ?: NavigationalStep(NavigationalStepConfig())
+    val exitStep = exitStepOverride ?: TaskExitStep(TaskExitStepConfig())
 
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
 
     override fun build(): List<JourneyStep<*, *, *>> {
-        step<NavigationComplete, NavigationalStepConfig>(exitStep) {
+        step<TaskComplete, TaskExitStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
         val built = super.build()
@@ -123,7 +123,7 @@ open class SubJourneyBuilder<TState : JourneyState>(
         return built
     }
 
-    fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
+    fun exitStep(init: StepInitialiser<TaskExitStepConfig, TState, TaskComplete>.() -> Unit) {
         exitInits.add(init)
     }
 }

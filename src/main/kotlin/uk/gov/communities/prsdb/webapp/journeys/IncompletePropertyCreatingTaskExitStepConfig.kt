@@ -4,9 +4,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 
 @JourneyFrameworkComponent
-class IncompletePropertyCreatingNavigationalStepConfig(
+class IncompletePropertyCreatingTaskExitStepConfig(
     private val incompletePropertiesService: IncompletePropertiesService,
-) : NavigationalStepConfig() {
+) : TaskExitStepConfig() {
     override fun afterSaveState(
         state: JourneyState,
         saveStateId: SavedJourneyState,
@@ -17,6 +17,6 @@ class IncompletePropertyCreatingNavigationalStepConfig(
 }
 
 @JourneyFrameworkComponent
-class IncompletePropertyCreatingNavigationalStep(
-    config: IncompletePropertyCreatingNavigationalStepConfig,
-) : NavigationalStep(config)
+class IncompletePropertyCreatingTaskExitStep(
+    config: IncompletePropertyCreatingTaskExitStepConfig,
+) : TaskExitStep(config)

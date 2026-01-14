@@ -196,14 +196,14 @@ class ParentageTests {
     fun `isComplete returns a single parent with the condition checking that tasks final step is complete`() {
         // Arrange
         val task = mock<Task<*>>()
-        val step = mock<NavigationalStep>()
+        val step = mock<TaskExitStep>()
         whenever(task.notionalExitStep).thenReturn(step)
 
         // Act
         val parent = task.isComplete()
 
         // Assert
-        whenever(step.outcome).thenReturn(NavigationComplete.COMPLETE)
+        whenever(step.outcome).thenReturn(TaskComplete.COMPLETE)
         assertTrue(parent.allowsChild())
 
         whenever(step.outcome).thenReturn(null)
