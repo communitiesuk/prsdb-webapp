@@ -52,15 +52,15 @@ class JourneyStateService(
 
     val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: restoreJourney()
 
-    private fun restoreJourney(): JourneyMetadata {
-        if (journeyStateMetadataMap.containsKey(journeyId)) {
-            throw JourneyInitialisationException("Journey with ID $journeyId already exists in session")
+    private fun restoreJourney(journeyToRestore: String = journeyId): JourneyMetadata {
+        if (journeyStateMetadataMap.containsKey(journeyToRestore)) {
+            throw JourneyInitialisationException("Journey with ID $journeyToRestore already exists in session")
         }
 
-        val stateToRestore = persistenceService.retrieveJourneyStateData(journeyId) ?: throw NoSuchJourneyException(journeyId)
+        val stateToRestore = persistenceService.retrieveJourneyStateData(journeyToRestore) ?: throw NoSuchJourneyException(journeyToRestore)
 
         val metadata = JourneyMetadata.withNewDataKey()
-        journeyStateMetadataMap += (journeyId to metadata)
+        journeyStateMetadataMap += (journeyToRestore to metadata)
 
         session.setAttribute(metadata.dataKey, stateToRestore)
         return metadata
@@ -108,6 +108,21 @@ class JourneyStateService(
         }
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
         JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
+    }
+
+    fun initialiseOrRestoreJourneyWithId(
+        newJourneyId: String,
+        stateInitialiser: JourneyStateService.() -> Unit = { },
+    ) {
+        if (journeyStateMetadataMap.containsKey(newJourneyId)) {
+            return
+        }
+        try {
+            restoreJourney(newJourneyId)
+        } catch (_: NoSuchJourneyException) {
+            journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
+            JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
+        }
     }
 
     fun initialiseChildJourney(

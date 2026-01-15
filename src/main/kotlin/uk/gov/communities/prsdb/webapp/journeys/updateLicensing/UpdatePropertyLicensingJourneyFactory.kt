@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneySt
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateLicensingJourneyFactory(
@@ -57,7 +56,7 @@ class UpdateLicensingJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
+    fun initializeJourneyState(ownershipId: Long): String = stateFactory.getObject().initializeOrRestoreState(ownershipId)
 }
 
 @JourneyFrameworkComponent
@@ -81,13 +80,13 @@ class UpdateLicensingJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
     override fun generateJourneyId(seed: Any?): String {
-        val user = seed as? Principal
+        val ownershipId = seed as? Long
 
-        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
+        return super<AbstractJourneyState>.generateJourneyId(ownershipId?.let { generateSeedForUser(it) })
     }
 
     companion object {
-        fun generateSeedForUser(user: Principal): String = "Update licence for user ${user.name} at time ${System.currentTimeMillis()}"
+        fun generateSeedForUser(ownershipId: Long): String = "Update licence for property $ownershipId}"
     }
 }
 
