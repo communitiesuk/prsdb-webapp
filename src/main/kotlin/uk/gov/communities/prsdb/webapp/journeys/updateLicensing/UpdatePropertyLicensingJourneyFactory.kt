@@ -30,7 +30,7 @@ class UpdateLicensingJourneyFactory(
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        if (state.isStateInitialized.not()) {
+        if (!state.isStateInitialized) {
             state.propertyId = propertyId
             state.hasOriginalLicense = ownershipService.getPropertyOwnership(propertyId).license != null
             state.isStateInitialized = true
