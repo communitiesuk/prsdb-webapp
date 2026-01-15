@@ -78,7 +78,6 @@ class NewPropertyRegistrationJourneyFactory(
                     nextStep { journey.propertyTypeStep }
                     checkable()
                     customExitStep(journey.addressExitStep)
-                    saveProgress()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment("property-type")
