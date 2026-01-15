@@ -21,7 +21,7 @@ class IncompletePropertiesService(
             IncompletePropertiesForReminderDataModel(
                 incompleteProperty.landlord.email,
                 incompleteProperty.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
-                CompleteByDateHelper.getIncompletePropertyCompleteByDate(incompleteProperty.savedJourneyState),
+                CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(incompleteProperty.savedJourneyState),
                 incompleteProperty.savedJourneyState.journeyId,
             )
         }

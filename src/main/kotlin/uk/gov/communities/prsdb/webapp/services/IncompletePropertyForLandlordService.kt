@@ -55,7 +55,7 @@ class IncompletePropertyForLandlordServiceImpl(
                 IncompletePropertiesDataModel(
                     journeyId = savedState.journeyId,
                     singleLineAddress = savedState.getPropertyRegistrationSingleLineAddress(),
-                    completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDate(savedState),
+                    completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(savedState),
                 )
             }
         } ?: throw IllegalArgumentException("Landlord not found for principal: $principalName")

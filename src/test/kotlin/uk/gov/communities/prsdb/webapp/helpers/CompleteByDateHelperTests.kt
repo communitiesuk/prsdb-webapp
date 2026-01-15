@@ -16,7 +16,7 @@ class CompleteByDateHelperTests {
                 .toInstant(java.time.ZoneOffset.UTC)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(createdDate = createdDate)
 
-        val completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDate(savedJourneyState)
+        val completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(savedJourneyState)
 
         assertEquals(
             LocalDate(2021, 1, 29),
