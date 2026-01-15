@@ -46,6 +46,6 @@ class DateTimeHelper(
         fun getJavaDateFromLocalDate(localDate: java.time.LocalDate): Date = Date.from(getJavaInstantFromLocalDate(localDate))
 
         fun getJavaInstantFromLocalDate(localDate: java.time.LocalDate): java.time.Instant =
-            localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+            localDate.atStartOfDay(ZoneId.of("Europe/London")).toInstant()
     }
 }
