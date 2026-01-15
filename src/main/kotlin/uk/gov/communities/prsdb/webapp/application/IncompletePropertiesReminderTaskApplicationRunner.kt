@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_RE
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LandlordIncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import java.time.LocalDate
 import kotlin.system.exitProcess
 
@@ -20,7 +20,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     private val context: ApplicationContext,
     private val emailSender: EmailNotificationService<IncompletePropertyReminderEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val landlordIncompletePropertiesService: LandlordIncompletePropertiesService,
+    private val incompletePropertiesService: IncompletePropertiesService,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
         println("Executing incomplete properties reminder scheduled task")
@@ -37,7 +37,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
 
     private fun incompletePropertiesReminderTaskLogic() {
         val incompleteProperties =
-            landlordIncompletePropertiesService.getIncompletePropertiesOlderThanDays(
+            incompletePropertiesService.getIncompletePropertiesOlderThanDays(
                 INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS,
             )
         // TODO - PRSD-1030

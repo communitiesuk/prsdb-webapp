@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -120,10 +120,10 @@ interface NumberOfIncompletePropertiesFeatureStrategy {
 @PrsdbWebService("oldNumberOfIncompletePropertiesProvider")
 @Primary
 class OldNumberOfIncompletePropertiesStrategy(
-    private val incompletePropertyService: IncompletePropertyService,
+    private val incompletePropertyForLandlordService: IncompletePropertyForLandlordService,
 ) : NumberOfIncompletePropertiesFeatureStrategy {
     override fun numberOfIncompleteProperties(landlord: Landlord): Int =
-        incompletePropertyService.getIncompletePropertiesForLandlord(landlord.baseUser.id).size
+        incompletePropertyForLandlordService.getIncompletePropertiesForLandlord(landlord.baseUser.id).size
 }
 
 @PrsdbWebService("newNumberOfIncompletePropertiesProvider")

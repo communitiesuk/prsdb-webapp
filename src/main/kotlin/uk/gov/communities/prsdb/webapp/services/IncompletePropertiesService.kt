@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesFor
 import java.time.LocalDate
 
 @PrsdbTaskService
-class LandlordIncompletePropertiesService(
+class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
 ) {
     fun getIncompletePropertiesOlderThanDays(days: Int): List<IncompletePropertiesForReminderDataModel> {

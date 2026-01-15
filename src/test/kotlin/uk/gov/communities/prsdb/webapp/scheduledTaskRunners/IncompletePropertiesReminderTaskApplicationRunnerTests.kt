@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesFor
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LandlordIncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.net.URI
@@ -38,7 +38,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
-    private lateinit var landlordIncompletePropertiesService: LandlordIncompletePropertiesService
+    private lateinit var incompletePropertiesService: IncompletePropertiesService
 
     @InjectMocks
     private lateinit var runner: IncompletePropertiesReminderTaskApplicationRunner
@@ -69,7 +69,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
         whenever(
-            landlordIncompletePropertiesService
+            incompletePropertiesService
                 .getIncompletePropertiesOlderThanDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS),
         ).thenReturn(
             listOf(
@@ -127,7 +127,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
         whenever(
-            landlordIncompletePropertiesService
+            incompletePropertiesService
                 .getIncompletePropertiesOlderThanDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS),
         ).thenReturn(
             listOf(

@@ -17,12 +17,12 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
-class LegacyIncompletePropertyServiceTests {
+class LegacyIncompletePropertyForLandlordServiceTests {
     @Mock
     private lateinit var mockLegacyIncompletePropertyFormContextService: LegacyIncompletePropertyFormContextService
 
     @InjectMocks
-    private lateinit var legacyIncompletePropertyService: LegacyIncompletePropertyService
+    private lateinit var legacyIncompletePropertyService: LegacyIncompletePropertyForLandlordService
 
     @Test
     fun `deleteIncompleteProperty deletes the form context for a valid incomplete property`() {

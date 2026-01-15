@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHe
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 
-interface IncompletePropertyService {
+interface IncompletePropertyForLandlordService {
     @PrsdbFlip(name = MIGRATE_PROPERTY_REGISTRATION, alterBean = "newIncompletePropertyService")
     fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel>
 
@@ -44,11 +44,11 @@ interface IncompletePropertyService {
 }
 
 @PrsdbWebService("newIncompletePropertyService")
-class IncompletePropertyServiceImpl(
+class IncompletePropertyForLandlordServiceImpl(
     private val repository: SavedJourneyStateRepository,
     private val landlordRepository: LandlordRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
-) : IncompletePropertyService {
+) : IncompletePropertyForLandlordService {
     override fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> =
         landlordRepository.findByBaseUser_Id(principalName)?.let { landlord ->
             landlord.incompleteProperties.map { savedState ->
@@ -95,9 +95,9 @@ class IncompletePropertyServiceImpl(
 
 @PrsdbWebService("legacyIncompletePropertyService")
 @Primary
-class LegacyIncompletePropertyService(
+class LegacyIncompletePropertyForLandlordService(
     private val propertyRegistrationService: LegacyIncompletePropertyFormContextService,
-) : IncompletePropertyService {
+) : IncompletePropertyForLandlordService {
     override fun isIncompletePropertyAvailable(
         incompletePropertyId: String,
         principalName: String,

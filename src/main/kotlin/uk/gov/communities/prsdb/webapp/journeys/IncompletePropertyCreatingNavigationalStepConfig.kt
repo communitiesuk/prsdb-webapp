@@ -2,18 +2,18 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
 
 @JourneyFrameworkComponent
 class IncompletePropertyCreatingNavigationalStepConfig(
-    private val incompletePropertyService: IncompletePropertyService,
+    private val incompletePropertyForLandlordService: IncompletePropertyForLandlordService,
 ) : NavigationalStepConfig() {
     override fun afterSaveState(
         state: JourneyState,
         saveStateId: SavedJourneyState,
     ) {
         super.afterSaveState(state, saveStateId)
-        incompletePropertyService.addIncompletePropertyToLandlord(saveStateId)
+        incompletePropertyForLandlordService.addIncompletePropertyToLandlord(saveStateId)
     }
 }
 
