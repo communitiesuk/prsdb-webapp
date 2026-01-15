@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData.Companion.createLandlordIncompleteProperties
 import java.time.LocalDate
-import kotlin.time.Duration.Companion.days
 
 @ExtendWith(MockitoExtension::class)
 class IncompletePropertiesServiceTests {
