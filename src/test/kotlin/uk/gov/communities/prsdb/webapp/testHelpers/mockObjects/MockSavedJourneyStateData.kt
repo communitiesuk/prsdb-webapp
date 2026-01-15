@@ -46,6 +46,37 @@ class MockSavedJourneyStateData {
             return ObjectMapper().writeValueAsString(stateData)
         }
 
+        fun createSerialisedStateWithManualAddress(
+            addressLineOne: String = "1 Example Road",
+            addressLineTwo: String? = null,
+            townOrCity: String = "TownVille",
+            county: String? = null,
+            postcode: String = "AB1 2CD",
+            localCouncilId: Int? = null,
+        ): String {
+            val stateData =
+                mapOf(
+                    "journeyData" to
+                        mapOf(
+                            "manual-address" to
+                                mapOf(
+                                    "addressLineOne" to addressLineOne,
+                                    "addressLineTwo" to addressLineTwo,
+                                    "townOrCity" to townOrCity,
+                                    "county" to county,
+                                    "postcode" to postcode,
+                                ),
+                            "local-council" to
+                                mapOf(
+                                    "localCouncilId" to localCouncilId,
+                                ),
+                        ),
+                    "cachedAddresses" to "[]",
+                )
+
+            return ObjectMapper().writeValueAsString(stateData)
+        }
+
         fun createLandlordIncompleteProperties(
             landlord: Landlord = createLandlord(),
             savedJourneyState: SavedJourneyState = createSavedJourneyState(),
