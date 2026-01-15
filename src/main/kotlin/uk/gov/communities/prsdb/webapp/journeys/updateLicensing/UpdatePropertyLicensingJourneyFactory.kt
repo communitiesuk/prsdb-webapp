@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -30,14 +31,14 @@ class UpdateLicensingJourneyFactory(
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        // TODO PRSD-1550 - properly init the state, make the property ID immutable and handle mismatched property IDs
-        if (state.propertyId == null) {
-            ownershipService.getPropertyOwnership(propertyId).let {
-                state.propertyId = propertyId
-                state.hasOriginalLicense = it.license != null
-            }
-        } else if (state.propertyId != propertyId) {
-            throw IllegalStateException("Journey state property ID ${state.propertyId} does not match provided property ID $propertyId")
+        if (state.isStateInitialized.not()) {
+            state.propertyId = propertyId
+            state.hasOriginalLicense = ownershipService.getPropertyOwnership(propertyId).license != null
+            state.isStateInitialized = true
+        }
+
+        if (state.propertyId != propertyId) {
+            throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
         return journey(state) {
@@ -73,10 +74,11 @@ class UpdateLicensingJourney(
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     UpdateLicensingJourneyState {
-    override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
+    override var cyaChildJourneyId: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
 
-    override var hasOriginalLicense: Boolean? by delegateProvider.mutableDelegate("hasOriginalLicense")
-    override var propertyId: Long? by delegateProvider.mutableDelegate("propertyId")
+    override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
+    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -94,6 +96,6 @@ interface UpdateLicensingJourneyState :
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
     override val cyaStep: UpdateLicensingCheckAnswersStep
-    val hasOriginalLicense: Boolean?
-    val propertyId: Long?
+    val hasOriginalLicense: Boolean
+    val propertyId: Long
 }
