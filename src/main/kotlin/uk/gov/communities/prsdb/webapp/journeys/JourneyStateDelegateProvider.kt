@@ -175,6 +175,9 @@ class JourneyStateDelegateProvider(
             if (rawValue == null) {
                 val encodedValue = value?.let { Json.encodeToString(serializer, value) }
                 journeyStateService.setValue(innerKey, encodedValue)
+            } else {
+                journeyStateService.deleteState()
+                throw IllegalStateException("Property $innerKey is immutable and cannot be updated once it is set - deleting state")
             }
         }
     }
