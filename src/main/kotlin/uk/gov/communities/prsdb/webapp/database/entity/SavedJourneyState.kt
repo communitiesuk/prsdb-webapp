@@ -40,8 +40,6 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
     constructor(user: OneLoginUser, journeyId: String) : this(serializedState = "{}", user, journeyId)
 
     fun getPropertyRegistrationSingleLineAddress(): String {
-        val objectMapper = ObjectMapper()
-
         val stateDataMap = objectMapper.readValue(serializedState, Map::class.java)
         val submittedJourneyData = stateDataMap["journeyData"] as Map<*, *>
         val selectedAddressData = submittedJourneyData["select-address"] as? Map<*, *>
@@ -64,5 +62,9 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
                     localCouncilId = localCouncilData["localCouncilId"] as Int?,
                 ).singleLineAddress
         }
+    }
+
+    companion object {
+        val objectMapper = ObjectMapper()
     }
 }

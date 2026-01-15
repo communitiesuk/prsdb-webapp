@@ -155,7 +155,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         method.isAccessible = true
 
         // Act, capturing stdout
-        // Assert does not through and stdout contains expected messages
+        // Assert does not throw and stdout contains expected messages
         val outContent = ByteArrayOutputStream()
         val originalOut = System.out
         System.setOut(PrintStream(outContent))
