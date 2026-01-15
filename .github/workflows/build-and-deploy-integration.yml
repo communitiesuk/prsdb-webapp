@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - feat/prsd-1030-retrieve-from-database
 
 jobs:
   build-and-deploy-integration:
