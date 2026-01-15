@@ -52,8 +52,13 @@ class JourneyStateDelegateProvider(
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
         registerKey(propertyKey)
         val delegate = RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer())
-        if (defaultValue != null && delegate.getValueOrNull() == null) {
-            delegate.setValue(null, null, defaultValue)
+
+        try {
+            if (defaultValue != null && delegate.getValueOrNull() == null) {
+                delegate.setValue(null, null, defaultValue)
+            }
+        } catch (_: NoSuchJourneyException) {
+            // Ignore - journey does not exist yet, so we cannot set a default value
         }
         return delegate
     }
