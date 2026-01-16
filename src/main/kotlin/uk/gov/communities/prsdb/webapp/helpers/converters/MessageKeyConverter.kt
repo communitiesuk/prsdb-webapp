@@ -108,16 +108,12 @@ class MessageKeyConverter {
 
         private fun convertEpcExemptionReason(epcExemptionReason: EpcExemptionReason): String =
             when (epcExemptionReason) {
-                EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS ->
-                    "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
+                EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS -> "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
                 EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT ->
                     "forms.epcExemptionReason.radios.annualEnergyConsumptionLessThan25Percent.label"
-                EpcExemptionReason.TEMPORARY_BUILDING ->
-                    "forms.epcExemptionReason.radios.temporaryBuilding.label"
-                EpcExemptionReason.STANDALONE_SMALL_BUILDING ->
-                    "forms.epcExemptionReason.radios.standaloneSmallBuilding.label"
-                EpcExemptionReason.DUE_FOR_DEMOLITION ->
-                    "forms.epcExemptionReason.radios.dueForDemolition.label"
+                EpcExemptionReason.TEMPORARY_BUILDING -> "forms.epcExemptionReason.radios.temporaryBuilding.label"
+                EpcExemptionReason.STANDALONE_SMALL_BUILDING -> "forms.epcExemptionReason.radios.standaloneSmallBuilding.label"
+                EpcExemptionReason.DUE_FOR_DEMOLITION -> "forms.epcExemptionReason.radios.dueForDemolition.label"
             }
 
         private fun convertMeesExemptionReason(meesExemptionReason: MeesExemptionReason): String =
