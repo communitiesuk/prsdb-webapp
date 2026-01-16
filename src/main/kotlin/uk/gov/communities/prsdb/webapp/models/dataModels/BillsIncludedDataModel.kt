@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 data class BillsIncludedDataModel(
     val allBillsIncludedList: List<Any>,
     val standardBillsIncludedList: String,
-    val customBillsIncluded: String,
+    val customBillsIncludedIfRequired: String?,
 ) {
     companion object {
         fun fromFormData(
@@ -15,7 +15,7 @@ data class BillsIncludedDataModel(
             BillsIncludedDataModel(
                 allBillsIncludedList = getAllBillsIncludedList(billsIncluded, customBillsIncluded),
                 standardBillsIncludedList = billsIncluded.filterNotNull().joinToString(separator = ","),
-                customBillsIncluded = customBillsIncluded,
+                customBillsIncludedIfRequired = getCustomBillsIncludedIfRequired(billsIncluded, customBillsIncluded),
             )
 
         fun getAllBillsIncludedList(
@@ -23,7 +23,7 @@ data class BillsIncludedDataModel(
             customBillsIncluded: String,
         ): List<Any> {
             val billsIncludedList = getStandardBillsIncludedList(billsIncluded)
-            if (billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString()) && customBillsIncluded.isNotEmpty()) {
+            if (shouldIncludeCustomBillsIncluded(billsIncluded, customBillsIncluded)) {
                 billsIncludedList += customBillsIncluded
             } else {
                 billsIncludedList.removeLast()
@@ -43,5 +43,20 @@ data class BillsIncludedDataModel(
             }
             return billsIncludedList
         }
+
+        fun getCustomBillsIncludedIfRequired(
+            billsIncluded: MutableList<String?>,
+            customBillsIncluded: String,
+        ): String? =
+            if (shouldIncludeCustomBillsIncluded(billsIncluded, customBillsIncluded)) {
+                customBillsIncluded
+            } else {
+                null
+            }
+
+        fun shouldIncludeCustomBillsIncluded(
+            billsIncluded: MutableList<String?>,
+            customBillsIncluded: String,
+        ): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString()) && customBillsIncluded.isNotEmpty()
     }
 }

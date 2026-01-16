@@ -37,6 +37,7 @@ class PropertyRegistrationService(
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
+        baseUserId: String,
         numBedrooms: Int?,
         billsIncludedList: String?,
         customBillsIncluded: String?,
@@ -44,7 +45,6 @@ class PropertyRegistrationService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
-        baseUserId: String,
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")

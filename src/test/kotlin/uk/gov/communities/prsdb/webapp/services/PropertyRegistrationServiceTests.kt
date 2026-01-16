@@ -15,10 +15,12 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -78,6 +80,13 @@ class PropertyRegistrationServiceTests {
                     1,
                     1,
                     "baseUserId",
+                    1,
+                    null,
+                    null,
+                    null,
+                    RentFrequency.MONTHLY,
+                    null,
+                    123.toBigDecimal(),
                 )
             }
 
@@ -102,6 +111,13 @@ class PropertyRegistrationServiceTests {
                     1,
                     1,
                     nonLandlordUserId,
+                    1,
+                    null,
+                    null,
+                    null,
+                    RentFrequency.MONTHLY,
+                    null,
+                    123.toBigDecimal(),
                 )
             }
 
@@ -122,6 +138,13 @@ class PropertyRegistrationServiceTests {
         val licenceNumber = "L1234"
         val licence = License(licenceType, licenceNumber)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val numberOfBedrooms = 1
+        val billsIncludedList = "Electricity, Water"
+        val customBillsIncluded = "Internet"
+        val furnishedStatus = FurnishedStatus.FURNISHED
+        val rentFrequency = RentFrequency.OTHER
+        val customRentFrequency = "Fortnightly"
+        val rentAmount = 123.toBigDecimal()
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -133,6 +156,13 @@ class PropertyRegistrationServiceTests {
                 address = address,
                 license = licence,
                 registrationNumber = registrationNumber,
+                numberOfBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
@@ -147,6 +177,13 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = propertyType,
                 address = address,
                 license = licence,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -162,6 +199,13 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds,
                 numberOfPeople,
                 landlord.baseUser.id,
+                numberOfBedrooms,
+                billsIncludedList,
+                customBillsIncluded,
+                furnishedStatus,
+                rentFrequency,
+                customRentFrequency,
+                rentAmount,
             )
 
         // Assert
@@ -174,6 +218,13 @@ class PropertyRegistrationServiceTests {
             propertyBuildType = propertyType,
             address = address,
             license = licence,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
         )
     }
 
@@ -202,6 +253,13 @@ class PropertyRegistrationServiceTests {
                 address = any(),
                 license = anyOrNull(),
                 isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -218,6 +276,13 @@ class PropertyRegistrationServiceTests {
             2,
             3,
             "USER_ID",
+            1,
+            null,
+            null,
+            null,
+            RentFrequency.MONTHLY,
+            null,
+            123.toBigDecimal(),
         )
 
         // Assert
@@ -246,6 +311,13 @@ class PropertyRegistrationServiceTests {
         val address = Address(addressDataModel)
         val licenceType = LicensingType.NO_LICENSING
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val numberOfBedrooms = 1
+        val billsIncludedList = "Electricity, Water"
+        val customBillsIncluded = "Internet"
+        val furnishedStatus = FurnishedStatus.FURNISHED
+        val rentFrequency = RentFrequency.OTHER
+        val customRentFrequency = "Fortnightly"
+        val rentAmount = 123.toBigDecimal()
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -257,6 +329,13 @@ class PropertyRegistrationServiceTests {
                 address = address,
                 license = null,
                 registrationNumber = registrationNumber,
+                numberOfBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
@@ -270,6 +349,13 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -284,6 +370,13 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds,
                 numberOfPeople,
                 landlord.baseUser.id,
+                numberOfBedrooms,
+                billsIncludedList,
+                customBillsIncluded,
+                furnishedStatus,
+                rentFrequency,
+                customRentFrequency,
+                rentAmount,
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)

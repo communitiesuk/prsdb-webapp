@@ -48,6 +48,11 @@ class PropertyOwnershipService(
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
+        primaryLandlord: Landlord,
+        propertyBuildType: PropertyType,
+        address: Address,
+        license: License? = null,
+        isActive: Boolean = true,
         numBedrooms: Int?,
         billsIncludedList: String?,
         customBillsIncluded: String?,
@@ -55,11 +60,6 @@ class PropertyOwnershipService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
-        primaryLandlord: Landlord,
-        propertyBuildType: PropertyType,
-        address: Address,
-        license: License? = null,
-        isActive: Boolean = true,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)

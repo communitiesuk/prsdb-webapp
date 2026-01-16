@@ -26,12 +26,17 @@ interface OccupationState : JourneyState {
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
 
-    fun getBillsIncluded(): BillsIncludedDataModel =
-        BillsIncludedDataModel.fromFormDataOrNull()
-            ?: throw NotNullFormModelValueIsNullException(("No bills included found in OccupationState"))
+    fun getBillsIncluded(): BillsIncludedDataModel? = BillsIncludedDataModel.fromFormDataOrNull()
 
     fun getRentAmount(): RentAmountDataModel =
         RentAmountDataModel.fromFormDataOrNull() ?: throw NotNullFormModelValueIsNullException("No rent amount found in OccupationState")
+
+    fun getCustomRentFrequencyIfSelected(): String? =
+        if (rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER) {
+            rentFrequency.formModelOrNull?.customRentFrequency
+        } else {
+            null
+        }
 
     private fun BillsIncludedDataModel.Companion.fromFormDataOrNull() =
         billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->
