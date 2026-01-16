@@ -148,8 +148,3 @@ open class SubJourneyBuilder<TState : JourneyState>(
         exitInits.add(init)
     }
 }
-
-class ConditionalElementConfiguration(
-    val condition: ConfigurableElement<*>.() -> Boolean,
-    val configuration: ConfigurableElement<*>.() -> Unit,
-)
