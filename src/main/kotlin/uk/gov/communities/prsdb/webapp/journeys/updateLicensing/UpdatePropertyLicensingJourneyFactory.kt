@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneySt
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.security.Principal
 
 @PrsdbWebService
 class UpdateLicensingJourneyFactory(
@@ -56,7 +57,10 @@ class UpdateLicensingJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(ownershipId: Long): String = stateFactory.getObject().initializeOrRestoreState(ownershipId)
+    fun initializeJourneyState(
+        ownershipId: Long,
+        user: Principal,
+    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 }
 
 @JourneyFrameworkComponent
@@ -80,13 +84,29 @@ class UpdateLicensingJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
     override fun generateJourneyId(seed: Any?): String {
-        val ownershipId = seed as? Long
+        val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
 
-        return super<AbstractJourneyState>.generateJourneyId(ownershipId?.let { generateSeedForUser(it) })
+        return super<AbstractJourneyState>.generateJourneyId(
+            ownershipUserPair?.let {
+                generateSeedForPropertyOwnershipAndUser(it.first, it.second)
+            },
+        )
     }
 
+    private fun convertSeedToOwnershipUserPairOrNull(seed: Any?): Pair<Long, Principal>? =
+        (seed as? Pair<*, *>)?.let {
+            (it.first as? Long)?.let { ownershipId ->
+                (it.second as? Principal)?.let { user ->
+                    Pair(ownershipId, user)
+                }
+            }
+        }
+
     companion object {
-        fun generateSeedForUser(ownershipId: Long): String = "Update licence for property $ownershipId}"
+        fun generateSeedForPropertyOwnershipAndUser(
+            ownershipId: Long,
+            user: Principal,
+        ): String = "Update licence for property $ownershipId by user ${user.name}"
     }
 }
 

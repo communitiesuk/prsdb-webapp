@@ -37,7 +37,7 @@ class UpdateLicensingController(
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId)
+            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
@@ -55,7 +55,7 @@ class UpdateLicensingController(
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId)
+            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
