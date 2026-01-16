@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
+import java.math.BigDecimal
+
 data class RentAmountDataModel(
     val formattedRentAmount: List<String>,
+    val rentAmount: BigDecimal,
 ) {
     companion object {
         fun fromFormData(
@@ -10,6 +13,7 @@ data class RentAmountDataModel(
         ): RentAmountDataModel =
             RentAmountDataModel(
                 formattedRentAmount = getFormattedRentAmount(rentAmount, isCustomRentFrequency),
+                rentAmount = rentAmount.toBigDecimal(),
             )
 
         private fun getFormattedRentAmount(

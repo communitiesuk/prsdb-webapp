@@ -4,15 +4,18 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
+import java.math.BigDecimal
 
 @PrsdbWebService
 class PropertyRegistrationService(
@@ -34,6 +37,13 @@ class PropertyRegistrationService(
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
+        numBedrooms: Int?,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus?,
+        rentFrequency: RentFrequency?,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal?,
         baseUserId: String,
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -58,6 +68,13 @@ class PropertyRegistrationService(
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
+                numBedrooms = numBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
                 address = address,

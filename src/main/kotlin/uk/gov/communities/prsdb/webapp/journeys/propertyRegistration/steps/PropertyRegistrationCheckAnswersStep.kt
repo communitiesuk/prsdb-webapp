@@ -16,11 +16,14 @@ import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJour
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -78,6 +81,16 @@ class PropertyRegistrationCyaStepConfig(
                     state.tenants.formModelOrNull
                         ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         ?.toInt() ?: 0,
+                numBedrooms =
+                    state.bedrooms.formModelOrNull
+                        ?.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                        ?.toInt() ?: 0,
+                billsIncludedList = state.getBillsIncluded().standardBillsIncludedList,
+                customBillsIncluded = state.getBillsIncluded().customBillsIncluded,
+                furnishedStatus = state.furnishedStatus.formModel.notNullValue(FurnishedStatusFormModel::furnishedStatus),
+                rentFrequency = state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
+                customRentFrequency = state.rentFrequency.formModel.customRentFrequency,
+                rentAmount = state.getRentAmount().rentAmount,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {
