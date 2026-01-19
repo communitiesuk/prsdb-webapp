@@ -58,6 +58,17 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                 println("Exception message: ${ex.message}")
                 println("Stack trace: ${ex.stackTraceToString()}")
             }
+
+            try {
+                incompletePropertiesService.recordReminderEmailSent(property)
+            } catch (ex: Exception) {
+                println(
+                    "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
+                        property.savedJourneyStateId,
+                )
+                println("Exception message: ${ex.message}")
+                println("Stack trace: ${ex.stackTraceToString()}")
+            }
         }
     }
 

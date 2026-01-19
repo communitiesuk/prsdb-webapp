@@ -74,13 +74,13 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                         landlordEmail = emailAddress1,
                         propertySingleLineAddress = propertyAddress1,
                         completeByDate = completeByDate,
-                        savedJourneyStateId = "journey-1",
+                        savedJourneyStateId = 1L,
                     ),
                     IncompletePropertyForReminderDataModel(
                         landlordEmail = emailAddress2,
                         propertySingleLineAddress = propertyAddress2,
                         completeByDate = completeByDate,
-                        savedJourneyStateId = "journey-2",
+                        savedJourneyStateId = 2L,
                     ),
                 ),
             )
@@ -130,13 +130,13 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                         landlordEmail = failingEmail,
                         propertySingleLineAddress = addressFail,
                         completeByDate = completeByDate,
-                        savedJourneyStateId = "journey-fail",
+                        savedJourneyStateId = 1L,
                     ),
                     IncompletePropertyForReminderDataModel(
                         landlordEmail = succeedingEmail,
                         propertySingleLineAddress = addressSucceed,
                         completeByDate = completeByDate,
-                        savedJourneyStateId = "journey-succeed",
+                        savedJourneyStateId = 2L,
                     ),
                 ),
             )
@@ -161,8 +161,8 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             }
 
             val output = outContent.toString()
-            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: journey-succeed"))
-            assertTrue(output.contains("Task failed for incomplete property with savedJourneyStateId: journey-fail"))
+            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 2"))
+            assertTrue(output.contains("Task failed for incomplete property with savedJourneyStateId: 1"))
         } finally {
             System.setOut(originalOut)
         }

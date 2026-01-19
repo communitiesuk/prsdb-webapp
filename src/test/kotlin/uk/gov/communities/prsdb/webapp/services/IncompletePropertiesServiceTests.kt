@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
@@ -24,6 +25,9 @@ import java.time.LocalDate
 class IncompletePropertiesServiceTests {
     @Mock
     private lateinit var mockLandlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
+
+    @Mock
+    private lateinit var mockReminderEmailSentRepository: ReminderEmailSentRepository
 
     @InjectMocks
     private lateinit var incompletePropertiesService: IncompletePropertiesService
@@ -41,7 +45,6 @@ class IncompletePropertiesServiceTests {
             )
         val savedJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
-                journeyId = "journey-123",
                 serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress("1 Test Street"),
                 createdDate = incompletePropertyCreatedDate,
             )
@@ -59,7 +62,7 @@ class IncompletePropertiesServiceTests {
                 landlordEmail = "user.name@example.com",
                 propertySingleLineAddress = "1 Test Street",
                 completeByDate = expectedCompleteByDate,
-                savedJourneyStateId = "journey-123",
+                savedJourneyStateId = savedJourneyState.id,
             )
 
         // Act

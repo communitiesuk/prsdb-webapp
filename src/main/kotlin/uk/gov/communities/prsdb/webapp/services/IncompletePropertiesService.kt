@@ -2,15 +2,20 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.RemindableEntityType
+import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
+import java.time.Instant
 import java.time.LocalDate
 
 @PrsdbTaskService
 class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
+    private val reminderEmailSentRepository: ReminderEmailSentRepository,
 ) {
     fun getIncompletePropertyReminders(): List<IncompletePropertyForReminderDataModel> {
         val incompleteProperties =
@@ -25,8 +30,18 @@ class IncompletePropertiesService(
                 incompleteProperty.landlord.email,
                 incompleteProperty.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
                 CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(incompleteProperty.savedJourneyState),
-                incompleteProperty.savedJourneyState.journeyId,
+                incompleteProperty.savedJourneyState.id,
             )
         }
+    }
+
+    fun recordReminderEmailSent(property: IncompletePropertyForReminderDataModel) {
+        val reminderEmailSentRecord =
+            ReminderEmailSent(
+                lastEmailSentDate = Instant.now(),
+                entityType = RemindableEntityType.SAVED_JOURNEY_STATE,
+                entityId = property.savedJourneyStateId,
+            )
+        reminderEmailSentRepository.save(reminderEmailSentRecord)
     }
 }
