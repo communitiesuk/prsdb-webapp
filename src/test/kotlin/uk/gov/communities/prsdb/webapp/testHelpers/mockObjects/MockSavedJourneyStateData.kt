@@ -2,11 +2,8 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOneLoginUser
 import java.time.Instant
 
@@ -76,14 +73,5 @@ class MockSavedJourneyStateData {
 
             return ObjectMapper().writeValueAsString(stateData)
         }
-
-        fun createLandlordIncompleteProperties(
-            landlord: Landlord = createLandlord(),
-            savedJourneyState: SavedJourneyState = createSavedJourneyState(),
-        ): LandlordIncompleteProperties =
-            LandlordIncompleteProperties(
-                landlord = landlord,
-                savedJourneyState = savedJourneyState,
-            )
     }
 }
