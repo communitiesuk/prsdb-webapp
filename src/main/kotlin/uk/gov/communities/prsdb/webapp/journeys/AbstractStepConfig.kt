@@ -119,7 +119,8 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
 abstract class AbstractRequestableStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState> :
     AbstractStepConfig<TEnum, TFormModel, TState>() {
-    override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = VisitableStepLifecycleOrchestrator(journeyStep)
+    override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>): StepLifecycleOrchestrator =
+        VisitableStepLifecycleOrchestrator(journeyStep)
 }
 
 abstract class AbstractInternalStepConfig<out TEnum : Enum<out TEnum>, in TState : JourneyState> :
