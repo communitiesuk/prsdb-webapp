@@ -10,12 +10,12 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 abstract class Task<in TState : JourneyState> {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
-    private lateinit var exitInit: StepInitialiser<TaskExitStepConfig, *, TaskComplete>.() -> Unit
-    private var exitStepOverride: TaskExitStep? = null
+    private lateinit var exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit
+    private var exitStepOverride: SubjourneyExitStep? = null
 
     fun getTaskSubJourneyBuilder(
         state: TState,
-        exitInit: StepInitialiser<TaskExitStepConfig, *, TaskComplete>.() -> Unit,
+        exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit,
     ): SubJourneyBuilder<*> {
         this.exitInit = exitInit
         return makeSubJourney(state)
@@ -38,7 +38,7 @@ abstract class Task<in TState : JourneyState> {
         return localSubJourneyBuilder
     }
 
-    fun setCustomExitStep(step: TaskExitStep) {
+    fun setCustomExitStep(step: SubjourneyExitStep) {
         if (::subJourneyBuilder.isInitialized) {
             throw JourneyInitialisationException("Cannot set custom exit step after sub-journey has been initialised")
         }
@@ -55,7 +55,7 @@ abstract class Task<in TState : JourneyState> {
             else -> TaskStatus.CANNOT_START
         }
 
-    val exitStep: TaskExitStep get() = subJourneyBuilder.exitStep
+    val exitStep: SubjourneyExitStep get() = subJourneyBuilder.exitStep
     val firstStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstStep
 
     protected fun ConfigurableElement<*>.savable() {

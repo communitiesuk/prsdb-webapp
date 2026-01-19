@@ -18,10 +18,10 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.TaskComplete
-import uk.gov.communities.prsdb.webapp.journeys.TaskExitStep
-import uk.gov.communities.prsdb.webapp.journeys.TaskExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 
 class TaskInitialiserTests {
@@ -73,25 +73,25 @@ class TaskInitialiserTests {
 
         val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
-        builder.nextStep { _: TaskComplete -> nextStepMock }
+        builder.nextStep { _: SubjourneyComplete -> nextStepMock }
 
         // Act
         builder.build()
 
         // Assert
-        val initCaptor = argumentCaptor<StepInitialiser<TaskExitStepConfig, *, TaskComplete>.() -> Unit>()
+        val initCaptor = argumentCaptor<StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit>()
         verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             initCaptor.capture(),
         )
 
-        val initialiser = mock<StepInitialiser<TaskExitStepConfig, JourneyState, TaskComplete>>()
+        val initialiser = mock<StepInitialiser<SubjourneyExitStepConfig, JourneyState, SubjourneyComplete>>()
         initCaptor.firstValue.invoke(initialiser)
 
-        val lambdaCaptor = argumentCaptor<(mode: TaskComplete) -> Destination>()
+        val lambdaCaptor = argumentCaptor<(mode: SubjourneyComplete) -> Destination>()
         verify(initialiser).nextDestination(lambdaCaptor.capture())
 
-        val destination = lambdaCaptor.firstValue.invoke(TaskComplete.COMPLETE)
+        val destination = lambdaCaptor.firstValue.invoke(SubjourneyComplete.COMPLETE)
         assertTrue(destination is Destination.VisitableStep)
         with(destination as Destination.VisitableStep) {
             assertEquals(nextStepSegment, step.routeSegment)
@@ -109,25 +109,25 @@ class TaskInitialiserTests {
         val builder = TaskInitialiser(taskMock, mock())
         builder.parents { mock() }
         val initiationDestination = Destination.ExternalUrl(nextStepSegment)
-        builder.nextDestination { _: TaskComplete -> initiationDestination }
+        builder.nextDestination { _: SubjourneyComplete -> initiationDestination }
 
         // Act
         builder.build()
 
         // Assert
-        val initCaptor = argumentCaptor<StepInitialiser<TaskExitStepConfig, *, TaskComplete>.() -> Unit>()
+        val initCaptor = argumentCaptor<StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit>()
         verify(taskMock).getTaskSubJourneyBuilder(
             anyOrNull(),
             initCaptor.capture(),
         )
 
-        val initialiser = mock<StepInitialiser<TaskExitStepConfig, JourneyState, TaskComplete>>()
+        val initialiser = mock<StepInitialiser<SubjourneyExitStepConfig, JourneyState, SubjourneyComplete>>()
         initCaptor.firstValue.invoke(initialiser)
 
-        val lambdaCaptor = argumentCaptor<(mode: TaskComplete) -> Destination>()
+        val lambdaCaptor = argumentCaptor<(mode: SubjourneyComplete) -> Destination>()
         verify(initialiser).nextDestination(lambdaCaptor.capture())
 
-        val finalDestination = lambdaCaptor.firstValue.invoke(TaskComplete.COMPLETE)
+        val finalDestination = lambdaCaptor.firstValue.invoke(SubjourneyComplete.COMPLETE)
         assertSame(initiationDestination, finalDestination)
     }
 
@@ -223,7 +223,7 @@ class TaskInitialiserTests {
         val configCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
         verify(subJourneyBuilderMock).configure(configCaptor.capture())
 
-        val mockConfigurable = mock<ConfigurableElement<TaskComplete>>()
+        val mockConfigurable = mock<ConfigurableElement<SubjourneyComplete>>()
         configCaptor.firstValue.invoke(mockConfigurable)
 
         val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
@@ -262,7 +262,7 @@ class TaskInitialiserTests {
         val configCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
         verify(subJourneyBuilderMock).configure(configCaptor.capture())
 
-        val mockConfigurable = mock<ConfigurableElement<TaskComplete>>()
+        val mockConfigurable = mock<ConfigurableElement<SubjourneyComplete>>()
         configCaptor.firstValue.invoke(mockConfigurable)
 
         val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
@@ -298,7 +298,7 @@ class TaskInitialiserTests {
         val firstStepConfigCaptor = argumentCaptor<ConfigurableElement<*>.() -> Unit>()
         verify(subJourneyBuilderMock).configureFirst(firstStepConfigCaptor.capture())
 
-        val mockStepInitialiser = mock<StepInitialiser<*, *, TaskComplete>>()
+        val mockStepInitialiser = mock<StepInitialiser<*, *, SubjourneyComplete>>()
         firstStepConfigCaptor.firstValue.invoke(mockStepInitialiser)
 
         val backDestCaptor = argumentCaptor<() -> Destination>()
@@ -322,7 +322,7 @@ class TaskInitialiserTests {
         ).thenReturn(subJourneyBuilderMock)
 
         val builder = TaskInitialiser(taskMock, mock())
-        val customExitStepMock = mock<TaskExitStep>()
+        val customExitStepMock = mock<SubjourneyExitStep>()
         builder.customExitStep(customExitStepMock)
         builder.nextDestination { mock() }
         builder.parents { NoParents() }

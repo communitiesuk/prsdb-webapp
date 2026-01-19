@@ -196,14 +196,14 @@ class ParentageTests {
     fun `isComplete returns a single parent with the condition checking that tasks final step is complete`() {
         // Arrange
         val task = mock<Task<*>>()
-        val step = mock<TaskExitStep>()
+        val step = mock<SubjourneyExitStep>()
         whenever(task.exitStep).thenReturn(step)
 
         // Act
         val parent = task.isComplete()
 
         // Assert
-        whenever(step.outcome).thenReturn(TaskComplete.COMPLETE)
+        whenever(step.outcome).thenReturn(SubjourneyComplete.COMPLETE)
         assertTrue(parent.allowsChild())
 
         whenever(step.outcome).thenReturn(null)

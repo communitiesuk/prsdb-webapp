@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.IncompletePropertyCreatingTaskExitStep
+import uk.gov.communities.prsdb.webapp.journeys.IncompletePropertyCreatingSubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -139,7 +139,7 @@ class PropertyRegistrationJourney(
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
     override val localCouncilStep: LocalCouncilStep,
-    override val addressExitStep: IncompletePropertyCreatingTaskExitStep,
+    override val addressExitStep: IncompletePropertyCreatingSubjourneyExitStep,
     // Property details steps
     override val propertyTypeStep: PropertyTypeStep,
     override val ownershipTypeStep: OwnershipTypeStep,
@@ -195,7 +195,7 @@ interface PropertyRegistrationJourneyState :
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: AddressTask
-    val addressExitStep: IncompletePropertyCreatingTaskExitStep
+    val addressExitStep: IncompletePropertyCreatingSubjourneyExitStep
     val propertyTypeStep: PropertyTypeStep
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask
