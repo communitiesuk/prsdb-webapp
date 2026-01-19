@@ -65,6 +65,6 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
     }
 
     companion object {
-        val objectMapper = ObjectMapper()
+        private val objectMapper = ObjectMapper()
     }
 }

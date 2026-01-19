@@ -14,9 +14,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
-import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
-import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesForReminderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -68,25 +67,23 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
-        whenever(
-            incompletePropertiesService
-                .getIncompletePropertiesOlderThanDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS),
-        ).thenReturn(
-            listOf(
-                IncompletePropertiesForReminderDataModel(
-                    landlordEmail = emailAddress1,
-                    propertySingleLineAddress = propertyAddress1,
-                    completeByDate = completeByDate,
-                    savedJourneyStateId = "journey-1",
+        whenever(incompletePropertiesService.getIncompletePropertyReminders())
+            .thenReturn(
+                listOf(
+                    IncompletePropertyForReminderDataModel(
+                        landlordEmail = emailAddress1,
+                        propertySingleLineAddress = propertyAddress1,
+                        completeByDate = completeByDate,
+                        savedJourneyStateId = "journey-1",
+                    ),
+                    IncompletePropertyForReminderDataModel(
+                        landlordEmail = emailAddress2,
+                        propertySingleLineAddress = propertyAddress2,
+                        completeByDate = completeByDate,
+                        savedJourneyStateId = "journey-2",
+                    ),
                 ),
-                IncompletePropertiesForReminderDataModel(
-                    landlordEmail = emailAddress2,
-                    propertySingleLineAddress = propertyAddress2,
-                    completeByDate = completeByDate,
-                    savedJourneyStateId = "journey-2",
-                ),
-            ),
-        )
+            )
 
         val method =
             IncompletePropertiesReminderTaskApplicationRunner::class.java
@@ -126,25 +123,23 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
-        whenever(
-            incompletePropertiesService
-                .getIncompletePropertiesOlderThanDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS),
-        ).thenReturn(
-            listOf(
-                IncompletePropertiesForReminderDataModel(
-                    landlordEmail = failingEmail,
-                    propertySingleLineAddress = addressFail,
-                    completeByDate = completeByDate,
-                    savedJourneyStateId = "journey-fail",
+        whenever(incompletePropertiesService.getIncompletePropertyReminders())
+            .thenReturn(
+                listOf(
+                    IncompletePropertyForReminderDataModel(
+                        landlordEmail = failingEmail,
+                        propertySingleLineAddress = addressFail,
+                        completeByDate = completeByDate,
+                        savedJourneyStateId = "journey-fail",
+                    ),
+                    IncompletePropertyForReminderDataModel(
+                        landlordEmail = succeedingEmail,
+                        propertySingleLineAddress = addressSucceed,
+                        completeByDate = completeByDate,
+                        savedJourneyStateId = "journey-succeed",
+                    ),
                 ),
-                IncompletePropertiesForReminderDataModel(
-                    landlordEmail = succeedingEmail,
-                    propertySingleLineAddress = addressSucceed,
-                    completeByDate = completeByDate,
-                    savedJourneyStateId = "journey-succeed",
-                ),
-            ),
-        )
+            )
 
         whenever(emailSender.sendEmail(failingEmail, expectedFailEmail))
             .doThrow(PersistentEmailSendException("Persistent failure"))

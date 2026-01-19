@@ -7,7 +7,6 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
-import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -37,9 +36,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
 
     private fun incompletePropertiesReminderTaskLogic() {
         val incompleteProperties =
-            incompletePropertiesService.getIncompletePropertiesOlderThanDays(
-                INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS,
-            )
+            incompletePropertiesService.getIncompletePropertyReminders()
         // TODO - PRSD-1030
         //  Will need to add something to the DB tracking if a reminder email has been sent for this incomplete property and only send if not yet sent
 

@@ -75,8 +75,8 @@ class Landlord() : ModifiableAuditableEntity() {
     )
     private lateinit var landlordIncompleteProperties: MutableSet<LandlordIncompleteProperties>
 
-    val incompleteProperties: MutableList<SavedJourneyState>
-        get() = landlordIncompleteProperties.map { it.savedJourneyState }.toMutableList()
+    val incompleteProperties: List<SavedJourneyState>
+        get() = landlordIncompleteProperties.map { it.savedJourneyState }.toList()
 
     constructor(
         baseUser: OneLoginUser,
