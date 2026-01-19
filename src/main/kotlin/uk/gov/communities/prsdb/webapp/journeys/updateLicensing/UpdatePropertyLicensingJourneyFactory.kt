@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -30,14 +31,14 @@ class UpdateLicensingJourneyFactory(
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        // TODO PRSD-1550 - properly init the state, make the property ID immutable and handle mismatched property IDs
-        if (state.propertyId == null) {
-            ownershipService.getPropertyOwnership(propertyId).let {
-                state.propertyId = propertyId
-                state.hasOriginalLicense = it.license != null
-            }
-        } else if (state.propertyId != propertyId) {
-            throw IllegalStateException("Journey state property ID ${state.propertyId} does not match provided property ID $propertyId")
+        if (!state.isStateInitialized) {
+            state.propertyId = propertyId
+            state.hasOriginalLicense = ownershipService.getPropertyOwnership(propertyId).license != null
+            state.isStateInitialized = true
+        }
+
+        if (state.propertyId != propertyId) {
+            throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
         return journey(state) {
@@ -56,7 +57,10 @@ class UpdateLicensingJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
+    fun initializeJourneyState(
+        ownershipId: Long,
+        user: Principal,
+    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 }
 
 @JourneyFrameworkComponent
@@ -73,19 +77,36 @@ class UpdateLicensingJourney(
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     UpdateLicensingJourneyState {
-    override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
+    override var cyaChildJourneyId: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
 
-    override var hasOriginalLicense: Boolean? by delegateProvider.mutableDelegate("hasOriginalLicense")
-    override var propertyId: Long? by delegateProvider.mutableDelegate("propertyId")
+    override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
+    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
     override fun generateJourneyId(seed: Any?): String {
-        val user = seed as? Principal
+        val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
 
-        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
+        return super<AbstractJourneyState>.generateJourneyId(
+            ownershipUserPair?.let {
+                generateSeedForPropertyOwnershipAndUser(it.first, it.second)
+            },
+        )
     }
 
+    private fun convertSeedToOwnershipUserPairOrNull(seed: Any?): Pair<Long, Principal>? =
+        (seed as? Pair<*, *>)?.let {
+            (it.first as? Long)?.let { ownershipId ->
+                (it.second as? Principal)?.let { user ->
+                    Pair(ownershipId, user)
+                }
+            }
+        }
+
     companion object {
-        fun generateSeedForUser(user: Principal): String = "Update licence for user ${user.name} at time ${System.currentTimeMillis()}"
+        fun generateSeedForPropertyOwnershipAndUser(
+            ownershipId: Long,
+            user: Principal,
+        ): String = "Update licence for property $ownershipId by user ${user.name}"
     }
 }
 
@@ -94,6 +115,6 @@ interface UpdateLicensingJourneyState :
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
     override val cyaStep: UpdateLicensingCheckAnswersStep
-    val hasOriginalLicense: Boolean?
-    val propertyId: Long?
+    val hasOriginalLicense: Boolean
+    val propertyId: Long
 }

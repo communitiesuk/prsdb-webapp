@@ -77,11 +77,11 @@ class AbstractJourneyStateTests {
 
 class JourneyStateDelegateProviderTests {
     @Test
-    fun `setting a var property implemented by mutableDelegate saves the value in the state`() {
+    fun `setting a var property implemented by nullableDelegate saves the value in the state`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
+        var testProperty: String? by delegateProvider.nullableDelegate("testProperty")
 
         // Act
         testProperty = "testValue"
@@ -91,12 +91,12 @@ class JourneyStateDelegateProviderTests {
     }
 
     @Test
-    fun `getting a var property implemented by mutableDelegate retrieves the value from the state if present`() {
+    fun `getting a var property implemented by nullableDelegate retrieves the value from the state if present`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn("\"testValue\"")
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
+        var testProperty: String? by delegateProvider.nullableDelegate("testProperty")
 
         // Act
         val result = testProperty
@@ -106,12 +106,12 @@ class JourneyStateDelegateProviderTests {
     }
 
     @Test
-    fun `getting a var property implemented by mutableDelegate returns null if value not present in state`() {
+    fun `getting a var property implemented by nullableDelegate returns null if value not present in state`() {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         whenever(journeyStateService.getValue("testProperty")).thenReturn(null)
         val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-        var testProperty: String? by delegateProvider.mutableDelegate("testProperty")
+        var testProperty: String? by delegateProvider.nullableDelegate("testProperty")
 
         // Act
         val result = testProperty
@@ -159,8 +159,8 @@ class JourneyStateDelegateProviderTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty")
-            var testProperty2: Int? by delegateProvider.mutableDelegate("testProperty")
+            var testProperty1: String? by delegateProvider.nullableDelegate("testProperty")
+            var testProperty2: Int? by delegateProvider.nullableDelegate("testProperty")
         }
     }
 
@@ -172,7 +172,7 @@ class JourneyStateDelegateProviderTests {
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {
-            var testProperty1: String? by delegateProvider.mutableDelegate("testProperty")
+            var testProperty1: String? by delegateProvider.nullableDelegate("testProperty")
             val testProperty2: Int by delegateProvider.requiredDelegate("testProperty")
         }
     }

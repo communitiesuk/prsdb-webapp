@@ -50,17 +50,17 @@ class JourneyStateService(
         get() = session.getAttribute(JOURNEY_STATE_METADATA_STORE_KEY)?.let { it as? String }?.let { Json.decodeFromString(it) } ?: mapOf()
         set(value) = session.setAttribute(JOURNEY_STATE_METADATA_STORE_KEY, Json.encodeToString(value))
 
-    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: restoreJourney()
+    val journeyMetadata get() = journeyStateMetadataMap[journeyId] ?: restoreJourneyOrNull() ?: throw NoSuchJourneyException(journeyId)
 
-    private fun restoreJourney(): JourneyMetadata {
-        if (journeyStateMetadataMap.containsKey(journeyId)) {
-            throw JourneyInitialisationException("Journey with ID $journeyId already exists in session")
+    private fun restoreJourneyOrNull(journeyToRestore: String = journeyId): JourneyMetadata? {
+        if (journeyStateMetadataMap.containsKey(journeyToRestore)) {
+            throw JourneyInitialisationException("Journey with ID $journeyToRestore already exists in session")
         }
 
-        val stateToRestore = persistenceService.retrieveJourneyStateData(journeyId) ?: throw NoSuchJourneyException(journeyId)
+        val stateToRestore = persistenceService.retrieveJourneyStateData(journeyToRestore) ?: return null
 
         val metadata = JourneyMetadata.withNewDataKey()
-        journeyStateMetadataMap += (journeyId to metadata)
+        journeyStateMetadataMap += (journeyToRestore to metadata)
 
         session.setAttribute(metadata.dataKey, stateToRestore)
         return metadata
@@ -106,6 +106,23 @@ class JourneyStateService(
         if (journeyStateMetadataMap.containsKey(newJourneyId)) {
             throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
         }
+        journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
+        JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
+    }
+
+    fun initialiseOrRestoreJourneyWithId(
+        newJourneyId: String,
+        stateInitialiser: JourneyStateService.() -> Unit = { },
+    ) {
+        if (journeyStateMetadataMap.containsKey(newJourneyId)) {
+            return
+        }
+
+        val restoredMetadata = restoreJourneyOrNull(newJourneyId)
+        if (restoredMetadata != null) {
+            return
+        }
+
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
         JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
     }
