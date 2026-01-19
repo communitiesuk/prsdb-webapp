@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -26,19 +26,7 @@ interface OccupationState : JourneyState {
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
 
-    fun getBillsIncluded(): BillsIncludedDataModel? = BillsIncludedDataModel.fromFormDataOrNull()
-
-    fun getRentAmount(): RentAmountDataModel =
-        RentAmountDataModel.fromFormDataOrNull() ?: throw NotNullFormModelValueIsNullException("No rent amount found in OccupationState")
-
-    fun getCustomRentFrequencyIfSelected(): String? =
-        if (rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER) {
-            rentFrequency.formModelOrNull?.customRentFrequency
-        } else {
-            null
-        }
-
-    private fun BillsIncludedDataModel.Companion.fromFormDataOrNull() =
+    fun getBillsIncludedOrNull(): BillsIncludedDataModel? =
         billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->
             BillsIncludedDataModel.fromFormData(
                 billsIncluded = billsIncludedFormModel.billsIncluded,
@@ -46,11 +34,43 @@ interface OccupationState : JourneyState {
             )
         }
 
-    private fun RentAmountDataModel.Companion.fromFormDataOrNull(): RentAmountDataModel? =
+    fun getRentAmountOrNull(): RentAmountDataModel? =
         rentAmount.formModelOrNull?.let { rentAmountFormModel ->
             RentAmountDataModel.fromFormData(
                 rentAmount = rentAmountFormModel.rentAmount,
-                isCustomRentFrequency = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER,
             )
         }
+
+    fun getCustomRentFrequencyIfSelected(): String? =
+        if (isRentFrequencyCustom()) {
+            rentFrequency.formModelOrNull?.customRentFrequency
+        } else {
+            null
+        }
+
+    fun getFormattedRentAmountOrNull(): List<String>? {
+        val rentAmountDataModel = getRentAmountOrNull() ?: return null
+        val formattedRentAmount = mutableListOf("commonText.poundSign", "${rentAmountDataModel.rentAmount} ")
+        if (isRentFrequencyCustom()) formattedRentAmount.add("forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
+        return formattedRentAmount
+    }
+
+    fun getFormattedAllBillsIncludedListOrNull(): List<Any>? {
+        val allBillsIncludedList: MutableList<Any?> = mutableListOf()
+        val billsIncludedDataModel = getBillsIncludedOrNull() ?: return null
+        billsIncludedDataModel.standardBillsIncludedListAsEnums.forEach { bill ->
+            if (bill != BillsIncluded.SOMETHING_ELSE) {
+                allBillsIncludedList.add(bill)
+                allBillsIncludedList.add(", ")
+            }
+        }
+        if (billsIncludedDataModel.customBillsIncludedIfRequired != null) {
+            allBillsIncludedList.add(billsIncludedDataModel.customBillsIncludedIfRequired)
+        } else {
+            allBillsIncludedList.removeLast()
+        }
+        return allBillsIncludedList.filterNotNull().ifEmpty { null }
+    }
+
+    private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER
 }

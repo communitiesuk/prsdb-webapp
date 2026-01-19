@@ -3,49 +3,26 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 
 data class BillsIncludedDataModel(
-    val allBillsIncludedList: List<Any>,
-    val standardBillsIncludedList: String,
+    val standardBillsIncludedListAsStrings: List<String>,
+    val standardBillsIncludedListAsEnums: List<BillsIncluded>,
     val customBillsIncludedIfRequired: String?,
 ) {
     companion object {
         fun fromFormData(
-            billsIncluded: MutableList<String?>,
+            billsIncluded: List<String?>,
             customBillsIncluded: String,
         ): BillsIncludedDataModel =
             BillsIncludedDataModel(
-                allBillsIncludedList = getAllBillsIncludedList(billsIncluded, customBillsIncluded),
-                standardBillsIncludedList = billsIncluded.filterNotNull().joinToString(separator = ","),
+                standardBillsIncludedListAsStrings = billsIncluded.filterNotNull(),
+                standardBillsIncludedListAsEnums = getStandardBillsIncludedListAsEnums(billsIncluded),
                 customBillsIncludedIfRequired = getCustomBillsIncludedIfRequired(billsIncluded, customBillsIncluded),
             )
 
-        fun getAllBillsIncludedList(
-            billsIncluded: MutableList<String?>,
-            customBillsIncluded: String,
-        ): List<Any> {
-            val billsIncludedList = getStandardBillsIncludedList(billsIncluded)
-            if (shouldIncludeCustomBillsIncluded(billsIncluded, customBillsIncluded)) {
-                billsIncludedList += customBillsIncluded
-            } else {
-                billsIncludedList.removeLast()
-            }
-            return billsIncludedList.filterNotNull()
-        }
-
-        fun getStandardBillsIncludedList(billsIncluded: MutableList<String?>): MutableList<Any?> {
-            val billsIncludedList: MutableList<Any?> = mutableListOf()
-            billsIncluded.forEach { bill ->
-                bill?.let {
-                    if (BillsIncluded.valueOf(bill) != BillsIncluded.SOMETHING_ELSE) {
-                        billsIncludedList.add(BillsIncluded.valueOf(bill))
-                        billsIncludedList.add(", ")
-                    }
-                }
-            }
-            return billsIncludedList
-        }
+        fun getStandardBillsIncludedListAsEnums(billsIncluded: List<String?>) =
+            billsIncluded.filterNotNull().map { BillsIncluded.valueOf(it) }
 
         fun getCustomBillsIncludedIfRequired(
-            billsIncluded: MutableList<String?>,
+            billsIncluded: List<String?>,
             customBillsIncluded: String,
         ): String? =
             if (shouldIncludeCustomBillsIncluded(billsIncluded, customBillsIncluded)) {
@@ -55,7 +32,7 @@ data class BillsIncludedDataModel(
             }
 
         fun shouldIncludeCustomBillsIncluded(
-            billsIncluded: MutableList<String?>,
+            billsIncluded: List<String?>,
             customBillsIncluded: String,
         ): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString()) && customBillsIncluded.isNotEmpty()
     }

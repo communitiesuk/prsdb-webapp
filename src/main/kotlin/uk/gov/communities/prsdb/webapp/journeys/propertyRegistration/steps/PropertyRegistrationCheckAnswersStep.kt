@@ -83,12 +83,12 @@ class PropertyRegistrationCyaStepConfig(
                     state.bedrooms.formModelOrNull
                         ?.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                         ?.toInt() ?: 0,
-                billsIncludedList = state.getBillsIncluded()?.standardBillsIncludedList,
-                customBillsIncluded = state.getBillsIncluded()?.customBillsIncludedIfRequired,
+                billsIncludedList = state.getBillsIncludedOrNull()?.standardBillsIncludedListAsStrings?.joinToString(separator = ","),
+                customBillsIncluded = state.getBillsIncludedOrNull()?.customBillsIncludedIfRequired,
                 furnishedStatus = state.furnishedStatus.formModelOrNull?.furnishedStatus,
                 rentFrequency = state.rentFrequency.formModelOrNull?.rentFrequency,
                 customRentFrequency = state.getCustomRentFrequencyIfSelected(),
-                rentAmount = state.rentAmount.formModelOrNull?.rentAmount?.toBigDecimalOrNull(),
+                rentAmount = state.getRentAmountOrNull()?.rentAmount,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {
@@ -197,7 +197,7 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getBillsIncluded()!!.allBillsIncludedList,
+                            state.getFormattedAllBillsIncludedListOrNull(),
                             Destination(billsIncludedStep),
                             enforceListAsSingleLineDisplay = true,
                         ),
@@ -220,7 +220,7 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getRentAmount().formattedRentAmount,
+                        state.getFormattedRentAmountOrNull(),
                         Destination(rentAmountStep),
                         enforceListAsSingleLineDisplay = true,
                     ),
