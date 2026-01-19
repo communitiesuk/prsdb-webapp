@@ -51,13 +51,15 @@ class IncompletePropertyForLandlordServiceImpl(
 ) : IncompletePropertyForLandlordService {
     override fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> =
         landlordRepository.findByBaseUser_Id(principalName)?.let { landlord ->
-            landlord.incompleteProperties.map { savedState ->
-                IncompletePropertiesDataModel(
-                    journeyId = savedState.journeyId,
-                    singleLineAddress = savedState.getPropertyRegistrationSingleLineAddress(),
-                    completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(savedState),
-                )
-            }
+            landlord.incompleteProperties
+                .sortedBy { it.createdDate }
+                .map { savedState ->
+                    IncompletePropertiesDataModel(
+                        journeyId = savedState.journeyId,
+                        singleLineAddress = savedState.getPropertyRegistrationSingleLineAddress(),
+                        completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(savedState),
+                    )
+                }
         } ?: throw IllegalArgumentException("Landlord not found for principal: $principalName")
 
     override fun deleteIncompleteProperty(
