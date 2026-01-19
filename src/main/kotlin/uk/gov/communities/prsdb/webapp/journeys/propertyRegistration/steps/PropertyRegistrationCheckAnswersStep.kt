@@ -82,7 +82,7 @@ class PropertyRegistrationCyaStepConfig(
                 numBedrooms =
                     state.bedrooms.formModelOrNull
                         ?.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                        ?.toInt() ?: 0,
+                        ?.toInt(),
                 billsIncludedList = state.getBillsIncludedOrNull()?.standardBillsIncludedListAsStrings?.joinToString(separator = ","),
                 customBillsIncluded = state.getBillsIncludedOrNull()?.customBillsIncludedIfRequired,
                 furnishedStatus = state.furnishedStatus.formModelOrNull?.furnishedStatus,
