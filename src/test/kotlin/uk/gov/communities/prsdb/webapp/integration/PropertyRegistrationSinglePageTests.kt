@@ -543,10 +543,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for weekly rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the weekly rent for your property?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every week, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
@@ -555,10 +557,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for four weekly rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the rent for your property, charged every 4 weeks?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every 4 weeks, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
@@ -567,10 +571,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for monthly rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the monthly rent for your property?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every month, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
@@ -579,13 +585,26 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for 'other' rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the monthly rent for your property?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every month, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
+            }
+        }
+
+        @Nested
+        inner class HasJointLandlordsStep {
+            @Test
+            fun `Submitting with no option selected returns an error`(page: Page) {
+                val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+                hasJointLandlordsPage.form.submit()
+                assertThat(hasJointLandlordsPage.form.getErrorMessage())
+                    .containsText("Select if there are any other landlords for this property")
             }
         }
     }

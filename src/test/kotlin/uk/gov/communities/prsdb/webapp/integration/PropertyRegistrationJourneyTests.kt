@@ -10,6 +10,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -188,10 +189,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(rentAmountPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         rentAmountPage.submitRentAmount("400")
-
-        // TODO PDJB-112, PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormPagePropertyRegistration::class)
-        hasJointLandlordsPage.form.submit()
+
+        // Has Joint Landlords - render page
+        assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+        // fill in and submit
+        hasJointLandlordsPage.submitHasJointLandlords()
+
+        // TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
+
         val addJointLandlordPage = assertPageIs(page, AddJointLandlordFormPagePropertyRegistration::class)
         addJointLandlordPage.form.submit()
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
@@ -301,10 +311,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         occupancyPage.submitIsVacant()
-
-        // TODO PDJB-112, PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormPagePropertyRegistration::class)
-        hasJointLandlordsPage.form.submit()
+
+        // Has Joint Landlords - render page
+        assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+        // fill in and submit
+        hasJointLandlordsPage.submitHasJointLandlords()
+
+        // TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
         val addJointLandlordPage = assertPageIs(page, AddJointLandlordFormPagePropertyRegistration::class)
         addJointLandlordPage.form.submit()
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
