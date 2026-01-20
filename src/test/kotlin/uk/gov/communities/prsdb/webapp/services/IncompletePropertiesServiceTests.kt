@@ -105,4 +105,37 @@ class IncompletePropertiesServiceTests {
         assertTrue(captor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now()))
         assertTrue(captor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
     }
+
+    @Test
+    fun `getIdsOfPropertiesWhichHaveHadRemindersSent returns list of entity IDs`() {
+        // Arrange
+        val savedJourneyStateIds = listOf(1L, 2L, 3L)
+        val reminderEmailSentRecords =
+            listOf(
+                ReminderEmailSent(
+                    lastEmailSentDate = Instant.now(),
+                    entityType = RemindableEntityType.SAVED_JOURNEY_STATE,
+                    entityId = 1L,
+                ),
+                ReminderEmailSent(
+                    lastEmailSentDate = Instant.now(),
+                    entityType = RemindableEntityType.SAVED_JOURNEY_STATE,
+                    entityId = 3L,
+                ),
+            )
+        whenever(
+            mockReminderEmailSentRepository.findByEntityTypeAndEntityIdIn(
+                RemindableEntityType.SAVED_JOURNEY_STATE,
+                savedJourneyStateIds,
+            ),
+        ).thenReturn(reminderEmailSentRecords)
+
+        // Act
+        val result = incompletePropertiesService.getIdsOfPropertiesWhichHaveHadRemindersSent(savedJourneyStateIds)
+
+        // Assert
+        assertEquals(listOf(1L, 3L), result)
+    }
+
+    // TODO PRSD-1030 - test getIdsOfPropertiesWhichHaveHadRemindersSent
 }

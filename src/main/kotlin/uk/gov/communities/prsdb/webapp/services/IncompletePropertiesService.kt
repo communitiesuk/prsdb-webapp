@@ -46,6 +46,9 @@ class IncompletePropertiesService(
     }
 
     fun getIdsOfPropertiesWhichHaveHadRemindersSent(savedJourneyStateIds: List<Long>): List<Long> {
+        // TODO PRSD-1030 - do we need to pass in savedJourneyStateIds?
+        // Can we delete these records when the relevant saved journey state is deleted?
+        // Might need to change the entity to properly FK to saved journey state so we can use orphan removal
         val sentReminders =
             reminderEmailSentRepository.findByEntityTypeAndEntityIdIn(
                 RemindableEntityType.SAVED_JOURNEY_STATE,
