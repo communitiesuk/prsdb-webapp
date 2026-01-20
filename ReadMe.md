@@ -70,11 +70,10 @@ You can run scheduled tasks locally using a new Run Configuration with the corre
 You will need to include the following profiles:
 - `web-server-deactivated`
 - `scheduled-task`
-- `local-scheduled-task-with-db`
+- `local`
 - The relevant task specific profile e.g. `incomplete-property-reminder-scheduled-task` to run `IncompletePropertiesReminderTaskApplicationRunner`
 
-You will also need to include additional environment variables. Add "scheduled-task.env" from Keeper to your project root.
-Set "Environment variables" in your run configuration to point to this file.
+If you need to use notify, also add the `use-notify` profile
 
 ### Code structure
 
