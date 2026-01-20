@@ -34,7 +34,7 @@ interface OccupationState : JourneyState {
 
     fun getCustomRentFrequencyIfSelected(): String? =
         if (isRentFrequencyCustom()) {
-            rentFrequency.formModelOrNull?.customRentFrequency
+            rentFrequency.formModelOrNull?.customRentFrequency!!.replaceFirstChar { it.uppercase() }
         } else {
             null
         }
@@ -57,7 +57,7 @@ interface OccupationState : JourneyState {
             if (bill != BillsIncluded.SOMETHING_ELSE) {
                 allBillsIncludedList.add(bill)
             } else {
-                allBillsIncludedList.add(billsIncludedDataModel.customBillsIncluded)
+                allBillsIncludedList.add(billsIncludedDataModel.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
             }
             if (index < billsIncludedDataModel.standardBillsIncludedListAsEnums.size - 1) allBillsIncludedList.add(", ")
         }
