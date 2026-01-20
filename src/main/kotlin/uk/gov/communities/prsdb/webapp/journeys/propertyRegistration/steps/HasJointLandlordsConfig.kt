@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
@@ -29,6 +30,7 @@ class HasJointLandlordsConfig : AbstractGenericStepConfig<YesOrNo, HasJointLandl
                         labelMsgKey = "forms.jointLandlords.hasJointLandlords.radios.no",
                     ),
                 ),
+            "findLegalAdviceUrl" to GOV_LEGAL_ADVICE_URL,
         )
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/hasJointLandlordsForm"
