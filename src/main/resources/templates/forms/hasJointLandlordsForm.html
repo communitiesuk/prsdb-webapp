@@ -3,11 +3,12 @@
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasJointLandlords', #{${fieldSetHeading}},  #{${fieldSetHint}})}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasJointLandlords', #{${fieldSetHeading}},  null)}">
         <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.one}"></p>
         <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.two}"></p>
         <details  id="details" th:replace="~{fragments/details :: details(#{forms.jointLandlords.hasJointLandlords.link.one}, ~{::#details/content()})}" >
@@ -17,7 +18,7 @@
                 <a class="govuk-link" th:href="" th:text="#{forms.jointLandlords.hasJointLandlords.link.two}"></a>
             </div>
         </details>
-        <th:block th:replace="~{fragments/forms/radios :: radios(null,'hasJointLandlords',null, ${radioOptions})}"></th:block>
+        <th:block th:replace="~{fragments/forms/radios :: radios(${label},'hasJointLandlords',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>

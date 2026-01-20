@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 
@@ -13,11 +15,16 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
         subJourney(state) {
             step(journey.hasJointLandlordsStep) {
                 routeSegment(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
-                nextStep { journey.addJointLandlordStep }
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.addJointLandlordStep
+                        YesOrNo.NO -> exitStep
+                    }
+                }
             }
             step(journey.addJointLandlordStep) {
                 routeSegment(RegisterPropertyStepId.AddJointLandlord.urlPathSegment)
-                parents { journey.hasJointLandlordsStep.isComplete() }
+                parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.checkJointLandlordsStep) {
