@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -24,6 +26,8 @@ class PropertyDetailsViewModel(
     private val changeLinkMessageKey = "forms.links.change"
 
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
+
+    val isRentFrequencyCustom: Boolean = propertyOwnership.rentFrequency == RentFrequency.OTHER
 
     val keyDetails: List<SummaryListRowViewModel> =
         listOf(
@@ -142,12 +146,12 @@ class PropertyDetailsViewModel(
                     if (propertyOwnership.rentIncludesBills) {
                         addRow(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
-                            // TODO PDJB-197 is there a better way to format this?
-                            propertyOwnership.billsIncludedList + propertyOwnership.customBillsIncluded,
+                            getFormattedBillsIncludedListComponents(),
                             changeLinkMessageKey,
                             // TODO PDJB-105: Add link when update step is created
                             null,
                             withChangeLinks,
+                            enforceListAsSingleLineDisplay = true,
                         )
                     }
                     addRow(
@@ -160,8 +164,7 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
-                        // TODO PDJB-197 find out how to display custom frequency
-                        propertyOwnership.customRentFrequency ?: MessageKeyConverter.convert(propertyOwnership.rentFrequency!!),
+                        getRentFrequencyValue(),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
                         null,
@@ -169,12 +172,45 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
-                        "£" + propertyOwnership.rentAmount.toString(),
+                        getFormattedRentAmountComponents(),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
                         null,
                         withChangeLinks,
+                        enforceListAsSingleLineDisplay = true,
                     )
                 }
             }.toList()
+
+    private fun getFormattedBillsIncludedListComponents(): List<Any> {
+        val allBillsIncludedList: MutableList<Any> = mutableListOf()
+        propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }.forEach { bill ->
+            if (bill != BillsIncluded.SOMETHING_ELSE) {
+                allBillsIncludedList.add(propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
+            } else {
+                allBillsIncludedList.add(bill)
+            }
+            allBillsIncludedList.add(", ")
+        }
+        allBillsIncludedList.removeLast()
+        return allBillsIncludedList
+    }
+
+    private fun getRentFrequencyValue(): String {
+        return if (!isRentFrequencyCustom) {
+            MessageKeyConverter.convert(propertyOwnership.rentFrequency!!)
+        } else {
+            propertyOwnership.customRentFrequency!!.replaceFirstChar { it.uppercase() }
+        }
+    }
+
+    private fun getFormattedRentAmountComponents(): MutableList<String> {
+        val formattedRentAmount = mutableListOf("commonText.poundSign", propertyOwnership.rentAmount!!.toString())
+        if (isRentFrequencyCustom) {
+            formattedRentAmount.addAll(
+                listOf(" ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
+            )
+        }
+        return formattedRentAmount
+    }
 }
