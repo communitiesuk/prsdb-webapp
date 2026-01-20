@@ -34,7 +34,7 @@ interface OccupationState : JourneyState {
 
     fun getCustomRentFrequencyIfSelected(): String? =
         if (isRentFrequencyCustom()) {
-            rentFrequency.formModelOrNull?.customRentFrequency!!.replaceFirstChar { it.uppercase() }
+            rentFrequency.formModel.customRentFrequency.replaceFirstChar { it.uppercase() }
         } else {
             null
         }
@@ -51,8 +51,9 @@ interface OccupationState : JourneyState {
     }
 
     fun getFormattedBillsIncludedListComponentsOrNull(): List<Any>? {
-        val allBillsIncludedList: MutableList<Any?> = mutableListOf()
+        val allBillsIncludedList: MutableList<Any> = mutableListOf()
         val billsIncludedDataModel = getBillsIncludedOrNull() ?: return null
+        if (billsIncludedDataModel.standardBillsIncludedListAsEnums.isEmpty()) return null
         billsIncludedDataModel.standardBillsIncludedListAsEnums.forEachIndexed { index, bill ->
             if (bill != BillsIncluded.SOMETHING_ELSE) {
                 allBillsIncludedList.add(bill)
@@ -61,7 +62,7 @@ interface OccupationState : JourneyState {
             }
             if (index < billsIncludedDataModel.standardBillsIncludedListAsEnums.size - 1) allBillsIncludedList.add(", ")
         }
-        return allBillsIncludedList.filterNotNull().ifEmpty { null }
+        return allBillsIncludedList.ifEmpty { null }
     }
 
     private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER

@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Licensing
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -64,7 +65,8 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
-            val isOccupied = state.occupied.formModel.occupied ?: false
+            val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+            val billsIncludedDataModel = state.getBillsIncludedOrNull()
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
@@ -73,34 +75,34 @@ class PropertyRegistrationCyaStepConfig(
                 ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
                 numberOfHouseholds =
                     if (isOccupied) {
-                        state.households.formModelOrNull
-                            ?.notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                            ?.toInt() ?: 0
+                        state.households.formModel
+                            .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                            .toInt()
                     } else {
                         0
                     },
                 numberOfPeople =
                     if (isOccupied) {
-                        state.tenants.formModelOrNull
-                            ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                            ?.toInt() ?: 0
+                        state.tenants.formModel
+                            .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                            .toInt()
                     } else {
                         0
                     },
                 numBedrooms =
                     if (isOccupied) {
-                        state.bedrooms.formModelOrNull
-                            ?.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                            ?.toInt()
+                        state.bedrooms.formModel
+                            .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                            .toInt()
                     } else {
                         null
                     },
-                billsIncludedList = if (isOccupied) state.getBillsIncludedOrNull()?.standardBillsIncludedString else null,
-                customBillsIncluded = if (isOccupied) state.getBillsIncludedOrNull()?.customBillsIncluded else null,
-                furnishedStatus = if (isOccupied) state.furnishedStatus.formModelOrNull?.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModelOrNull?.rentFrequency else null,
+                billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedString else null,
+                customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
+                furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
+                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
                 customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-                rentAmount = if (isOccupied) state.rentAmount.formModelOrNull?.rentAmount?.toBigDecimal() else null,
+                rentAmount = if (isOccupied) state.rentAmount.formModel.rentAmount.toBigDecimal() else null,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {
