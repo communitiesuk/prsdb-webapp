@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import kotlin.test.assertEquals
 
 class JourneyStatePersistenceServiceTests {
@@ -72,10 +73,10 @@ class JourneyStatePersistenceServiceTests {
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
         val existingJourneyState =
-            SavedJourneyState(
-                serializedState = """{"oldKey":"oldValue"}""",
-                user = oneLoginUser,
+            MockSavedJourneyStateData.createSavedJourneyState(
                 journeyId = testJourneyId,
+                serializedState = """{"oldKey":"oldValue"}""",
+                baseUser = oneLoginUser,
             )
         whenever(
             mockJourneyRepository.findByJourneyIdAndUser_Id(
@@ -121,10 +122,10 @@ class JourneyStatePersistenceServiceTests {
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
         val existingJourneyState =
-            SavedJourneyState(
-                serializedState = """{"key":"value"}""",
-                user = oneLoginUser,
+            MockSavedJourneyStateData.createSavedJourneyState(
                 journeyId = testJourneyId,
+                serializedState = """{"key":"value"}""",
+                baseUser = oneLoginUser,
             )
         whenever(
             mockJourneyRepository.findByJourneyIdAndUser_Id(

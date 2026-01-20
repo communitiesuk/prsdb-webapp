@@ -65,6 +65,16 @@ be mocked instead.
 
 You can run the unit tests by running the `verification\test` task from the Gradle tab in Intellij.
 
+#### Running scheduled tasks locally
+You can run scheduled tasks locally using a new Run Configuration with the correct profiles added.
+You will need to include the following profiles:
+- `web-server-deactivated`
+- `scheduled-task`
+- `local`
+- The relevant task specific profile e.g. `incomplete-property-reminder-scheduled-task` to run `IncompletePropertiesReminderTaskApplicationRunner`
+
+If you need to use notify, also add the `use-notify` profile
+
 ### Code structure
 
 #### Backend
