@@ -89,7 +89,7 @@ class IncompletePropertiesServiceTests {
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS + 2L),
             )
         val savedJourneyStateReminderAlreadySent =
-            MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate)
+            MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate, entityId = 2L)
 
         val landlordIncompleteProperties =
             listOf(
@@ -139,7 +139,7 @@ class IncompletePropertiesServiceTests {
         verify(mockReminderEmailSentRepository).save(captor.capture())
 
         assertEquals(incompletePropertySavedJourneyState, captor.firstValue.savedJourneyState)
-        assertTrue(captor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now()))
+        assertTrue(captor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now().plusSeconds(1)))
         assertTrue(captor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
     }
 }

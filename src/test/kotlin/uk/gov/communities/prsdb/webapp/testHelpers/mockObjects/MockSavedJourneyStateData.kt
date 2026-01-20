@@ -15,6 +15,7 @@ class MockSavedJourneyStateData {
             serializedState: String = createSerialisedStateWithSingleLineAddress("1 Example Road, EG1 2AB"),
             baseUser: OneLoginUser = createOneLoginUser(),
             createdDate: Instant = Instant.now(),
+            entityId: Long = 1L,
         ): SavedJourneyState {
             val savedJourneyState =
                 SavedJourneyState(
@@ -24,6 +25,7 @@ class MockSavedJourneyStateData {
                 )
 
             ReflectionTestUtils.setField(savedJourneyState, "createdDate", createdDate)
+            ReflectionTestUtils.setField(savedJourneyState, "id", entityId)
 
             return savedJourneyState
         }
