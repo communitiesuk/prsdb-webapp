@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.RentAmountDataModel
 
 interface OccupationState : JourneyState {
     val occupied: OccupiedStep
@@ -29,15 +28,7 @@ interface OccupationState : JourneyState {
     fun getBillsIncludedOrNull(): BillsIncludedDataModel? =
         billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->
             BillsIncludedDataModel.fromFormData(
-                billsIncluded = billsIncludedFormModel.billsIncluded,
-                customBillsIncluded = billsIncludedFormModel.customBillsIncluded,
-            )
-        }
-
-    fun getRentAmountOrNull(): RentAmountDataModel? =
-        rentAmount.formModelOrNull?.let { rentAmountFormModel ->
-            RentAmountDataModel.fromFormData(
-                rentAmount = rentAmountFormModel.rentAmount,
+                formModel = billsIncludedFormModel,
             )
         }
 
@@ -48,26 +39,27 @@ interface OccupationState : JourneyState {
             null
         }
 
-    fun getFormattedRentAmountOrNull(): List<String>? {
-        val rentAmountDataModel = getRentAmountOrNull() ?: return null
-        val formattedRentAmount = mutableListOf("commonText.poundSign", "${rentAmountDataModel.rentAmount} ")
-        if (isRentFrequencyCustom()) formattedRentAmount.add("forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
+    fun getFormattedRentAmountComponentsOrNull(): List<String>? {
+        val rentAmount = rentAmount.formModelOrNull?.rentAmount ?: return null
+        val formattedRentAmount = mutableListOf("commonText.poundSign", rentAmount)
+        if (isRentFrequencyCustom()) {
+            formattedRentAmount.addAll(
+                listOf(" ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
+            )
+        }
         return formattedRentAmount
     }
 
-    fun getFormattedAllBillsIncludedListOrNull(): List<Any>? {
+    fun getFormattedBillsIncludedListComponentsOrNull(): List<Any>? {
         val allBillsIncludedList: MutableList<Any?> = mutableListOf()
         val billsIncludedDataModel = getBillsIncludedOrNull() ?: return null
-        billsIncludedDataModel.standardBillsIncludedListAsEnums.forEach { bill ->
+        billsIncludedDataModel.standardBillsIncludedListAsEnums.forEachIndexed { index, bill ->
             if (bill != BillsIncluded.SOMETHING_ELSE) {
                 allBillsIncludedList.add(bill)
-                allBillsIncludedList.add(", ")
+            } else {
+                allBillsIncludedList.add(billsIncludedDataModel.customBillsIncluded)
             }
-        }
-        if (billsIncludedDataModel.customBillsIncludedIfRequired != null) {
-            allBillsIncludedList.add(billsIncludedDataModel.customBillsIncludedIfRequired)
-        } else {
-            allBillsIncludedList.removeLast()
+            if (index < billsIncludedDataModel.standardBillsIncludedListAsEnums.size - 1) allBillsIncludedList.add(", ")
         }
         return allBillsIncludedList.filterNotNull().ifEmpty { null }
     }

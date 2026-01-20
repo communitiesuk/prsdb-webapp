@@ -64,6 +64,7 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
+            val isOccupied = state.occupied.formModel.occupied ?: false
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
@@ -71,23 +72,35 @@ class PropertyRegistrationCyaStepConfig(
                 licenceNumber = state.getLicenceNumberOrNull() ?: "",
                 ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
                 numberOfHouseholds =
-                    state.households.formModelOrNull
-                        ?.notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                        ?.toInt() ?: 0,
+                    if (isOccupied) {
+                        state.households.formModelOrNull
+                            ?.notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                            ?.toInt() ?: 0
+                    } else {
+                        0
+                    },
                 numberOfPeople =
-                    state.tenants.formModelOrNull
-                        ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                        ?.toInt() ?: 0,
+                    if (isOccupied) {
+                        state.tenants.formModelOrNull
+                            ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                            ?.toInt() ?: 0
+                    } else {
+                        0
+                    },
                 numBedrooms =
-                    state.bedrooms.formModelOrNull
-                        ?.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                        ?.toInt(),
-                billsIncludedList = state.getBillsIncludedOrNull()?.standardBillsIncludedListAsStrings?.joinToString(separator = ","),
-                customBillsIncluded = state.getBillsIncludedOrNull()?.customBillsIncludedIfRequired,
-                furnishedStatus = state.furnishedStatus.formModelOrNull?.furnishedStatus,
-                rentFrequency = state.rentFrequency.formModelOrNull?.rentFrequency,
-                customRentFrequency = state.getCustomRentFrequencyIfSelected(),
-                rentAmount = state.getRentAmountOrNull()?.rentAmount,
+                    if (isOccupied) {
+                        state.bedrooms.formModelOrNull
+                            ?.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                            ?.toInt()
+                    } else {
+                        null
+                    },
+                billsIncludedList = if (isOccupied) state.getBillsIncludedOrNull()?.standardBillsIncludedString else null,
+                customBillsIncluded = if (isOccupied) state.getBillsIncludedOrNull()?.customBillsIncluded else null,
+                furnishedStatus = if (isOccupied) state.furnishedStatus.formModelOrNull?.furnishedStatus else null,
+                rentFrequency = if (isOccupied) state.rentFrequency.formModelOrNull?.rentFrequency else null,
+                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                rentAmount = if (isOccupied) state.rentAmount.formModelOrNull?.rentAmount?.toBigDecimal() else null,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {
@@ -162,7 +175,7 @@ class PropertyRegistrationCyaStepConfig(
                 val furnishedStatusStep = state.furnishedStatus
                 val rentFrequencyStep = state.rentFrequency
                 val rentAmountStep = state.rentAmount
-                val rentIncludesBills = rentIncludesBillsStep.formModel.rentIncludesBills ?: false
+                val rentIncludesBills = rentIncludesBillsStep.formModel.rentIncludesBills!!
                 val rentFrequency = rentFrequencyStep.formModel.rentFrequency
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -196,7 +209,7 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getFormattedAllBillsIncludedListOrNull(),
+                            state.getFormattedBillsIncludedListComponentsOrNull(),
                             Destination(billsIncludedStep),
                             enforceListAsSingleLineDisplay = true,
                         ),
@@ -219,7 +232,7 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getFormattedRentAmountOrNull(),
+                        state.getFormattedRentAmountComponentsOrNull(),
                         Destination(rentAmountStep),
                         enforceListAsSingleLineDisplay = true,
                     ),

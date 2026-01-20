@@ -556,7 +556,7 @@ checkPropertyAnswers:
     furnishedStatus: Furniture provided
     rentFrequency: When rent is paid
     rentAmount: Rent amount
-    customFrequencyRentAmountSuffix:  per month
+    customFrequencyRentAmountSuffix: per month
 update:
   email:
     fieldSetHeading: What is your updated email address?

@@ -1,39 +1,25 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 
 data class BillsIncludedDataModel(
-    val standardBillsIncludedListAsStrings: List<String>,
+    val standardBillsIncludedString: String,
     val standardBillsIncludedListAsEnums: List<BillsIncluded>,
-    val customBillsIncludedIfRequired: String?,
+    val customBillsIncluded: String?,
 ) {
     companion object {
-        fun fromFormData(
-            billsIncluded: List<String?>,
-            customBillsIncluded: String,
-        ): BillsIncludedDataModel =
+        fun fromFormData(formModel: BillsIncludedFormModel): BillsIncludedDataModel =
             BillsIncludedDataModel(
-                standardBillsIncludedListAsStrings = billsIncluded.filterNotNull(),
-                standardBillsIncludedListAsEnums = getStandardBillsIncludedListAsEnums(billsIncluded),
-                customBillsIncludedIfRequired = getCustomBillsIncludedIfRequired(billsIncluded, customBillsIncluded),
+                standardBillsIncludedString = formModel.billsIncluded.filterNotNull().joinToString(separator = ","),
+                standardBillsIncludedListAsEnums = getStandardBillsIncludedListAsEnums(billsIncluded = formModel.billsIncluded),
+                customBillsIncluded = getCustomBillsIncludedIfRequired(formModel),
             )
 
-        fun getStandardBillsIncludedListAsEnums(billsIncluded: List<String?>) =
+        private fun getStandardBillsIncludedListAsEnums(billsIncluded: List<String?>) =
             billsIncluded.filterNotNull().map { BillsIncluded.valueOf(it) }
 
-        fun getCustomBillsIncludedIfRequired(
-            billsIncluded: List<String?>,
-            customBillsIncluded: String,
-        ): String? =
-            if (shouldIncludeCustomBillsIncluded(billsIncluded, customBillsIncluded)) {
-                customBillsIncluded
-            } else {
-                null
-            }
-
-        fun shouldIncludeCustomBillsIncluded(
-            billsIncluded: List<String?>,
-            customBillsIncluded: String,
-        ): Boolean = billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString()) && customBillsIncluded.isNotEmpty()
+        private fun getCustomBillsIncludedIfRequired(formModel: BillsIncludedFormModel): String? =
+            if (formModel.billsIncluded.contains(BillsIncluded.SOMETHING_ELSE.toString())) formModel.customBillsIncluded else null
     }
 }
