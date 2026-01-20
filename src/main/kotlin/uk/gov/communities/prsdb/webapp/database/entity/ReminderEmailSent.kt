@@ -5,13 +5,18 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
-import uk.gov.communities.prsdb.webapp.constants.enums.RemindableEntityType
+import org.hibernate.annotations.Check
 import java.io.Serializable
 import java.time.Instant
 
+// It is expected that we will need to send reminder emails for entities such as PropertyCompliance as well as SavedJourneyState.
+// We can add further columns and modify the check constraint to allow only one of SavedJourneyState or other entities to be non-null as required.
 @Entity
+@Check(constraints = "(saved_journey_state_id IS NOT NULL)")
 class ReminderEmailSent() : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,19 +27,16 @@ class ReminderEmailSent() : Serializable {
     lateinit var lastReminderEmailSentDate: Instant
         private set
 
-    @Column(nullable = false)
-    lateinit var entityType: RemindableEntityType
-
-    @Column(nullable = false)
-    var entityId: Long = 0
+    @OneToOne(optional = true)
+    @JoinColumn(name = "saved_journey_state_id", nullable = true, unique = true)
+    var savedJourneyState: SavedJourneyState? = null
+        private set
 
     constructor(
-        lastEmailSentDate: Instant,
-        entityType: RemindableEntityType,
-        entityId: Long,
+        lastReminderEmailSentDate: Instant,
+        savedJourneyState: SavedJourneyState,
     ) : this() {
-        this.lastReminderEmailSentDate = lastEmailSentDate
-        this.entityType = entityType
-        this.entityId = entityId
+        this.lastReminderEmailSentDate = lastReminderEmailSentDate
+        this.savedJourneyState = savedJourneyState
     }
 }

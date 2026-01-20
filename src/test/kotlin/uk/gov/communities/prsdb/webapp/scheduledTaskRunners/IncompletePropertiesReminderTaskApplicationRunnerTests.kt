@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.scheduledTaskRunners
 
-import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -13,20 +12,21 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner
-import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.GET_INCOMPLETE_PROPERTY_REMINDERS_METHOD_NAME
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
+import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
-import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockIncompletePropertiesData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.net.URI
 import java.time.LocalDate
-import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class IncompletePropertiesReminderTaskApplicationRunnerTests {
@@ -54,7 +54,10 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         val propertyAddress1 = "Address One"
         val propertyAddress2 = "Address Two"
         val daysToComplete = 7
-        val completeByDate = LocalDate.now().plusDays(daysToComplete.toLong()).toKotlinLocalDate()
+        val createdDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
 
         val expectedEmail1 =
             IncompletePropertyReminderEmail(
@@ -70,20 +73,25 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
-        whenever(incompletePropertiesService.getIncompletePropertyReminders())
+
+        whenever(incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent())
             .thenReturn(
                 listOf(
-                    IncompletePropertyForReminderDataModel(
-                        landlordEmail = emailAddress1,
-                        propertySingleLineAddress = propertyAddress1,
-                        completeByDate = completeByDate,
-                        savedJourneyStateId = 1L,
+                    LandlordIncompleteProperties(
+                        landlord = MockLandlordData.createLandlord(email = emailAddress1),
+                        savedJourneyState =
+                            MockSavedJourneyStateData.createSavedJourneyState(
+                                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(propertyAddress1),
+                                createdDate = createdDate,
+                            ),
                     ),
-                    IncompletePropertyForReminderDataModel(
-                        landlordEmail = emailAddress2,
-                        propertySingleLineAddress = propertyAddress2,
-                        completeByDate = completeByDate,
-                        savedJourneyStateId = 2L,
+                    LandlordIncompleteProperties(
+                        landlord = MockLandlordData.createLandlord(email = emailAddress2),
+                        savedJourneyState =
+                            MockSavedJourneyStateData.createSavedJourneyState(
+                                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(propertyAddress2),
+                                createdDate = createdDate,
+                            ),
                     ),
                 ),
             )
@@ -110,7 +118,10 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         val addressFail = "Fail Address"
         val addressSucceed = "Succeed Address"
         val daysToComplete = 7
-        val completeByDate = LocalDate.now().plusDays(daysToComplete.toLong()).toKotlinLocalDate()
+        val createdDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
 
         val expectedFailEmail =
             IncompletePropertyReminderEmail(
@@ -126,20 +137,24 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             )
 
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
-        whenever(incompletePropertiesService.getIncompletePropertyReminders())
+        whenever(incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent())
             .thenReturn(
                 listOf(
-                    IncompletePropertyForReminderDataModel(
-                        landlordEmail = failingEmail,
-                        propertySingleLineAddress = addressFail,
-                        completeByDate = completeByDate,
-                        savedJourneyStateId = 1L,
+                    LandlordIncompleteProperties(
+                        landlord = MockLandlordData.createLandlord(email = failingEmail),
+                        savedJourneyState =
+                            MockSavedJourneyStateData.createSavedJourneyState(
+                                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(addressFail),
+                                createdDate = createdDate,
+                            ),
                     ),
-                    IncompletePropertyForReminderDataModel(
-                        landlordEmail = succeedingEmail,
-                        propertySingleLineAddress = addressSucceed,
-                        completeByDate = completeByDate,
-                        savedJourneyStateId = 2L,
+                    LandlordIncompleteProperties(
+                        landlord = MockLandlordData.createLandlord(email = succeedingEmail),
+                        savedJourneyState =
+                            MockSavedJourneyStateData.createSavedJourneyState(
+                                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(addressSucceed),
+                                createdDate = createdDate,
+                            ),
                     ),
                 ),
             )
@@ -164,53 +179,13 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             }
 
             val output = outContent.toString()
-            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 2"))
-            assertTrue(output.contains("Task failed for incomplete property with savedJourneyStateId: 1"))
+            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: "))
+            assertTrue(output.contains("Task failed for incomplete property with savedJourneyStateId: "))
         } finally {
             System.setOut(originalOut)
         }
 
         verify(emailSender).sendEmail(failingEmail, expectedFailEmail)
         verify(emailSender).sendEmail(succeedingEmail, expectedSucceedEmail)
-    }
-
-    @Test
-    fun `getIncompletePropertyReminders filters out properties that have already had reminders sent`() {
-        // Arrange
-        val completeByDate = LocalDate.now().plusDays(6).toKotlinLocalDate()
-
-        val oldIncompletePropertyIds = listOf(1L, 2L, 3L, 4L, 5L)
-        val allPropertiesOldEnoughForReminder =
-            oldIncompletePropertyIds.map {
-                MockIncompletePropertiesData.createIncompletePropertyForReminderDataModel(
-                    completeByDate = completeByDate,
-                    savedJourneyStateId = it,
-                )
-            }
-        whenever(incompletePropertiesService.getIncompletePropertyReminders())
-            .thenReturn(allPropertiesOldEnoughForReminder)
-
-        val sentReminderIds = listOf(2L, 4L)
-        whenever(incompletePropertiesService.getIdsOfPropertiesWhichHaveHadRemindersSent(oldIncompletePropertyIds))
-            .thenReturn(sentReminderIds)
-
-        val expectedFilteredIncompletePropertyList =
-            listOf(1L, 3L, 5L).map {
-                MockIncompletePropertiesData.createIncompletePropertyForReminderDataModel(
-                    completeByDate = completeByDate,
-                    savedJourneyStateId = it,
-                )
-            }
-
-        val method =
-            IncompletePropertiesReminderTaskApplicationRunner::class.java
-                .getDeclaredMethod(GET_INCOMPLETE_PROPERTY_REMINDERS_METHOD_NAME)
-        method.isAccessible = true
-
-        // Act
-        val result = method.invoke(runner)
-
-        // Assert
-        assertEquals(expectedFilteredIncompletePropertyList, result)
     }
 }

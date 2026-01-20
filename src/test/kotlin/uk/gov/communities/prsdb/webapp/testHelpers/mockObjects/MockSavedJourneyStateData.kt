@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import org.springframework.test.util.ReflectionTestUtils
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOneLoginUser
 import java.time.Instant
@@ -73,5 +74,14 @@ class MockSavedJourneyStateData {
 
             return ObjectMapper().writeValueAsString(stateData)
         }
+
+        fun createReminderEmailSent(
+            lastReminderEmailSentDate: Instant = Instant.now(),
+            savedJourneyState: SavedJourneyState = createSavedJourneyState(),
+        ): ReminderEmailSent =
+            ReminderEmailSent(
+                lastReminderEmailSentDate = lastReminderEmailSentDate,
+                savedJourneyState = savedJourneyState,
+            )
     }
 }

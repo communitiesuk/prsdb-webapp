@@ -12,14 +12,11 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
-import uk.gov.communities.prsdb.webapp.constants.enums.RemindableEntityType
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
-import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockIncompletePropertiesData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.time.Instant
@@ -37,7 +34,7 @@ class IncompletePropertiesServiceTests {
     private lateinit var incompletePropertiesService: IncompletePropertiesService
 
     @Test
-    fun `getIncompletePropertyReminders retrieves incomplete properties and maps fields`() {
+    fun `getOldIncompletePropertyRecordsWithNoReminderSent retrieves all old properties if no reminders have been sent`() {
         // Arrange
         val landlord =
             MockLandlordData.createLandlord(
@@ -47,33 +44,28 @@ class IncompletePropertiesServiceTests {
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS + 2L),
             )
-        val savedJourneyState =
-            MockSavedJourneyStateData.createSavedJourneyState(
-                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress("1 Test Street"),
-                createdDate = incompletePropertyCreatedDate,
-            )
 
-        val incompletePropertyEntities = MockIncompletePropertiesData.createLandlordIncompleteProperties(landlord, savedJourneyState)
+        val landlordIncompleteProperties =
+            listOf(
+                LandlordIncompleteProperties(
+                    landlord,
+                    MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate),
+                ),
+                LandlordIncompleteProperties(
+                    landlord,
+                    MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate),
+                ),
+            )
         whenever(
             mockLandlordIncompletePropertiesRepository
                 .findBySavedJourneyState_CreatedDateBefore(any()),
-        ).thenReturn(listOf(incompletePropertyEntities))
-
-        val expectedCompleteByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromCreatedDate(incompletePropertyCreatedDate)
-
-        val expectedIncompletePropertyForReminderDataModel =
-            IncompletePropertyForReminderDataModel(
-                landlordEmail = "user.name@example.com",
-                propertySingleLineAddress = "1 Test Street",
-                completeByDate = expectedCompleteByDate,
-                savedJourneyStateId = savedJourneyState.id,
-            )
+        ).thenReturn(landlordIncompleteProperties)
 
         // Act
-        val result = incompletePropertiesService.getIncompletePropertyReminders()
+        val result = incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent()
 
         // Assert mapping
-        assertEquals(listOf(expectedIncompletePropertyForReminderDataModel), result)
+        assertEquals(landlordIncompleteProperties, result)
 
         // Assert repository called with expected Instant cutoff
         val captor = argumentCaptor<java.time.Instant>()
@@ -86,56 +78,68 @@ class IncompletePropertiesServiceTests {
     }
 
     @Test
-    fun `recordReminderEmailSent saves ReminderEmailSent record with correct fields`() {
+    fun `getOldIncompletePropertyRecordsWithNoReminderSent excludes properties with reminders already sent`() {
         // Arrange
-        val incompletePropertyForReminderDataModel =
-            MockIncompletePropertiesData.createIncompletePropertyForReminderDataModel(
-                savedJourneyStateId = 123L,
+        val landlord =
+            MockLandlordData.createLandlord(
+                email = "user.name@example.com",
             )
+        val incompletePropertyCreatedDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS + 2L),
+            )
+        val savedJourneyStateReminderAlreadySent =
+            MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate)
+
+        val landlordIncompleteProperties =
+            listOf(
+                LandlordIncompleteProperties(
+                    landlord,
+                    savedJourneyStateReminderAlreadySent,
+                ),
+                LandlordIncompleteProperties(
+                    landlord,
+                    MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate),
+                ),
+            )
+        whenever(
+            mockLandlordIncompletePropertiesRepository
+                .findBySavedJourneyState_CreatedDateBefore(any()),
+        ).thenReturn(landlordIncompleteProperties)
+
+        whenever(
+            mockReminderEmailSentRepository
+                .findBySavedJourneyStateIn(
+                    listOf(
+                        landlordIncompleteProperties[0].savedJourneyState,
+                        landlordIncompleteProperties[1].savedJourneyState,
+                    ),
+                ),
+        ).thenReturn(
+            listOf(MockSavedJourneyStateData.createReminderEmailSent(savedJourneyState = savedJourneyStateReminderAlreadySent)),
+        )
 
         // Act
-        incompletePropertiesService.recordReminderEmailSent(incompletePropertyForReminderDataModel)
+        val result = incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent()
+
+        // Assert mapping
+        assertEquals(listOf(landlordIncompleteProperties[1]), result)
+    }
+
+    @Test
+    fun `recordReminderEmailSent saves ReminderEmailSent record with correct fields`() {
+        // Arrange
+        val incompletePropertySavedJourneyState = MockSavedJourneyStateData.createSavedJourneyState()
+
+        // Act
+        incompletePropertiesService.recordReminderEmailSent(incompletePropertySavedJourneyState)
 
         // Assert
         val captor = argumentCaptor<ReminderEmailSent>()
         verify(mockReminderEmailSentRepository).save(captor.capture())
 
-        assertEquals(RemindableEntityType.SAVED_JOURNEY_STATE, captor.firstValue.entityType)
-        assertEquals(123L, captor.firstValue.entityId)
+        assertEquals(incompletePropertySavedJourneyState, captor.firstValue.savedJourneyState)
         assertTrue(captor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now()))
         assertTrue(captor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
     }
-
-    @Test
-    fun `getIdsOfPropertiesWhichHaveHadRemindersSent returns list of entity IDs`() {
-        // Arrange
-        val savedJourneyStateIds = listOf(1L, 2L, 3L)
-        val reminderEmailSentRecords =
-            listOf(
-                ReminderEmailSent(
-                    lastEmailSentDate = Instant.now(),
-                    entityType = RemindableEntityType.SAVED_JOURNEY_STATE,
-                    entityId = 1L,
-                ),
-                ReminderEmailSent(
-                    lastEmailSentDate = Instant.now(),
-                    entityType = RemindableEntityType.SAVED_JOURNEY_STATE,
-                    entityId = 3L,
-                ),
-            )
-        whenever(
-            mockReminderEmailSentRepository.findByEntityTypeAndEntityIdIn(
-                RemindableEntityType.SAVED_JOURNEY_STATE,
-                savedJourneyStateIds,
-            ),
-        ).thenReturn(reminderEmailSentRecords)
-
-        // Act
-        val result = incompletePropertiesService.getIdsOfPropertiesWhichHaveHadRemindersSent(savedJourneyStateIds)
-
-        // Assert
-        assertEquals(listOf(1L, 3L), result)
-    }
-
-    // TODO PRSD-1030 - test getIdsOfPropertiesWhichHaveHadRemindersSent
 }

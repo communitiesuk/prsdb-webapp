@@ -7,7 +7,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
+import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -36,33 +36,36 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     }
 
     private fun incompletePropertiesReminderTaskLogic() {
-        val incompleteProperties = getIncompletePropertyReminders()
+        val incompleteProperties = incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent()
 
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 
         incompleteProperties.forEach { property ->
             try {
                 emailSender.sendEmail(
-                    property.landlordEmail,
+                    property.landlord.email,
                     IncompletePropertyReminderEmail(
-                        singleLineAddress = property.propertySingleLineAddress,
-                        daysToComplete = LocalDate.now().toKotlinLocalDate().daysUntil(property.completeByDate),
+                        singleLineAddress = property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+                        daysToComplete =
+                            LocalDate.now().toKotlinLocalDate().daysUntil(
+                                CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(property.savedJourneyState),
+                            ),
                         prsdUrl = prsdUrl,
                     ),
                 )
-                println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
+                println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
             } catch (ex: Exception) {
-                println("Task failed for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
+                println("Task failed for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
                 println("Exception message: ${ex.message}")
                 println("Stack trace: ${ex.stackTraceToString()}")
             }
 
             try {
-                incompletePropertiesService.recordReminderEmailSent(property)
+                incompletePropertiesService.recordReminderEmailSent(property.savedJourneyState)
             } catch (ex: Exception) {
                 println(
                     "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
-                        property.savedJourneyStateId,
+                        property.savedJourneyState.id,
                 )
                 println("Exception message: ${ex.message}")
                 println("Stack trace: ${ex.stackTraceToString()}")
@@ -70,20 +73,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
         }
     }
 
-    private fun getIncompletePropertyReminders(): List<IncompletePropertyForReminderDataModel> {
-        val incompleteProperties =
-            incompletePropertiesService.getIncompletePropertyReminders()
-        val incompletePropertySavedJourneyStateIds = incompleteProperties.map { it.savedJourneyStateId }
-
-        return incompleteProperties.filterNot {
-            it.savedJourneyStateId in
-                incompletePropertiesService.getIdsOfPropertiesWhichHaveHadRemindersSent(incompletePropertySavedJourneyStateIds)
-        }
-    }
-
     companion object {
         const val INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME = "incompletePropertiesReminderTaskLogic"
-
-        const val GET_INCOMPLETE_PROPERTY_REMINDERS_METHOD_NAME = "getIncompletePropertyReminders"
     }
 }

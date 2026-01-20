@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropert
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockIncompletePropertiesData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import kotlin.test.assertEquals
@@ -42,7 +41,7 @@ class IncompletePropertyForLandlordServiceTests {
             )
         whenever(landlordRepository.findByBaseUser_Id(landlordOneLoginId))
             .thenReturn(landlord)
-        val expectedNewEntry = MockIncompletePropertiesData.createLandlordIncompleteProperties(landlord, savedJourneyState)
+        val expectedNewEntry = LandlordIncompleteProperties(landlord, savedJourneyState)
 
         val captor = argumentCaptor<LandlordIncompleteProperties>()
 

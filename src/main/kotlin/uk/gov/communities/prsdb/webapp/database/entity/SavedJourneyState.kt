@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import kotlinx.serialization.json.Json
@@ -29,6 +30,10 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false)
     lateinit var user: OneLoginUser
+        private set
+
+    @OneToOne(mappedBy = "savedJourneyState", orphanRemoval = true, optional = true)
+    var reminderEmailSent: ReminderEmailSent? = null
         private set
 
     constructor(serializedState: String, user: OneLoginUser, journeyId: String) : this() {

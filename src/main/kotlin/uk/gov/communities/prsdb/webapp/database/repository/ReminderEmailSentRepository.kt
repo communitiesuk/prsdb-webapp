@@ -1,12 +1,10 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.communities.prsdb.webapp.constants.enums.RemindableEntityType
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 
 interface ReminderEmailSentRepository : JpaRepository<ReminderEmailSent, Long> {
-    fun findByEntityTypeAndEntityIdIn(
-        entityType: RemindableEntityType,
-        entityIds: List<Long>,
-    ): List<ReminderEmailSent>
+    @Suppress("ktlint:standard:function-naming")
+    fun findBySavedJourneyStateIn(savedJourneyStates: List<SavedJourneyState>): List<ReminderEmailSent>
 }
