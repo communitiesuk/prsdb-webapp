@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -69,6 +70,13 @@ class PropertyRegistrationJourneyTests {
                     any(),
                     any(),
                     any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
                 ),
             ).thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 57))
 
@@ -109,6 +117,13 @@ class PropertyRegistrationJourneyTests {
                 argThat { households -> households == 0 },
                 argThat { tenants -> tenants == 0 },
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -137,6 +152,13 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -167,6 +189,13 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -195,6 +224,13 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
