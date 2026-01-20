@@ -13,6 +13,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner
+import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.GET_INCOMPLETE_PROPERTY_REMINDERS_METHOD_NAME
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
@@ -20,10 +21,12 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompleteP
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockIncompletePropertiesData
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.net.URI
 import java.time.LocalDate
+import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class IncompletePropertiesReminderTaskApplicationRunnerTests {
@@ -169,5 +172,45 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
 
         verify(emailSender).sendEmail(failingEmail, expectedFailEmail)
         verify(emailSender).sendEmail(succeedingEmail, expectedSucceedEmail)
+    }
+
+    @Test
+    fun `getIncompletePropertyReminders filters out properties that have already had reminders sent`() {
+        // Arrange
+        val completeByDate = LocalDate.now().plusDays(6).toKotlinLocalDate()
+
+        val oldIncompletePropertyIds = listOf(1L, 2L, 3L, 4L, 5L)
+        val allPropertiesOldEnoughForReminder =
+            oldIncompletePropertyIds.map {
+                MockIncompletePropertiesData.createIncompletePropertyForReminderDataModel(
+                    completeByDate = completeByDate,
+                    savedJourneyStateId = it,
+                )
+            }
+        whenever(incompletePropertiesService.getIncompletePropertyReminders())
+            .thenReturn(allPropertiesOldEnoughForReminder)
+
+        val sentReminderIds = listOf(2L, 4L)
+        whenever(incompletePropertiesService.getIdsOfPropertiesWhichHaveHadRemindersSent(oldIncompletePropertyIds))
+            .thenReturn(sentReminderIds)
+
+        val expectedFilteredIncompletePropertyList =
+            listOf(1L, 3L, 5L).map {
+                MockIncompletePropertiesData.createIncompletePropertyForReminderDataModel(
+                    completeByDate = completeByDate,
+                    savedJourneyStateId = it,
+                )
+            }
+
+        val method =
+            IncompletePropertiesReminderTaskApplicationRunner::class.java
+                .getDeclaredMethod(GET_INCOMPLETE_PROPERTY_REMINDERS_METHOD_NAME)
+        method.isAccessible = true
+
+        // Act
+        val result = method.invoke(runner)
+
+        // Assert
+        assertEquals(expectedFilteredIncompletePropertyList, result)
     }
 }

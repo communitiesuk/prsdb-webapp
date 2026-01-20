@@ -44,4 +44,13 @@ class IncompletePropertiesService(
             )
         reminderEmailSentRepository.save(reminderEmailSentRecord)
     }
+
+    fun getIdsOfPropertiesWhichHaveHadRemindersSent(savedJourneyStateIds: List<Long>): List<Long> {
+        val sentReminders =
+            reminderEmailSentRepository.findByEntityTypeAndEntityIdIn(
+                RemindableEntityType.SAVED_JOURNEY_STATE,
+                savedJourneyStateIds,
+            )
+        return sentReminders.map { it.entityId }
+    }
 }

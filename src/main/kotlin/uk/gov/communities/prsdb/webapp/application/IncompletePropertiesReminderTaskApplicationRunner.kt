@@ -7,6 +7,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -35,10 +36,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     }
 
     private fun incompletePropertiesReminderTaskLogic() {
-        val incompleteProperties =
-            incompletePropertiesService.getIncompletePropertyReminders()
-        // TODO - PRSD-1030
-        //  Will need to add something to the DB tracking if a reminder email has been sent for this incomplete property and only send if not yet sent
+        val incompleteProperties = getIncompletePropertyReminders()
 
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 
@@ -72,7 +70,20 @@ class IncompletePropertiesReminderTaskApplicationRunner(
         }
     }
 
+    private fun getIncompletePropertyReminders(): List<IncompletePropertyForReminderDataModel> {
+        val incompleteProperties =
+            incompletePropertiesService.getIncompletePropertyReminders()
+        val incompletePropertySavedJourneyStateIds = incompleteProperties.map { it.savedJourneyStateId }
+
+        return incompleteProperties.filterNot {
+            it.savedJourneyStateId in
+                incompletePropertiesService.getIdsOfPropertiesWhichHaveHadRemindersSent(incompletePropertySavedJourneyStateIds)
+        }
+    }
+
     companion object {
         const val INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME = "incompletePropertiesReminderTaskLogic"
+
+        const val GET_INCOMPLETE_PROPERTY_REMINDERS_METHOD_NAME = "getIncompletePropertyReminders"
     }
 }
