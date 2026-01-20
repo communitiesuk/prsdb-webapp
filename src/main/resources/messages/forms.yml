@@ -1244,3 +1244,5 @@ jointLandlords:
     radios:
       yes: Yes
       no: No, I am the only landlord for this property
+    error:
+        missing: Select if there are any other landlords for this property
