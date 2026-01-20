@@ -5,20 +5,25 @@
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}"></h1>
+    <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.one}"></p>
+    <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.two}"></p>
+    <details  id="details" th:replace="~{fragments/details :: details(#{forms.jointLandlords.hasJointLandlords.link.one}, ~{::#details/content()})}" >
+        <div class="govuk-details__text" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.three}"></div>
+        <div class="govuk-details__text">
+            <!-- TODO Link URL to be added -->
+            <a class="govuk-link" th:href="placeholder" th:text="#{forms.jointLandlords.hasJointLandlords.link.two}"></a>
+        </div>
+    </details>
+    <h2 class="govuk-heading-m" th:text="#{forms.jointLandlords.hasJointLandlords.subHeading.one}"></h2>
+    <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.four}"></p>
+</th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasJointLandlords', #{${fieldSetHeading}},  null)}">
-        <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.one}"></p>
-        <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.two}"></p>
-        <details  id="details" th:replace="~{fragments/details :: details(#{forms.jointLandlords.hasJointLandlords.link.one}, ~{::#details/content()})}" >
-            <div class="govuk-details__text" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.three}"></div>
-            <div class="govuk-details__text">
-                <!-- TODO Link URL to be added -->
-                <a class="govuk-link" th:href="" th:text="#{forms.jointLandlords.hasJointLandlords.link.two}"></a>
-            </div>
-        </details>
-        <th:block th:replace="~{fragments/forms/radios :: radios(${label},'hasJointLandlords',null, ${radioOptions})}"></th:block>
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{${label}}, null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'hasJointLandlords',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
