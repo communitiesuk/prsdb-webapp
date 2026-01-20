@@ -43,7 +43,9 @@ class DateTimeHelper(
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
 
-        fun getJavaDateFromLocalDate(localDate: java.time.LocalDate): Date =
-            Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+        fun getJavaDateFromLocalDate(localDate: java.time.LocalDate): Date = Date.from(getJavaInstantFromLocalDate(localDate))
+
+        fun getJavaInstantFromLocalDate(localDate: java.time.LocalDate): java.time.Instant =
+            localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
     }
 }

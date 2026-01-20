@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -66,9 +67,18 @@ class MockLandlordData {
                     dateOfBirth = dateOfBirth,
                 )
 
+            val landlordIncompleteProperties =
+                incompleteProperties
+                    .map {
+                        LandlordIncompleteProperties(
+                            landlord = landlord,
+                            savedJourneyState = it,
+                        )
+                    }.toSet()
+
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
             ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
-            ReflectionTestUtils.setField(landlord, "incompleteProperties", incompleteProperties)
+            ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
 
             return landlord
         }

@@ -33,3 +33,5 @@ const val LOCAL_COUNCIL_INVITATIONS_CANCELLED_THIS_SESSION = "localCouncilInvita
 const val LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION = "localCouncilUsersInvitedThisSession"
 
 const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePropertyFormContextsDeletedThisSession"
+
+const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
