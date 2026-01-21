@@ -131,7 +131,14 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     }
 
     val isOccupied: Boolean
-        get() = currentNumTenants > 0
+        get() =
+            currentNumTenants > 0 &&
+                currentNumHouseholds > 0 &&
+                numBedrooms != null &&
+                numBedrooms!! > 0 &&
+                furnishedStatus != null &&
+                rentFrequency != null &&
+                rentAmount != null
 
     val isComplianceIncomplete: Boolean
         get() = incompleteComplianceForm != null
