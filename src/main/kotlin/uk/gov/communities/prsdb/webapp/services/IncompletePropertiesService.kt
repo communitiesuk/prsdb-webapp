@@ -16,26 +16,13 @@ class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
 ) {
-    fun getOldIncompletePropertyRecordsWithNoReminderSent(): List<LandlordIncompleteProperties> {
-        val incompletePropertyRecords =
-            landlordIncompletePropertiesRepository
-                .findBySavedJourneyState_CreatedDateBefore(
-                    DateTimeHelper.getJavaInstantFromLocalDate(
-                        LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
-                    ),
-                )
-        val incompletePropertySavedJourneyStates = incompletePropertyRecords.map { it.savedJourneyState }
-
-        val savedJourneyStatesWithRemindersSent =
-            reminderEmailSentRepository
-                .findBySavedJourneyStateIn(
-                    incompletePropertySavedJourneyStates,
-                ).map { it.savedJourneyState }
-
-        return incompletePropertyRecords.filterNot {
-            it.savedJourneyState.id in savedJourneyStatesWithRemindersSent.map { state -> state?.id }
-        }
-    }
+    fun getOldIncompletePropertyRecordsWithNoReminderSent(): List<LandlordIncompleteProperties> =
+        landlordIncompletePropertiesRepository
+            .findBySavedJourneyState_CreatedDateBefore(
+                DateTimeHelper.getJavaInstantFromLocalDate(
+                    LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                ),
+            ).filter { it.savedJourneyState.reminderEmailSent == null }
 
     fun recordReminderEmailSent(savedJourneyState: SavedJourneyState) {
         val reminderEmailSentRecord =

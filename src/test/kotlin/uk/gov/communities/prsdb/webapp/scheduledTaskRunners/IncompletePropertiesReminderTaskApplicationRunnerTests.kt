@@ -112,6 +112,52 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         verify(emailSender).sendEmail(emailAddress2, expectedSucceedEmail)
     }
 
+    @Test
+    fun `incompletePropertiesReminderTaskLogic records reminder email sent when email is sent`() {
+        // Arrange
+        setupTwoEmailsToSend()
+
+        // Act
+        incompletePropertyReminderTaskMethod.invoke(runner)
+
+        // Assert
+        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState1)
+        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
+    }
+
+    @Test
+    fun `incompletePropertiesReminderTaskLogic prints error then continues to next send if recording email sent fails`() {
+        // Arrange
+        setupTwoEmailsToSend()
+
+        whenever(incompletePropertiesService.recordReminderEmailSent(savedJourneyState1))
+            .doThrow(InvalidDataAccessResourceUsageException("Database error"))
+
+        // Act, capturing stdout
+        // Assert does not throw and stdout contains expected messages
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+        System.setOut(PrintStream(outContent))
+        try {
+            assertDoesNotThrow {
+                // Act
+                incompletePropertyReminderTaskMethod.invoke(runner)
+            }
+
+            val output = outContent.toString()
+            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 1"))
+            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 2"))
+            assertTrue(output.contains("Failed to record reminder email sent for incomplete property with savedJourneyStateId: 1"))
+        } finally {
+            System.setOut(originalOut)
+        }
+
+        verify(emailSender).sendEmail(emailAddress1, reminderEmail1)
+        verify(emailSender).sendEmail(emailAddress2, reminderEmail2)
+        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState1)
+        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
+    }
+
     private fun setupTwoEmailsToSend() {
         val propertyAddress1 = "Address One"
         val propertyAddress2 = "Address Two"
@@ -162,51 +208,5 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                     ),
                 ),
             )
-    }
-
-    @Test
-    fun `incompletePropertiesReminderTaskLogic records reminder email sent when email is sent`() {
-        // Arrange
-        setupTwoEmailsToSend()
-
-        // Act
-        incompletePropertyReminderTaskMethod.invoke(runner)
-
-        // Assert
-        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState1)
-        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
-    }
-
-    @Test
-    fun `incompletePropertiesReminderTaskLogic prints error then continues to next send if recording email sent fails`() {
-        // Arrange
-        setupTwoEmailsToSend()
-
-        whenever(incompletePropertiesService.recordReminderEmailSent(savedJourneyState1))
-            .doThrow(InvalidDataAccessResourceUsageException("Database error"))
-
-        // Act, capturing stdout
-        // Assert does not throw and stdout contains expected messages
-        val outContent = ByteArrayOutputStream()
-        val originalOut = System.out
-        System.setOut(PrintStream(outContent))
-        try {
-            assertDoesNotThrow {
-                // Act
-                incompletePropertyReminderTaskMethod.invoke(runner)
-            }
-
-            val output = outContent.toString()
-            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 1"))
-            assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 2"))
-            assertTrue(output.contains("Failed to record reminder email sent for incomplete property with savedJourneyStateId: 1"))
-        } finally {
-            System.setOut(originalOut)
-        }
-
-        verify(emailSender).sendEmail(emailAddress1, reminderEmail1)
-        verify(emailSender).sendEmail(emailAddress2, reminderEmail2)
-        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState1)
-        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
     }
 }

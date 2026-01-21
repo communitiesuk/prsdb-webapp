@@ -14,6 +14,7 @@ class MockSavedJourneyStateData {
             journeyId: String = "journey-123",
             serializedState: String = createSerialisedStateWithSingleLineAddress("1 Example Road, EG1 2AB"),
             baseUser: OneLoginUser = createOneLoginUser(),
+            reminderEmailSent: ReminderEmailSent? = null,
             createdDate: Instant = Instant.now(),
             entityId: Long = 1L,
         ): SavedJourneyState {
@@ -22,6 +23,7 @@ class MockSavedJourneyStateData {
                     journeyId = journeyId,
                     serializedState = serializedState,
                     user = baseUser,
+                    reminderEmailSent = reminderEmailSent,
                 )
 
             ReflectionTestUtils.setField(savedJourneyState, "createdDate", createdDate)
