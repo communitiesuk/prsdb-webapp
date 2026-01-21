@@ -37,9 +37,9 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
 VALUES (1, true, 1, 0, 0, 2, 1, 2, 1, 1, 1,
         null, null, null, null, null, null, null),
        (2, true, 1, 1, 2, 3, 1, 3, 1, null, null,
-        0, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12),
        (3, true, 1, 1, 2, 4, 1, 4, 1, null, null,
-        0, null, null, 2, 1, null, 123.12);
+        1, null, null, 2, 1, null, 123.12);
 
 INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
 VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
