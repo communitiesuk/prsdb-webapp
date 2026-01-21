@@ -181,4 +181,15 @@ class DateTimeHelperTests {
 
         assertEquals(expectedDate, result)
     }
+
+    @Test
+    fun `getJavaInstantFromLocalDate returns correct Date`() {
+        val localDate = java.time.LocalDate.of(2020, 1, 1)
+        val millisecondsSinceEpoch = ((2020 - 1970) * 365L + 12) * 24 * 60 * 60 * 1000 // Including 12 leap years
+        val expectedInstant = java.time.Instant.ofEpochMilli(millisecondsSinceEpoch)
+
+        val result = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
+
+        assertEquals(expectedInstant, result)
+    }
 }

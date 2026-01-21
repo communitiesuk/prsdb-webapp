@@ -16,7 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 
 @WebMvcTest(IncompletePropertiesController::class)
@@ -27,7 +27,7 @@ class IncompletePropertiesControllerTests(
     private lateinit var confirmationService: PropertyRegistrationConfirmationService
 
     @MockitoBean
-    private lateinit var incompletePropertyService: IncompletePropertyService
+    private lateinit var incompletePropertyForLandlordService: IncompletePropertyForLandlordService
 
     @Test
     fun `landlordIncompleteProperties returns a redirect for unauthenticated user`() {
@@ -52,7 +52,7 @@ class IncompletePropertiesControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
         whenever(
-            incompletePropertyService.getIncompletePropertiesForLandlord(
+            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord(
                 "user",
             ),
         ).thenReturn(emptyList())
@@ -80,7 +80,7 @@ class IncompletePropertiesControllerTests(
                     redirectedUrl(IncompletePropertiesController.getDeleteIncompletePropertyConfirmationPath((defaultContextId)))
                 }
 
-            verify(incompletePropertyService).deleteIncompleteProperty(anyString(), anyString())
+            verify(incompletePropertyForLandlordService).deleteIncompleteProperty(anyString(), anyString())
             verify(confirmationService).addIncompletePropertyFormContextsDeletedThisSession(defaultContextId)
         }
 
@@ -97,7 +97,7 @@ class IncompletePropertiesControllerTests(
                     redirectedUrl(LandlordController.INCOMPLETE_PROPERTIES_URL)
                 }
 
-            verify(incompletePropertyService, never())
+            verify(incompletePropertyForLandlordService, never())
                 .deleteIncompleteProperty(anyString(), anyString())
             verify(confirmationService, never()).addIncompletePropertyFormContextsDeletedThisSession(any())
         }
@@ -124,7 +124,7 @@ class IncompletePropertiesControllerTests(
             whenever(confirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId))
                 .thenReturn(true)
 
-            whenever(incompletePropertyService.isIncompletePropertyAvailable(defaultContextId, "user")).thenReturn(true)
+            whenever(incompletePropertyForLandlordService.isIncompletePropertyAvailable(defaultContextId, "user")).thenReturn(true)
 
             mvc
                 .get(

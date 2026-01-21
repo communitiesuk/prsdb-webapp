@@ -35,6 +35,7 @@ class PropertyRegistrationCheckAnswersPage(
         modelAndView.addObject("propertyName", getPropertyName(filteredJourneyData))
         modelAndView.addObject("propertyDetails", getPropertyDetailsSummaryList(filteredJourneyData))
         modelAndView.addObject("licensingDetails", getLicensingDetailsSummaryList(filteredJourneyData))
+        modelAndView.addObject("tenancyDetails", getTenancyRows(filteredJourneyData))
     }
 
     private fun getPropertyName(filteredJourneyData: JourneyData) = DataHelper.getAddress(filteredJourneyData)!!.singleLineAddress

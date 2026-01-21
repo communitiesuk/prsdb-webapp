@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.example.NewPropertyRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyService
+import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -30,7 +30,7 @@ import java.security.Principal
 @RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class NewRegisterPropertyController(
     private val propertyRegistrationJourneyFactory: NewPropertyRegistrationJourneyFactory,
-    private val incompletePropertyService: IncompletePropertyService,
+    private val incompletePropertyForLandlordService: IncompletePropertyForLandlordService,
 ) {
     @GetMapping
     @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)

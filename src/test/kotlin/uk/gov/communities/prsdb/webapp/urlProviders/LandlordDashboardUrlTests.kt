@@ -227,6 +227,13 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             ),
         ).thenReturn(propertyOwnership)
 
@@ -246,6 +253,13 @@ class LandlordDashboardUrlTests(
             numberOfHouseholds = propertyOwnership.currentNumHouseholds,
             numberOfPeople = propertyOwnership.currentNumTenants,
             baseUserId = propertyOwnership.primaryLandlord.baseUser.id,
+            numBedrooms = propertyOwnership.numBedrooms,
+            billsIncludedList = propertyOwnership.billsIncludedList,
+            customBillsIncluded = propertyOwnership.customBillsIncluded,
+            furnishedStatus = propertyOwnership.furnishedStatus,
+            rentFrequency = propertyOwnership.rentFrequency,
+            customRentFrequency = propertyOwnership.customRentFrequency,
+            rentAmount = propertyOwnership.rentAmount,
         )
 
         // Assert
