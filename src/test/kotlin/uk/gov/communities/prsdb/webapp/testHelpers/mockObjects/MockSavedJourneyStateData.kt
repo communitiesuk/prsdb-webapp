@@ -23,11 +23,11 @@ class MockSavedJourneyStateData {
                     journeyId = journeyId,
                     serializedState = serializedState,
                     user = baseUser,
-                    reminderEmailSent = reminderEmailSent,
                 )
 
             ReflectionTestUtils.setField(savedJourneyState, "createdDate", createdDate)
             ReflectionTestUtils.setField(savedJourneyState, "id", entityId)
+            ReflectionTestUtils.setField(savedJourneyState, "reminderEmailSent", reminderEmailSent)
 
             return savedJourneyState
         }

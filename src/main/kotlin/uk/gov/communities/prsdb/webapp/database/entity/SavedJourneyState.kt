@@ -36,11 +36,10 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
     var reminderEmailSent: ReminderEmailSent? = null
         private set
 
-    constructor(serializedState: String, user: OneLoginUser, journeyId: String, reminderEmailSent: ReminderEmailSent? = null) : this() {
+    constructor(serializedState: String, user: OneLoginUser, journeyId: String) : this() {
         this.serializedState = serializedState
         this.user = user
         this.journeyId = journeyId
-        this.reminderEmailSent = reminderEmailSent
     }
 
     constructor(user: OneLoginUser, journeyId: String) : this(serializedState = "{}", user, journeyId)
