@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -38,7 +39,12 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.removeJointLandlordStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.removeJointLandlordStep.isComplete(),
+                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
+                    )
+                }
             }
         }
 }

@@ -30,7 +30,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
             HasJointLandlordsFormModel().apply {
                 this.hasJointLandlords = hasJointLandlords
             }
-        withSubmittedValue(RegisterPropertyStepId.Occupancy.urlPathSegment, hasJointLandlordsFormModel)
+        withSubmittedValue(RegisterPropertyStepId.HasJointLandlords.urlPathSegment, hasJointLandlordsFormModel)
         return self()
     }
 
