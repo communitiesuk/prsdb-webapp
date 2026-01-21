@@ -131,6 +131,46 @@ class MockLandlordData {
             return propertyOwnership
         }
 
+        fun createOccupiedPropertyOwnership(
+            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
+            currentNumHouseholds: Int = 2,
+            currentNumTenants: Int = 1,
+            registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
+            primaryLandlord: Landlord = createLandlord(),
+            propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
+            address: Address = createAddress(),
+            license: License? = null,
+            incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
+            isActive: Boolean = true,
+            numberOfBedrooms: Int? = 1,
+            billsIncludedList: String? = "ELECTRICITY,WATER,SOMETHING_ELSE",
+            customBillsIncluded: String? = "Cat sitting",
+            furnishedStatus: FurnishedStatus? = FurnishedStatus.FURNISHED,
+            rentFrequency: RentFrequency? = RentFrequency.OTHER,
+            customRentFrequency: String? = "Fortnightly",
+            rentAmount: BigDecimal = BigDecimal(200),
+        ): PropertyOwnership {
+            return createPropertyOwnership(
+                ownershipType = ownershipType,
+                currentNumHouseholds = currentNumHouseholds,
+                currentNumTenants = currentNumTenants,
+                registrationNumber = registrationNumber,
+                primaryLandlord = primaryLandlord,
+                propertyBuildType = propertyBuildType,
+                address = address,
+                incompleteComplianceForm = incompleteComplianceForm,
+                license = license,
+                isActive = isActive,
+                numberOfBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
+            )
+        }
+
         fun createPropertyRegistrationFormContext(
             journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,
             context: String =

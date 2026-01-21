@@ -186,9 +186,9 @@ class PropertyDetailsViewModel(
         val allBillsIncludedList: MutableList<Any> = mutableListOf()
         propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }.forEach { bill ->
             if (bill != BillsIncluded.SOMETHING_ELSE) {
-                allBillsIncludedList.add(propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
-            } else {
                 allBillsIncludedList.add(bill)
+            } else {
+                allBillsIncludedList.add(propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
             }
             allBillsIncludedList.add(", ")
         }

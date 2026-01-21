@@ -111,7 +111,7 @@ propertyRecord:
     numberOfHouseholds: Number of households
     numberOfPeople: Number of tenants
     numberOfBedrooms: Number of bedrooms
-    rentIncludesBills: Which bills are included
+    rentIncludesBills: Rent includes bills
     billsIncluded: Which bills are included
     furnishedStatus: Furniture provided
     rentFrequency: When rent is paid
