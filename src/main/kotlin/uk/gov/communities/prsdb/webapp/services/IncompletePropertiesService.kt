@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertyForReminderDataModel
@@ -11,6 +12,7 @@ import java.time.LocalDate
 @PrsdbTaskService
 class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
+    private val savedJourneyStateRepository: SavedJourneyStateRepository,
 ) {
     fun getIncompletePropertyReminders(): List<IncompletePropertyForReminderDataModel> {
         val incompleteProperties =
@@ -28,5 +30,19 @@ class IncompletePropertiesService(
                 incompleteProperty.savedJourneyState.journeyId,
             )
         }
+    }
+
+    fun deleteIncompletePropertiesOlderThan28Days(): Int {
+        val incompletePropertyJourneyStatesOlderThan28Days =
+            landlordIncompletePropertiesRepository
+                .findBySavedJourneyState_CreatedDateBefore(
+                    DateTimeHelper.getJavaInstantFromLocalDate(
+                        LocalDate.now().minusDays(28),
+                    ),
+                ).map { it.savedJourneyState }
+
+        savedJourneyStateRepository.deleteAll(incompletePropertyJourneyStatesOlderThan28Days)
+
+        return incompletePropertyJourneyStatesOlderThan28Days.count()
     }
 }
