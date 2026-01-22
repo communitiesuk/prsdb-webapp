@@ -14,8 +14,6 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
 
     fun self(): SelfType
 
-    fun withNoJointLandlords(): SelfType = withHasJointLandlordsSetToFalse()
-
     fun withHasJointLandlordsSetToFalse(): SelfType {
         val hasJointLandlordsFormModel =
             HasJointLandlordsFormModel().apply {
@@ -24,6 +22,8 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
         withSubmittedValue(RegisterPropertyStepId.HasJointLandlords.urlPathSegment, hasJointLandlordsFormModel)
         return self()
     }
+
+    fun withHasNoJointLandlords(): SelfType = withHasJointLandlordsSetToFalse()
 
     fun withHasJointLandlords(hasJointLandlords: Boolean): SelfType {
         val hasJointLandlordsFormModel =

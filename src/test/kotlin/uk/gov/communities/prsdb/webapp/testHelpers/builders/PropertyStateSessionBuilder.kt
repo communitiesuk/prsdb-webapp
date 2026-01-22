@@ -108,7 +108,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount()
 
         fun beforePropertyRegistrationCheckAnswers() =
-            beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withNoJointLandlords()
+            beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withHasNoJointLandlords()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
