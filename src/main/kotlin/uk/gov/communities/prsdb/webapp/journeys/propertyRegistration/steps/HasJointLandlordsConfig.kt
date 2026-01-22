@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-112: Implement HasJointLandlordsStep
 @JourneyFrameworkComponent
 class HasJointLandlordsConfig : AbstractGenericStepConfig<YesOrNo, HasJointLandlordsFormModel, JointLandlordsState>() {
     override val formModelClass = HasJointLandlordsFormModel::class
