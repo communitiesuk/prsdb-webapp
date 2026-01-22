@@ -15,7 +15,6 @@ class BillsIncludedStepConfig : AbstractGenericStepConfig<Complete, BillsInclude
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.billsIncluded.fieldSetHeading",
             "fieldSetHint" to "forms.billsIncluded.fieldSetHint",
             "checkboxOptions" to

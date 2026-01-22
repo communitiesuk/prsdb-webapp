@@ -29,7 +29,6 @@ class AddressTask : Task<PropertyRegistrationAddressState>() {
                 }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "registerProperty.title",
                         "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
                         "fieldSetHint" to "forms.lookupAddress.propertyRegistration.fieldSetHint",
                     )

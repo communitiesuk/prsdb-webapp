@@ -26,7 +26,6 @@ class LocalCouncilStepConfig(
             }
 
         return mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.selectLocalCouncil.fieldSetHeading",
             "fieldSetHint" to "forms.selectLocalCouncil.fieldSetHint",
             "selectLabel" to "forms.selectLocalCouncil.select.label",

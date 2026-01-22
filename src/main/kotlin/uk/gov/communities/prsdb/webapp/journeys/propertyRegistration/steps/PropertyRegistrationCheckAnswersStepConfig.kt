@@ -45,7 +45,6 @@ class PropertyRegistrationCyaStepConfig(
             ?: throw UnrecoverableJourneyStateException(state.journeyId, "CYA child journey ID should be initialised")
 
         return mapOf(
-            "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
             "propertyName" to state.getAddress().singleLineAddress,
@@ -102,7 +101,13 @@ class PropertyRegistrationCyaStepConfig(
                 furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
                 rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
                 customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-                rentAmount = if (isOccupied) state.rentAmount.formModel.rentAmount.toBigDecimal() else null,
+                rentAmount =
+                    if (isOccupied) {
+                        state.rentAmount.formModel.rentAmount
+                            .toBigDecimal()
+                    } else {
+                        null
+                    },
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {

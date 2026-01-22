@@ -12,7 +12,6 @@ class AlreadyRegisteredStepConfig : AbstractGenericStepConfig<Nothing, Nothing, 
 
     override fun getStepSpecificContent(state: PropertyRegistrationAddressState) =
         mapOf(
-            "title" to "registerProperty.title",
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "singleLineAddress" to state.selectAddressStep.formModel.address,
         )

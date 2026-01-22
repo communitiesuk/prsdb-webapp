@@ -65,6 +65,9 @@ class NewPropertyRegistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
+            configure {
+                withAdditionalContentProperty { "title" to "registerProperty.title" }
+            }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()

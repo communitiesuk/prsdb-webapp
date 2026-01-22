@@ -14,7 +14,6 @@ class RentIncludesBillsStepConfig : AbstractGenericStepConfig<YesOrNo, RentInclu
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.rentIncludesBills.fieldSetHeading",
             "fieldSetHint" to "forms.rentIncludesBills.fieldSetHint",
             "radioOptions" to

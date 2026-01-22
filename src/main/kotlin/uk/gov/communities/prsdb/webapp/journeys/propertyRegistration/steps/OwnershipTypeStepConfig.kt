@@ -15,7 +15,6 @@ class OwnershipTypeStepConfig : AbstractGenericStepConfig<Complete, OwnershipTyp
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.ownershipType.fieldSetHeading",
             "radioOptions" to
                 listOf(

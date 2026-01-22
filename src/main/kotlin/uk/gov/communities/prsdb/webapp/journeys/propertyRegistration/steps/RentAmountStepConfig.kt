@@ -15,7 +15,6 @@ class RentAmountStepConfig : AbstractGenericStepConfig<Complete, RentAmountFormM
     override fun getStepSpecificContent(state: OccupationState): Map<String, Any?> {
         val rentFrequency = state.rentFrequency.formModel.rentFrequency!!
         return mapOf(
-            "title" to "registerProperty.title",
             "heading" to getHeading(rentFrequency),
             "fieldSetHint" to "forms.rentAmount.fieldSetHint",
             "billsExplanationForRentFrequency" to getBillsExplanationForRentFrequency(rentFrequency),

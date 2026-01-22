@@ -15,7 +15,6 @@ class TenantsStepConfig : AbstractGenericStepConfig<Complete, NewNumberOfPeopleF
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
             "label" to "forms.numberOfPeople.label",
