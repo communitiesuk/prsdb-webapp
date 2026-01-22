@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
-abstract class HasJointLandlordsFormPage(
+abstract class HasJointLandlordsFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {

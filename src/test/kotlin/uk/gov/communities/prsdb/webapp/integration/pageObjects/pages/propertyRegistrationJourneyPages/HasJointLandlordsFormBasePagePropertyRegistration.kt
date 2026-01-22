@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.HasJointLandlordsFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.HasJointLandlordsFormBasePage
 
-class HasJointLandlordsFormPagePropertyRegistration(
+class HasJointLandlordsFormBasePagePropertyRegistration(
     page: Page,
-) : HasJointLandlordsFormPage(
+) : HasJointLandlordsFormBasePage(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.HasJointLandlords.urlPathSegment}",
     )
