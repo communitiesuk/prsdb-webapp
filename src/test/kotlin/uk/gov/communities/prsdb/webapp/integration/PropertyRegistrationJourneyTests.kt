@@ -241,7 +241,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied)`(
+    fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied, no joint landlords)`(
         page: Page,
     ) {
         // Start page (not a journey step, but it is how the user accesses the journey)
@@ -316,14 +316,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // fill in and submit
         hasJointLandlordsPage.submitHasNoJointLandlords()
-
-        // TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
-        val addJointLandlordPage = assertPageIs(page, AddJointLandlordFormPagePropertyRegistration::class)
-        addJointLandlordPage.form.submit()
-        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        checkJointLandlordsPage.form.submit()
-        val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
-        removeJointLandlordsPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
