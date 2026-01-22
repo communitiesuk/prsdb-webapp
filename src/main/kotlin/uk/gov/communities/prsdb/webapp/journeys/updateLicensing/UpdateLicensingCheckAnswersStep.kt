@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class UpdateLicensingCyaStepConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractGenericRequestableStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, CheckAnswersFormModel, UpdateLicensingJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
     private lateinit var childJourneyId: String
@@ -50,7 +50,7 @@ class UpdateLicensingCyaStepConfig(
     private fun isRemovingLicensing(state: UpdateLicensingJourneyState): Boolean {
         val newLicensingType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType)
 
-        return state.hasOriginalLicense!! && newLicensingType == LicensingType.NO_LICENSING
+        return state.hasOriginalLicense && newLicensingType == LicensingType.NO_LICENSING
     }
 
     override fun enrichSubmittedDataBeforeValidation(
@@ -62,7 +62,7 @@ class UpdateLicensingCyaStepConfig(
 
     override fun afterStepDataIsAdded(state: UpdateLicensingJourneyState) {
         propertyOwnershipService.updateLicensing(
-            state.propertyId!!,
+            state.propertyId,
             state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             state.getLicenceNumberOrNull(),
         )

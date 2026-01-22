@@ -24,8 +24,6 @@ class StepConfigTests {
 
         override val formModelClass = TestFormModel::class
 
-        override fun isSubClassInitialised(): Boolean = true
-
         override fun mode(state: JourneyState): TestEnum = TestEnum.ENUM_VALUE
     }
 

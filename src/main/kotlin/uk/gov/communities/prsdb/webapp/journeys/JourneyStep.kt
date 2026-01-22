@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
 
@@ -40,7 +39,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     open class InternalStep<out TEnum : Enum<out TEnum>, in TState : JourneyState>(
         stepConfig: AbstractInternalStepConfig<TEnum, TState>,
-    ) : JourneyStep<TEnum, NoInputFormModel, TState>(stepConfig) {
+    ) : JourneyStep<TEnum, Nothing, TState>(stepConfig) {
         override fun getRouteSegmentOrNull(): String? = null
 
         override fun isRouteSegmentInitialised(): Boolean = true

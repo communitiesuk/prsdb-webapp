@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressService
 @JourneyFrameworkComponent
 class LookupAddressStepConfig(
     private val addressService: AddressService,
-) : AbstractGenericRequestableStepConfig<LookupAddressMode, LookupAddressFormModel, AddressState>() {
+) : AbstractRequestableStepConfig<LookupAddressMode, LookupAddressFormModel, AddressState>() {
     override val formModelClass = LookupAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressState) =

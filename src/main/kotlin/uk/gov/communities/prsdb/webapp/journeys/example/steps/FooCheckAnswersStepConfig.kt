@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.FooJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class FooCheckAnswersStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractGenericRequestableStepConfig<Complete, NoInputFormModel, FooJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, FooJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: FooJourneyState) =
@@ -28,7 +28,7 @@ class FooCheckAnswersStepConfig(
 
     private fun getOccupationRows(state: OccupationState): List<SummaryListRowViewModel> {
         val occupiedStep = state.occupied
-        return if (occupiedStep?.formModelOrNull?.occupied == true) {
+        return if (occupiedStep.formModelOrNull?.occupied == true) {
             val householdsStep = state.households
             val tenantsStep = state.tenants
             listOf(
@@ -39,13 +39,13 @@ class FooCheckAnswersStepConfig(
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.numberOfHouseholds.fieldSetHeading",
-                    householdsStep?.formModelOrNull?.numberOfHouseholds,
-                    householdsStep?.routeSegment,
+                    householdsStep.formModelOrNull?.numberOfHouseholds,
+                    householdsStep.routeSegment,
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.numberOfPeople.fieldSetHeading",
-                    tenantsStep?.formModelOrNull?.numberOfPeople,
-                    tenantsStep?.routeSegment,
+                    tenantsStep.formModelOrNull?.numberOfPeople,
+                    tenantsStep.routeSegment,
                 ),
             )
         } else {
@@ -53,7 +53,7 @@ class FooCheckAnswersStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.occupancy.fieldSetHeading",
                     false,
-                    occupiedStep?.routeSegment,
+                    occupiedStep.routeSegment,
                 ),
             )
         }

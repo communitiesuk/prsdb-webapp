@@ -17,7 +17,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysFalseValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import kotlin.test.assertEquals
@@ -273,7 +272,7 @@ class JourneyStepTests {
         // Arrange
         val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
         val step = JourneyStep.InternalStep(internalStepConfig)
-        whenever(step.stepConfig.formModelClass).thenReturn(NoInputFormModel::class)
+        whenever(step.stepConfig.formModelClass).thenReturn(Nothing::class)
         whenever(step.stepConfig.routeSegment).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
@@ -513,5 +512,17 @@ class JourneyStepTests {
                 false,
             )
         }
+    }
+
+    @Test
+    fun `lifecycleOrchestrator is determined by the step's config`() {
+        // Arrange
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        val stepLifecycleOrchestrator = StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator(step)
+        whenever(stepConfig.getStepLifecycleOrchestrator(step)).thenReturn(stepLifecycleOrchestrator)
+
+        // Act & Assert
+        assertEquals(stepLifecycleOrchestrator, step.lifecycleOrchestrator)
     }
 }

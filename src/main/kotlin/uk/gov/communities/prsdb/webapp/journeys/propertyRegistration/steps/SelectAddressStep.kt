@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 @JourneyFrameworkComponent
 class SelectAddressStepConfig(
     private val addressAvailabilityService: AddressAvailabilityService,
-) : AbstractGenericRequestableStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
+) : AbstractRequestableStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
     override val formModelClass = SelectAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressState): Map<String, Any?> {

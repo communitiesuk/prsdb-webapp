@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
@@ -81,7 +80,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    abstract fun isSubClassInitialised(): Boolean
+    open fun isSubClassInitialised(): Boolean = true
 
     abstract fun mode(state: TState): TEnum?
 
@@ -124,23 +123,12 @@ abstract class AbstractRequestableStepConfig<out TEnum : Enum<out TEnum>, TFormM
 }
 
 abstract class AbstractInternalStepConfig<out TEnum : Enum<out TEnum>, in TState : JourneyState> :
-    AbstractStepConfig<TEnum, NoInputFormModel, TState>() {
+    AbstractStepConfig<TEnum, Nothing, TState>() {
     final override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = RedirectingStepLifecycleOrchestrator(journeyStep)
 
-    override fun getStepSpecificContent(state: TState) = mapOf<String, String>()
+    final override fun getStepSpecificContent(state: TState) = mapOf<String, String>()
 
-    override fun chooseTemplate(state: TState): String = ""
+    final override fun chooseTemplate(state: TState) = ""
 
-    final override val formModelClass = NoInputFormModel::class
-}
-
-// Generic step config should be used where the subclass does not need any additional initialisation
-abstract class AbstractGenericRequestableStepConfig<TEnum : Enum<TEnum>, TModel : FormModel, TState : JourneyState> :
-    AbstractRequestableStepConfig<TEnum, TModel, TState>() {
-    override fun isSubClassInitialised(): Boolean = true
-}
-
-abstract class AbstractGenericInternalStepConfig<TEnum : Enum<TEnum>, TState : JourneyState> :
-    AbstractInternalStepConfig<TEnum, TState>() {
-    override fun isSubClassInitialised(): Boolean = true
+    final override val formModelClass = Nothing::class
 }

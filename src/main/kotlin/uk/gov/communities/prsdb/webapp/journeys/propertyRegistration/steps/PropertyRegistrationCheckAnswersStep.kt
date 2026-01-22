@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
@@ -31,7 +31,7 @@ class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
-) : AbstractGenericRequestableStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
     private lateinit var childJourneyId: String
@@ -102,7 +102,13 @@ class PropertyRegistrationCyaStepConfig(
                 furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
                 rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
                 customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-                rentAmount = if (isOccupied) state.rentAmount.formModel.rentAmount.toBigDecimal() else null,
+                rentAmount =
+                    if (isOccupied) {
+                        state.rentAmount.formModel.rentAmount
+                            .toBigDecimal()
+                    } else {
+                        null
+                    },
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {
