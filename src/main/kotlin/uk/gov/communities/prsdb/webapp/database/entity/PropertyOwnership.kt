@@ -144,5 +144,5 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         get() = incompleteComplianceForm != null
 
     val rentIncludesBills: Boolean
-        get() = billsIncludedList != null || customBillsIncluded != null
+        get() = billsIncludedList != null
 }

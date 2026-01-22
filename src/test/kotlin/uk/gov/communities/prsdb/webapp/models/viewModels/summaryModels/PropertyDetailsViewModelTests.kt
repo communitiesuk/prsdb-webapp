@@ -116,7 +116,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `Tenancy details are in the correct order when property is occupied all conditional and custom fields`() {
+    fun `Tenancy details are in the correct order when property is occupied and all conditional and custom fields are filled`() {
         // Arrange
         val propertyOwnership =
             createOccupiedPropertyOwnership(
@@ -300,7 +300,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `Tenancy details with conditional and custom values on the propertyRecord for an occupied property`() {
+    fun `Tenancy details are returned with conditional and custom values on the propertyRecord for an occupied property`() {
         val billsIncludedList = "ELECTRICITY,WATER,SOMETHING_ELSE"
         val customBillsIncluded = "cat sitting"
         val rentFrequency = RentFrequency.OTHER
