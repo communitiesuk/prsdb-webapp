@@ -13,4 +13,6 @@ data class VerifiedIdentityDataModel(
     @Serializable(with = LocalDateSerializer::class)
     var birthDate: LocalDate? = null,
 ) : FormModel,
-    JavaSerializable // Required for @Serializable to be compatible with Spring's DefaultSerializer
+    JavaSerializable { // Required for @Serializable to be compatible with Spring's DefaultSerializer
+    val isVerified get() = name != null && birthDate != null
+}
