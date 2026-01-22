@@ -22,6 +22,7 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                         YesOrNo.NO -> exitStep
                     }
                 }
+                savable()
             }
             step(journey.addJointLandlordStep) {
                 routeSegment(RegisterPropertyStepId.AddJointLandlord.urlPathSegment)

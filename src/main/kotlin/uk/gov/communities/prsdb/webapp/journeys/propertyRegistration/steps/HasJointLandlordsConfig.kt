@@ -22,7 +22,7 @@ class HasJointLandlordsConfig : AbstractGenericStepConfig<YesOrNo, HasJointLandl
                 listOf(
                     RadiosButtonViewModel(
                         value = true,
-                        labelMsgKey = "forms.jointLandlords.hasJointLandlords.radios.yes",
+                        labelMsgKey = "forms.radios.option.yes.label",
                     ),
                     RadiosButtonViewModel(
                         value = false,
