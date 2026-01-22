@@ -189,7 +189,18 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
-    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configure(configuration)
+    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
+
+    override fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        if (condition()) {
+            configuration()
+        }
+    }
+
+    fun isForStep(stepToCheck: JourneyStep<*, *, *>): Boolean = step === stepToCheck
 
     private fun build(state: TState): JourneyStep<TMode, *, TState> {
         val parentage =

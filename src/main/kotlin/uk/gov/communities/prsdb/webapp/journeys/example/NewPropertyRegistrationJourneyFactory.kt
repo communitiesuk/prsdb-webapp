@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.IncompletePropertyCreatingSubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -77,7 +76,6 @@ class NewPropertyRegistrationJourneyFactory(
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
                     checkable()
-                    customExitStep(journey.addressExitStep)
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment("property-type")
@@ -139,7 +137,6 @@ class PropertyRegistrationJourney(
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
     override val localCouncilStep: LocalCouncilStep,
-    override val addressExitStep: IncompletePropertyCreatingSubjourneyExitStep,
     // Property details steps
     override val propertyTypeStep: PropertyTypeStep,
     override val ownershipTypeStep: OwnershipTypeStep,
@@ -172,9 +169,9 @@ class PropertyRegistrationJourney(
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
-    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.mutableDelegate("cachedAddresses")
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.mutableDelegate("isAddressAlreadyRegistered")
-    override var cyaChildJourneyId: String? by delegateProvider.mutableDelegate("checkYourAnswersChildJourneyId")
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+    override var cyaChildJourneyId: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -195,7 +192,6 @@ interface PropertyRegistrationJourneyState :
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: AddressTask
-    val addressExitStep: IncompletePropertyCreatingSubjourneyExitStep
     val propertyTypeStep: PropertyTypeStep
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask

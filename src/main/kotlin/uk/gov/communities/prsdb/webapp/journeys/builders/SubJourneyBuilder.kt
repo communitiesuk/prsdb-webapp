@@ -16,6 +16,11 @@ interface BuildableElement {
     fun configure(configuration: ConfigurableElement<*>.() -> Unit)
 
     fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit)
+
+    fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    )
 }
 
 abstract class AbstractJourneyBuilder<TState : JourneyState>(
@@ -26,7 +31,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
+    private var additionalConfiguration: MutableList<ConditionalElementConfiguration> = mutableListOf()
     private var additionalFirstElementConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
     override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
@@ -34,14 +39,15 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
         configure {
             unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
-            additionalConfiguration.forEach { it() }
         }
+
+        additionalConfiguration.forEach { this.conditionallyConfigure(it.condition, it.configuration) }
 
         return build()
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
-        additionalConfiguration.add(configuration)
+        additionalConfiguration.add(ConditionalElementConfiguration({ journeyElements.any { this === it } }, configuration))
     }
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) {
@@ -76,6 +82,13 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
+    override fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        additionalConfiguration.add(ConditionalElementConfiguration(condition, configuration))
+    }
+
     fun unreachableStepUrl(getUrl: () -> String) {
         if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepDestination has already been set")
@@ -94,11 +107,19 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         tag: String,
         configuration: ConfigurableElement<*>.() -> Unit,
     ) {
-        configure {
-            if (tags.contains(tag)) {
-                configuration()
-            }
-        }
+        additionalConfiguration.add(ConditionalElementConfiguration({ tags.contains(tag) }, configuration))
+    }
+
+    fun configureStep(
+        step: JourneyStep<*, *, *>,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        additionalConfiguration.add(
+            ConditionalElementConfiguration(
+                { this is StepInitialiser<*, *, *> && isForStep(step) },
+                configuration,
+            ),
+        )
     }
 }
 

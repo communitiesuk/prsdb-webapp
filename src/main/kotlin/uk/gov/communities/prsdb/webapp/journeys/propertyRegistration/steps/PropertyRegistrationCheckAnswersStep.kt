@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericRequestableStepConfig
@@ -16,7 +17,9 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -48,6 +51,7 @@ class PropertyRegistrationCyaStepConfig(
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
             "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
+            "tenancyDetails" to getTenancyDetailsSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
     }
@@ -61,6 +65,8 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
+            val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+            val billsIncludedDataModel = state.getBillsIncludedOrNull()
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
@@ -68,13 +74,35 @@ class PropertyRegistrationCyaStepConfig(
                 licenceNumber = state.getLicenceNumberOrNull() ?: "",
                 ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
                 numberOfHouseholds =
-                    state.households.formModelOrNull
-                        ?.notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                        ?.toInt() ?: 0,
+                    if (isOccupied) {
+                        state.households.formModel
+                            .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                            .toInt()
+                    } else {
+                        0
+                    },
                 numberOfPeople =
-                    state.tenants.formModelOrNull
-                        ?.notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                        ?.toInt() ?: 0,
+                    if (isOccupied) {
+                        state.tenants.formModel
+                            .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                            .toInt()
+                    } else {
+                        0
+                    },
+                numBedrooms =
+                    if (isOccupied) {
+                        state.bedrooms.formModel
+                            .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                            .toInt()
+                    } else {
+                        null
+                    },
+                billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedString else null,
+                customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
+                furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
+                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
+                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                rentAmount = if (isOccupied) state.rentAmount.formModel.rentAmount.toBigDecimal() else null,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
             )
         } catch (_: EntityExistsException) {
@@ -85,8 +113,7 @@ class PropertyRegistrationCyaStepConfig(
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
         getAddressRows(state) +
             getPropertyTypeRow(state) +
-            getOwnershipTypeRow(state) +
-            getTenancyRows(state)
+            getOwnershipTypeRow(state)
 
     private fun getAddressRows(state: PropertyRegistrationJourneyState) =
         state.getAddress().let { address ->
@@ -121,36 +148,98 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
         )
 
-    private fun getTenancyRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
-        if (state.occupied.formModel.occupied == true) {
-            val householdsStep = state.households
-            val tenantsStep = state.tenants
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.occupied",
-                    true,
-                    Destination.VisitableStep(state.occupied, childJourneyId),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.households",
-                    householdsStep.formModel.numberOfHouseholds,
-                    Destination(householdsStep),
-                ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.people",
-                    tenantsStep.formModel.numberOfPeople,
-                    Destination(tenantsStep),
-                ),
-            )
-        } else {
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.occupied",
-                    false,
-                    Destination.VisitableStep(state.occupied, childJourneyId),
-                ),
-            )
-        }
+    private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val isOccupied = state.occupied.formModel.occupied ?: false
+                add(getOccupancyStatusRow(isOccupied, state.occupied))
+                if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state))
+            }
+
+    private fun getOccupancyStatusRow(
+        isOccupied: Boolean,
+        occupiedStep: RequestableStep<*, *, *>,
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.tenancyDetails.occupied",
+            isOccupied,
+            Destination.VisitableStep(occupiedStep, childJourneyId),
+        )
+
+    private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val householdsStep = state.households
+                val tenantsStep = state.tenants
+                val bedroomsStep = state.bedrooms
+                val rentIncludesBillsStep = state.rentIncludesBills
+                val billsIncludedStep = state.billsIncluded
+                val furnishedStatusStep = state.furnishedStatus
+                val rentFrequencyStep = state.rentFrequency
+                val rentAmountStep = state.rentAmount
+                val rentIncludesBills = rentIncludesBillsStep.formModel.rentIncludesBills!!
+                val rentFrequency = rentFrequencyStep.formModel.rentFrequency
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.households",
+                        householdsStep.formModel.numberOfHouseholds,
+                        Destination(householdsStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.people",
+                        tenantsStep.formModel.numberOfPeople,
+                        Destination(tenantsStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
+                        bedroomsStep.formModel.numberOfBedrooms,
+                        Destination(bedroomsStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
+                        rentIncludesBills,
+                        Destination(rentIncludesBillsStep),
+                    ),
+                )
+                if (rentIncludesBills) {
+                    add(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
+                            state.getFormattedBillsIncludedListComponentsOrNull(),
+                            Destination(billsIncludedStep),
+                            enforceListAsSingleLineDisplay = true,
+                        ),
+                    )
+                }
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
+                        furnishedStatusStep.formModel.furnishedStatus,
+                        Destination(furnishedStatusStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
+                        if (rentFrequency == RentFrequency.OTHER) rentFrequencyStep.formModel.customRentFrequency else rentFrequency,
+                        Destination(rentFrequencyStep),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
+                        state.getFormattedRentAmountComponentsOrNull(),
+                        Destination(rentAmountStep),
+                        enforceListAsSingleLineDisplay = true,
+                    ),
+                )
+            }
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,

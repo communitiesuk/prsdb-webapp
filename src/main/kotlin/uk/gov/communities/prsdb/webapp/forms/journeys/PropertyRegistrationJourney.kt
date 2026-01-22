@@ -607,6 +607,13 @@ class PropertyRegistrationJourney(
                 numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(filteredJourneyData),
                 numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(filteredJourneyData),
                 baseUserId = baseUserId,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
             )
 
             journeyDataService.deleteJourneyData()

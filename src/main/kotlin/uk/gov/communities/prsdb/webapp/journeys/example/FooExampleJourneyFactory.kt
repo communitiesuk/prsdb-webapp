@@ -106,8 +106,8 @@ class FooJourneyState(
 ) : AbstractJourneyState(journeyStateService),
     OccupationState,
     EpcJourneyState {
-    override var automatchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("automatchedEpc")
-    override var searchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("searchedEpc")
+    override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
+    override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
     override val propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state

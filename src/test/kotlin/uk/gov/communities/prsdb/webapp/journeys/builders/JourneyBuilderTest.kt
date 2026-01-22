@@ -569,5 +569,104 @@ class JourneyBuilderTest {
             assertFalse(capturedDestinationsOverwritten[1])
             assertFalse(capturedDestinationsOverwritten[2])
         }
+
+        @Test
+        fun `configure applies only to the direct children of the journey builder`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val step1 = StepInitialiserTests.mockInitialisableStep()
+            val step2 = StepInitialiserTests.mockInitialisableStep()
+            val step3 = StepInitialiserTests.mockInitialisableStep()
+            val task = testTaskWithSteps(step3)
+
+            // Act
+            jb.step(step1) {
+                routeSegment("segment1")
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step(step2) {
+                routeSegment("segment2")
+                parents { NoParents() }
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.task(task) {
+                parents { NoParents() }
+                nextUrl { "url1" }
+            }
+
+            jb.configure {
+                modifyNextDestination { { Destination.ExternalUrl("configured") } }
+            }
+
+            jb.buildRoutingMap()
+
+            // Assert
+            val nextDestinationCaptor = argumentCaptor<(TestEnum) -> Destination>()
+            verify(step1).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step2).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step3).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+
+            nextDestinationCaptor.allValues.take(2).forEach {
+                val destination = it(TestEnum.ENUM_VALUE)
+                assert(destination is Destination.ExternalUrl)
+                with(destination as Destination.ExternalUrl) {
+                    assertEquals("configured", externalUrl)
+                }
+            }
+            nextDestinationCaptor.allValues.last().let {
+                val destination = it(TestEnum.ENUM_VALUE)
+                assert(destination is Destination.ExternalUrl)
+                with(destination as Destination.ExternalUrl) {
+                    assertEquals("task-step-0", externalUrl)
+                }
+            }
+        }
+
+        private fun testTaskWithSteps(vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Task<JourneyState> =
+            object : Task<JourneyState>() {
+                override fun makeSubJourney(state: JourneyState) =
+                    subJourney(state) {
+                        steps.forEachIndexed { index, step ->
+                            this.step(step) {
+                                routeSegment("task-segment-$index")
+                                nextUrl { "task-step-$index" }
+                            }
+                        }
+                        exitStep {
+                            parents { NoParents() }
+                        }
+                        unreachableStepUrl { "unreachable" }
+                    }
+            }
     }
 }

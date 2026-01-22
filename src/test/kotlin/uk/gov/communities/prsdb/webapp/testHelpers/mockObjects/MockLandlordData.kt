@@ -2,13 +2,16 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -19,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 
@@ -63,9 +67,18 @@ class MockLandlordData {
                     dateOfBirth = dateOfBirth,
                 )
 
+            val landlordIncompleteProperties =
+                incompleteProperties
+                    .map {
+                        LandlordIncompleteProperties(
+                            landlord = landlord,
+                            savedJourneyState = it,
+                        )
+                    }.toSet()
+
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
             ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
-            ReflectionTestUtils.setField(landlord, "incompleteProperties", incompleteProperties)
+            ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
 
             return landlord
         }
@@ -83,6 +96,13 @@ class MockLandlordData {
             id: Long = 1,
             createdDate: Instant = Instant.now(),
             isActive: Boolean = true,
+            numberOfBedrooms: Int? = null,
+            billsIncludedList: String? = null,
+            customBillsIncluded: String? = null,
+            furnishedStatus: FurnishedStatus? = null,
+            rentFrequency: RentFrequency? = null,
+            customRentFrequency: String? = null,
+            rentAmount: BigDecimal? = null,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -96,6 +116,13 @@ class MockLandlordData {
                     incompleteComplianceForm = incompleteComplianceForm,
                     license = license,
                     isActive = isActive,
+                    numBedrooms = numberOfBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
