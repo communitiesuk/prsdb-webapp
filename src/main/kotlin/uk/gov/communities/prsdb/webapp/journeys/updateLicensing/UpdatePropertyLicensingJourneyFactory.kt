@@ -47,11 +47,19 @@ class UpdateLicensingJourneyFactory(
                 initialStep()
                 nextStep { journey.cyaStep }
                 checkable()
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
+                }
             }
             step(journey.cyaStep) {
                 routeSegment("check-licensing-answers")
                 parents { journey.licensingTask.isComplete() }
                 nextUrl { LANDLORD_PROPERTY_DETAILS_ROUTE }
+            }
+            configureStep(journey.licensingTypeStep) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
+                }
             }
             checkYourAnswersJourney()
         }

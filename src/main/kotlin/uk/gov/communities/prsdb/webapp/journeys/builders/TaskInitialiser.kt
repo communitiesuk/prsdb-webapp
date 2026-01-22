@@ -15,6 +15,8 @@ class TaskInitialiser<TStateInit : JourneyState>(
         ElementConfiguration("Task ${task::class.simpleName}}"),
 ) : ConfigurableElement<NavigationComplete> by elementConfiguration,
     BuildableElement {
+    private val conditionalConfigurations: MutableList<ConditionalElementConfiguration> = mutableListOf()
+
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
@@ -46,12 +48,26 @@ class TaskInitialiser<TStateInit : JourneyState>(
             }
         }
 
+        conditionalConfigurations.forEach { conditionConfig ->
+            taskSubJourney.conditionallyConfigure(conditionConfig.condition, conditionConfig.configuration)
+        }
+
         return taskSubJourney.build()
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
+
+    override fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        if (condition()) {
+            configuration()
+        }
+        conditionalConfigurations.add(ConditionalElementConfiguration(condition, configuration))
+    }
 
     var exitStepOverride: NavigationalStep? = null
         private set
