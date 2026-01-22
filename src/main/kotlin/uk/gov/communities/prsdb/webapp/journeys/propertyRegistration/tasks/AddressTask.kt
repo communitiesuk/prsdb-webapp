@@ -5,16 +5,18 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 
 @JourneyFrameworkComponent
-class AddressTask : Task<AddressState>() {
-    override fun makeSubJourney(state: AddressState) =
+class AddressTask : Task<PropertyRegistrationAddressState>() {
+    override fun makeSubJourney(state: PropertyRegistrationAddressState) =
         subJourney(state) {
-            step(journey.lookupStep) {
+            step<LookupAddressMode, LookupAddressStepConfig>(journey.lookupAddressStep) {
                 routeSegment("lookup-address")
                 nextStep { mode ->
                     when (mode) {
@@ -22,10 +24,20 @@ class AddressTask : Task<AddressState>() {
                         LookupAddressMode.NO_ADDRESSES_FOUND -> journey.noAddressFoundStep
                     }
                 }
+                stepSpecificInitialisation {
+                    restrictToEngland()
+                }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "registerProperty.title",
+                        "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
+                        "fieldSetHint" to "forms.lookupAddress.propertyRegistration.fieldSetHint",
+                    )
+                }
             }
             step(journey.selectAddressStep) {
                 routeSegment("select-address")
-                parents { journey.lookupStep.hasOutcome(LookupAddressMode.ADDRESSES_FOUND) }
+                parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.ADDRESSES_FOUND) }
                 nextStep { mode ->
                     when (mode) {
                         SelectAddressMode.MANUAL_ADDRESS -> journey.manualAddressStep
@@ -34,10 +46,13 @@ class AddressTask : Task<AddressState>() {
                     }
                 }
             }
-            step(journey.noAddressFoundStep) {
+            step<Complete, NoAddressFoundStepConfig>(journey.noAddressFoundStep) {
                 routeSegment("no-address-found")
-                parents { journey.lookupStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
+                parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { journey.manualAddressStep }
+                stepSpecificInitialisation {
+                    restrictToEngland()
+                }
             }
             step(journey.manualAddressStep) {
                 routeSegment("manual-address")
@@ -48,6 +63,7 @@ class AddressTask : Task<AddressState>() {
                     )
                 }
                 nextStep { journey.localCouncilStep }
+                withAdditionalContentProperty { "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading" }
             }
             step(journey.alreadyRegisteredStep) {
                 routeSegment("already-registered")

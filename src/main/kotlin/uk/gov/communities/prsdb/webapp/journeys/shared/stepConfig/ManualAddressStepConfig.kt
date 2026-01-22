@@ -1,20 +1,18 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
-class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
+class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddressFormModel, AddressState>() {
     override val formModelClass = ManualAddressFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
+    override fun getStepSpecificContent(state: AddressState) =
         mapOf(
-            "title" to "registerProperty.title",
-            "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading",
             "fieldSetHint" to "forms.manualAddress.fieldSetHint",
             "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
             "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
@@ -24,12 +22,12 @@ class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddres
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: JourneyState): String = "forms/manualAddressForm"
+    override fun chooseTemplate(state: AddressState) = "forms/manualAddressForm"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: AddressState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class ManualAddressStep(
     stepConfig: ManualAddressStepConfig,
-) : RequestableStep<Complete, ManualAddressFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, ManualAddressFormModel, AddressState>(stepConfig)
