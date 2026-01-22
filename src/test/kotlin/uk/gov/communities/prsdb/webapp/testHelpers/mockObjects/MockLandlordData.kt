@@ -143,7 +143,7 @@ class MockLandlordData {
             incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             isActive: Boolean = true,
             numberOfBedrooms: Int = 1,
-            billsIncludedList: String = "ELECTRICITY,WATER,SOMETHING_ELSE",
+            billsIncludedList: String? = "ELECTRICITY,WATER,SOMETHING_ELSE",
             customBillsIncluded: String? = "Cat sitting",
             furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED,
             rentFrequency: RentFrequency = RentFrequency.OTHER,
