@@ -32,7 +32,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
         taskSubJourney.configure {
             elementConfiguration.unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             elementConfiguration.additionalContentProviders.forEach { contentValueProvider ->
-                withAdditionalContentProperty(contentValueProvider)
+                withAdditionalContentProperties(contentValueProvider)
             }
         }
         taskSubJourney.configureFirst {
