@@ -9,16 +9,16 @@
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
     <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}"></h1>
-    <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.one}"></p>
-    <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.two}"></p>
-    <details  id="details" th:replace="~{fragments/details :: details(#{forms.jointLandlords.hasJointLandlords.link.one}, ~{::#details/content()})}" >
-        <div class="govuk-details__text" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.three}"></div>
+    <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.one}"></p>
+    <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.two}"></p>
+    <details  id="details" th:replace="~{fragments/details :: details(#{jointLandlords.hasJointLandlords.link.one}, ~{::#details/content()})}" >
+        <div class="govuk-details__text" th:text="#{jointLandlords.hasJointLandlords.paragraph.three}"></div>
         <div class="govuk-details__text">
-            <a class="govuk-link" th:href="${findLegalAdviceUrl}" th:text="#{forms.jointLandlords.hasJointLandlords.link.two}" rel="noreferrer noopener" target="_blank"></a>
+            <a class="govuk-link" th:href="${findLegalAdviceUrl}" th:text="#{jointLandlords.hasJointLandlords.link.two}" rel="noreferrer noopener" target="_blank"></a>
         </div>
     </details>
-    <h2 class="govuk-heading-m" th:text="#{forms.jointLandlords.hasJointLandlords.subHeading.one}"></h2>
-    <p class="govuk-body" th:text="#{forms.jointLandlords.hasJointLandlords.paragraph.four}"></p>
+    <h2 class="govuk-heading-m" th:text="#{jointLandlords.hasJointLandlords.subHeading.one}"></h2>
+    <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.four}"></p>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"

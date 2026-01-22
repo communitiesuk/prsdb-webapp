@@ -16,8 +16,8 @@ class HasJointLandlordsConfig : AbstractGenericStepConfig<YesOrNo, HasJointLandl
     override fun getStepSpecificContent(state: JointLandlordsState) =
         mapOf(
             "title" to "registerProperty.title",
-            "fieldSetHeading" to "forms.jointLandlords.hasJointLandlords.heading",
-            "label" to "forms.jointLandlords.hasJointLandlords.subHeading.two",
+            "fieldSetHeading" to "jointLandlords.hasJointLandlords.heading",
+            "label" to "jointLandlords.hasJointLandlords.subHeading.two",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
@@ -26,7 +26,7 @@ class HasJointLandlordsConfig : AbstractGenericStepConfig<YesOrNo, HasJointLandl
                     ),
                     RadiosButtonViewModel(
                         value = false,
-                        labelMsgKey = "forms.jointLandlords.hasJointLandlords.radios.no",
+                        labelMsgKey = "jointLandlords.hasJointLandlords.radios.no",
                     ),
                 ),
             "findLegalAdviceUrl" to GOV_LEGAL_ADVICE_URL,
