@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -11,7 +11,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListView
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
 
 @JourneyFrameworkComponent
-class PropertyRegistrationTaskListStepConfig : AbstractGenericStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
+class PropertyRegistrationTaskListStepConfig :
+    AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any> =

@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordSer
 @JourneyFrameworkComponent
 class PropertyTypeStepConfig(
     private val incompletePropertyForLandlordService: IncompletePropertyForLandlordService,
-) : AbstractGenericStepConfig<Complete, PropertyTypeFormModel, JourneyState>() {
+) : AbstractRequestableStepConfig<Complete, PropertyTypeFormModel, JourneyState>() {
     override val formModelClass = PropertyTypeFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =

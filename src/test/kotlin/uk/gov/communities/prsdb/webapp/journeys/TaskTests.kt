@@ -18,15 +18,15 @@ class TaskTests {
         override fun makeSubJourney(state: JourneyState) = subJourney(state) { }
     }
 
-    lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
+    private lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
     private val firstStepMock = mock<JourneyStep.RequestableStep<*, *, JourneyState>>()
-    private val exitStepMock = mock<NavigationalStep>()
+    private val exitStepMock = mock<SubjourneyExitStep>()
 
     @BeforeEach
     fun setup() {
         // Mock construction of SubJourneyBuilder to capture the init lambda
         subJourneyConstruction =
-            mockConstruction(SubJourneyBuilder::class.java) { mock, context ->
+            mockConstruction(SubJourneyBuilder::class.java) { mock, _ ->
                 whenever(mock.firstStep).thenReturn(firstStepMock)
                 whenever(mock.exitStep).thenReturn(exitStepMock)
             }
@@ -42,12 +42,16 @@ class TaskTests {
         // Arrange
         val task = TestTask()
 
-        val nextDestinationLambda = { _: NavigationComplete -> Destination.ExternalUrl("example.com") }
+        val nextDestinationLambda = { _: SubjourneyComplete -> Destination.ExternalUrl("example.com") }
         val state = mock<JourneyState>()
         val parent = NoParents()
 
         // Act
-        val subJourneyBuilder = task.getTaskSubJourneyBuilder(state) { nextDestination(nextDestinationLambda) }
+        val subJourneyBuilder =
+            task.getTaskSubJourneyBuilder(state) {
+                parents { parent }
+                nextDestination(nextDestinationLambda)
+            }
 
         // Assert
         assertSame(subJourneyConstruction.constructed().first(), subJourneyBuilder)
@@ -111,12 +115,12 @@ class TaskTests {
     }
 
     @Test
-    fun `notionalExitStep return a Navigational Step from the internal task builder`() {
+    fun `exitStep returns a TaskExitStep from the internal task builder`() {
         // Arrange
         val task = initialisedTask()
 
         // Act
-        val step = task.notionalExitStep
+        val step = task.exitStep
 
         // Assert
         assertSame(exitStepMock, step)
