@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -605,6 +606,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 hasJointLandlordsPage.form.submit()
                 assertThat(hasJointLandlordsPage.form.getErrorMessage())
                     .containsText("Select if there are any other landlords for this property")
+            }
+
+            @Test
+            fun `The link renders correctly`(page: Page) {
+                val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
             }
         }
     }

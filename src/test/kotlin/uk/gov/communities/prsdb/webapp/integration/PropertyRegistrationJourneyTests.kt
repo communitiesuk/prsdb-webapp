@@ -10,7 +10,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -194,9 +193,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Has Joint Landlords - render page
         assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
         assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
-        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
-        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
-        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+
         // fill in and submit
         hasJointLandlordsPage.submitHasJointLandlords()
 
@@ -316,9 +313,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Has Joint Landlords - render page
         assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
         assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
-        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
-        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
-        assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+
         // fill in and submit
         hasJointLandlordsPage.submitHasJointLandlords()
 
