@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Addr
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -28,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
@@ -160,7 +160,7 @@ class PropertyRegistrationJourney(
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val addJointLandlordStep: AddJointLandlordStep,
+    override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordStep: RemoveJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step

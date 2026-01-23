@@ -18,20 +18,20 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 routeSegment(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.addJointLandlordStep
+                        YesOrNo.YES -> journey.inviteJointLandlordStep
                         YesOrNo.NO -> exitStep
                     }
                 }
                 savable()
             }
-            step(journey.addJointLandlordStep) {
-                routeSegment(RegisterPropertyStepId.AddJointLandlord.urlPathSegment)
+            step(journey.inviteJointLandlordStep) {
+                routeSegment(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.checkJointLandlordsStep) {
                 routeSegment(RegisterPropertyStepId.CheckJointLandlords.urlPathSegment)
-                parents { journey.addJointLandlordStep.isComplete() }
+                parents { journey.inviteJointLandlordStep.isComplete() }
                 nextStep { journey.removeJointLandlordStep }
             }
             step(journey.removeJointLandlordStep) {
