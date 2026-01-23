@@ -5,22 +5,26 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
 
 // TODO PDJB-113: Implement AddJointLandlordStep
 @JourneyFrameworkComponent
-class AddJointLandlordConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JointLandlordsState>() {
-    override val formModelClass = NoInputFormModel::class
+class InviteJointLandlordConfig : AbstractRequestableStepConfig<Complete, InviteJointLandlordsFormModel, JointLandlordsState>() {
+    override val formModelClass = InviteJointLandlordsFormModel::class
 
     override fun getStepSpecificContent(state: JointLandlordsState) =
-        mapOf("todoComment" to "TODO PDJB-113: Implement add joint landlord page")
+        mapOf(
+            "title" to "registerProperty.title",
+            "fieldSetHeading" to "jointLandlords.inviteJointLandlord.fieldSetHeading",
+            "label" to "jointLandlords.inviteJointLandlord.email.label",
+        )
 
-    override fun chooseTemplate(state: JointLandlordsState): String = "forms/todo"
+    override fun chooseTemplate(state: JointLandlordsState): String = "forms/emailForm"
 
     override fun mode(state: JointLandlordsState) = Complete.COMPLETE
 }
 
 @JourneyFrameworkComponent
 final class AddJointLandlordStep(
-    stepConfig: AddJointLandlordConfig,
-) : RequestableStep<Complete, NoInputFormModel, JointLandlordsState>(stepConfig)
+    stepConfig: InviteJointLandlordConfig,
+) : RequestableStep<Complete, InviteJointLandlordsFormModel, JointLandlordsState>(stepConfig)
