@@ -17,6 +17,7 @@ class InviteJointLandlordConfig : AbstractRequestableStepConfig<Complete, Invite
             "title" to "registerProperty.title",
             "fieldSetHeading" to "jointLandlords.inviteJointLandlord.fieldSetHeading",
             "label" to "jointLandlords.inviteJointLandlord.email.label",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/emailForm"
