@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -543,10 +544,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for weekly rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the weekly rent for your property?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every week, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
@@ -555,10 +558,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for four weekly rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the rent for your property, charged every 4 weeks?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every 4 weeks, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
@@ -567,10 +572,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for monthly rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the monthly rent for your property?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every month, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
@@ -579,13 +586,34 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Page renders correctly for 'other' rent frequency`(page: Page) {
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
-                BaseComponent.assertThat(rentAmountPage.header)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
                     .containsText("How much is the monthly rent for your property?")
                 assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet.getText()
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
                         .contains("If the bills change every month, give an estimated amount."),
                 )
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
+            }
+        }
+
+        @Nested
+        inner class HasJointLandlordsStep {
+            @Test
+            fun `Submitting with no option selected returns an error`(page: Page) {
+                val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+                hasJointLandlordsPage.form.submit()
+                assertThat(hasJointLandlordsPage.form.getErrorMessage())
+                    .containsText("Select if there are any other landlords for this property")
+            }
+
+            @Test
+            fun `The link renders correctly`(page: Page) {
+                val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
             }
         }
     }
