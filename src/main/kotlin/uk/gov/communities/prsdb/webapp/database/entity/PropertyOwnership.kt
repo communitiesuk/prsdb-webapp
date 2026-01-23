@@ -130,6 +130,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.rentAmount = rentAmount
     }
 
+    // TODO PRSD-1550 once Old PropertyRegistration journey is removed revert this check to just currentNumTenants > 0
     val isOccupied: Boolean
         get() =
             currentNumTenants > 0 &&
