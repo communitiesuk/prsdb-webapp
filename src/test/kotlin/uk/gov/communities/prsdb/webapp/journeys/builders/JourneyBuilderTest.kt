@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -304,6 +305,7 @@ class JourneyBuilderTest {
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
             whenever(builtStep.routeSegment).thenReturn("segment")
+            whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             // Act 2
             val map = jb.buildRoutingMap()
@@ -318,14 +320,14 @@ class JourneyBuilderTest {
     }
 
     @Nested
-    inner class NotionalStepTests {
+    inner class InternalStepTests {
         lateinit var mockedStepBuilders: MockedConstruction<StepInitialiser<*, *, *>>
 
         @BeforeEach
         fun setup() {
             mockedStepBuilders =
                 mockConstruction(StepInitialiser::class.java) { mock, context ->
-                    val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+                    val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                     whenever((mock as StepInitialiser<*, JourneyState, *>).build()).thenReturn(listOf(mockedJourneyStep))
                 }
@@ -337,10 +339,10 @@ class JourneyBuilderTest {
         }
 
         @Test
-        fun `notionalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
+        fun `internalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
             // Arrange 1
             val jb = JourneyBuilder(mock())
-            val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+            val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
 
             // Act 1
             jb.step(uninitialisedStep) {
@@ -354,7 +356,7 @@ class JourneyBuilderTest {
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2
-            val builtStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+            val builtStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
             whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
 
             // Act 2
@@ -375,9 +377,9 @@ class JourneyBuilderTest {
 
         val builtSteps =
             listOf(
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
             )
 
         mockConstruction(TaskInitialiser::class.java) { mock, context ->
