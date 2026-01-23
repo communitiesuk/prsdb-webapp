@@ -1236,11 +1236,3 @@ inviteLocalCouncilAdminUserConfirmation:
   whatHappensNext:
     paragraph:
       three: 'They will also be able to add, edit and delete new local council users for {0,,localCouncilName}.'
-jointLandlords:
-  inviteJointLandlord:
-    fieldSetHeading: Invite a joint landlord to this property
-    email:
-      label: Enter their email address
-    error:
-      invalidEmail: Enter an email address in the correct format, like name@example.com
-      alreadyInvited: You have already invited this email address
