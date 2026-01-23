@@ -30,8 +30,8 @@ open class JourneyBuilder<TState : JourneyState>(
         buildMap {
             build().forEach { journeyStep ->
                 when (journeyStep) {
-                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
-                    is JourneyStep.InternalStep<*, *, *> -> {}
+                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, journeyStep.lifecycleOrchestrator)
+                    is JourneyStep.InternalStep<*, *> -> return@forEach
                 }
             }
         }

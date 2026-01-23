@@ -5,9 +5,9 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
 interface BuildableElement {
@@ -125,18 +125,18 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
 open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
-    exitStepOverride: NavigationalStep? = null,
+    exitStepOverride: SubjourneyExitStep? = null,
 ) : AbstractJourneyBuilder<TState>(journey) {
-    var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
+    var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> = mutableListOf()
         private set
 
-    val exitStep = exitStepOverride ?: NavigationalStep(NavigationalStepConfig())
+    val exitStep = exitStepOverride ?: SubjourneyExitStep(SubjourneyExitStepConfig())
 
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
 
     override fun build(): List<JourneyStep<*, *, *>> {
-        step<NavigationComplete, NavigationalStepConfig>(exitStep) {
+        step<SubjourneyComplete, SubjourneyExitStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
         val built = super.build()
@@ -144,7 +144,7 @@ open class SubJourneyBuilder<TState : JourneyState>(
         return built
     }
 
-    fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
+    fun exitStep(init: StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit) {
         exitInits.add(init)
     }
 }

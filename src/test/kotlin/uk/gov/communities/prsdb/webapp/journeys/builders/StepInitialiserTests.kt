@@ -12,6 +12,7 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -378,7 +379,7 @@ class StepInitialiserTests {
     fun `additional configuration is applied to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        whenever(stepMock.stepConfig).thenReturn(mock())
+        whenever(stepMock.stepConfig).thenReturn(mock<AbstractRequestableStepConfig<TestEnum, *, JourneyState>>())
         val builder = StepInitialiser(stepMock, mock())
         var additionalConfigApplied = false
         builder.stepSpecificInitialisation {
