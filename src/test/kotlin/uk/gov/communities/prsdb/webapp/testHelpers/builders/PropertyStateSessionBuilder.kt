@@ -18,7 +18,8 @@ class PropertyStateSessionBuilder(
 ) : JourneyStateSessionBuilder<PropertyStateSessionBuilder>(),
     AddressStateBuilder<PropertyStateSessionBuilder>,
     LicensingStateBuilder<PropertyStateSessionBuilder>,
-    OccupancyStateBuilder<PropertyStateSessionBuilder> {
+    OccupancyStateBuilder<PropertyStateSessionBuilder>,
+    JointLandlordsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
         additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
         return this
@@ -104,7 +105,10 @@ class PropertyStateSessionBuilder(
                 rentFrequency,
             )
 
-        fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
+        fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount()
+
+        fun beforePropertyRegistrationCheckAnswers() =
+            beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withHasNoJointLandlords()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
