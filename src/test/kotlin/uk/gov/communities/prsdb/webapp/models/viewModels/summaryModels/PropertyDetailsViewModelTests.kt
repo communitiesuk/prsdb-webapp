@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -296,7 +295,7 @@ class PropertyDetailsViewModelTests {
         assertEquals("commonText.no", propertyRecordRentIncludesBills.fieldValue)
         assertEquals("forms.furnishedStatus.radios.options.furnished.label", propertyRecordFurnishedStatus.fieldValue)
         assertEquals("forms.rentFrequency.radios.option.monthly.label", propertyRecordRentFrequency.fieldValue)
-        assertEquals(listOf<Any>("commonText.poundSign", "200"), propertyRecordRentAmount.fieldValue)
+        assertEquals(listOf("commonText.poundSign", "200"), propertyRecordRentAmount.singleLineFormattedStringValue?.listOfValues)
     }
 
     @Test
@@ -336,14 +335,14 @@ class PropertyDetailsViewModelTests {
 
         assertEquals("commonText.yes", propertyRecordRentIncludesBills.fieldValue)
         assertEquals(
-            listOf<Any>(BillsIncluded.ELECTRICITY, ", ", BillsIncluded.WATER, ", ", "Cat sitting"),
-            propertyRecordBillsIncluded.fieldValue,
+            listOf<String>("forms.billsIncluded.checkbox.electricity", "forms.billsIncluded.checkbox.water", "Cat sitting"),
+            propertyRecordBillsIncluded.singleLineFormattedStringValue?.listOfValues,
         )
         assertEquals("forms.furnishedStatus.radios.options.furnished.label", propertyRecordFurnishedStatus.fieldValue)
         assertEquals("Fortnightly", propertyRecordRentFrequency.fieldValue)
         assertEquals(
-            listOf<Any>("commonText.poundSign", "200", " ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
-            propertyRecordRentAmount.fieldValue,
+            listOf("commonText.poundSign", "200", " ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
+            propertyRecordRentAmount.singleLineFormattedStringValue?.listOfValues,
         )
     }
 

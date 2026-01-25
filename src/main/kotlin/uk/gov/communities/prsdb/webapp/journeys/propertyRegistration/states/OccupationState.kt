@@ -26,10 +26,12 @@ interface OccupationState : JourneyState {
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
 
-    fun getBillsIncluded(): BillsIncludedDataModel =
-        BillsIncludedDataModel.fromFormData(
-            formModel = billsIncluded.formModel,
-        )
+    fun getBillsIncludedOrNull(): BillsIncludedDataModel? =
+        billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->
+            BillsIncludedDataModel.fromFormData(
+                formModel = billsIncludedFormModel,
+            )
+        }
 
     fun getCustomRentFrequencyIfSelected(): String? =
         if (isRentFrequencyCustom()) {
@@ -50,7 +52,7 @@ interface OccupationState : JourneyState {
     }
 
     fun getFormattedBillsIncludedListComponents(): List<String>? {
-        val billsIncludedDataModel = getBillsIncluded()
+        val billsIncludedDataModel = getBillsIncludedOrNull()!!
         return billsIncludedDataModel.standardBillsIncludedListAsEnums.map { bill ->
             if (bill != BillsIncluded.SOMETHING_ELSE) {
                 MessageKeyConverter.convert(bill)

@@ -67,7 +67,7 @@ class PropertyRegistrationCyaStepConfig(
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
             val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-            val billsIncludedDataModel = state.getBillsIncluded()
+            val billsIncludedDataModel = state.getBillsIncludedOrNull()
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
