@@ -13,7 +13,7 @@ data class SummaryListRowViewModel(
     val action: SummaryListRowActionViewModel? = null,
     val valueUrl: String? = null,
     val valueUrlOpensNewTab: Boolean = false,
-    val enforceListAsSingleLineDisplay: Boolean = false,
+    val singleLineFormattedStringValue: SingleLineFormattedStringViewModel? = null,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {
@@ -61,7 +61,7 @@ data class SummaryListRowViewModel(
             valueUrl: String? = null,
             actionValue: String = "forms.links.change",
             valueUrlOpensNewTab: Boolean = false,
-            enforceListAsSingleLineDisplay: Boolean = false,
+            singleLineFormattedStringValue: SingleLineFormattedStringViewModel? = null,
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
@@ -75,7 +75,7 @@ data class SummaryListRowViewModel(
                     },
                 valueUrl = valueUrl,
                 valueUrlOpensNewTab = valueUrlOpensNewTab,
-                enforceListAsSingleLineDisplay = enforceListAsSingleLineDisplay,
+                singleLineFormattedStringValue = singleLineFormattedStringValue,
             )
     }
 }
@@ -83,4 +83,9 @@ data class SummaryListRowViewModel(
 data class SummaryListRowActionViewModel(
     val text: String,
     val url: String,
+)
+
+data class SingleLineFormattedStringViewModel(
+    val listOfValues: List<String>,
+    val separator: String? = null,
 )

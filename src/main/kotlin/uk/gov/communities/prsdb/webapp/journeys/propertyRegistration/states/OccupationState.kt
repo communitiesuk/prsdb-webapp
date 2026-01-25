@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -25,12 +26,10 @@ interface OccupationState : JourneyState {
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
 
-    fun getBillsIncludedOrNull(): BillsIncludedDataModel? =
-        billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->
-            BillsIncludedDataModel.fromFormData(
-                formModel = billsIncludedFormModel,
-            )
-        }
+    fun getBillsIncluded(): BillsIncludedDataModel =
+        BillsIncludedDataModel.fromFormData(
+            formModel = billsIncluded.formModel,
+        )
 
     fun getCustomRentFrequencyIfSelected(): String? =
         if (isRentFrequencyCustom()) {
@@ -39,7 +38,7 @@ interface OccupationState : JourneyState {
             null
         }
 
-    fun getFormattedRentAmountComponentsOrNull(): List<String>? {
+    fun getFormattedRentAmountComponents(): List<String>? {
         val rentAmount = rentAmount.formModelOrNull?.rentAmount ?: return null
         val formattedRentAmount = mutableListOf("commonText.poundSign", rentAmount)
         if (isRentFrequencyCustom()) {
@@ -50,19 +49,15 @@ interface OccupationState : JourneyState {
         return formattedRentAmount
     }
 
-    fun getFormattedBillsIncludedListComponentsOrNull(): List<Any>? {
-        val allBillsIncludedList: MutableList<Any> = mutableListOf()
-        val billsIncludedDataModel = getBillsIncludedOrNull() ?: return null
-        if (billsIncludedDataModel.standardBillsIncludedListAsEnums.isEmpty()) return null
-        billsIncludedDataModel.standardBillsIncludedListAsEnums.forEachIndexed { index, bill ->
+    fun getFormattedBillsIncludedListComponents(): List<String>? {
+        val billsIncludedDataModel = getBillsIncluded()
+        return billsIncludedDataModel.standardBillsIncludedListAsEnums.map { bill ->
             if (bill != BillsIncluded.SOMETHING_ELSE) {
-                allBillsIncludedList.add(bill)
+                MessageKeyConverter.convert(bill)
             } else {
-                allBillsIncludedList.add(billsIncludedDataModel.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
+                billsIncludedDataModel.customBillsIncluded!!.replaceFirstChar { it.uppercase() }
             }
-            if (index < billsIncludedDataModel.standardBillsIncludedListAsEnums.size - 1) allBillsIncludedList.add(", ")
         }
-        return allBillsIncludedList.ifEmpty { null }
     }
 
     private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER

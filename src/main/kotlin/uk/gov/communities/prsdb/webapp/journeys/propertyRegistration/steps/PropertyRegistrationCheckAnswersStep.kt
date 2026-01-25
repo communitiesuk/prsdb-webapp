@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SingleLineFormattedStringViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -66,7 +67,7 @@ class PropertyRegistrationCyaStepConfig(
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
             val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-            val billsIncludedDataModel = state.getBillsIncludedOrNull()
+            val billsIncludedDataModel = state.getBillsIncluded()
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
@@ -211,9 +212,13 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getFormattedBillsIncludedListComponentsOrNull(),
+                            null,
                             Destination(billsIncludedStep),
-                            enforceListAsSingleLineDisplay = true,
+                            singleLineFormattedStringValue =
+                                SingleLineFormattedStringViewModel(
+                                    state.getFormattedBillsIncludedListComponents()!!,
+                                    ", ",
+                                ),
                         ),
                     )
                 }
@@ -234,9 +239,9 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getFormattedRentAmountComponentsOrNull(),
+                        null,
                         Destination(rentAmountStep),
-                        enforceListAsSingleLineDisplay = true,
+                        singleLineFormattedStringValue = SingleLineFormattedStringViewModel(state.getFormattedRentAmountComponents()!!),
                     ),
                 )
             }

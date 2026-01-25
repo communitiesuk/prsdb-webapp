@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SingleLineFormattedStringViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
@@ -11,10 +12,10 @@ fun MutableList<SummaryListRowViewModel>.addRow(
     withActionLink: Boolean = true,
     valueUrl: String? = null,
     valueUrlOpensNewTab: Boolean = false,
-    enforceListAsSingleLineDisplay: Boolean = false,
+    singleLineFormattedStringValue: SingleLineFormattedStringViewModel? = null,
 ) {
     val actionOrNull = if (withActionLink) getActionOrNull(actionText, actionLink) else null
-    add(SummaryListRowViewModel(key, value, actionOrNull, valueUrl, valueUrlOpensNewTab, enforceListAsSingleLineDisplay))
+    add(SummaryListRowViewModel(key, value, actionOrNull, valueUrl, valueUrlOpensNewTab, singleLineFormattedStringValue))
 }
 
 fun MutableList<SummaryListRowViewModel>.addRow(

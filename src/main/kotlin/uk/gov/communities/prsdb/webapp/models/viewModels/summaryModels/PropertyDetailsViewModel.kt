@@ -146,12 +146,16 @@ class PropertyDetailsViewModel(
                     if (propertyOwnership.rentIncludesBills) {
                         addRow(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
-                            getFormattedBillsIncludedListComponents(),
+                            null,
                             changeLinkMessageKey,
                             // TODO PDJB-105: Add link when update step is created
                             null,
                             withChangeLinks,
-                            enforceListAsSingleLineDisplay = true,
+                            singleLineFormattedStringValue =
+                                SingleLineFormattedStringViewModel(
+                                    getFormattedBillsIncludedListComponents(),
+                                    ", ",
+                                ),
                         )
                     }
                     addRow(
@@ -172,28 +176,24 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
-                        getFormattedRentAmountComponents(),
+                        null,
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
                         null,
                         withChangeLinks,
-                        enforceListAsSingleLineDisplay = true,
+                        singleLineFormattedStringValue = SingleLineFormattedStringViewModel(getFormattedRentAmountComponents()),
                     )
                 }
             }.toList()
 
-    private fun getFormattedBillsIncludedListComponents(): List<Any> {
-        val allBillsIncludedList: MutableList<Any> = mutableListOf()
-        propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }.forEach { bill ->
+    private fun getFormattedBillsIncludedListComponents(): List<String> {
+        return propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }.map { bill ->
             if (bill != BillsIncluded.SOMETHING_ELSE) {
-                allBillsIncludedList.add(bill)
+                MessageKeyConverter.convert(bill)
             } else {
-                allBillsIncludedList.add(propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
+                propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() }
             }
-            allBillsIncludedList.add(", ")
         }
-        allBillsIncludedList.removeLast()
-        return allBillsIncludedList
     }
 
     private fun getRentFrequencyValue(): String {
