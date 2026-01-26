@@ -8,6 +8,7 @@ import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
+import uk.gov.communities.prsdb.webapp.helpers.SavedJourneyStateHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -45,7 +46,9 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                 emailSender.sendEmail(
                     property.landlord.email,
                     IncompletePropertyReminderEmail(
-                        singleLineAddress = property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+                        singleLineAddress =
+                            SavedJourneyStateHelper
+                                .getPropertyRegistrationSingleLineAddress(property.savedJourneyState.serializedState),
                         daysToComplete =
                             LocalDate.now().toKotlinLocalDate().daysUntil(
                                 CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(property.savedJourneyState),
