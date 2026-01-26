@@ -529,7 +529,7 @@ hmoShared:
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
   propertyDetails:
-    heading: Property details
+    heading: Property record
     hint: Check the property address is correct
     detail:
       summary: What is a UPRN?
@@ -541,13 +541,22 @@ checkPropertyAnswers:
     licensingType: Licensing type
     licensingNumber: Licensing number
     noLicensing: None
-    occupied: Occupied by tenants
-    households: Number of households
-    people: Number of people
   additionalLandlords:
     heading: Additional landlords
   interestedParties:
     heading: Interested parties
+  tenancyDetails:
+    heading: Tenancy and rental information
+    occupied: Occupied by tenants
+    households: Number of households
+    people: Number of tenants
+    bedrooms: Number of bedrooms
+    rentIncludesBills: Rent includes bills
+    billsIncluded: Which bills are included
+    furnishedStatus: Furniture provided
+    rentFrequency: When rent is paid
+    rentAmount: Rent amount
+    customFrequencyRentAmountSuffix: per month
 update:
   email:
     fieldSetHeading: What is your updated email address?
@@ -1227,3 +1236,4 @@ inviteLocalCouncilAdminUserConfirmation:
   whatHappensNext:
     paragraph:
       three: 'They will also be able to add, edit and delete new local council users for {0,,localCouncilName}.'
+

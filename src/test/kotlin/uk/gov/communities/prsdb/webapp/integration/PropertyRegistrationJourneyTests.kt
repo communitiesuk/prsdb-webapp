@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -188,10 +188,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(rentAmountPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         rentAmountPage.submitRentAmount("400")
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
-        // TODO PDJB-112, PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
-        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormPagePropertyRegistration::class)
-        hasJointLandlordsPage.form.submit()
+        // Has Joint Landlords - render page
+        assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+
+        // fill in and submit
+        hasJointLandlordsPage.submitHasJointLandlords()
+
+        // TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
+
         val addJointLandlordPage = assertPageIs(page, AddJointLandlordFormPagePropertyRegistration::class)
         addJointLandlordPage.form.submit()
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
@@ -234,7 +241,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied)`(
+    fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied, no joint landlords)`(
         page: Page,
     ) {
         // Start page (not a journey step, but it is how the user accesses the journey)
@@ -301,16 +308,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
         // fill in and submit
         occupancyPage.submitIsVacant()
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
-        // TODO PDJB-112, PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
-        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormPagePropertyRegistration::class)
-        hasJointLandlordsPage.form.submit()
-        val addJointLandlordPage = assertPageIs(page, AddJointLandlordFormPagePropertyRegistration::class)
-        addJointLandlordPage.form.submit()
-        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        checkJointLandlordsPage.form.submit()
-        val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
-        removeJointLandlordsPage.form.submit()
+        // Has Joint Landlords - render page
+        assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+
+        // fill in and submit
+        hasJointLandlordsPage.submitHasNoJointLandlords()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
