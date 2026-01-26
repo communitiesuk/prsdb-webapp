@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class SummaryListRowViewModel(
-    val fieldHeading: String,
+    val fieldHeading: String?,
     val fieldValue: Any?,
     val action: SummaryListRowActionViewModel? = null,
     val valueUrl: String? = null,
@@ -33,7 +33,7 @@ data class SummaryListRowViewModel(
 
     companion object {
         fun forCheckYourAnswersPage(
-            fieldHeading: String,
+            fieldHeading: String?,
             fieldValue: Any?,
             actionUrl: String?,
             valueUrl: String? = null,
@@ -55,7 +55,7 @@ data class SummaryListRowViewModel(
             )
 
         fun forCheckYourAnswersPage(
-            fieldHeading: String,
+            fieldHeading: String?,
             fieldValue: Any?,
             destination: Destination,
             valueUrl: String? = null,
