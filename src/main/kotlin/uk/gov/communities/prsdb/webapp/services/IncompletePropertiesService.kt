@@ -16,7 +16,7 @@ class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
 ) {
-    fun getOldIncompletePropertyRecordsWithNoReminderSent(): List<LandlordIncompleteProperties> =
+    fun getIncompletePropertiesDueReminder(): List<LandlordIncompleteProperties> =
         landlordIncompletePropertiesRepository
             .findBySavedJourneyState_CreatedDateBefore(
                 DateTimeHelper.getJavaInstantFromLocalDate(

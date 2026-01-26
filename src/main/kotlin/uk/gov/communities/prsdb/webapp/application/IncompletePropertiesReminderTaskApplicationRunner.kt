@@ -37,7 +37,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     }
 
     private fun incompletePropertiesReminderTaskLogic() {
-        val incompleteProperties = incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent()
+        val incompleteProperties = incompletePropertiesService.getIncompletePropertiesDueReminder()
 
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 

@@ -195,7 +195,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                 entityId = 2L,
             )
 
-        whenever(incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent())
+        whenever(incompletePropertiesService.getIncompletePropertiesDueReminder())
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(

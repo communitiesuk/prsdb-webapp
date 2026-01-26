@@ -34,7 +34,7 @@ class IncompletePropertiesServiceTests {
     private lateinit var incompletePropertiesService: IncompletePropertiesService
 
     @Test
-    fun `getOldIncompletePropertyRecordsWithNoReminderSent retrieves all old properties if no reminders have been sent`() {
+    fun `getIncompletePropertiesDueReminder retrieves all old properties if no reminders have been sent`() {
         // Arrange
         val landlord = MockLandlordData.createLandlord()
         val incompletePropertyCreatedDate =
@@ -59,7 +59,7 @@ class IncompletePropertiesServiceTests {
         ).thenReturn(landlordIncompleteProperties)
 
         // Act
-        val result = incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent()
+        val result = incompletePropertiesService.getIncompletePropertiesDueReminder()
 
         // Assert
         assertEquals(landlordIncompleteProperties, result)
@@ -74,7 +74,7 @@ class IncompletePropertiesServiceTests {
     }
 
     @Test
-    fun `getOldIncompletePropertyRecordsWithNoReminderSent excludes properties with reminders already sent`() {
+    fun `getIncompletePropertiesDueReminder excludes properties with reminders already sent`() {
         // Arrange
         val landlord = MockLandlordData.createLandlord()
         val incompletePropertyCreatedDate =
@@ -102,7 +102,7 @@ class IncompletePropertiesServiceTests {
         ).thenReturn(landlordIncompleteProperties)
 
         // Act
-        val result = incompletePropertiesService.getOldIncompletePropertyRecordsWithNoReminderSent()
+        val result = incompletePropertiesService.getIncompletePropertiesDueReminder()
 
         // Assert mapping
         assertEquals(listOf(landlordIncompleteProperties[1]), result)
