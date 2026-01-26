@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
@@ -22,21 +21,15 @@ class IncompletePropertiesService(
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
 ) {
-    fun getIncompletePropertiesDueReminder(page: Int = 0): List<LandlordIncompleteProperties> {
-        // TODO PDJB-340 after PRSD-1030
-        // Refactor so that all pages are processed / reminder emails sent.
-        // Do we want to do something if we hit the notify daily email limit part way through sending these emails?
-        val cutoffDate =
-            DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
-            )
-
-        return landlordIncompletePropertiesRepository
+    fun getIncompletePropertiesDueReminderPage(
+        cutoffDate: Instant,
+        page: Int = 0,
+    ): List<LandlordIncompleteProperties> =
+        landlordIncompletePropertiesRepository
             .findBySavedJourneyState_CreatedDateBefore(
                 cutoffDate,
                 PageRequest.of(page, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE),
             ).filter { it.savedJourneyState.reminderEmailSent == null }
-    }
 
     fun recordReminderEmailSent(savedJourneyState: SavedJourneyState) {
         val reminderEmailSentRecord =

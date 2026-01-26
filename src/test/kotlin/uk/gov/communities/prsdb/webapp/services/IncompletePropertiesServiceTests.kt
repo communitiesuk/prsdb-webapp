@@ -9,8 +9,10 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
@@ -43,13 +45,18 @@ class IncompletePropertiesServiceTests {
     private lateinit var incompletePropertiesService: IncompletePropertiesService
 
     @Test
-    fun `getIncompletePropertiesDueReminder retrieves all old properties if no reminders have been sent`() {
+    fun `getIncompletePropertiesDueReminderPage retrieves a page of old properties if no reminders have been sent`() {
         // Arrange
         val landlord = MockLandlordData.createLandlord()
         val incompletePropertyCreatedDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS + 2L),
             )
+        val reminderCutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
+        val pageRequest = PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
 
         val landlordIncompleteProperties =
             listOf(
@@ -64,17 +71,17 @@ class IncompletePropertiesServiceTests {
             )
         whenever(
             mockLandlordIncompletePropertiesRepository
-                .findBySavedJourneyState_CreatedDateBefore(any(), any()),
+                .findBySavedJourneyState_CreatedDateBefore(reminderCutoffDate, pageRequest),
         ).thenReturn(landlordIncompleteProperties)
 
         // Act
-        val result = incompletePropertiesService.getIncompletePropertiesDueReminder()
+        val result = incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0)
 
         // Assert
         assertEquals(landlordIncompleteProperties, result)
 
         val captor = argumentCaptor<java.time.Instant>()
-        verify(mockLandlordIncompletePropertiesRepository).findBySavedJourneyState_CreatedDateBefore(captor.capture(), any())
+        verify(mockLandlordIncompletePropertiesRepository).findBySavedJourneyState_CreatedDateBefore(captor.capture(), eq(pageRequest))
         val expectedInstant =
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
@@ -83,13 +90,18 @@ class IncompletePropertiesServiceTests {
     }
 
     @Test
-    fun `getIncompletePropertiesDueReminder excludes properties with reminders already sent`() {
+    fun `getIncompletePropertiesDueReminderPage excludes properties with reminders already sent`() {
         // Arrange
         val landlord = MockLandlordData.createLandlord()
         val incompletePropertyCreatedDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS + 2L),
             )
+        val reminderCutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
+        val pageRequest = PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
 
         val landlordIncompleteProperties =
             listOf(
@@ -107,11 +119,11 @@ class IncompletePropertiesServiceTests {
             )
         whenever(
             mockLandlordIncompletePropertiesRepository
-                .findBySavedJourneyState_CreatedDateBefore(any(), any()),
+                .findBySavedJourneyState_CreatedDateBefore(reminderCutoffDate, pageRequest),
         ).thenReturn(landlordIncompleteProperties)
 
         // Act
-        val result = incompletePropertiesService.getIncompletePropertiesDueReminder()
+        val result = incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0)
 
         // Assert mapping
         assertEquals(listOf(landlordIncompleteProperties[1]), result)
