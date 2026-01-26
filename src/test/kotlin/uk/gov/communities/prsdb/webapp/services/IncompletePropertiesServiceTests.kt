@@ -12,20 +12,16 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
-import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
+import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
-import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
-import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData.Companion.createLandlordIncompleteProperties
 import java.time.Instant
 import java.time.LocalDate
 
@@ -68,7 +64,7 @@ class IncompletePropertiesServiceTests {
             )
         whenever(
             mockLandlordIncompletePropertiesRepository
-                .findBySavedJourneyState_CreatedDateBefore(any()),
+                .findBySavedJourneyState_CreatedDateBefore(any(), any()),
         ).thenReturn(landlordIncompleteProperties)
 
         // Act
@@ -78,7 +74,7 @@ class IncompletePropertiesServiceTests {
         assertEquals(landlordIncompleteProperties, result)
 
         val captor = argumentCaptor<java.time.Instant>()
-        verify(mockLandlordIncompletePropertiesRepository).findBySavedJourneyState_CreatedDateBefore(captor.capture())
+        verify(mockLandlordIncompletePropertiesRepository).findBySavedJourneyState_CreatedDateBefore(captor.capture(), any())
         val expectedInstant =
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
@@ -111,7 +107,7 @@ class IncompletePropertiesServiceTests {
             )
         whenever(
             mockLandlordIncompletePropertiesRepository
-                .findBySavedJourneyState_CreatedDateBefore(any()),
+                .findBySavedJourneyState_CreatedDateBefore(any(), any()),
         ).thenReturn(landlordIncompleteProperties)
 
         // Act
@@ -163,14 +159,17 @@ class IncompletePropertiesServiceTests {
                 createdDate = incompletePropertyCreatedDate,
             )
 
+        whenever(mockLandlordIncompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(any()))
+            .thenReturn(1L)
+
         val incompletePropertyEntities =
             listOf(
-                createLandlordIncompleteProperties(landlord, savedJourneyState1),
-                createLandlordIncompleteProperties(landlord, savedJourneyState2),
+                LandlordIncompleteProperties(landlord, savedJourneyState1),
+                LandlordIncompleteProperties(landlord, savedJourneyState2),
             )
         whenever(
             mockLandlordIncompletePropertiesRepository
-                .findBySavedJourneyState_CreatedDateBefore(any()),
+                .findBySavedJourneyState_CreatedDateBefore(any(), any()),
         ).thenReturn(incompletePropertyEntities)
 
         // Act
@@ -178,12 +177,31 @@ class IncompletePropertiesServiceTests {
 
         // Assert deleteAll called with correct SavedJourneyStates
         val captor = argumentCaptor<List<SavedJourneyState>>()
-        verify(mockLandlordIncompletePropertiesRepository).findBySavedJourneyState_CreatedDateBefore(any())
+        verify(mockLandlordIncompletePropertiesRepository).findBySavedJourneyState_CreatedDateBefore(any(), any())
         verify(mockSavedJourneyStateRepository).deleteAll(captor.capture())
         val deletedSavedJourneyStates = captor.firstValue
         assertEquals(2, deletedSavedJourneyStates.size)
         assertEquals(2, deletedCount)
         assert(deletedSavedJourneyStates.any { it.journeyId == "journey-1" })
         assert(deletedSavedJourneyStates.any { it.journeyId == "journey-2" })
+    }
+
+    @Test
+    fun `getTotalPagesOfIncompletePropertiesOlderThanDate calculates total pages correctly`() {
+        // Arrange
+        val cutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(28),
+            )
+
+        whenever(mockLandlordIncompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(cutoffDate))
+            .thenReturn(MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE + 1L)
+
+        // Act
+        val totalPages = incompletePropertiesService.getTotalPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+
+        // Assert
+        // Assuming MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE is 100, 250 records should result in 3 pages
+        assertEquals(2, totalPages)
     }
 }
