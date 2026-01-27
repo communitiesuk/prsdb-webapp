@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.example
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent

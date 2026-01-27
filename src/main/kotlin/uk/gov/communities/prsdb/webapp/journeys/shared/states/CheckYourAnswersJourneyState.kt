@@ -23,7 +23,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
     }
 
     companion object {
-        fun <T> JourneyBuilder<T>.checkYourAnswersJourney() where T : CheckYourAnswersJourneyState {
+        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
             configureTagged(CHECKABLE) {
                 if (journey.isCheckingAnswers) {
                     modifyNextDestination {
