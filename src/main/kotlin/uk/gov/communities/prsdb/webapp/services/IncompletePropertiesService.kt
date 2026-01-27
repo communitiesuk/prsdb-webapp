@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.Instant
 import java.time.LocalDate
@@ -15,6 +16,7 @@ import java.time.LocalDate
 class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
+    private val savedJourneyStateRepository: SavedJourneyStateRepository,
 ) {
     fun getIncompletePropertiesDueReminder(): List<LandlordIncompleteProperties> =
         landlordIncompletePropertiesRepository
@@ -28,8 +30,9 @@ class IncompletePropertiesService(
         val reminderEmailSentRecord =
             ReminderEmailSent(
                 lastReminderEmailSentDate = Instant.now(),
-                savedJourneyState = savedJourneyState,
             )
         reminderEmailSentRepository.save(reminderEmailSentRecord)
+        savedJourneyState.reminderEmailSent = reminderEmailSentRecord
+        savedJourneyStateRepository.save(savedJourneyState)
     }
 }

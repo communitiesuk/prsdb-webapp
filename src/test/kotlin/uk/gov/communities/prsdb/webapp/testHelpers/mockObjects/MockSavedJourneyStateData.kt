@@ -79,13 +79,9 @@ class MockSavedJourneyStateData {
             return ObjectMapper().writeValueAsString(stateData)
         }
 
-        fun createReminderEmailSent(
-            lastReminderEmailSentDate: Instant = Instant.now(),
-            savedJourneyState: SavedJourneyState = createSavedJourneyState(),
-        ): ReminderEmailSent =
+        fun createReminderEmailSent(lastReminderEmailSentDate: Instant = Instant.now()): ReminderEmailSent =
             ReminderEmailSent(
                 lastReminderEmailSentDate = lastReminderEmailSentDate,
-                savedJourneyState = savedJourneyState,
             )
     }
 }

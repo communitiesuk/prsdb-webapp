@@ -14,8 +14,10 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
@@ -29,6 +31,9 @@ class IncompletePropertiesServiceTests {
 
     @Mock
     private lateinit var mockReminderEmailSentRepository: ReminderEmailSentRepository
+
+    @Mock
+    private lateinit var mockSavedJourneyStateRepository: SavedJourneyStateRepository
 
     @InjectMocks
     private lateinit var incompletePropertiesService: IncompletePropertiesService
@@ -117,11 +122,16 @@ class IncompletePropertiesServiceTests {
         incompletePropertiesService.recordReminderEmailSent(incompletePropertySavedJourneyState)
 
         // Assert
-        val captor = argumentCaptor<ReminderEmailSent>()
-        verify(mockReminderEmailSentRepository).save(captor.capture())
+        val reminderEmailSentCaptor = argumentCaptor<ReminderEmailSent>()
+        verify(mockReminderEmailSentRepository).save(reminderEmailSentCaptor.capture())
+        assertTrue(reminderEmailSentCaptor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now().plusSeconds(1)))
+        assertTrue(reminderEmailSentCaptor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
 
-        assertEquals(incompletePropertySavedJourneyState, captor.firstValue.savedJourneyState)
-        assertTrue(captor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now().plusSeconds(1)))
-        assertTrue(captor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
+        val savedJourneyStateCaptor = argumentCaptor<SavedJourneyState>()
+        verify(mockSavedJourneyStateRepository).save(savedJourneyStateCaptor.capture())
+        assertEquals(
+            reminderEmailSentCaptor.firstValue,
+            savedJourneyStateCaptor.firstValue.reminderEmailSent,
+        )
     }
 }

@@ -29,9 +29,9 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
     lateinit var user: OneLoginUser
         private set
 
-    @OneToOne(mappedBy = "savedJourneyState", orphanRemoval = true, optional = true)
+    @OneToOne(orphanRemoval = true, optional = true)
+    @JoinColumn(name = "reminder_email_sent_id", nullable = true, unique = true)
     var reminderEmailSent: ReminderEmailSent? = null
-        private set
 
     constructor(serializedState: String, user: OneLoginUser, journeyId: String) : this() {
         this.serializedState = serializedState
