@@ -308,17 +308,19 @@ class PropertyDetailsViewModelTests {
         val rentFrequency = RentFrequency.OTHER
         val customRentFrequency = "fortnightly"
         val rentAmount = BigDecimal(200)
-        val expectedRentAmount = 
+        val expectedRentAmount =
             SingleLineFormattableViewModel(
-                listOf("commonText.poundSign", 
-                    rentAmount.toString(), 
-                    " ", 
-                    "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
+                listOf(
+                    "commonText.poundSign",
+                    rentAmount.toString(),
+                    " ",
+                    "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix",
+                ),
             )
-        val expectedBillsIncluded = 
+        val expectedBillsIncluded =
             SingleLineFormattableViewModel(
-                listOf("forms.billsIncluded.checkbox.electricity", "forms.billsIncluded.checkbox.water", "Cat sitting"), 
-                ", "
+                listOf("forms.billsIncluded.checkbox.electricity", "forms.billsIncluded.checkbox.water", "Cat sitting"),
+                ", ",
             )
 
         val propertyOwnership =
@@ -349,11 +351,11 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount" }
 
         assertEquals("commonText.yes", propertyRecordRentIncludesBills.fieldValue)
-        assertEquals( expectedBillsIncluded, propertyRecordBillsIncluded.fieldValue)
+        assertEquals(expectedBillsIncluded, propertyRecordBillsIncluded.fieldValue)
         assertTrue(propertyRecordBillsIncluded.useSingleLineFormattableViewModel)
         assertEquals("forms.furnishedStatus.radios.options.furnished.label", propertyRecordFurnishedStatus.fieldValue)
         assertEquals("Fortnightly", propertyRecordRentFrequency.fieldValue)
-        assertEquals(expectedRentAmount,propertyRecordRentAmount.fieldValue)
+        assertEquals(expectedRentAmount, propertyRecordRentAmount.fieldValue)
         assertTrue(propertyRecordRentAmount.useSingleLineFormattableViewModel)
     }
 
