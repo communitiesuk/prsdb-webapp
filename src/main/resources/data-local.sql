@@ -202,7 +202,7 @@ SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM addr
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified, has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
-        'Alexander Smith', 'jasmin.conterio@softwire.com', 'England or Wales', true, true),
+        'Alexander Smith', 'alex.surname@example.com', 'England or Wales', true, true),
        (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
         'Alexandra Davies', 'alexandra.q.davies@example.com', 'England or Wales', true, true),
        (3, '09/13/24', '09/13/24', 3, 3, '07/13/1997', true, 07111111111, 'urn:fdc:gov.uk:2022:PQRST',

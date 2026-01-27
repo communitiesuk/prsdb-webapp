@@ -19,7 +19,6 @@ class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
-    private val savedJourneyStateRepository: SavedJourneyStateRepository,
 ) {
     fun getIncompletePropertiesDueReminderPage(
         cutoffDate: Instant,

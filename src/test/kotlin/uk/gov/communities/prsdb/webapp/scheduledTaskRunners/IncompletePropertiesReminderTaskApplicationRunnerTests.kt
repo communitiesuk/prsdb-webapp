@@ -12,8 +12,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
-import org.mockito.kotlin.times
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
@@ -171,6 +169,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     fun `incompletePropertiesReminderTaskLogic does not try to record the email sent if email sending fails`() {
         // Arrange
         setupTwoEmailsToSend()
+        setupTwoEntriesOnOneDatabasePage()
 
         whenever(emailSender.sendEmail(emailAddress1, reminderEmail1))
             .doThrow(PersistentEmailSendException("Persistent email failure"))

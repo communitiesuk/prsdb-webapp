@@ -40,9 +40,6 @@ class IncompletePropertiesServiceTests {
     @Mock
     private lateinit var mockReminderEmailSentRepository: ReminderEmailSentRepository
 
-    @Mock
-    private lateinit var mockSavedJourneyStateRepository: SavedJourneyStateRepository
-
     @InjectMocks
     private lateinit var incompletePropertiesService: IncompletePropertiesService
 
