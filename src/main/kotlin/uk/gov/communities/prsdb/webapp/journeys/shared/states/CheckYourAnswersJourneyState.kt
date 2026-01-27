@@ -1,16 +1,16 @@
-package uk.gov.communities.prsdb.webapp.journeys.shared
+package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
 import uk.gov.communities.prsdb.webapp.constants.ReservedTagValues
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 
 interface CheckYourAnswersJourneyState : JourneyState {
-    val cyaStep: JourneyStep.RequestableStep<Complete, CheckAnswersFormModel, *>
-    var cyaChildJourneyId: String?
+    val cyaStep: AbstractCheckYourAnswersStep<*>
+
+    var cyaChildJourneyIdIfInitialized: String?
 
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
@@ -19,12 +19,11 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.childJourneyName == CHECK_ANSWERS_JOURNEY_NAME
 
     fun initialiseCyaChildJourney() {
-        val newId = initializeChildState(CHECK_ANSWERS_JOURNEY_NAME)
-        cyaChildJourneyId = newId
+        cyaChildJourneyIdIfInitialized = initializeChildState(CHECK_ANSWERS_JOURNEY_NAME)
     }
 
     companion object {
-        fun <T> JourneyBuilder<T>.checkYourAnswersJourney() where T : JourneyState, T : CheckYourAnswersJourneyState {
+        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkYourAnswersJourney() {
             configureTagged(CHECKABLE) {
                 if (journey.isCheckingAnswers) {
                     modifyNextDestination {
