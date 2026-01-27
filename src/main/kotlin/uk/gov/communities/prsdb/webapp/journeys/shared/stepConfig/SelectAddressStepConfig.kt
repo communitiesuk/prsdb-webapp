@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 @JourneyFrameworkComponent
 class SelectAddressStepConfig(
     private val addressAvailabilityService: AddressAvailabilityService,
-) : AbstractGenericStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
+) : AbstractRequestableStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
     override val formModelClass = SelectAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressState): Map<String, Any?> {
