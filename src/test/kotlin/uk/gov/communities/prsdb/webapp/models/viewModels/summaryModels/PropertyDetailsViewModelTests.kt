@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -251,6 +252,7 @@ class PropertyDetailsViewModelTests {
         val furnishedStatus = FurnishedStatus.FURNISHED
         val rentFrequency = RentFrequency.MONTHLY
         val rentAmount = BigDecimal(200)
+        val expectedRentAmount = SingleLineFormattableViewModel(listOf("commonText.poundSign", rentAmount.toString()))
 
         val propertyOwnership =
             createOccupiedPropertyOwnership(
@@ -295,7 +297,8 @@ class PropertyDetailsViewModelTests {
         assertEquals("commonText.no", propertyRecordRentIncludesBills.fieldValue)
         assertEquals("forms.furnishedStatus.radios.options.furnished.label", propertyRecordFurnishedStatus.fieldValue)
         assertEquals("forms.rentFrequency.radios.option.monthly.label", propertyRecordRentFrequency.fieldValue)
-        assertEquals(listOf("commonText.poundSign", "200"), propertyRecordRentAmount.singleLineFormattedStringValue?.listOfValues)
+        assertEquals(expectedRentAmount, propertyRecordRentAmount.fieldValue)
+        assertTrue(propertyRecordRentAmount.useSingleLineFormattableViewModel)
     }
 
     @Test
@@ -305,6 +308,18 @@ class PropertyDetailsViewModelTests {
         val rentFrequency = RentFrequency.OTHER
         val customRentFrequency = "fortnightly"
         val rentAmount = BigDecimal(200)
+        val expectedRentAmount = 
+            SingleLineFormattableViewModel(
+                listOf("commonText.poundSign", 
+                    rentAmount.toString(), 
+                    " ", 
+                    "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
+            )
+        val expectedBillsIncluded = 
+            SingleLineFormattableViewModel(
+                listOf("forms.billsIncluded.checkbox.electricity", "forms.billsIncluded.checkbox.water", "Cat sitting"), 
+                ", "
+            )
 
         val propertyOwnership =
             createOccupiedPropertyOwnership(
@@ -334,16 +349,12 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount" }
 
         assertEquals("commonText.yes", propertyRecordRentIncludesBills.fieldValue)
-        assertEquals(
-            listOf<String>("forms.billsIncluded.checkbox.electricity", "forms.billsIncluded.checkbox.water", "Cat sitting"),
-            propertyRecordBillsIncluded.singleLineFormattedStringValue?.listOfValues,
-        )
+        assertEquals( expectedBillsIncluded, propertyRecordBillsIncluded.fieldValue)
+        assertTrue(propertyRecordBillsIncluded.useSingleLineFormattableViewModel)
         assertEquals("forms.furnishedStatus.radios.options.furnished.label", propertyRecordFurnishedStatus.fieldValue)
         assertEquals("Fortnightly", propertyRecordRentFrequency.fieldValue)
-        assertEquals(
-            listOf("commonText.poundSign", "200", " ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
-            propertyRecordRentAmount.singleLineFormattedStringValue?.listOfValues,
-        )
+        assertEquals(expectedRentAmount,propertyRecordRentAmount.fieldValue)
+        assertTrue(propertyRecordRentAmount.useSingleLineFormattableViewModel)
     }
 
     @Test

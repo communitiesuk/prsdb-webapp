@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SingleLineFormattedStringViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SingleLineFormattableViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -218,13 +218,12 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            null,
+                            SingleLineFormattableViewModel(
+                                state.getFormattedBillsIncludedListComponents()!!,
+                                ", ",
+                            ),
                             Destination(billsIncludedStep),
-                            singleLineFormattedStringValue =
-                                SingleLineFormattedStringViewModel(
-                                    state.getFormattedBillsIncludedListComponents()!!,
-                                    ", ",
-                                ),
+                            useSingleLineFormattableViewModel = true,
                         ),
                     )
                 }
@@ -245,9 +244,9 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        null,
+                        SingleLineFormattableViewModel(state.getFormattedRentAmountComponents()!!),
                         Destination(rentAmountStep),
-                        singleLineFormattedStringValue = SingleLineFormattedStringViewModel(state.getFormattedRentAmountComponents()!!),
+                        useSingleLineFormattableViewModel = true,
                     ),
                 )
             }

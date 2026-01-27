@@ -146,16 +146,15 @@ class PropertyDetailsViewModel(
                     if (propertyOwnership.rentIncludesBills) {
                         addRow(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
-                            null,
+                            SingleLineFormattableViewModel(
+                                getFormattedBillsIncludedListComponents(),
+                                ", ",
+                            ),
                             changeLinkMessageKey,
                             // TODO PDJB-105: Add link when update step is created
                             null,
                             withChangeLinks,
-                            singleLineFormattedStringValue =
-                                SingleLineFormattedStringViewModel(
-                                    getFormattedBillsIncludedListComponents(),
-                                    ", ",
-                                ),
+                            useSingleLineFormattableViewModel = true,
                         )
                     }
                     addRow(
@@ -176,12 +175,12 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
-                        null,
+                        SingleLineFormattableViewModel(getFormattedRentAmountComponents()),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
                         null,
                         withChangeLinks,
-                        singleLineFormattedStringValue = SingleLineFormattedStringViewModel(getFormattedRentAmountComponents()),
+                        useSingleLineFormattableViewModel = true,
                     )
                 }
             }.toList()
