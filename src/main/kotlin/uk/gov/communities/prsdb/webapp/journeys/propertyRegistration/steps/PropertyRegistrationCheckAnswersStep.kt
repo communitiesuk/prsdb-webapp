@@ -223,7 +223,6 @@ class PropertyRegistrationCyaStepConfig(
                                 ", ",
                             ),
                             Destination(billsIncludedStep),
-                            useSingleLineFormattableViewModel = true,
                         ),
                     )
                 }
@@ -237,7 +236,13 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        if (rentFrequency == RentFrequency.OTHER) rentFrequencyStep.formModel.customRentFrequency else rentFrequency,
+                        if (rentFrequency == RentFrequency.OTHER) {
+                            rentFrequencyStep.formModel.customRentFrequency.replaceFirstChar {
+                                it.uppercase()
+                            }
+                        } else {
+                            rentFrequency
+                        },
                         Destination(rentFrequencyStep),
                     ),
                 )
@@ -246,7 +251,6 @@ class PropertyRegistrationCyaStepConfig(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
                         SingleLineFormattableViewModel(state.getFormattedRentAmountComponents()!!),
                         Destination(rentAmountStep),
-                        useSingleLineFormattableViewModel = true,
                     ),
                 )
             }

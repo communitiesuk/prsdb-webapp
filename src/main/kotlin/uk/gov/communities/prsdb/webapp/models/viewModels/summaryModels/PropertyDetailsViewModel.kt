@@ -154,7 +154,6 @@ class PropertyDetailsViewModel(
                             // TODO PDJB-105: Add link when update step is created
                             null,
                             withChangeLinks,
-                            useSingleLineFormattableViewModel = true,
                         )
                     }
                     addRow(
@@ -180,7 +179,6 @@ class PropertyDetailsViewModel(
                         // TODO PDJB-105: Add link when update step is created
                         null,
                         withChangeLinks,
-                        useSingleLineFormattableViewModel = true,
                     )
                 }
             }.toList()
