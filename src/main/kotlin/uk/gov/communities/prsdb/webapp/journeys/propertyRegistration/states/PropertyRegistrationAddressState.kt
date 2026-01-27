@@ -3,17 +3,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalCouncilFormModel
 
 interface PropertyRegistrationAddressState : AddressState {
-    override val selectAddressStep: SelectAddressStep
     val alreadyRegisteredStep: AlreadyRegisteredStep
     val localCouncilStep: LocalCouncilStep
-    var isAddressAlreadyRegistered: Boolean?
 
     override fun getManualAddressOrNull() =
         manualAddressStep.formModelOrNull?.let { manualAddressData ->
