@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
-class ManualAddressStepConfig : AbstractGenericStepConfig<Complete, ManualAddressFormModel, AddressState>() {
+class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, AddressState>() {
     override val formModelClass = ManualAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressState) =

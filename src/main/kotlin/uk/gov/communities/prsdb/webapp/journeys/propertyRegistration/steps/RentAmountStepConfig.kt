@@ -2,14 +2,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 
 @JourneyFrameworkComponent
-class RentAmountStepConfig : AbstractGenericStepConfig<Complete, RentAmountFormModel, OccupationState>() {
+class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountFormModel, OccupationState>() {
     override val formModelClass = RentAmountFormModel::class
 
     override fun getStepSpecificContent(state: OccupationState): Map<String, Any?> {
