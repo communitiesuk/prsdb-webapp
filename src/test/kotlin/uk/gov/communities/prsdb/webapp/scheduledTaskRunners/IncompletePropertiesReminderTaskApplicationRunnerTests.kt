@@ -9,6 +9,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
@@ -155,6 +156,24 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         verify(emailSender).sendEmail(emailAddress1, reminderEmail1)
         verify(emailSender).sendEmail(emailAddress2, reminderEmail2)
         verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState1)
+        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
+    }
+
+    @Test
+    fun `incompletePropertiesReminderTaskLogic does not try to record the email sent if email sending fails`() {
+        // Arrange
+        setupTwoEmailsToSend()
+
+        whenever(emailSender.sendEmail(emailAddress1, reminderEmail1))
+            .doThrow(PersistentEmailSendException("Persistent email failure"))
+
+        // Act
+        incompletePropertyReminderTaskMethod.invoke(runner)
+
+        // Assert
+        verify(emailSender).sendEmail(emailAddress1, reminderEmail1)
+        verify(emailSender).sendEmail(emailAddress2, reminderEmail2)
+        verify(incompletePropertiesService, never()).recordReminderEmailSent(savedJourneyState1)
         verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
     }
 
