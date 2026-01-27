@@ -4,26 +4,25 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class AlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Nothing, NoInputFormModel, AddressState>() {
+class AlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Nothing, NoInputFormModel, PropertyRegistrationAddressState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: AddressState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: PropertyRegistrationAddressState) =
         mapOf(
-            "title" to "registerProperty.title",
-            "searchAgainUrl" to Destination(state.lookupStep).toUrlStringOrNull(),
+            "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "singleLineAddress" to state.selectAddressStep.formModel.address,
         )
 
-    override fun chooseTemplate(state: AddressState): String = "alreadyRegisteredPropertyPage"
+    override fun chooseTemplate(state: PropertyRegistrationAddressState) = "alreadyRegisteredPropertyPage"
 
-    override fun mode(state: AddressState): Nothing? = null
+    override fun mode(state: PropertyRegistrationAddressState) = null
 }
 
 @JourneyFrameworkComponent
 final class AlreadyRegisteredStep(
     stepConfig: AlreadyRegisteredStepConfig,
-) : RequestableStep<Nothing, NoInputFormModel, AddressState>(stepConfig)
+) : RequestableStep<Nothing, NoInputFormModel, PropertyRegistrationAddressState>(stepConfig)

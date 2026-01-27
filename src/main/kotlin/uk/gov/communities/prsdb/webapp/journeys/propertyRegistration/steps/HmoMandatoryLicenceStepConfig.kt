@@ -14,7 +14,6 @@ class HmoMandatoryLicenceStepConfig : AbstractRequestableStepConfig<Complete, Hm
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
             "label" to "forms.hmoMandatoryLicence.label",
             "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",

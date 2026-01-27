@@ -46,7 +46,6 @@ class EpcQuestionStepConfig(
     override fun chooseTemplate(state: EpcJourneyState): String = "forms/certificateForm"
 
     override fun afterStepDataIsAdded(state: EpcJourneyState) {
-        super.afterStepDataIsAdded(state)
         val uprn = propertyOwnershipService.getPropertyOwnership(state.propertyId).address.uprn
         if (uprn != null) {
             val epc = epcLookupService.getEpcByUprn(uprn)

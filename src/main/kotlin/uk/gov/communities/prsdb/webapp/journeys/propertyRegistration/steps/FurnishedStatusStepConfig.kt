@@ -15,7 +15,6 @@ class FurnishedStatusStepConfig : AbstractRequestableStepConfig<Complete, Furnis
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.furnishedStatus.fieldSetHeading",
             "radioOptions" to
                 listOf(
