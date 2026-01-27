@@ -28,7 +28,6 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
         state: OccupationState,
         bindingResult: BindingResult,
     ) {
-        super.afterPrimaryValidation(state, bindingResult)
         if (!bindingResult.hasErrors()) {
             bindingResult.validateNumberOfPeople(
                 bindingResult.getFormModel(),

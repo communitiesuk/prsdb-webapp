@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
 
 @JourneyFrameworkComponent
-class AddressTask : Task<PropertyRegistrationAddressState>() {
+class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>() {
     override fun makeSubJourney(state: PropertyRegistrationAddressState) =
         subJourney(state) {
             step<LookupAddressMode, LookupAddressStepConfig>(journey.lookupAddressStep) {

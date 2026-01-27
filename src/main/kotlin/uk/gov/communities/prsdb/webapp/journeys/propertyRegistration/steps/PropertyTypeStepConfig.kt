@@ -59,7 +59,6 @@ class PropertyTypeStepConfig(
         state: JourneyState,
         saveStateId: SavedJourneyState,
     ) {
-        super.afterSaveState(state, saveStateId)
         incompletePropertyForLandlordService.addIncompletePropertyToLandlord(saveStateId)
     }
 }

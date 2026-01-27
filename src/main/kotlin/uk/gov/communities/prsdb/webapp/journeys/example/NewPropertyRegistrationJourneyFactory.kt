@@ -40,10 +40,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
@@ -133,7 +133,7 @@ class PropertyRegistrationJourney(
     // Task list step
     override val taskListStep: PropertyRegistrationTaskListStep,
     // Address task
-    override val addressTask: AddressTask,
+    override val addressTask: PropertyRegistrationAddressTask,
     override val lookupAddressStep: LookupAddressStep,
     override val selectAddressStep: SelectAddressStep,
     override val alreadyRegisteredStep: AlreadyRegisteredStep,
@@ -194,7 +194,7 @@ interface PropertyRegistrationJourneyState :
     JointLandlordsState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
-    val addressTask: AddressTask
+    val addressTask: PropertyRegistrationAddressTask
     val propertyTypeStep: PropertyTypeStep
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask
