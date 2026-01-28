@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -24,6 +26,8 @@ class PropertyDetailsViewModel(
     private val changeLinkMessageKey = "forms.links.change"
 
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
+
+    val isRentFrequencyCustom: Boolean = propertyOwnership.rentFrequency == RentFrequency.OTHER
 
     val keyDetails: List<SummaryListRowViewModel> =
         listOf(
@@ -76,29 +80,6 @@ class PropertyDetailsViewModel(
                     "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
                     withChangeLinks,
                 )
-                addRow(
-                    "propertyDetails.propertyRecord.occupied",
-                    isTenantedKey,
-                    changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
-                    withChangeLinks,
-                )
-                if (propertyOwnership.isOccupied) {
-                    addRow(
-                        "propertyDetails.propertyRecord.numberOfHouseholds",
-                        propertyOwnership.currentNumHouseholds,
-                        changeLinkMessageKey,
-                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
-                        withChangeLinks,
-                    )
-                    addRow(
-                        "propertyDetails.propertyRecord.numberOfPeople",
-                        propertyOwnership.currentNumTenants,
-                        changeLinkMessageKey,
-                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
-                        withChangeLinks,
-                    )
-                }
             }.toList()
 
     val licensingInformation: List<SummaryListRowViewModel> =
@@ -120,4 +101,113 @@ class PropertyDetailsViewModel(
                     )
                 }
             }.toList()
+
+    val tenancyAndRentalInformation: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                    isTenantedKey,
+                    changeLinkMessageKey,
+                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+                    withChangeLinks,
+                )
+                if (propertyOwnership.isOccupied) {
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
+                        propertyOwnership.currentNumHouseholds,
+                        changeLinkMessageKey,
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
+                        propertyOwnership.currentNumTenants,
+                        changeLinkMessageKey,
+                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
+                        propertyOwnership.numBedrooms,
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                        MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    if (propertyOwnership.rentIncludesBills) {
+                        addRow(
+                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
+                            SingleLineFormattableViewModel(
+                                getFormattedBillsIncludedListComponents(),
+                                ", ",
+                            ),
+                            changeLinkMessageKey,
+                            // TODO PDJB-105: Add link when update step is created
+                            null,
+                            withChangeLinks,
+                        )
+                    }
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                        MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
+                        getRentFrequencyValue(),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                    addRow(
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
+                        SingleLineFormattableViewModel(getFormattedRentAmountComponents()),
+                        changeLinkMessageKey,
+                        // TODO PDJB-105: Add link when update step is created
+                        null,
+                        withChangeLinks,
+                    )
+                }
+            }.toList()
+
+    private fun getFormattedBillsIncludedListComponents(): List<String> {
+        return propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }.map { bill ->
+            if (bill != BillsIncluded.SOMETHING_ELSE) {
+                MessageKeyConverter.convert(bill)
+            } else {
+                propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() }
+            }
+        }
+    }
+
+    private fun getRentFrequencyValue(): String {
+        return if (!isRentFrequencyCustom) {
+            MessageKeyConverter.convert(propertyOwnership.rentFrequency!!)
+        } else {
+            propertyOwnership.customRentFrequency!!.replaceFirstChar { it.uppercase() }
+        }
+    }
+
+    private fun getFormattedRentAmountComponents(): MutableList<String> {
+        val formattedRentAmount = mutableListOf("commonText.poundSign", propertyOwnership.rentAmount!!.toString())
+        if (isRentFrequencyCustom) {
+            formattedRentAmount.addAll(
+                listOf(" ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
+            )
+        }
+        return formattedRentAmount
+    }
 }

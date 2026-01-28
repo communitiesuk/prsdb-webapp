@@ -934,12 +934,12 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext()
             val propertyOwnershipWithIncompleteCompliance =
-                MockLandlordData.createPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = incompleteComplianceForm)
+                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = incompleteComplianceForm)
             val properties =
                 listOf(
                     MockLandlordData.createPropertyOwnership(currentNumTenants = 0, incompleteComplianceForm = null),
                     MockLandlordData.createPropertyOwnership(currentNumTenants = 0, incompleteComplianceForm = incompleteComplianceForm),
-                    MockLandlordData.createPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = null),
+                    MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = null),
                     propertyOwnershipWithIncompleteCompliance,
                 )
 
@@ -1018,7 +1018,7 @@ class PropertyOwnershipServiceTests {
         fun occupiedPropertyOwnership(): Named<PropertyOwnership> =
             Named.of(
                 "an occupied property",
-                MockLandlordData.createPropertyOwnership(
+                MockLandlordData.createOccupiedPropertyOwnership(
                     ownershipType = OwnershipType.FREEHOLD,
                     currentNumHouseholds = 2,
                     currentNumTenants = 4,

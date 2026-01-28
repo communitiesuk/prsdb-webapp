@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class RegisteredPropertyViewModelsTests {
@@ -57,15 +58,14 @@ class RegisteredPropertyViewModelsTests {
 
         @ParameterizedTest
         @CsvSource(
-            "0,commonText.no",
-            "1,commonText.yes",
-            "2,commonText.yes",
+            "false,commonText.no",
+            "true,commonText.yes",
         )
         fun `Returns correct isTenanted message key`(
-            currentNumTenants: Int,
+            isTenanted: Boolean,
             expectedMessageKey: String,
         ) {
-            val propertyOwnership = createPropertyOwnership(currentNumTenants = currentNumTenants)
+            val propertyOwnership = if (isTenanted) createOccupiedPropertyOwnership() else createPropertyOwnership(currentNumTenants = 0)
 
             val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 

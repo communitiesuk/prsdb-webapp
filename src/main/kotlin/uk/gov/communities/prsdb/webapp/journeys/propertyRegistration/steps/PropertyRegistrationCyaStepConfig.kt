@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SingleLineFormattableViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -208,9 +209,11 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getFormattedBillsIncludedListComponentsOrNull(),
+                            SingleLineFormattableViewModel(
+                                state.getFormattedBillsIncludedListComponents()!!,
+                                ", ",
+                            ),
                             Destination(billsIncludedStep),
-                            enforceListAsSingleLineDisplay = true,
                         ),
                     )
                 }
@@ -224,16 +227,21 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        if (rentFrequency == RentFrequency.OTHER) rentFrequencyStep.formModel.customRentFrequency else rentFrequency,
+                        if (rentFrequency == RentFrequency.OTHER) {
+                            rentFrequencyStep.formModel.customRentFrequency.replaceFirstChar {
+                                it.uppercase()
+                            }
+                        } else {
+                            rentFrequency
+                        },
                         Destination(rentFrequencyStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getFormattedRentAmountComponentsOrNull(),
+                        SingleLineFormattableViewModel(state.getFormattedRentAmountComponents()!!),
                         Destination(rentAmountStep),
-                        enforceListAsSingleLineDisplay = true,
                     ),
                 )
             }
