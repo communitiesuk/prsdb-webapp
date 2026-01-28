@@ -47,7 +47,7 @@ class IncompletePropertiesService(
 
     fun deleteIncompletePropertiesOlderThan28Days(): Long {
         val cutoffDate = DateTimeHelper.getJavaInstantFromLocalDate(LocalDate.now().minusDays(28))
-        val totalPages = getTotalPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+        val totalPages = getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
 
         var totalDeleted = 0L
 
@@ -69,8 +69,8 @@ class IncompletePropertiesService(
         return totalDeleted
     }
 
-    fun getTotalPagesOfIncompletePropertiesOlderThanDate(cutoffDate: Instant): Int {
+    fun getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate: Instant): Int {
         val totalProperties = landlordIncompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(cutoffDate).toDouble()
-        return ceil((totalProperties / MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)).toInt()
+        return ceil(totalProperties / MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE).toInt()
     }
 }

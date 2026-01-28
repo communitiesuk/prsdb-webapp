@@ -246,7 +246,7 @@ class IncompletePropertiesServiceTests {
     }
 
     @Test
-    fun `getTotalPagesOfIncompletePropertiesOlderThanDate calculates total pages correctly`() {
+    fun `getNumberOfPagesOfIncompletePropertiesOlderThanDate calculates total pages correctly`() {
         // Arrange
         val cutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
@@ -257,7 +257,7 @@ class IncompletePropertiesServiceTests {
             .thenReturn(MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE + 1L)
 
         // Act
-        val totalPages = incompletePropertiesService.getTotalPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+        val totalPages = incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
 
         // Assert
         assertEquals(2, totalPages)

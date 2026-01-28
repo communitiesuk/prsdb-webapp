@@ -48,7 +48,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
-        val pagesOfProperties = incompletePropertiesService.getTotalPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+        val pagesOfProperties = incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
 
         for (page in 0..<pagesOfProperties) {
             val incompleteProperties = incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)

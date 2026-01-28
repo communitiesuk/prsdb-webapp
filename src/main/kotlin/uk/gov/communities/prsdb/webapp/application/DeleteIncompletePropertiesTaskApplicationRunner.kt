@@ -28,7 +28,7 @@ class DeleteIncompletePropertiesTaskApplicationRunner(
 
     private fun deleteIncompletePropertiesTaskLogic() {
         val numberOfRecordsDeleted = incompletePropertiesService.deleteIncompletePropertiesOlderThan28Days()
-        println("Deleted incomplete $numberOfRecordsDeleted incomplete properties.")
+        println("Deleted $numberOfRecordsDeleted incomplete properties.")
     }
 
     companion object {

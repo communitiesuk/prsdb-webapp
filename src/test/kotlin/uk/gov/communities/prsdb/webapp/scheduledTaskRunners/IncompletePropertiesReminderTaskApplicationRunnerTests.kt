@@ -245,7 +245,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
-        whenever(incompletePropertiesService.getTotalPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(1)
+        whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(1)
 
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
@@ -268,7 +268,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
-        whenever(incompletePropertiesService.getTotalPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(2)
+        whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(2)
 
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0))
             .thenReturn(
