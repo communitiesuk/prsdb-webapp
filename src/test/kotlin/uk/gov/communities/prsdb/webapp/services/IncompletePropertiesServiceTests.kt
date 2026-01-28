@@ -170,14 +170,9 @@ class IncompletePropertiesServiceTests {
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(30),
             )
-        private val savedJourneyState1 =
+        private val savedJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
                 journeyId = "journey-1",
-                createdDate = incompletePropertyCreatedDate,
-            )
-        private val savedJourneyState2 =
-            MockSavedJourneyStateData.createSavedJourneyState(
-                journeyId = "journey-2",
                 createdDate = incompletePropertyCreatedDate,
             )
 
@@ -186,22 +181,26 @@ class IncompletePropertiesServiceTests {
                 LocalDate.now().minusDays(28),
             )
 
-        @Test
-        fun `deleteIncompletePropertiesOlderThan28Days deletes records and returns count`() {
-            // Arrange
-            val pageRequest = PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
-            whenever(mockLandlordIncompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(cutoffDate))
-                .thenReturn(2L)
+        private val pageRequest = PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
 
-            val incompletePropertyEntities =
-                listOf(
-                    LandlordIncompleteProperties(landlord, savedJourneyState1),
-                    LandlordIncompleteProperties(landlord, savedJourneyState2),
+        @Test
+        fun `deleteIncompletePropertiesOlderThan28Days deletes less than a page of records and returns count`() {
+            // Arrange
+            val savedJourneyState2 =
+                MockSavedJourneyStateData.createSavedJourneyState(
+                    journeyId = "journey-2",
+                    createdDate = incompletePropertyCreatedDate,
                 )
+
             whenever(
                 mockLandlordIncompletePropertiesRepository
                     .findBySavedJourneyState_CreatedDateBefore(cutoffDate, pageRequest),
-            ).thenReturn(incompletePropertyEntities)
+            ).thenReturn(
+                listOf(
+                    LandlordIncompleteProperties(landlord, savedJourneyState),
+                    LandlordIncompleteProperties(landlord, savedJourneyState2),
+                ),
+            )
 
             // Act
             val deletedCount = incompletePropertiesService.deleteIncompletePropertiesOlderThan28Days()
@@ -220,28 +219,53 @@ class IncompletePropertiesServiceTests {
         @Test
         fun `deleteIncompletePropertiesOlderThan28Days processes multiple pages of database records`() {
             // Arrange
-            val pageRequest1 = PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
-            val pageRequest2 = PageRequest.of(1, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
-            whenever(mockLandlordIncompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(cutoffDate))
-                .thenReturn((MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE + 1).toLong())
+            // Return a full page on the first call and a partial page on the second call
+            var call = 0
+            whenever(
+                mockLandlordIncompletePropertiesRepository
+                    .findBySavedJourneyState_CreatedDateBefore(cutoffDate, pageRequest),
+            ).thenAnswer {
+                when (call++) {
+                    0 -> {
+                        (1..MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE).map {
+                            LandlordIncompleteProperties(landlord, savedJourneyState)
+                        }
+                    }
 
-            val incompletePropertyEntitiesPage1 = listOf(LandlordIncompleteProperties(landlord, savedJourneyState1))
-            val incompletePropertyEntitiesPage2 = listOf(LandlordIncompleteProperties(landlord, savedJourneyState2))
-            whenever(
-                mockLandlordIncompletePropertiesRepository
-                    .findBySavedJourneyState_CreatedDateBefore(cutoffDate, pageRequest1),
-            ).thenReturn(incompletePropertyEntitiesPage1)
-            whenever(
-                mockLandlordIncompletePropertiesRepository
-                    .findBySavedJourneyState_CreatedDateBefore(cutoffDate, pageRequest2),
-            ).thenReturn(incompletePropertyEntitiesPage2)
+                    1 -> {
+                        (1..5).map {
+                            LandlordIncompleteProperties(landlord, savedJourneyState)
+                        }
+                    }
+
+                    else -> {
+                        emptyList<LandlordIncompleteProperties>()
+                    }
+                }
+            }
 
             // Act
             val deletedCount = incompletePropertiesService.deleteIncompletePropertiesOlderThan28Days()
 
             // Assert
-            assertEquals(2, deletedCount)
+            assertEquals(1005, deletedCount)
             verify(mockSavedJourneyStateRepository, times(2)).deleteAll(any())
+        }
+
+        @Test
+        fun `deleteIncompletePropertiesOlderThan28Days handles no records to delete`() {
+            // Arrange
+            whenever(
+                mockLandlordIncompletePropertiesRepository
+                    .findBySavedJourneyState_CreatedDateBefore(cutoffDate, pageRequest),
+            ).thenReturn(emptyList())
+
+            // Act
+            val deletedCount = incompletePropertiesService.deleteIncompletePropertiesOlderThan28Days()
+
+            // Assert
+            assertEquals(0, deletedCount)
+            verify(mockSavedJourneyStateRepository, times(0)).deleteAll(any())
         }
     }
 

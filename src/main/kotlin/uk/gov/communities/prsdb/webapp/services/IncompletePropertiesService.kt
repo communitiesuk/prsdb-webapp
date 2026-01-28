@@ -47,24 +47,26 @@ class IncompletePropertiesService(
 
     fun deleteIncompletePropertiesOlderThan28Days(): Long {
         val cutoffDate = DateTimeHelper.getJavaInstantFromLocalDate(LocalDate.now().minusDays(28))
-        val totalPages = getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
 
         var totalDeleted = 0L
-
-        // Delete in reverse order to avoid issues with pagination changing as we delete records
-        for (page in (totalPages - 1) downTo 0) {
+        do {
             val incompletePropertiesBatch =
                 landlordIncompletePropertiesRepository
                     .findBySavedJourneyState_CreatedDateBefore(
                         cutoffDate,
-                        PageRequest.of(page, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE),
+                        PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE),
                     )
 
-            val journeyStatesToDelete = incompletePropertiesBatch.map { it.savedJourneyState }
-            savedJourneyStateRepository.deleteAll(journeyStatesToDelete)
-
-            totalDeleted += journeyStatesToDelete.size
-        }
+            if (!incompletePropertiesBatch.isEmpty()) {
+                val journeyStatesToDelete = incompletePropertiesBatch.map { it.savedJourneyState }
+                savedJourneyStateRepository.deleteAll(journeyStatesToDelete)
+                // Because of cascade settings, deleting the SavedJourneyState will also delete this page
+                // of LandlordIncompleteProperties records
+                totalDeleted += journeyStatesToDelete.size
+            }
+        } while (incompletePropertiesBatch.count() == MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
+        // Keep looping while we are deleting full pages of results. If less than a full page is returned,
+        // we know we've reached the end.
 
         return totalDeleted
     }
