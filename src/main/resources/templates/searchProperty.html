@@ -53,17 +53,19 @@
                         </tbody>
                     </table>
 
-                    <div th:if="${searchResults.size() == 0}"
-                         class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
-                        <h1 class="govuk-heading-l" th:text="#{propertySearch.error.heading}">
-                            propertySearch.error.heading
-                        </h1>
-                        <div class="govuk-hint">
-                            <span th:remove="tag" th:text="#{propertySearch.error.hint.beforeLink}">propertySearch.error.hint.beforeLink</span>
-                            <a class="govuk-link" th:href="@{${landlordSearchURL}}"
-                               th:text="#{propertySearch.error.hint.link}">propertySearch.error.hint.link
-                            </a>
-                        </div>
+                    <div th:if="${searchResults.size() == 0}" class="govuk-!-text-align-centre govuk-!-margin-bottom-6" id="no-results">
+                        <th:block th:if="${searchTimedOut}">
+                            <h1 class="govuk-heading-l" th:text="#{propertySearch.timeout.heading}">propertySearch.timeout.heading</h1>
+                            <div class="govuk-hint" th:text="#{propertySearch.timeout.hint}">propertySearch.timeout.hint</div>
+                        </th:block>
+
+                        <th:block th:unless="${searchTimedOut}">
+                            <h1 class="govuk-heading-l" th:text="#{propertySearch.noResults.heading}">propertySearch.noResults.heading</h1>
+                            <div class="govuk-hint">
+                                <span th:remove="tag" th:text="#{propertySearch.noResults.hint.beforeLink}">propertySearch.noResults.hint.beforeLink</span>
+                                <a class="govuk-link" th:href="@{${landlordSearchURL}}" th:text="#{propertySearch.noResults.hint.link}">propertySearch.noResults.hint.link</a>
+                            </div>
+                        </th:block>
                     </div>
 
                 </div>

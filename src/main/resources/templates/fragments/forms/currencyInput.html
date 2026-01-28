@@ -1,0 +1,12 @@
+<th:block th:fragment="currencyInput(label, fieldName, hint)"
+          th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#input-wrapper}, ${hint})}">
+    <div id="input-wrapper" class="govuk-input__wrapper">
+        <div class="govuk-input__prefix" aria-hidden="true" th:text="#{commonText.poundSign}">£</div>
+        <input class="govuk-input  govuk-input--width-5"
+               th:classappend='${#fields.hasErrors(fieldName) ? "govuk-input--error" : ""} + ${widthClass}'
+               type="text"
+               spellcheck="false"
+               th:field="*{__${fieldName}__}"
+               th:attrappend="aria-describedby=${hint != null} ? ${fieldName}+'-details-hint'">
+    </div>
+</th:block>

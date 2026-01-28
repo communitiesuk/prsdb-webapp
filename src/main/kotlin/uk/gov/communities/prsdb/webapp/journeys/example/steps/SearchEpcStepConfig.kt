@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 @JourneyFrameworkComponent
 class SearchEpcStepConfig(
     private val epcLookupService: EpcLookupService,
-) : AbstractGenericStepConfig<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
+) : AbstractRequestableStepConfig<EpcSearchResult, EpcLookupFormModel, EpcJourneyState>() {
     override val formModelClass = EpcLookupFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =
@@ -36,9 +36,7 @@ class SearchEpcStepConfig(
     }
 
     override fun afterStepDataIsAdded(state: EpcJourneyState) {
-        super.afterStepDataIsAdded(state)
         val formModel = getFormModelFromStateOrNull(state) ?: return
-
         val epc = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
         state.searchedEpc = epc
     }

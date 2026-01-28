@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.NumberOfIncompletePropertiesFeatureStrategy
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
@@ -48,10 +49,12 @@ import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -99,7 +102,10 @@ class LandlordDashboardUrlTests(
     private lateinit var mockLandlordService: LandlordService
 
     @MockitoBean
-    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+    private lateinit var propertyRegistrationService: LegacyIncompletePropertyFormContextService
+
+    @MockitoBean
+    private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
 
     @MockitoBean
     private lateinit var mockIdentityService: OneLoginIdentityService
@@ -132,6 +138,9 @@ class LandlordDashboardUrlTests(
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
+
+    @MockitoBean
+    private lateinit var strategy: NumberOfIncompletePropertiesFeatureStrategy
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
@@ -199,19 +208,24 @@ class LandlordDashboardUrlTests(
             PropertyRegistrationService(
                 propertyOwnershipRepository = mock(),
                 landlordRepository = mockLandlordRepository,
-                formContextRepository = mock(),
-                registeredAddressCache = mock(),
                 addressService = mock(),
                 licenseService = mock(),
                 propertyOwnershipService = mockPropertyOwnershipService,
-                session = mock(),
                 absoluteUrlProvider = absoluteUrlProvider,
                 confirmationEmailSender = mockEmailNotificationService,
+                confirmationService = mock(),
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -239,6 +253,13 @@ class LandlordDashboardUrlTests(
             numberOfHouseholds = propertyOwnership.currentNumHouseholds,
             numberOfPeople = propertyOwnership.currentNumTenants,
             baseUserId = propertyOwnership.primaryLandlord.baseUser.id,
+            numBedrooms = propertyOwnership.numBedrooms,
+            billsIncludedList = propertyOwnership.billsIncludedList,
+            customBillsIncluded = propertyOwnership.customBillsIncluded,
+            furnishedStatus = propertyOwnership.furnishedStatus,
+            rentFrequency = propertyOwnership.rentFrequency,
+            customRentFrequency = propertyOwnership.customRentFrequency,
+            rentAmount = propertyOwnership.rentAmount,
         )
 
         // Assert

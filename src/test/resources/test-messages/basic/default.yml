@@ -1,0 +1,9 @@
+simple:
+  message: This is a simple message
+  nested:
+    deep: This is a deeply nested message
+greeting: Hello, {0}!
+greetings: Hello, {0} and {1}!
+topLevel: A top level message
+numeric: 12345
+

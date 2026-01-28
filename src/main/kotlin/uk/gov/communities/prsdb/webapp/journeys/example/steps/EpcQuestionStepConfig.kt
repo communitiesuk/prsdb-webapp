@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.journeys.AbstractGenericStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class EpcQuestionStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
-) : AbstractGenericStepConfig<EpcStatus, EpcFormModel, EpcJourneyState>() {
+) : AbstractRequestableStepConfig<EpcStatus, EpcFormModel, EpcJourneyState>() {
     override val formModelClass = EpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcJourneyState) =
@@ -46,7 +46,6 @@ class EpcQuestionStepConfig(
     override fun chooseTemplate(state: EpcJourneyState): String = "forms/certificateForm"
 
     override fun afterStepDataIsAdded(state: EpcJourneyState) {
-        super.afterStepDataIsAdded(state)
         val uprn = propertyOwnershipService.getPropertyOwnership(state.propertyId).address.uprn
         if (uprn != null) {
             val epc = epcLookupService.getEpcByUprn(uprn)

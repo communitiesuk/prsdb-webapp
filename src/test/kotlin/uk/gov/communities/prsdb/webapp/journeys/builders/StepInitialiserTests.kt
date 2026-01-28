@@ -12,6 +12,7 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -378,7 +379,7 @@ class StepInitialiserTests {
     fun `additional configuration is applied to the step when built`() {
         // Arrange
         val stepMock = mockInitialisableStep()
-        whenever(stepMock.stepConfig).thenReturn(mock())
+        whenever(stepMock.stepConfig).thenReturn(mock<AbstractRequestableStepConfig<TestEnum, *, JourneyState>>())
         val builder = StepInitialiser(stepMock, mock())
         var additionalConfigApplied = false
         builder.stepSpecificInitialisation {
@@ -509,9 +510,11 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser(stepMock, mock())
-        val expectedKey = "testKey"
-        val expectedValue = "testValue"
-        builder.withAdditionalContentProperty { expectedKey to expectedValue }
+        val firstKey = "firstKey"
+        val firstValue = "firstValue"
+        val secondKey = "secondKey"
+        val secondValue = 177
+        builder.withAdditionalContentProperties { mapOf(firstKey to firstValue, secondKey to secondValue) }
         builder.nextUrl { "next" }
         builder.parents { NoParents() }
         builder.unreachableStepDestinationIfNotSet { mock() }
@@ -532,7 +535,7 @@ class StepInitialiserTests {
             mapCaptor.capture(),
         )
         val additionalContent = mapCaptor.firstValue()
-        assertEquals(mapOf(expectedKey to expectedValue), additionalContent)
+        assertEquals(mapOf(firstKey to firstValue, secondKey to secondValue), additionalContent)
     }
 
     @Test

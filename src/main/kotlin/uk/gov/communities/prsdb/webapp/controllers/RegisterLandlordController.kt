@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
@@ -83,13 +84,13 @@ class RegisterLandlordController(
         principal: Principal,
         @AuthenticationPrincipal oidcUser: OidcUser,
     ): ModelAndView {
-        val identity = identityService.getVerifiedIdentityData(oidcUser) ?: mapOf()
+        val identity = identityService.getVerifiedIdentityData(oidcUser) ?: VerifiedIdentityDataModel()
 
         return landlordRegistrationJourneyFactory
             .create()
             .completeStep(
                 IDENTITY_VERIFICATION_PATH_SEGMENT,
-                identity,
+                identity.toPageData(),
                 subPageNumber = null,
                 principal,
             )

@@ -31,6 +31,13 @@ abstract class AbstractJourneyState(
         return journeyId
     }
 
+    override fun initializeOrRestoreState(seed: Any?): String {
+        val journeyId = generateJourneyId(seed)
+
+        journeyStateService.initialiseOrRestoreJourneyWithId(journeyId) {}
+        return journeyId
+    }
+
     override fun save(): SavedJourneyState = journeyStateService.save()
 
     override fun initializeChildState(

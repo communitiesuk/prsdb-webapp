@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -304,6 +305,7 @@ class JourneyBuilderTest {
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
             whenever(builtStep.routeSegment).thenReturn("segment")
+            whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             // Act 2
             val map = jb.buildRoutingMap()
@@ -318,14 +320,14 @@ class JourneyBuilderTest {
     }
 
     @Nested
-    inner class NotionalStepTests {
+    inner class InternalStepTests {
         lateinit var mockedStepBuilders: MockedConstruction<StepInitialiser<*, *, *>>
 
         @BeforeEach
         fun setup() {
             mockedStepBuilders =
                 mockConstruction(StepInitialiser::class.java) { mock, context ->
-                    val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+                    val mockedJourneyStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
                     whenever(mockedJourneyStep.initialisationStage).thenReturn(StepInitialisationStage.FULLY_INITIALISED)
                     whenever((mock as StepInitialiser<*, JourneyState, *>).build()).thenReturn(listOf(mockedJourneyStep))
                 }
@@ -337,10 +339,10 @@ class JourneyBuilderTest {
         }
 
         @Test
-        fun `notionalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
+        fun `internalStep method creates and inits a stepBuilder, which is built and excluded when the journey is built`() {
             // Arrange 1
             val jb = JourneyBuilder(mock())
-            val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+            val uninitialisedStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
 
             // Act 1
             jb.step(uninitialisedStep) {
@@ -354,7 +356,7 @@ class JourneyBuilderTest {
             verify(mockStepInitialiser).stepSpecificInitialisation(any())
 
             // Arrange 2
-            val builtStep = mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>()
+            val builtStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
             whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
 
             // Act 2
@@ -375,9 +377,9 @@ class JourneyBuilderTest {
 
         val builtSteps =
             listOf(
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
-                mock<JourneyStep.InternalStep<TestEnum, *, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
+                mock<JourneyStep.InternalStep<TestEnum, JourneyState>>(),
             )
 
         mockConstruction(TaskInitialiser::class.java) { mock, context ->
@@ -567,5 +569,104 @@ class JourneyBuilderTest {
             assertFalse(capturedDestinationsOverwritten[1])
             assertFalse(capturedDestinationsOverwritten[2])
         }
+
+        @Test
+        fun `configure applies only to the direct children of the journey builder`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val step1 = StepInitialiserTests.mockInitialisableStep()
+            val step2 = StepInitialiserTests.mockInitialisableStep()
+            val step3 = StepInitialiserTests.mockInitialisableStep()
+            val task = testTaskWithSteps(step3)
+
+            // Act
+            jb.step(step1) {
+                routeSegment("segment1")
+                initialStep()
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.step(step2) {
+                routeSegment("segment2")
+                parents { NoParents() }
+                nextUrl { "url1" }
+                unreachableStepUrl { "unreachable" }
+            }
+            jb.task(task) {
+                parents { NoParents() }
+                nextUrl { "url1" }
+            }
+
+            jb.configure {
+                modifyNextDestination { { Destination.ExternalUrl("configured") } }
+            }
+
+            jb.buildRoutingMap()
+
+            // Assert
+            val nextDestinationCaptor = argumentCaptor<(TestEnum) -> Destination>()
+            verify(step1).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step2).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+            verify(step3).initialize(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                nextDestinationCaptor.capture(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+            )
+
+            nextDestinationCaptor.allValues.take(2).forEach {
+                val destination = it(TestEnum.ENUM_VALUE)
+                assert(destination is Destination.ExternalUrl)
+                with(destination as Destination.ExternalUrl) {
+                    assertEquals("configured", externalUrl)
+                }
+            }
+            nextDestinationCaptor.allValues.last().let {
+                val destination = it(TestEnum.ENUM_VALUE)
+                assert(destination is Destination.ExternalUrl)
+                with(destination as Destination.ExternalUrl) {
+                    assertEquals("task-step-0", externalUrl)
+                }
+            }
+        }
+
+        private fun testTaskWithSteps(vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Task<JourneyState> =
+            object : Task<JourneyState>() {
+                override fun makeSubJourney(state: JourneyState) =
+                    subJourney(state) {
+                        steps.forEachIndexed { index, step ->
+                            this.step(step) {
+                                routeSegment("task-segment-$index")
+                                nextUrl { "task-step-$index" }
+                            }
+                        }
+                        exitStep {
+                            parents { NoParents() }
+                        }
+                        unreachableStepUrl { "unreachable" }
+                    }
+            }
     }
 }

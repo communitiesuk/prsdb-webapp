@@ -31,20 +31,22 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         @Test
         fun `Summary card lists are populated correctly`() {
             val currentDate = DateTimeHelper().getCurrentDateInUK()
-            val completeByDate = currentDate.plus(DatePeriod(days = 28))
-            val formattedCompleteByDate = "${completeByDate.dayOfMonth} ${completeByDate.month.name} ${completeByDate.year}"
+            val completeByDate1 = currentDate.plus(DatePeriod(days = 27))
+            val formattedCompleteByDate1 = "${completeByDate1.dayOfMonth} ${completeByDate1.month.name} ${completeByDate1.year}"
+            val completeByDate2 = currentDate.plus(DatePeriod(days = 28))
+            val formattedCompleteByDate2 = "${completeByDate2.dayOfMonth} ${completeByDate2.month.name} ${completeByDate2.year}"
 
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
 
             assertThat(incompletePropertiesPage.firstSummaryCard.summaryList.propertyAddressRow).containsText("4, Example Road, EG")
             assertThat(
                 incompletePropertiesPage.firstSummaryCard.summaryList.completeByRow,
-            ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
+            ).containsText(formattedCompleteByDate1, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
 
             assertThat(incompletePropertiesPage.secondSummaryCard.summaryList.propertyAddressRow).containsText("5, Example Road, EG")
             assertThat(
                 incompletePropertiesPage.secondSummaryCard.summaryList.completeByRow,
-            ).containsText(formattedCompleteByDate, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
+            ).containsText(formattedCompleteByDate2, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
 
         @Disabled("TODO PRSD-1550: Migrate test once journey can be migrated")

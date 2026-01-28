@@ -50,3 +50,12 @@ VALUES  (1, 2, '01/01/25', '01/01/25',
          null, null, 0, null,
          'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'g', null, null,
          true, true, true);
+
+INSERT INTO saved_journey_state (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier)
+VALUES (1, current_date, current_date, '1', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW51tl"},"select-address":{"address":"4, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}},"cachedAddresses":"[{\"singleLineAddress\":\"1, Example Road, EG\",\"localCouncilId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localCouncilId\":2,\"uprn\":2123456,\"buildingNumber\":\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localCouncilId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"4, Example Road, EG\",\"localCouncilId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localCouncilId\":5,\"uprn\":5123456,\"buildingNumber\":\"5\",\"postcode\":\"EG\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY'),
+       (2, current_date, current_date, '2', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW51tl"},"select-address":{"address":"5, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}},"cachedAddresses":"[{\"singleLineAddress\":\"1, Example Road, EG\",\"localCouncilId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localCouncilId\":2,\"uprn\":2123456,\"buildingNumber\":\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localCouncilId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"4, Example Road, EG\",\"localCouncilId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localCouncilId\":5,\"uprn\":5123456,\"buildingNumber\":\"5\",\"postcode\":\"EG\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY');
+
+INSERT INTO landlord_incomplete_properties (landlord_id, saved_journey_state_id)
+VALUES (1, 1),
+       (1, 2);
+

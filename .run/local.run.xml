@@ -1,27 +1,26 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-        <option name="ACTIVE_PROFILES" value="local, local-no-auth"/>
-        <option name="envFilePaths">
-            <option value="$PROJECT_DIR$/.env"/>
-        </option>
-        <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources"/>
-        <module name="prsdb-webapp.main"/>
-        <selectedOptions>
-            <option name="environmentVariables"/>
-        </selectedOptions>
-        <option name="SHORTEN_COMMAND_LINE" value="ARGS_FILE"/>
-        <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.communities.prsdb.webapp.PrsdbWebappApplication"/>
-        <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
-            <option name="credential"/>
-            <option name="region"/>
-            <option name="useCurrentConnection" value="false"/>
-        </extension>
-        <method v="2">
-            <option name="RunConfigurationTask" enabled="true" run_configuration_name="local_resources_up"
-                    run_configuration_type="docker-deploy"/>
-            <option name="Make" enabled="true"/>
-            <option name="RunConfigurationTask" enabled="true" run_configuration_name="flywayClean-local"
-                    run_configuration_type="GradleRunConfiguration"/>
-        </method>
-    </configuration>
+  <configuration default="false" name="local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="local, local-no-auth" />
+    <option name="ALTERNATIVE_JRE_PATH" value="corretto-21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="envFilePaths">
+      <option value="$PROJECT_DIR$/.env" />
+    </option>
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <module name="prsdb-webapp.main" />
+    <selectedOptions>
+      <option name="environmentVariables" />
+    </selectedOptions>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.communities.prsdb.webapp.PrsdbWebappApplication" />
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="local_resources_up" run_configuration_type="docker-deploy" />
+      <option name="Make" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="flywayClean-local" run_configuration_type="GradleRunConfiguration" />
+    </method>
+  </configuration>
 </component>

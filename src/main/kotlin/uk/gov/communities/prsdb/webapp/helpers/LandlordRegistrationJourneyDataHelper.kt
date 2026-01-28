@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
@@ -13,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
 import java.time.LocalDate
 
 class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
@@ -31,7 +31,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldStringValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                VerifiedIdentityModel::name.name,
+                VerifiedIdentityDataModel::name.name,
             )
 
         fun getDOB(journeyData: JourneyData) = getVerifiedDOB(journeyData) ?: getManualDOB(journeyData)
@@ -40,7 +40,7 @@ class LandlordRegistrationJourneyDataHelper : JourneyDataHelper() {
             getFieldLocalDateValue(
                 journeyData,
                 LandlordRegistrationStepId.VerifyIdentity.urlPathSegment,
-                VerifiedIdentityModel::birthDate.name,
+                VerifiedIdentityDataModel::birthDate.name,
             )
 
         private fun getManualDOB(journeyData: JourneyData): LocalDate? {
