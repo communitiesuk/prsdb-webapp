@@ -21,6 +21,9 @@ features:
     - name: "migrate-property-registration"
       enabled: true
       expiry-date: "2026-01-31"
+    - name: "migrate-local-council-user-registration"
+      enabled: true
+      expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
       enabled: true

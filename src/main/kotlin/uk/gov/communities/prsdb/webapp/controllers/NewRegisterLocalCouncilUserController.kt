@@ -9,20 +9,20 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.NewLocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
@@ -30,20 +30,18 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(LOCAL_COUNCIL_USER_REGISTRATION_ROUTE)
-class RegisterLocalCouncilUserController(
-    private val localCouncilUserRegistrationJourneyFactory: LocalCouncilUserRegistrationJourneyFactory,
+class NewRegisterLocalCouncilUserController(
+    private val localCouncilUserRegistrationJourneyFactory: NewLocalCouncilUserRegistrationJourneyFactory,
     private val invitationService: LocalCouncilInvitationService,
     private val localCouncilDataService: LocalCouncilDataService,
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
-    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun acceptInvitation(
         @RequestParam(value = TOKEN, required = true) token: String,
+        principal: Principal,
     ): CharSequence {
-        // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
-        // the LocalCouncilInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
-        // see https://github.com/spring-projects/spring-hateoas/issues/155 for details
         val invitation = invitationService.getInvitationOrNull(token)
 
         return if (invitation == null) {
@@ -52,45 +50,27 @@ class RegisterLocalCouncilUserController(
             invitationService.deleteInvitation(invitation)
             "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE"
         } else {
+            // Check if user already has local council role
+            if (userRolesService.getHasLocalCouncilRole(principal.name)) {
+                invitationService.deleteInvitation(invitation)
+                return "redirect:$LOCAL_COUNCIL_DASHBOARD_URL"
+            }
+
             invitationService.storeTokenInSession(token)
-            return "redirect:${LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}"
+            val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
+            val redirectUrl =
+                JourneyStateService.urlWithJourneyState(
+                    "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$LANDING_PAGE_PATH_SEGMENT",
+                    journeyId,
+                )
+            "redirect:$redirectUrl"
         }
-    }
-
-    @GetMapping("/$LANDING_PAGE_PATH_SEGMENT")
-    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
-    fun getLandingPage(
-        model: Model,
-        principal: Principal,
-    ): ModelAndView {
-        val token = getValidTokenFromSessionOrNull()
-        if (token == null) {
-            invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
-        }
-
-        val invitation = invitationService.getInvitationFromToken(token)
-
-        if (userRolesService.getHasLocalCouncilRole(principal.name)) {
-            invitationService.deleteInvitation(invitation)
-            invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LOCAL_COUNCIL_DASHBOARD_URL")
-        }
-
-        return localCouncilUserRegistrationJourneyFactory
-            .create(invitation)
-            .getModelAndViewForStep(
-                LANDING_PAGE_PATH_SEGMENT,
-                subPageNumber = null,
-            )
     }
 
     @GetMapping("/{stepName}")
-    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
-        model: Model,
         principal: Principal,
     ): ModelAndView {
         val token = getValidTokenFromSessionOrNull()
@@ -99,21 +79,27 @@ class RegisterLocalCouncilUserController(
             return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
-        return localCouncilUserRegistrationJourneyFactory
-            .create(invitationService.getInvitationFromToken(token))
-            .getModelAndViewForStep(
-                stepName,
-                subpage,
-            )
+        return try {
+            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps()
+            journeyMap[stepName]?.getStepModelAndView()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val invitation = invitationService.getInvitationFromToken(token)
+            val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
+            val redirectUrl =
+                JourneyStateService.urlWithJourneyState(
+                    "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$stepName",
+                    journeyId,
+                )
+            ModelAndView("redirect:$redirectUrl")
+        }
     }
 
     @PostMapping("/{stepName}")
-    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam formData: PageData,
-        model: Model,
         principal: Principal,
     ): ModelAndView {
         val token = getValidTokenFromSessionOrNull()
@@ -122,18 +108,24 @@ class RegisterLocalCouncilUserController(
             return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
-        return localCouncilUserRegistrationJourneyFactory
-            .create(invitationService.getInvitationFromToken(token))
-            .completeStep(
-                stepName,
-                formData,
-                subpage,
-                principal,
-            )
+        return try {
+            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps()
+            journeyMap[stepName]?.postStepModelAndView(formData)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val invitation = invitationService.getInvitationFromToken(token)
+            val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
+            val redirectUrl =
+                JourneyStateService.urlWithJourneyState(
+                    "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$stepName",
+                    journeyId,
+                )
+            ModelAndView("redirect:$redirectUrl")
+        }
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun getConfirmation(
         model: Model,
         principal: Principal,
@@ -159,7 +151,7 @@ class RegisterLocalCouncilUserController(
     }
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
-    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun invalidToken(model: Model): String = "invalidLocalCouncilInvitationLink"
 
     private fun getValidTokenFromSessionOrNull(): String? {
@@ -169,12 +161,5 @@ class RegisterLocalCouncilUserController(
         } else {
             token
         }
-    }
-
-    companion object {
-        const val LOCAL_COUNCIL_USER_REGISTRATION_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL"
-
-        const val LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE =
-            "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }
