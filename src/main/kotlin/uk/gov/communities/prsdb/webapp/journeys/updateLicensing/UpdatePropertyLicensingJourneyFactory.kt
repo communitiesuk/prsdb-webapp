@@ -17,9 +17,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -80,13 +80,12 @@ class UpdateLicensingJourney(
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     // Check your answers step
-    override val cyaStep: UpdateLicensingCheckAnswersStep,
+    override val cyaStep: UpdateLicensingCyaStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     UpdateLicensingJourneyState {
-    override var cyaChildJourneyId: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
-
+    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
@@ -122,7 +121,7 @@ interface UpdateLicensingJourneyState :
     LicensingState,
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
-    override val cyaStep: UpdateLicensingCheckAnswersStep
+    override val cyaStep: UpdateLicensingCyaStep
     val hasOriginalLicense: Boolean
     val propertyId: Long
 }

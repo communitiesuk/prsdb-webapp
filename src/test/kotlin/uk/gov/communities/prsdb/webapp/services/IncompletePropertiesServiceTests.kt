@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
@@ -35,10 +37,10 @@ class IncompletePropertiesServiceTests {
     private lateinit var mockLandlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @Mock
-    private lateinit var mockSavedJourneyStateRepository: SavedJourneyStateRepository
+    private lateinit var mockReminderEmailSentRepository: ReminderEmailSentRepository
 
     @Mock
-    private lateinit var mockReminderEmailSentRepository: ReminderEmailSentRepository
+    private lateinit var mockSavedJourneyStateRepository: SavedJourneyStateRepository
 
     @InjectMocks
     private lateinit var incompletePropertiesService: IncompletePropertiesService
@@ -120,26 +122,44 @@ class IncompletePropertiesServiceTests {
         }
     }
 
-    @Test
-    fun `recordReminderEmailSent saves ReminderEmailSent record with correct fields`() {
-        // Arrange
-        val incompletePropertySavedJourneyState = MockSavedJourneyStateData.createSavedJourneyState()
+    @Nested
+    inner class RecordReminderEmailSentTests {
+        @Test
+        fun `recordReminderEmailSent saves ReminderEmailSent record with correct fields`() {
+            // Arrange
+            val incompletePropertySavedJourneyState = MockSavedJourneyStateData.createSavedJourneyState()
 
-        // Act
-        incompletePropertiesService.recordReminderEmailSent(incompletePropertySavedJourneyState)
+            // Act
+            incompletePropertiesService.recordReminderEmailSent(incompletePropertySavedJourneyState)
 
-        // Assert
-        val reminderEmailSentCaptor = argumentCaptor<ReminderEmailSent>()
-        verify(mockReminderEmailSentRepository).save(reminderEmailSentCaptor.capture())
-        assertTrue(reminderEmailSentCaptor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now().plusSeconds(1)))
-        assertTrue(reminderEmailSentCaptor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
+            // Assert
+            val reminderEmailSentCaptor = argumentCaptor<ReminderEmailSent>()
+            verify(mockReminderEmailSentRepository).save(reminderEmailSentCaptor.capture())
+            assertTrue(reminderEmailSentCaptor.firstValue.lastReminderEmailSentDate.isBefore(Instant.now().plusSeconds(1)))
+            assertTrue(reminderEmailSentCaptor.firstValue.lastReminderEmailSentDate.isAfter(Instant.now().minusSeconds(600)))
 
-        val savedJourneyStateCaptor = argumentCaptor<SavedJourneyState>()
-        verify(mockSavedJourneyStateRepository).save(savedJourneyStateCaptor.capture())
-        assertEquals(
-            reminderEmailSentCaptor.firstValue,
-            savedJourneyStateCaptor.firstValue.reminderEmailSent,
-        )
+            val savedJourneyStateCaptor = argumentCaptor<SavedJourneyState>()
+            verify(mockSavedJourneyStateRepository).save(savedJourneyStateCaptor.capture())
+            assertEquals(
+                reminderEmailSentCaptor.firstValue,
+                savedJourneyStateCaptor.firstValue.reminderEmailSent,
+            )
+        }
+
+        @Test
+        fun `recordReminderEmailSent throws TrackEmailSentException on failure`() {
+            // Arrange
+            val incompletePropertySavedJourneyState = MockSavedJourneyStateData.createSavedJourneyState()
+            whenever(mockReminderEmailSentRepository.save(any()))
+                .thenThrow(RuntimeException("Database error"))
+
+            // Act & Assert
+            assertThrows<TrackEmailSentException> {
+                incompletePropertiesService.recordReminderEmailSent(
+                    incompletePropertySavedJourneyState,
+                )
+            }
+        }
     }
 
     @Nested

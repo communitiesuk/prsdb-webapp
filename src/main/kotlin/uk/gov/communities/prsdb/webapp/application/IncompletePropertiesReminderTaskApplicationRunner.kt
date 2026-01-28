@@ -8,6 +8,9 @@ import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.SavedJourneyStateHelper
@@ -67,23 +70,36 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                         ),
                     )
                     println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
-                    try {
-                        incompletePropertiesService.recordReminderEmailSent(property.savedJourneyState)
-                    } catch (ex: Exception) {
-                        println(
-                            "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
-                                property.savedJourneyState.id,
-                        )
-                        println("Exception message: ${ex.message}")
-                        println("Stack trace: ${ex.stackTraceToString()}")
-                    }
-                } catch (ex: Exception) {
-                    println("Task failed for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
-                    println("Exception message: ${ex.message}")
-                    println("Stack trace: ${ex.stackTraceToString()}")
+
+                    incompletePropertiesService.recordReminderEmailSent(property.savedJourneyState)
+                } catch (ex: PersistentEmailSendException) {
+                    printMessagesForFailedTask(
+                        ex,
+                        "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
+                    )
+                } catch (ex: TransientEmailSentException) {
+                    printMessagesForFailedTask(
+                        ex,
+                        "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
+                    )
+                } catch (ex: TrackEmailSentException) {
+                    printMessagesForFailedTask(
+                        ex,
+                        "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
+                            property.savedJourneyState.id,
+                    )
                 }
             }
         }
+    }
+
+    private fun printMessagesForFailedTask(
+        ex: Exception,
+        statusMessage: String,
+    ) {
+        println(statusMessage)
+        println("Exception message: ${ex.message}")
+        println("Stack trace: ${ex.stackTraceToString()}")
     }
 
     companion object {

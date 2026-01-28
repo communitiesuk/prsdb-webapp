@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.Instant
 import java.time.LocalDate
@@ -17,8 +18,8 @@ import kotlin.math.ceil
 @PrsdbTaskService
 class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
-    private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
+    private val savedJourneyStateRepository: SavedJourneyStateRepository,
 ) {
     fun getIncompletePropertiesDueReminderPage(
         cutoffDate: Instant,
@@ -31,13 +32,17 @@ class IncompletePropertiesService(
             ).filter { it.savedJourneyState.reminderEmailSent == null }
 
     fun recordReminderEmailSent(savedJourneyState: SavedJourneyState) {
-        val reminderEmailSentRecord =
-            ReminderEmailSent(
-                lastReminderEmailSentDate = Instant.now(),
-            )
-        reminderEmailSentRepository.save(reminderEmailSentRecord)
-        savedJourneyState.reminderEmailSent = reminderEmailSentRecord
-        savedJourneyStateRepository.save(savedJourneyState)
+        try {
+            val reminderEmailSentRecord =
+                ReminderEmailSent(
+                    lastReminderEmailSentDate = Instant.now(),
+                )
+            reminderEmailSentRepository.save(reminderEmailSentRecord)
+            savedJourneyState.reminderEmailSent = reminderEmailSentRecord
+            savedJourneyStateRepository.save(savedJourneyState)
+        } catch (e: Exception) {
+            throw TrackEmailSentException(message = e.message, cause = e.cause)
+        }
     }
 
     fun deleteIncompletePropertiesOlderThan28Days(): Long {

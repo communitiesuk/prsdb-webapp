@@ -13,7 +13,6 @@ class SelectiveLicenceStepConfig : AbstractRequestableStepConfig<Complete, Selec
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
             "label" to "forms.selectiveLicence.label",
             "detailSummary" to "forms.selectiveLicence.detail.summary",

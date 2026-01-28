@@ -15,7 +15,6 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
             "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
             "label" to "forms.numberOfPeople.label",
@@ -29,7 +28,6 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
         state: OccupationState,
         bindingResult: BindingResult,
     ) {
-        super.afterPrimaryValidation(state, bindingResult)
         if (!bindingResult.hasErrors()) {
             bindingResult.validateNumberOfPeople(
                 bindingResult.getFormModel(),

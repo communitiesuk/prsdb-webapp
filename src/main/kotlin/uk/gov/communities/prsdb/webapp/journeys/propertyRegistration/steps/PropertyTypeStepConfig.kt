@@ -19,7 +19,6 @@ class PropertyTypeStepConfig(
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.propertyType.fieldSetHeading",
             "radioOptions" to
                 listOf(
@@ -60,7 +59,6 @@ class PropertyTypeStepConfig(
         state: JourneyState,
         saveStateId: SavedJourneyState,
     ) {
-        super.afterSaveState(state, saveStateId)
         incompletePropertyForLandlordService.addIncompletePropertyToLandlord(saveStateId)
     }
 }

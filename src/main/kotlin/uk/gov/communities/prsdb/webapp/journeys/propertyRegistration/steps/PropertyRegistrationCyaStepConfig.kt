@@ -6,14 +6,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
-import uk.gov.communities.prsdb.webapp.journeys.example.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
@@ -31,20 +29,11 @@ class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
-) : AbstractRequestableStepConfig<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>() {
-    override val formModelClass = CheckAnswersFormModel::class
+) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
+    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
-    private lateinit var childJourneyId: String
-
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any> {
-        if (state.cyaChildJourneyId == null) {
-            state.initialiseCyaChildJourney()
-        }
-
-        childJourneyId = state.cyaChildJourneyId
-            ?: throw UnrecoverableJourneyStateException(state.journeyId, "CYA child journey ID should be initialised")
-
-        return mapOf(
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) =
+        mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
@@ -54,14 +43,6 @@ class PropertyRegistrationCyaStepConfig(
             "tenancyDetails" to getTenancyDetailsSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
-
-    override fun enrichSubmittedDataBeforeValidation(
-        state: PropertyRegistrationJourneyState,
-        formData: PageData,
-    ): PageData =
-        super.enrichSubmittedDataBeforeValidation(state, formData) +
-            (CheckAnswersFormModel::storedJourneyData.name to state.getSubmittedStepData())
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
@@ -116,7 +97,17 @@ class PropertyRegistrationCyaStepConfig(
         }
     }
 
-    private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+    override fun resolveNextDestination(
+        state: PropertyRegistrationJourneyState,
+        defaultDestination: Destination,
+    ): Destination =
+        if (state.isAddressAlreadyRegistered == true) {
+            Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
+        } else {
+            super.resolveNextDestination(state, defaultDestination)
+        }
+
+    private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(state) +
             getPropertyTypeRow(state) +
             getOwnershipTypeRow(state)
@@ -127,7 +118,7 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination.VisitableStep(state.lookupStep, childJourneyId),
+                    Destination.VisitableStep(state.lookupAddressStep, childJourneyId),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
@@ -154,7 +145,7 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
         )
 
-    private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+    private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = state.occupied.formModel.occupied ?: false
@@ -172,7 +163,7 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(occupiedStep, childJourneyId),
         )
 
-    private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+    private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val householdsStep = state.households
@@ -246,24 +237,9 @@ class PropertyRegistrationCyaStepConfig(
                     ),
                 )
             }
-
-    override fun resolveNextDestination(
-        state: PropertyRegistrationJourneyState,
-        defaultDestination: Destination,
-    ): Destination =
-        if (state.isAddressAlreadyRegistered == true) {
-            Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
-        } else {
-            state.deleteJourney()
-            defaultDestination
-        }
-
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
-
-    override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
-final class PropertyRegistrationCheckAnswersStep(
+final class PropertyRegistrationCyaStep(
     stepConfig: PropertyRegistrationCyaStepConfig,
-) : RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<PropertyRegistrationJourneyState>(stepConfig)

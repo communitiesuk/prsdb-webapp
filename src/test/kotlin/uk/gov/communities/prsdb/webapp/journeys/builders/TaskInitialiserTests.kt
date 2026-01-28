@@ -210,9 +210,11 @@ class TaskInitialiserTests {
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
 
         val builder = TaskInitialiser(taskMock, mock())
-        val expectedKey = "testKey"
-        val expectedValue = "testValue"
-        builder.withAdditionalContentProperty { expectedKey to expectedValue }
+        val firstKey = "firstKey"
+        val firstValue = "firstValue"
+        val secondKey = "secondKey"
+        val secondValue = 177
+        builder.withAdditionalContentProperties { mapOf(firstKey to firstValue, secondKey to secondValue) }
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
 
@@ -226,11 +228,11 @@ class TaskInitialiserTests {
         val mockConfigurable = mock<ConfigurableElement<SubjourneyComplete>>()
         configCaptor.firstValue.invoke(mockConfigurable)
 
-        val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
-        verify(mockConfigurable).withAdditionalContentProperty(contentCaptor.capture())
+        val additionalContentCaptor = argumentCaptor<() -> Map<String, Any>>()
+        verify(mockConfigurable).withAdditionalContentProperties(additionalContentCaptor.capture())
 
-        val content = contentCaptor.firstValue()
-        assertEquals(expectedKey to expectedValue, content)
+        val additionalContent = additionalContentCaptor.firstValue()
+        assertEquals(mapOf(firstKey to firstValue, secondKey to secondValue), additionalContent)
     }
 
     @Test
@@ -265,12 +267,12 @@ class TaskInitialiserTests {
         val mockConfigurable = mock<ConfigurableElement<SubjourneyComplete>>()
         configCaptor.firstValue.invoke(mockConfigurable)
 
-        val contentCaptor = argumentCaptor<() -> Pair<String, Any>>()
-        verify(mockConfigurable, times(2)).withAdditionalContentProperty(contentCaptor.capture())
+        val contentCaptor = argumentCaptor<() -> Map<String, Any>>()
+        verify(mockConfigurable, times(2)).withAdditionalContentProperties(contentCaptor.capture())
 
         val allContent = contentCaptor.allValues.map { it() }
-        assertTrue(allContent.contains(firstKey to firstValue))
-        assertTrue(allContent.contains(secondKey to secondValue))
+        assertTrue(allContent.contains(mapOf(firstKey to firstValue)))
+        assertTrue(allContent.contains(mapOf(secondKey to secondValue)))
     }
 
     @Test

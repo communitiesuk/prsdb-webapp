@@ -15,13 +15,13 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
-import org.springframework.dao.InvalidDataAccessResourceUsageException
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -108,7 +108,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
 
             val output = outContent.toString()
             assertTrue(output.contains("Email sent for incomplete property with savedJourneyStateId: 2"))
-            assertTrue(output.contains("Task failed for incomplete property with savedJourneyStateId: 1"))
+            assertTrue(output.contains("Failed to send reminder email for incomplete property with savedJourneyStateId: 1"))
         } finally {
             System.setOut(originalOut)
         }
@@ -138,7 +138,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         setupTwoEntriesOnOneDatabasePage()
 
         whenever(incompletePropertiesService.recordReminderEmailSent(savedJourneyState1))
-            .doThrow(InvalidDataAccessResourceUsageException("Database error"))
+            .doThrow(TrackEmailSentException("Database error"))
 
         // Act, capturing stdout
         // Assert does not throw and stdout contains expected messages

@@ -15,7 +15,6 @@ class LicensingTypeStepConfig : AbstractRequestableStepConfig<LicensingTypeMode,
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
             "fieldSetHint" to "forms.licensingType.fieldSetHint",
             "radioOptions" to
