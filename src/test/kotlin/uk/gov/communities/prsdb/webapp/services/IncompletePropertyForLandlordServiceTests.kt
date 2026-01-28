@@ -41,7 +41,7 @@ class IncompletePropertyForLandlordServiceTests {
             )
         whenever(landlordRepository.findByBaseUser_Id(landlordOneLoginId))
             .thenReturn(landlord)
-        val expectedNewEntry = MockSavedJourneyStateData.createLandlordIncompleteProperties(landlord, savedJourneyState)
+        val expectedNewEntry = LandlordIncompleteProperties(landlord, savedJourneyState)
 
         val captor = argumentCaptor<LandlordIncompleteProperties>()
 

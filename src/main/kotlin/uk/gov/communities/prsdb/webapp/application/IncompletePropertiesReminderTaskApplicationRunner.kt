@@ -7,6 +7,11 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
+import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
+import uk.gov.communities.prsdb.webapp.helpers.SavedJourneyStateHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -35,30 +40,55 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     }
 
     private fun incompletePropertiesReminderTaskLogic() {
-        val incompleteProperties =
-            incompletePropertiesService.getIncompletePropertyReminders()
-        // TODO - PRSD-1030
-        //  Will need to add something to the DB tracking if a reminder email has been sent for this incomplete property and only send if not yet sent
+        val incompleteProperties = incompletePropertiesService.getIncompletePropertiesDueReminder()
 
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
 
         incompleteProperties.forEach { property ->
             try {
                 emailSender.sendEmail(
-                    property.landlordEmail,
+                    property.landlord.email,
                     IncompletePropertyReminderEmail(
-                        singleLineAddress = property.propertySingleLineAddress,
-                        daysToComplete = LocalDate.now().toKotlinLocalDate().daysUntil(property.completeByDate),
+                        singleLineAddress =
+                            SavedJourneyStateHelper
+                                .getPropertyRegistrationSingleLineAddress(property.savedJourneyState.serializedState),
+                        daysToComplete =
+                            LocalDate.now().toKotlinLocalDate().daysUntil(
+                                CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(property.savedJourneyState),
+                            ),
                         prsdUrl = prsdUrl,
                     ),
                 )
-                println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
-            } catch (ex: Exception) {
-                println("Task failed for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
-                println("Exception message: ${ex.message}")
-                println("Stack trace: ${ex.stackTraceToString()}")
+                println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
+
+                incompletePropertiesService.recordReminderEmailSent(property.savedJourneyState)
+            } catch (ex: PersistentEmailSendException) {
+                printMessagesForFailedTask(
+                    ex,
+                    "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
+                )
+            } catch (ex: TransientEmailSentException) {
+                printMessagesForFailedTask(
+                    ex,
+                    "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
+                )
+            } catch (ex: TrackEmailSentException) {
+                printMessagesForFailedTask(
+                    ex,
+                    "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
+                        property.savedJourneyState.id,
+                )
             }
         }
+    }
+
+    private fun printMessagesForFailedTask(
+        ex: Exception,
+        statusMessage: String,
+    ) {
+        println(statusMessage)
+        println("Exception message: ${ex.message}")
+        println("Stack trace: ${ex.stackTraceToString()}")
     }
 
     companion object {
