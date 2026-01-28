@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
@@ -133,5 +135,16 @@ class IncompletePropertiesServiceTests {
             reminderEmailSentCaptor.firstValue,
             savedJourneyStateCaptor.firstValue.reminderEmailSent,
         )
+    }
+
+    @Test
+    fun `recordReminderEmailSent throws TrackEmailSentException on failure`() {
+        // Arrange
+        val incompletePropertySavedJourneyState = MockSavedJourneyStateData.createSavedJourneyState()
+        whenever(mockReminderEmailSentRepository.save(any()))
+            .thenThrow(RuntimeException("Database error"))
+
+        // Act & Assert
+        assertThrows<TrackEmailSentException> { incompletePropertiesService.recordReminderEmailSent(incompletePropertySavedJourneyState) }
     }
 }
