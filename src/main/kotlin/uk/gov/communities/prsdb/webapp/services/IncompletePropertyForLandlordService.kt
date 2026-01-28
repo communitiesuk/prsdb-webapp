@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepo
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyRegistrationJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.SavedJourneyStateHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDataModel
 
@@ -57,7 +57,7 @@ class IncompletePropertyForLandlordServiceImpl(
                 .map { savedState ->
                     IncompletePropertiesDataModel(
                         journeyId = savedState.journeyId,
-                        singleLineAddress = SavedJourneyStateHelper.getPropertyRegistrationSingleLineAddress(savedState.serializedState),
+                        singleLineAddress = savedState.getPropertyRegistrationSingleLineAddress(),
                         completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(savedState),
                     )
                 }
@@ -75,7 +75,7 @@ class IncompletePropertyForLandlordServiceImpl(
         repository
             .findByJourneyIdAndUser_Id(incompletePropertyId, principalName)
             ?.let { savedJourneyState ->
-                SavedJourneyStateHelper.getPropertyRegistrationSingleLineAddress(savedJourneyState.serializedState)
+                savedJourneyState.getPropertyRegistrationSingleLineAddress()
             }
             ?: throw IllegalArgumentException(
                 "Incomplete property not found for id: $incompletePropertyId and principal: $principalName",

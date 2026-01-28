@@ -1,16 +1,17 @@
-package uk.gov.communities.prsdb.webapp.helpers
+package uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.serialization.json.Json
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.collections.get
 
-class SavedJourneyStateHelper {
+class SavedJourneyStateExtensions {
     companion object {
         private val objectMapper = ObjectMapper()
 
-        fun getPropertyRegistrationSingleLineAddress(serializedState: String): String {
-            val stateDataMap = objectMapper.readValue(serializedState, Map::class.java)
+        fun SavedJourneyState.getPropertyRegistrationSingleLineAddress(): String {
+            val stateDataMap = objectMapper.readValue(this.serializedState, Map::class.java)
             val submittedJourneyData = stateDataMap["journeyData"] as Map<*, *>
             val selectedAddressData = submittedJourneyData["select-address"] as? Map<*, *>
             val selectedAddress = selectedAddressData?.get("address") as? String

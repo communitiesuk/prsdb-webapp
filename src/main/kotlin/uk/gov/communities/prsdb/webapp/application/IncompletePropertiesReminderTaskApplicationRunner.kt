@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.SavedJourneyStateHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -58,8 +58,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
                         property.landlord.email,
                         IncompletePropertyReminderEmail(
                             singleLineAddress =
-                                SavedJourneyStateHelper
-                                    .getPropertyRegistrationSingleLineAddress(property.savedJourneyState.serializedState),
+                                property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
                             daysToComplete =
                                 LocalDate.now().toKotlinLocalDate().daysUntil(
                                     CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(
