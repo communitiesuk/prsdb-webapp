@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.ConfirmIdentityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
@@ -8,6 +9,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
+import java.time.LocalDate
 
 interface IdentityState : JourneyState {
     val identityVerifyingStep: IdentityVerifyingStep
@@ -19,4 +23,17 @@ interface IdentityState : JourneyState {
 
     fun getNotNullVerifiedIdentity(): VerifiedIdentityDataModel =
         verifiedIdentity ?: throw NotNullFormModelValueIsNullException("No verified identity found in IdentityState")
+
+    fun getIsIdentityVerified(): Boolean = verifiedIdentity?.isVerified ?: false
+
+    fun getName(): String = verifiedIdentity?.name ?: nameStep.formModel.notNullValue(NameFormModel::name)
+
+    fun getDateOfBirth(): LocalDate =
+        verifiedIdentity?.birthDate ?: dateOfBirthStep.formModel.run {
+            LocalDate.of(
+                notNullValue(DateOfBirthFormModel::year).toInt(),
+                notNullValue(DateOfBirthFormModel::month).toInt(),
+                notNullValue(DateOfBirthFormModel::day).toInt(),
+            )
+        }
 }

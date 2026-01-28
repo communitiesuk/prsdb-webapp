@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifiedMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 
 @JourneyFrameworkComponent
 class IdentityTask : Task<IdentityState>() {
@@ -40,11 +41,13 @@ class IdentityTask : Task<IdentityState>() {
                 routeSegment(NameStep.ROUTE_SEGMENT)
                 parents { journey.identityNotVerifiedStep.isComplete() }
                 nextStep { journey.dateOfBirthStep }
+                checkable()
             }
             step(journey.dateOfBirthStep) {
                 routeSegment(DateOfBirthStep.ROUTE_SEGMENT)
                 parents { journey.nameStep.isComplete() }
                 nextStep { exitStep }
+                checkable()
             }
             exitStep {
                 parents { OrParents(journey.confirmIdentityStep.isComplete(), journey.dateOfBirthStep.isComplete()) }

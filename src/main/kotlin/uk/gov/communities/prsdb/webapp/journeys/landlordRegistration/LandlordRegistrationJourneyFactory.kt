@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
@@ -25,6 +27,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -63,11 +69,13 @@ class LandlordRegistrationJourneyFactory(
                     routeSegment(EmailStep.ROUTE_SEGMENT)
                     parents { journey.identityTask.isComplete() }
                     nextStep { journey.phoneNumberStep }
+                    checkable()
                 }
                 step(journey.phoneNumberStep) {
                     routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
                     parents { journey.emailStep.isComplete() }
                     nextStep { journey.countryOfResidenceStep }
+                    checkable()
                 }
                 step(journey.countryOfResidenceStep) {
                     routeSegment(CountryOfResidenceStep.ROUTE_SEGMENT)
@@ -78,6 +86,8 @@ class LandlordRegistrationJourneyFactory(
                             CountryOfResidenceMode.NON_ENGLAND_OR_WALES -> journey.nonEnglandOrWalesAddressStep
                         }
                     }
+                    // TODO PDJB-550: Fix CYA flow
+                    checkable()
                 }
                 step(journey.nonEnglandOrWalesAddressStep) {
                     routeSegment(NonEnglandOrWalesAddressStep.ROUTE_SEGMENT)
@@ -86,13 +96,19 @@ class LandlordRegistrationJourneyFactory(
                 }
                 task(journey.addressTask) {
                     parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.ENGLAND_OR_WALES) }
-                    nextStep { TODO("CYA") }
+                    nextStep { journey.cyaStep }
+                    checkable()
                 }
             }
             section {
                 withHeadingMessageKey("registerAsALandlord.section.checkAndSubmit.heading")
-                // TODO PRSD-1745: Add CYA step
+                step(journey.cyaStep) {
+                    routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+                    parents { journey.addressTask.isComplete() }
+                    nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
+                }
             }
+            checkYourAnswersJourney()
         }
     }
 
@@ -121,7 +137,8 @@ class LandlordRegistrationJourney(
     override val noAddressFoundStep: NoAddressFoundStep,
     override val selectAddressStep: SelectAddressStep,
     override val manualAddressStep: ManualAddressStep,
-    // TODO PRSD-1745: Add CYA step
+    // Check your answers step
+    override val cyaStep: LandlordRegistrationCyaStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
@@ -129,6 +146,7 @@ class LandlordRegistrationJourney(
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -143,7 +161,8 @@ class LandlordRegistrationJourney(
 
 interface LandlordRegistrationJourneyState :
     IdentityState,
-    AddressState {
+    AddressState,
+    CheckYourAnswersJourneyState {
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
     val emailStep: EmailStep
@@ -151,5 +170,5 @@ interface LandlordRegistrationJourneyState :
     val countryOfResidenceStep: CountryOfResidenceStep
     val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep
     val addressTask: LandlordRegistrationAddressTask
-    // TODO: PRSD-1745: Add CYA state and step
+    override val cyaStep: LandlordRegistrationCyaStep
 }
