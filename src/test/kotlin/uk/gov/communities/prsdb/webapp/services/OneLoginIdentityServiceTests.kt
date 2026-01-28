@@ -47,7 +47,7 @@ class OneLoginIdentityServiceTests {
     fun `getVerifiedIdentityData returns cached identity if it is present`() {
         // Arrange
         val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
-        whenever(session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY)).thenReturn(verifiedIdentity.toMap())
+        whenever(session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY)).thenReturn(verifiedIdentity)
 
         // Act
         val returnedVerifiedIdentity = identityService.getVerifiedIdentityData(user)
@@ -86,7 +86,7 @@ class OneLoginIdentityServiceTests {
         val returnedVerifiedIdentity = identityService.getVerifiedIdentityData(user)
 
         // Assert
-        verify(session).setAttribute(VERIFIED_IDENTITY_CACHE_KEY, returnedVerifiedIdentity?.toMap())
+        verify(session).setAttribute(VERIFIED_IDENTITY_CACHE_KEY, returnedVerifiedIdentity)
         assertEquals(verifiedIdentity, returnedVerifiedIdentity)
     }
 

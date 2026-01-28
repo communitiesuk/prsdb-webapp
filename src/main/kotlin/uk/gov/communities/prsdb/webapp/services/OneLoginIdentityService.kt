@@ -30,13 +30,10 @@ class OneLoginIdentityService(
         return verifiedIdentity
     }
 
-    private fun retrieveCachedVerifiedIdentity(): VerifiedIdentityDataModel? {
-        val verifiedIdentityMap = session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY) as? Map<*, *> ?: return null
-        return VerifiedIdentityDataModel.fromMap(verifiedIdentityMap)
-    }
+    private fun retrieveCachedVerifiedIdentity() = session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY) as? VerifiedIdentityDataModel
 
     private fun cacheVerifiedIdentity(verifiedIdentity: VerifiedIdentityDataModel) {
-        session.setAttribute(VERIFIED_IDENTITY_CACHE_KEY, verifiedIdentity.toMap())
+        session.setAttribute(VERIFIED_IDENTITY_CACHE_KEY, verifiedIdentity)
     }
 
     private fun decodeCoreIdentityJwt(idClaimString: String): Jwt {
