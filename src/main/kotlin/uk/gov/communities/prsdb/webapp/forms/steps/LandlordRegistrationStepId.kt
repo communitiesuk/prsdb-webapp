@@ -1,14 +1,13 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 
 enum class LandlordRegistrationStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: LandlordRegistrationGroupIdentifier,
 ) : GroupedStepId<LandlordRegistrationGroupIdentifier> {
     PrivacyNotice(PRIVACY_NOTICE_PATH_SEGMENT, LandlordRegistrationGroupIdentifier.PrivacyNotice),
-    VerifyIdentity(RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT, LandlordRegistrationGroupIdentifier.IdentityVerification),
+    VerifyIdentity("verify-identity", LandlordRegistrationGroupIdentifier.IdentityVerification),
     IdentityNotVerified("identity-not-verified", LandlordRegistrationGroupIdentifier.IdentityVerification),
     Name("name", LandlordRegistrationGroupIdentifier.Name),
     DateOfBirth("date-of-birth", LandlordRegistrationGroupIdentifier.DateOfBirth),

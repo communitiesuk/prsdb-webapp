@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -10,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
@@ -26,11 +23,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeControll
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.helpers.JourneyControllerHelper
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
 
@@ -38,16 +35,12 @@ import java.security.Principal
 @RequestMapping(LANDLORD_REGISTRATION_ROUTE)
 class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
-    private val identityService: OneLoginIdentityService,
     private val landlordService: LandlordService,
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
     fun index(model: Model): CharSequence {
-        model.addAttribute(
-            "registerAsALandlordStartPageRoute",
-            LANDLORD_REGISTRATION_START_PAGE_ROUTE,
-        )
+        model.addAttribute("registerAsALandlordStartPageRoute", LANDLORD_REGISTRATION_START_PAGE_ROUTE)
         model.addAttribute("oneLoginInfoUrl", ONE_LOGIN_INFO_URL)
         model.addAttribute("provingYourIdentity", ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY)
         model.addAttribute("rentersRightsBillGuideUrl", RENTERS_RIGHTS_BILL_GUIDE_URL)
@@ -59,72 +52,41 @@ class RegisterLandlordController(
 
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStart(model: Model): String {
-        model.addAttribute(
-            "registerAsALandlordInitialStep",
-            LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
-        )
+        model.addAttribute("registerAsALandlordInitialStep", PrivacyNoticeStep.ROUTE_SEGMENT)
         model.addAttribute("backUrl", LANDLORD_REGISTRATION_ROUTE)
 
         return "registerAsALandlordStartPage"
     }
 
-    @GetMapping("/${PRIVACY_NOTICE_PATH_SEGMENT}")
-    fun getPrivacyNotice(principal: Principal): ModelAndView =
-        if (userRolesService.getHasLandlordUserRole(principal.name)) {
+    @GetMapping("/{stepRouteSegment}")
+    fun getJourneyStep(
+        @PathVariable stepRouteSegment: String,
+        principal: Principal,
+    ): ModelAndView =
+        if (stepRouteSegment == PrivacyNoticeStep.ROUTE_SEGMENT &&
+            userRolesService.getHasLandlordUserRole(principal.name)
+        ) {
             ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
         } else {
-            landlordRegistrationJourneyFactory
-                .create()
-                .getModelAndViewForStep(PRIVACY_NOTICE_PATH_SEGMENT, null)
+            JourneyControllerHelper.handleGetRequest(
+                { landlordRegistrationJourneyFactory.createJourneySteps() },
+                stepRouteSegment,
+                { landlordRegistrationJourneyFactory.initializeJourneyState(principal) },
+            )
         }
 
-    @GetMapping("/${IDENTITY_VERIFICATION_PATH_SEGMENT}")
-    fun getVerifyIdentity(
-        model: Model,
-        principal: Principal,
-        @AuthenticationPrincipal oidcUser: OidcUser,
-    ): ModelAndView {
-        val identity = identityService.getVerifiedIdentityData(oidcUser) ?: VerifiedIdentityDataModel()
-
-        return landlordRegistrationJourneyFactory
-            .create()
-            .completeStep(
-                IDENTITY_VERIFICATION_PATH_SEGMENT,
-                identity.toPageData(),
-                subPageNumber = null,
-                principal,
-            )
-    }
-
-    @GetMapping("/{stepName}")
-    fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
-        model: Model,
-        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
-    ): ModelAndView =
-        landlordRegistrationJourneyFactory
-            .create()
-            .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
-
-    @PostMapping("/{stepName}")
+    @PostMapping("/{stepRouteSegment}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
+        @PathVariable stepRouteSegment: String,
         @RequestParam formData: PageData,
-        model: Model,
         principal: Principal,
-        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
     ): ModelAndView =
-        landlordRegistrationJourneyFactory
-            .create()
-            .completeStep(
-                stepName,
-                formData,
-                subpage,
-                principal,
-                checkingAnswersForStep = checkingAnswersForStep,
-            )
+        JourneyControllerHelper.handlePostRequest(
+            { landlordRegistrationJourneyFactory.createJourneySteps() },
+            stepRouteSegment,
+            { landlordRegistrationJourneyFactory.initializeJourneyState(principal) },
+            formData,
+        )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
@@ -145,8 +107,6 @@ class RegisterLandlordController(
     }
 
     companion object {
-        const val IDENTITY_VERIFICATION_PATH_SEGMENT = "verify-identity"
-
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
 
         const val LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$PRIVACY_NOTICE_PATH_SEGMENT"
