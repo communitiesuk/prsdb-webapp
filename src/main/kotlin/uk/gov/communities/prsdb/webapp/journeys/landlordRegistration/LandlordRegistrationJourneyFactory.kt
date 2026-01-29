@@ -143,10 +143,12 @@ class LandlordRegistrationJourney(
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LandlordRegistrationJourneyState {
-    override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
-    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate(IdentityState::verifiedIdentity.name)
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate(AddressState::cachedAddresses.name)
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate(AddressState::isAddressAlreadyRegistered.name)
+    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate(
+        CheckYourAnswersJourneyState::cyaChildJourneyIdIfInitialized.name,
+    )
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
