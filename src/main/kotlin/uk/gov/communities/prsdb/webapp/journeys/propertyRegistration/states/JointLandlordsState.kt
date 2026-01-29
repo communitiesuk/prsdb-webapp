@@ -11,4 +11,6 @@ interface JointLandlordsState : JourneyState {
     val inviteJointLandlordStep: InviteJointLandlordStep
     val checkJointLandlordsStep: CheckJointLandlordsStep
     val removeJointLandlordStep: RemoveJointLandlordStep
+
+    var invitedJointLandlordEmails: List<String>?
 }
