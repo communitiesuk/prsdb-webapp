@@ -80,12 +80,20 @@ class NewRegisterLocalCouncilUserController(
             return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
+        val invitation = invitationService.getInvitationFromToken(token)
+
+        // If user already has a local council role, redirect to dashboard
+        if (stepName == LANDING_PAGE_PATH_SEGMENT && userRolesService.getHasLocalCouncilRole(principal.name)) {
+            invitationService.deleteInvitation(invitation)
+            invitationService.clearTokenFromSession()
+            return ModelAndView("redirect:$LOCAL_COUNCIL_DASHBOARD_URL")
+        }
+
         return try {
             val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val invitation = invitationService.getInvitationFromToken(token)
             val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
             val redirectUrl =
                 JourneyStateService.urlWithJourneyState(

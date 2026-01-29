@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -173,6 +174,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyS
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
@@ -337,8 +339,10 @@ class Navigator(
         )
         navigate(
             "${
-                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
-                "/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
+                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
+            }" +
+                "/${
+                    RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
                 }",
         )
         return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
@@ -378,8 +382,10 @@ class Navigator(
         )
         navigate(
             "${
-                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
-                "/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
+                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
+            }" +
+                "/${
+                    RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
                 }",
         )
         return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
@@ -387,6 +393,53 @@ class Navigator(
 
     fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
         navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+    }
+
+    // New journey framework methods for local council user registration
+    fun skipToNewLocalCouncilUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLocalCouncilUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforePrivacyNotice().build(),
+        )
+        navigateToNewLocalCouncilUserRegistrationJourneyStep("privacy-notice")
+        return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
+    }
+
+    fun skipToNewLocalCouncilUserRegistrationNameFormPage(token: UUID): NameFormPageLocalCouncilUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeName().build(),
+        )
+        navigateToNewLocalCouncilUserRegistrationJourneyStep("name")
+        return createValidPage(page, NameFormPageLocalCouncilUserRegistration::class)
+    }
+
+    fun skipToNewLocalCouncilUserRegistrationEmailFormPage(token: UUID): EmailFormPageLocalCouncilUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeEmail().build(),
+        )
+        navigateToNewLocalCouncilUserRegistrationJourneyStep("email")
+        return createValidPage(page, EmailFormPageLocalCouncilUserRegistration::class)
+    }
+
+    fun skipToNewLocalCouncilUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLocalCouncilUserRegistration {
+        storeInvitationTokenInSession(token)
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeCheckAnswers().build(),
+        )
+        navigateToNewLocalCouncilUserRegistrationJourneyStep("check-answers")
+        return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
+    }
+
+    private fun navigateToNewLocalCouncilUserRegistrationJourneyStep(stepName: String = "") {
+        val url =
+            if (stepName.isEmpty()) {
+                NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
+            } else {
+                "${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID"
+            }
+        navigate(url)
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {

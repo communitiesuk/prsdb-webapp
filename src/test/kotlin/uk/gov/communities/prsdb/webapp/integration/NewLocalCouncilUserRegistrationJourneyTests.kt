@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration
+﻿package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
@@ -31,7 +31,7 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import java.net.URI
 
-class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-local-council-user.sql") {
+class NewLocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-local-council-user.sql") {
     @Autowired
     lateinit var localCouncilService: LocalCouncilService
 
@@ -51,7 +51,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.disableFeature(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+        featureFlagManager.enableFeature(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
 
         val token =
             invitationService.createInvitationToken(

@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
-class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-local-council-user.sql") {
+class NewLocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-local-council-user.sql") {
     @Autowired
     lateinit var localCouncilService: LocalCouncilService
 
@@ -29,7 +29,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.disableFeature(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
+        featureFlagManager.enableFeature(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
 
         val token =
             invitationService.createInvitationToken(
@@ -69,7 +69,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     inner class LocalCouncilUserRegistrationStepName {
         @Test
         fun `Submitting an empty name returns an error`() {
-            val namePage = navigator.skipToLocalCouncilUserRegistrationNameFormPage(invitation.token)
+            val namePage = navigator.skipToNewLocalCouncilUserRegistrationNameFormPage(invitation.token)
             namePage.submitName("")
             assertThat(namePage.form.getErrorMessage()).containsText("You must enter your full name")
         }
@@ -79,7 +79,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     inner class LocalCouncilUserRegistrationPrivacyNoticeName {
         @Test
         fun `Submitting without confirming returns an error`() {
-            val privacyNoticePage = navigator.skipToLocalCouncilUserRegistrationPrivacyNoticePage(invitation.token)
+            val privacyNoticePage = navigator.skipToNewLocalCouncilUserRegistrationPrivacyNoticePage(invitation.token)
             privacyNoticePage.form.submit()
             assertThat(privacyNoticePage.form.getErrorMessage()).containsText("You must confirm you’ve read the privacy notice to continue")
         }
@@ -89,7 +89,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     inner class LocalCouncilUserRegistrationStepEmail {
         @Test
         fun `Submitting an empty e-mail address returns an error`() {
-            val emailPage = navigator.skipToLocalCouncilUserRegistrationEmailFormPage(invitation.token)
+            val emailPage = navigator.skipToNewLocalCouncilUserRegistrationEmailFormPage(invitation.token)
             emailPage.submitEmail("")
             assertThat(emailPage.form.getErrorMessage())
                 .containsText("Enter a valid email address to continue. An email is required for contact purposes.")
@@ -97,7 +97,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Submitting an invalid e-mail address returns an error`() {
-            val emailPage = navigator.skipToLocalCouncilUserRegistrationEmailFormPage(invitation.token)
+            val emailPage = navigator.skipToNewLocalCouncilUserRegistrationEmailFormPage(invitation.token)
             emailPage.submitEmail("notAnEmail")
             assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
         }
@@ -107,7 +107,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     inner class LocalCouncilUserRegistrationCheckAnswers {
         @Test
         fun `Change Name link navigates to the name step`(page: Page) {
-            val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
+            val checkAnswersPage = navigator.skipToNewLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.nameRow
                 .clickActionLinkAndWait()
             BasePage.assertPageIs(page, NameFormPageLocalCouncilUserRegistration::class)
@@ -115,7 +115,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Change Email link navigates to the email step`(page: Page) {
-            val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
+            val checkAnswersPage = navigator.skipToNewLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.emailRow
                 .clickActionLinkAndWait()
             BasePage.assertPageIs(page, EmailFormPageLocalCouncilUserRegistration::class)
