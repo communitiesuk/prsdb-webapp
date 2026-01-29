@@ -82,6 +82,7 @@ ff4j:
   web-console:
     enabled: false
 
+# TODO PDJB-467: enabled migrate-property-compliance by default when complete
 features:
   feature-flags:
     - name: "example-feature-flag-one"
@@ -105,6 +106,9 @@ features:
     - name: "migrate-property-registration"
       enabled: true
       expiry-date: "2026-01-31"
+    - name: "migrate-property-compliance"
+      enabled: false
+      expiry-date: "2026-06-30"
   releases:
     - name: "release-1-0"
       enabled: true
