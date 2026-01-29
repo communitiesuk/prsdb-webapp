@@ -562,10 +562,14 @@ class Navigator(
         return createValidPage(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationInviteJointLandlordPage(): InviteJointLandlordFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords().build(),
-        )
+    fun skipToPropertyRegistrationInviteJointLandlordPage(
+        alreadyInvitedEmails: MutableList<String>? = null,
+    ): InviteJointLandlordFormPagePropertyRegistration {
+        val builder = PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords()
+        if (alreadyInvitedEmails != null) {
+            builder.withInvitedJointLandlords(alreadyInvitedEmails)
+        }
+        setJourneyStateInSession(builder.build())
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
         return createValidPage(page, InviteJointLandlordFormPagePropertyRegistration::class)
     }

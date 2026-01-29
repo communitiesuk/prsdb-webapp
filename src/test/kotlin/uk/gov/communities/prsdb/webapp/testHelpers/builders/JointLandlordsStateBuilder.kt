@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
@@ -7,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJoi
 
 interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfType>> {
     val submittedValueMap: MutableMap<String, FormModel>
+    val additionalDataMap: MutableMap<String, String>
 
     fun withSubmittedValue(
         key: String,
@@ -44,6 +47,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
                 this.emailAddresses = emailAddresses
             }
         withSubmittedValue(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment, inviteJointLandlordsFormModel)
+        additionalDataMap["invitedJointLandlordEmails"] = Json.encodeToString(serializer(), emailAddresses.toList())
         return self()
     }
 
