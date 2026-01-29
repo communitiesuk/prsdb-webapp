@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
-// TODO PDJB-113: validation for already invited landlords
 @IsValidPrioritised
 class InviteJointLandlordsFormModel : FormModel {
     var emailAddresses: MutableList<String> = mutableListOf()

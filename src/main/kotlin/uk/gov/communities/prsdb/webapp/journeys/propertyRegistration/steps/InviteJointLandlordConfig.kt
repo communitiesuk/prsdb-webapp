@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
 
-// TODO PDJB-113: Implement InviteJointLandlordStep
 @JourneyFrameworkComponent
 class InviteJointLandlordConfig : AbstractRequestableStepConfig<Complete, InviteJointLandlordsFormModel, JointLandlordsState>() {
     override val formModelClass = InviteJointLandlordsFormModel::class

@@ -206,7 +206,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         inviteJointLandlordPage.submitEmail("email@address.com")
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
 
-        // TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task test case
+        // TODO PDJB-114, PDJB-117: Implement joint landlord task test case
         checkJointLandlordsPage.form.submit()
         val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
         removeJointLandlordsPage.form.submit()

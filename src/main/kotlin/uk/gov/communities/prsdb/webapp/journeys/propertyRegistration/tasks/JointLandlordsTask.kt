@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 
-// TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task logic
+// TODO PDJB-114, PDJB-117: Implement joint landlord task logic
 @JourneyFrameworkComponent
 class JointLandlordsTask : Task<JointLandlordsState>() {
     override fun makeSubJourney(state: JointLandlordsState) =
