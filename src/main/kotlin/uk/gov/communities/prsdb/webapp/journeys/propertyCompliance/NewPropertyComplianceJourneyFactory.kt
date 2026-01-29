@@ -11,7 +11,7 @@ import java.security.Principal
 class NewPropertyComplianceJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyComplianceJourneyState>,
 ) {
-    final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
