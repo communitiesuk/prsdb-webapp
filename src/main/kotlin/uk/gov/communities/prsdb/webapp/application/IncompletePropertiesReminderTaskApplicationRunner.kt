@@ -7,6 +7,13 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
+import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
+import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
+import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompletePropertyReminderEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -35,30 +42,63 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     }
 
     private fun incompletePropertiesReminderTaskLogic() {
-        val incompleteProperties =
-            incompletePropertiesService.getIncompletePropertyReminders()
-        // TODO - PRSD-1030
-        //  Will need to add something to the DB tracking if a reminder email has been sent for this incomplete property and only send if not yet sent
-
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
+        val cutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
 
-        incompleteProperties.forEach { property ->
-            try {
-                emailSender.sendEmail(
-                    property.landlordEmail,
-                    IncompletePropertyReminderEmail(
-                        singleLineAddress = property.propertySingleLineAddress,
-                        daysToComplete = LocalDate.now().toKotlinLocalDate().daysUntil(property.completeByDate),
-                        prsdUrl = prsdUrl,
-                    ),
-                )
-                println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
-            } catch (ex: Exception) {
-                println("Task failed for incomplete property with savedJourneyStateId: ${property.savedJourneyStateId}")
-                println("Exception message: ${ex.message}")
-                println("Stack trace: ${ex.stackTraceToString()}")
+        val pagesOfProperties = incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+
+        for (page in 0..<pagesOfProperties) {
+            val incompleteProperties = incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
+            incompleteProperties.forEach { property ->
+                try {
+                    emailSender.sendEmail(
+                        property.landlord.email,
+                        IncompletePropertyReminderEmail(
+                            singleLineAddress =
+                                property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+                            daysToComplete =
+                                LocalDate.now().toKotlinLocalDate().daysUntil(
+                                    CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(
+                                        property.savedJourneyState,
+                                    ),
+                                ),
+                            prsdUrl = prsdUrl,
+                        ),
+                    )
+                    println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
+
+                    incompletePropertiesService.recordReminderEmailSent(property.savedJourneyState)
+                } catch (ex: PersistentEmailSendException) {
+                    printMessagesForFailedTask(
+                        ex,
+                        "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
+                    )
+                } catch (ex: TransientEmailSentException) {
+                    printMessagesForFailedTask(
+                        ex,
+                        "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
+                    )
+                } catch (ex: TrackEmailSentException) {
+                    printMessagesForFailedTask(
+                        ex,
+                        "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
+                            property.savedJourneyState.id,
+                    )
+                }
             }
         }
+    }
+
+    private fun printMessagesForFailedTask(
+        ex: Exception,
+        statusMessage: String,
+    ) {
+        println(statusMessage)
+        println("Exception message: ${ex.message}")
+        println("Stack trace: ${ex.stackTraceToString()}")
     }
 
     companion object {

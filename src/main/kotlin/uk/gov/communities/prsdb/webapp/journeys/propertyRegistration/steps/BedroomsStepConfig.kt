@@ -13,7 +13,6 @@ class BedroomsStepConfig : AbstractRequestableStepConfig<Complete, NumberOfBedro
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "forms.numberOfBedrooms.fieldsetHeading",
         )
 

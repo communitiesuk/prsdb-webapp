@@ -2,11 +2,9 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOneLoginUser
 import java.time.Instant
 
@@ -16,7 +14,9 @@ class MockSavedJourneyStateData {
             journeyId: String = "journey-123",
             serializedState: String = createSerialisedStateWithSingleLineAddress("1 Example Road, EG1 2AB"),
             baseUser: OneLoginUser = createOneLoginUser(),
+            reminderEmailSent: ReminderEmailSent? = null,
             createdDate: Instant = Instant.now(),
+            entityId: Long = 1L,
         ): SavedJourneyState {
             val savedJourneyState =
                 SavedJourneyState(
@@ -26,6 +26,8 @@ class MockSavedJourneyStateData {
                 )
 
             ReflectionTestUtils.setField(savedJourneyState, "createdDate", createdDate)
+            ReflectionTestUtils.setField(savedJourneyState, "id", entityId)
+            ReflectionTestUtils.setField(savedJourneyState, "reminderEmailSent", reminderEmailSent)
 
             return savedJourneyState
         }
@@ -77,13 +79,9 @@ class MockSavedJourneyStateData {
             return ObjectMapper().writeValueAsString(stateData)
         }
 
-        fun createLandlordIncompleteProperties(
-            landlord: Landlord = createLandlord(),
-            savedJourneyState: SavedJourneyState = createSavedJourneyState(),
-        ): LandlordIncompleteProperties =
-            LandlordIncompleteProperties(
-                landlord = landlord,
-                savedJourneyState = savedJourneyState,
+        fun createReminderEmailSent(lastReminderEmailSentDate: Instant = Instant.now()): ReminderEmailSent =
+            ReminderEmailSent(
+                lastReminderEmailSentDate = lastReminderEmailSentDate,
             )
     }
 }

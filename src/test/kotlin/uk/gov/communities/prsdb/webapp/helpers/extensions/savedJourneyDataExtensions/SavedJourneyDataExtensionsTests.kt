@@ -1,10 +1,11 @@
-package uk.gov.communities.prsdb.webapp.database.entity
+package uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyDataExtensions
 
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import kotlin.test.assertEquals
 
-class SavedJourneyStateTests {
+class SavedJourneyDataExtensionsTests {
     @Test
     fun `getPropertyRegistrationSingleLineAddress retrieve a selected single line address from the SavedJourneyState`() {
         // Arrange
