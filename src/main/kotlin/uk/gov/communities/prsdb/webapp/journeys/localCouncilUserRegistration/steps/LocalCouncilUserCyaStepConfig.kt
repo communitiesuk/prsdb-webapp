@@ -25,7 +25,6 @@ class LocalCouncilUserCyaStepConfig(
         val localCouncilName = getLocalCouncilName(state)
 
         return mapOf(
-            "title" to "registerLocalCouncilUser.title",
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirm",
             "summaryListData" to getSummaryList(state, localCouncilName),

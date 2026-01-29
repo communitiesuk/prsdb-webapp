@@ -11,14 +11,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class LandingPageStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
-        mapOf(
-            "title" to "registerLocalCouncilUser.title",
-        )
+    override fun getStepSpecificContent(state: JourneyState) = mapOf<String, Any?>()
 
     override fun chooseTemplate(state: JourneyState): String = "registerLocalCouncilUser"
 
-    override fun mode(state: JourneyState) = Complete.COMPLETE
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent

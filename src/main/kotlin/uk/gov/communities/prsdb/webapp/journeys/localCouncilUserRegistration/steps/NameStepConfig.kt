@@ -13,7 +13,6 @@ class NameStepConfig : AbstractRequestableStepConfig<Complete, NameFormModel, Jo
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerLocalCouncilUser.title",
             "fieldSetHeading" to "forms.name.fieldSetHeading",
             "fieldSetHint" to "forms.name.fieldSetHint",
             "label" to "forms.name.label",

@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -17,7 +15,6 @@ class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCou
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerLocalCouncilUser.title",
             "submitButtonText" to "forms.buttons.continue",
             "localCouncilPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE,
             "options" to
@@ -27,7 +24,6 @@ class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCou
                         labelMsgKey = "registerLocalCouncilUser.privacyNotice.checkBox.label",
                     ),
                 ),
-            BACK_URL_ATTR_NAME to RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE,
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/localCouncilPrivacyNoticeForm"
