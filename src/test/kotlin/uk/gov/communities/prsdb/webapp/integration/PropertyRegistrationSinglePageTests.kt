@@ -597,24 +597,43 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
             }
         }
+    }
 
-        @Nested
-        inner class HasJointLandlordsStep {
-            @Test
-            fun `Submitting with no option selected returns an error`(page: Page) {
-                val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
-                hasJointLandlordsPage.form.submit()
-                assertThat(hasJointLandlordsPage.form.getErrorMessage())
-                    .containsText("Select if there are any other landlords for this property")
-            }
+    @Nested
+    inner class HasJointLandlordsStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+            hasJointLandlordsPage.form.submit()
+            assertThat(hasJointLandlordsPage.form.getErrorMessage())
+                .containsText("Select if there are any other landlords for this property")
+        }
 
-            @Test
-            fun `The link renders correctly`(page: Page) {
-                val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
-                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
-                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
-                BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
-            }
+        @Test
+        fun `The link renders correctly`(page: Page) {
+            val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+        }
+    }
+
+    @Nested
+    inner class InviteJointLandlordsStep {
+        @Test
+        fun `Submitting with no email returns an error`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("")
+            assertThat(inviteJointLandlordsPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `Submitting with an invalid email returns an error`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("not-an-email")
+            assertThat(inviteJointLandlordsPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
         }
     }
 
