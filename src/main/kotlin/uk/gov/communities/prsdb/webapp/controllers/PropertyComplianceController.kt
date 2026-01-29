@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
-import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CHECK_GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -42,9 +42,9 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_U
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REVIEW_PATH_SEGMENT
@@ -87,6 +87,7 @@ class PropertyComplianceController(
     private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
     private val landlordService: LandlordService,
 ) {
+    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged), so this controller can be deleted
     @GetMapping
     fun index(
         model: Model,
@@ -101,6 +102,7 @@ class PropertyComplianceController(
         return "propertyComplianceStartPage"
     }
 
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
     fun getTaskList(
         @PathVariable propertyOwnershipId: Long,
@@ -113,6 +115,7 @@ class PropertyComplianceController(
             .getModelAndViewForTaskList()
     }
 
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
     @GetMapping("/{stepName}")
     fun getJourneyStep(
         @PathVariable propertyOwnershipId: Long,
@@ -135,6 +138,7 @@ class PropertyComplianceController(
         return stepModelAndView
     }
 
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
     @PostMapping("/{stepName}", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     fun postJourneyData(
         @PathVariable propertyOwnershipId: Long,
@@ -153,6 +157,7 @@ class PropertyComplianceController(
             .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
     }
 
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadJourneyData(
         @PathVariable propertyOwnershipId: Long,
@@ -188,6 +193,7 @@ class PropertyComplianceController(
             )
     }
 
+    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
     @GetMapping("/$FEEDBACK_LATER_PATH_SEGMENT")
     fun sendFeedbackLater(
         @PathVariable propertyOwnershipId: Long,
@@ -204,6 +210,7 @@ class PropertyComplianceController(
         return "redirect:$CONFIRMATION_PATH_SEGMENT"
     }
 
+    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
     @GetMapping("/$FEEDBACK_FORM_SEGMENT")
     fun getFeedbackForm(
         @PathVariable propertyOwnershipId: Long,
@@ -216,6 +223,7 @@ class PropertyComplianceController(
         return "redirect:$FEEDBACK_FORM_URL"
     }
 
+    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
     @GetMapping("/$CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT")
     fun getContinueToComplianceConfirmation(
         @PathVariable propertyOwnershipId: Long,
@@ -228,6 +236,7 @@ class PropertyComplianceController(
         return "redirect:$CONFIRMATION_PATH_SEGMENT"
     }
 
+    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
     @GetMapping("/$FEEDBACK_PATH_SEGMENT")
     fun getPostComplianceFeedback(
         @PathVariable propertyOwnershipId: Long,
@@ -244,6 +253,7 @@ class PropertyComplianceController(
         return "postComplianceFeedback"
     }
 
+    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
         @PathVariable propertyOwnershipId: Long,
@@ -505,7 +515,7 @@ class PropertyComplianceController(
     }
 
     companion object {
-        const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT/{propertyOwnershipId}"
+        const val PROPERTY_COMPLIANCE_ROUTE = NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE
 
         private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
 
