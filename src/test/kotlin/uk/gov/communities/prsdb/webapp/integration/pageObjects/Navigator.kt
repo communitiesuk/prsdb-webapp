@@ -148,6 +148,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -549,6 +550,7 @@ class Navigator(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentAmount(rentFrequency).build(),
         )
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentAmount.urlPathSegment)
+
         return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
     }
 
@@ -558,6 +560,14 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
         return createValidPage(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationInviteJointLandlordPage(): InviteJointLandlordFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
+        return createValidPage(page, InviteJointLandlordFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
