@@ -515,31 +515,32 @@ class PropertyComplianceController(
     }
 
     companion object {
+        // TODO PDJB-467 -  make private, move usages to NewPropertyComplianceController
         const val PROPERTY_COMPLIANCE_ROUTE = NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE
 
         private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
-
+        // TODO PDJB-467 - make private, move usages to NewPropertyComplianceController
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
-            UriTemplate(PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)
 
-        fun getPropertyComplianceTaskListPath(propertyOwnershipId: Long): String =
-            UriTemplate(PROPERTY_COMPLIANCE_TASK_LIST_ROUTE).expand(propertyOwnershipId).toASCIIString()
-
+        // TODO PDJB-546 - new to new controller
         fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
+        // TODO PDJB-546 - new to new controller
         fun getUpdatePropertyComplianceStepPath(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
         ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
 
+        // TODO PDJB-467 - move to NewPropertyComplianceController
         fun getReviewPropertyComplianceStepPath(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
         ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/${stepId.urlPathSegment}"
 
+        // TODO PDJB-467 - move to NewPropertyComplianceController
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }
 }

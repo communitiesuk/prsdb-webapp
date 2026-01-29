@@ -53,3 +53,6 @@ const val EDIT_ADMIN_PATH_SEGMENT = "edit-admin"
 const val DELETE_ADMIN_PATH_SEGMENT = "delete-admin"
 const val WELL_KNOWN_PATH_SEGMENT = ".well-known"
 const val SECURITY_PATH_SEGMENT = "security.txt"
+
+// Compliance url segments
+const val GAS_SAFETY_UPLOAD_PATH_SEGMENT = "gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING"
