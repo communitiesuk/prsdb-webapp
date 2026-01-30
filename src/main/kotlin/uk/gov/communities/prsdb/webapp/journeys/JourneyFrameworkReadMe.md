@@ -445,5 +445,5 @@ To add custom behaviour, override the `getStepLifecycleOrchestrator()` method in
 Journey state is persisted to the session via `JourneyStateDelegateProvider`. Key concepts:
 
 - Use `delegateProvider.nullableDelegate("key")` for nullable properties
-- Use `delegateProvider.delegate("key", defaultValue)` for non-nullable properties
+- Use `delegateProvider.requiredDelegate("key", defaultValue)` for non-nullable properties
 - The delegate automatically saves to session on set and loads on get
