@@ -21,7 +21,7 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/emailForm"
 
-    override fun mode(state: JointLandlordsState) = Complete.COMPLETE
+    override fun mode(state: JointLandlordsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun enrichSubmittedDataBeforeValidation(
         state: JointLandlordsState,
