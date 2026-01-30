@@ -14,7 +14,6 @@ class InviteJointLandlordConfig : AbstractRequestableStepConfig<Complete, Invite
 
     override fun getStepSpecificContent(state: JointLandlordsState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "jointLandlords.inviteJointLandlord.fieldSetHeading",
             "label" to "jointLandlords.inviteJointLandlord.email.label",
             "submitButtonText" to "forms.buttons.saveAndContinue",
