@@ -44,7 +44,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
     fun withInvitedJointLandlords(emailAddresses: MutableList<String> = mutableListOf<String>("email@address.com")): SelfType {
         val inviteJointLandlordsFormModel =
             InviteJointLandlordsFormModel().apply {
-                this.emailAddresses = emailAddresses
+                this.invitedEmailAddresses = emailAddresses
             }
         withSubmittedValue(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment, inviteJointLandlordsFormModel)
         additionalDataMap["invitedJointLandlordEmails"] = Json.encodeToString(serializer(), emailAddresses.toList())

@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class InviteJointLandlordsFormModel : FormModel {
-    var emailAddresses: MutableList<String> = mutableListOf()
+    var invitedEmailAddresses: MutableList<String> = mutableListOf()
 
     @ValidatedBy(
         constraints = [
@@ -30,5 +30,5 @@ class InviteJointLandlordsFormModel : FormModel {
     )
     var emailAddress: String? = null
 
-    fun isEmailNotAlreadyInvited(): Boolean = emailAddress == null || !emailAddresses.contains(emailAddress)
+    fun isEmailNotAlreadyInvited(): Boolean = emailAddress == null || !invitedEmailAddresses.contains(emailAddress)
 }
