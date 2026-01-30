@@ -35,13 +35,11 @@ import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Compa
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
@@ -50,7 +48,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
@@ -320,126 +317,58 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
     fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
-        navigate(
-            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
-                "/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}",
-        )
+        navigateToLocalCouncilUserRegistrationJourneyStep("landing-page")
     }
 
     fun skipToLocalCouncilUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
-        setJourneyDataInSession(
-            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyDataBuilder().withLandingPageReached().build(),
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforePrivacyNotice().build(),
         )
-        navigate(
-            "${
-                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
-            }" +
-                "/${
-                    RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment
-                }",
-        )
+        navigateToLocalCouncilUserRegistrationJourneyStep("privacy-notice")
         return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
     }
 
     fun skipToLocalCouncilUserRegistrationNameFormPage(token: UUID): NameFormPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
-        setJourneyDataInSession(
-            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationName().build(),
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeName().build(),
         )
-        navigate(
-            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
-                "/${RegisterLocalCouncilUserStepId.Name.urlPathSegment}",
-        )
+        navigateToLocalCouncilUserRegistrationJourneyStep("name")
         return createValidPage(page, NameFormPageLocalCouncilUserRegistration::class)
     }
 
     fun skipToLocalCouncilUserRegistrationEmailFormPage(token: UUID): EmailFormPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
-        setJourneyDataInSession(
-            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationEmail().build(),
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeEmail().build(),
         )
-        navigate(
-            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
-                "/${RegisterLocalCouncilUserStepId.Email.urlPathSegment}",
-        )
+        navigateToLocalCouncilUserRegistrationJourneyStep("email")
         return createValidPage(page, EmailFormPageLocalCouncilUserRegistration::class)
     }
 
     fun skipToLocalCouncilUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLocalCouncilUserRegistration {
         storeInvitationTokenInSession(token)
-        setJourneyDataInSession(
-            LocalCouncilUserRegistrationJourneyFactory.JOURNEY_DATA_KEY,
-            JourneyPageDataBuilder.beforeLocalCouncilUserRegistrationCheckAnswers().build(),
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeCheckAnswers().build(),
         )
-        navigate(
-            "${
-                RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
-            }" +
-                "/${
-                    RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment
-                }",
-        )
+        navigateToLocalCouncilUserRegistrationJourneyStep("check-answers")
         return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
     }
 
     fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
-        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
-    // New journey framework methods for local council user registration
-    fun skipToNewLocalCouncilUserRegistrationPrivacyNoticePage(token: UUID): PrivacyNoticePageLocalCouncilUserRegistration {
-        storeInvitationTokenInSession(token)
-        setJourneyStateInSession(
-            LocalCouncilUserRegistrationStateSessionBuilder.beforePrivacyNotice().build(),
+    private fun navigateToLocalCouncilUserRegistrationJourneyStep(stepName: String) {
+        navigate(
+            "${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
         )
-        navigateToNewLocalCouncilUserRegistrationJourneyStep("privacy-notice")
-        return createValidPage(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
-    }
-
-    fun skipToNewLocalCouncilUserRegistrationNameFormPage(token: UUID): NameFormPageLocalCouncilUserRegistration {
-        storeInvitationTokenInSession(token)
-        setJourneyStateInSession(
-            LocalCouncilUserRegistrationStateSessionBuilder.beforeName().build(),
-        )
-        navigateToNewLocalCouncilUserRegistrationJourneyStep("name")
-        return createValidPage(page, NameFormPageLocalCouncilUserRegistration::class)
-    }
-
-    fun skipToNewLocalCouncilUserRegistrationEmailFormPage(token: UUID): EmailFormPageLocalCouncilUserRegistration {
-        storeInvitationTokenInSession(token)
-        setJourneyStateInSession(
-            LocalCouncilUserRegistrationStateSessionBuilder.beforeEmail().build(),
-        )
-        navigateToNewLocalCouncilUserRegistrationJourneyStep("email")
-        return createValidPage(page, EmailFormPageLocalCouncilUserRegistration::class)
-    }
-
-    fun skipToNewLocalCouncilUserRegistrationCheckAnswersPage(token: UUID): CheckAnswersPageLocalCouncilUserRegistration {
-        storeInvitationTokenInSession(token)
-        setJourneyStateInSession(
-            LocalCouncilUserRegistrationStateSessionBuilder.beforeCheckAnswers().build(),
-        )
-        navigateToNewLocalCouncilUserRegistrationJourneyStep("check-answers")
-        return createValidPage(page, CheckAnswersPageLocalCouncilUserRegistration::class)
-    }
-
-    private fun navigateToNewLocalCouncilUserRegistrationJourneyStep(stepName: String = "") {
-        val url =
-            if (stepName.isEmpty()) {
-                NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
-            } else {
-                "${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID"
-            }
-        navigate(url)
     }
 
     fun goToPropertyRegistrationStartPage(): RegisterPropertyStartPage {

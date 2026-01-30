@@ -11,7 +11,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
@@ -51,8 +50,6 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.disableFeature(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
-
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",

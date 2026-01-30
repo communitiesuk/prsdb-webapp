@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -29,8 +28,6 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.disableFeature(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
-
         val token =
             invitationService.createInvitationToken(
                 email = "anyEmail@test.com",
