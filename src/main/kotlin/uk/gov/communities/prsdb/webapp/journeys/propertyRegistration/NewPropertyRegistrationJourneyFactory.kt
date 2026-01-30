@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -27,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
@@ -161,7 +161,7 @@ class PropertyRegistrationJourney(
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val addJointLandlordStep: AddJointLandlordStep,
+    override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordStep: RemoveJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step
@@ -173,6 +173,7 @@ class PropertyRegistrationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var invitedJointLandlordEmails: List<String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
