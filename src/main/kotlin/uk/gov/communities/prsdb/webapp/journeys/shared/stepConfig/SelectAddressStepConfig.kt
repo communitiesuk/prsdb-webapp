@@ -82,7 +82,11 @@ class SelectAddressStepConfig(
 @JourneyFrameworkComponent
 final class SelectAddressStep(
     stepConfig: SelectAddressStepConfig,
-) : RequestableStep<SelectAddressMode, SelectAddressFormModel, AddressState>(stepConfig)
+) : RequestableStep<SelectAddressMode, SelectAddressFormModel, AddressState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "select-address"
+    }
+}
 
 enum class SelectAddressMode {
     MANUAL_ADDRESS,

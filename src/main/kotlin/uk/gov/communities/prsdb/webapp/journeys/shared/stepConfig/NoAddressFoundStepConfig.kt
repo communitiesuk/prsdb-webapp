@@ -37,4 +37,8 @@ class NoAddressFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInput
 @JourneyFrameworkComponent
 final class NoAddressFoundStep(
     stepConfig: NoAddressFoundStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, AddressState>(stepConfig)
+) : RequestableStep<Complete, NoInputFormModel, AddressState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "no-address-found"
+    }
+}
