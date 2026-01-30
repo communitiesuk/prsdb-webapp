@@ -193,12 +193,12 @@ class ParentageTests {
     }
 
     @Test
-    fun `notHasOutcome returns a single parent with the condition checking that step's outcome does not match`() {
+    fun `doesNotHaveOutcome returns a single parent with the condition checking that step's outcome does not match`() {
         // Arrange
         val step = mock<JourneyStep.RequestableStep<TestEnum, *, *>>()
 
         // Act
-        val parent = step.notHasOutcome(TestEnum.ENUM_VALUE)
+        val parent = step.doesNotHaveOutcome(TestEnum.ENUM_VALUE)
 
         // Assert
         whenever(step.outcome).thenReturn(TestEnum.ENUM_VALUE)
