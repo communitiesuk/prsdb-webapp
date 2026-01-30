@@ -277,3 +277,177 @@ Step functions are divided into three categories:
 
 Override methods on the step class for custom functionality, including final form submission. Most lifecycle functions have `before` and `after` hooks for additional customisation.
 
+## Testing
+
+The journey framework has comprehensive test coverage across multiple test categories.
+
+### Unit Tests
+
+Unit tests for the framework live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
+
+| Test File | Description |
+|-----------|-------------|
+| `JourneyStepTests.kt` | Tests for individual step behaviour and configuration |
+| `StepConfigTests.kt` | Tests for step configuration classes |
+| `StepLifecycleOrchestratorTest.kt` | Tests for the request lifecycle handling |
+| `ParentageTests.kt` | Tests for parent/child relationships between steps |
+| `TaskTests.kt` | Tests for task (step group) functionality |
+| `AbstractJourneyStateTests.kt` | Tests for journey state persistence |
+| `builders/JourneyBuilderTest.kt` | Tests for the DSL builder |
+
+### Integration Tests
+
+Integration tests for complete journeys live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/integration/`. These use Playwright for end-to-end testing of journey flows.
+
+Example: `LandlordRegistrationJourneyTests.kt`
+
+### Test Utilities
+
+- **`JourneyTestHelper`** (`src/test/kotlin/uk/gov/communities/prsdb/webapp/testHelpers/JourneyTestHelper.kt`): Helper class for setting up mock users in tests.
+
+### Writing Tests for Your Journey
+
+1. **Unit test individual steps**: Test step validation, mode determination, and content generation
+2. **Test journey structure**: Verify parentage relationships and navigation paths
+3. **Integration test the full flow**: Use Playwright page objects to test the complete user journey
+
+## File Locations
+
+### Framework Code
+
+The core journey framework lives in `src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
+
+| File | Description |
+|------|-------------|
+| `JourneyStep.kt` | Core step class definition |
+| `JourneyState.kt` | Base interface for journey state |
+| `AbstractJourneyState.kt` | Base class for journey state implementations |
+| `AbstractStepConfig.kt` | Base classes for step configuration |
+| `JourneyStateDelegateProvider.kt` | Handles session persistence |
+| `StepLifecycleOrchestrator.kt` | Manages request lifecycle for steps |
+| `Task.kt` | Base class for reusable task groups |
+| `Parentage.kt` | Defines parent/child relationships |
+| `Destination.kt` | Navigation destination types |
+| `builders/` | DSL builder classes |
+
+### Journey Implementations
+
+Each journey has its own subdirectory. For example, property registration:
+
+```
+src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/propertyRegistration/
+├── NewPropertyRegistrationJourneyFactory.kt  # DSL journey definition
+├── states/                                    # State interfaces and implementations
+│   ├── OccupationState.kt
+│   ├── LicensingState.kt
+│   └── ...
+├── steps/                                     # Step configuration classes
+│   ├── PropertyTypeStepConfig.kt
+│   ├── BedroomsStepConfig.kt
+│   └── ...
+└── tasks/                                     # Reusable task definitions
+    ├── OccupationTask.kt
+    ├── LicensingTask.kt
+    └── ...
+```
+
+### Shared Components
+
+Reusable step configurations and states live in `src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/shared/`:
+
+- `stepConfig/` — Shared step configuration classes
+- `states/` — Shared state interfaces
+- `helpers/` — Utility classes
+
+If you want to reuse steps from another journey, move them here first.
+
+### Controllers
+
+Journey controllers are in `src/main/kotlin/uk/gov/communities/prsdb/webapp/controllers/`. For example:
+- `NewRegisterPropertyController.kt` — Handles property registration journey requests
+
+## Implementation Notes
+
+This section covers advanced topics for developers who need to extend or modify the framework.
+
+### Adding a New Step
+
+1. Create a step config class extending `AbstractRequestableStepConfig`:
+
+```kotlin
+@Component
+class MyStepConfig : AbstractRequestableStepConfig<MyMode, MyFormModel, MyJourneyState>() {
+    override val formModelClass = MyFormModel::class
+
+    override fun getStepSpecificContent(state: MyJourneyState) = mapOf(
+        "someData" to state.someValue
+    )
+
+    override fun chooseTemplate(state: MyJourneyState) = "templates/my-step"
+
+    override fun mode(state: MyJourneyState): MyMode? =
+        state.myAnswer?.let { MyMode.fromAnswer(it) }
+}
+```
+
+2. Create a step instance in your journey state class
+3. Reference the step in the journey DSL
+
+### Creating a New Task
+
+1. Create a task class extending `Task<TState>`:
+
+```kotlin
+class MyTask : Task<MyJourneyState>() {
+    // Define steps as lateinit vars
+    lateinit var step1: JourneyStep.RequestableStep<*, *, MyJourneyState>
+    lateinit var step2: JourneyStep.RequestableStep<*, *, MyJourneyState>
+
+    override fun makeSubJourney(state: MyJourneyState) = subJourney(state) {
+        step(step1) {
+            routeSegment("step1")
+            initialStep()
+            nextStep { step2 }
+        }
+        step(step2) {
+            routeSegment("step2")
+            parents { step1.isComplete() }
+            nextStep { exitStep }
+        }
+        exitStep {
+            parents { step2.isComplete() }
+        }
+    }
+}
+```
+
+2. Create a state interface for the task if needed
+3. Use the task in journey definitions with the `task()` DSL function
+
+### Extending the DSL
+
+The DSL is built using Kotlin builder patterns. Key extension points:
+
+- **`JourneyBuilderDsl`** interface: Defines `step()` and `task()` functions
+- **`StepInitialiser`**: Configures individual steps with `nextStep()`, `parents()`, `routeSegment()`, etc.
+- **`TaskInitialiser`**: Configures tasks within journeys
+
+To add new DSL functions, extend the relevant initialiser classes in `builders/`.
+
+See: https://kotlinlang.org/docs/type-safe-builders.html
+
+### Custom Lifecycle Orchestrators
+
+The `StepLifecycleOrchestrator` sealed class has two implementations:
+- `VisitableStepLifecycleOrchestrator` — For regular steps that render pages
+- `RedirectingStepLifecycleOrchestrator` — For internal steps that redirect
+
+To add custom behaviour, override the `getStepLifecycleOrchestrator()` method in your step config.
+
+### Session Persistence
+
+Journey state is persisted to the session via `JourneyStateDelegateProvider`. Key concepts:
+
+- Use `delegateProvider.nullableDelegate("key")` for nullable properties
+- Use `delegateProvider.delegate("key", defaultValue)` for non-nullable properties
+- The delegate automatically saves to session on set and loads on get
