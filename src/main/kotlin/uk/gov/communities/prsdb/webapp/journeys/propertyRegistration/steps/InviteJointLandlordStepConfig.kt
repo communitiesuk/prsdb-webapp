@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
 
 @JourneyFrameworkComponent
-class InviteJointLandlordConfig : AbstractRequestableStepConfig<Complete, InviteJointLandlordsFormModel, JointLandlordsState>() {
+class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, InviteJointLandlordsFormModel, JointLandlordsState>() {
     override val formModelClass = InviteJointLandlordsFormModel::class
 
     override fun getStepSpecificContent(state: JointLandlordsState) =
@@ -40,5 +40,5 @@ class InviteJointLandlordConfig : AbstractRequestableStepConfig<Complete, Invite
 
 @JourneyFrameworkComponent
 final class InviteJointLandlordStep(
-    stepConfig: InviteJointLandlordConfig,
+    stepConfig: InviteJointLandlordStepConfig,
 ) : RequestableStep<Complete, InviteJointLandlordsFormModel, JointLandlordsState>(stepConfig)
