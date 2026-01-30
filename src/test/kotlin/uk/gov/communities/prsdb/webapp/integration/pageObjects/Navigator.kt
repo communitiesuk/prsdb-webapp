@@ -550,7 +550,6 @@ class Navigator(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentAmount(rentFrequency).build(),
         )
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentAmount.urlPathSegment)
-
         return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
     }
 
