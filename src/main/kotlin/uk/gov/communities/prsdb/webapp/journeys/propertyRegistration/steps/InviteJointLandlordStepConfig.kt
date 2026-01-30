@@ -31,9 +31,9 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
             (InviteJointLandlordsFormModel::emailAddresses.name to (state.invitedJointLandlordEmails ?: emptyList()))
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
-        val formModel = getFormModelFromStateOrNull(state)
+        val formModel = getFormModelFromState(state)
         val currentList = state.invitedJointLandlordEmails?.toMutableList() ?: mutableListOf()
-        formModel?.emailAddress?.let { currentList.add(it) }
+        formModel.emailAddress?.let { currentList.add(it) }
         state.invitedJointLandlordEmails = currentList
     }
 }
