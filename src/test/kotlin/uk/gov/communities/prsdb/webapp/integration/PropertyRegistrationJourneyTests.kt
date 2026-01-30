@@ -200,7 +200,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Invite joint landlord - render page
         assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
-        assertThat(inviteJointLandlordPage.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
+        assertThat(inviteJointLandlordPage.form.sectionHeader).containsText("Section 1 of 2 \u2014 Register your property details")
 
         // fill in and submit
         inviteJointLandlordPage.submitEmail("email@address.com")
