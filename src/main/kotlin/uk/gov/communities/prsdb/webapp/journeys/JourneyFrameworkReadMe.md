@@ -399,10 +399,6 @@ class MyStepConfig : AbstractRequestableStepConfig<MyMode, MyFormModel, MyJourne
 
 ```kotlin
 class MyTask : Task<MyJourneyState>() {
-    // Define steps as lateinit vars
-    lateinit var step1: JourneyStep.RequestableStep<*, *, MyJourneyState>
-    lateinit var step2: JourneyStep.RequestableStep<*, *, MyJourneyState>
-
     override fun makeSubJourney(state: MyJourneyState) = subJourney(state) {
         step(step1) {
             routeSegment("step1")
