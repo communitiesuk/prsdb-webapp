@@ -107,7 +107,12 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount()
 
-        fun beforePropertyRegistrationInviteJointLandlords() = beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
+        fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>?) =
+            if (alreadyInvitedEmails != null) {
+                beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
+            } else {
+                beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
+            }
 
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withHasNoJointLandlords()
