@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 
-// TODO PDJB-113, PDJB-114, PDJB-117: Implement joint landlord task logic
+// TODO PDJB-114, PDJB-117: Implement joint landlord task logic
 @JourneyFrameworkComponent
 class JointLandlordsTask : Task<JointLandlordsState>() {
     override fun makeSubJourney(state: JointLandlordsState) =
@@ -18,20 +18,20 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 routeSegment(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.addJointLandlordStep
+                        YesOrNo.YES -> journey.inviteJointLandlordStep
                         YesOrNo.NO -> exitStep
                     }
                 }
                 savable()
             }
-            step(journey.addJointLandlordStep) {
-                routeSegment(RegisterPropertyStepId.AddJointLandlord.urlPathSegment)
+            step(journey.inviteJointLandlordStep) {
+                routeSegment(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.checkJointLandlordsStep) {
                 routeSegment(RegisterPropertyStepId.CheckJointLandlords.urlPathSegment)
-                parents { journey.addJointLandlordStep.isComplete() }
+                parents { journey.inviteJointLandlordStep.isComplete() }
                 nextStep { journey.removeJointLandlordStep }
             }
             step(journey.removeJointLandlordStep) {
