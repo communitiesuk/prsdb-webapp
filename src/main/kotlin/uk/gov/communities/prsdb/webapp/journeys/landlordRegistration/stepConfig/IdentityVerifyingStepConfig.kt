@@ -21,7 +21,7 @@ class IdentityVerifyingStepConfig(
     override fun chooseTemplate(state: IdentityState) = ""
 
     override fun mode(state: IdentityState) =
-        if (state.verifiedIdentity?.isVerified == true) {
+        if (state.getIsIdentityVerified()) {
             IdentityVerifiedMode.VERIFIED
         } else {
             IdentityVerifiedMode.NOT_VERIFIED
