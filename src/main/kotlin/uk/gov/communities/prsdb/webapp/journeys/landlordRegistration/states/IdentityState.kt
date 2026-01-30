@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateOfBirthFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import java.time.LocalDate
 
@@ -28,12 +27,8 @@ interface IdentityState : JourneyState {
 
     fun getName(): String = verifiedIdentity?.name ?: nameStep.formModel.notNullValue(NameFormModel::name)
 
-    fun getDateOfBirth(): LocalDate =
-        verifiedIdentity?.birthDate ?: dateOfBirthStep.formModel.run {
-            LocalDate.of(
-                notNullValue(DateOfBirthFormModel::year).toInt(),
-                notNullValue(DateOfBirthFormModel::month).toInt(),
-                notNullValue(DateOfBirthFormModel::day).toInt(),
-            )
-        }
+    fun getDateOfBirth(): LocalDate {
+        val dobOrNull = verifiedIdentity?.birthDate ?: dateOfBirthStep.formModel.toLocalDateOrNull()
+        return dobOrNull ?: throw NotNullFormModelValueIsNullException("No date of birth found in IdentityState")
+    }
 }
