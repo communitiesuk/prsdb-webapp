@@ -171,6 +171,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
 
+    // We use StepLifecycleOrchestrator type here as requestable steps with redirecting orchestrators can't be used as backUrls
     val backUrl: String?
         get() {
             val singleParentStep = parentage.allowingParentSteps.singleOrNull()
