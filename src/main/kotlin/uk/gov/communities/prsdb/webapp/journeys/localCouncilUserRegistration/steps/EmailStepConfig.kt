@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("localCouncilUserRegistrationEmailStepConfig")
 class EmailStepConfig(
     private val invitationService: LocalCouncilInvitationService,
 ) : AbstractRequestableStepConfig<Complete, EmailFormModel, JourneyState>() {
@@ -45,7 +45,7 @@ class EmailStepConfig(
     }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("localCouncilUserRegistrationEmailStep")
 final class EmailStep(
     stepConfig: EmailStepConfig,
 ) : RequestableStep<Complete, EmailFormModel, JourneyState>(stepConfig)

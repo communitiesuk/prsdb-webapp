@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("localCouncilUserRegistrationNameStepConfig")
 class NameStepConfig : AbstractRequestableStepConfig<Complete, NameFormModel, JourneyState>() {
     override val formModelClass = NameFormModel::class
 
@@ -24,7 +24,7 @@ class NameStepConfig : AbstractRequestableStepConfig<Complete, NameFormModel, Jo
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("localCouncilUserRegistrationNameStep")
 final class NameStep(
     stepConfig: NameStepConfig,
 ) : RequestableStep<Complete, NameFormModel, JourneyState>(stepConfig)

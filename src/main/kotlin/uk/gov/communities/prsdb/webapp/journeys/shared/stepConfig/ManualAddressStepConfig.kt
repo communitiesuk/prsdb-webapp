@@ -30,4 +30,8 @@ class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAd
 @JourneyFrameworkComponent
 final class ManualAddressStep(
     stepConfig: ManualAddressStepConfig,
-) : RequestableStep<Complete, ManualAddressFormModel, AddressState>(stepConfig)
+) : RequestableStep<Complete, ManualAddressFormModel, AddressState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "manual-address"
+    }
+}

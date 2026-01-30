@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LocalCouncilPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("localCouncilUserRegistrationPrivacyNoticeStepConfig")
 class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCouncilPrivacyNoticeFormModel, JourneyState>() {
     override val formModelClass = LocalCouncilPrivacyNoticeFormModel::class
 
@@ -31,7 +31,7 @@ class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCou
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("localCouncilUserRegistrationPrivacyNoticeStep")
 final class PrivacyNoticeStep(
     stepConfig: PrivacyNoticeStepConfig,
 ) : RequestableStep<Complete, LocalCouncilPrivacyNoticeFormModel, JourneyState>(stepConfig)

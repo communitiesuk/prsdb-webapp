@@ -44,4 +44,8 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
 
 abstract class AbstractCheckYourAnswersStep<TState : CheckYourAnswersJourneyState>(
     stepConfig: AbstractCheckYourAnswersStepConfig<TState>,
-) : RequestableStep<Complete, CheckAnswersFormModel, TState>(stepConfig)
+) : RequestableStep<Complete, CheckAnswersFormModel, TState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-answers"
+    }
+}
