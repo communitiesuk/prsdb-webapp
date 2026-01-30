@@ -24,7 +24,7 @@ interface IdentityState : JourneyState {
     fun getNotNullVerifiedIdentity(): VerifiedIdentityDataModel =
         verifiedIdentity ?: throw NotNullFormModelValueIsNullException("No verified identity found in IdentityState")
 
-    fun getIsIdentityVerified(): Boolean = verifiedIdentity?.isVerified ?: false
+    fun getIsIdentityVerified(): Boolean = verifiedIdentity != null
 
     fun getName(): String = verifiedIdentity?.name ?: nameStep.formModel.notNullValue(NameFormModel::name)
 

@@ -9,10 +9,8 @@ import java.io.Serializable as JavaSerializable
 // TODO PRSD-1745: This won't need to be a form model after migrating to the new journey framework
 @Serializable
 data class VerifiedIdentityDataModel(
-    var name: String? = null,
+    var name: String,
     @Serializable(with = LocalDateSerializer::class)
-    var birthDate: LocalDate? = null,
+    var birthDate: LocalDate,
 ) : FormModel,
-    JavaSerializable { // Required for @Serializable to be compatible with Spring's DefaultSerializer
-    val isVerified get() = name != null && birthDate != null
-}
+    JavaSerializable // Required for @Serializable to be compatible with Spring's DefaultSerializer
