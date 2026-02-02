@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
 
@@ -24,8 +25,8 @@ class PropertyComplianceTaskListStepConfig :
                     "propertyCompliance.taskList.upload.heading",
                     "upload-documents",
                     listOf(
-                       /* TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.gasSafety", state.gasSafetyTask),
-                        TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.eicr", state.eicrTask),
+                        TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.gasSafety", state.gasSafetyTask),
+                        /*TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.eicr", state.eicrTask),
                         TaskListItemViewModel.fromTask(
                             "propertyCompliance.taskList.upload.epc",
                             state.epcTask,
