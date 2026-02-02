@@ -239,52 +239,40 @@ class PropertyRegistrationCyaStepConfig(
                     ),
                 )
             }
+
     private fun getJointLandLordsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> {
         val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)
         return mutableListOf<SummaryListRowViewModel>()
             .apply {
                 if (hasJointLandlords) {
+                    val invitedLandlordEmails = state.getAllInvitedJointLandlordEmails()
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
                             null,
                             Destination(state.hasJointLandlordsStep),
-                        )
+                        ),
                     )
-                    add(
-                        // TODO PDJB-117: Update to show list of joint landlords once implemented
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            null,
-                            state.addJointLandlordStep.formModelOrNull, 
-                            null,
+                    invitedLandlordEmails.forEach {
+                        add(
+                            SummaryListRowViewModel.forCheckYourAnswersPage(
+                                null,
+                                it,
+                                null,
+                            ),
                         )
-                    )
+                    }
                 } else {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.jointLandlordsDetails.hasJointLandlords",
                             "jointLandlords.hasJointLandlords.radios.no",
                             Destination(state.hasJointLandlordsStep),
-                        )
+                        ),
                     )
                 }
             }
     }
-
-    override fun resolveNextDestination(
-        state: PropertyRegistrationJourneyState,
-        defaultDestination: Destination,
-    ): Destination =
-        if (state.isAddressAlreadyRegistered == true) {
-            Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
-        } else {
-            state.deleteJourney()
-            defaultDestination
-        }
-
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
-
-    override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
