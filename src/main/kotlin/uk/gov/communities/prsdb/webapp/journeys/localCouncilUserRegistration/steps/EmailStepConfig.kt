@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -30,7 +31,7 @@ class EmailStepConfig(
         state: JourneyState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
-        val formModel = defaultContent["formModel"] as? EmailFormModel
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? EmailFormModel
         if (formModel?.emailAddress == null) {
             val token = invitationService.getTokenFromSession()
             if (token != null) {
@@ -38,7 +39,7 @@ class EmailStepConfig(
                     EmailFormModel.fromLocalCouncilInvitation(
                         invitationService.getInvitationFromToken(token),
                     )
-                return defaultContent + ("formModel" to prePopulatedFormModel)
+                return defaultContent + (FORM_MODEL_ATTR_NAME to prePopulatedFormModel)
             }
         }
         return defaultContent

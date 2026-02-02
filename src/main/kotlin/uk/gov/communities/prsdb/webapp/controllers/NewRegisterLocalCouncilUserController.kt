@@ -43,6 +43,8 @@ class NewRegisterLocalCouncilUserController(
         @RequestParam(value = TOKEN, required = true) token: String,
         principal: Principal,
     ): CharSequence {
+        // This is using a CharSequence instead of returning a String to handle an error that otherwise occurs in
+        // the LocalCouncilInvitationService method that creates the invitation url using MvcUriComponentsBuilder.fromMethodName
         val invitation = invitationService.getInvitationOrNull(token)
 
         return if (invitation == null) {
@@ -50,20 +52,12 @@ class NewRegisterLocalCouncilUserController(
         } else if (invitationService.getInvitationHasExpired(invitation)) {
             invitationService.deleteInvitation(invitation)
             "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE"
+        } else if (userRolesService.getHasLocalCouncilRole(principal.name)) {
+            invitationService.deleteInvitation(invitation)
+            "redirect:$LOCAL_COUNCIL_DASHBOARD_URL"
         } else {
-            // Check if user already has local council role
-            if (userRolesService.getHasLocalCouncilRole(principal.name)) {
-                invitationService.deleteInvitation(invitation)
-                return "redirect:$LOCAL_COUNCIL_DASHBOARD_URL"
-            }
-
             invitationService.storeTokenInSession(token)
-            val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
-            val redirectUrl =
-                JourneyStateService.urlWithJourneyState(
-                    "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$LANDING_PAGE_PATH_SEGMENT",
-                    journeyId,
-                )
+            val redirectUrl = "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$LANDING_PAGE_PATH_SEGMENT"
             "redirect:$redirectUrl"
         }
     }
@@ -81,13 +75,6 @@ class NewRegisterLocalCouncilUserController(
         }
 
         val invitation = invitationService.getInvitationFromToken(token)
-
-        // If user already has a local council role, redirect to dashboard
-        if (stepName == LANDING_PAGE_PATH_SEGMENT && userRolesService.getHasLocalCouncilRole(principal.name)) {
-            invitationService.deleteInvitation(invitation)
-            invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LOCAL_COUNCIL_DASHBOARD_URL")
-        }
 
         return try {
             val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps()

@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.EmailStep
@@ -44,9 +43,8 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
             }
             step(journey.privacyNoticeStep) {
                 routeSegment(PRIVACY_NOTICE_PATH_SEGMENT)
-                parents { journey.landingPageStep.always() }
+                parents { journey.landingPageStep.isComplete() }
                 nextStep { journey.nameStep }
-                checkable()
             }
             step(journey.nameStep) {
                 routeSegment("name")

@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.st
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
@@ -19,18 +22,13 @@ class LocalCouncilUserCyaStepConfig(
     private val invitationService: LocalCouncilInvitationService,
     private val securityContextService: SecurityContextService,
 ) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
-    override fun chooseTemplate(state: LocalCouncilUserRegistrationJourneyState) = "forms/checkAnswersForm"
-
-    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> {
-        val localCouncilName = getLocalCouncilName(state)
-
-        return mapOf(
+    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> =
+        mapOf(
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirm",
-            "summaryListData" to getSummaryList(state, localCouncilName),
+            "summaryListData" to getSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
 
     override fun afterStepDataIsAdded(state: LocalCouncilUserRegistrationJourneyState) {
         val token =
@@ -39,12 +37,8 @@ class LocalCouncilUserCyaStepConfig(
 
         val invitation = invitationService.getInvitationFromToken(token)
 
-        val name =
-            state.nameStep.formModel.name
-                ?: throw PrsdbWebException("Name not found in journey state")
-        val email =
-            state.emailStep.formModel.emailAddress
-                ?: throw PrsdbWebException("Email not found in journey state")
+        val name = state.nameStep.formModel.notNullValue(NameFormModel::name)
+        val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
         val hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.agreesToPrivacyNotice
 
         val localCouncilUserId =
@@ -65,7 +59,7 @@ class LocalCouncilUserCyaStepConfig(
         securityContextService.refreshContext()
     }
 
-    private fun getLocalCouncilName(state: LocalCouncilUserRegistrationJourneyState): String {
+    private fun getLocalCouncilName(): String {
         val token =
             invitationService.getTokenFromSession()
                 ?: throw PrsdbWebException("Invitation token not found in session")
@@ -73,22 +67,16 @@ class LocalCouncilUserCyaStepConfig(
         return invitationService.getAuthorityForToken(token).name
     }
 
-    private fun getSummaryList(
-        state: LocalCouncilUserRegistrationJourneyState,
-        localCouncilName: String,
-    ): List<SummaryListRowViewModel> {
-        val name =
-            state.nameStep.formModel.name
-                ?: throw PrsdbWebException("Name not found in journey state")
-        val email =
-            state.emailStep.formModel.emailAddress
-                ?: throw PrsdbWebException("Email not found in journey state")
+    private fun getSummaryList(state: LocalCouncilUserRegistrationJourneyState): List<SummaryListRowViewModel> {
+        val localCouncilName = getLocalCouncilName()
+        val name = state.nameStep.formModel.notNullValue(NameFormModel::name)
+        val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.localCouncil",
                 localCouncilName,
-                actionUrl = null,
+                Destination.Nowhere(),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.name",
