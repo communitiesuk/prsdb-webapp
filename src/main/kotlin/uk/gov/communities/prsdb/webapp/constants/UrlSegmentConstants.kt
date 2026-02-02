@@ -56,3 +56,4 @@ const val SECURITY_PATH_SEGMENT = "security.txt"
 
 // Compliance url segments
 const val GAS_SAFETY_UPLOAD_PATH_SEGMENT = "gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING"
+const val GAS_SAFETY_UPLOAD_CONFIRMATION_PATH_SEGMENT = "gas-safety-certificate-upload-confirmation"
