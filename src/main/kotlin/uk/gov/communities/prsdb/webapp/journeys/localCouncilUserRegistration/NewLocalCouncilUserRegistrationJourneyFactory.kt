@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
@@ -28,8 +29,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 class NewLocalCouncilUserRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LocalCouncilUserRegistrationJourney>,
 ) {
-    fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(invitationId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+
+        if (!state.isStateInitialized) {
+            state.invitationId = invitationId
+            state.isStateInitialized = true
+        }
+
+        if (state.invitationId != invitationId) {
+            throw PrsdbWebException("Journey state invitationId ${state.invitationId} does not match provided invitationId $invitationId")
+        }
 
         return journey(state) {
             unreachableStepStep { journey.landingPageStep }
@@ -67,8 +77,7 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(invitation: LocalCouncilInvitation): String =
-        stateFactory.getObject().initializeState(invitation.token.toString())
+    fun initializeJourneyState(invitation: LocalCouncilInvitation): String = stateFactory.getObject().initializeState(invitation.id)
 }
 
 @JourneyFrameworkComponent
@@ -83,11 +92,13 @@ class LocalCouncilUserRegistrationJourney(
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var invitationId: Long by delegateProvider.requiredImmutableDelegate("invitationId")
+    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override fun generateJourneyId(seed: Any?): String {
-        val token = seed as? String
+        val invitationId = seed as? Long
         return super<AbstractJourneyState>.generateJourneyId(
-            token?.let { "LA user reg journey for token $it" },
+            invitationId?.let { "LC user reg journey for invitation $it" },
         )
     }
 }
@@ -100,4 +111,5 @@ interface LocalCouncilUserRegistrationJourneyState :
     val nameStep: NameStep
     val emailStep: EmailStep
     override val cyaStep: LocalCouncilUserCyaStep
+    val invitationId: Long
 }

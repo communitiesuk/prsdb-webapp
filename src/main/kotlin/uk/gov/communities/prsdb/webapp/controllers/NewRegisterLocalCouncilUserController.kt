@@ -77,7 +77,7 @@ class NewRegisterLocalCouncilUserController(
         val invitation = invitationService.getInvitationFromToken(token)
 
         return try {
-            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps()
+            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(invitation.id)
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -104,8 +104,10 @@ class NewRegisterLocalCouncilUserController(
             return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
         }
 
+        val invitation = invitationService.getInvitationFromToken(token)
+
         return try {
-            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps()
+            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(invitation.id)
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {

@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.st
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
@@ -12,10 +12,10 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 @JourneyFrameworkComponent("localCouncilUserRegistrationEmailStepConfig")
 class EmailStepConfig(
     private val invitationService: LocalCouncilInvitationService,
-) : AbstractRequestableStepConfig<Complete, EmailFormModel, JourneyState>() {
+) : AbstractRequestableStepConfig<Complete, EmailFormModel, LocalCouncilUserRegistrationJourneyState>() {
     override val formModelClass = EmailFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
+    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState) =
         mapOf(
             "fieldSetHeading" to "registerLocalCouncilUser.email.fieldSetHeading",
             "fieldSetHint" to "registerLocalCouncilUser.email.fieldSetHint",
@@ -23,22 +23,19 @@ class EmailStepConfig(
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: JourneyState): String = "forms/emailForm"
+    override fun chooseTemplate(state: LocalCouncilUserRegistrationJourneyState): String = "forms/emailForm"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: LocalCouncilUserRegistrationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun resolvePageContent(
-        state: JourneyState,
+        state: LocalCouncilUserRegistrationJourneyState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? EmailFormModel
         if (formModel?.emailAddress == null) {
-            val token = invitationService.getTokenFromSession()
-            if (token != null) {
-                val prePopulatedFormModel =
-                    EmailFormModel.fromLocalCouncilInvitation(
-                        invitationService.getInvitationFromToken(token),
-                    )
+            val invitation = invitationService.getInvitationByIdOrNull(state.invitationId)
+            if (invitation != null) {
+                val prePopulatedFormModel = EmailFormModel.fromLocalCouncilInvitation(invitation)
                 return defaultContent + (FORM_MODEL_ATTR_NAME to prePopulatedFormModel)
             }
         }
@@ -49,4 +46,4 @@ class EmailStepConfig(
 @JourneyFrameworkComponent("localCouncilUserRegistrationEmailStep")
 final class EmailStep(
     stepConfig: EmailStepConfig,
-) : RequestableStep<Complete, EmailFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, EmailFormModel, LocalCouncilUserRegistrationJourneyState>(stepConfig)

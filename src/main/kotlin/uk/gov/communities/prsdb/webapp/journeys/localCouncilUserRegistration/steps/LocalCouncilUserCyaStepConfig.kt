@@ -31,11 +31,9 @@ class LocalCouncilUserCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: LocalCouncilUserRegistrationJourneyState) {
-        val token =
-            invitationService.getTokenFromSession()
-                ?: throw PrsdbWebException("Invitation token not found in session")
-
-        val invitation = invitationService.getInvitationFromToken(token)
+        val invitation =
+            invitationService.getInvitationByIdOrNull(state.invitationId)
+                ?: throw PrsdbWebException("Invitation not found for ID ${state.invitationId}")
 
         val name = state.nameStep.formModel.notNullValue(NameFormModel::name)
         val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
@@ -59,16 +57,11 @@ class LocalCouncilUserCyaStepConfig(
         securityContextService.refreshContext()
     }
 
-    private fun getLocalCouncilName(): String {
-        val token =
-            invitationService.getTokenFromSession()
-                ?: throw PrsdbWebException("Invitation token not found in session")
-
-        return invitationService.getAuthorityForToken(token).name
-    }
-
     private fun getSummaryList(state: LocalCouncilUserRegistrationJourneyState): List<SummaryListRowViewModel> {
-        val localCouncilName = getLocalCouncilName()
+        val invitation =
+            invitationService.getInvitationByIdOrNull(state.invitationId)
+                ?: throw PrsdbWebException("Invitation not found for ID ${state.invitationId}")
+        val localCouncilName = invitation.invitingCouncil.name
         val name = state.nameStep.formModel.notNullValue(NameFormModel::name)
         val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
 
