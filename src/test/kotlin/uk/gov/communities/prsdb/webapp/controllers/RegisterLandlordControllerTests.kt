@@ -73,7 +73,7 @@ class RegisterLandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `getJourneyStep returns privacy notice step for unauthenticated user on it`() {
+    fun `getJourneyStep returns privacy notice step for authenticated user on it`() {
         whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(false)
 
         val journeyId = "test-journey-id"

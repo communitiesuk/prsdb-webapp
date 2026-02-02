@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.constants.TENANCY_TYPES_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
@@ -104,7 +103,7 @@ class RegisterLandlordController(
     ): String {
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
-                ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "User ${principal.name} is not registered as a landlord")
 
         model.addAttribute(
             "registrationNumber",
