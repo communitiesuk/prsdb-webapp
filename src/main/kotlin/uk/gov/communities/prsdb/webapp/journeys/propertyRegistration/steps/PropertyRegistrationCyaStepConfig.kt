@@ -251,6 +251,7 @@ class PropertyRegistrationCyaStepConfig(
                             "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
                             null,
                             Destination(state.hasJointLandlordsStep),
+                            bottomBorder = false,
                         ),
                     )
                     invitedLandlordEmails.forEach {
