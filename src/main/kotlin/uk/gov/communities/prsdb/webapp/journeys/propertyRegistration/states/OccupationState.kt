@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
+import uk.gov.communities.prsdb.webapp.helpers.RentAmountHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -14,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 
 interface OccupationState : JourneyState {
     val occupied: OccupiedStep
@@ -40,21 +43,18 @@ interface OccupationState : JourneyState {
             null
         }
 
-    fun getFormattedRentAmountComponents(): List<String>? {
-        val rentAmount = rentAmount.formModelOrNull?.rentAmount ?: return null
-        val formattedRentAmount = mutableListOf("commonText.poundSign", rentAmount)
-        if (isRentFrequencyCustom()) {
-            formattedRentAmount.addAll(
-                listOf(" ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
-            )
-        }
-        return formattedRentAmount
-    }
+    fun getRentAmount(messageSource: MessageSource): String =
+        RentAmountHelper.getRentAmount(
+            rentAmount.formModel.notNullValue(RentAmountFormModel::rentAmount),
+            isRentFrequencyCustom(),
+            messageSource,
+        )
 
-    fun getBillsIncluded(messageSource: MessageSource): String {
-        val billsIncludedDataModel = getBillsIncludedOrNull()!!
-        return BillsIncludedHelper.getBillsIncludedForCYAStep(billsIncludedDataModel, messageSource)
-    }
+    fun getBillsIncluded(messageSource: MessageSource): String =
+        BillsIncludedHelper.getBillsIncludedForCYAStep(
+            getBillsIncludedOrNull()!!,
+            messageSource,
+        )
 
     private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER
 }

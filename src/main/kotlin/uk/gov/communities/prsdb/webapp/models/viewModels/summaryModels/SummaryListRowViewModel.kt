@@ -13,7 +13,6 @@ data class SummaryListRowViewModel(
     val action: SummaryListRowActionViewModel? = null,
     val valueUrl: String? = null,
     val valueUrlOpensNewTab: Boolean = false,
-    val useSingleLineFormattableViewModel: Boolean = fieldValue is SingleLineFormattableViewModel,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {

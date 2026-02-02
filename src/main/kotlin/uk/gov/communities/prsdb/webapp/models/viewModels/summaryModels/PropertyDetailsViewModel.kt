@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.RentAmountHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -173,7 +174,11 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
-                        SingleLineFormattableViewModel(getFormattedRentAmountComponents()),
+                        RentAmountHelper.getRentAmount(
+                            propertyOwnership.rentAmount!!.toString(),
+                            isRentFrequencyCustom,
+                            messageSource,
+                        ),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
                         null,
@@ -188,15 +193,5 @@ class PropertyDetailsViewModel(
         } else {
             propertyOwnership.customRentFrequency!!.replaceFirstChar { it.uppercase() }
         }
-    }
-
-    private fun getFormattedRentAmountComponents(): MutableList<String> {
-        val formattedRentAmount = mutableListOf("commonText.poundSign", propertyOwnership.rentAmount!!.toString())
-        if (isRentFrequencyCustom) {
-            formattedRentAmount.addAll(
-                listOf(" ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
-            )
-        }
-        return formattedRentAmount
     }
 }
