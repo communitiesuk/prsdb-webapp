@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY
-import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
@@ -118,8 +117,6 @@ class RegisterLandlordController(
 
     companion object {
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
-
-        const val LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$PRIVACY_NOTICE_PATH_SEGMENT"
 
         const val LANDLORD_REGISTRATION_START_PAGE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$START_PAGE_PATH_SEGMENT"
 
