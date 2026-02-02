@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_UPLOAD_CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_UPLOAD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -12,8 +13,14 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class GasSafetyTask : Task<GasSafetyState>() {
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {
+            step(journey.gasSafetyEngineerNumberStep) {
+                routeSegment(GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT)
+                nextStep { state.gasSafetyCertificateUploadStep }
+                savable()
+            }
             step(journey.gasSafetyCertificateUploadStep) {
                 routeSegment(GAS_SAFETY_UPLOAD_PATH_SEGMENT)
+                parents { journey.gasSafetyEngineerNumberStep.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.gasSafetyUploadConfirmationStep }
                 savable()
             }

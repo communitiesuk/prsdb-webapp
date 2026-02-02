@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.GasSafetyTask
@@ -13,6 +14,7 @@ class PropertyComplianceJourney(
     override val taskListStep: PropertyComplianceTaskListStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
+    override val gasSafetyEngineerNumberStep: GasSafetyEngineerNumberStep,
     override val gasSafetyCertificateUploadStep: GasSafetyCertificateUploadStep,
     override val gasSafetyUploadConfirmationStep: GasSafetyUploadConfirmationStep,
     journeyStateService: JourneyStateService,
