@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
+import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -30,6 +31,7 @@ class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
+    private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
@@ -209,10 +211,7 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            SingleLineFormattableViewModel(
-                                state.getFormattedBillsIncludedListComponents()!!,
-                                ", ",
-                            ),
+                            state.getBillsIncluded(messageSource),
                             Destination(billsIncludedStep),
                         ),
                     )

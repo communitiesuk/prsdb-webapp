@@ -1,13 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
-import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
+import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -17,6 +18,7 @@ class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
+    private val messageSource: MessageSource,
     landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
 ) {
     val address: String = propertyOwnership.address.singleLineAddress
@@ -146,10 +148,7 @@ class PropertyDetailsViewModel(
                     if (propertyOwnership.rentIncludesBills) {
                         addRow(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
-                            SingleLineFormattableViewModel(
-                                getFormattedBillsIncludedListComponents(),
-                                ", ",
-                            ),
+                            BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource),
                             changeLinkMessageKey,
                             // TODO PDJB-105: Add link when update step is created
                             null,
@@ -182,16 +181,6 @@ class PropertyDetailsViewModel(
                     )
                 }
             }.toList()
-
-    private fun getFormattedBillsIncludedListComponents(): List<String> {
-        return propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }.map { bill ->
-            if (bill != BillsIncluded.SOMETHING_ELSE) {
-                MessageKeyConverter.convert(bill)
-            } else {
-                propertyOwnership.customBillsIncluded!!.replaceFirstChar { it.uppercase() }
-            }
-        }
-    }
 
     private fun getRentFrequencyValue(): String {
         return if (!isRentFrequencyCustom) {

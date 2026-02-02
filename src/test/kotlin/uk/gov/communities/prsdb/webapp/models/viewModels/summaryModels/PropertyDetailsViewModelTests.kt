@@ -12,9 +12,12 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.math.BigDecimal
 
 class PropertyDetailsViewModelTests {
+    private val mockMessageSource = MockMessageSource()
+
     @Test
     fun `Key details are in the correct order`() {
         // Arrange
@@ -27,7 +30,7 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
         val headerList = viewModel.keyDetails.map { it.fieldHeading }
 
         // Assert
@@ -54,7 +57,7 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
         val headerList = viewModel.propertyRecord.map { it.fieldHeading }
 
         // Assert
@@ -76,7 +79,7 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
         val headerList = viewModel.licensingInformation.map { it.fieldHeading }
 
         // Assert
@@ -108,7 +111,7 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
         val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
@@ -141,7 +144,7 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
         val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
@@ -162,7 +165,7 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
         val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
@@ -177,7 +180,7 @@ class PropertyDetailsViewModelTests {
                 license = License(LicensingType.NO_LICENSING, ""),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         assertNull(
             viewModel.licensingInformation.firstOrNull {
@@ -195,7 +198,7 @@ class PropertyDetailsViewModelTests {
                 license = null,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         assertNull(
             viewModel.licensingInformation.firstOrNull {
@@ -208,7 +211,7 @@ class PropertyDetailsViewModelTests {
     @Test
     fun `isTenantedKey returns the correct value in keyDetails and tenancyAndRentalInformation`() {
         val unoccupiedPropertyOwnership = createPropertyOwnership()
-        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership)
+        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
         val unoccupiedPropertyDetailsRow =
             unoccupiedViewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
@@ -216,7 +219,7 @@ class PropertyDetailsViewModelTests {
         assertEquals("commonText.no", unoccupiedPropertyDetailsRow.fieldValue)
 
         val occupiedPropertyOwnership = createOccupiedPropertyOwnership(currentNumTenants = 2)
-        val occupiedViewModel = PropertyDetailsViewModel(occupiedPropertyOwnership)
+        val occupiedViewModel = PropertyDetailsViewModel(occupiedPropertyOwnership, messageSource = mockMessageSource)
         val occupiedPropertyDetailsRow =
             occupiedViewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
@@ -234,7 +237,8 @@ class PropertyDetailsViewModelTests {
                 primaryLandlord = landlord,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, landlordDetailsUrl = landlordDetailsUrl)
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, landlordDetailsUrl = landlordDetailsUrl, messageSource = mockMessageSource)
 
         val keyDetailsLandlord =
             viewModel.keyDetails
@@ -267,7 +271,7 @@ class PropertyDetailsViewModelTests {
                 rentAmount = rentAmount,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         val propertyRecordNumberOfPeople =
             viewModel.tenancyAndRentalInformation
@@ -318,10 +322,7 @@ class PropertyDetailsViewModelTests {
                 ),
             )
         val expectedBillsIncluded =
-            SingleLineFormattableViewModel(
-                listOf("forms.billsIncluded.checkbox.electricity", "forms.billsIncluded.checkbox.water", "Cat sitting"),
-                ", ",
-            )
+            "Message for forms.billsIncluded.checkbox.electricity, Message for forms.billsIncluded.checkbox.water, Cat sitting"
 
         val propertyOwnership =
             createOccupiedPropertyOwnership(
@@ -332,7 +333,7 @@ class PropertyDetailsViewModelTests {
                 rentAmount = rentAmount,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         val propertyRecordRentIncludesBills =
             viewModel.tenancyAndRentalInformation
@@ -352,7 +353,6 @@ class PropertyDetailsViewModelTests {
 
         assertEquals("commonText.yes", propertyRecordRentIncludesBills.fieldValue)
         assertEquals(expectedBillsIncluded, propertyRecordBillsIncluded.fieldValue)
-        assertTrue(propertyRecordBillsIncluded.useSingleLineFormattableViewModel)
         assertEquals("forms.furnishedStatus.radios.options.furnished.label", propertyRecordFurnishedStatus.fieldValue)
         assertEquals("Fortnightly", propertyRecordRentFrequency.fieldValue)
         assertEquals(expectedRentAmount, propertyRecordRentAmount.fieldValue)
@@ -367,7 +367,7 @@ class PropertyDetailsViewModelTests {
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, licenseNumber),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         val propertyRecordLicenseType =
             viewModel.licensingInformation
@@ -387,7 +387,7 @@ class PropertyDetailsViewModelTests {
             createPropertyOwnership(
                 license = License(LicensingType.NO_LICENSING, ""),
             )
-        val viewModelDeclaredNoLicense = PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense)
+        val viewModelDeclaredNoLicense = PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense, messageSource = mockMessageSource)
         val propertyRecordDeclaredNoLicense =
             viewModelDeclaredNoLicense.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
@@ -399,7 +399,7 @@ class PropertyDetailsViewModelTests {
 
         val propertyOwnershipNullLicense =
             createPropertyOwnership()
-        val viewModelNullLicense = PropertyDetailsViewModel(propertyOwnershipNullLicense)
+        val viewModelNullLicense = PropertyDetailsViewModel(propertyOwnershipNullLicense, messageSource = mockMessageSource)
         val propertyRecordNullLicense =
             viewModelNullLicense.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
@@ -415,7 +415,7 @@ class PropertyDetailsViewModelTests {
         val propertyOwnership = createPropertyOwnership(address = address)
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         // Assert
         val uprn =
@@ -431,7 +431,7 @@ class PropertyDetailsViewModelTests {
     fun `Property details hides null uprn if hideNullUprn is true`() {
         val propertyOwnership = createPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = true, messageSource = mockMessageSource)
 
         assertNull(viewModel.propertyRecord.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.uprn" })
     }
@@ -440,7 +440,7 @@ class PropertyDetailsViewModelTests {
     fun `Property details declares null uprn unavailable if hideNullUprn is false`() {
         val propertyOwnership = createPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = false)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = false, messageSource = mockMessageSource)
 
         val uprnKey =
             viewModel.propertyRecord
@@ -458,7 +458,7 @@ class PropertyDetailsViewModelTests {
                 address = createAddress(uprn = 1234.toLong()),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true, messageSource = mockMessageSource)
 
         val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
 
@@ -479,7 +479,7 @@ class PropertyDetailsViewModelTests {
                 address = createAddress(uprn = 1234.toLong()),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false, messageSource = mockMessageSource)
 
         val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
 

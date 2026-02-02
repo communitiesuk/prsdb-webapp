@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
-import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -51,15 +51,9 @@ interface OccupationState : JourneyState {
         return formattedRentAmount
     }
 
-    fun getFormattedBillsIncludedListComponents(): List<String>? {
+    fun getBillsIncluded(messageSource: MessageSource): String {
         val billsIncludedDataModel = getBillsIncludedOrNull()!!
-        return billsIncludedDataModel.standardBillsIncludedListAsEnums.map { bill ->
-            if (bill != BillsIncluded.SOMETHING_ELSE) {
-                MessageKeyConverter.convert(bill)
-            } else {
-                billsIncludedDataModel.customBillsIncluded!!.replaceFirstChar { it.uppercase() }
-            }
-        }
+        return BillsIncludedHelper.getBillsIncludedForCYAStep(billsIncludedDataModel, messageSource)
     }
 
     private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER
