@@ -31,4 +31,8 @@ class GasSafetyUploadConfirmationConfig : AbstractRequestableStepConfig<Complete
 @JourneyFrameworkComponent
 final class GasSafetyUploadConfirmationStep(
     stepConfig: GasSafetyUploadConfirmationConfig,
-) : RequestableStep<Complete, NoInputFormModel, GasSafetyState>(stepConfig)
+) : RequestableStep<Complete, NoInputFormModel, GasSafetyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "gas-safety-certificate-upload-confirmation"
+    }
+}

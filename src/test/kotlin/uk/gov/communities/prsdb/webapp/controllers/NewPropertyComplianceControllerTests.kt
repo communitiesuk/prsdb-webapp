@@ -23,12 +23,12 @@ import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_UPLOAD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.NewPropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -59,14 +59,14 @@ class NewPropertyComplianceControllerTests(
 
     private val validPropertyOwnershipId = 1L
     private val validPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
-    private val validPropertyComplianceStepUrl = "$validPropertyComplianceUrl/$GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT"
-    private val validPropertyComplianceFileUploadUrl = "$validPropertyComplianceUrl/$GAS_SAFETY_UPLOAD_PATH_SEGMENT"
+    private val validPropertyComplianceStepUrl = "$validPropertyComplianceUrl/${GasSafetyEngineerNumberStep.ROUTE_SEGMENT}"
+    private val validPropertyComplianceFileUploadUrl = "$validPropertyComplianceUrl/${GasSafetyCertificateUploadStep.ROUTE_SEGMENT}"
     private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
 
     private val invalidPropertyOwnershipId = 2L
     private val invalidPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
-    private val invalidPropertyComplianceStepUrl = "$invalidPropertyComplianceUrl/$GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT"
-    private val invalidPropertyComplianceFileUploadUrl = "$invalidPropertyComplianceUrl/$GAS_SAFETY_UPLOAD_PATH_SEGMENT"
+    private val invalidPropertyComplianceStepUrl = "$invalidPropertyComplianceUrl/${GasSafetyEngineerNumberStep.ROUTE_SEGMENT}"
+    private val invalidPropertyComplianceFileUploadUrl = "$invalidPropertyComplianceUrl/${GasSafetyCertificateUploadStep.ROUTE_SEGMENT}"
     private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
 
     @BeforeEach
@@ -108,7 +108,7 @@ class NewPropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 200 without a cookie for a valid non-file-upload request`() {
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
-                .thenReturn(mapOf(GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
             mvc.get(validPropertyComplianceStepUrl).andExpect {
                 status { isOk() }
@@ -120,7 +120,7 @@ class NewPropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 200 with a cookie for a valid file-upload request`() {
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
-                .thenReturn(mapOf(GAS_SAFETY_UPLOAD_PATH_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockTokenCookieService.createCookieForValue(eq(FILE_UPLOAD_COOKIE_NAME), any(), any()))
                 .thenReturn(validFileUploadCookie)
 
@@ -174,7 +174,7 @@ class NewPropertyComplianceControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `postJourneyData returns a redirect for a landlord user that does own the property`() {
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
-                .thenReturn(mapOf(GAS_SAFETY_ENGINEER_NUMBER_PATH_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
             mvc
                 .post(validPropertyComplianceStepUrl) {
@@ -208,7 +208,7 @@ class NewPropertyComplianceControllerTests(
                 mockTokenCookieService.isTokenForCookieValue(invalidFileUploadCookie.value, validPropertyComplianceFileUploadUrl),
             ).thenReturn(false)
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
-                .thenReturn(mapOf(GAS_SAFETY_UPLOAD_PATH_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockTokenCookieService.createCookieForValue(eq(FILE_UPLOAD_COOKIE_NAME), any(), any()))
                 .thenReturn(validFileUploadCookie)
         }

@@ -28,4 +28,8 @@ class GasSafetyEngineerNumberStepConfig : AbstractRequestableStepConfig<Complete
 @JourneyFrameworkComponent
 final class GasSafetyEngineerNumberStep(
     stepConfig: GasSafetyEngineerNumberStepConfig,
-) : RequestableStep<Complete, GasSafeEngineerNumFormModel, GasSafetyState>(stepConfig)
+) : RequestableStep<Complete, GasSafeEngineerNumFormModel, GasSafetyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "gas-safety-engineer-number"
+    }
+}
