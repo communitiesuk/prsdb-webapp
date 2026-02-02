@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
@@ -78,9 +79,7 @@ class LandlordSecurityConfig(
                     .contentSecurityPolicy { csp ->
                         csp
                             .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
-                    }
-                    .permissionsPolicyHeader {
-                            permissions ->
+                    }.permissionsPolicyHeader { permissions ->
                         permissions
                             .policy(PERMISSIONS_POLICY_DIRECTIVES)
                     }
@@ -94,16 +93,15 @@ class LandlordSecurityConfig(
     fun idVerificationFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher(
-                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
-                    RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT,
+                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${IdentityVerifyingStep.ROUTE_SEGMENT}",
                 "/id-verification/**",
             ).authorizeHttpRequests { requests ->
                 requests
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
-                oauth.authorizationEndpoint { authorization ->
-                    authorization.addIdVerificationParametersToAuthorizationWithBaseUri("/id-verification/oauth2/authorize")
+                oauth.authorizationEndpoint { auth ->
+                    auth.addIdVerificationParametersToAuthorizationWithBaseUri("/id-verification/oauth2/authorize")
                 }
                 oauth.userInfoEndpoint { userInfo ->
                     userInfo.oidcUserService(landlordOidcUserService())
