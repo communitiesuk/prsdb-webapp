@@ -6,12 +6,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkb
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 
 class PrivacyNoticePageLandlordRegistration(
     page: Page,
 ) : BasePage(
         page,
-        RegisterLandlordController.LANDLORD_REGISTRATION_PRIVACY_NOTICE_ROUTE,
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${PrivacyNoticeStep.ROUTE_SEGMENT}",
     ) {
     val form = PrivacyNoticeForm(page)
 
