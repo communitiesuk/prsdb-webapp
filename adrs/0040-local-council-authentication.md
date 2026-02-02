@@ -125,3 +125,28 @@ on their council's IT infrastructure (e.g., Internal Access for Google Workspace
 * ADR-0007 - User Authentication, Registration, and ID Verification
 * ADR-0011 - Access Control
 * ADR-0012 - Session Authentication
+
+### Implementation Notes for Option 4 (Parallel Authentication)
+
+If Option 4 were chosen, there are several approaches for routing users to the correct authentication provider:
+
+**Council Selection Before Authentication**: Users would select their council from a dropdown/search interface before
+being directed to the appropriate authentication provider. This is simple to implement and works regardless of email
+domain configuration, but adds an extra step to the login process.
+
+**Email Domain-Based Routing**: Users would enter their email address, and the system would automatically route them to
+the correct provider based on their domain. This provides a seamless user experience but requires maintaining accurate
+domain mappings and may fail for ambiguous cases (e.g., generic email domains shared by multiple councils).
+
+**Hybrid Approach**: The system could attempt automatic routing by email domain first, falling back to council selection
+for ambiguous cases. This optimizes the user experience for the common case while handling edge cases, but is the most
+complex to implement and requires careful UX design.
+
+**Cookie Caching**: For any of these approaches, the user's previous choice could be cached in a cookie, allowing
+returning users to bypass the selection/input screen entirely. This would make the authentication experience for most
+users identical to a single-provider setup while maintaining the flexibility of the parallel architecture.
+
+Since both One Login and Internal Access use OIDC/OAuth2, Spring Security can support both providers simultaneously
+with appropriate configuration. The user's authentication provider would need to be stored alongside their other data
+in the database.
+
