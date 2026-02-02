@@ -85,14 +85,20 @@ Switch to Internal Access for Local Council users but keep the One Login integra
 allowing a quick reversion if Internal Access experiences significant issues.
 
 * Good, because it provides the JML integration benefits of Internal Access when the service is working correctly.
-* Good, because it allows a rapid switch back to One Login during private beta if Internal Access proves unsuitable.
+* Good, because it allows a rapid switch back to One Login before go-live if Internal Access proves unsuitable
+  (requiring minimal effort with a few weeks' notice).
+* Good, because it provides a genuine safety net to trial Internal Access in production during private beta without
+  committing irrevocably.
 * Good, because it reduces risk around our go-live timeline - we can launch with the fallback if needed.
-* Bad, because maintaining two authentication integrations increases code complexity and maintenance burden.
+* Good, because once confident in Internal Access post-go-live, the One Login integration can be removed, making the
+  complexity temporary rather than permanent.
+* Bad, because maintaining two authentication integrations increases code complexity and maintenance burden during the
+  trial period.
 * Bad, because the fallback code path may not be well-tested if it's rarely used, potentially causing issues when
   needed.
 * Bad, because it still inherits the maturity and reliability risks of Internal Access during normal operation.
 * Bad, because switching back to One Login after full go-live would be extremely disruptive (requiring all council
-  users to re-register), making the fallback only viable as a pre-go-live safety net rather than a long-term option.
+  users to re-register), so the decision must be made before go-live.
 
 ### Run Internal Access and One Login in parallel (targeting specific councils)
 
@@ -100,7 +106,6 @@ Run both Internal Access and One Login simultaneously, routing users to the appr
 on their council's IT infrastructure (e.g., Internal Access for Google Workspace councils, One Login for others).
 
 * Good, because it maximizes the number of councils that can benefit from JML integration via Internal Access.
-* Good, because it provides a gradual migration path as Internal Access matures and adds Microsoft 365 support.
 * Good, because it allows targeting Internal Access to specific councils (e.g., those using Google Workspace) during
   private beta phases.
 * Good, because authorization is already managed within our application, so handling users from different authentication
@@ -108,8 +113,10 @@ on their council's IT infrastructure (e.g., Internal Access for Google Workspace
 * Neutral, because determining which authentication provider to use when a user arrives requires upfront development
   (e.g., users selecting their council, or maintaining email domain mappings), but this is a solvable technical
   challenge.
-* Bad, because maintaining two active authentication paths increases code complexity, testing burden, and ongoing
-  maintenance overhead.
+* Bad, because migrating councils between providers post-go-live would be extremely disruptive (requiring all users to
+  re-register), making this dual-authentication architecture permanent rather than transitional.
+* Bad, because maintaining two active authentication paths permanently increases code complexity, testing burden, and
+  ongoing maintenance overhead.
 * Bad, because users may experience different authentication flows depending on their council, which could cause
   confusion and require additional support documentation.
 
