@@ -26,12 +26,6 @@ class PropertyComplianceTaskListStepConfig :
                     "upload-documents",
                     listOf(
                         TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.gasSafety", state.gasSafetyTask),
-                        /*TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.eicr", state.eicrTask),
-                        TaskListItemViewModel.fromTask(
-                            "propertyCompliance.taskList.upload.epc",
-                            state.epcTask,
-                            "propertyCompliance.taskList.upload.epc.hint",
-                        ),*/
                     ),
                 ),
             )
