@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -567,7 +568,7 @@ class Navigator(
     }
 
     fun goToPropertyComplianceStartPage(propertyOwnershipId: Long): StartPagePropertyCompliance {
-        navigate(PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId))
+        navigate(NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId))
         return createValidPage(
             page,
             StartPagePropertyCompliance::class,
@@ -577,7 +578,7 @@ class Navigator(
 
     fun goToPropertyComplianceGasSafetyPage(propertyOwnershipId: Long): GasSafetyPagePropertyCompliance {
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafety.urlPathSegment}",
         )
         return createValidPage(
@@ -593,7 +594,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceGasSafetyIssueDate().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment}",
         )
         return createValidPage(
@@ -609,7 +610,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceGasSafetyEngineerNum().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment}",
         )
         return createValidPage(
@@ -625,7 +626,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceGasSafetyUpload().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}",
         )
         return createValidPage(
@@ -641,7 +642,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemption().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafetyExemption.urlPathSegment}",
         )
         return createValidPage(
@@ -657,7 +658,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemptionReason().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
         )
         return createValidPage(
@@ -675,7 +676,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemptionOtherReason().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment}",
         )
         return createValidPage(
@@ -691,7 +692,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEicr().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EICR.urlPathSegment}",
         )
         return createValidPage(
@@ -707,7 +708,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEicrIssueDate().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
         )
         return createValidPage(
@@ -723,7 +724,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEicrUpload().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
         )
         return createValidPage(
@@ -739,7 +740,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEicrExemption().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
         )
         return createValidPage(
@@ -755,7 +756,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEicrExemptionReason().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
         )
         return createValidPage(
@@ -771,7 +772,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEicrExemptionOtherReason().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment}",
         )
         return createValidPage(
@@ -787,7 +788,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEpc().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EPC.urlPathSegment}",
         )
         return createValidPage(
@@ -803,7 +804,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEpcExemptionReason().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EpcExemptionReason.urlPathSegment}",
         )
         return createValidPage(
@@ -822,7 +823,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceCheckAutoMatchedEpc(epcDetails).build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment}",
         )
         return createValidPage(
@@ -841,7 +842,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceCheckMatchedEpc(epcDetails).build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment}",
         )
         return createValidPage(
@@ -857,7 +858,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEpcLookup().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EpcLookup.urlPathSegment}",
         )
         return createValidPage(
@@ -876,7 +877,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEpcExpiryCheck(epcRating).build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment}",
         )
         return createValidPage(
@@ -895,7 +896,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceEpcExpired(epcRating).build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.EpcExpired.urlPathSegment}",
         )
         return createValidPage(
@@ -911,7 +912,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceMeesExemptionCheck().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment}",
         )
         return createValidPage(
@@ -927,7 +928,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceMeesExemptionReason().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.MeesExemptionReason.urlPathSegment}",
         )
         return createValidPage(
@@ -943,7 +944,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceLowEnergyRating().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.LowEnergyRating.urlPathSegment}",
         )
         return createValidPage(
@@ -959,7 +960,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceFireSafetyDeclaration().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment}",
         )
         return createValidPage(
@@ -975,7 +976,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceKeepPropertySafe().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.KeepPropertySafe.urlPathSegment}",
         )
         return createValidPage(
@@ -991,7 +992,7 @@ class Navigator(
             JourneyPageDataBuilder.beforePropertyComplianceResponsibilityToTenants().build(),
         )
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment}",
         )
         return createValidPage(
@@ -1011,7 +1012,7 @@ class Navigator(
         )
 
         navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
                 "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
         )
         return createValidPage(
