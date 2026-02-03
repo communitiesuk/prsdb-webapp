@@ -47,7 +47,7 @@ import java.security.Principal
 @PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
 @RequestMapping(NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE)
-class PropertyComplianceController(
+class LegacyPropertyComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
     private val uploadService: UploadService,

@@ -44,8 +44,8 @@ import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import kotlin.reflect.full.memberProperties
 
-@WebMvcTest(PropertyComplianceController::class)
-class PropertyComplianceControllerTests(
+@WebMvcTest(LegacyPropertyComplianceController::class)
+class LegacyPropertyComplianceControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
@@ -92,7 +92,7 @@ class PropertyComplianceControllerTests(
         "$validPropertyComplianceUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
     private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
     private val validPropertyComplianceUpdateUrl =
-        PropertyComplianceController.getUpdatePropertyComplianceBasePath(
+        LegacyPropertyComplianceController.getUpdatePropertyComplianceBasePath(
             validPropertyOwnershipId,
         )
     private val validPropertyComplianceUpdateInitialStepUrl =
@@ -108,7 +108,7 @@ class PropertyComplianceControllerTests(
         "$invalidPropertyComplianceUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
     private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
     private val invalidPropertyComplianceUpdateUrl =
-        PropertyComplianceController.getUpdatePropertyComplianceBasePath(
+        LegacyPropertyComplianceController.getUpdatePropertyComplianceBasePath(
             invalidPropertyOwnershipId,
         )
     private val invalidPropertyComplianceUpdateInitialStepUrl =
