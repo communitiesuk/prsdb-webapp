@@ -52,6 +52,7 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -537,8 +538,5 @@ class PropertyComplianceController(
         ): String =
             "${NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/" +
                 stepId.urlPathSegment
-
-        // TODO PDJB-467 - move to NewPropertyComplianceController
-        const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
     }
 }
