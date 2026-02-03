@@ -24,18 +24,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
-import uk.gov.communities.prsdb.webapp.constants.CHECK_GAS_SAFE_REGISTER_URL
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_URL
-import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_URL
-import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
-import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL
 import uk.gov.communities.prsdb.webapp.constants.HOMES_ACT_2018_URL
 import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_URL
@@ -43,14 +33,10 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATIN
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
-import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -62,10 +48,6 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
@@ -83,8 +65,6 @@ class PropertyComplianceController(
     private val propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory,
     private val validator: Validator,
     private val propertyComplianceService: PropertyComplianceService,
-    private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
-    private val landlordService: LandlordService,
 ) {
     @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
@@ -175,103 +155,6 @@ class PropertyComplianceController(
                 principal,
                 checkingAnswersForStep,
             )
-    }
-
-    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
-    @GetMapping("/$FEEDBACK_LATER_PATH_SEGMENT")
-    fun sendFeedbackLater(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
-
-        val landlord = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord
-
-        emailSender.sendEmail(landlord.email, GiveFeedbackLaterEmail())
-        landlordService.setHasRespondedToFeedback(landlord)
-
-        return "redirect:$CONFIRMATION_PATH_SEGMENT"
-    }
-
-    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
-    @GetMapping("/$FEEDBACK_FORM_SEGMENT")
-    fun getFeedbackForm(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
-
-        landlordService.setHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
-        return "redirect:$FEEDBACK_FORM_URL"
-    }
-
-    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
-    @GetMapping("/$CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT")
-    fun getContinueToComplianceConfirmation(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
-
-        landlordService.setHasRespondedToFeedback(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).primaryLandlord)
-        return "redirect:$CONFIRMATION_PATH_SEGMENT"
-    }
-
-    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
-    @GetMapping("/$FEEDBACK_PATH_SEGMENT")
-    fun getPostComplianceFeedback(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-        model: Model,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
-
-        model.addAttribute("completeFeedbackLaterUrl", FEEDBACK_LATER_PATH_SEGMENT)
-        model.addAttribute("startSurveyUrl", FEEDBACK_FORM_SEGMENT)
-        model.addAttribute("continueToComplianceUrl", CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT)
-
-        return "postComplianceFeedback"
-    }
-
-    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged)
-    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-        model: Model,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId)
-
-        val propertyCompliance =
-            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
-                ?: throw ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "No property compliance found for property ownership $propertyOwnershipId",
-                )
-
-        val confirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
-
-        model.addAttribute("propertyAddress", propertyCompliance.propertyOwnership.address.singleLineAddress)
-        model.addAttribute("confirmationMessageKeys", confirmationMessageKeys)
-        model.addAttribute("gasSafeRegisterUrl", CHECK_GAS_SAFE_REGISTER_URL)
-        model.addAttribute("electricalSafetyStandardsUrl", ELECTRICAL_SAFETY_STANDARDS_URL)
-        model.addAttribute("getNewEpcUrl", GET_NEW_EPC_URL)
-        model.addAttribute("registerMeesExemptionUrl", REGISTER_PRS_EXEMPTION_URL)
-        model.addAttribute("meesUrl", MEES_EXEMPTION_GUIDE_URL)
-        model.addAttribute("findEpcUrl", FIND_EPC_URL)
-        model.addAttribute("addComplianceUrl", COMPLIANCE_ACTIONS_URL)
-        model.addAttribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
-
-        return if (confirmationMessageKeys.nonCompliantMsgKeys.isEmpty()) {
-            "fullyCompliantPropertyConfirmation"
-        } else {
-            "partiallyCompliantPropertyConfirmation"
-        }
     }
 
     @GetMapping("/$UPDATE_PATH_SEGMENT/{stepName}")
@@ -397,15 +280,6 @@ class PropertyComplianceController(
             model.addAttribute("howToRentGuideUrl", HOW_TO_RENT_GUIDE_URL)
             model.addAttribute("propertyComplianceUrl", propertyComplianceUrl)
             "forms/responsibilityToTenantsReview"
-        }
-    }
-
-    private fun throwErrorIfPropertyWasNotAddedThisSession(propertyOwnershipId: Long) {
-        if (!propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No property compliance was added for property ownership $propertyOwnershipId in this session",
-            )
         }
     }
 

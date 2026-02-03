@@ -2,9 +2,14 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import jakarta.servlet.http.Cookie
+import org.hamcrest.Matchers.samePropertyValuesAs
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -23,15 +28,27 @@ import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_URL
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.NewPropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 
 @WebMvcTest(NewPropertyComplianceController::class)
 class NewPropertyComplianceControllerTests(
@@ -54,6 +71,15 @@ class NewPropertyComplianceControllerTests(
 
     @MockitoBean
     private lateinit var mockValidator: Validator
+
+    @MockitoBean
+    private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var mockEmailSender: EmailNotificationService<GiveFeedbackLaterEmail>
+
+    @MockitoBean
+    private lateinit var mockLandlordService: LandlordService
 
     private val redirectUrl = "any-url"
 
@@ -382,5 +408,218 @@ class NewPropertyComplianceControllerTests(
             verify(mockUploadService).uploadFile(any(), any(), any())
             verify(mockTokenCookieService, never()).createCookieForValue(any(), any(), any())
         }
+    }
+
+    @Nested
+    inner class GetConfirmation {
+        private val validPropertyComplianceConfirmationUrl = "$validPropertyComplianceUrl/$CONFIRMATION_PATH_SEGMENT"
+        private val invalidPropertyComplianceConfirmationUrl = "$invalidPropertyComplianceUrl/$CONFIRMATION_PATH_SEGMENT"
+
+        @Test
+        fun `getConfirmation returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getConfirmation returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getConfirmation returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceConfirmationUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getConfirmation returns 404 if the landlord didn't add compliance details for the property this session`() {
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(false)
+
+            mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getConfirmation returns 500 if the landlord added compliance details this session but no compliance record is found`() {
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(mockPropertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(null)
+
+            mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
+                status { is5xxServerError() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getConfirmation returns 200 for if the landlord added compliance details for the property this session`() {
+            val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+            val expectedConfirmationMessageKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
+
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(mockPropertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(propertyCompliance)
+
+            mvc.get(validPropertyComplianceConfirmationUrl).andExpect {
+                status { isOk() }
+                model { attribute("confirmationMessageKeys", samePropertyValuesAs(expectedConfirmationMessageKeys)) }
+                view { name("fullyCompliantPropertyConfirmation") }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetFeedback {
+        private val validFeedbackUrl = "$validPropertyComplianceUrl/$FEEDBACK_PATH_SEGMENT"
+        private val invalidFeedbackUrl = "$invalidPropertyComplianceUrl/$FEEDBACK_PATH_SEGMENT"
+
+        @Test
+        fun `getFeedback returns a redirect for unauthenticated user`() {
+            mvc.get(validFeedbackUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getFeedback returns 403 for an unauthorised user`() {
+            mvc.get(validFeedbackUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFeedback returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidFeedbackUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFeedback returns 404 if the landlord didn't add compliance details for the property this session`() {
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(false)
+
+            mvc.get(validFeedbackUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getFeedback returns 200 for if the landlord added compliance details for the property this session`() {
+            val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(mockPropertyComplianceService.getComplianceForPropertyOrNull(validPropertyOwnershipId)).thenReturn(propertyCompliance)
+
+            mvc.get(validFeedbackUrl).andExpect {
+                status { isOk() }
+                view { name("postComplianceFeedback") }
+            }
+        }
+    }
+
+    @Nested
+    inner class RespondToRequestForFeedback {
+        private fun validPropertyComplianceSendFeedbackUrl(route: String) = "$validPropertyComplianceUrl/$route"
+
+        private fun invalidPropertyComplianceSendFeedbackUrl(route: String) = "$invalidPropertyComplianceUrl/$route"
+
+        @ParameterizedTest()
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        fun `route returns a redirect for unauthenticated user`(route: String) {
+            mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @ParameterizedTest()
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @WithMockUser
+        fun `route returns 403 for an unauthorised user`(route: String) {
+            mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @ParameterizedTest()
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `route returns 404 for a landlord user that doesn't own the property`(route: String) {
+            mvc.get(invalidPropertyComplianceSendFeedbackUrl(route)).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @ParameterizedTest()
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `route returns 404 if the landlord didn't add compliance details for the property this session`(route: String) {
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(false)
+
+            mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @ParameterizedTest()
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `route redirects and marks landlord as having seen feedback if the compliance details were added for the property this session`(
+            route: String,
+            destination: String,
+        ) {
+            val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(validPropertyOwnershipId))
+                .thenReturn(propertyCompliance.propertyOwnership)
+
+            mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(destination)
+            }
+
+            verify(mockLandlordService).setHasRespondedToFeedback(
+                eq(propertyCompliance.propertyOwnership.primaryLandlord),
+            )
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `sendFeedbackLater sends an email to the landlord`() {
+            val propertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
+
+            whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(true)
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(validPropertyOwnershipId))
+                .thenReturn(propertyCompliance.propertyOwnership)
+
+            mvc.get(validPropertyComplianceSendFeedbackUrl(FEEDBACK_LATER_PATH_SEGMENT))
+
+            verify(mockEmailSender).sendEmail(
+                eq(propertyCompliance.propertyOwnership.primaryLandlord.email),
+                any(),
+            )
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun feedbackResponseRoutes(): List<Arguments> =
+            listOf(
+                Arguments.of(Named.of("give feedback later", FEEDBACK_LATER_PATH_SEGMENT), CONFIRMATION_PATH_SEGMENT),
+                Arguments.of(Named.of("feedback form", FEEDBACK_FORM_SEGMENT), FEEDBACK_FORM_URL),
+                Arguments.of(Named.of("skip feedback", CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT), CONFIRMATION_PATH_SEGMENT),
+            )
     }
 }
