@@ -80,6 +80,40 @@ class NewPropertyComplianceControllerTests(
     }
 
     @Nested
+    inner class Index {
+        @Test
+        fun `index returns a redirect for unauthenticated user`() {
+            mvc.get(validPropertyComplianceUrl).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `index returns 403 for an unauthorised user`() {
+            mvc.get(validPropertyComplianceUrl).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `index returns 404 for a landlord user that doesn't own the property`() {
+            mvc.get(invalidPropertyComplianceUrl).andExpect {
+                status { isNotFound() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `index returns 200 for a landlord user that does own the property`() {
+            mvc.get(validPropertyComplianceUrl).andExpect {
+                status { isOk() }
+            }
+        }
+    }
+
+    @Nested
     inner class GetJourneyStep {
         @Test
         fun `getJourneyStep returns a redirect for unauthenticated user`() {

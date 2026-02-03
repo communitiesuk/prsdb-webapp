@@ -86,24 +86,6 @@ class PropertyComplianceController(
     private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
     private val landlordService: LandlordService,
 ) {
-    // TODO PDJB-467 - move to NewPropertyComplianceController (not feature flagged), so this controller can be deleted
-    @GetMapping
-    fun index(
-        model: Model,
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-    ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        model.addAttribute("findEpcUrl", FIND_EPC_URL)
-        model.addAttribute("landlordResponsibilitiesUrl", LANDLORD_RESPONSIBILITIES_URL)
-        model.addAttribute(
-            "taskListUrl",
-            "${NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
-        )
-        return "propertyComplianceStartPage"
-    }
-
     @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
     fun getTaskList(

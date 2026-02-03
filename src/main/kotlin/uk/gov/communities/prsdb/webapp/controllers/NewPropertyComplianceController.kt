@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.ui.Model
 import org.springframework.validation.Validator
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,7 +25,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
@@ -53,6 +56,23 @@ class NewPropertyComplianceController(
     private val tokenCookieService: TokenCookieService,
     private val uploadService: UploadService,
 ) {
+    @GetMapping
+    fun index(
+        model: Model,
+        @PathVariable propertyOwnershipId: Long,
+        principal: Principal,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
+        model.addAttribute("findEpcUrl", FIND_EPC_URL)
+        model.addAttribute("landlordResponsibilitiesUrl", LANDLORD_RESPONSIBILITIES_URL)
+        model.addAttribute(
+            "taskListUrl",
+            "${getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
+        )
+        return "propertyComplianceStartPage"
+    }
+
     @GetMapping("/{stepName}")
     @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_COMPLIANCE)
     fun getJourneyStep(
