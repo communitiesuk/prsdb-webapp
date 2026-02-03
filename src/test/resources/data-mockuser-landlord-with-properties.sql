@@ -28,6 +28,9 @@ INSERT INTO form_context (id, journey_type, context, subject_identifier)
 VALUES (1, 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
+INSERT INTO saved_journey_state (id, created_date, journey_id, serialized_state, subject_identifier)
+VALUES (1,current_date, 'example-incomplete-journey1', '{}', 'urn:fdc:gov.uk:2022:UVWXY');
+
 INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'LIC123456');
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
