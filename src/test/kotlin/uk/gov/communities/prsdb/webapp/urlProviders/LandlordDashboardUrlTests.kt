@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.NumberOfIncompletePropertiesFeatureStrategy
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -321,7 +322,7 @@ class LandlordDashboardUrlTests(
         // Act, Assert
         mvc
             .post(
-                PropertyComplianceController.getPropertyCompliancePath(compliantPropertyCompliance.propertyOwnership.id) +
+                NewPropertyComplianceController.getPropertyCompliancePath(compliantPropertyCompliance.propertyOwnership.id) +
                     "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
             ) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED

@@ -79,7 +79,7 @@ class PropertyDetailsController(
                 )
             }
 
-        val addComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)
+        val addComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)
 
         val modelAndView = ModelAndView("propertyDetailsView")
         modelAndView.addObject("propertyDetails", propertyDetails)

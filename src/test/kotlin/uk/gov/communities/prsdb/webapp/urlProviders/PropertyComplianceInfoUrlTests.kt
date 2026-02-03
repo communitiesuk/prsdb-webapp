@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
@@ -158,7 +159,7 @@ class PropertyComplianceInfoUrlTests(
         // Act, Assert
         mvc
             .post(
-                PropertyComplianceController.getPropertyCompliancePath(nonCompliantPropertyCompliance.propertyOwnership.id) +
+                NewPropertyComplianceController.getPropertyCompliancePath(nonCompliantPropertyCompliance.propertyOwnership.id) +
                     "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
             ) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
