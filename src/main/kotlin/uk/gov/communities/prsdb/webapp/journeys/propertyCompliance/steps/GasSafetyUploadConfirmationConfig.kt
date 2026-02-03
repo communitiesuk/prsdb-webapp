@@ -14,7 +14,7 @@ class GasSafetyUploadConfirmationConfig : AbstractRequestableStepConfig<Complete
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyCompliance.title",
-            // TODO PDJB-340 - implement these properly
+            // TODO PDJB-467 - implement these properly / remove if not needed
             "submitButtonText" to "forms.buttons.saveAndContinueToEICR",
             /*"submitButtonText" to
                 getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
@@ -25,7 +25,7 @@ class GasSafetyUploadConfirmationConfig : AbstractRequestableStepConfig<Complete
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/uploadCertificateConfirmationForm"
 
-    override fun mode(state: GasSafetyState) = Complete.COMPLETE
+    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent

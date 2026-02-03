@@ -27,7 +27,7 @@ class GasSafetyTask : Task<GasSafetyState>() {
             step(journey.gasSafetyUploadConfirmationStep) {
                 routeSegment(GasSafetyUploadConfirmationStep.ROUTE_SEGMENT)
                 parents { journey.gasSafetyCertificateUploadStep.hasOutcome(Complete.COMPLETE) }
-                noNextDestination()
+                nextStep { exitStep }
                 savable()
             }
             exitStep {

@@ -18,11 +18,10 @@ class GasSafetyCertificateUploadStepConfig :
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
-            // TODO PDJB-340 - implement these properly
-            "alreadyUploaded" to false,
+            "alreadyUploaded" to (getFormModelFromStateOrNull(state)?.fileUploadId != null),
+            // TODO PDJB-467 - implement this properly / remove if not needed
             "nextStepUrl" to "",
-            /*"alreadyUploaded" to (journeyDataService.getJourneyDataFromSession().getGasSafetyCertUploadId() != null),
-            "nextStepUrl" to gasSafetyUploadNextStepUrl(checkingAnswersFor),*/
+            // "nextStepUrl" to gasSafetyUploadNextStepUrl(checkingAnswersFor),
         )
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/uploadCertificateForm"
