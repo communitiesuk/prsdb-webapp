@@ -52,7 +52,6 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -75,7 +74,7 @@ import java.security.Principal
 
 @PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
-@RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
+@RequestMapping(NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE)
 class PropertyComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
@@ -98,7 +97,10 @@ class PropertyComplianceController(
 
         model.addAttribute("findEpcUrl", FIND_EPC_URL)
         model.addAttribute("landlordResponsibilitiesUrl", LANDLORD_RESPONSIBILITIES_URL)
-        model.addAttribute("taskListUrl", "${getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT")
+        model.addAttribute(
+            "taskListUrl",
+            "${NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)}/$TASK_LIST_PATH_SEGMENT",
+        )
         return "propertyComplianceStartPage"
     }
 
@@ -515,14 +517,8 @@ class PropertyComplianceController(
     }
 
     companion object {
-        // TODO PDJB-467 -  make private, move usages to NewPropertyComplianceController
-        const val PROPERTY_COMPLIANCE_ROUTE = NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE
-
-        private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$UPDATE_PATH_SEGMENT"
-
-        // TODO PDJB-467 - make private, move usages to NewPropertyComplianceController
-        fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
-            NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)
+        private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE =
+            "${NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE}/$UPDATE_PATH_SEGMENT"
 
         // TODO PDJB-546 - new to new controller
         fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =
@@ -538,7 +534,9 @@ class PropertyComplianceController(
         fun getReviewPropertyComplianceStepPath(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
-        ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/${stepId.urlPathSegment}"
+        ): String =
+            "${NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/" +
+                stepId.urlPathSegment
 
         // TODO PDJB-467 - move to NewPropertyComplianceController
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"

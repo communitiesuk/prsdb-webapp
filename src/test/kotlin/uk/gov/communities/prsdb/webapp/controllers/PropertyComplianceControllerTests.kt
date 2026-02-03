@@ -105,7 +105,7 @@ class PropertyComplianceControllerTests(
     private val propertyComplianceUpdateJourneyRedirectUrl = "any-url"
 
     private val validPropertyOwnershipId = 1L
-    private val validPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
+    private val validPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
     private val validPropertyComplianceInitialStepUrl =
         "$validPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
     private val validPropertyComplianceFileUploadUrl =
@@ -121,7 +121,7 @@ class PropertyComplianceControllerTests(
         "$validPropertyComplianceUpdateUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
-    private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
+    private val invalidPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
     private val invalidPropertyComplianceInitialStepUrl =
         "$invalidPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
     private val invalidPropertyComplianceFileUploadUrl =
