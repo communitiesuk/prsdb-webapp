@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TaskList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -12,7 +12,9 @@ class TaskListPagePropertyCompliance(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        "${PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong())}/$TASK_LIST_PATH_SEGMENT",
+        "${NewPropertyComplianceController.getPropertyCompliancePath(
+            urlArguments["propertyOwnershipId"]!!.toLong(),
+        )}/$TASK_LIST_PATH_SEGMENT",
     ) {
     private val uploadTasks = TaskList.byIndex(page, 0)
 
