@@ -15,3 +15,10 @@ hasJointLandlords:
     "no": No, I am the only landlord for this property
   error:
     missing: Select if there are any other landlords for this property
+inviteJointLandlord:
+  fieldSetHeading: Invite a joint landlord to this property
+  email:
+    label: Enter their email address
+  error:
+    invalidEmail: Enter an email address in the correct format, like name@example.com
+    alreadyInvited: You have already invited this email address

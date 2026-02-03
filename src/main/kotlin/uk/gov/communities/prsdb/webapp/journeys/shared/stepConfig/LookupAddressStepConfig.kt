@@ -51,7 +51,11 @@ class LookupAddressStepConfig(
 @JourneyFrameworkComponent
 final class LookupAddressStep(
     stepConfig: LookupAddressStepConfig,
-) : RequestableStep<LookupAddressMode, LookupAddressFormModel, AddressState>(stepConfig)
+) : RequestableStep<LookupAddressMode, LookupAddressFormModel, AddressState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "lookup-address"
+    }
+}
 
 enum class LookupAddressMode {
     ADDRESSES_FOUND,
