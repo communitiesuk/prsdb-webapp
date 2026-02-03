@@ -12,9 +12,7 @@ class TaskListPagePropertyCompliance(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        "${PropertyComplianceController.getPropertyCompliancePath(
-            urlArguments["propertyOwnershipId"]!!.toLong(),
-        )}/$TASK_LIST_PATH_SEGMENT",
+        "${PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong())}/$TASK_LIST_PATH_SEGMENT",
     ) {
     private val uploadTasks = TaskList.byIndex(page, 0)
 

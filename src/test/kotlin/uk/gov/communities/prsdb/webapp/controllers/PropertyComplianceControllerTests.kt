@@ -544,7 +544,7 @@ class PropertyComplianceControllerTests(
         private fun invalidPropertyComplianceSendFeedbackUrl(route: String) = "$invalidPropertyComplianceUrl/$route"
 
         @ParameterizedTest()
-        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceControllerTests#feedbackResponseRoutes")
         fun `route returns a redirect for unauthenticated user`(route: String) {
             mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
                 status { is3xxRedirection() }
@@ -552,7 +552,7 @@ class PropertyComplianceControllerTests(
         }
 
         @ParameterizedTest()
-        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceControllerTests#feedbackResponseRoutes")
         @WithMockUser
         fun `route returns 403 for an unauthorised user`(route: String) {
             mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
@@ -561,7 +561,7 @@ class PropertyComplianceControllerTests(
         }
 
         @ParameterizedTest()
-        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceControllerTests#feedbackResponseRoutes")
         @WithMockUser(roles = ["LANDLORD"])
         fun `route returns 404 for a landlord user that doesn't own the property`(route: String) {
             mvc.get(invalidPropertyComplianceSendFeedbackUrl(route)).andExpect {
@@ -570,7 +570,7 @@ class PropertyComplianceControllerTests(
         }
 
         @ParameterizedTest()
-        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceControllerTests#feedbackResponseRoutes")
         @WithMockUser(roles = ["LANDLORD"])
         fun `route returns 404 if the landlord didn't add compliance details for the property this session`(route: String) {
             whenever(mockPropertyComplianceService.wasPropertyComplianceAddedThisSession(validPropertyOwnershipId)).thenReturn(false)
@@ -581,7 +581,7 @@ class PropertyComplianceControllerTests(
         }
 
         @ParameterizedTest()
-        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceControllerTests#feedbackResponseRoutes")
+        @MethodSource("uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceControllerTests#feedbackResponseRoutes")
         @WithMockUser(roles = ["LANDLORD"])
         fun `route redirects and marks landlord as having seen feedback if the compliance details were added for the property this session`(
             route: String,
