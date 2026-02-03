@@ -40,7 +40,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_U
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -58,8 +58,8 @@ import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 
-@WebMvcTest(NewPropertyComplianceController::class)
-class NewPropertyComplianceControllerTests(
+@WebMvcTest(PropertyComplianceController::class)
+class PropertyComplianceControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
@@ -92,13 +92,13 @@ class NewPropertyComplianceControllerTests(
     private val redirectUrl = "any-url"
 
     private val validPropertyOwnershipId = 1L
-    private val validPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
+    private val validPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
     private val validPropertyComplianceStepUrl = "$validPropertyComplianceUrl/${GasSafetyEngineerNumberStep.ROUTE_SEGMENT}"
     private val validPropertyComplianceFileUploadUrl = "$validPropertyComplianceUrl/${GasSafetyCertificateUploadStep.ROUTE_SEGMENT}"
     private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
 
     private val invalidPropertyOwnershipId = 2L
-    private val invalidPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
+    private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
     private val invalidPropertyComplianceStepUrl = "$invalidPropertyComplianceUrl/${GasSafetyEngineerNumberStep.ROUTE_SEGMENT}"
     private val invalidPropertyComplianceFileUploadUrl = "$invalidPropertyComplianceUrl/${GasSafetyCertificateUploadStep.ROUTE_SEGMENT}"
     private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
@@ -624,12 +624,12 @@ class NewPropertyComplianceControllerTests(
     @Nested
     inner class GetFireSafetyReview {
         private val validPropertyComplianceFireSafetyReviewUrl =
-            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
                 PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
             )
         private val invalidPropertyComplianceFireSafetyReviewUrl =
-            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
                 PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
             )
@@ -692,12 +692,12 @@ class NewPropertyComplianceControllerTests(
     @Nested
     inner class GetKeepPropertySafeReview {
         private val validPropertyComplianceKeepPropertySafeReviewUrl =
-            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
                 PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
             )
         private val invalidPropertyComplianceKeepPropertySafeReviewUrl =
-            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
                 PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
             )
@@ -761,12 +761,12 @@ class NewPropertyComplianceControllerTests(
     @Nested
     inner class GetResponsibilityToTenantsReview {
         private val validPropertyComplianceResponsibilityToTenantsReviewUrl =
-            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
                 PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
             )
         private val invalidPropertyComplianceResponsibilityToTenantsReviewUrl =
-            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+            PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
                 PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
             )

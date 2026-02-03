@@ -27,7 +27,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
@@ -85,7 +85,7 @@ class LegacyPropertyComplianceControllerTests(
     private val propertyComplianceUpdateJourneyRedirectUrl = "any-url"
 
     private val validPropertyOwnershipId = 1L
-    private val validPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
+    private val validPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
     private val validPropertyComplianceInitialStepUrl =
         "$validPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
     private val validPropertyComplianceFileUploadUrl =
@@ -101,7 +101,7 @@ class LegacyPropertyComplianceControllerTests(
         "$validPropertyComplianceUpdateUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
-    private val invalidPropertyComplianceUrl = NewPropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
+    private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
     private val invalidPropertyComplianceInitialStepUrl =
         "$invalidPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
     private val invalidPropertyComplianceFileUploadUrl =

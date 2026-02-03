@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ExemptionReasonFormPage
 
@@ -11,6 +11,6 @@ class EpcExemptionReasonPagePropertyCompliance(
     urlArguments: Map<String, String>,
 ) : ExemptionReasonFormPage<EpcExemptionReason>(
         page,
-        NewPropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.EpcExemptionReason.urlPathSegment}",
     )

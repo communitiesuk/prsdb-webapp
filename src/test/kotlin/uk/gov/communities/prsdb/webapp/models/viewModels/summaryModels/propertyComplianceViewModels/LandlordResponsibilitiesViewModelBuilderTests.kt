@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
@@ -44,7 +44,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
-                                NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
                                 ),
@@ -55,7 +55,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
-                                NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
                                 ),
@@ -66,7 +66,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                             SummaryListRowActionViewModel(
                                 "forms.links.view",
-                                NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
                                 ),

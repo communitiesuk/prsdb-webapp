@@ -51,7 +51,7 @@ import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
@@ -75,7 +75,7 @@ import java.security.Principal
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
 @RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
-class NewPropertyComplianceController(
+class PropertyComplianceController(
     private val propertyComplianceJourneyFactory: NewPropertyComplianceJourneyFactory,
     private val validator: Validator,
     private val propertyOwnershipService: PropertyOwnershipService,

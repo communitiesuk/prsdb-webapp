@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -46,7 +46,7 @@ import java.security.Principal
 
 @PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
-@RequestMapping(NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE)
+@RequestMapping(PropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE)
 class LegacyPropertyComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
@@ -304,7 +304,7 @@ class LegacyPropertyComplianceController(
 
     companion object {
         private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE =
-            "${NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE}/$UPDATE_PATH_SEGMENT"
+            "${PropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE}/$UPDATE_PATH_SEGMENT"
 
         // TODO PDJB-546 - new to new controller
         fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =

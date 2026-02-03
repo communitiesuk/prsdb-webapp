@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
@@ -13,7 +13,7 @@ class CheckAndSubmitPagePropertyCompliance(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        NewPropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
     ) {
     val form = PostForm(page)

@@ -26,8 +26,8 @@ import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.NumberOfIncompletePropertiesFeatureStrategy
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
@@ -322,7 +322,7 @@ class LandlordDashboardUrlTests(
         // Act, Assert
         mvc
             .post(
-                NewPropertyComplianceController.getPropertyCompliancePath(compliantPropertyCompliance.propertyOwnership.id) +
+                PropertyComplianceController.getPropertyCompliancePath(compliantPropertyCompliance.propertyOwnership.id) +
                     "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
             ) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED

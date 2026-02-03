@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -12,7 +12,7 @@ class FireSafetyDeclarationPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
+        PropertyComplianceController.getReviewPropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
             PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
         ),
