@@ -994,14 +994,14 @@ class PropertyComplianceControllerTests(
     @Nested
     inner class GetFireSafetyReview {
         private val validPropertyComplianceFireSafetyReviewUrl =
-            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
-                PropertyComplianceStepId.FireSafetyDeclaration,
+                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
             )
         private val invalidPropertyComplianceFireSafetyReviewUrl =
-            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
-                PropertyComplianceStepId.FireSafetyDeclaration,
+                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
             )
 
         @Test
@@ -1060,14 +1060,14 @@ class PropertyComplianceControllerTests(
     @Nested
     inner class GetKeepPropertySafeReview {
         private val validPropertyComplianceKeepPropertySafeReviewUrl =
-            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
-                PropertyComplianceStepId.KeepPropertySafe,
+                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
             )
         private val invalidPropertyComplianceKeepPropertySafeReviewUrl =
-            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
-                PropertyComplianceStepId.KeepPropertySafe,
+                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
             )
 
         @Test
@@ -1129,14 +1129,14 @@ class PropertyComplianceControllerTests(
     @Nested
     inner class GetResponsibilityToTenantsReview {
         private val validPropertyComplianceResponsibilityToTenantsReviewUrl =
-            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
-                PropertyComplianceStepId.ResponsibilityToTenants,
+                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
             )
         private val invalidPropertyComplianceResponsibilityToTenantsReviewUrl =
-            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
-                PropertyComplianceStepId.ResponsibilityToTenants,
+                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
             )
 
         @Test

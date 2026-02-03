@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -19,9 +19,9 @@ class LandlordResponsibilitiesViewModelBuilder {
                         value = "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                         actionText = "forms.links.view",
                         actionLink =
-                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.FireSafetyDeclaration,
+                                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
                             ),
                         withActionLink = withActionLinks,
                     )
@@ -30,9 +30,9 @@ class LandlordResponsibilitiesViewModelBuilder {
                         value = "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                         actionText = "forms.links.view",
                         actionLink =
-                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.KeepPropertySafe,
+                                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
                             ),
                         withActionLink = withActionLinks,
                     )
@@ -41,9 +41,9 @@ class LandlordResponsibilitiesViewModelBuilder {
                         value = "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
                         actionText = "forms.links.view",
                         actionLink =
-                            PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                            NewPropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.ResponsibilityToTenants,
+                                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
                             ),
                         withActionLink = withActionLinks,
                     )

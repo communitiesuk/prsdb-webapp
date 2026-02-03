@@ -47,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.REVIEW_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
@@ -521,6 +520,8 @@ class PropertyComplianceController(
         private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE =
             "${NewPropertyComplianceController.PROPERTY_COMPLIANCE_ROUTE}/$UPDATE_PATH_SEGMENT"
 
+        private const val REVIEW_PATH_SEGMENT = "review"
+
         // TODO PDJB-546 - new to new controller
         fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
@@ -530,13 +531,5 @@ class PropertyComplianceController(
             propertyOwnershipId: Long,
             stepId: PropertyComplianceStepId,
         ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/${stepId.urlPathSegment}"
-
-        // TODO PDJB-467 - move to NewPropertyComplianceController
-        fun getReviewPropertyComplianceStepPath(
-            propertyOwnershipId: Long,
-            stepId: PropertyComplianceStepId,
-        ): String =
-            "${NewPropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/" +
-                stepId.urlPathSegment
     }
 }

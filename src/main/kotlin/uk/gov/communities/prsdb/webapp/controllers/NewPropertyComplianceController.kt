@@ -231,10 +231,17 @@ class NewPropertyComplianceController(
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
 
+        private const val REVIEW_PATH_SEGMENT = "review"
+
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
         fun getPropertyComplianceTaskListPath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_TASK_LIST_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getReviewPropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            stepName: String,
+        ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/$stepName"
     }
 }
