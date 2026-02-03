@@ -242,6 +242,7 @@ The journey structure is defined using a Kotlin DSL. For each element, you defin
 ### Basic Structure
 
 ```kotlin
+val state = stateFactory.getObject()
 val simpleJourney = journey(state) {
     unreachableStepStep { journey.nameStep }
     step(journey.nameStep) {
@@ -300,6 +301,137 @@ step(journey.slowSwallowStep) {
 
 ## Initialising Journey State
 
+When a user first accesses a journey, the controller must initialise a new journey state and generate a unique journey ID. This ID becomes part of the URL and allows the session to be restored if the user returns later.
+
+### Generating Journey IDs
+
+Journey IDs are generated using the `generateJourneyId` method on `JourneyState`. There are two approaches:
+
+**Seed-based generation** (preferred):
+- A given seed will always produce the same journey ID
+- Generates a 6-character alphanumeric string based on a hash of the seed
+- By constructing the seed manually, you can control whether IDs are stable or unique:
+    - **Stable**: Use a seed based only on an entity (e.g. `"Journey for user ${user.name}"` — the same user always gets the same ID)
+    - **Unique**: Include a timestamp or random element in the seed (e.g. `"Journey for user ${user.name} at time ${System.currentTimeMillis()}"` — each invocation creates a new ID)
+
+**Random generation** (default when no seed is provided):
+- Generates a 7-character alphanumeric string
+- Creates a unique ID on every call
+- Only suitable when journeys should never be resumed
+
+### Overriding `generateJourneyId`
+
+Override `generateJourneyId` in your journey state class to:
+1. **Type-check the base seed** — Cast to the expected type and handle unexpected seeds gracefully (by passing `null` to the super method)
+2. **Create a journey-specific string** — Use string interpolation with the base seed to ensure different journeys produce different IDs even for the same base seed
+
+```kotlin
+override fun generateJourneyId(seed: Any?): String {
+    val user = seed as? Principal
+    return super.generateJourneyId(user?.let { generateSeedForUser(it) })
+}
+
+companion object {
+    fun generateSeedForUser(user: Principal): String =
+        "Property registration journey for user ${user.name} at time ${System.currentTimeMillis()}"
+}
+```
+
+The journey-specific interpolable string ensures that the hash differs from other journeys that might use the same `Principal`.
+Without this, two journeys seeded with the same user would produce identical IDs.
+
+### Initialisation Methods
+
+Add an initialisation function to your journey factory that creates the state and returns the journey ID:
+
+```kotlin
+fun initializeJourneyState(user: Principal): String =
+    stateFactory.getObject().initializeState(user)
+```
+
+## Add Controller Methods
+
+Define at least two controller methods for each journey:
+- **GET**: Render pages
+- **POST**: Handle form submissions
+
+Capture the route segment as a path variable to identify the step being requested.
+
+Each method calls a journey factory to create a map of route segments to [`StepLifecycleOrchestrator`](StepLifecycleOrchestrator.kt) instances, which wrap steps and handle the request lifecycle.
+
+You must catch `NoSuchJourneyException` to handle the case where the user has not yet initialised a journey.
+You should then call your initialisation method to create a new journey state and redirect the user to the same step with the new journey ID.
+
+```kotlin
+
+    @GetMapping("/{stepName}")
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
+    fun getJourneyStep(
+        @PathVariable("stepName") stepName: String,
+        principal: Principal,
+    ): ModelAndView =
+        try {
+            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
+            journeyMap[stepName]?.getStepModelAndView()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
+        }
+
+    @PostMapping("/{stepName}")
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
+    fun postJourneyData(
+        @PathVariable("stepName") stepName: String,
+        @RequestParam formData: PageData,
+        principal: Principal,
+    ): ModelAndView =
+        try {
+            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
+            journeyMap[stepName]?.postStepModelAndView(formData)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
+        }
+```
+
+## Testing
+
+The journey framework has comprehensive test coverage across multiple test categories.
+
+### Unit Tests
+
+Unit tests for the framework live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
+
+| Test File | Description |
+|-----------|-------------|
+| `JourneyStepTests.kt` | Tests for individual step behaviour and configuration |
+| `StepConfigTests.kt` | Tests for step configuration classes |
+| `StepLifecycleOrchestratorTest.kt` | Tests for the request lifecycle handling |
+| `ParentageTests.kt` | Tests for parent/child relationships between steps |
+| `TaskTests.kt` | Tests for task (step group) functionality |
+| `AbstractJourneyStateTests.kt` | Tests for journey state persistence |
+| `builders/JourneyBuilderTest.kt` | Tests for the DSL builder |
+
+### Integration Tests
+
+Integration tests for complete journeys live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/integration/`. These use Playwright for end-to-end testing of journey flows.
+
+Example: `LandlordRegistrationJourneyTests.kt`
+
+### Test Utilities
+
+- **`JourneyTestHelper`** (`src/test/kotlin/uk/gov/communities/prsdb/webapp/testHelpers/JourneyTestHelper.kt`): Helper class for setting up mock users in tests.
+
+### Writing Tests for Your Journey
+
+1. **Unit test individual steps**: Test step validation, mode determination, and content generation
+2. **Test journey structure**: Verify parentage relationships and navigation paths
+3. **Integration test the full flow**: Use Playwright page objects to test the complete user journey
+
 ## File Locations
 
 ### Framework Code
@@ -354,47 +486,3 @@ If you want to reuse steps from another journey, move them here first.
 
 Journey controllers are in `src/main/kotlin/uk/gov/communities/prsdb/webapp/controllers/`. For example:
 - `NewRegisterPropertyController.kt` — Handles property registration journey requests
-
-## Rendering and Form Handling
-
-### Controller Methods
-
-Define at least two controller methods for each journey:
-- **GET**: Render pages
-- **POST**: Handle form submissions
-
-Each method calls a journey factory to create a map of route segments to [`StepLifecycleOrchestrator`](StepLifecycleOrchestrator.kt) instances, which wrap steps and handle the request lifecycle.
-
-## Testing
-
-The journey framework has comprehensive test coverage across multiple test categories.
-
-### Unit Tests
-
-Unit tests for the framework live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
-
-| Test File | Description |
-|-----------|-------------|
-| `JourneyStepTests.kt` | Tests for individual step behaviour and configuration |
-| `StepConfigTests.kt` | Tests for step configuration classes |
-| `StepLifecycleOrchestratorTest.kt` | Tests for the request lifecycle handling |
-| `ParentageTests.kt` | Tests for parent/child relationships between steps |
-| `TaskTests.kt` | Tests for task (step group) functionality |
-| `AbstractJourneyStateTests.kt` | Tests for journey state persistence |
-| `builders/JourneyBuilderTest.kt` | Tests for the DSL builder |
-
-### Integration Tests
-
-Integration tests for complete journeys live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/integration/`. These use Playwright for end-to-end testing of journey flows.
-
-Example: `LandlordRegistrationJourneyTests.kt`
-
-### Test Utilities
-
-- **`JourneyTestHelper`** (`src/test/kotlin/uk/gov/communities/prsdb/webapp/testHelpers/JourneyTestHelper.kt`): Helper class for setting up mock users in tests.
-
-### Writing Tests for Your Journey
-
-1. **Unit test individual steps**: Test step validation, mode determination, and content generation
-2. **Test journey structure**: Verify parentage relationships and navigation paths
-3. **Integration test the full flow**: Use Playwright page objects to test the complete user journey
