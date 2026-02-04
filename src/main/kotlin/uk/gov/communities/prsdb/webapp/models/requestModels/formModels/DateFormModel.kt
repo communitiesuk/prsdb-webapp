@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import kotlinx.datetime.toJavaLocalDate
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.validation.DateValidator
 
 abstract class DateFormModel : FormModel {
@@ -35,4 +37,6 @@ abstract class DateFormModel : FormModel {
         DateValidator.isAnyBlank(day, month, year) ||
             DateValidator.isAnyInvalid(day, month, year) ||
             DateValidator.isValidDate(day, month, year)
+
+    fun toLocalDateOrNull() = DateTimeHelper.parseDateOrNull(day, month, year)?.toJavaLocalDate()
 }

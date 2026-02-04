@@ -510,9 +510,11 @@ class StepInitialiserTests {
         // Arrange
         val stepMock = mockInitialisableStep()
         val builder = StepInitialiser(stepMock, mock())
-        val expectedKey = "testKey"
-        val expectedValue = "testValue"
-        builder.withAdditionalContentProperty { expectedKey to expectedValue }
+        val firstKey = "firstKey"
+        val firstValue = "firstValue"
+        val secondKey = "secondKey"
+        val secondValue = 177
+        builder.withAdditionalContentProperties { mapOf(firstKey to firstValue, secondKey to secondValue) }
         builder.nextUrl { "next" }
         builder.parents { NoParents() }
         builder.unreachableStepDestinationIfNotSet { mock() }
@@ -533,7 +535,7 @@ class StepInitialiserTests {
             mapCaptor.capture(),
         )
         val additionalContent = mapCaptor.firstValue()
-        assertEquals(mapOf(expectedKey to expectedValue), additionalContent)
+        assertEquals(mapOf(firstKey to firstValue, secondKey to secondValue), additionalContent)
     }
 
     @Test

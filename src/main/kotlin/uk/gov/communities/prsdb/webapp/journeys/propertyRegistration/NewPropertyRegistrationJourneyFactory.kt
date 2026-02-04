@@ -13,11 +13,10 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -27,11 +26,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LookupAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ManualAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -41,16 +38,19 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
 
@@ -63,6 +63,9 @@ class NewPropertyRegistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
+            configure {
+                withAdditionalContentProperty { "title" to "registerProperty.title" }
+            }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
@@ -128,8 +131,8 @@ class PropertyRegistrationJourney(
     // Task list step
     override val taskListStep: PropertyRegistrationTaskListStep,
     // Address task
-    override val addressTask: AddressTask,
-    override val lookupStep: LookupAddressStep,
+    override val addressTask: PropertyRegistrationAddressTask,
+    override val lookupAddressStep: LookupAddressStep,
     override val selectAddressStep: SelectAddressStep,
     override val alreadyRegisteredStep: AlreadyRegisteredStep,
     override val noAddressFoundStep: NoAddressFoundStep,
@@ -158,7 +161,7 @@ class PropertyRegistrationJourney(
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val addJointLandlordStep: AddJointLandlordStep,
+    override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordStep: RemoveJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step
@@ -170,6 +173,7 @@ class PropertyRegistrationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var invitedJointLandlordEmails: List<String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -183,13 +187,13 @@ class PropertyRegistrationJourney(
 }
 
 interface PropertyRegistrationJourneyState :
-    AddressState,
+    PropertyRegistrationAddressState,
     LicensingState,
     OccupationState,
     JointLandlordsState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
-    val addressTask: AddressTask
+    val addressTask: PropertyRegistrationAddressTask
     val propertyTypeStep: PropertyTypeStep
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask

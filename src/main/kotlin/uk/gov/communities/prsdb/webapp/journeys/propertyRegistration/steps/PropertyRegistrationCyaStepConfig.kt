@@ -120,7 +120,7 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination.VisitableStep(state.lookupStep, childJourneyId),
+                    Destination.VisitableStep(state.lookupAddressStep, childJourneyId),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
