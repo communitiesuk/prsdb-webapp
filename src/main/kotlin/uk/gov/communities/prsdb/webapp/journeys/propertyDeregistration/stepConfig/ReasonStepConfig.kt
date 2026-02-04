@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConf
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -48,6 +49,15 @@ class ReasonStepConfig(
                 propertyAddress,
             ),
         )
+    }
+
+    override fun resolveNextDestination(
+        state: PropertyDeregistrationJourneyState,
+        defaultDestination: Destination,
+    ): Destination {
+        // Clean up journey state from session after all business logic completes
+        state.deleteJourney()
+        return defaultDestination
     }
 }
 
