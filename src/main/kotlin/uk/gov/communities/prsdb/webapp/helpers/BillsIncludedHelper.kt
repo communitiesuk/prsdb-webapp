@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
+import kotlin.collections.joinToString
 
 class BillsIncludedHelper {
     companion object {
@@ -37,12 +38,12 @@ class BillsIncludedHelper {
             customBillsIncluded: String?,
             messageSource: MessageSource,
         ): String =
-            billsIncluded.map { bill ->
+            billsIncluded.joinToString(", ") { bill ->
                 if (bill != BillsIncluded.SOMETHING_ELSE) {
                     messageSource.getMessageForKey(MessageKeyConverter.convert(bill))
                 } else {
                     customBillsIncluded!!.replaceFirstChar { it.uppercase() }
                 }
-            }.joinToString(", ")
+            }
     }
 }
