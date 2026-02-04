@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
@@ -51,14 +50,15 @@ interface OccupationState : JourneyState {
             messageSource,
         )
 
+    // TODO cosmetic change to trigger commit hook
     fun getBillsIncluded(messageSource: MessageSource): String =
         BillsIncludedHelper.getBillsIncludedForCYAStep(
             getBillsIncludedOrNull()!!,
             messageSource,
         )
 
-    private fun hasCustomRentFrequency(): Boolean = 
+    private fun hasCustomRentFrequency(): Boolean =
         RentDataHelper.hasCustomRentFrequency(
-            rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+            rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
         )
 }
