@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
-interface EpcJourneyState : JourneyState {
+interface ExampleEpcJourneyState : JourneyState {
     var automatchedEpc: EpcDataModel?
     var searchedEpc: EpcDataModel?
     val propertyId: Long

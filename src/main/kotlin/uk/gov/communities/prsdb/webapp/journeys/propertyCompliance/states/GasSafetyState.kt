@@ -6,7 +6,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 
 interface GasSafetyState : JourneyState {
+    // val gasSafetyStep: GasSafetyStep
+    // val gasSafetyIssueDateStep: GasSafetyIssueDateStep
     val gasSafetyEngineerNumberStep: GasSafetyEngineerNumberStep
     val gasSafetyCertificateUploadStep: GasSafetyCertificateUploadStep
     val gasSafetyUploadConfirmationStep: GasSafetyUploadConfirmationStep
+    // val gasSafetyOutdatedStep: GasSafetyOutdatedStep
+    // val gasSafetyExemptionStep: GasSafetyExemptionStep
+    // val gasSafetyExemptionReasonStep: GasSafetyExemptionReasonStep
+    // val gasSafetyExemptionOtherReasonStep: GasSafetyExemptionOtherReasonStep
+    // val gasSafetyExemptionConfirmationStep: GasSafetyExemptionConfirmationStep
+    // val gasSafetyExemptionMissingStep: GasSafetyExemptionMissingStep
 }

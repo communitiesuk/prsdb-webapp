@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.example.tasks.ExampleEpcTask
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -101,11 +101,11 @@ class FooJourneyState(
     val fooCheckYourAnswersStep: FooCheckAnswersStep,
     private val journeyStateService: JourneyStateService,
     val occupationTask: OccupationTask,
-    val epcTask: EpcTask,
+    val epcTask: ExampleEpcTask,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     OccupationState,
-    EpcJourneyState {
+    ExampleEpcJourneyState {
     override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
     override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
     override val propertyId: Long by delegateProvider.requiredDelegate("propertyId")
