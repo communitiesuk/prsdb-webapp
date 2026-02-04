@@ -13,6 +13,7 @@ data class PropertyRegistrationConfirmationEmail(
     private val occupiedKey = "occupied"
     private val unoccupiedKey = "unoccupied"
     private val landlordInvitesKey = "landlordInvites"
+    private val hasJointLandlordsKey = "hasJointLandlords"
 
     override val template = EmailTemplate.PROPERTY_REGISTRATION_CONFIRMATION
 
@@ -28,6 +29,10 @@ data class PropertyRegistrationConfirmationEmail(
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
             baseMap[landlordInvitesKey] = jointLandlordEmails.joinToString("\n") { "* $it" }
+            baseMap[hasJointLandlordsKey] = "yes"
+        } else {
+            baseMap[landlordInvitesKey] = ""
+            baseMap[hasJointLandlordsKey] = "no"
         }
 
         return baseMap
