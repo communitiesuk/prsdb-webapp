@@ -50,7 +50,6 @@ interface OccupationState : JourneyState {
             messageSource,
         )
 
-    // TODO cosmetic change to trigger commit hook
     fun getBillsIncluded(messageSource: MessageSource): String =
         BillsIncludedHelper.getBillsIncludedForCYAStep(
             getBillsIncludedOrNull()!!,
