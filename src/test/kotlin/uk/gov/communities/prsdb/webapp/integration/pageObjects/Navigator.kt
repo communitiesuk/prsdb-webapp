@@ -42,10 +42,8 @@ import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -185,10 +183,12 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep as DeregistrationReasonStep
 
 class Navigator(
     private val page: Page,
@@ -1227,13 +1227,12 @@ class Navigator(
     }
 
     fun skipToPropertyDeregistrationReasonPage(propertyOwnershipId: Long): ReasonPagePropertyDeregistration {
-        setJourneyDataInSession(
-            PropertyDeregistrationJourneyFactory.getJourneyKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyDeregistrationReason().build(),
+        setJourneyStateInSession(
+            PropertyDeregistrationStateSessionBuilder.beforePropertyDeregistrationReason().build(),
         )
         navigate(
             DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
-                "/${DeregisterPropertyStepId.Reason.urlPathSegment}",
+                "/${DeregistrationReasonStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
         )
         return createValidPage(
             page,
