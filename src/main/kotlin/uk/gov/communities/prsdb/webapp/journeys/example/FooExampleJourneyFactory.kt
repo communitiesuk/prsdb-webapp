@@ -60,7 +60,7 @@ class FooExampleJourneyFactory(
             section {
                 withHeadingMessageKey("tasks-section-part-2")
                 task(journey.epcTask) {
-                    parents { journey.occupationTask.isComplete() }
+                    parents { journey.taskListStep.always() }
                     nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
