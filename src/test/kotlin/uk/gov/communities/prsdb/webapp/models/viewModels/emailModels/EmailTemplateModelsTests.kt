@@ -217,6 +217,10 @@ class EmailTemplateModelsTests {
                     IncompletePropertyReminderEmail("propertyAddress", 7, "prsdUrl"),
                     "/emails/IncompletePropertyReminder.md",
                 ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationEmail("John Smith", "1 Fake Street, London", URI("invitationUrl")),
+                    "/emails/JointLandlordInvitation.md",
+                ),
             )
     }
 

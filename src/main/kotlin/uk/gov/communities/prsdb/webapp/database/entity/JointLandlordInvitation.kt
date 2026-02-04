@@ -24,7 +24,7 @@ class JointLandlordInvitation(
         private set
 
     @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "registered_propertyid", nullable = false)
     lateinit var registeredPropertyID: PropertyOwnership
         private set
 

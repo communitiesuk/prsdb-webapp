@@ -27,6 +27,7 @@ class PropertyRegistrationService(
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
+    private val jointLandlordInvitationEmailSender: JointLandlordInvitationEmailSender,
 ) {
     @Transactional
     fun registerProperty(
@@ -45,6 +46,7 @@ class PropertyRegistrationService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
+        jointLandlordEmails: List<String>? = null,
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -94,6 +96,10 @@ class PropertyRegistrationService(
                 propertyOwnership.currentNumTenants > 0,
             ),
         )
+
+        if (!jointLandlordEmails.isNullOrEmpty()) {
+            jointLandlordInvitationEmailSender.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+        }
 
         return propertyOwnership.registrationNumber
     }

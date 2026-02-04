@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
@@ -27,6 +28,13 @@ class AbsoluteUrlProvider {
 
     fun buildInvitationUri(token: String): URI =
         uriFromMethodCall(on(RegisterLocalCouncilUserController::class.java).acceptInvitation(token))
+
+    fun buildJointLandlordInvitationUri(token: String): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .pathSegment(JOINT_LANDLORD_INVITATION_PATH_SEGMENT, token)
+            .build()
+            .toUri()
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI =
         uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
