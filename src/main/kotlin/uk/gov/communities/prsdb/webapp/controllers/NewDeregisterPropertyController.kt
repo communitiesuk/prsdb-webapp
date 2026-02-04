@@ -10,18 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_DEREGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyDeregistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.NewPropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -29,50 +28,73 @@ import java.security.Principal
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
 @RequestMapping(PROPERTY_DEREGISTRATION_ROUTE)
-class DeregisterPropertyController(
-    private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
+class NewDeregisterPropertyController(
+    private val propertyDeregistrationJourneyFactory: NewPropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
 ) {
     @GetMapping("/{stepName}")
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_DEREGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_DEREGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
-        model: Model,
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
-        return propertyDeregistrationJourneyFactory
-            .create(propertyOwnershipId)
-            .getModelAndViewForStep(
-                stepName,
-                subpage,
-            )
+        return try {
+            val journeyMap = propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
+            journeyMap[stepName]?.getStepModelAndView()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            initializeAndRedirect(propertyOwnershipId, stepName)
+        } catch (_: PropertyOwnershipMismatchException) {
+            initializeAndRedirect(propertyOwnershipId, stepName)
+        }
     }
 
     @PostMapping("/{stepName}")
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_DEREGISTRATION)
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_DEREGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
         @RequestParam formData: PageData,
-        model: Model,
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
-        return propertyDeregistrationJourneyFactory
-            .create(propertyOwnershipId)
-            .completeStep(
-                stepName,
-                formData,
-                subpage,
-                principal,
-            )
+        return try {
+            val journeyMap = propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
+            journeyMap[stepName]?.postStepModelAndView(formData)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            initializeAndRedirect(propertyOwnershipId, stepName)
+        } catch (_: PropertyOwnershipMismatchException) {
+            initializeAndRedirect(propertyOwnershipId, stepName)
+        }
+    }
+
+    private fun initializeAndRedirect(
+        propertyOwnershipId: Long,
+        stepName: String,
+    ): ModelAndView {
+        val journeyId = propertyDeregistrationJourneyFactory.initializeJourneyState(propertyOwnershipId)
+        val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+        return ModelAndView("redirect:$redirectUrl")
+    }
+
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_DEREGISTRATION)
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
+    ): String {
+        checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId)
+
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        return "deregisterPropertyConfirmation"
     }
 
     private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(
@@ -94,20 +116,6 @@ class DeregisterPropertyController(
         propertyOwnershipService
             .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
 
-    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_DEREGISTRATION)
-    fun getConfirmation(
-        model: Model,
-        principal: Principal,
-        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
-    ): String {
-        checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId)
-
-        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
-
-        return "deregisterPropertyConfirmation"
-    }
-
     private fun checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId: Long) {
         if (propertyOwnershipId !in propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()) {
             throw ResponseStatusException(
@@ -122,17 +130,5 @@ class DeregisterPropertyController(
                 "Property ownership $propertyOwnershipId was found in the database",
             )
         }
-    }
-
-    companion object {
-        const val PROPERTY_DEREGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
-
-        fun getPropertyDeregistrationBasePath(propertyOwnershipId: Long): String =
-            UriTemplate(PROPERTY_DEREGISTRATION_ROUTE)
-                .expand(propertyOwnershipId)
-                .toASCIIString()
-
-        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
-            "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${PropertyDeregistrationJourney.initialStepId.urlPathSegment}"
     }
 }
