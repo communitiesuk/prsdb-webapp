@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.RentAmountHelper
+import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -166,7 +166,7 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
-                        getRentFrequencyValue(),
+                        RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
                         null,
@@ -174,9 +174,9 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
-                        RentAmountHelper.getRentAmount(
+                        RentDataHelper.getRentAmount(
                             propertyOwnership.rentAmount!!.toString(),
-                            isRentFrequencyCustom,
+                            propertyOwnership.rentFrequency!!,
                             messageSource,
                         ),
                         changeLinkMessageKey,
@@ -186,12 +186,4 @@ class PropertyDetailsViewModel(
                     )
                 }
             }.toList()
-
-    private fun getRentFrequencyValue(): String {
-        return if (!isRentFrequencyCustom) {
-            MessageKeyConverter.convert(propertyOwnership.rentFrequency!!)
-        } else {
-            propertyOwnership.customRentFrequency!!.replaceFirstChar { it.uppercase() }
-        }
-    }
 }

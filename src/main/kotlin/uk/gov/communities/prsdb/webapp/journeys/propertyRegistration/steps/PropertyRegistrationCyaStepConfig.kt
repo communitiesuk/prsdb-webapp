@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -177,7 +178,7 @@ class PropertyRegistrationCyaStepConfig(
                 val rentFrequencyStep = state.rentFrequency
                 val rentAmountStep = state.rentAmount
                 val rentIncludesBills = rentIncludesBillsStep.formModel.rentIncludesBills!!
-                val rentFrequency = rentFrequencyStep.formModel.rentFrequency
+                val rentFrequency = rentFrequencyStep.formModel.rentFrequency!!
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.households",
@@ -225,13 +226,7 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        if (rentFrequency == RentFrequency.OTHER) {
-                            rentFrequencyStep.formModel.customRentFrequency.replaceFirstChar {
-                                it.uppercase()
-                            }
-                        } else {
-                            rentFrequency
-                        },
+                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
                         Destination(rentFrequencyStep),
                     ),
                 )

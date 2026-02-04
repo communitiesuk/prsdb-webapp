@@ -4,7 +4,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
-import uk.gov.communities.prsdb.webapp.helpers.RentAmountHelper
+import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 
 interface OccupationState : JourneyState {
     val occupied: OccupiedStep
@@ -37,16 +38,16 @@ interface OccupationState : JourneyState {
         }
 
     fun getCustomRentFrequencyIfSelected(): String? =
-        if (isRentFrequencyCustom()) {
+        if (hasCustomRentFrequency()) {
             rentFrequency.formModel.customRentFrequency.replaceFirstChar { it.uppercase() }
         } else {
             null
         }
 
     fun getRentAmount(messageSource: MessageSource): String =
-        RentAmountHelper.getRentAmount(
+        RentDataHelper.getRentAmount(
             rentAmount.formModel.notNullValue(RentAmountFormModel::rentAmount),
-            isRentFrequencyCustom(),
+            rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
             messageSource,
         )
 
@@ -56,5 +57,8 @@ interface OccupationState : JourneyState {
             messageSource,
         )
 
-    private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER
+    private fun hasCustomRentFrequency(): Boolean = 
+        RentDataHelper.hasCustomRentFrequency(
+            rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+        )
 }
