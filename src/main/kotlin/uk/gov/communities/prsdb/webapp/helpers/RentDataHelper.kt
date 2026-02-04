@@ -21,7 +21,6 @@ class RentDataHelper {
             return formattedRentAmount
         }
 
-        // TODO cosmetic change to trigger commit hooks
         fun getRentFrequency(
             rentFrequency: RentFrequency,
             customRentFrequency: String?,
