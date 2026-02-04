@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
@@ -27,14 +29,21 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.security.Principal
 
 @PrsdbWebService
 class NewPropertyComplianceJourneyFactory(
-    private val stateFactory: ObjectFactory<PropertyComplianceJourneyState>,
+    private val stateFactory: ObjectFactory<PropertyComplianceJourney>,
 ) {
-    fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+
+        if (!state.isStateInitialized) {
+            state.propertyId = propertyId
+            state.isStateInitialized = true
+        }
+
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
@@ -49,13 +58,13 @@ class NewPropertyComplianceJourneyFactory(
                 withHeadingMessageKey("propertyCompliance.taskList.upload.heading")
                 task(journey.gasSafetyTask) {
                     parents { journey.taskListStep.always() }
-                    nextStep { journey.cyaStep }
+                    nextStep { journey.eicrTask.firstStep }
                     checkable()
                     saveProgress()
                 }
                 task(journey.eicrTask) {
                     parents { journey.taskListStep.always() }
-                    nextStep { journey.cyaStep }
+                    nextStep { journey.epcTask.firstStep }
                     checkable()
                     saveProgress()
                 }
@@ -70,7 +79,13 @@ class NewPropertyComplianceJourneyFactory(
                 withHeadingMessageKey("propertyCompliance.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                    parents { journey.gasSafetyTask.isComplete() }
+                    parents {
+                        AndParents(
+                            journey.gasSafetyTask.isComplete(),
+                            journey.eicrTask.isComplete(),
+                            journey.epcTask.isComplete(),
+                        )
+                    }
                     // TODO PDJB-467 - do we need the full route for this? Do we even have it if we need the propertyOwernshipId?
                     nextUrl { CONFIRMATION_PATH_SEGMENT }
                 }
@@ -93,12 +108,17 @@ class PropertyComplianceJourney(
     override val eicrTask: EicrTask,
     // EPC task
     override val epcTask: EpcTask,
+    override val epcQuestionStep: EpcQuestionStep,
     // CYA
     override val cyaStep: PropertyComplianceCyaStep,
-    journeyStateService: JourneyStateService,
+    private val journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     PropertyComplianceJourneyState {
+    override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
+    override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
+    override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
+    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
 }
 

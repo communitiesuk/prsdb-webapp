@@ -7,9 +7,10 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 
 @JourneyFrameworkComponent
 class PropertyComplianceCyaStepConfig : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
-    override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> {
-        TODO("Not yet implemented")
-    }
+    override fun getStepSpecificContent(state: PropertyComplianceJourneyState) =
+        mapOf(
+            "summaryName" to "forms.checkComplianceAnswers.summaryName",
+        )
 }
 
 @JourneyFrameworkComponent

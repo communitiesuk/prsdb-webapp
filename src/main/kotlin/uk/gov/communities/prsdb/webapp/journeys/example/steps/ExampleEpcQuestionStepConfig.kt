@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class EpcQuestionStepConfig(
+class ExampleEpcQuestionStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
 ) : AbstractRequestableStepConfig<EpcStatus, EpcFormModel, ExampleEpcJourneyState>() {
@@ -63,6 +63,6 @@ class EpcQuestionStepConfig(
 }
 
 @JourneyFrameworkComponent
-final class EpcQuestionStep(
-    stepConfig: EpcQuestionStepConfig,
+final class ExampleEpcQuestionStep(
+    stepConfig: ExampleEpcQuestionStepConfig,
 ) : RequestableStep<EpcStatus, EpcFormModel, ExampleEpcJourneyState>(stepConfig)

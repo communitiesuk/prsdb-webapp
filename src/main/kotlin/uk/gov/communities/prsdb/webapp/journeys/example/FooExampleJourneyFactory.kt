@@ -15,8 +15,8 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.ExampleEpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
@@ -92,7 +92,7 @@ class FooJourneyState(
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
-    override val epcQuestion: EpcQuestionStep,
+    override val epcQuestion: ExampleEpcQuestionStep,
     override val checkAutomatchedEpc: CheckEpcStep,
     override val searchForEpc: SearchEpcStep,
     override val epcNotFound: EpcNotFoundStep,
@@ -112,6 +112,7 @@ class FooJourneyState(
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state
     final fun initializeJourneyState(propertyId: Long): String {
+        // This is what AbstractJourneyState.initaliseState does, but still need to set the propertyId
         val journeyId = generateJourneyId(propertyId)
 
         journeyStateService

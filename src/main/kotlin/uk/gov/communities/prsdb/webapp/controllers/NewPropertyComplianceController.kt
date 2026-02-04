@@ -66,7 +66,7 @@ class NewPropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         val modelAndView =
             try {
-                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps()
+                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId)
                 journeyMap[stepName]?.getStepModelAndView()
                     ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
             } catch (_: NoSuchJourneyException) {
@@ -92,7 +92,7 @@ class NewPropertyComplianceController(
 
         val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
 
-        return postProcessedJourneyData(stepName, annotatedFormData, principal)
+        return postProcessedJourneyData(stepName, propertyOwnershipId, annotatedFormData, principal)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -118,16 +118,17 @@ class NewPropertyComplianceController(
                 response,
             )
 
-        return postProcessedJourneyData(stepName, formData, principal)
+        return postProcessedJourneyData(stepName, propertyOwnershipId, formData, principal)
     }
 
     private fun postProcessedJourneyData(
         stepName: String,
+        propertyOwnershipId: Long,
         formData: PageData,
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = propertyComplianceJourneyFactory.createJourneySteps()
+            val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
