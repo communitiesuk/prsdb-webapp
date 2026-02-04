@@ -21,14 +21,18 @@ class RentDataHelper {
             return formattedRentAmount
         }
 
-        fun getRentFrequency(rentFrequency: RentFrequency, customRentFrequency: String?): String {
+        // TODO cosmetic change to trigger commit hooks
+        fun getRentFrequency(
+            rentFrequency: RentFrequency,
+            customRentFrequency: String?,
+        ): String {
             return if (!hasCustomRentFrequency(rentFrequency)) {
                 MessageKeyConverter.convert(rentFrequency)
             } else {
                 customRentFrequency!!.replaceFirstChar { it.uppercase() }
             }
         }
-        
+
         fun hasCustomRentFrequency(rentFrequency: RentFrequency): Boolean = rentFrequency == RentFrequency.OTHER
     }
 }
