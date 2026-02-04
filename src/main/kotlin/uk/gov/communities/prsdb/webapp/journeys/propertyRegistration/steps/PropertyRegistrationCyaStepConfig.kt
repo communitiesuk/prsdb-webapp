@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
@@ -41,6 +42,7 @@ class PropertyRegistrationCyaStepConfig(
             "propertyDetails" to getPropertyDetailsSummaryList(state),
             "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
             "tenancyDetails" to getTenancyDetailsSummaryList(state),
+            "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
 
@@ -237,6 +239,23 @@ class PropertyRegistrationCyaStepConfig(
                     ),
                 )
             }
+
+    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+        val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)
+        return if (hasJointLandlords) {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+                state.getAllInvitedJointLandlordEmails(),
+                Destination(state.hasJointLandlordsStep),
+            )
+        } else {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.hasJointLandlords",
+                "jointLandlords.hasJointLandlords.radios.no",
+                Destination(state.hasJointLandlordsStep),
+            )
+        }
+    }
 }
 
 @JourneyFrameworkComponent
