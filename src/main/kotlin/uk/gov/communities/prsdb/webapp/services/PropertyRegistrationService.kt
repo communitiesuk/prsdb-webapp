@@ -94,6 +94,7 @@ class PropertyRegistrationService(
                 addressModel.singleLineAddress,
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 propertyOwnership.currentNumTenants > 0,
+                jointLandlordEmails,
             ),
         )
 

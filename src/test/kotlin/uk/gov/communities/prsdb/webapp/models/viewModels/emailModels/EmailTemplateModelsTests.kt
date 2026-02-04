@@ -38,8 +38,15 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    PropertyRegistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, AB1 2CD", "prsdUrl", isOccupied = true),
+                    PropertyRegistrationConfirmationEmail(
+                        "P-XXX-YYY",
+                        "1 Street Name, AB1 2CD",
+                        "prsdUrl",
+                        isOccupied = true,
+                        jointLandlordEmails = listOf("joint1@example.com", "joint2@example.com"),
+                    ),
                     "/emails/PropertyRegistrationConfirmation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     PropertyDeregistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
