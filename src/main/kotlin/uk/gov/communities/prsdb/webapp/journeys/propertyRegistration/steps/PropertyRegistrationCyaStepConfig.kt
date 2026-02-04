@@ -42,7 +42,7 @@ class PropertyRegistrationCyaStepConfig(
             "propertyDetails" to getPropertyDetailsSummaryList(state),
             "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
             "tenancyDetails" to getTenancyDetailsSummaryList(state),
-            "jointLandlordsDetails" to getJointLandLordsSummaryList(state),
+            "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
 
@@ -240,39 +240,21 @@ class PropertyRegistrationCyaStepConfig(
                 )
             }
 
-    private fun getJointLandLordsSummaryList(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> {
+    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)
-        return mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                if (hasJointLandlords) {
-                    val invitedLandlordEmails = state.getAllInvitedJointLandlordEmails()
-                    add(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-                            null,
-                            Destination(state.hasJointLandlordsStep),
-                            bottomBorder = false,
-                        ),
-                    )
-                    invitedLandlordEmails.forEach {
-                        add(
-                            SummaryListRowViewModel.forCheckYourAnswersPage(
-                                null,
-                                it,
-                                null,
-                            ),
-                        )
-                    }
-                } else {
-                    add(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.jointLandlordsDetails.hasJointLandlords",
-                            "jointLandlords.hasJointLandlords.radios.no",
-                            Destination(state.hasJointLandlordsStep),
-                        ),
-                    )
-                }
-            }
+        return if (hasJointLandlords) {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+                state.getAllInvitedJointLandlordEmails(),
+                Destination(state.hasJointLandlordsStep),
+            )
+        } else {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.hasJointLandlords",
+                "jointLandlords.hasJointLandlords.radios.no",
+                Destination(state.hasJointLandlordsStep),
+            )
+        }
     }
 }
 
