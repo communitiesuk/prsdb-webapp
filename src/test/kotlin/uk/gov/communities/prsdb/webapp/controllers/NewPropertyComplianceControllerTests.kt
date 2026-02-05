@@ -107,7 +107,7 @@ class NewPropertyComplianceControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 200 without a cookie for a valid non-file-upload request`() {
-            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId))
                 .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
             mvc.get(validPropertyComplianceStepUrl).andExpect {
@@ -119,7 +119,7 @@ class NewPropertyComplianceControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getJourneyStep returns 200 with a cookie for a valid file-upload request`() {
-            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId))
                 .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockTokenCookieService.createCookieForValue(eq(FILE_UPLOAD_COOKIE_NAME), any(), any()))
                 .thenReturn(validFileUploadCookie)
@@ -173,7 +173,7 @@ class NewPropertyComplianceControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `postJourneyData returns a redirect for a landlord user that does own the property`() {
-            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId))
                 .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
             mvc
@@ -207,7 +207,7 @@ class NewPropertyComplianceControllerTests(
             whenever(
                 mockTokenCookieService.isTokenForCookieValue(invalidFileUploadCookie.value, validPropertyComplianceFileUploadUrl),
             ).thenReturn(false)
-            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps())
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId))
                 .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockTokenCookieService.createCookieForValue(eq(FILE_UPLOAD_COOKIE_NAME), any(), any()))
                 .thenReturn(validFileUploadCookie)
