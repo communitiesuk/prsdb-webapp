@@ -37,7 +37,20 @@ class PropertyComplianceTaskListStepConfig :
                 TaskSectionViewModel(
                     "propertyCompliance.taskList.landlordResponsibilities.heading",
                     "property-details",
-                    emptyList(),
+                    listOf(
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.landlordResponsibilities.fireSafety",
+                            state.fireSafetyStep,
+                        ),
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
+                            state.keepPropertySafeStep,
+                        ),
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.landlordResponsibilities.tenants",
+                            state.responsibilityToTenantsStep,
+                        ),
+                    ),
                 ),
                 TaskSectionViewModel(
                     "propertyCompliance.taskList.checkAndSubmit.heading",
