@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
@@ -236,5 +237,8 @@ class NewPropertyComplianceController(
 
         fun getPropertyComplianceTaskListPath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_TASK_LIST_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getPropertyComplianceConfirmationPath(propertyOwnershipId: Long): String =
+            UriTemplate("$PROPERTY_COMPLIANCE_ROUTE/$CONFIRMATION_PATH_SEGMENT").expand(propertyOwnershipId).toASCIIString()
     }
 }

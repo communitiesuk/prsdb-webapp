@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -113,8 +113,7 @@ class NewPropertyComplianceJourneyFactory(
                             journey.epcTask.isComplete(),
                         )
                     }
-                    // TODO PDJB-467 - do we need the full route for this? Do we even have it if we need the propertyOwernshipId?
-                    nextUrl { CONFIRMATION_PATH_SEGMENT }
+                    nextUrl { NewPropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId) }
                 }
             }
         }
