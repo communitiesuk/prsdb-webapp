@@ -81,6 +81,11 @@ class JourneyStateService(
         setValue(STEP_DATA_KEY, newJourneyData)
     }
 
+    fun removeSingleStepData(key: String) {
+        val newJourneyData = getSubmittedStepData() - key
+        setValue(STEP_DATA_KEY, newJourneyData)
+    }
+
     fun getSubmittedStepData() = objectToStringKeyedMap(getValue(STEP_DATA_KEY)) ?: emptyMap()
 
     fun setValue(

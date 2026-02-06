@@ -35,6 +35,8 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
         override fun submitFormData(bindingResult: BindingResult) =
             addStepData(routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
+
+        fun clearFormData() = clearFormData(routeSegment)
     }
 
     open class InternalStep<out TEnum : Enum<out TEnum>, in TState : JourneyState>(
@@ -108,6 +110,10 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         stepConfig.beforeStepDataIsAdded(state, data)
         state.addStepData(routeSegment, data)
         stepConfig.afterStepDataIsAdded(state)
+    }
+
+    fun clearFormData(routeSegment: String) {
+        state.removeStepData(routeSegment)
     }
 
     fun saveStateIfAllowed() {
