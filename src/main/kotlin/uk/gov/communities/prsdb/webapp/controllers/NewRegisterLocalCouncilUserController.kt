@@ -57,8 +57,7 @@ class NewRegisterLocalCouncilUserController(
             "redirect:$LOCAL_COUNCIL_DASHBOARD_URL"
         } else {
             invitationService.storeTokenInSession(token)
-            val redirectUrl = "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$LANDING_PAGE_PATH_SEGMENT"
-            "redirect:$redirectUrl"
+            "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$LANDING_PAGE_PATH_SEGMENT"
         }
     }
 
