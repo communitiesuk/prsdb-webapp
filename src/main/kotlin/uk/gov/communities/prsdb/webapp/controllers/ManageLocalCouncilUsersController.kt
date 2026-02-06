@@ -186,9 +186,9 @@ class ManageLocalCouncilUsersController(
         if (request.isUserInRole(ROLE_SYSTEM_OPERATOR) &&
             (request.isUserInRole(ROLE_LOCAL_COUNCIL_ADMIN) || request.isUserInRole(ROLE_LOCAL_COUNCIL_USER))
         ) {
-            // If the user is a system operator they can delete themself from the local_authority_user table
-            // If this happens we will need to update their user roles as the Manage LA Users page
-            // will throw an error if they have the LA_ADMIN role but are no longer in the local_authority_users table.
+            // If the user is a system operator they can delete themselves from the local_council_user table
+            // If this happens we will need to update their user roles as the Manage LC Users page
+            // will throw an error if they have the LOCAL_COUNCIL_ADMIN role but are no longer in the local_council_users table.
             val currentUser = localCouncilDataService.getLocalCouncilUser(principal.name)
             if (currentUser.id == userBeingDeleted.id) {
                 securityContextService.refreshContext()
@@ -274,7 +274,7 @@ class ManageLocalCouncilUsersController(
 
             return "redirect:$INVITE_USER_CONFIRMATION_ROUTE"
         } catch (retryException: TransientEmailSentException) {
-            bindingResult.reject("addLAUser.error.retryable")
+            bindingResult.reject("addLocalCouncilUser.error.retryable")
             return "inviteLocalCouncilUser"
         }
     }

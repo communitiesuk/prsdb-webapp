@@ -1,22 +1,26 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -26,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpd
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
+import java.math.BigDecimal
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -48,6 +53,13 @@ class PropertyOwnershipService(
         address: Address,
         license: License? = null,
         isActive: Boolean = true,
+        numBedrooms: Int?,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus?,
+        rentFrequency: RentFrequency?,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal?,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
@@ -64,6 +76,13 @@ class PropertyOwnershipService(
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
                 isActive = isActive,
+                numBedrooms = numBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             ),
         )
     }
@@ -141,30 +160,34 @@ class PropertyOwnershipService(
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val matchingProperties =
-            if (prn != null) {
-                propertyOwnershipRepository.searchMatchingPRN(
-                    prn.number,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
-            } else if (uprn != null) {
-                propertyOwnershipRepository.searchMatchingUPRN(
-                    uprn,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
-            } else {
-                propertyOwnershipRepository.searchMatching(
-                    searchTerm,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    restrictToLicenses,
-                    pageRequest,
-                )
+            try {
+                if (prn != null) {
+                    propertyOwnershipRepository.searchMatchingPRN(
+                        prn.number,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        restrictToLicenses,
+                        pageRequest,
+                    )
+                } else if (uprn != null) {
+                    propertyOwnershipRepository.searchMatchingUPRN(
+                        uprn,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        restrictToLicenses,
+                        pageRequest,
+                    )
+                } else {
+                    propertyOwnershipRepository.searchMatching(
+                        searchTerm,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        restrictToLicenses,
+                        pageRequest,
+                    )
+                }
+            } catch (_: QueryTimeoutException) {
+                throw RepositoryQueryTimeoutException("Property search with query '$searchTerm' timed out")
             }
 
         return matchingProperties.map {
@@ -173,6 +196,23 @@ class PropertyOwnershipService(
                 backLinkService.storeCurrentUrlReturningKey(),
             )
         }
+    }
+
+    @Transactional
+    fun updateLicensing(
+        id: Long,
+        licensingType: LicensingType,
+        licenceNumber: String?,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        val updatedLicence =
+            licenseService.updateLicence(
+                propertyOwnership.license,
+                licensingType,
+                licenceNumber,
+            )
+        propertyOwnership.license = updatedLicence
+        propertyOwnershipRepository.save(propertyOwnership)
     }
 
     @Transactional

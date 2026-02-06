@@ -73,9 +73,12 @@ class SingleParent(
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
     SingleParent(this) { outcome == outcomeValue }
 
+fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.doesNotHaveOutcome(outcomeValue: TEnum): Parentage =
+    SingleParent(this) { outcome != outcomeValue }
+
 fun Task<*>.isComplete() =
-    SingleParent(notionalExitStep) {
-        notionalExitStep.outcome == NavigationComplete.COMPLETE
+    SingleParent(exitStep) {
+        exitStep.outcome == SubjourneyComplete.COMPLETE
     }
 
 fun JourneyStep<Complete, *, *>.isComplete() = this.hasOutcome(Complete.COMPLETE)

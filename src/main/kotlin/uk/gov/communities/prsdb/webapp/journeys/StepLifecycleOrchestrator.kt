@@ -57,12 +57,4 @@ sealed class StepLifecycleOrchestrator(
 
         override fun postStepModelAndView(formData: PageData): ModelAndView = journeyStep.getUnreachableStepDestination().toModelAndView()
     }
-
-    companion object {
-        operator fun invoke(journeyStep: JourneyStep<*, *, *>) =
-            when (journeyStep) {
-                is JourneyStep.RequestableStep -> VisitableStepLifecycleOrchestrator(journeyStep)
-                is JourneyStep.InternalStep -> RedirectingStepLifecycleOrchestrator(journeyStep)
-            }
-    }
 }

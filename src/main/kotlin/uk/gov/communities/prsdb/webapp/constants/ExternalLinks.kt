@@ -97,3 +97,5 @@ const val HSE_URL = "https://www.hse.gov.uk/"
 const val LANDLORD_GAS_SAFETY_URL = "https://www.hse.gov.uk/gas/domestic/faqlandlord.htm"
 
 const val SECURITY_TXT_REDIRECT = "https://vdp.cabinetoffice.gov.uk/.well-known/security.txt"
+
+const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"

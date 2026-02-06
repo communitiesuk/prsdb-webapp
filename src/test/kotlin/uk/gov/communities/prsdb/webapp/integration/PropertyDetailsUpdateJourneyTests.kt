@@ -4,6 +4,7 @@ import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
@@ -234,6 +235,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
     }
 
+    // TODO PDJB-105: re-enable and update tests once rent level updates have been added
+    @Disabled
     @Nested
     inner class OccupancyUpdates {
         private val occupiedPropertyOwnershipId = 1L

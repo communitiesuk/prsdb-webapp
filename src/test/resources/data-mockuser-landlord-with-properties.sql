@@ -28,14 +28,21 @@ INSERT INTO form_context (id, journey_type, context, subject_identifier)
 VALUES (1, 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
+INSERT INTO saved_journey_state (id, created_date, journey_id, serialized_state, subject_identifier)
+VALUES (1,current_date, 'example-incomplete-journey1', '{}', 'urn:fdc:gov.uk:2022:UVWXY');
+
 INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'LIC123456');
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, property_build_type, license_id, incomplete_compliance_form_id)
-VALUES (1, true, 1, 0, 0, 2, 1, 2, 1, 1, 1),
-       (2, true, 1, 1, 2, 3, 1, 3, 1, null, null),
-       (3, true, 1, 1, 2, 4, 1, 4, 1, null, null);
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, property_build_type, license_id, incomplete_compliance_form_id,
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
+VALUES (1, true, 1, 0, 0, 2, 1, 2, 1, 1, 1,
+        null, null, null, null, null, null, null),
+       (2, true, 1, 1, 2, 3, 1, 3, 1, null, null,
+        1, null, null, 2, 1, null, 123.12),
+       (3, true, 1, 1, 2, 4, 1, 4, 1, null, null,
+        1, null, null, 2, 1, null, 123.12);
 
 INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
 VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');

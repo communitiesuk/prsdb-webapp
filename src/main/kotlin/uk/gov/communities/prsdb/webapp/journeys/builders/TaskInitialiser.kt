@@ -3,18 +3,20 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
 
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
-    private val elementConfiguration: ElementConfiguration<NavigationComplete> =
+    private val elementConfiguration: ElementConfiguration<SubjourneyComplete> =
         ElementConfiguration("Task ${task::class.simpleName}}"),
-) : ConfigurableElement<NavigationComplete> by elementConfiguration,
+) : ConfigurableElement<SubjourneyComplete> by elementConfiguration,
     BuildableElement {
+    private val conditionalConfigurations: MutableList<ConditionalElementConfiguration> = mutableListOf()
+
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
@@ -30,7 +32,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
         taskSubJourney.configure {
             elementConfiguration.unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             elementConfiguration.additionalContentProviders.forEach { contentValueProvider ->
-                withAdditionalContentProperty(contentValueProvider)
+                withAdditionalContentProperties(contentValueProvider)
             }
         }
         taskSubJourney.configureFirst {
@@ -46,6 +48,10 @@ class TaskInitialiser<TStateInit : JourneyState>(
             }
         }
 
+        conditionalConfigurations.forEach { conditionConfig ->
+            taskSubJourney.conditionallyConfigure(conditionConfig.condition, conditionConfig.configuration)
+        }
+
         return taskSubJourney.build()
     }
 
@@ -53,10 +59,20 @@ class TaskInitialiser<TStateInit : JourneyState>(
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
-    var exitStepOverride: NavigationalStep? = null
+    override fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        if (condition()) {
+            configuration()
+        }
+        conditionalConfigurations.add(ConditionalElementConfiguration(condition, configuration))
+    }
+
+    var exitStepOverride: SubjourneyExitStep? = null
         private set
 
-    fun customExitStep(step: NavigationalStep) {
+    fun customExitStep(step: SubjourneyExitStep) {
         if (exitStepOverride != null) {
             throw JourneyInitialisationException("Exit step has already been initialised")
         }

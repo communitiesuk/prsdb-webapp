@@ -1,0 +1,24 @@
+hasJointLandlords:
+  heading: Invite joint landlords
+  paragraph:
+    one: You must invite any other landlords for this property. These are sometimes called 'joint landlords'.
+    two: We'll email them a link to join the property after you complete this property's registration. They'll have 28 days to use this link.
+    three: If there's a written tenancy agreement for this property, check who else is named as a landlord. A legal adviser may also be able to help.
+    four: Keeping the property up to date is everyone's shared responsibility. After registering, each landlord can update the property's details on the service.
+  link:
+    one: Who counts as a landlord
+    two: Find legal advice and information (opens in new tab)
+  subHeading:
+    one: Each landlord's responsibility
+    two: Are there any other landlords for this property?
+  radios:
+    "no": No, I am the only landlord for this property
+  error:
+    missing: Select if there are any other landlords for this property
+inviteJointLandlord:
+  fieldSetHeading: Invite a joint landlord to this property
+  email:
+    label: Enter their email address
+  error:
+    invalidEmail: Enter an email address in the correct format, like name@example.com
+    alreadyInvited: You have already invited this email address

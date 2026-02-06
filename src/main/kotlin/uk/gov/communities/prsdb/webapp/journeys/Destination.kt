@@ -49,9 +49,9 @@ sealed class Destination {
     }
 
     class NavigationalStep(
-        val step: JourneyStep.InternalStep<*, *, *>,
+        val step: JourneyStep.InternalStep<*, *>,
     ) : Destination() {
-        override fun toModelAndView() = StepLifecycleOrchestrator(step).getStepModelAndView()
+        override fun toModelAndView() = step.lifecycleOrchestrator.getStepModelAndView()
 
         override fun toUrlStringOrNull() = if (step.isStepReachable) step.getNextDestination().toUrlStringOrNull() else null
     }

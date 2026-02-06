@@ -2,17 +2,17 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 
 class CheckAnswersPageLandlordRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${RegisterLocalCouncilUserStepId.CheckAnswers.urlPathSegment}",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
     ) {
     fun confirmAndSubmit() = form.submit()
 

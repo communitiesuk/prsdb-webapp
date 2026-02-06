@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
@@ -25,8 +27,9 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import java.security.Principal
 
@@ -36,10 +39,12 @@ import java.security.Principal
 class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationService: LegacyIncompletePropertyFormContextService,
+    private val propertyConfirmationService: PropertyRegistrationConfirmationService,
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
 ) {
     @GetMapping
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_REGISTRATION)
     fun index(model: Model): String {
         model.addAttribute(
             "registerPropertyInitialStep",
@@ -50,6 +55,7 @@ class RegisterPropertyController(
         return "registerPropertyStartPage"
     }
 
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_REGISTRATION)
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStart(): String {
         journeyDataServiceFactory.create(PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY).removeJourneyDataAndContextIdFromSession()
@@ -57,6 +63,7 @@ class RegisterPropertyController(
     }
 
     @GetMapping("/$RESUME_PAGE_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_REGISTRATION)
     fun getResume(
         principal: Principal,
         @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: String,
@@ -74,6 +81,7 @@ class RegisterPropertyController(
     }
 
     @GetMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_REGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -88,12 +96,14 @@ class RegisterPropertyController(
             )
 
     @GetMapping("/$TASK_LIST_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_REGISTRATION)
     fun getTaskList(): ModelAndView =
         propertyRegistrationJourneyFactory
             .create()
             .getModelAndViewForTaskList()
 
     @PostMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_REGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -114,7 +124,7 @@ class RegisterPropertyController(
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(model: Model): String {
         val propertyRegistrationNumber =
-            propertyRegistrationService.getLastPrnRegisteredThisSession()
+            propertyConfirmationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "No registered property was found in the session",
@@ -145,7 +155,7 @@ class RegisterPropertyController(
             "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
-        fun getResumePropertyRegistrationPath(contextId: Long): String =
-            UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(contextId).toASCIIString()
+        fun getResumePropertyRegistrationPath(journeyId: String): String =
+            UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(journeyId).toASCIIString()
     }
 }

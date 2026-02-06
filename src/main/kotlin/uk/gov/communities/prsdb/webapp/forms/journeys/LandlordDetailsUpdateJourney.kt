@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordDetailsUpdateJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -305,14 +304,14 @@ class LandlordDetailsUpdateJourney(
         }
 
     private fun selectAddressNextAction(filteredJourneyData: JourneyData): Pair<LandlordDetailsUpdateStepId?, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
+        if (LandlordDetailsUpdateJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress, null)
         } else {
             Pair(null, null)
         }
 
     private fun selectAddressHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
+        if (LandlordDetailsUpdateJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress.urlPathSegment
         } else {
             updateLandlordWithChangesAndRedirect()

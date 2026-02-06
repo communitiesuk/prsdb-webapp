@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
@@ -42,6 +43,7 @@ class PropertyDetailsController(
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
+    private val messageSource: MessageSource,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -63,6 +65,7 @@ class PropertyDetailsController(
                 withChangeLinks = true,
                 hideNullUprn = true,
                 landlordDetailsUrl = landlordDetailsUrl,
+                messageSource = messageSource,
             )
 
         val landlordViewModel =
@@ -159,6 +162,7 @@ class PropertyDetailsController(
                 withChangeLinks = false,
                 hideNullUprn = false,
                 landlordDetailsUrl = primaryLandlordDetailsUrl,
+                messageSource = messageSource,
             )
 
         val landlordViewModel =

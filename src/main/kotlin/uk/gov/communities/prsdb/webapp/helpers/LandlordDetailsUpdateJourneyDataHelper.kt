@@ -81,5 +81,15 @@ class LandlordDetailsUpdateJourneyDataHelper : JourneyDataHelper() {
 
             return LocalDate.of(year, month, day)
         }
+
+        fun isManualAddressChosen(journeyData: JourneyData): Boolean =
+            journeyData.getLookedUpAddresses().isEmpty() || getSelectedAddress(journeyData) == MANUAL_ADDRESS_CHOSEN
+
+        private fun getSelectedAddress(journeyData: JourneyData) =
+            getFieldStringValue(
+                journeyData,
+                "select-address",
+                SelectAddressFormModel::address.name,
+            )
     }
 }

@@ -23,17 +23,20 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -41,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
@@ -93,6 +97,13 @@ class PropertyOwnershipServiceTests {
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val license = License()
         val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
+        val numberOfBedrooms = 1
+        val billsIncludedList = "Electricity, Water"
+        val customBillsIncluded = "Internet"
+        val furnishedStatus = FurnishedStatus.FURNISHED
+        val rentFrequency = RentFrequency.OTHER
+        val customRentFrequency = "Fortnightly"
+        val rentAmount = 123.toBigDecimal()
 
         val expectedPropertyOwnership =
             PropertyOwnership(
@@ -105,6 +116,13 @@ class PropertyOwnershipServiceTests {
                 address = address,
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             )
 
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
@@ -125,6 +143,13 @@ class PropertyOwnershipServiceTests {
             propertyBuildType,
             address,
             license,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -142,6 +167,13 @@ class PropertyOwnershipServiceTests {
         val propertyBuildType = PropertyType.FLAT
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
+        val numberOfBedrooms = 1
+        val billsIncludedList = "Electricity, Water"
+        val customBillsIncluded = "Internet"
+        val furnishedStatus = FurnishedStatus.FURNISHED
+        val rentFrequency = RentFrequency.OTHER
+        val customRentFrequency = "Fortnightly"
+        val rentAmount = 123.toBigDecimal()
 
         val expectedPropertyOwnership =
             PropertyOwnership(
@@ -154,6 +186,13 @@ class PropertyOwnershipServiceTests {
                 address = address,
                 license = null,
                 incompleteComplianceForm = incompleteComplianceForm,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
             )
 
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
@@ -173,6 +212,13 @@ class PropertyOwnershipServiceTests {
             landlord,
             propertyBuildType,
             address,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -311,7 +357,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `throws not found error if user is not primary landlord or an la user`() {
+        fun `throws not found error if user is not primary landlord or an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -326,7 +372,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `returns property ownership when user is an la user`() {
+        fun `returns property ownership when user is an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val localCouncilUser =
                 MockLocalCouncilData.createLocalCouncilUser(
@@ -528,7 +574,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `searchForProperties returns the requested page of properties`() {
         val searchTerm = "searchTerm"
-        val laBaseUserId = "id"
+        val lcBaseUserId = "id"
         val pageSize = 25
         val matchingProperties = (1..40).map { MockLandlordData.createPropertyOwnership() }
 
@@ -544,21 +590,69 @@ class PropertyOwnershipServiceTests {
         val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
         val expectedPage2SearchResults = matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
 
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest1))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest1))
             .thenReturn(PageImpl(matchingPropertiesPage1))
-        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, laBaseUserId, pageable = pageRequest2))
+        whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest2))
             .thenReturn(PageImpl(matchingPropertiesPage2))
 
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey1)
         val searchResults1 =
-            propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex1)
+            propertyOwnershipService.searchForProperties(searchTerm, lcBaseUserId, requestedPageIndex = pageIndex1)
 
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(urlKey2)
         val searchResults2 =
-            propertyOwnershipService.searchForProperties(searchTerm, laBaseUserId, requestedPageIndex = pageIndex2)
+            propertyOwnershipService.searchForProperties(searchTerm, lcBaseUserId, requestedPageIndex = pageIndex2)
 
         assertEquals(expectedPage1SearchResults, searchResults1.content)
         assertEquals(expectedPage2SearchResults, searchResults2.content)
+    }
+
+    @Test
+    fun `searchForProperties throws an exception when fuzzy searching times out`() {
+        // Arrange
+        val searchTerm = "searchTerm"
+        val lcBaseUserId = "id"
+        val pageRequest = PageRequest.of(1, 10)
+
+        whenever(
+            mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest),
+        ).thenThrow(QueryTimeoutException("Query timed out"))
+
+        // Act & Assert
+        assertThrows<RepositoryQueryTimeoutException> {
+            propertyOwnershipService.searchForProperties(
+                searchTerm,
+                lcBaseUserId,
+                requestedPageIndex = pageRequest.pageNumber,
+                pageSize = pageRequest.pageSize,
+            )
+        }
+    }
+
+    @Test
+    fun `updateLicensing updates the property's license`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
+            )
+        val newLicensingType = LicensingType.HMO_MANDATORY_LICENCE
+        val newLicenceNumber = "newLicenceNumber"
+        val updatedLicence = License(newLicensingType, newLicenceNumber)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, newLicensingType, newLicenceNumber),
+        ).thenReturn(updatedLicence)
+
+        // Act
+        propertyOwnershipService.updateLicensing(propertyOwnership.id, newLicensingType, newLicenceNumber)
+
+        // Assert
+        assertEquals(updatedLicence, propertyOwnership.license)
     }
 
     @Test
@@ -840,12 +934,12 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext()
             val propertyOwnershipWithIncompleteCompliance =
-                MockLandlordData.createPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = incompleteComplianceForm)
+                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = incompleteComplianceForm)
             val properties =
                 listOf(
                     MockLandlordData.createPropertyOwnership(currentNumTenants = 0, incompleteComplianceForm = null),
                     MockLandlordData.createPropertyOwnership(currentNumTenants = 0, incompleteComplianceForm = incompleteComplianceForm),
-                    MockLandlordData.createPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = null),
+                    MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = null),
                     propertyOwnershipWithIncompleteCompliance,
                 )
 
@@ -924,7 +1018,7 @@ class PropertyOwnershipServiceTests {
         fun occupiedPropertyOwnership(): Named<PropertyOwnership> =
             Named.of(
                 "an occupied property",
-                MockLandlordData.createPropertyOwnership(
+                MockLandlordData.createOccupiedPropertyOwnership(
                     ownershipType = OwnershipType.FREEHOLD,
                     currentNumHouseholds = 2,
                     currentNumTenants = 4,

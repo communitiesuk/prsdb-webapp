@@ -20,7 +20,7 @@ class JourneyDataHelperTests {
     @BeforeEach
     fun setup() {
         mockLocalCouncilService = mock()
-        journeyDataBuilder = JourneyDataBuilder.landlordDefault(mockLocalCouncilService)
+        journeyDataBuilder = JourneyDataBuilder.propertyDefault(mockLocalCouncilService)
     }
 
     @Test

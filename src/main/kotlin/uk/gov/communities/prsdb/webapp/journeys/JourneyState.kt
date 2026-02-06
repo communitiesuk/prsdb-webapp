@@ -25,6 +25,8 @@ interface JourneyState {
 
     fun initializeState(seed: Any? = null): String
 
+    fun initializeOrRestoreState(seed: Any?): String
+
     fun generateJourneyId(seed: Any? = null): String =
         if (seed == null) {
             val allowedChars = ('a'..'z') + ('0'..'9')

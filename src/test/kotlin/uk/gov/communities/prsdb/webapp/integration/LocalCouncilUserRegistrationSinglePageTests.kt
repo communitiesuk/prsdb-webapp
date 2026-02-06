@@ -55,7 +55,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     inner class LocalCouncilUserRegistrationStepLandingPage : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `Navigating here as a registered local council user redirects to the Local Council dashboard page`(page: Page) {
-            navigator.navigateToLocalCouncilUserRegistrationLandingPage(invitation.token)
+            navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(invitation.token.toString())
             val dashboardPage = BasePage.assertPageIs(page, LocalCouncilDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.bannerHeading).containsText("Mock User")
             BaseComponent.assertThat(dashboardPage.bannerSubHeading).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")

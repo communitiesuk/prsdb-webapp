@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.LegacyAddressCheckingService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
@@ -36,6 +38,9 @@ class PropertyRegistrationJourneyTests {
     @Mock
     lateinit var addressService: AddressService
 
+    @Mock
+    lateinit var addressCheckingService: LegacyAddressCheckingService
+
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
     @BeforeEach
@@ -44,6 +49,7 @@ class PropertyRegistrationJourneyTests {
         mockPropertyRegistrationService = mock()
         localCouncilService = mock()
         addressService = mock()
+        addressCheckingService = mock()
     }
 
     @Nested
@@ -64,6 +70,13 @@ class PropertyRegistrationJourneyTests {
                     any(),
                     any(),
                     any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
                 ),
             ).thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 57))
 
@@ -73,6 +86,7 @@ class PropertyRegistrationJourneyTests {
                     journeyDataService = mockJourneyDataService,
                     addressService = addressService,
                     propertyRegistrationService = mockPropertyRegistrationService,
+                    addressCheckingService = addressCheckingService,
                     localCouncilService = localCouncilService,
                 )
             JourneyTestHelper.setMockUser(principalName)
@@ -103,6 +117,13 @@ class PropertyRegistrationJourneyTests {
                 argThat { households -> households == 0 },
                 argThat { tenants -> tenants == 0 },
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -131,6 +152,13 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -161,6 +189,13 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -189,6 +224,13 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 

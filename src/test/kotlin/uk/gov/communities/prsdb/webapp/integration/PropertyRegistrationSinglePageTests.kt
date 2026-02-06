@@ -4,8 +4,10 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import kotlin.test.assertTrue
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -53,6 +56,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Submitting with empty data fields returns an error`(page: Page) {
             val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
+            lookupAddressPage.clearForm() // There may be form answers in the journey state
             lookupAddressPage.form.submit()
             assertThat(lookupAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
             assertThat(lookupAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
@@ -464,6 +468,182 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             billsIncludedPage.form.submit()
             assertThat(billsIncludedPage.form.getErrorMessage("customBillsIncluded"))
                 .containsText("The description of other bills and services must be 200 characters or fewer")
+        }
+    }
+
+    @Nested
+    inner class FurnishedStatusStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val furnishedStatusPage = navigator.skipToPropertyRegistrationFurnishedStatusPage()
+            furnishedStatusPage.form.submit()
+            assertThat(
+                furnishedStatusPage.form.getErrorMessage(),
+            ).containsText("Select whether the property is furnished, partly furnished or unfurnished")
+        }
+    }
+
+    @Nested
+    inner class RentFrequencyStep {
+        @Test
+        fun `Submitting with no rentFrequency selected returns an error`(page: Page) {
+            val rentFrequencyPage = navigator.skipToPropertyRegistrationRentFrequencyPage()
+            rentFrequencyPage.form.submit()
+            assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Select how often you charge rent")
+        }
+
+        @Test
+        fun `Submitting with other rent frequency selected but no text entered returns an error`(page: Page) {
+            val rentFrequencyPage = navigator.skipToPropertyRegistrationRentFrequencyPage()
+            rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
+            rentFrequencyPage.form.submit()
+            assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Enter how often you charge rent")
+        }
+    }
+
+    @Nested
+    inner class RentAmountStep {
+        @Test
+        fun `Submitting no rentAmount returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.form.submit()
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a rentAmount greater than two decimals returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.submitRentAmount("400.123")
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a negative rentAmount returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.submitRentAmount("-400.12")
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a non-numerical rentAmount returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.submitRentAmount("not-a-number")
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Nested
+        inner class ConditionalContentPerRentFrequency {
+            @Test
+            fun `Page renders correctly for weekly rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
+                    .containsText("How much is the weekly rent for your property?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
+                        .contains("If the bills change every week, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+            }
+
+            @Test
+            fun `Page renders correctly for four weekly rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
+                    .containsText("How much is the rent for your property, charged every 4 weeks?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
+                        .contains("If the bills change every 4 weeks, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+            }
+
+            @Test
+            fun `Page renders correctly for monthly rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
+                    .containsText("How much is the monthly rent for your property?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
+                        .contains("If the bills change every month, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+            }
+
+            @Test
+            fun `Page renders correctly for 'other' rent frequency`(page: Page) {
+                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
+                BaseComponent
+                    .assertThat(rentAmountPage.header)
+                    .containsText("How much is the monthly rent for your property?")
+                assertTrue(
+                    rentAmountPage.billsExplanationForRentFrequencyBullet
+                        .getText()
+                        .contains("If the bills change every month, give an estimated amount."),
+                )
+                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
+            }
+        }
+    }
+
+    @Nested
+    inner class HasJointLandlordsStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+            hasJointLandlordsPage.form.submit()
+            assertThat(hasJointLandlordsPage.form.getErrorMessage())
+                .containsText("Select if there are any other landlords for this property")
+        }
+
+        @Test
+        fun `The link renders correctly`(page: Page) {
+            val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+        }
+    }
+
+    @Nested
+    inner class InviteJointLandlordsStep {
+        @Test
+        fun `Submitting with no email returns an error`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("")
+            assertThat(inviteJointLandlordsPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `Submitting with an invalid email returns an error`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("not-an-email")
+            assertThat(inviteJointLandlordsPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `Submitting with an already invited email returns an error`(page: Page) {
+            val alreadyInvitedEmail = "already@invited.com"
+            val inviteJointLandlordsPage =
+                navigator.skipToPropertyRegistrationInviteJointLandlordPage(mutableListOf(alreadyInvitedEmail))
+            inviteJointLandlordsPage.submitEmail(alreadyInvitedEmail)
+            assertThat(inviteJointLandlordsPage.form.getErrorMessage())
+                .containsText("You have already invited this email address")
         }
     }
 

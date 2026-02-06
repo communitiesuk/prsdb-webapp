@@ -34,7 +34,10 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
 
     fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode>
 
-    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode>
+    fun withAdditionalContentProperties(getAdditionalContent: () -> Map<String, Any>): ConfigurableElement<TMode>
+
+    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> =
+        withAdditionalContentProperties { mapOf(getAdditionalContent()) }
 
     fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode>
 
@@ -53,7 +56,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
     var parentageProvider: (() -> Parentage)? = null
     var unreachableStepDestination: (() -> Destination)? = null
-    var additionalContentProviders: MutableList<() -> Pair<String, Any>> = mutableListOf()
+    var additionalContentProviders: MutableList<() -> Map<String, Any>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
     var shouldSaveProgress: Boolean = false
     override var tags: Set<String> = emptySet()
@@ -145,7 +148,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         return this
     }
 
-    override fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> {
+    override fun withAdditionalContentProperties(getAdditionalContent: () -> Map<String, Any>): ConfigurableElement<TMode> {
         additionalContentProviders.add(getAdditionalContent)
         return this
     }
@@ -189,7 +192,18 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 
-    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configure(configuration)
+    override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
+
+    override fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        if (condition()) {
+            configuration()
+        }
+    }
+
+    fun isForStep(stepToCheck: JourneyStep<*, *, *>): Boolean = step === stepToCheck
 
     private fun build(state: TState): JourneyStep<TMode, *, TState> {
         val parentage =
@@ -210,7 +224,9 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
                 ),
             elementConfiguration.shouldSaveProgress,
         ) {
-            elementConfiguration.additionalContentProviders.associate { provider -> provider() }
+            elementConfiguration.additionalContentProviders.fold(emptyMap()) { additionalContent, provider ->
+                additionalContent + provider()
+            }
         }
 
         if (step.initialisationStage == StepInitialisationStage.UNINITIALISED) {

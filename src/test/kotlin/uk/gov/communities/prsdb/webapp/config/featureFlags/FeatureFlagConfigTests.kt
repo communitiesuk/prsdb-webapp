@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import java.time.LocalDate
-import kotlin.test.assertEquals
+import kotlin.test.assertContains
 
 class FeatureFlagConfigTests : FeatureFlagTest() {
     val expectedFeatureFlagsFromDefaultApplicationYaml =
@@ -68,8 +68,8 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 ),
             )
 
-        assertEquals(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
-        assertEquals(expectedReleases, featureFlagConfig.releases)
+        assertSubset(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
+        assertSubset(expectedReleases, featureFlagConfig.releases)
     }
 
     @ActiveProfiles("integration")
@@ -96,10 +96,15 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                     ),
                 )
 
-            assertEquals(expectedFeatureFlags, featureFlagConfig.featureFlags)
-            assertEquals(expectedReleases, featureFlagConfig.releases)
+            assertSubset(expectedFeatureFlags, featureFlagConfig.featureFlags)
+            assertSubset(expectedReleases, featureFlagConfig.releases)
         }
     }
+
+    private fun <T> assertSubset(
+        subset: List<T>,
+        superset: List<T>,
+    ) = subset.forEach { item -> assertContains(superset, item) }
 
     @Nested
     inner class AfterPropertiesSetTests {

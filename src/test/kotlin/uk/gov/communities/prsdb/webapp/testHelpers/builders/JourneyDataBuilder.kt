@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -123,34 +122,6 @@ class JourneyDataBuilder(
                 createLocalCouncil(),
             )
 
-        private val defaultLandlordJourneyData: JourneyData =
-            mapOf(
-                LandlordRegistrationStepId.PrivacyNotice.urlPathSegment to
-                    mapOf(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true),
-                LandlordRegistrationStepId.VerifyIdentity.urlPathSegment to mapOf(),
-                LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment to mapOf(),
-                LandlordRegistrationStepId.Name.urlPathSegment to mapOf("name" to "Arthur Dent"),
-                LandlordRegistrationStepId.DateOfBirth.urlPathSegment to
-                    mapOf(
-                        "day" to 6,
-                        "month" to 8,
-                        "year" to 2000,
-                    ),
-                LandlordRegistrationStepId.Email.urlPathSegment to mapOf("emailAddress" to "test@example.com"),
-                LandlordRegistrationStepId.PhoneNumber.urlPathSegment to mapOf("phoneNumber" to "07123456789"),
-                LandlordRegistrationStepId.CountryOfResidence.urlPathSegment to mapOf("livesInEnglandOrWales" to true),
-                LandlordRegistrationStepId.LookupAddress.urlPathSegment to mapOf("houseNameOrNumber" to "44", "postcode" to "EG1 1GE"),
-                LandlordRegistrationStepId.SelectAddress.urlPathSegment to mapOf("address" to DEFAULT_ADDRESS),
-                LandlordRegistrationStepId.CheckAnswers.urlPathSegment to emptyMap(),
-            )
-
-        fun landlordDefault(localCouncilService: LocalCouncilService) =
-            JourneyDataBuilder(localCouncilService, defaultLandlordJourneyData).withSelectedAddress(
-                DEFAULT_ADDRESS,
-                709902,
-                createLocalCouncil(),
-            )
-
         fun forLocalCouncilUser(
             name: String,
             email: String,
@@ -243,7 +214,7 @@ class JourneyDataBuilder(
     }
 
     fun withEnglandOrWalesResidence(): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
+        journeyData["country-of-residence"] =
             mapOf(
                 "livesInEnglandOrWales" to true,
             )
@@ -284,9 +255,18 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         withLicensingType(licensingType)
         when (licensingType) {
-            LicensingType.SELECTIVE_LICENCE -> withLicenceNumber("selective-licence", licenseNumber)
-            LicensingType.HMO_MANDATORY_LICENCE -> withLicenceNumber("hmo-mandatory-licence", licenseNumber)
-            LicensingType.HMO_ADDITIONAL_LICENCE -> withLicenceNumber("hmo-additional-licence", licenseNumber)
+            LicensingType.SELECTIVE_LICENCE -> {
+                withLicenceNumber("selective-licence", licenseNumber)
+            }
+
+            LicensingType.HMO_MANDATORY_LICENCE -> {
+                withLicenceNumber("hmo-mandatory-licence", licenseNumber)
+            }
+
+            LicensingType.HMO_ADDITIONAL_LICENCE -> {
+                withLicenceNumber("hmo-additional-licence", licenseNumber)
+            }
+
             LicensingType.NO_LICENSING -> {}
         }
         return this
@@ -337,102 +317,13 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withPrivacyNotice(): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.PrivacyNotice.urlPathSegment] =
-            mapOf(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true)
-        return this
-    }
-
-    fun withVerifiedUser(
-        name: String = "Arthur Dent",
-        dob: LocalDate = LocalDate.of(2000, 6, 8),
-    ): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] =
-            mapOf(
-                "name" to name,
-                "birthDate" to dob,
-            )
-        journeyData[LandlordRegistrationStepId.ConfirmIdentity.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withUnverifiedUser(
-        name: String? = null,
-        dob: LocalDate? = null,
-    ): JourneyDataBuilder {
-        this
-            .withVerifyIdentityUnverified()
-            .withIdentityNotVerified()
-            .withNameUnverifiedLandlordData(
-                name ?: "Arthur Dent",
-            ).withDateOfBirthUnverifiedLandlordData(dob ?: LocalDate.of(2000, 6, 8))
-        return this
-    }
-
-    fun withVerifyIdentityUnverified(): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.VerifyIdentity.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withIdentityNotVerified(): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.IdentityNotVerified.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withNameUnverifiedLandlordData(name: String = "Arthur Dent"): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.Name.urlPathSegment] = mapOf("name" to name)
-        return this
-    }
-
-    fun withDateOfBirthUnverifiedLandlordData(dob: LocalDate = LocalDate.of(2000, 6, 8)): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
-            mapOf("day" to dob.dayOfMonth, "month" to dob.monthValue, "year" to dob.year)
-        return this
-    }
-
     fun withEmailAddress(emailAddress: String = "email@test.com"): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.Email.urlPathSegment] = mapOf("emailAddress" to emailAddress)
+        journeyData[RegisterLocalCouncilUserStepId.Email.urlPathSegment] = mapOf("emailAddress" to emailAddress)
         return this
     }
 
     fun withPhoneNumber(phoneNumber: String = "07456097576"): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.PhoneNumber.urlPathSegment] = mapOf("phoneNumber" to phoneNumber)
-        return this
-    }
-
-    fun withNonEnglandOrWalesAndSelectedContactAddress(
-        countryOfResidence: String,
-        nonEnglandOrWalesAddress: String,
-        selectedAddress: String,
-    ): JourneyDataBuilder =
-        this
-            .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
-            .withSelectedAddress(selectedAddress, localCouncil = null, isContactAddress = true)
-
-    fun withNonEnglandOrWalesAndManualContactAddress(
-        countryOfResidence: String,
-        nonEnglandOrWalesAddress: String,
-        addressLineOne: String,
-        townOrCity: String,
-        postcode: String,
-    ): JourneyDataBuilder =
-        this
-            .withNonEnglandOrWalesAddress(countryOfResidence, nonEnglandOrWalesAddress)
-            .withManualAddress(addressLineOne, townOrCity, postcode, isContactAddress = true)
-
-    fun withNonEnglandOrWalesAddress(
-        countryOfResidence: String = "Zimbabwe",
-        nonEnglandOrWalesAddress: String? = "123 Example Road, Harare",
-    ): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.CountryOfResidence.urlPathSegment] =
-            mapOf(
-                "livesInEnglandOrWales" to false,
-                "countryOfResidence" to countryOfResidence,
-            )
-        nonEnglandOrWalesAddress?.let {
-            journeyData[LandlordRegistrationStepId.NonEnglandOrWalesAddress.urlPathSegment] =
-                mapOf("nonEnglandOrWalesAddress" to nonEnglandOrWalesAddress)
-        }
+        journeyData[LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment] = mapOf("phoneNumber" to phoneNumber)
         return this
     }
 
@@ -447,7 +338,7 @@ class JourneyDataBuilder(
     }
 
     fun withDateOfBirthUpdate(dateOfBirth: LocalDate): JourneyDataBuilder {
-        journeyData[LandlordRegistrationStepId.DateOfBirth.urlPathSegment] =
+        journeyData[LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment] =
             mapOf("day" to dateOfBirth.dayOfMonth, "month" to dateOfBirth.monthValue, "year" to dateOfBirth.year)
         return this
     }
