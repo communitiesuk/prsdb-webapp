@@ -14,7 +14,7 @@ class ResponsibilityToTenantsPagePropertyComplianceUpdate(
         page,
         PropertyComplianceController.getReviewPropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.ResponsibilityToTenants,
+            PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
         ),
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))

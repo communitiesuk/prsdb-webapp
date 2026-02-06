@@ -14,7 +14,7 @@ class FireSafetyDeclarationPagePropertyComplianceUpdate(
         page,
         PropertyComplianceController.getReviewPropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.FireSafetyDeclaration,
+            PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
         ),
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))

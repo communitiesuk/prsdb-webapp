@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -30,7 +30,7 @@ class GasSafetyViewModelFactory(
                         },
                     actionText = "forms.links.change",
                     actionLink =
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateGasSafety,
                         ),
@@ -67,26 +67,33 @@ class GasSafetyViewModelFactory(
         val uploadedFileStatus = propertyCompliance.gasSafetyFileUpload?.status
         val expired = propertyCompliance.isGasSafetyCertExpired
         return when {
-            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! ->
+            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! -> {
                 "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
+            }
 
-            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! ->
+            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! -> {
                 "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
+            }
 
-            uploadedFileStatus == FileUploadStatus.QUARANTINED ->
+            uploadedFileStatus == FileUploadStatus.QUARANTINED -> {
                 "propertyCompliance.uploadedFile.virusScanPending"
+            }
 
-            uploadedFileStatus == FileUploadStatus.DELETED ->
+            uploadedFileStatus == FileUploadStatus.DELETED -> {
                 "propertyCompliance.uploadedFile.virusScanFailed"
+            }
 
-            expired == true ->
+            expired == true -> {
                 "propertyDetails.complianceInformation.expired"
+            }
 
-            propertyCompliance.hasGasSafetyExemption ->
+            propertyCompliance.hasGasSafetyExemption -> {
                 "propertyDetails.complianceInformation.exempt"
+            }
 
-            else ->
+            else -> {
                 "propertyDetails.complianceInformation.notAdded"
+            }
         }
     }
 

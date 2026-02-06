@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -53,7 +53,7 @@ class PropertyComplianceUpdateJourneyFactory(
         fun getJourneyDataKey(
             propertyOwnershipId: Long,
             stepGroupId: PropertyComplianceGroupIdentifier?,
-        ) = PropertyComplianceController
+        ) = LegacyPropertyComplianceController
             .getUpdatePropertyComplianceBasePath(propertyOwnershipId) + stepGroupId?.name
     }
 }
