@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.example.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.example.ExampleEpcJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
-class EpcTask : Task<EpcJourneyState>() {
-    override fun makeSubJourney(state: EpcJourneyState) =
+class ExampleEpcTask : Task<ExampleEpcJourneyState>() {
+    override fun makeSubJourney(state: ExampleEpcJourneyState) =
         subJourney(state) {
             step(journey.epcQuestion) {
                 routeSegment("has-epc")

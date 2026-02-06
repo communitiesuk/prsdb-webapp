@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.example.ExampleEpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
@@ -12,13 +12,13 @@ import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class EpcQuestionStepConfig(
+class ExampleEpcQuestionStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
-) : AbstractRequestableStepConfig<EpcStatus, EpcFormModel, EpcJourneyState>() {
+) : AbstractRequestableStepConfig<EpcStatus, EpcFormModel, ExampleEpcJourneyState>() {
     override val formModelClass = EpcFormModel::class
 
-    override fun getStepSpecificContent(state: EpcJourneyState) =
+    override fun getStepSpecificContent(state: ExampleEpcJourneyState) =
         mapOf(
             "formModel" to EpcFormModel(),
             "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
@@ -43,9 +43,9 @@ class EpcQuestionStepConfig(
                 ),
         )
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/certificateForm"
+    override fun chooseTemplate(state: ExampleEpcJourneyState): String = "forms/certificateForm"
 
-    override fun afterStepDataIsAdded(state: EpcJourneyState) {
+    override fun afterStepDataIsAdded(state: ExampleEpcJourneyState) {
         val uprn = propertyOwnershipService.getPropertyOwnership(state.propertyId).address.uprn
         if (uprn != null) {
             val epc = epcLookupService.getEpcByUprn(uprn)
@@ -53,7 +53,7 @@ class EpcQuestionStepConfig(
         }
     }
 
-    override fun mode(state: EpcJourneyState) =
+    override fun mode(state: ExampleEpcJourneyState) =
         getFormModelFromStateOrNull(state)?.hasCert?.let {
             when (it) {
                 HasEpc.YES -> if (state.automatchedEpc != null) EpcStatus.AUTOMATCHED else EpcStatus.NOT_AUTOMATCHED
@@ -63,6 +63,6 @@ class EpcQuestionStepConfig(
 }
 
 @JourneyFrameworkComponent
-final class EpcQuestionStep(
-    stepConfig: EpcQuestionStepConfig,
-) : RequestableStep<EpcStatus, EpcFormModel, EpcJourneyState>(stepConfig)
+final class ExampleEpcQuestionStep(
+    stepConfig: ExampleEpcQuestionStepConfig,
+) : RequestableStep<EpcStatus, EpcFormModel, ExampleEpcJourneyState>(stepConfig)
