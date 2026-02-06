@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.ClassOrderer
 import org.junit.jupiter.api.ClassOrdererContext
 import org.junit.jupiter.api.TestClassOrder
 import org.junit.jupiter.api.TestInstance
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
@@ -21,12 +23,14 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagTestHelper
 import uk.gov.service.notify.NotificationClient
 import kotlin.reflect.full.isSubclassOf
 
@@ -73,6 +77,9 @@ abstract class IntegrationTest {
     @MockitoSpyBean
     lateinit var featureFlagManager: FeatureFlagManager
 
+    @Autowired
+    lateinit var featureFlagConfig: FeatureFlagConfig
+
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests
      * start the application on a random port, so we need to update that config. Unfortunately, the port is not chosen
@@ -113,6 +120,17 @@ abstract class IntegrationTest {
     @BeforeEach
     fun setUp(page: Page) {
         navigator = Navigator(page, port)
+    }
+
+    @AfterEach
+    fun resetFeatureFlags() {
+        // Reset feature flags to their original configuration from application.yml
+        // to prevent test pollution between integration tests
+        FeatureFlagTestHelper.resetToConfiguration(
+            featureFlagManager,
+            featureFlagConfig.featureFlags,
+            featureFlagConfig.releases,
+        )
     }
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)

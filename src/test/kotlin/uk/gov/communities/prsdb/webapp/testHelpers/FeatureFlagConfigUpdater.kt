@@ -105,8 +105,6 @@ class FeatureFlagConfigUpdater(
         featureFlags: List<FeatureFlagConfigModel>,
         featureReleases: List<FeatureReleaseConfigModel> = emptyList(),
     ) {
-        featureFlagManager.featureStore.clear()
-        featureFlagManager.initializeFeatureFlags(featureFlags)
-        featureFlagManager.initialiseFeatureReleases(featureReleases)
+        FeatureFlagTestHelper.resetToConfiguration(featureFlagManager, featureFlags, featureReleases)
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.config.featureFlags
 
+import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ConfigurableApplicationContext
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagTestHelper
 import uk.gov.service.notify.NotificationClient
 
 @SpringBootTest(classes = [FeatureFlagConfig::class])
@@ -75,4 +77,15 @@ class FeatureFlagTest {
 
     @Autowired
     lateinit var featureFlagConfig: FeatureFlagConfig
+
+    @AfterEach
+    fun resetFeatureFlags() {
+        // Reset feature flags to their original configuration from application.yml
+        // to prevent test pollution between tests
+        FeatureFlagTestHelper.resetToConfiguration(
+            featureFlagManager,
+            featureFlagConfig.featureFlags,
+            featureFlagConfig.releases,
+        )
+    }
 }
