@@ -24,6 +24,8 @@ const val MIGRATE_PROPERTY_REGISTRATION = "migrate-property-registration"
 
 const val MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION = "migrate-local-council-user-registration"
 
+const val MIGRATE_PROPERTY_COMPLIANCE = "migrate-property-compliance"
+
 val featureFlagNames =
     listOf(
         EXAMPLE_FEATURE_FLAG_ONE,
@@ -33,4 +35,5 @@ val featureFlagNames =
         FAILOVER_TEST_ENDPOINTS,
         MIGRATE_PROPERTY_REGISTRATION,
         MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION,
+        MIGRATE_PROPERTY_COMPLIANCE,
     )

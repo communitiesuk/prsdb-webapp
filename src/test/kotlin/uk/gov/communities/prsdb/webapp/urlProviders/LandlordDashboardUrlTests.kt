@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -84,8 +83,6 @@ class LandlordDashboardUrlTests(
 ) : ControllerTest(context) {
     @MockitoBean
     private lateinit var mockLandlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
-
-    private lateinit var landlordRegistrationJourney: LandlordRegistrationJourney
 
     @MockitoBean
     private lateinit var mockPropertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory

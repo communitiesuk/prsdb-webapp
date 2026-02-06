@@ -113,6 +113,9 @@ features:
     - name: "migrate-local-council-user-registration"
       enabled: true
       expiry-date: "2026-02-28"
+    - name: "migrate-property-compliance"
+      enabled: false
+      expiry-date: "2026-06-30"
   releases:
     - name: "release-1-0"
       enabled: false

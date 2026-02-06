@@ -9,31 +9,6 @@ import java.time.LocalDate
 
 class JourneyPageDataBuilder {
     companion object {
-        fun beforeLandlordRegistrationConfirmIdentity() = JourneyDataBuilder().withPrivacyNotice().withVerifiedUser()
-
-        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withPrivacyNotice().withVerifyIdentityUnverified()
-
-        fun beforeLandlordRegistrationName() = beforeLandlordRegistrationIdentityNotVerified().withIdentityNotVerified()
-
-        fun beforeLandlordRegistrationDob() = beforeLandlordRegistrationName().withNameUnverifiedLandlordData()
-
-        fun beforeLandlordRegistrationEmail() = beforeLandlordRegistrationConfirmIdentity()
-
-        fun beforeLandlordRegistrationPhoneNumber() = beforeLandlordRegistrationEmail().withEmailAddress()
-
-        fun beforeLandlordRegistrationCountryOfResidence() = beforeLandlordRegistrationPhoneNumber().withPhoneNumber()
-
-        fun beforeLandlordRegistrationLookupAddress() = beforeLandlordRegistrationCountryOfResidence().withEnglandOrWalesResidence()
-
-        fun beforeLandlordRegistrationSelectAddress() =
-            beforeLandlordRegistrationLookupAddress().withLookupAddress().withLookedUpAddresses()
-
-        fun beforeLandlordRegistrationManualAddress() = beforeLandlordRegistrationSelectAddress().withManualAddressSelected()
-
-        fun beforeLandlordRegistrationCheckAnswers() = beforeLandlordRegistrationSelectAddress().withSelectedAddress()
-
-        fun beforeLandlordRegistrationDeclaration() = beforeLandlordRegistrationCheckAnswers().withCheckedAnswers()
-
         fun beforeLocalCouncilUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
 
         fun beforeLocalCouncilUserRegistrationEmail() = beforeLocalCouncilUserRegistrationName().withName()

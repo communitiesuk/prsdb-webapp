@@ -26,6 +26,8 @@
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">
