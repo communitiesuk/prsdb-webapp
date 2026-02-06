@@ -25,6 +25,7 @@ class BillsIncludedHelper {
             propertyOwnership: PropertyOwnership,
             messageSource: MessageSource,
         ): String {
+            // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
             val allBillsIncluded = propertyOwnership.billsIncludedList!!.split(",").map { BillsIncluded.valueOf(it) }
             return buildBillsIncludedString(
                 billsIncluded = allBillsIncluded,

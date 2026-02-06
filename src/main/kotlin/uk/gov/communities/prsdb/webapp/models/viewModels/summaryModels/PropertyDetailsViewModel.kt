@@ -158,6 +158,7 @@ class PropertyDetailsViewModel(
                     }
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                        // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
@@ -166,6 +167,7 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
+                        // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
                         changeLinkMessageKey,
                         // TODO PDJB-105: Add link when update step is created
@@ -174,6 +176,7 @@ class PropertyDetailsViewModel(
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
+                        // TODO PDJB-548 remove not-null assertions !! once occupancy is embedded in PropertyOwnership
                         RentDataHelper.getRentAmount(
                             propertyOwnership.rentAmount!!.toString(),
                             propertyOwnership.rentFrequency!!,
