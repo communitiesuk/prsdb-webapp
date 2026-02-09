@@ -46,7 +46,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.FireSafetyDeclaration,
+                                    PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
                                 ),
                             ),
                         ),
@@ -57,7 +57,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.KeepPropertySafe,
+                                    PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
                                 ),
                             ),
                         ),
@@ -68,7 +68,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                                 "forms.links.view",
                                 PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.ResponsibilityToTenants,
+                                    PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
                                 ),
                             ),
                         ),
