@@ -26,6 +26,41 @@ class PropertyComplianceTaskListStepConfig :
                     "upload-documents",
                     listOf(
                         TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.gasSafety", state.gasSafetyTask),
+                        TaskListItemViewModel.fromTask("propertyCompliance.taskList.upload.eicr", state.eicrTask),
+                        TaskListItemViewModel.fromTask(
+                            "propertyCompliance.taskList.upload.epc",
+                            state.epcTask,
+                            "propertyCompliance.taskList.upload.epc.hint",
+                        ),
+                    ),
+                ),
+                TaskSectionViewModel(
+                    "propertyCompliance.taskList.landlordResponsibilities.heading",
+                    "property-details",
+                    listOf(
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.landlordResponsibilities.fireSafety",
+                            state.fireSafetyStep,
+                        ),
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.landlordResponsibilities.keepPropertySafe",
+                            state.keepPropertySafeStep,
+                        ),
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.landlordResponsibilities.tenants",
+                            state.responsibilityToTenantsStep,
+                        ),
+                    ),
+                ),
+                TaskSectionViewModel(
+                    "propertyCompliance.taskList.checkAndSubmit.heading",
+                    "check-and-submit",
+                    listOf(
+                        TaskListItemViewModel.fromStep(
+                            "propertyCompliance.taskList.checkAndSubmit.check",
+                            state.cyaStep,
+                            "propertyCompliance.taskList.checkAndSubmit.check.hint",
+                        ),
                     ),
                 ),
             )
