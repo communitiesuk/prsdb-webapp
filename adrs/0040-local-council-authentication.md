@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Proposed
 
-Date of decision: {yyyy-MM-dd}
+Date of decision: 2026-02-09
 
 ## Context and Problem Statement
 
@@ -39,7 +39,13 @@ Should we continue using One Login for Local Council users, switch to Internal A
 
 ## Decision Outcome
 
-{Title of Option X}, because {summary justification / rationale}.
+Switch to Internal Access but maintain One Login integration as a fallback, because it provides the JML integration
+benefits we need while allowing us to trial Internal Access in production during private beta without committing
+irrevocably. This approach gives us a genuine safety net - we can rapidly switch back to One Login before go-live if
+Internal Access proves unsuitable. It also allows us to answer the critical question of whether we could feasibly go
+live with Internal Access even if they haven't finished their Microsoft 365 integration by the end of the year. Once
+confident in Internal Access post-go-live, the One Login integration can be removed, making the complexity temporary
+rather than permanent.
 
 ## Pros and Cons of the Options
 
@@ -65,11 +71,8 @@ Fully switch to Internal Access for Local Council users, removing the One Login 
 
 * Good, because it integrates with councils' existing JML processes via Google Workspace / Microsoft 365,
   automatically revoking access when users leave.
-* Good, because it reduces the manual overhead for councils in managing user access (though authorization would still
-  be managed within our application).
 * Good, because it may enable alternatives to manual invite flows, such as automated join requests based on email
   domain verification.
-* Good, because it provides a cleaner architecture with a single authentication provider per user type.
 * Bad, because Internal Access is immature and may not be ready in time for our go-live date.
 * Bad, because Microsoft 365 integration is not yet complete, excluding councils that use Microsoft (rather than
   Google Workspace).
@@ -97,8 +100,9 @@ allowing a quick reversion if Internal Access experiences significant issues.
 * Bad, because the fallback code path may not be well-tested if it's rarely used, potentially causing issues when
   needed.
 * Bad, because it still inherits the maturity and reliability risks of Internal Access during normal operation.
-* Bad, because switching back to One Login after full go-live would be extremely disruptive (requiring all council
-  users to re-register), so the decision must be made before go-live.
+* Bad, because a final decision needs to be made before go-live even if Internal Access is still evolving, as
+  switching back to One Login after full go-live would be extremely disruptive (requiring all council users to
+  re-register).
 
 ### Run Internal Access and One Login in parallel (targeting specific councils)
 
@@ -115,10 +119,13 @@ on their council's IT infrastructure (e.g., Internal Access for Google Workspace
   challenge.
 * Bad, because migrating councils between providers post-go-live would be extremely disruptive (requiring all users to
   re-register), making this dual-authentication architecture permanent rather than transitional.
-* Bad, because maintaining two active authentication paths permanently increases code complexity, testing burden, and
-  ongoing maintenance overhead.
+* Bad, because a final decision needs to be made before go-live even if Internal Access is still evolving, as
+  switching back to One Login after full go-live would be extremely disruptive (requiring all council users to
+  re-register).
 * Bad, because users may experience different authentication flows depending on their council, which could cause
-  confusion and require additional support documentation.
+  confusion and complicate support. For example, we'd need two different training videos, more complex signposting or
+  onboarding documentation, and support would need to be able to look up which authentication flow any given user is
+  using for login issues (which are expected to make up the majority of support requests from Local Councils).
 
 ## More Information
 
