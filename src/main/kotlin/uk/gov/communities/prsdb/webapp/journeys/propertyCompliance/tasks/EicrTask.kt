@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrSt
 
 @JourneyFrameworkComponent
 class EicrTask : Task<EicrState>() {
+    // TODO PDJB-467 - configure this task
     override fun makeSubJourney(state: EicrState) =
         subJourney(state) {
             exitStep

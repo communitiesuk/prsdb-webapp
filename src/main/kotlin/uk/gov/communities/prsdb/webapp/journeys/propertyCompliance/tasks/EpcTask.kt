@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcSta
 @JourneyFrameworkComponent
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
+        // TODO PDJB-467: Configure this task - some steps may exist in ExampleEpcTask but should be checked to make sure they are correct
         subJourney(state) {
             step(journey.epcQuestionStep) {
                 routeSegment("has-epc")

@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQues
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 interface EpcState : JourneyState {
+    // TODO PDJB-467: Populate this - some steps may exist in ExampleEpcState but should be checked to make sure they are correct
     var automatchedEpc: EpcDataModel?
     var searchedEpc: EpcDataModel?
     val propertyId: Long
