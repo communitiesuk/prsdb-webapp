@@ -14,6 +14,19 @@ import java.time.LocalDate
 class FeatureFlagConfigUpdater(
     private val featureFlagManager: FeatureFlagManager,
 ) {
+    companion object {
+        fun resetToConfiguration(
+            featureFlagManager: FeatureFlagManager,
+            featureFlags: List<FeatureFlagConfigModel>,
+            featureReleases: List<FeatureReleaseConfigModel>,
+        ) {
+            // Access the featureStore from the parent FF4j class
+            featureFlagManager.featureStore.clear()
+            featureFlagManager.initializeFeatureFlags(featureFlags)
+            featureFlagManager.initialiseFeatureReleases(featureReleases)
+        }
+    }
+
     fun updateFeatureReleaseDate(
         featureName: String,
         newReleaseDate: LocalDate,
@@ -105,6 +118,6 @@ class FeatureFlagConfigUpdater(
         featureFlags: List<FeatureFlagConfigModel>,
         featureReleases: List<FeatureReleaseConfigModel> = emptyList(),
     ) {
-        FeatureFlagTestHelper.resetToConfiguration(featureFlagManager, featureFlags, featureReleases)
+        resetToConfiguration(featureFlagManager, featureFlags, featureReleases)
     }
 }

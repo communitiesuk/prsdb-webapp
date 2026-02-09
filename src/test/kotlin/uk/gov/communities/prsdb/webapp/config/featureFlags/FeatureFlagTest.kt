@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
-import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import uk.gov.service.notify.NotificationClient
 
 @SpringBootTest(classes = [FeatureFlagConfig::class])
@@ -82,7 +82,7 @@ class FeatureFlagTest {
     fun resetFeatureFlags() {
         // Reset feature flags to their original configuration from application.yml
         // to prevent test pollution between tests
-        FeatureFlagTestHelper.resetToConfiguration(
+        FeatureFlagConfigUpdater.resetToConfiguration(
             featureFlagManager,
             featureFlagConfig.featureFlags,
             featureFlagConfig.releases,

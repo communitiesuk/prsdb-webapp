@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
-import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import uk.gov.service.notify.NotificationClient
 import kotlin.reflect.full.isSubclassOf
 
@@ -126,7 +126,7 @@ abstract class IntegrationTest {
     fun resetFeatureFlags() {
         // Reset feature flags to their original configuration from application.yml
         // to prevent test pollution between integration tests
-        FeatureFlagTestHelper.resetToConfiguration(
+        FeatureFlagConfigUpdater.resetToConfiguration(
             featureFlagManager,
             featureFlagConfig.featureFlags,
             featureFlagConfig.releases,
