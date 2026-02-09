@@ -111,6 +111,9 @@ class NewPropertyComplianceJourneyFactory(
                             journey.gasSafetyTask.isComplete(),
                             journey.eicrTask.isComplete(),
                             journey.epcTask.isComplete(),
+                            journey.fireSafetyStep.isComplete(),
+                            journey.keepPropertySafeStep.isComplete(),
+                            journey.responsibilityToTenantsStep.isComplete(),
                         )
                     }
                     nextUrl { PropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId) }
