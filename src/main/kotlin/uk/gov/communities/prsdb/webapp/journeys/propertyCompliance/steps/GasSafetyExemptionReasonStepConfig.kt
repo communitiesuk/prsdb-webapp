@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class GasSafetyExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, GasSafetyExemptionReasonFormModel, GasSafetyState>() {
+class GasSafetyExemptionReasonStepConfig :
+    AbstractRequestableStepConfig<GasSafetyExemptionReasonMode, GasSafetyExemptionReasonFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyExemptionReasonFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
@@ -38,14 +38,26 @@ class GasSafetyExemptionReasonStepConfig : AbstractRequestableStepConfig<Complet
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/exemptionReasonForm.html"
 
-    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.exemptionReason?.let { Complete.COMPLETE }
+    override fun mode(state: GasSafetyState) =
+        state.gasSafetyExemptionReasonStep.formModelOrNull?.let {
+            if (it.exemptionReason == GasSafetyExemptionReason.OTHER) {
+                GasSafetyExemptionReasonMode.OTHER_REASON_SELECTED
+            } else {
+                GasSafetyExemptionReasonMode.LISTED_REASON_SELECTED
+            }
+        }
 }
 
 @JourneyFrameworkComponent
 final class GasSafetyExemptionReasonStep(
     stepConfig: GasSafetyExemptionReasonStepConfig,
-) : RequestableStep<Complete, GasSafetyExemptionReasonFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<GasSafetyExemptionReasonMode, GasSafetyExemptionReasonFormModel, GasSafetyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-exemption-reason"
     }
+}
+
+enum class GasSafetyExemptionReasonMode {
+    LISTED_REASON_SELECTED,
+    OTHER_REASON_SELECTED,
 }
