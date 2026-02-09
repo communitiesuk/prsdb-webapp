@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
-import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
+import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -13,6 +15,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 
 interface OccupationState : JourneyState {
     val occupied: OccupiedStep
@@ -33,37 +37,27 @@ interface OccupationState : JourneyState {
         }
 
     fun getCustomRentFrequencyIfSelected(): String? =
-        if (isRentFrequencyCustom()) {
+        if (hasCustomRentFrequency()) {
             rentFrequency.formModel.customRentFrequency.replaceFirstChar { it.uppercase() }
         } else {
             null
         }
 
-    fun getFormattedRentAmountComponentsOrNull(): List<String>? {
-        val rentAmount = rentAmount.formModelOrNull?.rentAmount ?: return null
-        val formattedRentAmount = mutableListOf("commonText.poundSign", rentAmount)
-        if (isRentFrequencyCustom()) {
-            formattedRentAmount.addAll(
-                listOf(" ", "forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"),
-            )
-        }
-        return formattedRentAmount
-    }
+    fun getRentAmount(messageSource: MessageSource): String =
+        RentDataHelper.getRentAmount(
+            rentAmount.formModel.notNullValue(RentAmountFormModel::rentAmount),
+            rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
+            messageSource,
+        )
 
-    fun getFormattedBillsIncludedListComponentsOrNull(): List<Any>? {
-        val allBillsIncludedList: MutableList<Any> = mutableListOf()
-        val billsIncludedDataModel = getBillsIncludedOrNull() ?: return null
-        if (billsIncludedDataModel.standardBillsIncludedListAsEnums.isEmpty()) return null
-        billsIncludedDataModel.standardBillsIncludedListAsEnums.forEachIndexed { index, bill ->
-            if (bill != BillsIncluded.SOMETHING_ELSE) {
-                allBillsIncludedList.add(bill)
-            } else {
-                allBillsIncludedList.add(billsIncludedDataModel.customBillsIncluded!!.replaceFirstChar { it.uppercase() })
-            }
-            if (index < billsIncludedDataModel.standardBillsIncludedListAsEnums.size - 1) allBillsIncludedList.add(", ")
-        }
-        return allBillsIncludedList.ifEmpty { null }
-    }
+    fun getBillsIncluded(messageSource: MessageSource): String =
+        BillsIncludedHelper.getBillsIncludedForCYAStep(
+            getBillsIncludedOrNull()!!,
+            messageSource,
+        )
 
-    private fun isRentFrequencyCustom(): Boolean = rentFrequency.formModelOrNull?.rentFrequency == RentFrequency.OTHER
+    private fun hasCustomRentFrequency(): Boolean =
+        RentDataHelper.hasCustomRentFrequency(
+            rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
+        )
 }
