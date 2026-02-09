@@ -95,8 +95,6 @@ allowing a quick reversion if Internal Access experiences significant issues.
 * Good, because it reduces risk around our go-live timeline - we can launch with the fallback if needed.
 * Good, because once confident in Internal Access post-go-live, the One Login integration can be removed, making the
   complexity temporary rather than permanent.
-* Bad, because maintaining two authentication integrations increases code complexity and maintenance burden during the
-  trial period.
 * Bad, because the fallback code path may not be well-tested if it's rarely used, potentially causing issues when
   needed.
 * Bad, because it still inherits the maturity and reliability risks of Internal Access during normal operation.
@@ -117,8 +115,6 @@ on their council's IT infrastructure (e.g., Internal Access for Google Workspace
 * Neutral, because determining which authentication provider to use when a user arrives requires upfront development
   (e.g., users selecting their council, or maintaining email domain mappings), but this is a solvable technical
   challenge.
-* Bad, because migrating councils between providers post-go-live would be extremely disruptive (requiring all users to
-  re-register), making this dual-authentication architecture permanent rather than transitional.
 * Bad, because a final decision needs to be made before go-live even if Internal Access is still evolving, as
   switching back to One Login after full go-live would be extremely disruptive (requiring all council users to
   re-register).
