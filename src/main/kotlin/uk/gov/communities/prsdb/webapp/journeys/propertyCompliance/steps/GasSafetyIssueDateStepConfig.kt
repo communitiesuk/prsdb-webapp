@@ -4,11 +4,10 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 
 @JourneyFrameworkComponent
-class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<Complete, TodayOrPastDateFormModel, GasSafetyState>() {
+class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<GasSafetyIssueDateMode, TodayOrPastDateFormModel, GasSafetyState>() {
     override val formModelClass = TodayOrPastDateFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
@@ -21,14 +20,25 @@ class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<Complete, Tod
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/dateForm"
 
-    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.toLocalDateOrNull()?.let { Complete.COMPLETE }
+    override fun mode(state: GasSafetyState) =
+        state.getGasSafetyCertificateIsOutdated()?.let {
+            when (it) {
+                true -> GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED
+                false -> GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE
+            }
+        }
 }
 
 @JourneyFrameworkComponent
 final class GasSafetyIssueDateStep(
     stepConfig: GasSafetyIssueDateStepConfig,
-) : RequestableStep<Complete, TodayOrPastDateFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<GasSafetyIssueDateMode, TodayOrPastDateFormModel, GasSafetyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-issue-date"
     }
+}
+
+enum class GasSafetyIssueDateMode {
+    GAS_SAFETY_CERTIFICATE_OUTDATED,
+    GAS_SAFETY_CERTIFICATE_IN_DATE,
 }
