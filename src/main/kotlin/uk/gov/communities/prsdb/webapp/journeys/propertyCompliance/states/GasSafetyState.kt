@@ -28,6 +28,7 @@ interface GasSafetyState : JourneyState {
     val gasSafetyExemptionOtherReasonStep: GasSafetyExemptionOtherReasonStep
     val gasSafetyExemptionConfirmationStep: GasSafetyExemptionConfirmationStep
     val gasSafetyExemptionMissingStep: GasSafetyExemptionMissingStep
+    val propertyId: Long
 
     fun getGasSafetyCertificateIssueDate() =
         gasSafetyIssueDateStep.formModelOrNull?.let { date ->

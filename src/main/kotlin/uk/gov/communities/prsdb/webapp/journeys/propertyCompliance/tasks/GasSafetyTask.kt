@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyIssueDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
@@ -21,24 +22,23 @@ class GasSafetyTask : Task<GasSafetyState>() {
         subJourney(state) {
             step(journey.gasSafetyStep) {
                 routeSegment(GasSafetyStep.ROUTE_SEGMENT)
-                nextStep { state.gasSafetyIssueDateStep }
+                nextStep { mode ->
+                    when (mode) {
+                        GasSafetyMode.HAS_CERTIFICATE -> journey.gasSafetyIssueDateStep
+                        GasSafetyMode.NO_CERTIFICATE -> journey.gasSafetyExemptionStep
+                    }
+                }
                 savable()
             }
             step(journey.gasSafetyIssueDateStep) {
                 routeSegment(GasSafetyIssueDateStep.ROUTE_SEGMENT)
-                parents { journey.gasSafetyStep.hasOutcome(Complete.COMPLETE) }
+                parents { journey.gasSafetyStep.hasOutcome(GasSafetyMode.HAS_CERTIFICATE) }
                 nextStep { mode ->
                     when (mode) {
                         GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE -> journey.gasSafetyEngineerNumberStep
                         GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED -> journey.gasSafetyOutdatedStep
                     }
                 }
-                savable()
-            }
-            step(journey.gasSafetyOutdatedStep) {
-                routeSegment(GasSafetyOutdatedStep.ROUTE_SEGMENT)
-                parents { journey.gasSafetyIssueDateStep.hasOutcome(GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED) }
-                nextStep { exitStep }
                 savable()
             }
             step(journey.gasSafetyEngineerNumberStep) {
@@ -56,6 +56,12 @@ class GasSafetyTask : Task<GasSafetyState>() {
             step(journey.gasSafetyUploadConfirmationStep) {
                 routeSegment(GasSafetyUploadConfirmationStep.ROUTE_SEGMENT)
                 parents { journey.gasSafetyCertificateUploadStep.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.gasSafetyOutdatedStep) {
+                routeSegment(GasSafetyOutdatedStep.ROUTE_SEGMENT)
+                parents { journey.gasSafetyIssueDateStep.hasOutcome(GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED) }
                 nextStep { exitStep }
                 savable()
             }
