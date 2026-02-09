@@ -216,6 +216,16 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateOwnershipType(
+        id: Long,
+        ownershipType: OwnershipType,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        propertyOwnership.ownershipType = ownershipType
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,

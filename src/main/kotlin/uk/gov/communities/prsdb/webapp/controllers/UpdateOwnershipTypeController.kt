@@ -13,18 +13,18 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.UPDATE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.UpdateOwnershipTypeJourneyFactory
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateLicensingController(
-    private val journeyFactory: UpdateLicensingJourneyFactory,
+class UpdateOwnershipTypeController(
+    private val journeyFactory: UpdateOwnershipTypeJourneyFactory,
 ) {
     @GetMapping("{stepName}")
     fun getNewUpdateStep(
@@ -61,6 +61,15 @@ class UpdateLicensingController(
         }
 
     companion object {
-        const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-licensing"
+        const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-ownership-type"
+        const val UPDATE_OWNERSHIP_TYPE_ROUTE = "$UPDATE_ROUTE/ownership-type"
+        const val UPDATE_CYA_OWNERSHIP_TYPE_ROUTE = "$UPDATE_ROUTE/check-ownership-type"
+
+        // TODO PDJB-545 update to fit the route building pattern
+        fun getUpdateOwnershipTypePathWithUpdateStep(propertyOwnershipId: Long): String =
+            UPDATE_OWNERSHIP_TYPE_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+
+        fun getUpdateOwnershipTypePathWithCYAStep(propertyOwnershipId: Long): String =
+            UPDATE_CYA_OWNERSHIP_TYPE_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
     }
 }
