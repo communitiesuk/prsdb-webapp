@@ -4,7 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -113,7 +113,7 @@ class NewPropertyComplianceJourneyFactory(
                             journey.epcTask.isComplete(),
                         )
                     }
-                    nextUrl { NewPropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId) }
+                    nextUrl { PropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId) }
                 }
             }
         }

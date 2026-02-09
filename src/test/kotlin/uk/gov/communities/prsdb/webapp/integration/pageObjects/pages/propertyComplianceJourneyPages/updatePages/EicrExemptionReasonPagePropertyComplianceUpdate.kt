@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ExemptionReasonFormPage
 
@@ -11,7 +11,7 @@ class EicrExemptionReasonPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : ExemptionReasonFormPage<EicrExemptionReason>(
         page,
-        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+        LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
             PropertyComplianceStepId.EicrExemptionReason,
         ),
