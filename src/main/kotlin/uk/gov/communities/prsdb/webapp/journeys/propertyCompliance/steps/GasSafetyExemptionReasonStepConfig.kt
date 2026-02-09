@@ -1,0 +1,51 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+
+@JourneyFrameworkComponent
+class GasSafetyExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, GasSafetyExemptionReasonFormModel, GasSafetyState>() {
+    override val formModelClass = GasSafetyExemptionReasonFormModel::class
+
+    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
+        mapOf(
+            "title" to "propertyCompliance.title",
+            "fieldSetHeading" to "forms.gasSafetyExemptionReason.fieldSetHeading",
+            "radioOptions" to
+                listOf(
+                    RadiosButtonViewModel(
+                        value = GasSafetyExemptionReason.NO_GAS_SUPPLY,
+                        labelMsgKey = "forms.gasSafetyExemptionReason.radios.noGas.label",
+                    ),
+                    RadiosButtonViewModel(
+                        value = GasSafetyExemptionReason.LONG_LEASE,
+                        labelMsgKey = "forms.gasSafetyExemptionReason.radios.longLease.label",
+                        hintMsgKey = "forms.gasSafetyExemptionReason.radios.longLease.hint",
+                    ),
+                    RadiosButtonViewModel(
+                        value = GasSafetyExemptionReason.OTHER,
+                        labelMsgKey = "forms.gasSafetyExemptionReason.radios.other.label",
+                        hintMsgKey = "forms.gasSafetyExemptionReason.radios.other.hint",
+                    ),
+                ),
+        )
+
+    override fun chooseTemplate(state: GasSafetyState): String = "forms/exemptionReasonForm.html"
+
+    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.exemptionReason?.let { Complete.COMPLETE }
+}
+
+@JourneyFrameworkComponent
+final class GasSafetyExemptionReasonStep(
+    stepConfig: GasSafetyExemptionReasonStepConfig,
+) : RequestableStep<Complete, GasSafetyExemptionReasonFormModel, GasSafetyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "gas-safety-certificate-exemption-reason"
+    }
+}
