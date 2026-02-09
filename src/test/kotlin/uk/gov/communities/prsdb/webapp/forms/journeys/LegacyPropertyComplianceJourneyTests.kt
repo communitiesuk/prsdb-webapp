@@ -56,7 +56,7 @@ import kotlin.test.assertContains
 
 // TODO PDJB-467 - replicate these tests for the new journey framework
 @ExtendWith(MockitoExtension::class)
-class PropertyComplianceJourneyTests {
+class LegacyPropertyComplianceJourneyTests {
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
