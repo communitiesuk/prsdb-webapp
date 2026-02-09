@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_FOUR
 import uk.gov.communities.prsdb.webapp.constants.EXAMPLE_FEATURE_FLAG_ONE
@@ -206,7 +205,6 @@ class ExampleFlaggedFeaturesTests : IntegrationTestWithImmutableData("data-local
     }
 
     @Nested
-    @Disabled("TODO: PDJB-245. Resolve feature flag changes bleeding between tests")
     inner class ReinitialiseConfigTests {
         // If making several changes to the feature flag configuration compared to the default loaded from application.yml, it may be easier to
         // reinitialise the whole config.
