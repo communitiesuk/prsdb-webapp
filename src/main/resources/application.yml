@@ -106,6 +106,9 @@ features:
     - name: "migrate-property-registration"
       enabled: true
       expiry-date: "2026-02-28"
+    - name: "migrate-local-council-user-registration"
+      enabled: false
+      expiry-date: "2026-02-28"
     - name: "migrate-property-compliance"
       enabled: false
       expiry-date: "2026-06-30"
@@ -115,7 +118,7 @@ features:
     - name: "release-with-strategy"
       enabled: true
       strategy-config:
-          release-date: "2025-06-01"
+        release-date: "2025-06-01"
 
 ---
 
