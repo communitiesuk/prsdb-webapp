@@ -560,7 +560,8 @@ checkPropertyAnswers:
   jointLandlordsDetails:
     heading: Invite joint landlords
     invitations: Invitations
-    hasJointLandlords: Are there any other landlords for this property?
+    areThereJointLandlords: Are there any other landlords for this property?
+    noJointLandlords: No, I am the only landlord
 update:
   email:
     fieldSetHeading: What is your updated email address?
