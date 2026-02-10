@@ -80,7 +80,7 @@ class NewRegisterLocalCouncilUserController(
                 val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token)
                 val redirectUrl =
                     JourneyStateService.urlWithJourneyState(
-                        "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$stepName",
+                        stepName,
                         journeyId,
                     )
                 ModelAndView("redirect:$redirectUrl")
@@ -109,7 +109,7 @@ class NewRegisterLocalCouncilUserController(
                 val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token)
                 val redirectUrl =
                     JourneyStateService.urlWithJourneyState(
-                        "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$stepName",
+                        stepName,
                         journeyId,
                     )
                 ModelAndView("redirect:$redirectUrl")
