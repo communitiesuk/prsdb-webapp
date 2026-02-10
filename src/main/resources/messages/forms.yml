@@ -529,7 +529,7 @@ hmoShared:
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
   propertyDetails:
-    heading: Property record
+    heading: Property details
     hint: Check the property address is correct
     detail:
       summary: What is a UPRN?
@@ -557,6 +557,11 @@ checkPropertyAnswers:
     rentFrequency: When rent is paid
     rentAmount: Rent amount
     customFrequencyRentAmountSuffix: per month
+  jointLandlordsDetails:
+    heading: Invite joint landlords
+    invitations: Invitations
+    areThereJointLandlords: Are there any other landlords for this property?
+    noJointLandlords: No, I am the only landlord
 update:
   email:
     fieldSetHeading: What is your updated email address?

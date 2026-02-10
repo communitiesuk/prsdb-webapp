@@ -1,11 +1,12 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
+import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
@@ -20,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -29,6 +33,7 @@ class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
+    private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
@@ -41,6 +46,7 @@ class PropertyRegistrationCyaStepConfig(
             "propertyDetails" to getPropertyDetailsSummaryList(state),
             "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
             "tenancyDetails" to getTenancyDetailsSummaryList(state),
+            "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
 
@@ -175,8 +181,8 @@ class PropertyRegistrationCyaStepConfig(
                 val furnishedStatusStep = state.furnishedStatus
                 val rentFrequencyStep = state.rentFrequency
                 val rentAmountStep = state.rentAmount
-                val rentIncludesBills = rentIncludesBillsStep.formModel.rentIncludesBills!!
-                val rentFrequency = rentFrequencyStep.formModel.rentFrequency
+                val rentIncludesBills = rentIncludesBillsStep.formModel.notNullValue(RentIncludesBillsFormModel::rentIncludesBills)
+                val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.households",
@@ -209,9 +215,8 @@ class PropertyRegistrationCyaStepConfig(
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getFormattedBillsIncludedListComponentsOrNull(),
+                            state.getBillsIncluded(messageSource),
                             Destination(billsIncludedStep),
-                            enforceListAsSingleLineDisplay = true,
                         ),
                     )
                 }
@@ -225,19 +230,35 @@ class PropertyRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        if (rentFrequency == RentFrequency.OTHER) rentFrequencyStep.formModel.customRentFrequency else rentFrequency,
+                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
                         Destination(rentFrequencyStep),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getFormattedRentAmountComponentsOrNull(),
+                        state.getRentAmount(messageSource),
                         Destination(rentAmountStep),
-                        enforceListAsSingleLineDisplay = true,
                     ),
                 )
             }
+
+    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+        val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)
+        return if (hasJointLandlords) {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+                state.getAllInvitedJointLandlordEmails(),
+                Destination(state.hasJointLandlordsStep),
+            )
+        } else {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                Destination(state.hasJointLandlordsStep),
+            )
+        }
+    }
 }
 
 @JourneyFrameworkComponent

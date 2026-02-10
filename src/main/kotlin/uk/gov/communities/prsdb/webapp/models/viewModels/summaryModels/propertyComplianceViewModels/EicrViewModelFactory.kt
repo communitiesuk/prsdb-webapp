@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -30,7 +30,7 @@ class EicrViewModelFactory(
                         },
                     actionText = "forms.links.change",
                     actionLink =
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateEICR,
                         ),
@@ -61,26 +61,33 @@ class EicrViewModelFactory(
         val uploadedFileStatus = propertyCompliance.eicrFileUpload?.status
         val expired = propertyCompliance.isEicrExpired
         return when {
-            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! ->
+            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! -> {
                 "propertyDetails.complianceInformation.electricalSafety.downloadEicr"
+            }
 
-            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! ->
+            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! -> {
                 "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr"
+            }
 
-            uploadedFileStatus == FileUploadStatus.QUARANTINED ->
+            uploadedFileStatus == FileUploadStatus.QUARANTINED -> {
                 "propertyCompliance.uploadedFile.virusScanPending"
+            }
 
-            uploadedFileStatus == FileUploadStatus.DELETED ->
+            uploadedFileStatus == FileUploadStatus.DELETED -> {
                 "propertyCompliance.uploadedFile.virusScanFailed"
+            }
 
-            expired == true ->
+            expired == true -> {
                 "propertyDetails.complianceInformation.expired"
+            }
 
-            propertyCompliance.hasEicrExemption ->
+            propertyCompliance.hasEicrExemption -> {
                 "propertyDetails.complianceInformation.exempt"
+            }
 
-            else ->
+            else -> {
                 "propertyDetails.complianceInformation.notAdded"
+            }
         }
     }
 

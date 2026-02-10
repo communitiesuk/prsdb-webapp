@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
 class GasSafetyTask : Task<GasSafetyState>() {
+    // TODO PDJB-467 - configure this task
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {
             step(journey.gasSafetyEngineerNumberStep) {

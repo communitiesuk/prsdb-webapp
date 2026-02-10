@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.NumberOfIncompletePropertiesFeatureStrategy
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
@@ -73,7 +74,7 @@ import kotlin.test.Test
         LandlordController::class,
         RegisterLandlordController::class,
         RegisterPropertyController::class,
-        PropertyComplianceController::class,
+        LegacyPropertyComplianceController::class,
     ],
     properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )

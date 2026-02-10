@@ -14,7 +14,7 @@ class KeepPropertySafePagePropertyComplianceUpdate(
         page,
         PropertyComplianceController.getReviewPropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.KeepPropertySafe,
+            PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
         ),
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))
