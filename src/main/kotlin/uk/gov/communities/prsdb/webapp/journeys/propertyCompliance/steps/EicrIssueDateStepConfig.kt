@@ -23,9 +23,13 @@ class EicrIssueDateStepConfig(
 
     override fun chooseTemplate(state: EicrState): String = "forms/certificateForm"
 
-    // TODO PDJB-467 - update this when we have done state.getEicrCertificateIsOutdated()
     override fun mode(state: EicrState) =
-        getFormModelFromStateOrNull(state)?.isValidDate()?.let { EicrIssueDateMode.EICR_CERTIFICATE_IN_DATE }
+        state.getEicrCertificateIsOutdated()?.let {
+            when (it) {
+                true -> EicrIssueDateMode.EICR_CERTIFICATE_OUTDATED
+                false -> EicrIssueDateMode.EICR_CERTIFICATE_IN_DATE
+            }
+        }
 }
 
 @JourneyFrameworkComponent

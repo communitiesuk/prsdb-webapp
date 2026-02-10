@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
+import kotlinx.datetime.yearsUntil
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
@@ -25,4 +28,17 @@ interface EicrState : JourneyState {
     val eicrExemptionConfirmationStep: EicrExemptionConfirmationStep
     val eicrExemptionMissingStep: EicrExemptionMissingStep
     val propertyId: Long
+
+    fun getEicrCertificateIssueDate() =
+        eicrIssueDateStep.formModelOrNull?.let { date ->
+            DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
+        }
+
+    fun getEicrCertificateIsOutdated() =
+        getEicrCertificateIssueDate()?.let { issueDate ->
+            val today = DateTimeHelper().getCurrentDateInUK()
+            issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
+        }
+
+    fun getEicrCertificateFileUploadId() = eicrUploadStep.formModelOrNull?.fileUploadId
 }
