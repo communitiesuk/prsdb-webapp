@@ -356,7 +356,7 @@ Journey IDs are generated using the `generateJourneyId` method on `JourneyState`
 **Random generation** (default when no seed is provided):
 - Generates a 7-character alphanumeric string
 - Creates a unique ID on every call
-- Only suitable when journeys should never be resumed
+- Prefer seed based generation where possible for base journeys
 
 ### Overriding `generateJourneyId`
 
