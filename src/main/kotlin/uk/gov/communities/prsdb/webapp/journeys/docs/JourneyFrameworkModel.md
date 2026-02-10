@@ -53,12 +53,15 @@ In this example, both branches must be completed before proceeding to "Check you
 
 ### Modes and Outcomes
 
-**Modes** represent the possible answers on a page that affect journey structure. The mode is determined by the user's answer (or external factors), not by direct user selection.
+**Modes** represent the possible answers on a page that affect journey structure.
+The user does not directly select the mode - it is derived from some combination of the user's answer and external factors.
+For example, a mode might be "Is the user over 18?" which is derived from the user's answer to a date of birth question.
 
 - Modes are specified using an enum class when defining a step
 - If the page has not been answered yet, the mode is `null`
 
-**Outcomes** are similar to modes but account for journey structure—they determine reachability. An outcome is the same as the mode if the page is reachable, and `null` otherwise.
+**Outcomes** are similar to modes but account for journey structure—they determine reachability.
+An outcome is the same as the mode if the page is reachable, and `null` otherwise.
 
 ### Redirection vs. Reachability
 It's important to distinguish between redirection and reachability:
