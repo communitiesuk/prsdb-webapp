@@ -52,7 +52,7 @@ The step config must define the following overrides:
     - Otherwise, it should return the appropriate enum value based on the user's answers
 
 ### Register the bean
-Annotate the step config class with `@JourneyFrameworkComponent` to register it as a Spring.
+Annotate the step config class with `@JourneyFrameworkComponent` to register it as a Spring bean.
 Each bean must have a unique name, so if the step shares a name with one from another journey an explicit bean name must be set.
 
 ### Example Step Config
