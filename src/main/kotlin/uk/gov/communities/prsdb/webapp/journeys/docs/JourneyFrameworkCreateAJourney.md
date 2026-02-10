@@ -26,7 +26,7 @@ This config class takes three type parameters:
 - The form model class for the step
 - The journey state interface for the step
 
-The mode enum defines the possible outcomes for the step that affect journey structure.
+The mode enum defines the ways the step can affect journey structure.
 This is not the same as the possible answers on the page; rather, it is derived from the user's answers.
 For example, it might represent "does user's answer match our previous record?" with modes `MATCH` and `NO_MATCH` even if it is a free text field.
 There are a few shared mode enums for common scenarios:
@@ -128,10 +128,74 @@ final class OccupiedStep(
 Some steps may not have an associated page, but still require validation and parentage rules.
 For these steps, create a subclass of `Step` instead of `RequestableStep` and implement the necessary lifecycle functions directly on the class.
 
-This is a convenient way to implement logic relating to the journey or task structure without needing a separate HTTP request.
+This is a convenient way to implement logic relating to the journey structure without needing a separate HTTP request.
 For example, if a user should be shown different pages depending on their previously recorded age, you could implement a `DateOfBirthStep` that calculates the user's age from their date of birth but does not have an associated page.
 
-### Define a task
+## Defining Journey Structure
+
+The journey structure is defined using a Kotlin DSL. For each element, you define:
+- Where the user goes when completing the element (for each mode)
+- What previous elements must be completed for this element to be visitable (parents)
+- Where to redirect if the element is not visitable
+- The URL route segment for the element (if applicable)
+
+### Basic Structure
+
+```kotlin
+val state = stateFactory.getObject()
+val simpleJourney = journey(state) {
+    unreachableStepStep { journey.nameStep }
+    step(journey.nameStep) {
+        nextStep { journey.questStep }
+        routeSegment("name")
+        initialStep()
+    }
+    step(journey.questStep) {
+        nextStep { journey.colourStep }
+        routeSegment("quest")
+        parents { journey.nameStep.isComplete() }
+    }
+    step(journey.colourStep) {
+        nextStep { journey.checkAnswersStep }
+        routeSegment("colour")
+        parents { journey.questStep.isComplete() }
+    }
+    step(journey.checkAnswersStep) {
+        nextUrl { "/home" }
+        parents { journey.colourStep.isComplete() }
+        routeSegment("check-answers")
+    }
+}
+```
+
+### Branching Based on Mode
+
+```kotlin
+step(journey.swallowSpeedStep) {
+    nextStep {
+        when (it) {
+            SwallowSpeed.OVER_330 -> journey.fastSwallowStep
+            SwallowSpeed.UNDER_330 -> journey.slowSwallowStep
+        }
+    }
+    routeSegment("swallow-speed")
+    parents { journey.nameStep.isComplete() }
+}
+step(journey.fastSwallowStep) {
+    nextStep { journey.checkAnswersStep }
+    routeSegment("fast-swallow")
+    parents { journey.swallowSpeedStep.hasOutcome(SwallowSpeed.OVER_330) }
+}
+step(journey.slowSwallowStep) {
+    nextStep { journey.checkAnswersStep }
+    routeSegment("slow-swallow")
+    parents { journey.swallowSpeedStep.hasOutcome(SwallowSpeed.UNDER_330) }
+}
+```
+
+> **Note:** `nextStep` and `parents` are independent concepts. `nextStep` defines where a user is redirected; `parents` defines when a user can visit a step. It's possible to redirect to an unreachable step.
+
+## Define a task
 Create a subclass of `Task` and override `makeSubJourney` with the internal structure:
 
 ```kotlin
@@ -176,6 +240,41 @@ The first step listed in the task must be the "entry point" step, which users wi
 
 The `exitStep` is an internal step without an associated page.
 It defines the requirements for completing the task and where to go next.
+
+### Journey structure including a task
+When adding a task to a journey, it can be configured just like a step except that you do not specify a route segment (tasks do not have their own URL).
+When specifying a task as the destination following another step use `task.firstStep` to direct users to the entry point of the task.
+
+```kotlin
+val state = stateFactory.getObject()
+val simpleJourney = journey(state) {
+    unreachableStepStep { journey.nameStep }
+    step(journey.nameStep) {
+        nextStep { journey.questStep }
+        routeSegment("name")
+        initialStep()
+    }
+    step(journey.questStep) {
+        nextStep { journey.colourStep }
+        routeSegment("quest")
+        parents { journey.nameStep.isComplete() }
+    }
+    step(journey.colourStep) {
+        nextStep { journey.exampleTask.firstStep }
+        routeSegment("colour")
+        parents { journey.questStep.isComplete() }
+    }
+    task(journey.exampleTask) {
+        parents { journey.colourStep.isComplete() }
+        nextStep { journey.checkAnswersStep }
+    }
+    step(journey.checkAnswersStep) {
+        nextUrl { "/home" }
+        parents { journey.exampleTask.isComplete() }
+        routeSegment("check-answers")
+    }
+}
+```
 
 ## Define the Journey State
 
@@ -238,74 +337,6 @@ class SimpleJourney(
 ```
 
 The `changedMindAboutColour` property is automatically persisted to the session using the key `"changedMind"`.
-
-## Defining Journey Structure
-
-The journey structure is defined using a Kotlin DSL. For each element, you define:
-- Where the user goes when completing the element (for each mode)
-- What previous elements must be completed for this element to be visitable (parents)
-- Where to redirect if the element is not visitable
-- The URL route segment for the element (if applicable)
-
-### Basic Structure
-
-```kotlin
-val state = stateFactory.getObject()
-val simpleJourney = journey(state) {
-    unreachableStepStep { journey.nameStep }
-    step(journey.nameStep) {
-        nextStep { journey.questStep }
-        routeSegment("name")
-        initialStep()
-    }
-    step(journey.questStep) {
-        nextStep { journey.colourStep }
-        routeSegment("quest")
-        parents { journey.nameStep.isComplete() }
-    }
-    step(journey.colourStep) {
-        nextStep { journey.exampleTask.firstStep }
-        routeSegment("colour")
-        parents { journey.questStep.isComplete() }
-    }
-    task(journey.exampleTask) {
-        parents { journey.colourStep.isComplete() }
-        nextStep { journey.checkAnswersStep }
-    }
-    step(journey.checkAnswersStep) {
-        nextUrl { "/home" }
-        parents { journey.colourStep.isComplete() }
-        routeSegment("check-answers")
-    }
-}
-```
-
-### Branching Based on Mode
-
-```kotlin
-step(journey.swallowSpeedStep) {
-    nextStep {
-        when (it) {
-            SwallowSpeed.OVER_330 -> journey.fastSwallowStep
-            SwallowSpeed.UNDER_330 -> journey.slowSwallowStep
-        }
-    }
-    routeSegment("swallow-speed")
-    parents { journey.nameStep.isComplete() }
-}
-step(journey.fastSwallowStep) {
-    nextStep { journey.checkAnswersStep }
-    routeSegment("fast-swallow")
-    parents { journey.swallowSpeedStep.hasOutcome(SwallowSpeed.OVER_330) }
-}
-step(journey.slowSwallowStep) {
-    nextStep { journey.checkAnswersStep }
-    routeSegment("slow-swallow")
-    parents { journey.swallowSpeedStep.hasOutcome(SwallowSpeed.UNDER_330) }
-}
-```
-
-> **Note:** `nextStep` and `parents` are independent concepts. `nextStep` defines where a user is redirected; `parents` defines when a user can visit a step. It's possible to redirect to an unreachable step.
 
 ## Initialising Journey State
 
