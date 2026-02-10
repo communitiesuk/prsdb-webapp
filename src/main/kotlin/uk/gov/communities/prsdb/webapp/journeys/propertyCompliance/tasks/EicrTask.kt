@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrSt
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
@@ -36,6 +37,11 @@ class EicrTask : Task<EicrState>() {
                     }
                 }
                 savable()
+            }
+            step(journey.eicrUploadStep) {
+                routeSegment(EicrUploadStep.ROUTE_SEGMENT)
+                parents { journey.eicrIssueDateStep.hasOutcome(EicrIssueDateMode.EICR_CERTIFICATE_IN_DATE) }
+                nextStep { journey.eicrUploadConfirmationStep }
             }
             exitStep {
                 parents {

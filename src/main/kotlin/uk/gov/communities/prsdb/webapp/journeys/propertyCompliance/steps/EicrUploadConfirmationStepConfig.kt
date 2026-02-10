@@ -14,13 +14,7 @@ class EicrUploadConfirmationStepConfig : AbstractRequestableStepConfig<Complete,
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
         mapOf(
             "title" to "propertyCompliance.title",
-            // TODO PDJB-467 - implement these properly / remove if not needed
             "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
-            /*"submitButtonText" to
-                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
-                    "forms.buttons.saveAndContinueToEPC",
-                    isCheckingAnswers || isUpdateJourney,
-                ),*/
         )
 
     override fun chooseTemplate(state: EicrState): String = "forms/uploadCertificateConfirmationForm"
