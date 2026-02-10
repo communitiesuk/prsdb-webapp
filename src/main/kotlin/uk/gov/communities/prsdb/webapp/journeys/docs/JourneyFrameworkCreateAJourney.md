@@ -17,7 +17,8 @@ I would recommend implementing the journey iteratively, starting with a single s
 This will allow you to add specific state interfaces to each step when they need to reference other steps in the journey.
 
 ## Define Step Classes
-Each step is defined by a step configuration class that extends one of the base step config classes (e.g., `AbstractRequestableStepConfig`).
+The logic and data for a specific step is defined by a step configuration class that extends one of the base step config classes (e.g., `AbstractRequestableStepConfig`).
+The shared logic for handling requests and rendering pages is implemented in the base `RequestableStep` class, which uses the config class to determine how to handle the step-specific logic.
 
 ### Type Parameters
 This config class takes three type parameters:
@@ -122,6 +123,13 @@ final class OccupiedStep(
     stepConfig: OccupiedStepConfig,
 ) : RequestableStep<YesOrNo, OccupancyFormModel, OccupationState>(stepConfig)
 ```
+
+### Internal steps
+Some steps may not have an associated page, but still require validation and parentage rules.
+For these steps, create a subclass of `Step` instead of `RequestableStep` and implement the necessary lifecycle functions directly on the class.
+
+This is a convenient way to implement logic relating to the journey or task structure without needing a separate HTTP request.
+For example, if a user should be shown different pages depending on their previously recorded age, you could implement a `DateOfBirthStep` that calculates the user's age from their date of birth but does not have an associated page.
 
 ### Define a task
 Create a subclass of `Task` and override `makeSubJourney` with the internal structure:
