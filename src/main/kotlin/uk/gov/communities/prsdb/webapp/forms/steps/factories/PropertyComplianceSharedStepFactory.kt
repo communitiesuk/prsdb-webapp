@@ -207,7 +207,6 @@ class PropertyComplianceSharedStepFactory(
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
-            // TODO PDJB-467 - replicate this saving the certificate upload
             handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,

@@ -36,10 +36,9 @@ interface GasSafetyState : JourneyState {
         }
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
-        gasSafetyIssueDateStep.formModelOrNull?.let {
-            val issueDate = getGasSafetyCertificateIssueDate()
+        getGasSafetyCertificateIssueDate()?.let { issueDate ->
             val today = DateTimeHelper().getCurrentDateInUK()
-            return issueDate?.yearsUntil(today)!! >= GAS_SAFETY_CERT_VALIDITY_YEARS
+            issueDate.yearsUntil(today) >= GAS_SAFETY_CERT_VALIDITY_YEARS
         }
 
     fun getGasSafetyCertificateFileUploadId(): Long? = gasSafetyCertificateUploadStep.formModelOrNull?.fileUploadId
