@@ -72,7 +72,7 @@ class JointLandlordInvitationService(
     fun getTokenFromSession(): String? = session.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN) as String?
 
     fun clearTokenFromSession() {
-        session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN, null)
+        session.removeAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
     }
 
     fun getInvitationByIdOrNull(id: Long): JointLandlordInvitation? = invitationRepository.findById(id).orElse(null)
