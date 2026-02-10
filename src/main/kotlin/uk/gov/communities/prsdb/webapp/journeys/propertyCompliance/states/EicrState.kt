@@ -1,6 +1,28 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOutdatedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 
-// TODO PDJB-467 - populate this and configure the EicrTask
-interface EicrState : JourneyState
+interface EicrState : JourneyState {
+    // TODO PDJB-467 - Implement these steps and add to the EicrTask
+    val eicrStep: EicrStep
+    val eicrIssueDateStep: EicrIssueDateStep
+    val eicrUploadStep: EicrUploadStep
+    val eicrUploadConfirmationStep: EicrUploadConfirmationStep
+    val eicrOutdatedStep: EicrOutdatedStep
+    val eicrExemptionStep: EicrExemptionStep
+    val eicrExemptionReasonStep: EicrExemptionReasonStep
+    val eicrExemptionOtherReasonStep: EicrExemptionOtherReasonStep
+    val eicrExemptionConfirmationStep: EicrExemptionConfirmationStep
+    val eicrExemptionMissingStep: EicrExemptionMissingStep
+    val propertyId: Long
+}

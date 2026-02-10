@@ -17,6 +17,16 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOutdatedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
@@ -135,6 +145,16 @@ class PropertyComplianceJourney(
     override val gasSafetyUploadConfirmationStep: GasSafetyUploadConfirmationStep,
     // EICR task
     override val eicrTask: EicrTask,
+    override val eicrStep: EicrStep,
+    override val eicrIssueDateStep: EicrIssueDateStep,
+    override val eicrUploadStep: EicrUploadStep,
+    override val eicrUploadConfirmationStep: EicrUploadConfirmationStep,
+    override val eicrOutdatedStep: EicrOutdatedStep,
+    override val eicrExemptionStep: EicrExemptionStep,
+    override val eicrExemptionReasonStep: EicrExemptionReasonStep,
+    override val eicrExemptionOtherReasonStep: EicrExemptionOtherReasonStep,
+    override val eicrExemptionConfirmationStep: EicrExemptionConfirmationStep,
+    override val eicrExemptionMissingStep: EicrExemptionMissingStep,
     // EPC task
     override val epcTask: EpcTask,
     override val epcQuestionStep: EpcQuestionStep,
