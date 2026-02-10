@@ -455,17 +455,24 @@ Example: `LandlordRegistrationJourneyTests.kt`
 
 ### Framework Code
 
-The core journey framework lives in `src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
+The core journey framework lives in `src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/`.
+Some of these are base classes you will need to extend when creating a new journey, while others are internal classes that you can use but do not need to modify.
+
+Base classes you will need to extend:
+
+| File | Description |
+|------|-------------|
+| `AbstractJourneyState.kt` | Base class for journey state implementations |
+| `AbstractStepConfig.kt` | Base classes for step configuration |
+| `Task.kt` | Base class for reusable task groups |
+
+Internal final classes that you can use but do not need to modify:
 
 | File | Description |
 |------|-------------|
 | `JourneyStep.kt` | Core step class definition |
-| `JourneyState.kt` | Base interface for journey state |
-| `AbstractJourneyState.kt` | Base class for journey state implementations |
-| `AbstractStepConfig.kt` | Base classes for step configuration |
 | `JourneyStateDelegateProvider.kt` | Handles session persistence |
 | `StepLifecycleOrchestrator.kt` | Manages request lifecycle for steps |
-| `Task.kt` | Base class for reusable task groups |
 | `Parentage.kt` | Defines parent/child relationships |
 | `Destination.kt` | Navigation destination types |
 | `builders/` | DSL builder classes |
