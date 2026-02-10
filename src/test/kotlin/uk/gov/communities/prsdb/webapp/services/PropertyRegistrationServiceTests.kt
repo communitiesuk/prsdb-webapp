@@ -58,6 +58,9 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockPropertyRegistrationConfirmationService: PropertyRegistrationConfirmationService
 
+    @Mock
+    private lateinit var mockJointLandlordInvitationEmailSender: JointLandlordInvitationEmailSender
+
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
 
