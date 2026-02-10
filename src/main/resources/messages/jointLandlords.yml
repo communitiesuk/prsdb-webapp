@@ -22,3 +22,6 @@ inviteJointLandlord:
   error:
     invalidEmail: Enter an email address in the correct format, like name@example.com
     alreadyInvited: You have already invited this email address
+checkJointLandlords:
+  heading: Check joint landlords
+  invitedEmailAddress: Joint Landlord Email

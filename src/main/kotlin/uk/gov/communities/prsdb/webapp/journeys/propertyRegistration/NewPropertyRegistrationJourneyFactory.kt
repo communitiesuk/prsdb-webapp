@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bedro
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsInternalStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
@@ -160,6 +161,7 @@ class PropertyRegistrationJourney(
     override val rentAmount: RentAmountStep,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
+    override val hasJointLandlordsInternalStep: HasJointLandlordsInternalStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordStep: RemoveJointLandlordStep,

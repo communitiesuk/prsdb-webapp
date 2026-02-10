@@ -21,7 +21,12 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/emailForm"
 
-    override fun mode(state: JointLandlordsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: JointLandlordsState) =
+        if (state.invitedJointLandlords.isEmpty()) {
+            null
+        } else {
+            Complete.COMPLETE
+        }
 
     override fun enrichSubmittedDataBeforeValidation(
         state: JointLandlordsState,
@@ -32,9 +37,10 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
         val formModel = getFormModelFromState(state)
-        val currentList = state.invitedJointLandlordEmails?.toMutableList() ?: mutableListOf()
+        val currentList = state.invitedJointLandlords.toMutableList()
         formModel.emailAddress?.let { currentList.add(it) }
         state.invitedJointLandlordEmails = currentList
+        state.inviteJointLandlordStep.clearFormData()
     }
 }
 
