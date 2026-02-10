@@ -12,3 +12,17 @@ The DSL is built using Kotlin builder patterns. Key extension points:
 To add new DSL functions, extend the relevant initialiser classes in `builders/`.
 
 See: https://kotlinlang.org/docs/type-safe-builders.html
+
+## Unit Tests
+
+Unit tests for the framework live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
+
+| Test File | Description |
+|-----------|-------------|
+| `JourneyStepTests.kt` | Tests for individual step behaviour and configuration |
+| `StepConfigTests.kt` | Tests for step configuration classes |
+| `StepLifecycleOrchestratorTest.kt` | Tests for the request lifecycle handling |
+| `ParentageTests.kt` | Tests for parent/child relationships between steps |
+| `TaskTests.kt` | Tests for task (step group) functionality |
+| `AbstractJourneyStateTests.kt` | Tests for journey state persistence |
+| `builders/JourneyBuilderTest.kt` | Tests for the DSL builder |

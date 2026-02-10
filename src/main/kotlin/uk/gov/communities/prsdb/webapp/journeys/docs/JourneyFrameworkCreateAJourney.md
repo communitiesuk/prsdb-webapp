@@ -439,21 +439,7 @@ You should then call your initialisation method to create a new journey state an
 
 ## Testing
 
-The journey framework has comprehensive test coverage across multiple test categories.
-
-### Unit Tests
-
-Unit tests for the framework live in `src/test/kotlin/uk/gov/communities/prsdb/webapp/journeys/`:
-
-| Test File | Description |
-|-----------|-------------|
-| `JourneyStepTests.kt` | Tests for individual step behaviour and configuration |
-| `StepConfigTests.kt` | Tests for step configuration classes |
-| `StepLifecycleOrchestratorTest.kt` | Tests for the request lifecycle handling |
-| `ParentageTests.kt` | Tests for parent/child relationships between steps |
-| `TaskTests.kt` | Tests for task (step group) functionality |
-| `AbstractJourneyStateTests.kt` | Tests for journey state persistence |
-| `builders/JourneyBuilderTest.kt` | Tests for the DSL builder |
+When adding a new journey, add integration tests to cover the journey.
 
 ### Integration Tests
 
@@ -464,12 +450,6 @@ Example: `LandlordRegistrationJourneyTests.kt`
 ### Test Utilities
 
 - **`JourneyTestHelper`** (`src/test/kotlin/uk/gov/communities/prsdb/webapp/testHelpers/JourneyTestHelper.kt`): Helper class for setting up mock users in tests.
-
-### Writing Tests for Your Journey
-
-1. **Unit test individual steps**: Test step validation, mode determination, and content generation
-2. **Test journey structure**: Verify parentage relationships and navigation paths
-3. **Integration test the full flow**: Use Playwright page objects to test the complete user journey
 
 ## File Locations
 
