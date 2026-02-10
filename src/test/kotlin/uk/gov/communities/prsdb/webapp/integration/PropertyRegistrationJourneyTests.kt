@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -47,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.net.URI
@@ -58,12 +60,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoSpyBean
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
+    @MockitoSpyBean
+    private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
+
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var jointLandlordInvitationEmailSender: EmailNotificationService<JointLandlordInvitationEmail>
 
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
+        whenever(
+            absoluteUrlProvider.buildJointLandlordInvitationUri(org.mockito.kotlin.any()),
+        ).thenReturn(URI("http://localhost/invite/test-token"))
     }
 
     @Test
@@ -236,6 +247,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "1 Fictional Road, FA1 1AA",
                 absoluteLandlordUrl,
                 true,
+                listOf("email@address.com"),
             ),
         )
 
@@ -347,6 +359,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "Test address line 1, Testville, EG1 2AB",
                 absoluteLandlordUrl,
                 false,
+                null,
             ),
         )
 
