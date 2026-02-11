@@ -131,6 +131,7 @@ class StepLifecycleOrchestratorTest {
         myInOrder.verify(step).attemptToReachStep()
         myInOrder.verify(step).validateSubmittedData(anyOrNull())
         myInOrder.verify(step).submitFormData(anyOrNull())
+        myInOrder.verify(step).saveStateIfAllowed()
         myInOrder.verify(step).getNextDestination()
 
         assertTrue(modelAndView.model.isEmpty())
