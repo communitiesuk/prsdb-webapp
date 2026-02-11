@@ -396,7 +396,7 @@ Define at least two controller methods for each journey:
 
 Capture the route segment as a path variable to identify the step being requested.
 
-Each method calls a journey factory to create a map of route segments to [`StepLifecycleOrchestrator`](StepLifecycleOrchestrator.kt) instances, which wrap steps and handle the request lifecycle.
+Each method calls a journey factory to create a map of route segments to [`StepLifecycleOrchestrator`](JourneyFrameworkReadMe.md#glossary-of-terms) instances, which wrap steps and handle the request lifecycle.
 
 You must catch `NoSuchJourneyException` to handle the case where the user has not yet initialised a journey.
 You should then call your initialisation method to create a new journey state and redirect the user to the same step with the new journey ID.

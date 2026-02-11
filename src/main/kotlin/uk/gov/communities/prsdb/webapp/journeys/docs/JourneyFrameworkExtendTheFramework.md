@@ -20,9 +20,9 @@ Unit tests for the framework live in `src/test/kotlin/uk/gov/communities/prsdb/w
 | Test File | Description |
 |-----------|-------------|
 | `JourneyStepTests.kt` | Tests for individual step behaviour and configuration |
-| `StepConfigTests.kt` | Tests for step configuration classes |
+| `StepConfigTests.kt` | Tests for [step configuration](JourneyFrameworkReadMe.md#glossary-of-terms) classes |
 | `StepLifecycleOrchestratorTest.kt` | Tests for the request lifecycle handling |
-| `ParentageTests.kt` | Tests for parent/child relationships between steps |
+| `ParentageTests.kt` | Tests for [parent](JourneyFrameworkReadMe.md#glossary-of-terms)/child relationships between steps |
 | `TaskTests.kt` | Tests for task (step group) functionality |
-| `AbstractJourneyStateTests.kt` | Tests for journey state persistence |
+| `AbstractJourneyStateTests.kt` | Tests for [journey state](JourneyFrameworkReadMe.md#glossary-of-terms) persistence |
 | `builders/JourneyBuilderTest.kt` | Tests for the DSL builder |

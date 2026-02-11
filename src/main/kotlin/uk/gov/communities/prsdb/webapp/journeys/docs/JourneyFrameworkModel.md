@@ -1,13 +1,13 @@
 # Understanding the Journey Framework Model
-The Journey Framework is designed to create complex multi-page form journeys in a structured and maintainable way.
+The Journey Framework is designed to create complex multi-page form [journeys](JourneyFrameworkReadMe.md#glossary-of-terms) in a structured and maintainable way.
 This document explains the conceptual model used in the framework to represent journeys, pages, and user navigation.
 
 ## The Journey as a Directed Graph
 
 ### Graphs and Journey Elements
 
-Journeys are modelled as directed graphs, where nodes are called "Journey Elements" or simply "Elements".
-Elements can be steps (pages) or tasks (groups of steps).
+Journeys are modelled as directed graphs, where nodes are called "[Journey Elements](JourneyFrameworkReadMe.md#glossary-of-terms)" or simply "Elements".
+Elements can be [steps](JourneyFrameworkReadMe.md#glossary-of-terms) (pages) or [tasks](JourneyFrameworkReadMe.md#glossary-of-terms) (groups of steps).
 
 A simple linear journey made up of single pages looks like this:
 
@@ -66,7 +66,7 @@ An outcome is the same as the mode if the page is reachable, and `null` otherwis
 ### Redirection vs. Reachability
 It's important to distinguish between redirection and reachability:
 - **Redirection** is defined for each step and determines where the user is sent next after completing a step. This can be based on the mode, but can be any destination regardless of the graph structure.
-- **Reachability** is the determining factor for the graph structure and is defined by the completion status of previous steps. A step is reachable if the right combinations of its parent steps have been completed and are themselves reachable.
+- **Reachability** is the determining factor for the graph structure and is defined by the completion status of previous steps. A step is reachable if the right combinations of its [parent](JourneyFrameworkReadMe.md#glossary-of-terms) steps have been completed and are themselves reachable.
 
 ## Journey Elements
 ### Steps
