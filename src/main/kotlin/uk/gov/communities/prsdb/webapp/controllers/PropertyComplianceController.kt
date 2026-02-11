@@ -114,7 +114,7 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         val modelAndView =
             try {
-                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps()
+                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId)
                 journeyMap[stepName]?.getStepModelAndView()
                     ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
             } catch (_: NoSuchJourneyException) {
@@ -140,7 +140,7 @@ class PropertyComplianceController(
 
         val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
 
-        return postProcessedJourneyData(stepName, annotatedFormData, principal)
+        return postProcessedJourneyData(stepName, propertyOwnershipId, annotatedFormData, principal)
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -166,7 +166,7 @@ class PropertyComplianceController(
                 response,
             )
 
-        return postProcessedJourneyData(stepName, formData, principal)
+        return postProcessedJourneyData(stepName, propertyOwnershipId, formData, principal)
     }
 
     @GetMapping("/$FEEDBACK_LATER_PATH_SEGMENT")
@@ -323,11 +323,12 @@ class PropertyComplianceController(
 
     private fun postProcessedJourneyData(
         stepName: String,
+        propertyOwnershipId: Long,
         formData: PageData,
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = propertyComplianceJourneyFactory.createJourneySteps()
+            val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -453,5 +454,8 @@ class PropertyComplianceController(
             propertyOwnershipId: Long,
             stepName: String,
         ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/$stepName"
+
+        fun getPropertyComplianceConfirmationPath(propertyOwnershipId: Long): String =
+            UriTemplate("$PROPERTY_COMPLIANCE_ROUTE/$CONFIRMATION_PATH_SEGMENT").expand(propertyOwnershipId).toASCIIString()
     }
 }
