@@ -29,7 +29,7 @@ class JointLandlordInvitationService(
         return token.toString()
     }
 
-    fun getPropertyOwnershipForToken(token: String): PropertyOwnership = getInvitationFromToken(token).registeredPropertyID
+    fun getPropertyOwnershipForToken(token: String): PropertyOwnership = getInvitationFromToken(token).registeredPropertyId
 
     fun getEmailAddressForToken(token: String): String = getInvitationFromToken(token).invitedEmail
 
