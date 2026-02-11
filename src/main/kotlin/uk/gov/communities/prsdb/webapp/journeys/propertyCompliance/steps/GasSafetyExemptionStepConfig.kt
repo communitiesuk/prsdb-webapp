@@ -2,16 +2,16 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExemptionMode, GasSafetyExemptionFormModel, GasSafetyState>() {
+class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExemptionMode, GasSafetyExemptionFormModel, JourneyState>() {
     override val formModelClass = GasSafetyExemptionFormModel::class
 
-    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafetyExemption.fieldSetHeading",
@@ -30,10 +30,10 @@ class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExem
                 ),
         )
 
-    override fun chooseTemplate(state: GasSafetyState): String = "forms/exemptionForm"
+    override fun chooseTemplate(state: JourneyState): String = "forms/exemptionForm"
 
-    override fun mode(state: GasSafetyState) =
-        state.gasSafetyExemptionStep.formModelOrNull?.let {
+    override fun mode(state: JourneyState) =
+        getFormModelFromStateOrNull(state)?.let {
             when (it.hasExemption) {
                 true -> GasSafetyExemptionMode.HAS_EXEMPTION
                 false -> GasSafetyExemptionMode.NO_EXEMPTION
@@ -45,7 +45,7 @@ class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExem
 @JourneyFrameworkComponent
 final class GasSafetyExemptionStep(
     stepConfig: GasSafetyExemptionStepConfig,
-) : RequestableStep<GasSafetyExemptionMode, GasSafetyExemptionFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<GasSafetyExemptionMode, GasSafetyExemptionFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-exemption"
     }
