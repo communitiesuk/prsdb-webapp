@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.st
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -31,9 +30,7 @@ class LocalCouncilUserCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: LocalCouncilUserRegistrationJourneyState) {
-        val invitation =
-            invitationService.getInvitationByIdOrNull(state.invitationId)
-                ?: throw PrsdbWebException("Invitation not found for ID ${state.invitationId}")
+        val invitation = state.invitation
 
         val name = state.nameStep.formModel.notNullValue(NameFormModel::name)
         val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
@@ -58,9 +55,7 @@ class LocalCouncilUserCyaStepConfig(
     }
 
     private fun getSummaryList(state: LocalCouncilUserRegistrationJourneyState): List<SummaryListRowViewModel> {
-        val invitation =
-            invitationService.getInvitationByIdOrNull(state.invitationId)
-                ?: throw PrsdbWebException("Invitation not found for ID ${state.invitationId}")
+        val invitation = state.invitation
         val localCouncilName = invitation.invitingCouncil.name
         val name = state.nameStep.formModel.notNullValue(NameFormModel::name)
         val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)

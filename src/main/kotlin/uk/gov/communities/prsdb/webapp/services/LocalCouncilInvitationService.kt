@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_INVITATION_T
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.InvalidInvitationException
 import uk.gov.communities.prsdb.webapp.exceptions.TokenNotFoundException
 import java.util.UUID
 import kotlin.time.Duration.Companion.hours
@@ -103,5 +104,17 @@ class LocalCouncilInvitationService(
                 .plus(LOCAL_COUNCIL_INVITATION_LIFETIME_IN_HOURS.hours)
 
         return Clock.System.now() > expiresAtInstant
+    }
+
+    fun getValidInvitationFromToken(token: String): LocalCouncilInvitation {
+        val invitation =
+            getInvitationOrNull(token)
+                ?: throw InvalidInvitationException("Invitation not found for token")
+
+        if (getInvitationHasExpired(invitation)) {
+            throw InvalidInvitationException("Invitation has expired")
+        }
+
+        return invitation
     }
 }
