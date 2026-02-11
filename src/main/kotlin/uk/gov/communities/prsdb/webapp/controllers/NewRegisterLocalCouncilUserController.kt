@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOU
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.InvalidInvitationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
@@ -65,28 +66,27 @@ class NewRegisterLocalCouncilUserController(
     @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
-        principal: Principal,
     ): ModelAndView {
-        val token = getValidTokenFromSessionOrNull()
-        if (token == null) {
-            invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
-        }
-
-        val invitation = invitationService.getInvitationFromToken(token)
+        val token =
+            getValidTokenFromSessionOrNull()
+                ?: return redirectToInvalidLink()
 
         return try {
-            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(invitation.id)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
-            val redirectUrl =
-                JourneyStateService.urlWithJourneyState(
-                    "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$stepName",
-                    journeyId,
-                )
-            ModelAndView("redirect:$redirectUrl")
+            try {
+                val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(token)
+                journeyMap[stepName]?.getStepModelAndView()
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+            } catch (_: NoSuchJourneyException) {
+                val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token)
+                val redirectUrl =
+                    JourneyStateService.urlWithJourneyState(
+                        stepName,
+                        journeyId,
+                    )
+                ModelAndView("redirect:$redirectUrl")
+            }
+        } catch (_: InvalidInvitationException) {
+            redirectToInvalidLink()
         }
     }
 
@@ -95,38 +95,33 @@ class NewRegisterLocalCouncilUserController(
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
-        principal: Principal,
     ): ModelAndView {
-        val token = getValidTokenFromSessionOrNull()
-        if (token == null) {
-            invitationService.clearTokenFromSession()
-            return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
-        }
-
-        val invitation = invitationService.getInvitationFromToken(token)
+        val token =
+            getValidTokenFromSessionOrNull()
+                ?: return redirectToInvalidLink()
 
         return try {
-            val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(invitation.id)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val invitation = invitationService.getInvitationFromToken(token)
-            val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(invitation)
-            val redirectUrl =
-                JourneyStateService.urlWithJourneyState(
-                    "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$stepName",
-                    journeyId,
-                )
-            ModelAndView("redirect:$redirectUrl")
+            try {
+                val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(token)
+                journeyMap[stepName]?.postStepModelAndView(formData)
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+            } catch (_: NoSuchJourneyException) {
+                val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token)
+                val redirectUrl =
+                    JourneyStateService.urlWithJourneyState(
+                        stepName,
+                        journeyId,
+                    )
+                ModelAndView("redirect:$redirectUrl")
+            }
+        } catch (_: InvalidInvitationException) {
+            redirectToInvalidLink()
         }
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
-    fun getConfirmation(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun getConfirmation(model: Model): String {
         val localCouncilUserID =
             localCouncilDataService.getLastUserIdRegisteredThisSession()
                 ?: throw ResponseStatusException(
@@ -149,7 +144,7 @@ class NewRegisterLocalCouncilUserController(
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
-    fun invalidToken(model: Model): String = "invalidLocalCouncilInvitationLink"
+    fun invalidToken(): String = "invalidLocalCouncilInvitationLink"
 
     private fun getValidTokenFromSessionOrNull(): String? {
         val token = invitationService.getTokenFromSession()
@@ -158,6 +153,11 @@ class NewRegisterLocalCouncilUserController(
         } else {
             token
         }
+    }
+
+    private fun redirectToInvalidLink(): ModelAndView {
+        invitationService.clearTokenFromSession()
+        return ModelAndView("redirect:$LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE")
     }
 
     companion object {
