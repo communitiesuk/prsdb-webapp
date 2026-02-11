@@ -7,12 +7,9 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
-import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 
 @JourneyFrameworkComponent("localCouncilUserRegistrationEmailStepConfig")
-class EmailStepConfig(
-    private val invitationService: LocalCouncilInvitationService,
-) : AbstractRequestableStepConfig<Complete, EmailFormModel, LocalCouncilUserRegistrationJourneyState>() {
+class EmailStepConfig : AbstractRequestableStepConfig<Complete, EmailFormModel, LocalCouncilUserRegistrationJourneyState>() {
     override val formModelClass = EmailFormModel::class
 
     override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState) =
@@ -33,11 +30,8 @@ class EmailStepConfig(
     ): Map<String, Any?> {
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? EmailFormModel
         if (formModel?.emailAddress == null) {
-            val invitation = invitationService.getInvitationByIdOrNull(state.invitationId)
-            if (invitation != null) {
-                val prePopulatedFormModel = EmailFormModel.fromLocalCouncilInvitation(invitation)
-                return defaultContent + (FORM_MODEL_ATTR_NAME to prePopulatedFormModel)
-            }
+            val prePopulatedFormModel = EmailFormModel.fromLocalCouncilInvitation(state.invitation)
+            return defaultContent + (FORM_MODEL_ATTR_NAME to prePopulatedFormModel)
         }
         return defaultContent
     }

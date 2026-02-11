@@ -11,8 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifiedMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 
 @JourneyFrameworkComponent
 class IdentityTask : Task<IdentityState>() {
