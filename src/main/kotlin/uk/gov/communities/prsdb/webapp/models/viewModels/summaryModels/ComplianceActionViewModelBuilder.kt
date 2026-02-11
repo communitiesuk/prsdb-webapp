@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.controllers.NewPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -62,14 +62,14 @@ class ComplianceActionViewModelBuilder {
                 } else if (dataModel.isInProgress) {
                     SummaryCardActionViewModel(
                         "complianceActions.action.continue",
-                        NewPropertyComplianceController
+                        PropertyComplianceController
                             .getPropertyComplianceTaskListPath(dataModel.propertyOwnershipId)
                             .overrideBackLinkForUrl(currentUrlKey),
                     )
                 } else {
                     SummaryCardActionViewModel(
                         "complianceActions.action.start",
-                        NewPropertyComplianceController.getPropertyCompliancePath(dataModel.propertyOwnershipId),
+                        PropertyComplianceController.getPropertyCompliancePath(dataModel.propertyOwnershipId),
                     )
                 }
 
