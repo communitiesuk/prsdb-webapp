@@ -46,7 +46,7 @@ class EicrUploadStepTests {
         verify(mockCertificateUploadService).saveCertificateUpload(
             propertyId,
             fileUploadId,
-            FileCategory.GasSafetyCert,
+            FileCategory.Eicr,
         )
     }
 

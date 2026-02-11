@@ -44,7 +44,7 @@ class EicrUploadStepConfig(
             certificateUploadService.saveCertificateUpload(
                 state.propertyId,
                 fileUploadId,
-                FileCategory.Eirc,
+                FileCategory.Eicr,
             )
         }
     }
