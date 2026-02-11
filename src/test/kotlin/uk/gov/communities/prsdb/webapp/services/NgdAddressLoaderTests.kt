@@ -38,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.UPRN_BATCH_SIZE
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.io.FileInputStream
 import java.sql.Connection
@@ -224,29 +225,27 @@ class NgdAddressLoaderTests {
     }
 
     @Test
-    fun `loadNewDataPackageVersions updates property ownership addresses after each data package is loaded`() {
+    fun `loadNewDataPackageVersions updates property ownership addresses in batches during data package loads`() {
         // Arrange
         setUpMockNgdAddressLoaderRepository { mock ->
-            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
-        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
-            .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
 
-        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID))
-            .thenReturn(secondVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+            .thenReturn(getNgdFileInputStream("largeCsv.zip"))
 
-        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID))
-            .thenReturn(thirdVersionDetails)
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
         // Act
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        verify(mockNgdAddressLoaderRepository, times(2)).updatePropertyOwnershipAddresses()
+        val expectedBatchCount = ceil(LARGE_CSV_LINE_COUNT / UPRN_BATCH_SIZE).toInt()
+        verify(mockNgdAddressLoaderRepository, times(expectedBatchCount)).updatePropertyOwnershipAddresses(any())
     }
 
     @Test
@@ -309,8 +308,8 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
-        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -321,24 +320,24 @@ class NgdAddressLoaderTests {
         val uprnCaptor = argumentCaptor<Long>()
         verify(mockPreparedStatement, times(3)).setLong(eq(1), uprnCaptor.capture())
 
-        val localAuthorityIndex = 11
+        val localCouncilIndex = 11
 
         val isActiveCaptor = argumentCaptor<Boolean>()
         verify(mockPreparedStatement, times(3)).setBoolean(eq(12), isActiveCaptor.capture())
 
         // 'Delete' change type and OS custodian code - deactivate
         assertEquals(10000490106, uprnCaptor.firstValue)
-        verify(mockPreparedStatement, times(2)).setNull(localAuthorityIndex, java.sql.Types.INTEGER)
+        verify(mockPreparedStatement, times(2)).setNull(localCouncilIndex, java.sql.Types.INTEGER)
         assertFalse(isActiveCaptor.firstValue)
 
         // 'Upsert' change type and invalid country - deactivate
         assertEquals(10000067954, uprnCaptor.secondValue)
-        verify(mockPreparedStatement, times(2)).setNull(localAuthorityIndex, java.sql.Types.INTEGER)
+        verify(mockPreparedStatement, times(2)).setNull(localCouncilIndex, java.sql.Types.INTEGER)
         assertFalse(isActiveCaptor.secondValue)
 
         // 'Upsert' change type - upsert
         assertEquals(10000071648, uprnCaptor.thirdValue)
-        verify(mockPreparedStatement).setInt(localAuthorityIndex, localAuthorities.first().id)
+        verify(mockPreparedStatement).setInt(localCouncilIndex, localCouncils.first().id)
         assertTrue(isActiveCaptor.thirdValue)
 
         // 'No' change type - ignore (fourth record isn't processed)
@@ -358,8 +357,8 @@ class NgdAddressLoaderTests {
         whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
             .thenReturn(getNgdFileInputStream("largeCsv.zip"))
 
-        val localAuthorities = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
-        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localAuthorities)
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -367,8 +366,7 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        val largeCsvLineCount = 10001f
-        val expectedBatchCount = ceil(largeCsvLineCount / BATCH_SIZE).toInt()
+        val expectedBatchCount = ceil(LARGE_CSV_LINE_COUNT / BATCH_SIZE).toInt()
         verify(mockPreparedStatement, times(expectedBatchCount)).executeBatch()
     }
 
@@ -583,6 +581,8 @@ class NgdAddressLoaderTests {
               ]
             }
             """.trimIndent()
+
+        private const val LARGE_CSV_LINE_COUNT = 10001f
 
         fun getNgdFileInputStream(fileName: String) = FileInputStream(ResourceUtils.getFile("classpath:data/ngd/$fileName"))
 

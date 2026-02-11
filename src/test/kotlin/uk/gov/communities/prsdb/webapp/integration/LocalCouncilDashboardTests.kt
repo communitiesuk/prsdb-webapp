@@ -39,7 +39,7 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Nested
-    inner class LaUserNotAdmin : NestedIntegrationTestWithImmutableData("data-mockuser-local-council-user-not-admin.sql") {
+    inner class LcUserNotAdmin : NestedIntegrationTestWithImmutableData("data-mockuser-local-council-user-not-admin.sql") {
         @Test
         fun `the manage users button is not visible`(page: Page) {
             val dashboard = navigator.goToLocalCouncilDashboard()
@@ -48,7 +48,7 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Nested
-    inner class LaAdminUser : NestedIntegrationTestWithImmutableData("data-mockuser-local-council-admin-user.sql") {
+    inner class LcAdminUser : NestedIntegrationTestWithImmutableData("data-mockuser-local-council-admin-user.sql") {
         @Test
         fun `the manage users button is visible and when clicked redirects to the manage users page`(page: Page) {
             val dashboard = navigator.goToLocalCouncilDashboard()

@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.VerifiedIdentityModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -55,12 +55,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in (verified, England or Wales, selected address)`(page: Page) {
         // Set up mock One Login data
-        val verifiedIdentityMap =
-            mutableMapOf<String, Any?>(
-                VerifiedIdentityModel.NAME_KEY to "name",
-                VerifiedIdentityModel.BIRTH_DATE_KEY to LocalDate.now(),
-            )
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentityMap)
+        val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
 
         val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()

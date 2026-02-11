@@ -1,0 +1,8 @@
+title: Deregister a Property
+confirmation:
+  banner:
+    heading: You have deleted a property
+  whatHappensNext:
+    paragraph:
+      one: This property has been removed from the database and your landlord record.
+      two: We’ve sent a confirmation email about the deleted property to your email address.

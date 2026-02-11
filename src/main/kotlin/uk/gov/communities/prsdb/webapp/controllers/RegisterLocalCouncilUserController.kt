@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
@@ -35,6 +37,7 @@ class RegisterLocalCouncilUserController(
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
+    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun acceptInvitation(
         @RequestParam(value = TOKEN, required = true) token: String,
     ): CharSequence {
@@ -55,6 +58,7 @@ class RegisterLocalCouncilUserController(
     }
 
     @GetMapping("/$LANDING_PAGE_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun getLandingPage(
         model: Model,
         principal: Principal,
@@ -82,6 +86,7 @@ class RegisterLocalCouncilUserController(
     }
 
     @GetMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -103,6 +108,7 @@ class RegisterLocalCouncilUserController(
     }
 
     @PostMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -127,6 +133,7 @@ class RegisterLocalCouncilUserController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun getConfirmation(
         model: Model,
         principal: Principal,
@@ -152,6 +159,7 @@ class RegisterLocalCouncilUserController(
     }
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION)
     fun invalidToken(model: Model): String = "invalidLocalCouncilInvitationLink"
 
     private fun getValidTokenFromSessionOrNull(): String? {

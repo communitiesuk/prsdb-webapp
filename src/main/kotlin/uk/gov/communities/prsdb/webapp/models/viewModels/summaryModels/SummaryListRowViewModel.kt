@@ -81,3 +81,8 @@ data class SummaryListRowActionViewModel(
     val text: String,
     val url: String,
 )
+
+data class SingleLineFormattableViewModel(
+    val listOfValues: List<String>,
+    val separator: String? = null,
+)

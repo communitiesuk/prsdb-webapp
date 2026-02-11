@@ -30,8 +30,8 @@ open class JourneyBuilder<TState : JourneyState>(
         buildMap {
             build().forEach { journeyStep ->
                 when (journeyStep) {
-                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, StepLifecycleOrchestrator(journeyStep))
-                    is JourneyStep.InternalStep<*, *, *> -> {}
+                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, journeyStep.lifecycleOrchestrator)
+                    is JourneyStep.InternalStep<*, *> -> return@forEach
                 }
             }
         }
@@ -65,9 +65,7 @@ open class JourneyBuilder<TState : JourneyState>(
             init: TaskInitialiser<TState>.() -> Unit,
         ) = journeyBuilder.task(uninitialisedTask) {
             init()
-            configure {
-                withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
-            }
+            withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
         }
 
         private fun JourneyBuilder<*>.getSectionHeaderViewModel(headingMessageKey: String): SectionHeaderViewModel {

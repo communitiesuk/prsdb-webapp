@@ -15,18 +15,21 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.CheckEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.example.steps.ExampleEpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.FooTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.example.steps.SearchEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.example.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.example.tasks.ExampleEpcTask
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
@@ -57,7 +60,7 @@ class FooExampleJourneyFactory(
             section {
                 withHeadingMessageKey("tasks-section-part-2")
                 task(journey.epcTask) {
-                    parents { journey.occupationTask.isComplete() }
+                    parents { journey.taskListStep.always() }
                     nextStep { journey.fooCheckYourAnswersStep }
                 }
             }
@@ -86,7 +89,10 @@ class FooJourneyState(
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
-    override val epcQuestion: EpcQuestionStep,
+    override val furnishedStatus: FurnishedStatusStep,
+    override val rentFrequency: RentFrequencyStep,
+    override val rentAmount: RentAmountStep,
+    override val epcQuestion: ExampleEpcQuestionStep,
     override val checkAutomatchedEpc: CheckEpcStep,
     override val searchForEpc: SearchEpcStep,
     override val epcNotFound: EpcNotFoundStep,
@@ -95,17 +101,18 @@ class FooJourneyState(
     val fooCheckYourAnswersStep: FooCheckAnswersStep,
     private val journeyStateService: JourneyStateService,
     val occupationTask: OccupationTask,
-    val epcTask: EpcTask,
+    val epcTask: ExampleEpcTask,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     OccupationState,
-    EpcJourneyState {
-    override var automatchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("automatchedEpc")
-    override var searchedEpc: EpcDataModel? by delegateProvider.mutableDelegate("searchedEpc")
+    ExampleEpcJourneyState {
+    override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
+    override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
     override val propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     // TODO PRSD-1546: Choose where to initialize and validate journey state
     final fun initializeJourneyState(propertyId: Long): String {
+        // This is what AbstractJourneyState.initaliseState does, but still need to set the propertyId
         val journeyId = generateJourneyId(propertyId)
 
         journeyStateService

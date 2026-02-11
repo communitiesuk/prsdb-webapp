@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LookupAddressFormPage
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 class LookupAddressFormPageLandlordRegistration(
     page: Page,
 ) : LookupAddressFormPage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.LookupAddress.urlPathSegment}",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}",
     )

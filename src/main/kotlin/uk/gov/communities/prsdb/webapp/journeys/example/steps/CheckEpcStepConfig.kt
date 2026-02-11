@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.example.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.example.ExampleEpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -12,10 +12,10 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class CheckEpcStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractStepConfig<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>() {
+) : AbstractRequestableStepConfig<YesOrNo, CheckMatchedEpcFormModel, ExampleEpcJourneyState>() {
     override val formModelClass = CheckMatchedEpcFormModel::class
 
-    override fun getStepSpecificContent(state: EpcJourneyState) =
+    override fun getStepSpecificContent(state: ExampleEpcJourneyState) =
         getReleventEpc(state)?.let { epcDetails ->
             mapOf(
                 "title" to "propertyCompliance.title",
@@ -37,9 +37,9 @@ class CheckEpcStepConfig(
             )
         } ?: emptyMap()
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/checkMatchedEpcForm"
+    override fun chooseTemplate(state: ExampleEpcJourneyState): String = "forms/checkMatchedEpcForm"
 
-    override fun mode(state: EpcJourneyState): YesOrNo? =
+    override fun mode(state: ExampleEpcJourneyState): YesOrNo? =
         getFormModelFromStateOrNull(state)?.let {
             when (it.matchedEpcIsCorrect) {
                 true -> YesOrNo.YES
@@ -50,9 +50,9 @@ class CheckEpcStepConfig(
 
     override fun isSubClassInitialised(): Boolean = ::getReleventEpc.isInitialized
 
-    private lateinit var getReleventEpc: (EpcJourneyState) -> EpcDataModel?
+    private lateinit var getReleventEpc: (ExampleEpcJourneyState) -> EpcDataModel?
 
-    fun usingEpc(getReleventEpc: EpcJourneyState.() -> EpcDataModel?): CheckEpcStepConfig {
+    fun usingEpc(getReleventEpc: ExampleEpcJourneyState.() -> EpcDataModel?): CheckEpcStepConfig {
         this.getReleventEpc = getReleventEpc
         return this
     }
@@ -61,4 +61,4 @@ class CheckEpcStepConfig(
 @JourneyFrameworkComponent
 final class CheckEpcStep(
     stepConfig: CheckEpcStepConfig,
-) : RequestableStep<YesOrNo, CheckMatchedEpcFormModel, EpcJourneyState>(stepConfig)
+) : RequestableStep<YesOrNo, CheckMatchedEpcFormModel, ExampleEpcJourneyState>(stepConfig)

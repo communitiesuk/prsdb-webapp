@@ -2,13 +2,13 @@ package uk.gov.communities.prsdb.webapp.local.services
 
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import uk.gov.communities.prsdb.webapp.annotations.processAnnotations.PrsdbProcessService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.DequarantiningFileCopier
 import java.io.File
 
-@PrsdbProcessService
+@PrsdbTaskService
 @Primary
 @Profile("local")
 class LocalDequarantiningFileCopier : DequarantiningFileCopier {

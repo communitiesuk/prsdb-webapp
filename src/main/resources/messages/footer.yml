@@ -1,0 +1,19 @@
+supportLinks: Support links
+email:
+  beforeLink: 'If you need help using this private beta, get in touch by email:'
+  link: 'PRSDatabase@communities.gov.uk'
+  afterLink: .
+cookies:
+  link: Cookies
+privacyNotice:
+  link: Privacy notice
+rentersRightsBill:
+  link: Renters’ Rights Bill
+builtBy:
+  beforeLink: Built by
+  link: 'Ministry of Housing, Communities, and Local Government (MHCLG)'
+licence:
+  beforeLink: All content is available under the
+  link: Open Government Licence v3.0
+  afterLink: ', except where otherwise stated'
+crownCopyright: © Crown copyright

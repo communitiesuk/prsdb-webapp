@@ -2,7 +2,7 @@
 
 ## You have not finished registering the property: ((property address))
 
-You have 7 days to complete this registration or it will be removed from the database and you'll need to start again.
+You have ((days to complete)) days to complete this registration or it will be removed from the database and you'll need to start again.
 
 To continue registering this property:
   1. Go to your dashboard on the database

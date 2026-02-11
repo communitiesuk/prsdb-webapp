@@ -14,7 +14,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     val stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
 ) {
     open class RequestableStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
-        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
+        stepConfig: AbstractRequestableStepConfig<TEnum, TFormModel, TState>,
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val routeSegment: String get() = stepConfig.routeSegment
 
@@ -37,9 +37,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
             addStepData(routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
     }
 
-    open class InternalStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in TState : JourneyState>(
-        stepConfig: AbstractStepConfig<TEnum, TFormModel, TState>,
-    ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
+    open class InternalStep<out TEnum : Enum<out TEnum>, in TState : JourneyState>(
+        stepConfig: AbstractInternalStepConfig<TEnum, TState>,
+    ) : JourneyStep<TEnum, Nothing, TState>(stepConfig) {
         override fun getRouteSegmentOrNull(): String? = null
 
         override fun isRouteSegmentInitialised(): Boolean = true
@@ -147,6 +147,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private var shouldSaveOnCompletion: Boolean = false
 
+    val lifecycleOrchestrator: StepLifecycleOrchestrator
+        get() = stepConfig.getStepLifecycleOrchestrator(this)
+
     val isStepReachable: Boolean
         get() = parentage.allowsChild()
 
@@ -160,7 +163,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private lateinit var state: TState
 
-    val outcome: TEnum? get() = if (isStepReachable)stepConfig.mode(state) else null
+    val outcome: TEnum? get() = if (isStepReachable) stepConfig.mode(state) else null
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 
@@ -168,12 +171,14 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
 
+    // We use StepLifecycleOrchestrator type here as requestable steps with redirecting orchestrators can't be used as backUrls
     val backUrl: String?
         get() {
+            val singleParentStep = parentage.allowingParentSteps.singleOrNull()
             val singleParentUrl =
-                when (val singleParentStep = parentage.allowingParentSteps.singleOrNull()) {
-                    is InternalStep<*, *, *> -> singleParentStep.backUrl
-                    is RequestableStep<*, *, *> -> Destination(singleParentStep).toUrlStringOrNull()
+                when (singleParentStep?.lifecycleOrchestrator) {
+                    is StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator -> singleParentStep.backUrl
+                    is StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator -> Destination(singleParentStep).toUrlStringOrNull()
                     null -> null
                 }
             val backUrlOverrideValue = this.backUrlOverride?.let { it().toUrlStringOrNull() }

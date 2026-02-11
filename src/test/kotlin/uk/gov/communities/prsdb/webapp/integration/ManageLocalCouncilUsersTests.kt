@@ -41,7 +41,7 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
     }
 
     @Nested
-    inner class UserIsLaAdminButNotSystemOperator : NestedIntegrationTestWithImmutableData("data-local-council-users-and-invitations.sql") {
+    inner class UserIsLcAdminButNotSystemOperator : NestedIntegrationTestWithImmutableData("data-local-council-users-and-invitations.sql") {
         @Test
         fun `table of users renders`() {
             val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
@@ -62,7 +62,7 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
             // Current User Row
             assertThat(managePage.table.getCell(1, ACTIONS_COL_INDEX)).isEmpty()
 
-            // Rows are Arthur Dent (la user) row, Admin row, and 2 non-admin invite row and that is all - no admin invite
+            // Rows are Arthur Dent (lc user) row, Admin row, and 2 non-admin invite row and that is all - no admin invite
             assertEquals(4, managePage.table.rows.count())
             assertThat(managePage.table.getCell(2, ACCESS_LEVEL_COL_INDEX)).containsText("Basic")
             assertThat(managePage.table.getCell(2, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
@@ -71,7 +71,7 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
         }
 
         @Test
-        fun `return to dashboard button goes to LA dashboard`(page: Page) {
+        fun `return to dashboard button goes to LC dashboard`(page: Page) {
             val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
             managePage.returnToDashboardButton.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)
