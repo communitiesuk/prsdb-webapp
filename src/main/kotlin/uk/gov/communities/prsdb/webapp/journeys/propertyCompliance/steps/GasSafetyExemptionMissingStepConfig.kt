@@ -25,7 +25,7 @@ class GasSafetyExemptionMissingStepConfig : AbstractRequestableStepConfig<Comple
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/gasSafetyExemptionMissingForm"
 
-    override fun mode(state: GasSafetyState) = Complete.COMPLETE
+    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent

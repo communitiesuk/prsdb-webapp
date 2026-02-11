@@ -25,7 +25,7 @@ class GasSafetyOutdatedStepConfig : AbstractRequestableStepConfig<Complete, NoIn
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/gasSafetyOutdatedForm"
 
-    override fun mode(state: GasSafetyState) = Complete.COMPLETE
+    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
