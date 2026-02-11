@@ -5,12 +5,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, EicrExemptionReasonFormModel, EicrState>() {
+class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<EicrExemptionReasonMode, EicrExemptionReasonFormModel, EicrState>() {
     override val formModelClass = EicrExemptionReasonFormModel::class
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
@@ -34,14 +33,26 @@ class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, Ei
 
     override fun chooseTemplate(state: EicrState): String = "forms/exemptionReasonForm.html"
 
-    override fun mode(state: EicrState) = getFormModelFromStateOrNull(state)?.exemptionReason?.let { Complete.COMPLETE }
+    override fun mode(state: EicrState) =
+        state.eicrExemptionReasonStep.formModelOrNull?.let {
+            if (it.exemptionReason == EicrExemptionReason.OTHER) {
+                EicrExemptionReasonMode.OTHER_REASON_SELECTED
+            } else {
+                EicrExemptionReasonMode.LISTED_REASON_SELECTED
+            }
+        }
 }
 
 @JourneyFrameworkComponent
 final class EicrExemptionReasonStep(
     stepConfig: EicrExemptionReasonStepConfig,
-) : RequestableStep<Complete, EicrExemptionReasonFormModel, EicrState>(stepConfig) {
+) : RequestableStep<EicrExemptionReasonMode, EicrExemptionReasonFormModel, EicrState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "eicr-exemption-reason"
     }
+}
+
+enum class EicrExemptionReasonMode {
+    LISTED_REASON_SELECTED,
+    OTHER_REASON_SELECTED,
 }

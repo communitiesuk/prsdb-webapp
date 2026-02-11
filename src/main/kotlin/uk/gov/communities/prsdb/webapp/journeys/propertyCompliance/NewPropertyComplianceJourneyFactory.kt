@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -76,7 +77,12 @@ class NewPropertyComplianceJourneyFactory(
                     saveProgress()
                 }
                 task(journey.eicrTask) {
-                    parents { journey.taskListStep.always() }
+                    parents {
+                        OrParents(
+                            journey.gasSafetyTask.isComplete(),
+                            journey.taskListStep.always(),
+                        )
+                    }
                     nextStep { journey.epcTask.firstStep }
                     checkable()
                     saveProgress()

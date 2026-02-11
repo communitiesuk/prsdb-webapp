@@ -18,13 +18,7 @@ class EicrOutdatedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFo
             "title" to "propertyCompliance.title",
             "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
             "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
-            // TODO PDJB-467 - implement these properly / remove if not needed
             "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
-            /*"submitButtonText" to
-                getSubmitButtonTextOrDefaultIfCheckingOrUpdatingAnswers(
-                    "forms.buttons.saveAndContinueToEPC",
-                    isCheckingAnswers || isUpdateJourney,
-                ),*/
         )
 
     override fun chooseTemplate(state: EicrState): String = "forms/eicrOutdatedForm"

@@ -4,12 +4,11 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class EicrExemptionStepConfig : AbstractRequestableStepConfig<Complete, EicrExemptionFormModel, EicrState>() {
+class EicrExemptionStepConfig : AbstractRequestableStepConfig<EicrExemptionMode, EicrExemptionFormModel, EicrState>() {
     override val formModelClass = EicrExemptionFormModel::class
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
@@ -33,14 +32,26 @@ class EicrExemptionStepConfig : AbstractRequestableStepConfig<Complete, EicrExem
 
     override fun chooseTemplate(state: EicrState): String = "forms/exemptionForm"
 
-    override fun mode(state: EicrState) = getFormModelFromStateOrNull(state)?.hasExemption?.let { Complete.COMPLETE }
+    override fun mode(state: EicrState) =
+        state.eicrExemptionStep.formModelOrNull?.let {
+            when (it.hasExemption) {
+                true -> EicrExemptionMode.HAS_EXEMPTION
+                false -> EicrExemptionMode.NO_EXEMPTION
+                null -> null
+            }
+        }
 }
 
 @JourneyFrameworkComponent
 final class EicrExemptionStep(
     stepConfig: EicrExemptionStepConfig,
-) : RequestableStep<Complete, EicrExemptionFormModel, EicrState>(stepConfig) {
+) : RequestableStep<EicrExemptionMode, EicrExemptionFormModel, EicrState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "eicr-exemption"
     }
+}
+
+enum class EicrExemptionMode {
+    HAS_EXEMPTION,
+    NO_EXEMPTION,
 }

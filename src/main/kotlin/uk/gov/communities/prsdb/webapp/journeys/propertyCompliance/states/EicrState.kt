@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUpl
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 
 interface EicrState : JourneyState {
-    // TODO PDJB-467 - Implement these steps and add to the EicrTask
     val eicrStep: EicrStep
     val eicrIssueDateStep: EicrIssueDateStep
     val eicrUploadStep: EicrUploadStep

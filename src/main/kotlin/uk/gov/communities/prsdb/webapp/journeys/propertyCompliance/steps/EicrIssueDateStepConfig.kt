@@ -5,12 +5,9 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class EicrIssueDateStepConfig(
-    private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractRequestableStepConfig<EicrIssueDateMode, TodayOrPastDateFormModel, EicrState>() {
+class EicrIssueDateStepConfig : AbstractRequestableStepConfig<EicrIssueDateMode, TodayOrPastDateFormModel, EicrState>() {
     override val formModelClass = TodayOrPastDateFormModel::class
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
@@ -21,7 +18,7 @@ class EicrIssueDateStepConfig(
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
-    override fun chooseTemplate(state: EicrState): String = "forms/certificateForm"
+    override fun chooseTemplate(state: EicrState): String = "forms/dateForm"
 
     override fun mode(state: EicrState) =
         state.getEicrCertificateIsOutdated()?.let {
@@ -37,7 +34,7 @@ final class EicrIssueDateStep(
     stepConfig: EicrIssueDateStepConfig,
 ) : RequestableStep<EicrIssueDateMode, TodayOrPastDateFormModel, EicrState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "eicr"
+        const val ROUTE_SEGMENT = "eicr-issue-date"
     }
 }
 
