@@ -6,10 +6,17 @@
 <!--/*@thymesVar id="howToRentGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
 <!DOCTYPE html>
-<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, null)}">
-    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', #{forms.landlordResponsibilities.responsibilityToTenants.heading}, null)}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{forms.landlordResponsibilities.responsibilityToTenants.heading}">
+            forms.landlordResponsibilities.responsibilityToTenants.heading
+        </h1>
         <th:block th:replace="~{fragments/content/responsibilityToTenantsContent :: responsibilityToTenantsContent(${landlordResponsibilitiesUrl}, ${governmentApprovedDepositProtectionSchemeUrl}, ${howToRentGuideUrl})}"></th:block>
-        <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndContinue})}"></button>
+    <th:block id="form-content">
+        <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'agreesToResponsibility', null, null)}">
+            <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'agreesToResponsibility', null, ${options})}"></th:block>
+        </th:block>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.confirmAndContinue})}"></button>
+    </th:block>
 </html>

@@ -3,88 +3,17 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
 
 class JourneyPageDataBuilder {
     companion object {
-        fun beforeLandlordRegistrationConfirmIdentity() = JourneyDataBuilder().withPrivacyNotice().withVerifiedUser()
+        fun beforeLocalCouncilUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
 
-        fun beforeLandlordRegistrationIdentityNotVerified() = JourneyDataBuilder().withPrivacyNotice().withVerifyIdentityUnverified()
+        fun beforeLocalCouncilUserRegistrationEmail() = beforeLocalCouncilUserRegistrationName().withName()
 
-        fun beforeLandlordRegistrationName() = beforeLandlordRegistrationIdentityNotVerified().withIdentityNotVerified()
-
-        fun beforeLandlordRegistrationDob() = beforeLandlordRegistrationName().withNameUnverifiedLandlordData()
-
-        fun beforeLandlordRegistrationEmail() = beforeLandlordRegistrationConfirmIdentity()
-
-        fun beforeLandlordRegistrationPhoneNumber() = beforeLandlordRegistrationEmail().withEmailAddress()
-
-        fun beforeLandlordRegistrationCountryOfResidence() = beforeLandlordRegistrationPhoneNumber().withPhoneNumber()
-
-        fun beforeLandlordRegistrationLookupAddress() = beforeLandlordRegistrationCountryOfResidence().withEnglandOrWalesResidence()
-
-        fun beforeLandlordRegistrationSelectAddress() =
-            beforeLandlordRegistrationLookupAddress().withLookupAddress().withLookedUpAddresses()
-
-        fun beforeLandlordRegistrationManualAddress() = beforeLandlordRegistrationSelectAddress().withManualAddressSelected()
-
-        fun beforeLandlordRegistrationNonEnglandOrWalesAddress() =
-            beforeLandlordRegistrationCountryOfResidence().withNonEnglandOrWalesAddress(nonEnglandOrWalesAddress = null)
-
-        fun beforeLandlordRegistrationLookupContactAddress() =
-            beforeLandlordRegistrationNonEnglandOrWalesAddress().withNonEnglandOrWalesAddress()
-
-        fun beforeLandlordRegistrationSelectContactAddress() =
-            beforeLandlordRegistrationLookupContactAddress().withLookupAddress(isContactAddress = true).withLookedUpAddresses()
-
-        fun beforeLandlordRegistrationManualContactAddress() =
-            beforeLandlordRegistrationSelectContactAddress().withManualAddressSelected(isContactAddress = true)
-
-        fun beforeLandlordRegistrationCheckAnswers() = beforeLandlordRegistrationSelectAddress().withSelectedAddress()
-
-        fun beforeLandlordRegistrationDeclaration() = beforeLandlordRegistrationCheckAnswers().withCheckedAnswers()
-
-        fun beforeLaUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
-
-        fun beforeLaUserRegistrationEmail() = beforeLaUserRegistrationName().withName()
-
-        fun beforeLaUserRegistrationCheckAnswers() = beforeLaUserRegistrationEmail().withEmailAddress()
-
-        fun beforePropertyRegistrationSelectAddress(customLookedUpAddresses: List<AddressDataModel>? = null) =
-            JourneyDataBuilder().withLookupAddress().withLookedUpAddresses(customLookedUpAddresses)
-
-        fun beforePropertyRegistrationManualAddress() = beforePropertyRegistrationSelectAddress().withManualAddressSelected()
-
-        fun beforePropertyRegistrationSelectLocalAuthority() = beforePropertyRegistrationManualAddress().withManualAddress()
-
-        fun beforePropertyRegistrationPropertyType() = JourneyDataBuilder().withLookupAddress().withSelectedAddress()
-
-        fun beforePropertyRegistrationOwnershipType() = beforePropertyRegistrationPropertyType().withPropertyType()
-
-        fun beforePropertyRegistrationLicensingType() = beforePropertyRegistrationOwnershipType().withOwnershipType()
-
-        fun beforePropertyRegistrationSelectiveLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
-
-        fun beforePropertyRegistrationHmoMandatoryLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
-
-        fun beforePropertyRegistrationHmoAdditionalLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-
-        fun beforePropertyRegistrationOccupancy() = beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.NO_LICENSING)
-
-        fun beforePropertyRegistrationHouseholds() = beforePropertyRegistrationOccupancy().withOccupancyStatus(true)
-
-        fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
-
-        fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
-
-        fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
+        fun beforeLocalCouncilUserRegistrationCheckAnswers() = beforeLocalCouncilUserRegistrationEmail().withEmailAddress()
 
         fun beforePropertyComplianceGasSafetyIssueDate() = JourneyDataBuilder().withGasSafetyCertStatus(true)
 

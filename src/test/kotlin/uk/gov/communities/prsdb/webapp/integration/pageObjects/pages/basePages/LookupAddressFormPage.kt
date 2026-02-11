@@ -19,6 +19,11 @@ abstract class LookupAddressFormPage(
         form.submit()
     }
 
+    fun clearForm() {
+        form.postcodeInput.fill("")
+        form.houseNameOrNumberInput.fill("")
+    }
+
     class LookupAddressForm(
         page: Page,
     ) : FormWithSectionHeader(page) {

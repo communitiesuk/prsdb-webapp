@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
 import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
-@Service
+@PrsdbTaskService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
     private val virusAlertSender: VirusAlertSender,
@@ -40,6 +40,7 @@ class VirusScanProcessingService(
                     throw PrsdbWebException("Failed to dequarantine file: ${certificateUpload.fileUpload.objectKey}")
                 }
             }
+
             ScanResult.Threats,
             ScanResult.Unsupported,
             ScanResult.Failed,
@@ -49,9 +50,12 @@ class VirusScanProcessingService(
                     throw PrsdbWebException("Failed to delete unsafe file: ${certificateUpload.fileUpload.objectKey}")
                 }
             }
-            ScanResult.AccessDenied -> throw PrsdbWebException(
-                "GuardDuty does not have access to scan $certificateUpload.fileUpload.objectKey",
-            )
+
+            ScanResult.AccessDenied -> {
+                throw PrsdbWebException(
+                    "GuardDuty does not have access to scan $certificateUpload.fileUpload.objectKey",
+                )
+            }
         }
     }
 

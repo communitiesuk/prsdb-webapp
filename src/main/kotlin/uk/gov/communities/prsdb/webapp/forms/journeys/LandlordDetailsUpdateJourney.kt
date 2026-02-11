@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.LandlordDetailsUpdateJourneyDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.LandlordRegistrationJourneyDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.getSerializedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.JourneyDataExtensions.Companion.withUpdatedLookedUpAddresses
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -32,7 +31,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import kotlin.reflect.KFunction
@@ -40,7 +39,7 @@ import kotlin.reflect.KFunction
 class LandlordDetailsUpdateJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    addressLookupService: AddressLookupService,
+    addressService: AddressService,
     private val landlordService: LandlordService,
     private val landlordBaseUserId: String,
     stepName: String,
@@ -209,7 +208,7 @@ class LandlordDetailsUpdateJourney(
                 ),
             nextStepIfAddressesFound = LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress,
             nextStepIfNoAddressesFound = LandlordDetailsUpdateStepId.NoAddressFound,
-            addressLookupService = addressLookupService,
+            addressService = addressService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
         )
@@ -305,14 +304,14 @@ class LandlordDetailsUpdateJourney(
         }
 
     private fun selectAddressNextAction(filteredJourneyData: JourneyData): Pair<LandlordDetailsUpdateStepId?, Int?> =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
+        if (LandlordDetailsUpdateJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress, null)
         } else {
             Pair(null, null)
         }
 
     private fun selectAddressHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String =
-        if (LandlordRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
+        if (LandlordDetailsUpdateJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             LandlordDetailsUpdateStepId.ManualEnglandAndWalesAddress.urlPathSegment
         } else {
             updateLandlordWithChangesAndRedirect()

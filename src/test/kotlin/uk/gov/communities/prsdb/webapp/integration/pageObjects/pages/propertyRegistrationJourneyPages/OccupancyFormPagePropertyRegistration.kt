@@ -7,4 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.O
 
 class OccupancyFormPagePropertyRegistration(
     page: Page,
-) : OccupancyFormPage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.Occupancy.urlPathSegment}")
+) : OccupancyFormPage(
+        page,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
+    )

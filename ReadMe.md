@@ -5,8 +5,7 @@ This is the web app code for the Private Rental Sector Database (PRSDB).
 ## Development
 
 The prsdb-webapp is a Spring Boot application written in Kotlin. The following should allow you to get started
-developing
-functionality for prsdb-webapp.
+developing functionality for prsdb-webapp.
 
 ### Dependencies
 
@@ -17,20 +16,45 @@ dependencies before starting the application.
 A running docker daemon is also required to run the integration tests, which make use
 of [testcontainers](https://testcontainers.com/).
 
-The application requires Java 17 - Gradle should automatically install this for you the first time you run the
+The application requires Java 21 - Gradle should automatically install this for you the first time you run the
 application locally.
 
 We are using Ktlint for linting, via the [ktlint-gradle plugin](https://github.com/jlleitschuh/ktlint-gradle) and the
 [ktlint Intellij plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) which can be installed from within Intellij.
 
-To ensure that your code meets the linting and formatting rules (as well as checking that the tests pass), we recommend
-installing the pre-commit hook by running the `addKtlintCheckGitPreCommitHook` task from Gradle tab in Intellij.
+To ensure that your code meets the linting and formatting rules install these pre-commit hooks by running the
+`addKtlintCheckGitPreCommitHook` and `addKtlintFormatGitPreCommitHook` tasks from Gradle tab in Intellij.
+
+To prevent you from accidentally committing secrets we are also using a precommit hook called `detect-secrets`. To install the pre-commit
+hook first ensure you have Python 3 and pip installed, then run the appropriate script from the `scripts` folder:
+
+**PowerShell (Windows):**
+
+```powershell
+.\scripts\install-detect-secrets.ps1
+```
+
+**Bash (Linux/macOS):**
+
+```bash
+./scripts/install-detect-secrets.sh
+```
 
 There are also some local secrets that will need to be set up if you need to test integrations with other services when
 running the project locally. Ask the team lead where these can be found.
 
 When running your build against the integration environment of Gov.UK One Login you will be prompted for credentials to
 access the integration environment, ask your team lead where these can be found.
+
+#### Troubleshooting `detect-secrets` installation issues
+
+If you run into issues such as the one shown below, you can try the following:
+
+- check if the python scripts folder is in your PATH variable - if not add it and restart
+- if you installed Python a different way, try installing it directly from [python.org](https://www.python.org/downloads/)
+- try running the `install-detect-secrets` script as an administrator
+
+![detect-secrets-error.png](readMeAssets/detect-secrets-error.png)
 
 ### Testing
 
@@ -40,6 +64,16 @@ for integration tests that need to interact with a real database - for other tes
 be mocked instead.
 
 You can run the unit tests by running the `verification\test` task from the Gradle tab in Intellij.
+
+#### Running scheduled tasks locally
+You can run scheduled tasks locally using a new Run Configuration with the correct profiles added.
+You will need to include the following profiles:
+- `web-server-deactivated`
+- `scheduled-task`
+- `local`
+- The relevant task specific profile e.g. `incomplete-property-reminder-scheduled-task` to run `IncompletePropertiesReminderTaskApplicationRunner`
+
+If you need to use notify, also add the `use-notify` profile
 
 ### Code structure
 
@@ -93,30 +127,29 @@ application start up. If you are using the `local` launch profile in IntelliJ, t
 before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
 populate the database with seed data.
 
-### Updating Local Authority Data
+### Updating Local Council Data
 
-The project uses migrations to populate the `local_authority` table with data from
-`src/main/resources/data/local_authorities/local_authorities.csv`.
+The project uses migrations to populate the `local_council` table with data from
+`src/main/resources/data/local_councils/local_councils.csv`.
 
-If the CSV file is updated, create a copy of it and call it `local_authorities_V<version number>.csv`, 
-where `version number` is one more than the latest version in`src/main/resources/db/migrations/data/local_authorities`.
+If the CSV file is updated, create a copy of it and call it `local_councils_V<version number>.csv`,
+where `version number` is one more than the latest version in`src/main/resources/db/migrations/data/local_councils`.
 
 Then run the utility script to generate the sql for some new migrations by:
 
 - `cd`ing into the `/scripts` folder
-- running `node generate_update_local_authorities_migrations.js`
+- running `node generate_update_local_councils_migrations.js`
 - this will output some draft migrations in `/scripts/output/`
 
-#### Migration process for updating Local Authority Data
+#### Migration process for updating Local Council Data
 
-- create a migration using `/scripts/output/draft_upsert_local_authorities_migration.sql` to upsert and new/changed local authorities
-- run the sql statement in `/scripts/output/select_all_local_authorities_to_be_deleted.sql` on your local copy of the database to 
-  get a list of the local authorities that will be removed by the delete migration
+- create a migration using `/scripts/output/draft_upsert_local_councils_migration.sql` to upsert and new/changed local councils
+- run the sql statement in `/scripts/output/select_all_local_councils_to_be_deleted.sql` on your local copy of the database to
+  get a list of the local councils that will be removed by the delete migration
 - write a custom migration to handle any changes that will need to be made before the delete migration can be run
-  - check for local authority users/admins that will need to be deleted/assigned to another local authority
-  - check for addresses that will now belong to a different local authority
-- create a migration using `/scripts/output/draft_delete_local_authorities_migration.sql` to delete any removed local authorities
-
+    - check for local council users/admins that will need to be deleted/assigned to another local council
+    - check for addresses that will now belong to a different local council
+- create a migration using `/scripts/output/draft_delete_local_councils_migration.sql` to delete any removed local councils
 
 ### Mock One Login Oauth2
 
@@ -141,15 +174,15 @@ When you run the app with the one login mock disabled and try to view pages, you
 One Login account.
 
 To view most pages, your account will need to have been added to the relevant database (e.g. LandlordUser,
-LocalAuthorityUser) for you to be able to see the page. It checks the database on login (you can step through
+LocalCouncilUser) for you to be able to see the page. It checks the database on login (you can step through
 `getRolesforSubjectId` in `UserRolesService` to test it), so you will need to log in again to see the change in
 permissions (if logging out is not yet implemented, try running in an incognito tab so you are prompted to log in
 again).
 
 For local dev, you can add your account by modifying the `data-local.sql` file. Insert an entry into the
 `one_login_user` database with a subject_identifier matching your real one login id (see below).
-Then you can add entries to any other user database that you need access to (e.g. landlord, local_authority_user
-with is_manager set to true to see local authority admin pages).
+Then you can add entries to any other user database that you need access to (e.g. landlord, local_council_user
+with is_manager set to true to see local council admin pages).
 
 #### Finding your One Login id
 
@@ -177,6 +210,7 @@ To set up `aws-vault` follow the instructions in the `prsdb-infra` repository.
 #### Setting up `aws-vault` as a profile server
 
 Run
+
 ```shell
 aws-vault exec <profile> --server
 ```
@@ -185,6 +219,7 @@ This starts a session with aws-vault acting as a credential server.
 You can add `-- bash` or `-- powershell` to enter the server using your shell of choice.
 
 Then run
+
 ```shell
 env | grep AWS_CONTAINER
 ```
@@ -192,6 +227,7 @@ env | grep AWS_CONTAINER
 This will return two lines giving you the `AWS_CONTAINER_CREDENTIALS_FULL_URI` and the
 `AWS_CONTAINER_AUTHORIZATION_TOKEN` for your server.
 Copy both of these lines into your `.env` file and add the line
+
 ```
 AWS_REGION=eu-west-2
 ```
@@ -213,7 +249,9 @@ changes are merged to the `test` branch. Merges into `test` should be made as no
 common git history between `main` and `test`.
 
 ### Release infra before webapp
-Before releasing the webapp, go to the [prsd-infra](https://github.com/communitiesuk/prsdb-infra) repo and release main to test (follow the same PR process below)
+
+Before releasing the webapp, go to the [prsd-infra](https://github.com/communitiesuk/prsdb-infra) repo and release main to test (follow the
+same PR process below)
 
 ### PR process
 
@@ -221,9 +259,11 @@ The normal process is simply to raise a PR merging `main` into `test`, name the 
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
 
-There may be an existing draft PR for the release including any extra release instructions (e.g. environment variables that need to be set), so check for this and make sure any actions have been completed.
+There may be an existing draft PR for the release including any extra release instructions (e.g. environment variables that need to be set),
+so check for this and make sure any actions have been completed.
 
-Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and can be ignored. 
+Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and
+can be ignored.
 
 In the rare case that there are changes on `main` that we do not want to release to `test`:
 
@@ -244,3 +284,12 @@ releasing to `test` in the normal way). However, if this is needed:
 - Merge the hotfix branch into `test`
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
+
+## Licence
+
+Unless stated otherwise, the codebase is released under [the MIT License][mit].
+This covers both the codebase and any sample code in the documentation.
+
+Copyright © 2025 Crown Copyright (Ministry of Housing, Communities & Local Government)
+
+[mit]: LICENCE

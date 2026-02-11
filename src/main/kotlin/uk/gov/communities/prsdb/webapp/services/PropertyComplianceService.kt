@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -154,7 +154,7 @@ class PropertyComplianceService(
             recipientAddress = propertyOwnership.primaryLandlord.email,
             email =
                 ComplianceUpdateConfirmationEmail(
-                    propertyAddress = propertyOwnership.property.address.singleLineAddress,
+                    propertyAddress = propertyOwnership.address.singleLineAddress,
                     registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                     dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                     complianceUpdateType = updateType,
@@ -208,17 +208,6 @@ class PropertyComplianceService(
     @Suppress("UNCHECKED_CAST")
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
-
-    fun deletePropertyCompliance(propertyCompliance: PropertyCompliance) {
-        propertyComplianceRepository.delete(propertyCompliance)
-    }
-
-    fun deletePropertyComplianceByOwnershipId(propertyOwnershipId: Long) =
-        propertyComplianceRepository.deleteByPropertyOwnership_Id(propertyOwnershipId)
-
-    fun deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds: List<Long>) {
-        propertyComplianceRepository.deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
-    }
 
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {

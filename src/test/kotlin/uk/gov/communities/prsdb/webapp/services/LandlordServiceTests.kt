@@ -1,11 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -22,6 +21,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -29,20 +29,20 @@ import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
 import java.net.URI
 import java.time.LocalDate
 import kotlin.reflect.full.hasAnnotation
@@ -55,9 +55,6 @@ class LandlordServiceTests {
 
     @Mock
     private lateinit var mockOneLoginUserService: OneLoginUserService
-
-    @Mock
-    private lateinit var mockLandlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -86,7 +83,6 @@ class LandlordServiceTests {
             LandlordService(
                 mockLandlordRepository,
                 mockOneLoginUserService,
-                mockLandlordWithListedPropertyCountRepository,
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
@@ -239,213 +235,183 @@ class LandlordServiceTests {
         )
     }
 
-    @Test
-    fun `searchForLandlords returns a corresponding list of LandlordSearchResultViewModels`() {
-        val searchTerm = "searchTerm"
-        val laUserBaseId = "laUserBaseId"
-        val requestedPageNumber = 0
-        val pageSize = 25
-        val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
-        val currentPageKey = 77
+    @Nested
+    inner class SearchForLandlordsTests {
+        @Test
+        fun `searchForLandlords returns a corresponding list of LandlordSearchResultViewModels`() {
+            // Arrange
+            val searchTerm = "searchTerm"
+            val lcUserBaseId = "lcUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-        val matchingLandlords = mutableListOf<Landlord>()
-        val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
-        for (i in 1..3) {
-            val landlord = createLandlord()
-            matchingLandlords.add(landlord)
-            matchingLandlordsWithListedPropertyCount.add(LandlordWithListedPropertyCount(landlord.id, landlord, 0))
+            val matchingLandlords =
+                listOf(createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel())
+            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+                .thenReturn(PageImpl(matchingLandlords))
+
+            val currentUrlKey = 77
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
+
+            // Act
+            val searchResults =
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+
+            // Assert
+            val expectedSearchResults =
+                matchingLandlords.map {
+                    LandlordSearchResultViewModel.fromDataModel(
+                        it,
+                        currentUrlKey,
+                    )
+                }
+            assertEquals(expectedSearchResults, searchResults.content)
         }
 
-        val expectedFormattedSearchResults =
-            matchingLandlordsWithListedPropertyCount.map {
-                LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
-                    it,
-                    currentPageKey,
-                )
-            }
+        @Test
+        fun `searchForLandlords returns a corresponding list of LandlordSearchResultViewModels (LRN searchTerm)`() {
+            // Arrange
+            val searchTerm = "L-CCCC-CCCC"
+            val searchLRN = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)!!.number
+            val lcUserBaseId = "lcUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-        whenever(
-            mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest),
-        ).thenReturn(PageImpl(matchingLandlords))
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlords.map { it.id }))
-            .thenReturn(matchingLandlordsWithListedPropertyCount)
-        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentPageKey)
+            val matchingLandlord = listOf(createLandlordSearchResultDataModel())
+            whenever(mockLandlordRepository.searchMatchingLRN(searchLRN, lcUserBaseId, pageable = pageRequest))
+                .thenReturn(PageImpl(matchingLandlord))
 
-        val searchResults =
-            landlordService.searchForLandlords(
-                searchTerm,
-                laUserBaseId,
-                requestedPageIndex = requestedPageNumber,
-                pageSize = pageSize,
-            )
+            val currentUrlKey = 79
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
 
-        assertEquals(expectedFormattedSearchResults, searchResults.content)
-    }
+            // Act
+            val searchResults =
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
 
-    @Test
-    fun `searchForLandlords returns a corresponding list of LandlordSearchResultViewModels (LRN searchTerm)`() {
-        val searchTerm = "L-CCCC-CCCC"
-        val searchLRN =
-            RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)!!.number
-        val laUserBaseId = "laUserBaseId"
-        val requestedPageIndex = 0
-        val pageSize = 25
-        val pageKey = 79
-        val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
-        val matchingLandlord = listOf(createLandlord())
-        val matchingLandlordWithListedPropertyCount =
-            listOf(LandlordWithListedPropertyCount(matchingLandlord[0].id, matchingLandlord[0], 0))
-        val expectedFormattedSearchResults =
-            matchingLandlordWithListedPropertyCount.map {
-                LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
-                    it,
-                    pageKey,
-                )
-            }
-
-        whenever(
-            mockLandlordRepository.searchMatchingLRN(searchLRN, laUserBaseId, pageable = pageRequest),
-        ).thenReturn(PageImpl(matchingLandlord))
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(listOf(matchingLandlord[0].id)))
-            .thenReturn(matchingLandlordWithListedPropertyCount)
-        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(pageKey)
-
-        val searchResults =
-            landlordService.searchForLandlords(
-                searchTerm,
-                laUserBaseId,
-                requestedPageIndex = requestedPageIndex,
-                pageSize = pageSize,
-            )
-
-        assertEquals(expectedFormattedSearchResults, searchResults.content)
-    }
-
-    @Test
-    fun `searchForLandlords returns no results when given a non-landlord registration number`() {
-        val searchTerm = "P-CCCC-CCCC"
-        val laUserBaseId = "laUserBaseId"
-        val requestedPageIndex = 0
-        val pageSize = 25
-        val expectedPageRequest = PageRequest.of(requestedPageIndex, pageSize)
-        val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
-
-        whenever(
-            mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = expectedPageRequest),
-        ).thenReturn(Page.empty())
-
-        val searchResults =
-            landlordService.searchForLandlords(
-                searchTerm,
-                laUserBaseId,
-                requestedPageIndex = requestedPageIndex,
-                pageSize = pageSize,
-            )
-
-        verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
-        assertEquals(expectedSearchResults, searchResults.content)
-    }
-
-    @Test
-    fun `searchForLandlords returns no results when given a searchTerm that has no LRN or fuzzy search matches`() {
-        val searchTerm = "non-matching searchTerm"
-        val laUserBaseId = "laUserBaseId"
-        val requestedPageIndex = 0
-        val pageSize = 25
-        val expectedPageRequest = PageRequest.of(requestedPageIndex, pageSize)
-        val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
-
-        whenever(
-            mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = expectedPageRequest),
-        ).thenReturn(Page.empty())
-
-        val searchResults =
-            landlordService.searchForLandlords(
-                searchTerm,
-                laUserBaseId,
-                requestedPageIndex = requestedPageIndex,
-                pageSize = pageSize,
-            )
-
-        verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
-        assertEquals(expectedSearchResults, searchResults.content)
-    }
-
-    @Test
-    fun `searchForLandlords returns the requested page of LandlordSearchResultViewModels`() {
-        val searchTerm = "searchTerm"
-        val laUserBaseId = "laUserBaseId"
-        val pageSize = 25
-
-        val matchingLandlords = mutableListOf<Landlord>()
-        val matchingLandlordsWithListedPropertyCount = mutableListOf<LandlordWithListedPropertyCount>()
-        for (i in 1..40) {
-            val landlord = createLandlord()
-            matchingLandlords.add(landlord)
-            matchingLandlordsWithListedPropertyCount.add(
-                LandlordWithListedPropertyCount(
-                    landlord.id,
-                    landlord,
-                    i.mod(3),
-                ),
-            )
+            // Assert
+            val expectedSearchResults =
+                matchingLandlord.map {
+                    LandlordSearchResultViewModel.fromDataModel(
+                        it,
+                        currentUrlKey,
+                    )
+                }
+            assertEquals(expectedSearchResults, searchResults.content)
         }
 
-        val pageIndex1 = 0
-        val pageKey1 = 77
-        val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
-        val matchingLandlordsPage1 = matchingLandlords.subList(0, pageSize)
-        val matchingLandlordsWithListedPropertiesPage1 = matchingLandlordsWithListedPropertyCount.subList(0, pageSize)
-        val expectedFormattedSearchResultsPage1 =
-            matchingLandlordsWithListedPropertiesPage1.map {
-                LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
-                    it,
-                    pageKey1,
-                )
+        @Test
+        fun `searchForLandlords returns no results when given a non-landlord registration number`() {
+            // Arrange
+            val searchTerm = "P-CCCC-CCCC"
+            val lcUserBaseId = "lcUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
+
+            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+                .thenReturn(Page.empty())
+
+            // Act
+            val searchResults =
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+
+            // Assert
+            val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
+            assertEquals(expectedSearchResults, searchResults.content)
+            verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+        }
+
+        @Test
+        fun `searchForLandlords returns no results when given a searchTerm that has no LRN or fuzzy search matches`() {
+            // Arrange
+            val searchTerm = "non-matching searchTerm"
+            val lcUserBaseId = "lcUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
+
+            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+                .thenReturn(Page.empty())
+
+            // Act
+            val searchResults =
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+
+            // Assert
+            val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
+            assertEquals(expectedSearchResults, searchResults.content)
+            verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+        }
+
+        @Test
+        fun `searchForLandlords returns the requested page of LandlordSearchResultViewModels`() {
+            // Arrange
+            val searchTerm = "searchTerm"
+            val lcUserBaseId = "lcUserBaseId"
+            val pageSize = 25
+
+            val matchingLandlords =
+                mutableListOf<LandlordSearchResultDataModel>().apply {
+                    for (i in 1..40) {
+                        add(createLandlordSearchResultDataModel())
+                    }
+                }
+
+            val pageNumber1 = 0
+            val pageRequest1 = PageRequest.of(pageNumber1, pageSize)
+            val matchingLandlordsPage1 = matchingLandlords.subList(0, pageSize)
+            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest1))
+                .thenReturn(PageImpl(matchingLandlordsPage1))
+
+            val pageNumber2 = 1
+            val pageRequest2 = PageRequest.of(pageNumber2, pageSize)
+            val matchingLandlordsPage2 = matchingLandlords.subList(pageSize, matchingLandlords.size)
+            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest2))
+                .thenReturn(PageImpl(matchingLandlordsPage2))
+
+            val currentUrlKey = 77
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey).thenReturn(currentUrlKey)
+
+            // Act
+            val searchResults1 =
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = pageNumber1, pageSize = pageSize)
+
+            val searchResults2 =
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = pageNumber2, pageSize = pageSize)
+
+            // Assert
+            val expectedSearchResultsPage1 =
+                matchingLandlordsPage1.map {
+                    LandlordSearchResultViewModel.fromDataModel(it, currentUrlKey)
+                }
+            assertEquals(expectedSearchResultsPage1, searchResults1.content)
+
+            val expectedSearchResultsPage2 =
+                matchingLandlordsPage2.map {
+                    LandlordSearchResultViewModel.fromDataModel(it, currentUrlKey)
+                }
+            assertEquals(expectedSearchResultsPage2, searchResults2.content)
+        }
+
+        @Test
+        fun `searchForLandlords throws an exception when fuzzy searching times out`() {
+            // Arrange
+            val searchTerm = "searchTerm"
+            val lcUserBaseId = "lcUserBaseId"
+            val requestedPageNumber = 0
+            val pageSize = 25
+            val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
+
+            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+                .thenThrow(QueryTimeoutException("Query timed out"))
+
+            // Act & Assert
+            assertThrows<RepositoryQueryTimeoutException> {
+                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
             }
-
-        val pageIndex2 = 1
-        val pageKey2 = 202
-        val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
-        val matchingLandlordsPage2 = matchingLandlords.subList(pageSize, 40)
-        val matchingLandlordsWithListedPropertiesPage2 = matchingLandlordsWithListedPropertyCount.subList(pageSize, 40)
-        val expectedFormattedSearchResultsPage2 =
-            matchingLandlordsWithListedPropertiesPage2.map {
-                LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
-                    it,
-                    pageKey2,
-                )
-            }
-
-        whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest1))
-            .thenReturn(PageImpl(matchingLandlordsPage1))
-        whenever(mockLandlordRepository.searchMatching(searchTerm, laUserBaseId, pageable = pageRequest2))
-            .thenReturn(PageImpl(matchingLandlordsPage2))
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlordsPage1.map { it.id }))
-            .thenReturn(matchingLandlordsWithListedPropertiesPage1)
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlordIdIn(matchingLandlordsPage2.map { it.id }))
-            .thenReturn(matchingLandlordsWithListedPropertiesPage2)
-
-        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(pageKey1)
-        val searchResults1 =
-            landlordService.searchForLandlords(
-                searchTerm,
-                laUserBaseId,
-                requestedPageIndex = pageIndex1,
-                pageSize = pageSize,
-            )
-
-        whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(pageKey2)
-        val searchResults2 =
-            landlordService.searchForLandlords(
-                searchTerm,
-                laUserBaseId,
-                requestedPageIndex = pageIndex2,
-                pageSize = pageSize,
-            )
-
-        assertEquals(expectedFormattedSearchResultsPage1, searchResults1.content)
-        assertEquals(expectedFormattedSearchResultsPage2, searchResults2.content)
+        }
     }
 
     @Test
@@ -595,36 +561,6 @@ class LandlordServiceTests {
     @Test
     fun `updateLandlordForBaseUserId is annotated with @Transactional`() {
         assertTrue(landlordService::updateLandlordForBaseUserId.hasAnnotation<Transactional>())
-    }
-
-    @Test
-    fun `getLandlordHasRegisteredProperties throws an error if the landlord is not found`() {
-        val baseUserId = "one-login-id"
-        assertThrows<EntityNotFoundException> { landlordService.getLandlordHasRegisteredProperties(baseUserId) }
-    }
-
-    @Test
-    fun `getLandlordHasRegisteredProperties returns true if listedPropertyCount is greater than 0`() {
-        // Arrange
-        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(5)
-        val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
-            .thenReturn(landlordWithListedPropertyCount)
-
-        // Act, Assert
-        assertTrue(landlordService.getLandlordHasRegisteredProperties(baseUserId))
-    }
-
-    @Test
-    fun `getLandlordHasRegisteredProperties returns false true if listedPropertyCount is 0`() {
-        // Arrange
-        val landlordWithListedPropertyCount = MockLandlordData.createLandlordWithListedPropertyCount(0)
-        val baseUserId = landlordWithListedPropertyCount.landlord.baseUser.id
-        whenever(mockLandlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId))
-            .thenReturn(landlordWithListedPropertyCount)
-
-        // Act, Assert
-        assertFalse(landlordService.getLandlordHasRegisteredProperties(baseUserId))
     }
 
     companion object {

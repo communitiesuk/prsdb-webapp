@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -55,7 +55,7 @@ class EpcViewModelBuilderTests {
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                     compliant.propertyOwnership.id,
                                     PropertyComplianceStepId.UpdateEpc,
                                 ),
@@ -131,7 +131,7 @@ class EpcViewModelBuilderTests {
                             "propertyDetails.complianceInformation.notAdded",
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                     missing.propertyOwnership.id,
                                     PropertyComplianceStepId.UpdateEpc,
                                 ),
@@ -155,7 +155,7 @@ class EpcViewModelBuilderTests {
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                     meesCompliant.propertyOwnership.id,
                                     PropertyComplianceStepId.UpdateEpc,
                                 ),
@@ -176,7 +176,7 @@ class EpcViewModelBuilderTests {
                             MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
                             SummaryListRowActionViewModel(
                                 "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                     meesCompliant.propertyOwnership.id,
                                     PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
                                 ),

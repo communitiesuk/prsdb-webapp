@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -25,7 +25,7 @@ class EpcViewModelBuilder {
                         valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
                         actionText = "forms.links.change",
                         actionLink =
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -58,7 +58,7 @@ class EpcViewModelBuilder {
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
                             actionText = "forms.links.change",
                             actionLink =
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                     propertyCompliance.propertyOwnership.id,
                                     PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
                                 ),

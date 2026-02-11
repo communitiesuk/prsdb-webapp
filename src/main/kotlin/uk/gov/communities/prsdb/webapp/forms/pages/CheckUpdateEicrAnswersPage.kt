@@ -18,6 +18,7 @@ class CheckUpdateEicrAnswersPage(
                 "summaryName" to "forms.update.eicr.checkYourAnswers.summary",
                 "showWarning" to true,
                 "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                "insetText" to true,
             ),
         journeyDataService = journeyDataService,
         missingAnswersRedirect = missingAnswersRedirect,

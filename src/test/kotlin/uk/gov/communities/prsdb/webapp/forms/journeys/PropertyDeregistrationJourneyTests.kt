@@ -80,8 +80,7 @@ class PropertyDeregistrationJourneyTests {
 
         // Assert
         verify(mockPropertyDeregistrationService).deregisterProperty(propertyOwnershipId)
-        verify(mockPropertyDeregistrationService)
-            .addDeregisteredPropertyAndOwnershipIdsToSession(propertyOwnershipId, propertyOwnership.property.id)
+        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
     }
 
     @Test

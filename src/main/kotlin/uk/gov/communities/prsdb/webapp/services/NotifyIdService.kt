@@ -4,12 +4,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.context.annotation.ApplicationScope
 import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import kotlin.jvm.javaClass
 
-@ApplicationScope
 @Service
 class NotifyIdService(
     @Value("\${notify.use-production-notify}") private val useProductionNotify: Boolean,

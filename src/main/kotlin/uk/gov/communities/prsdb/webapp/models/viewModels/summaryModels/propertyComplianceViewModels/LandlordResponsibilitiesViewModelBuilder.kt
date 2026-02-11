@@ -21,7 +21,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.FireSafetyDeclaration,
+                                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
                             ),
                         withActionLink = withActionLinks,
                     )
@@ -32,7 +32,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.KeepPropertySafe,
+                                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
                             ),
                         withActionLink = withActionLinks,
                     )
@@ -43,7 +43,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.ResponsibilityToTenants,
+                                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
                             ),
                         withActionLink = withActionLinks,
                     )

@@ -2,6 +2,9 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.taskModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.forms.steps.StepId
+import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.Task
 
 data class TaskListItemViewModel(
     val nameKey: String,
@@ -10,6 +13,30 @@ data class TaskListItemViewModel(
     val url: String? = null,
 ) {
     companion object {
+        fun fromTask(
+            nameKey: String,
+            task: Task<*>,
+            hintKey: String? = null,
+        ): TaskListItemViewModel =
+            TaskListItemViewModel(
+                nameKey,
+                TaskStatusViewModel.fromStatus(task.taskStatus()),
+                hintKey,
+                Destination(task.firstStep).toUrlStringOrNull(),
+            )
+
+        fun fromStep(
+            nameKey: String,
+            singleStepTask: RequestableStep<*, *, *>,
+            hintKey: String? = null,
+        ): TaskListItemViewModel =
+            TaskListItemViewModel(
+                nameKey,
+                TaskStatusViewModel.fromStatus(singleStepTask.taskStatus()),
+                hintKey,
+                Destination(singleStepTask).toUrlStringOrNull(),
+            )
+
         fun <T : StepId> fromTaskDetails(
             nameKey: String,
             status: TaskStatus,
@@ -27,3 +54,10 @@ data class TaskListItemViewModel(
         )
     }
 }
+
+fun RequestableStep<*, *, *>.taskStatus(): TaskStatus =
+    when {
+        this.outcome != null -> TaskStatus.COMPLETED
+        this.isStepReachable -> TaskStatus.NOT_STARTED
+        else -> TaskStatus.CANNOT_START
+    }

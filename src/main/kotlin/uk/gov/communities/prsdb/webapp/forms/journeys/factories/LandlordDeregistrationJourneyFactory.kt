@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.journeys.factories
 
 import org.springframework.validation.Validator
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWit
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
@@ -18,6 +19,7 @@ class LandlordDeregistrationJourneyFactory(
     private val journeyDataServiceFactory: JourneyDataServiceFactory,
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val landlordService: LandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
     private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
@@ -28,6 +30,7 @@ class LandlordDeregistrationJourneyFactory(
             journeyDataServiceFactory.create(JOURNEY_DATA_KEY),
             landlordDeregistrationService,
             landlordService,
+            propertyOwnershipService,
             securityContextService,
             confirmationWithNoPropertiesEmailSender,
             confirmationWithPropertiesEmailSender,

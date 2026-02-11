@@ -5,7 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.Validator
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_AUTHORITY_URL
+import uk.gov.communities.prsdb.webapp.constants.FIND_LOCAL_COUNCIL_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.PropertyRegistrationNumberOfPeoplePage
 import uk.gov.communities.prsdb.webapp.forms.pages.SelectAddressPage
-import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalAuthorityPage
+import uk.gov.communities.prsdb.webapp.forms.pages.SelectLocalCouncilPage
 import uk.gov.communities.prsdb.webapp.forms.steps.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
@@ -42,17 +42,19 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Selective
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LegacyAddressCheckingService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 class PropertyRegistrationJourney(
     validator: Validator,
     journeyDataService: JourneyDataService,
-    private val addressLookupService: AddressLookupService,
+    private val addressService: AddressService,
     private val propertyRegistrationService: PropertyRegistrationService,
-    private val localAuthorityService: LocalAuthorityService,
+    private val addressCheckingService: LegacyAddressCheckingService,
+    private val localCouncilService: LocalCouncilService,
 ) : JourneyWithTaskList<RegisterPropertyStepId>(
         journeyType = JourneyType.PROPERTY_REGISTRATION,
         initialStepId = RegisterPropertyStepId.LookupAddress,
@@ -108,7 +110,7 @@ class PropertyRegistrationJourney(
                 selectAddressStep(),
                 alreadyRegisteredStep(),
                 manualAddressStep(),
-                localAuthorityStep(),
+                localCouncilStep(),
             ),
             "registerProperty.taskList.register.addAddress",
         )
@@ -160,7 +162,7 @@ class PropertyRegistrationJourney(
                 ),
             nextStepIfAddressesFound = RegisterPropertyStepId.SelectAddress,
             nextStepIfNoAddressesFound = RegisterPropertyStepId.NoAddressFound,
-            addressLookupService = addressLookupService,
+            addressService = addressService,
             journeyDataService = journeyDataService,
             saveAfterSubmit = false,
             restrictToEngland = true,
@@ -186,7 +188,7 @@ class PropertyRegistrationJourney(
                     journeyDataService = journeyDataService,
                     displaySectionHeader = true,
                 ),
-            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData, propertyRegistrationService) },
+            nextAction = { filteredJourneyData, _ -> selectAddressNextAction(filteredJourneyData, addressCheckingService) },
             saveAfterSubmit = false,
         )
 
@@ -258,24 +260,24 @@ class PropertyRegistrationJourney(
                         ),
                     shouldDisplaySectionHeader = true,
                 ),
-            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalAuthority, null) },
+            nextAction = { _, _ -> Pair(RegisterPropertyStepId.LocalCouncil, null) },
             saveAfterSubmit = false,
         )
 
-    private fun localAuthorityStep() =
+    private fun localCouncilStep() =
         Step(
-            id = RegisterPropertyStepId.LocalAuthority,
+            id = RegisterPropertyStepId.LocalCouncil,
             page =
-                SelectLocalAuthorityPage(
+                SelectLocalCouncilPage(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.selectLocalAuthority.fieldSetHeading",
-                            "fieldSetHint" to "forms.selectLocalAuthority.fieldSetHint",
-                            "selectLabel" to "forms.selectLocalAuthority.select.label",
-                            "findLocalAuthorityUrl" to FIND_LOCAL_AUTHORITY_URL,
+                            "fieldSetHeading" to "forms.selectLocalCouncil.fieldSetHeading",
+                            "fieldSetHint" to "forms.selectLocalCouncil.fieldSetHint",
+                            "selectLabel" to "forms.selectLocalCouncil.select.label",
+                            "findLocalCouncilUrl" to FIND_LOCAL_COUNCIL_URL,
                         ),
-                    localAuthorityService = localAuthorityService,
+                    localCouncilService = localCouncilService,
                     displaySectionHeader = true,
                 ),
             nextAction = { _, _ -> Pair(RegisterPropertyStepId.PropertyType, null) },
@@ -524,7 +526,7 @@ class PropertyRegistrationJourney(
                     content =
                         mapOf(
                             "title" to "registerProperty.title",
-                            "fieldSetHeading" to "forms.numberOfHouseholds.fieldSetHeading",
+                            "fieldSetHeading" to "forms.numberOfHouseholds.heading",
                             "label" to "forms.numberOfHouseholds.label",
                         ),
                     shouldDisplaySectionHeader = true,
@@ -558,7 +560,7 @@ class PropertyRegistrationJourney(
     private fun checkAnswersStep() =
         Step(
             id = RegisterPropertyStepId.CheckAnswers,
-            page = PropertyRegistrationCheckAnswersPage(journeyDataService, localAuthorityService, unreachableStepRedirect),
+            page = PropertyRegistrationCheckAnswersPage(journeyDataService, localCouncilService, unreachableStepRedirect),
             handleSubmitAndRedirect = { filteredJourneyData, _, _ -> checkAnswersSubmitAndRedirect(filteredJourneyData) },
         )
 
@@ -571,13 +573,13 @@ class PropertyRegistrationJourney(
 
     private fun selectAddressNextAction(
         filteredJourneyData: JourneyData,
-        propertyRegistrationService: PropertyRegistrationService,
+        addressCheckingService: LegacyAddressCheckingService,
     ): Pair<RegisterPropertyStepId, Int?> =
         if (PropertyRegistrationJourneyDataHelper.isManualAddressChosen(filteredJourneyData)) {
             Pair(RegisterPropertyStepId.ManualAddress, null)
         } else {
             val selectedAddress = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
-            if (selectedAddress.uprn != null && propertyRegistrationService.getIsAddressRegistered(selectedAddress.uprn)) {
+            if (selectedAddress.uprn != null && addressCheckingService.getIsAddressRegistered(selectedAddress.uprn)) {
                 Pair(RegisterPropertyStepId.AlreadyRegistered, null)
             } else {
                 Pair(RegisterPropertyStepId.PropertyType, null)
@@ -597,7 +599,7 @@ class PropertyRegistrationJourney(
             val address = PropertyRegistrationJourneyDataHelper.getAddress(filteredJourneyData)!!
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             propertyRegistrationService.registerProperty(
-                address = address,
+                addressModel = address,
                 propertyType = PropertyRegistrationJourneyDataHelper.getPropertyType(filteredJourneyData)!!,
                 licenseType = PropertyRegistrationJourneyDataHelper.getLicensingType(filteredJourneyData)!!,
                 licenceNumber = PropertyRegistrationJourneyDataHelper.getLicenseNumber(filteredJourneyData)!!,
@@ -605,6 +607,13 @@ class PropertyRegistrationJourney(
                 numberOfHouseholds = PropertyRegistrationJourneyDataHelper.getNumberOfHouseholds(filteredJourneyData),
                 numberOfPeople = PropertyRegistrationJourneyDataHelper.getNumberOfTenants(filteredJourneyData),
                 baseUserId = baseUserId,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
             )
 
             journeyDataService.deleteJourneyData()

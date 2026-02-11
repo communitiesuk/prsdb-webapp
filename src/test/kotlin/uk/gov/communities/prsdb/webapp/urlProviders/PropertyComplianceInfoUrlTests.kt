@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
@@ -45,7 +46,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 
 @WebMvcTest(
-    controllers = [PropertyComplianceController::class, PropertyDetailsController::class],
+    controllers = [LegacyPropertyComplianceController::class, PropertyDetailsController::class],
     properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
 @Import(AbsoluteUrlProvider::class)
