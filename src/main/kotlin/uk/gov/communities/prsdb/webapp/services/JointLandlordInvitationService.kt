@@ -81,7 +81,7 @@ class JointLandlordInvitationService(
         if (invitationRepository.existsById(invitation.id)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Invitation with id ${invitation.id} is still in the joint_landlord_invitations table",
+                "Invitation with id ${invitation.id} is still in the joint_landlord_invitation table",
             )
         }
     }
