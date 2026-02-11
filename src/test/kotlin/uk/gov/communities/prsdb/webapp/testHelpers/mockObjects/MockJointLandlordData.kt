@@ -22,7 +22,7 @@ class MockJointLandlordData {
                     id = id,
                     token = token,
                     email = email,
-                    registeredPropertyID = propertyOwnership,
+                    registeredPropertyId = propertyOwnership,
                 )
 
             ReflectionTestUtils.setField(jointLandlordInvitation, "createdDate", createdDate)
