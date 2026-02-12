@@ -59,7 +59,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockPropertyRegistrationConfirmationService: PropertyRegistrationConfirmationService
 
     @Mock
-    private lateinit var mockJointLandlordInvitationEmailSender: JointLandlordInvitationEmailSender
+    private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -458,7 +458,7 @@ class PropertyRegistrationServiceTests {
         )
 
         // Assert
-        verify(mockJointLandlordInvitationEmailSender).sendInvitationEmails(
+        verify(mockJointLandlordInvitationService).sendInvitationEmails(
             eq(jointLandlordEmails),
             eq(expectedPropertyOwnership),
         )
@@ -533,7 +533,7 @@ class PropertyRegistrationServiceTests {
         )
 
         // Assert
-        org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationEmailSender)
+        org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationService)
     }
 
     @Test
@@ -606,6 +606,6 @@ class PropertyRegistrationServiceTests {
         )
 
         // Assert
-        org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationEmailSender)
+        org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationService)
     }
 }

@@ -27,7 +27,7 @@ class PropertyRegistrationService(
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
-    private val jointLandlordInvitationEmailSender: JointLandlordInvitationEmailSender,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
     @Transactional
     fun registerProperty(
@@ -99,7 +99,7 @@ class PropertyRegistrationService(
         )
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
-            jointLandlordInvitationEmailSender.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
         }
 
         return propertyOwnership.registrationNumber
