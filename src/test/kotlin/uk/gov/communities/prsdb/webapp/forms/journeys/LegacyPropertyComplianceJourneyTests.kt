@@ -191,7 +191,7 @@ class LegacyPropertyComplianceJourneyTests {
             verify(mockCertificateUploadService).saveCertificateUpload(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
-                eq(FileCategory.Eirc),
+                eq(FileCategory.Eicr),
             )
         }
     }

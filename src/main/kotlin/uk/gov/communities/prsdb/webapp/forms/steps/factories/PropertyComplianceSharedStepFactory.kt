@@ -430,7 +430,7 @@ class PropertyComplianceSharedStepFactory(
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
-                    FileCategory.Eirc,
+                    FileCategory.Eicr,
                 )
                 eicrUploadNextStepUrl(checkingFor)
             },

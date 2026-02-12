@@ -259,7 +259,7 @@ class PropertyComplianceOriginalJourneyDataTest {
             certificateUploadRepository.findByFileUpload_Id(any()),
         ).thenReturn(
             originalRecord.gasSafetyFileUpload?.let { CertificateUpload(it, FileCategory.GasSafetyCert, mock()) },
-            originalRecord.eicrFileUpload?.let { CertificateUpload(it, FileCategory.Eirc, mock()) },
+            originalRecord.eicrFileUpload?.let { CertificateUpload(it, FileCategory.Eicr, mock()) },
         )
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com/landlord"))
 
