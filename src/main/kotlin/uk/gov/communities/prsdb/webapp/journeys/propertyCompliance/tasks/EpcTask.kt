@@ -16,6 +16,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQues
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcStatusMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
@@ -44,7 +48,9 @@ class EpcTask : Task<EpcState>() {
 
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
 
-                        // TODO PDJB-467 - configure the routes for expired, and/or low energy rating routes
+                        CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+
+                        // TODO PDJB-467 - configure the routes for expired routes
                         else -> exitStep
                     }
                 }
@@ -90,7 +96,9 @@ class EpcTask : Task<EpcState>() {
 
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
 
-                        // TODO PDJB-467 - configure the routes for expired, and/or low energy rating routes
+                        CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+
+                        // TODO PDJB-467 - configure the routes for expired routes
                         else -> exitStep
                     }
                 }
@@ -123,6 +131,34 @@ class EpcTask : Task<EpcState>() {
                 nextStep { exitStep }
                 savable()
             }
+            step(journey.meesExemptionCheckStep) {
+                routeSegment(MeesExemptionCheckStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        MeesExemptionCheckMode.HAS_EXEMPTION -> journey.meesExemptionReasonStep
+                        MeesExemptionCheckMode.NO_EXEMPTION -> exitStep
+                    }
+                }
+                savable()
+            }
+            step(journey.meesExemptionReasonStep) {
+                routeSegment(MeesExemptionReasonStep.ROUTE_SEGMENT)
+                parents { journey.meesExemptionCheckStep.hasOutcome(MeesExemptionCheckMode.HAS_EXEMPTION) }
+                nextStep { journey.meesExemptionConfirmationStep }
+                savable()
+            }
+            step(journey.meesExemptionConfirmationStep) {
+                routeSegment(MeesExemptionConfirmationStep.ROUTE_SEGMENT)
+                parents { journey.meesExemptionReasonStep.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
             exitStep {
                 parents {
                     OrParents(
@@ -131,6 +167,8 @@ class EpcTask : Task<EpcState>() {
                         journey.epcNotFoundStep.hasOutcome(Complete.COMPLETE),
                         journey.epcMissingStep.hasOutcome(Complete.COMPLETE),
                         journey.epcExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
+                        journey.meesExemptionCheckStep.hasOutcome(MeesExemptionCheckMode.NO_EXEMPTION),
+                        journey.meesExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
             }
