@@ -10,6 +10,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMa
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
@@ -49,10 +52,10 @@ class EpcTask : Task<EpcState>() {
 
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
 
-                        CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
 
-                        // TODO PDJB-467 - configure the routes for expired routes
-                        else -> exitStep
+                        CheckMatchedEpcMode.EPC_EXPIRED,
+                        -> journey.epcExpiryCheckStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -97,10 +100,10 @@ class EpcTask : Task<EpcState>() {
 
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
 
-                        CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
 
-                        // TODO PDJB-467 - configure the routes for expired routes
-                        else -> exitStep
+                        CheckMatchedEpcMode.EPC_EXPIRED,
+                        -> journey.epcExpiryCheckStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -136,8 +139,9 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(MeesExemptionCheckStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING),
-                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING),
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING),
                     )
                 }
                 nextStep { mode ->
@@ -166,6 +170,29 @@ class EpcTask : Task<EpcState>() {
                 nextStep { exitStep }
                 savable()
             }
+            step(journey.epcExpiryCheckStep) {
+                routeSegment(EpcExpiryCheckStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        EpcExpiryCheckMode.EPC_COMPLIANT -> exitStep
+                        EpcExpiryCheckMode.EPC_EXPIRED -> journey.epcExpiredStep
+                        EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                    }
+                }
+                savable()
+            }
+            step(journey.epcExpiredStep) {
+                routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
+                parents { journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_EXPIRED) }
+                nextStep { exitStep }
+                savable()
+            }
             exitStep {
                 parents {
                     OrParents(
@@ -176,6 +203,8 @@ class EpcTask : Task<EpcState>() {
                         journey.epcExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
                         journey.meesExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
                         journey.lowEnergyRatingStep.hasOutcome(Complete.COMPLETE),
+                        journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_COMPLIANT),
+                        journey.epcExpiredStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
             }
