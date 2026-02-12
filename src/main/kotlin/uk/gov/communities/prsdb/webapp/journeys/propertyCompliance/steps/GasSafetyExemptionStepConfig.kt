@@ -4,11 +4,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExemptionMode, GasSafetyExemptionFormModel, JourneyState>() {
+class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<ExemptionMode, GasSafetyExemptionFormModel, JourneyState>() {
     override val formModelClass = GasSafetyExemptionFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
@@ -35,8 +36,8 @@ class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExem
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.let {
             when (it.hasExemption) {
-                true -> GasSafetyExemptionMode.HAS_EXEMPTION
-                false -> GasSafetyExemptionMode.NO_EXEMPTION
+                true -> ExemptionMode.HAS_EXEMPTION
+                false -> ExemptionMode.NO_EXEMPTION
                 null -> null
             }
         }
@@ -45,13 +46,8 @@ class GasSafetyExemptionStepConfig : AbstractRequestableStepConfig<GasSafetyExem
 @JourneyFrameworkComponent
 final class GasSafetyExemptionStep(
     stepConfig: GasSafetyExemptionStepConfig,
-) : RequestableStep<GasSafetyExemptionMode, GasSafetyExemptionFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<ExemptionMode, GasSafetyExemptionFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-exemption"
     }
-}
-
-enum class GasSafetyExemptionMode {
-    HAS_EXEMPTION,
-    NO_EXEMPTION,
 }

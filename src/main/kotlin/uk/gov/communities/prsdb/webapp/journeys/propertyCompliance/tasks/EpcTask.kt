@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
@@ -20,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSear
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcStatusMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
@@ -146,15 +146,15 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        MeesExemptionCheckMode.HAS_EXEMPTION -> journey.meesExemptionReasonStep
-                        MeesExemptionCheckMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
+                        ExemptionMode.HAS_EXEMPTION -> journey.meesExemptionReasonStep
+                        ExemptionMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
                     }
                 }
                 savable()
             }
             step(journey.meesExemptionReasonStep) {
                 routeSegment(MeesExemptionReasonStep.ROUTE_SEGMENT)
-                parents { journey.meesExemptionCheckStep.hasOutcome(MeesExemptionCheckMode.HAS_EXEMPTION) }
+                parents { journey.meesExemptionCheckStep.hasOutcome(ExemptionMode.HAS_EXEMPTION) }
                 nextStep { journey.meesExemptionConfirmationStep }
                 savable()
             }
@@ -166,7 +166,7 @@ class EpcTask : Task<EpcState>() {
             }
             step(journey.lowEnergyRatingStep) {
                 routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
-                parents { journey.meesExemptionCheckStep.hasOutcome(MeesExemptionCheckMode.NO_EXEMPTION) }
+                parents { journey.meesExemptionCheckStep.hasOutcome(ExemptionMode.NO_EXEMPTION) }
                 nextStep { exitStep }
                 savable()
             }

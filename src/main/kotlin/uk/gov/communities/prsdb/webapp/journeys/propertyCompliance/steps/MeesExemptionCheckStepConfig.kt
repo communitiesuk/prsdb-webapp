@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -12,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 @JourneyFrameworkComponent
 class MeesExemptionCheckStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractRequestableStepConfig<MeesExemptionCheckMode, MeesExemptionCheckFormModel, EpcState>() {
+) : AbstractRequestableStepConfig<ExemptionMode, MeesExemptionCheckFormModel, EpcState>() {
     override val formModelClass = MeesExemptionCheckFormModel::class
 
     override fun getStepSpecificContent(state: EpcState) =
@@ -37,11 +38,11 @@ class MeesExemptionCheckStepConfig(
 
     override fun chooseTemplate(state: EpcState): String = "forms/meesExemptionCheckForm"
 
-    override fun mode(state: EpcState): MeesExemptionCheckMode? =
+    override fun mode(state: EpcState): ExemptionMode? =
         getFormModelFromStateOrNull(state)?.let {
             when (it.propertyHasExemption) {
-                true -> MeesExemptionCheckMode.HAS_EXEMPTION
-                false -> MeesExemptionCheckMode.NO_EXEMPTION
+                true -> ExemptionMode.HAS_EXEMPTION
+                false -> ExemptionMode.NO_EXEMPTION
                 null -> null
             }
         }
@@ -50,13 +51,8 @@ class MeesExemptionCheckStepConfig(
 @JourneyFrameworkComponent
 final class MeesExemptionCheckStep(
     stepConfig: MeesExemptionCheckStepConfig,
-) : RequestableStep<MeesExemptionCheckMode, MeesExemptionCheckFormModel, EpcState>(stepConfig) {
+) : RequestableStep<ExemptionMode, MeesExemptionCheckFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "mees-exemption-check"
     }
-}
-
-enum class MeesExemptionCheckMode {
-    HAS_EXEMPTION,
-    NO_EXEMPTION,
 }
