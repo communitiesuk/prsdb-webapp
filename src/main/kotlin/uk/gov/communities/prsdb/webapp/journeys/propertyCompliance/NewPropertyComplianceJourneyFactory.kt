@@ -30,6 +30,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUpl
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
@@ -199,6 +201,8 @@ class PropertyComplianceJourney(
     override val meesExemptionReasonStep: MeesExemptionReasonStep,
     override val meesExemptionConfirmationStep: MeesExemptionConfirmationStep,
     override val lowEnergyRatingStep: LowEnergyRatingStep,
+    override val epcExpiryCheckStep: EpcExpiryCheckStep,
+    override val epcExpiredStep: EpcExpiredStep,
     // Landlord Responsibilties
     override val fireSafetyStep: FireSafetyDeclarationStep,
     override val keepPropertySafeStep: KeepPropertySafeStep,
@@ -211,6 +215,7 @@ class PropertyComplianceJourney(
     PropertyComplianceJourneyState {
     override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
     override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
+    override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")

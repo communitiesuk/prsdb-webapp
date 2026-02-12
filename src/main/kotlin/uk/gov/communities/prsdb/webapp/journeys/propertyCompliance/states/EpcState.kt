@@ -4,6 +4,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
@@ -18,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 interface EpcState : JourneyState {
     var automatchedEpc: EpcDataModel?
     var searchedEpc: EpcDataModel?
+    var acceptedEpc: EpcDataModel?
     val propertyId: Long
 
     val epcQuestionStep: EpcQuestionStep
@@ -33,5 +36,6 @@ interface EpcState : JourneyState {
     val meesExemptionReasonStep: MeesExemptionReasonStep
     val meesExemptionConfirmationStep: MeesExemptionConfirmationStep
     val lowEnergyRatingStep: LowEnergyRatingStep
-    val checkAutomatchedEpcStep: CheckMatchedEpcStep
+    val epcExpiryCheckStep: EpcExpiryCheckStep
+    val epcExpiredStep: EpcExpiredStep
 }

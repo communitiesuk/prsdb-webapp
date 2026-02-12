@@ -44,18 +44,9 @@ class CheckMatchedEpcStepConfig(
         if (formModelOrNull?.matchedEpcIsCorrect == null) return null
         if (formModelOrNull.matchedEpcIsCorrect == false) return CheckMatchedEpcMode.EPC_INCORRECT
 
-        val epcDetails = getReleventEpc(state)
-        val energyRatingIsGood = epcDetails?.isEnergyRatingEOrBetter() ?: return null
-        val epcExpired = epcDetails.isPastExpiryDate()
-
-        if (epcExpired) {
-            return if (energyRatingIsGood) {
-                CheckMatchedEpcMode.EPC_EXPIRED_WITH_GOOD_ENERGY_RATING
-            } else {
-                CheckMatchedEpcMode.EPC_EXPIRED_WITH_LOW_ENERGY_RATING
-            }
-        }
-        if (!energyRatingIsGood) return CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING
+        val epcDetails = getReleventEpc(state) ?: return null
+        if (epcDetails.isPastExpiryDate()) return CheckMatchedEpcMode.EPC_EXPIRED
+        if (!(epcDetails.isEnergyRatingEOrBetter())) return CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING
         return CheckMatchedEpcMode.EPC_COMPLIANT
     }
 
@@ -66,6 +57,10 @@ class CheckMatchedEpcStepConfig(
     fun usingEpc(getReleventEpc: EpcState.() -> EpcDataModel?): CheckMatchedEpcStepConfig {
         this.getReleventEpc = getReleventEpc
         return this
+    }
+
+    override fun afterStepDataIsAdded(state: EpcState) {
+        state.acceptedEpc = getReleventEpc(state)
     }
 }
 
@@ -81,8 +76,7 @@ final class CheckMatchedEpcStep(
 
 enum class CheckMatchedEpcMode {
     EPC_COMPLIANT,
-    EPC_EXPIRED_WITH_LOW_ENERGY_RATING,
-    EPC_EXPIRED_WITH_GOOD_ENERGY_RATING,
-    EPC_IN_DATE_BUT_LOW_ENERGY_RATING,
+    EPC_EXPIRED,
+    EPC_LOW_ENERGY_RATING,
     EPC_INCORRECT,
 }
