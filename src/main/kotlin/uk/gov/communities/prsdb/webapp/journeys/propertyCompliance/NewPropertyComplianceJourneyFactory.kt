@@ -17,10 +17,28 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOutdatedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCyaStep
@@ -66,7 +84,9 @@ class NewPropertyComplianceJourneyFactory(
                     saveProgress()
                 }
                 task(journey.eicrTask) {
-                    parents { journey.taskListStep.always() }
+                    parents {
+                        journey.taskListStep.always()
+                    }
                     nextStep { journey.epcTask.firstStep }
                     checkable()
                     saveProgress()
@@ -130,11 +150,29 @@ class PropertyComplianceJourney(
     override val taskListStep: PropertyComplianceTaskListStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
+    override val gasSafetyStep: GasSafetyStep,
+    override val gasSafetyIssueDateStep: GasSafetyIssueDateStep,
     override val gasSafetyEngineerNumberStep: GasSafetyEngineerNumberStep,
     override val gasSafetyCertificateUploadStep: GasSafetyCertificateUploadStep,
     override val gasSafetyUploadConfirmationStep: GasSafetyUploadConfirmationStep,
+    override val gasSafetyOutdatedStep: GasSafetyOutdatedStep,
+    override val gasSafetyExemptionStep: GasSafetyExemptionStep,
+    override val gasSafetyExemptionReasonStep: GasSafetyExemptionReasonStep,
+    override val gasSafetyExemptionOtherReasonStep: GasSafetyExemptionOtherReasonStep,
+    override val gasSafetyExemptionConfirmationStep: GasSafetyExemptionConfirmationStep,
+    override val gasSafetyExemptionMissingStep: GasSafetyExemptionMissingStep,
     // EICR task
     override val eicrTask: EicrTask,
+    override val eicrStep: EicrStep,
+    override val eicrIssueDateStep: EicrIssueDateStep,
+    override val eicrUploadStep: EicrUploadStep,
+    override val eicrUploadConfirmationStep: EicrUploadConfirmationStep,
+    override val eicrOutdatedStep: EicrOutdatedStep,
+    override val eicrExemptionStep: EicrExemptionStep,
+    override val eicrExemptionReasonStep: EicrExemptionReasonStep,
+    override val eicrExemptionOtherReasonStep: EicrExemptionOtherReasonStep,
+    override val eicrExemptionConfirmationStep: EicrExemptionConfirmationStep,
+    override val eicrExemptionMissingStep: EicrExemptionMissingStep,
     // EPC task
     override val epcTask: EpcTask,
     override val epcQuestionStep: EpcQuestionStep,

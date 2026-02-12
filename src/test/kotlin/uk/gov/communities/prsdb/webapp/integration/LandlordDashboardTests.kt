@@ -36,6 +36,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         assertPageIs(page, LandlordIncompletePropertiesPage::class)
     }
 
+    // TODO: PDJB-273 - Update test to navigate to join registered property page once implemented
     @Test
     fun `the join registered property button is displayed`() {
         val dashboard = navigator.goToLandlordDashboard()

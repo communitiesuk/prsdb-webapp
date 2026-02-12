@@ -54,8 +54,9 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.net.URI
 import kotlin.test.assertContains
 
+// TODO PDJB-467 - replicate these tests for the new journey framework
 @ExtendWith(MockitoExtension::class)
-class PropertyComplianceJourneyTests {
+class LegacyPropertyComplianceJourneyTests {
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
@@ -190,7 +191,7 @@ class PropertyComplianceJourneyTests {
             verify(mockCertificateUploadService).saveCertificateUpload(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
-                eq(FileCategory.Eirc),
+                eq(FileCategory.Eicr),
             )
         }
     }
