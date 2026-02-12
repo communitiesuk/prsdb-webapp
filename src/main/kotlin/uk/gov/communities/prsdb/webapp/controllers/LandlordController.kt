@@ -67,6 +67,7 @@ class LandlordController(
 
         model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
+        model.addAttribute("joinPropertyUrl", "#")
         model.addAttribute(
             "viewPropertiesUrl",
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",

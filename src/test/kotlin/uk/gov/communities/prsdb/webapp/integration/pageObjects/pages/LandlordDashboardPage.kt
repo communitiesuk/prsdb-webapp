@@ -19,6 +19,7 @@ class LandlordDashboardPage(
     val dashboardBannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
     val registerPropertyButton = Button.byText(page, "Register a property")
     val viewIncompletePropertiesButton = Button.byText(page, "Incomplete property details")
+    val joinRegisteredPropertyButton = Button.byText(page, "Join a registered property")
     val viewPropertyRecordsButton = Button.byText(page, "View your property records")
     val viewLandlordRecordButton = Button.byText(page, "View your landlord record")
     val addComplianceInformationButton = Button.byText(page, "Compliance actions")

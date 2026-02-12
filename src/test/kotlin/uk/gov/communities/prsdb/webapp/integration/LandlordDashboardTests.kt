@@ -37,6 +37,12 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
+    fun `the join registered property button is displayed`() {
+        val dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.joinRegisteredPropertyButton).isVisible()
+    }
+
+    @Test
     fun `the view property records button links to property records tab on the landlord details page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewPropertyRecordsButton.clickAndWait()
