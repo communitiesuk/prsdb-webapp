@@ -16,7 +16,7 @@ After you've registered, you'll get your Landlord Registration Number. you need 
 
 ## If you're a landlord
 
-You need to join this property's registration on the service. If this is your first time registering as a landlord we'll ask for some basic details like your name and contact address.
+You need to join this property's registration on the service. If this is your first time registering as a landlord, we'll ask for some basic details like your name and contact address.
 
 This link expires after 28 days.
 
