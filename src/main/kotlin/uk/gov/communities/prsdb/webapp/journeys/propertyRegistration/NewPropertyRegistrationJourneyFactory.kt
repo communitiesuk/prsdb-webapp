@@ -164,6 +164,7 @@ class PropertyRegistrationJourney(
     override val hasJointLandlordsInternalStep: HasJointLandlordsInternalStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
+    override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordStep: RemoveJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step

@@ -157,11 +157,13 @@ class JourneyStateService(
         fun urlWithJourneyState(
             path: String,
             journeyId: String,
+            urlParams: Map<String, String> = mapOf(),
         ): String =
             UriComponentsBuilder
                 .newInstance()
                 .path(path)
                 .queryParam(JOURNEY_ID_PARAM, journeyId)
+                .apply { urlParams.forEach { (key, values) -> values.forEach { value -> queryParam(key, value) } } }
                 .build(true)
                 .toUriString()
     }

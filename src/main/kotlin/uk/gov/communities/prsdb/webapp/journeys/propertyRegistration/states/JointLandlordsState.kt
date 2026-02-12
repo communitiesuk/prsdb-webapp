@@ -1,18 +1,17 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsInternalStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
 
 interface JointLandlordsState : JourneyState {
     val hasJointLandlordsInternalStep: HasJointLandlordsInternalStep
     val hasJointLandlordsStep: HasJointLandlordsStep
     val inviteJointLandlordStep: InviteJointLandlordStep
+    val inviteAnotherJointLandlordStep: InviteJointLandlordStep
     val checkJointLandlordsStep: CheckJointLandlordsStep
     val removeJointLandlordStep: RemoveJointLandlordStep
 
@@ -20,10 +19,4 @@ interface JointLandlordsState : JourneyState {
 
     val invitedJointLandlords: List<String>
         get() = invitedJointLandlordEmails ?: emptyList()
-
-    fun getAllInvitedJointLandlordEmails(): List<String> {
-        val invitedLandlords = inviteJointLandlordStep.formModel.notNullValue(InviteJointLandlordsFormModel::invitedEmailAddresses)
-        val lastInvitedLandlord = inviteJointLandlordStep.formModel.notNullValue(InviteJointLandlordsFormModel::emailAddress)
-        return invitedLandlords + lastInvitedLandlord
-    }
 }

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -19,22 +20,26 @@ class CheckJointLandlordsConfig : AbstractRequestableStepConfig<Complete, NoInpu
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.continue",
             "summaryListData" to getEmailRows(state),
+            "addAnotherUrl" to Destination(state.inviteAnotherJointLandlordStep).toUrlStringOrNull(),
         )
 
     private fun getEmailRows(state: JointLandlordsState): List<SummaryListRowViewModel> {
         val invitedEmails = state.invitedJointLandlordEmails ?: emptyList()
-        return invitedEmails.map { email ->
+        return invitedEmails.mapIndexed { index, email ->
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "jointLandlords.checkJointLandlords.invitedEmailAddress",
                 email,
-                null,
+                Destination(state.removeJointLandlordStep).withUrlParameter("index", index.toString()),
+                actionValue = "forms.links.remove",
+                valueUrl = null,
+                valueUrlOpensNewTab = false,
             )
         }
     }
 
-    override fun chooseTemplate(state: JointLandlordsState): String = "forms/checkAnswersForm"
+    override fun chooseTemplate(state: JointLandlordsState): String = "forms/addAnotherForm"
 
-    override fun mode(state: JointLandlordsState) = Complete.COMPLETE
+    override fun mode(state: JointLandlordsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent

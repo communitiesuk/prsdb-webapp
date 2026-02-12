@@ -41,6 +41,7 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
         formModel.emailAddress?.let { currentList.add(it) }
         state.invitedJointLandlordEmails = currentList
         state.inviteJointLandlordStep.clearFormData()
+        state.inviteAnotherJointLandlordStep.clearFormData()
     }
 }
 

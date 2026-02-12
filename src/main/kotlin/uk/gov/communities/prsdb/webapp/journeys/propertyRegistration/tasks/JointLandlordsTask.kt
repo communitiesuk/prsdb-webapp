@@ -46,17 +46,22 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                         journey.hasJointLandlordsInternalStep.hasOutcome(YesOrNo.YES),
                     )
                 }
-                nextStep { journey.removeJointLandlordStep }
+                nextStep { exitStep }
+            }
+            step(journey.inviteAnotherJointLandlordStep) {
+                routeSegment("invite-another-joint-landlord")
+                parents { journey.hasJointLandlordsInternalStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.removeJointLandlordStep) {
                 routeSegment(RegisterPropertyStepId.RemoveJointLandlord.urlPathSegment)
                 parents { journey.checkJointLandlordsStep.isComplete() }
-                nextStep { exitStep }
+                nextStep { journey.checkJointLandlordsStep }
             }
             exitStep {
                 parents {
                     OrParents(
-                        journey.removeJointLandlordStep.isComplete(),
+                        journey.checkJointLandlordsStep.isComplete(),
                         journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
                     )
                 }

@@ -248,7 +248,7 @@ class PropertyRegistrationCyaStepConfig(
         return if (hasJointLandlords) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-                state.getAllInvitedJointLandlordEmails(),
+                state.invitedJointLandlords,
                 Destination(state.hasJointLandlordsStep),
             )
         } else {
