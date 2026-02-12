@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcSta
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
@@ -26,13 +28,9 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         EpcStatusMode.AUTOMATCHED -> journey.checkAutomatchedEpcStep
-
                         EpcStatusMode.NOT_AUTOMATCHED -> journey.searchForEpcStep
-
                         EpcStatusMode.NO_EPC -> journey.epcMissingStep
-
-                        // TODO PDJB-467 - configure the EpcNotRequired (exemption) route
-                        EpcStatusMode.EPC_NOT_REQUIRED -> exitStep
+                        EpcStatusMode.EPC_NOT_REQUIRED -> journey.epcExemptionReasonStep
                     }
                 }
                 savable()
@@ -113,14 +111,26 @@ class EpcTask : Task<EpcState>() {
                 nextStep { exitStep }
                 savable()
             }
+            step(journey.epcExemptionReasonStep) {
+                routeSegment(EpcExemptionReasonStep.ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.EPC_NOT_REQUIRED) }
+                nextStep { journey.epcExemptionConfirmationStep }
+                savable()
+            }
+            step(journey.epcExemptionConfirmationStep) {
+                routeSegment(EpcExemptionConfirmationStep.ROUTE_SEGMENT)
+                parents { journey.epcExemptionReasonStep.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
             exitStep {
                 parents {
                     OrParents(
-                        journey.epcQuestionStep.hasOutcome(EpcStatusMode.EPC_NOT_REQUIRED),
                         journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.epcNotFoundStep.hasOutcome(Complete.COMPLETE),
                         journey.epcMissingStep.hasOutcome(Complete.COMPLETE),
+                        journey.epcExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
             }
