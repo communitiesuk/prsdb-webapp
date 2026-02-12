@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQues
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSearchResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcStatusMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
@@ -142,7 +143,7 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         MeesExemptionCheckMode.HAS_EXEMPTION -> journey.meesExemptionReasonStep
-                        MeesExemptionCheckMode.NO_EXEMPTION -> exitStep
+                        MeesExemptionCheckMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
                     }
                 }
                 savable()
@@ -159,6 +160,12 @@ class EpcTask : Task<EpcState>() {
                 nextStep { exitStep }
                 savable()
             }
+            step(journey.lowEnergyRatingStep) {
+                routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
+                parents { journey.meesExemptionCheckStep.hasOutcome(MeesExemptionCheckMode.NO_EXEMPTION) }
+                nextStep { exitStep }
+                savable()
+            }
             exitStep {
                 parents {
                     OrParents(
@@ -167,8 +174,8 @@ class EpcTask : Task<EpcState>() {
                         journey.epcNotFoundStep.hasOutcome(Complete.COMPLETE),
                         journey.epcMissingStep.hasOutcome(Complete.COMPLETE),
                         journey.epcExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
-                        journey.meesExemptionCheckStep.hasOutcome(MeesExemptionCheckMode.NO_EXEMPTION),
                         journey.meesExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
+                        journey.lowEnergyRatingStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
             }
