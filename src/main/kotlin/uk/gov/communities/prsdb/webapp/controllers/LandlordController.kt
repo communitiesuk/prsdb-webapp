@@ -67,7 +67,7 @@ class LandlordController(
 
         model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
-        model.addAttribute("joinPropertyUrl", "#")
+        model.addAttribute("joinPropertyUrl", JOIN_PROPERTY_PLACEHOLDER_URL)
         model.addAttribute(
             "viewPropertiesUrl",
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
@@ -110,6 +110,9 @@ class LandlordController(
         const val LANDLORD_BASE_URL = "/$LANDLORD_PATH_SEGMENT"
         const val INCOMPLETE_PROPERTIES_URL = "/$LANDLORD_PATH_SEGMENT/$INCOMPLETE_PROPERTIES_PATH_SEGMENT"
         const val COMPLIANCE_ACTIONS_URL = "/$LANDLORD_PATH_SEGMENT/$COMPLIANCE_ACTIONS_PATH_SEGMENT"
+
+        // TODO: PDJB-273 - Replace with actual join property route when implemented
+        const val JOIN_PROPERTY_PLACEHOLDER_URL = "#"
     }
 }
 
