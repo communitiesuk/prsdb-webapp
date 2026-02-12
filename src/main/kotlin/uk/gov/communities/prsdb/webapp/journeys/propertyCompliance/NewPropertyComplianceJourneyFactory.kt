@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
@@ -185,6 +186,7 @@ class PropertyComplianceJourney(
     override val epcSupersededStep: EpcSupersededStep,
     override val checkMatchedEpcStep: CheckMatchedEpcStep,
     override val epcNotFoundStep: EpcNotFoundStep,
+    override val epcMissingStep: EpcMissingStep,
     // Landlord Responsibilties
     override val fireSafetyStep: FireSafetyDeclarationStep,
     override val keepPropertySafeStep: KeepPropertySafeStep,

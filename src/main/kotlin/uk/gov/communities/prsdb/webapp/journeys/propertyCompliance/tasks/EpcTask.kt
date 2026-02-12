@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcSta
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSearchResult
@@ -28,9 +29,9 @@ class EpcTask : Task<EpcState>() {
 
                         EpcStatusMode.NOT_AUTOMATCHED -> journey.searchForEpcStep
 
-                        // TODO PDJB-467 - configure the NoEpc (missing) and EpcNotRequired (exemption) routes
-                        EpcStatusMode.NO_EPC -> exitStep
+                        EpcStatusMode.NO_EPC -> journey.epcMissingStep
 
+                        // TODO PDJB-467 - configure the EpcNotRequired (exemption) route
                         EpcStatusMode.EPC_NOT_REQUIRED -> exitStep
                     }
                 }
@@ -106,13 +107,20 @@ class EpcTask : Task<EpcState>() {
                 nextStep { exitStep }
                 savable()
             }
+            step(journey.epcMissingStep) {
+                routeSegment(EpcMissingStep.ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.NO_EPC) }
+                nextStep { exitStep }
+                savable()
+            }
             exitStep {
                 parents {
                     OrParents(
-                        journey.epcQuestionStep.hasOutcome(EpcStatusMode.NO_EPC),
+                        journey.epcQuestionStep.hasOutcome(EpcStatusMode.EPC_NOT_REQUIRED),
                         journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.epcNotFoundStep.hasOutcome(Complete.COMPLETE),
+                        journey.epcMissingStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
             }

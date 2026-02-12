@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
@@ -19,4 +20,5 @@ interface EpcState : JourneyState {
     val epcSupersededStep: EpcSupersededStep
     val checkMatchedEpcStep: CheckMatchedEpcStep
     val epcNotFoundStep: EpcNotFoundStep
+    val epcMissingStep: EpcMissingStep
 }
