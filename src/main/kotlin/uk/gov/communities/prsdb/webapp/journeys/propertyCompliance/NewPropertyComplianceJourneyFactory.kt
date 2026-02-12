@@ -47,6 +47,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
@@ -191,6 +194,9 @@ class PropertyComplianceJourney(
     override val epcMissingStep: EpcMissingStep,
     override val epcExemptionReasonStep: EpcExemptionReasonStep,
     override val epcExemptionConfirmationStep: EpcExemptionConfirmationStep,
+    override val meesExemptionCheckStep: MeesExemptionCheckStep,
+    override val meesExemptionReasonStep: MeesExemptionReasonStep,
+    override val meesExemptionConfirmationStep: MeesExemptionConfirmationStep,
     // Landlord Responsibilties
     override val fireSafetyStep: FireSafetyDeclarationStep,
     override val keepPropertySafeStep: KeepPropertySafeStep,

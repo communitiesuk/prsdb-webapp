@@ -8,6 +8,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMiss
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
@@ -25,4 +28,7 @@ interface EpcState : JourneyState {
     val epcMissingStep: EpcMissingStep
     val epcExemptionReasonStep: EpcExemptionReasonStep
     val epcExemptionConfirmationStep: EpcExemptionConfirmationStep
+    val meesExemptionCheckStep: MeesExemptionCheckStep
+    val meesExemptionReasonStep: MeesExemptionReasonStep
+    val meesExemptionConfirmationStep: MeesExemptionConfirmationStep
 }
