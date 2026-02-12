@@ -14,9 +14,10 @@ interface EpcState : JourneyState {
     val propertyId: Long
 
     val epcQuestionStep: EpcQuestionStep
-    val checkAutomatchedEpcStep: CheckMatchedEpcStep
+    val checkMatchedEpcStep: CheckMatchedEpcStep
     val searchForEpcStep: SearchForEpcStep
     val epcSupersededStep: EpcSupersededStep
-    val checkMatchedEpcStep: CheckMatchedEpcStep
+    val checkSearchedEpcStep: CheckMatchedEpcStep
     val epcNotFoundStep: EpcNotFoundStep
+    val checkAutomatchedEpcStep: CheckMatchedEpcStep
 }
