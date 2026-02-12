@@ -49,7 +49,7 @@ class JointLandlordInvitationServiceTests {
         val inviteCaptor = captor<JointLandlordInvitation>()
         verify(mockJointLandlordInvitationRepository).save(inviteCaptor.capture())
 
-        assertEquals(propertyOwnership, inviteCaptor.value.registeredPropertyId)
+        assertEquals(propertyOwnership, inviteCaptor.value.registeredOwnership)
         assertEquals(token, inviteCaptor.value.token.toString())
         assertEquals("email@example.com", inviteCaptor.value.invitedEmail)
     }

@@ -25,7 +25,7 @@ class JointLandlordInvitation(
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "registered_propertyid", nullable = false)
-    lateinit var registeredPropertyId: PropertyOwnership
+    lateinit var registeredOwnership: PropertyOwnership
         private set
 
     constructor(
@@ -35,12 +35,12 @@ class JointLandlordInvitation(
     ) : this() {
         this.token = token
         this.invitedEmail = email
-        this.registeredPropertyId = registeredPropertyId
+        this.registeredOwnership = registeredPropertyId
     }
 
     constructor(id: Long, token: UUID, email: String, registeredPropertyId: PropertyOwnership) : this(id) {
         this.token = token
         this.invitedEmail = email
-        this.registeredPropertyId = registeredPropertyId
+        this.registeredOwnership = registeredPropertyId
     }
 }
