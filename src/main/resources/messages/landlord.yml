@@ -7,6 +7,9 @@ dashboard:
     button: Register a property
   viewIncompleteProperties:
     button: Incomplete property details
+  joinProperty:
+    heading: Join a registered property as a joint landlord
+    button: Join a registered property
   viewAndUpdateRecords:
     heading: View and update your information or properties
   viewPropertyRecords:
