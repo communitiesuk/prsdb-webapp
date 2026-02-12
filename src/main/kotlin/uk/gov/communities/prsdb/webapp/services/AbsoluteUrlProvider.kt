@@ -29,6 +29,7 @@ class AbsoluteUrlProvider {
     fun buildInvitationUri(token: String): URI =
         uriFromMethodCall(on(RegisterLocalCouncilUserController::class.java).acceptInvitation(token))
 
+    // TODO: PDJB-260 - when implementing accepting the invitation we will want to use uriFromMethodCall here instead of hardcoding the path
     fun buildJointLandlordInvitationUri(token: String): URI =
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
