@@ -41,9 +41,12 @@ confirmation:
       heading: Property Registration Number
   whatHappensNext:
     paragraph:
-      one: 'We’ve sent the <strong>Property Registration Number</strong> to your email. Local councils use this number to find the property on the database.'
-      two:
-        occupied: 'If you have tenants in the property, you must add compliance certificates within 28 days of registering your property.'
+      one: 'We’ve sent you an email including the <strong>Property Registration Number</strong>.'
+      two: We've also now sent the invitations to this property's joint landlords. We'll email you when they respond.
+      three: 'When advertising this property to rent, you must include:'
+    bullet:
+        one: the Property Registration Number
+        two: each landlord’s Landlord Registration Number
   addCompliance: Add compliance for this property
   beforeYouLetThisProperty:
     heading: Before you let this property
