@@ -57,7 +57,8 @@ class EpcQuestionStepConfig(
         getFormModelFromStateOrNull(state)?.hasCert?.let {
             when (it) {
                 HasEpc.YES -> if (state.automatchedEpc != null) EpcStatusMode.AUTOMATCHED else EpcStatusMode.NOT_AUTOMATCHED
-                HasEpc.NO, HasEpc.NOT_REQUIRED -> EpcStatusMode.NO_EPC
+                HasEpc.NO -> EpcStatusMode.NO_EPC
+                HasEpc.NOT_REQUIRED -> EpcStatusMode.EPC_NOT_REQUIRED
             }
         }
 }
@@ -75,4 +76,5 @@ enum class EpcStatusMode {
     AUTOMATCHED,
     NOT_AUTOMATCHED,
     NO_EPC,
+    EPC_NOT_REQUIRED,
 }

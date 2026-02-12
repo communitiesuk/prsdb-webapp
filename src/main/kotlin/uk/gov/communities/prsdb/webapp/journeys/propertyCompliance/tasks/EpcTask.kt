@@ -5,8 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckAutomatchedEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckAutomatchedEpcStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStepConfig
@@ -27,19 +25,28 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         EpcStatusMode.AUTOMATCHED -> journey.checkAutomatchedEpcStep
+
                         EpcStatusMode.NOT_AUTOMATCHED -> journey.searchForEpcStep
+
+                        // TODO PDJB-467 - configure the NoEpc (missing) and EpcNotRequired (exemption) routes
                         EpcStatusMode.NO_EPC -> exitStep
+
+                        EpcStatusMode.EPC_NOT_REQUIRED -> exitStep
                     }
                 }
                 savable()
             }
-            step<CheckMatchedEpcMode, CheckAutomatchedEpcStepConfig>(journey.checkAutomatchedEpcStep) {
-                routeSegment(CheckAutomatchedEpcStep.ROUTE_SEGMENT)
+            step<CheckMatchedEpcMode, CheckMatchedEpcStepConfig>(journey.checkAutomatchedEpcStep) {
+                routeSegment(CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT)
                 parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.AUTOMATCHED) }
                 nextStep { mode ->
                     when (mode) {
-                        CheckMatchedEpcMode.EPC_CORRECT -> exitStep
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> exitStep
+
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
+
+                        // TODO PDJB-467 - configure the routes for expired, and/or low energy rating routes
+                        else -> exitStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -57,7 +64,7 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcSearchResult.FOUND -> journey.checkSearchedEpcStep
+                        EpcSearchResult.FOUND -> journey.checkMatchedEpcStep
                         EpcSearchResult.SUPERSEDED -> journey.epcSupersededStep
                         EpcSearchResult.NOT_FOUND -> journey.epcNotFoundStep
                     }
@@ -67,10 +74,10 @@ class EpcTask : Task<EpcState>() {
             step(journey.epcSupersededStep) {
                 routeSegment(EpcSupersededStep.ROUTE_SEGMENT)
                 parents { journey.searchForEpcStep.hasOutcome(EpcSearchResult.SUPERSEDED) }
-                nextStep { journey.checkSearchedEpcStep }
+                nextStep { journey.checkMatchedEpcStep }
                 savable()
             }
-            step<CheckMatchedEpcMode, CheckMatchedEpcStepConfig>(journey.checkSearchedEpcStep) {
+            step<CheckMatchedEpcMode, CheckMatchedEpcStepConfig>(journey.checkMatchedEpcStep) {
                 routeSegment(CheckMatchedEpcStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
@@ -80,8 +87,12 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        CheckMatchedEpcMode.EPC_CORRECT -> exitStep
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> exitStep
+
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
+
+                        // TODO PDJB-467 - configure the routes for expired, and/or low energy rating routes
+                        else -> exitStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -99,8 +110,8 @@ class EpcTask : Task<EpcState>() {
                 parents {
                     OrParents(
                         journey.epcQuestionStep.hasOutcome(EpcStatusMode.NO_EPC),
-                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_CORRECT),
-                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_CORRECT),
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.epcNotFoundStep.hasOutcome(Complete.COMPLETE),
                     )
                 }

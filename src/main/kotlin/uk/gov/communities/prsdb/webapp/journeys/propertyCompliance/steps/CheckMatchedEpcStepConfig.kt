@@ -39,14 +39,25 @@ class CheckMatchedEpcStepConfig(
 
     override fun chooseTemplate(state: EpcState): String = "forms/checkMatchedEpcForm"
 
-    override fun mode(state: EpcState): CheckMatchedEpcMode? =
-        getFormModelFromStateOrNull(state)?.let {
-            when (it.matchedEpcIsCorrect) {
-                true -> CheckMatchedEpcMode.EPC_CORRECT
-                false -> CheckMatchedEpcMode.EPC_INCORRECT
-                null -> null
+    override fun mode(state: EpcState): CheckMatchedEpcMode? {
+        val formModelOrNull = getFormModelFromStateOrNull(state)
+        if (formModelOrNull?.matchedEpcIsCorrect == null) return null
+        if (formModelOrNull.matchedEpcIsCorrect == false) return CheckMatchedEpcMode.EPC_INCORRECT
+
+        val epcDetails = getReleventEpc(state)
+        val energyRatingIsGood = epcDetails?.isEnergyRatingEOrBetter() ?: return null
+        val epcExpired = epcDetails.isPastExpiryDate()
+
+        if (epcExpired) {
+            return if (energyRatingIsGood) {
+                CheckMatchedEpcMode.EPC_EXPIRED_WITH_GOOD_ENERGY_RATING
+            } else {
+                CheckMatchedEpcMode.EPC_EXPIRED_WITH_LOW_ENERGY_RATING
             }
         }
+        if (!energyRatingIsGood) return CheckMatchedEpcMode.EPC_IN_DATE_BUT_LOW_ENERGY_RATING
+        return CheckMatchedEpcMode.EPC_COMPLIANT
+    }
 
     override fun isSubClassInitialised(): Boolean = ::getReleventEpc.isInitialized
 
@@ -64,5 +75,14 @@ final class CheckMatchedEpcStep(
 ) : RequestableStep<CheckMatchedEpcMode, CheckMatchedEpcFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-matched-epc"
+        const val AUTOMATCHED_ROUTE_SEGMENT = "check-automatched-epc"
     }
+}
+
+enum class CheckMatchedEpcMode {
+    EPC_COMPLIANT,
+    EPC_EXPIRED_WITH_LOW_ENERGY_RATING,
+    EPC_EXPIRED_WITH_GOOD_ENERGY_RATING,
+    EPC_IN_DATE_BUT_LOW_ENERGY_RATING,
+    EPC_INCORRECT,
 }
