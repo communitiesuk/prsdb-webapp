@@ -17,6 +17,8 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckAutomatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
@@ -27,7 +29,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
@@ -44,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPro
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.EicrTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.GasSafetyTask
@@ -176,6 +181,11 @@ class PropertyComplianceJourney(
     // EPC task
     override val epcTask: EpcTask,
     override val epcQuestionStep: EpcQuestionStep,
+    override val checkAutomatchedEpcStep: CheckAutomatchedEpcStep,
+    override val searchForEpcStep: SearchForEpcStep,
+    override val epcSupersededStep: EpcSupersededStep,
+    override val checkSearchedEpcStep: CheckMatchedEpcStep,
+    override val epcNotFoundStep: EpcNotFoundStep,
     // Landlord Responsibilties
     override val fireSafetyStep: FireSafetyDeclarationStep,
     override val keepPropertySafeStep: KeepPropertySafeStep,
