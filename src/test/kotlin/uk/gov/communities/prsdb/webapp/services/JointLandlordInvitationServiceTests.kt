@@ -89,7 +89,7 @@ class JointLandlordInvitationServiceTests {
             .sendEmail(eq("landlord1@example.com"), emailModelCaptor.capture())
 
         assertEquals("John Smith", emailModelCaptor.firstValue.senderName)
-        assertEquals("123 Test Street, London, SW1A 1AA", emailModelCaptor.firstValue.propertyAddress)
+        assertEquals("123 Test Street\nLondon\nSW1A 1AA", emailModelCaptor.firstValue.propertyAddress)
         assertEquals(mockUri, emailModelCaptor.firstValue.invitationUri)
     }
 
