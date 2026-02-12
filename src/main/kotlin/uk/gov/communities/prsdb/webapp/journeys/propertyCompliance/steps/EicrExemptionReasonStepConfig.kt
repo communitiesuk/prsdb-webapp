@@ -3,16 +3,16 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<EicrExemptionReasonMode, EicrExemptionReasonFormModel, EicrState>() {
+class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<EicrExemptionReasonMode, EicrExemptionReasonFormModel, JourneyState>() {
     override val formModelClass = EicrExemptionReasonFormModel::class
 
-    override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.eicrExemptionReason.fieldSetHeading",
@@ -31,10 +31,10 @@ class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<EicrExemptio
                 ),
         )
 
-    override fun chooseTemplate(state: EicrState): String = "forms/exemptionReasonForm.html"
+    override fun chooseTemplate(state: JourneyState): String = "forms/exemptionReasonForm.html"
 
-    override fun mode(state: EicrState) =
-        state.eicrExemptionReasonStep.formModelOrNull?.let {
+    override fun mode(state: JourneyState) =
+        getFormModelFromStateOrNull(state)?.let {
             if (it.exemptionReason == EicrExemptionReason.OTHER) {
                 EicrExemptionReasonMode.OTHER_REASON_SELECTED
             } else {
@@ -46,7 +46,7 @@ class EicrExemptionReasonStepConfig : AbstractRequestableStepConfig<EicrExemptio
 @JourneyFrameworkComponent
 final class EicrExemptionReasonStep(
     stepConfig: EicrExemptionReasonStepConfig,
-) : RequestableStep<EicrExemptionReasonMode, EicrExemptionReasonFormModel, EicrState>(stepConfig) {
+) : RequestableStep<EicrExemptionReasonMode, EicrExemptionReasonFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "eicr-exemption-reason"
     }
