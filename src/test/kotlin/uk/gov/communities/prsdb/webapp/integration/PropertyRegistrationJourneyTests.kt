@@ -348,8 +348,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
         assertTrue(confirmationPage.addComplianceButton.locator.isHidden)
-        assertTrue(confirmationPage.goToDashboardButton.locator.isHidden)
-        assertTrue(confirmationPage.returnToDashboardButton.locator.isVisible)
+        assertTrue(confirmationPage.goToDashboardButton.locator.isVisible)
+        assertTrue(confirmationPage.returnToDashboardButton.locator.isHidden)
 
         // Check confirmation email
         verify(confirmationEmailSender).sendEmail(
@@ -364,7 +364,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
 
         // Go to dashboard
-        confirmationPage.returnToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 }
