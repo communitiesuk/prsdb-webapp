@@ -4,10 +4,10 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 // TODO PDJB-114, PDJB-117: Implement joint landlord task logic
 @JourneyFrameworkComponent

@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -16,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class EpcQuestionStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcLookupService: EpcLookupService,
-) : AbstractRequestableStepConfig<EpcStatus, EpcFormModel, EpcState>() {
+) : AbstractRequestableStepConfig<EpcStatusMode, EpcFormModel, EpcState>() {
     override val formModelClass = EpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcState) =
@@ -57,8 +56,9 @@ class EpcQuestionStepConfig(
     override fun mode(state: EpcState) =
         getFormModelFromStateOrNull(state)?.hasCert?.let {
             when (it) {
-                HasEpc.YES -> if (state.automatchedEpc != null) EpcStatus.AUTOMATCHED else EpcStatus.NOT_AUTOMATCHED
-                HasEpc.NO, HasEpc.NOT_REQUIRED -> EpcStatus.NO_EPC
+                HasEpc.YES -> if (state.automatchedEpc != null) EpcStatusMode.AUTOMATCHED else EpcStatusMode.NOT_AUTOMATCHED
+                HasEpc.NO -> EpcStatusMode.NO_EPC
+                HasEpc.NOT_REQUIRED -> EpcStatusMode.EPC_NOT_REQUIRED
             }
         }
 }
@@ -66,4 +66,15 @@ class EpcQuestionStepConfig(
 @JourneyFrameworkComponent
 final class EpcQuestionStep(
     stepConfig: EpcQuestionStepConfig,
-) : RequestableStep<EpcStatus, EpcFormModel, EpcState>(stepConfig)
+) : RequestableStep<EpcStatusMode, EpcFormModel, EpcState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "epc"
+    }
+}
+
+enum class EpcStatusMode {
+    AUTOMATCHED,
+    NOT_AUTOMATCHED,
+    NO_EPC,
+    EPC_NOT_REQUIRED,
+}
