@@ -2,9 +2,9 @@
 
 ## Status
 
-Draft
+Accepted
 
-Date of decision: {yyyy-MM-dd}
+Date of decision: 13/02/2026
 
 ## Context and Problem Statement
 
@@ -24,7 +24,8 @@ environment to an initial seeded state.
 ## Decision Outcome
 
 Initially generating the data (via an ECS instance), then restoring via pg_dump and pg_restore, because it provides the best balance of
-efficiency, repeatability, and simplicity.
+efficiency, repeatability, and simplicity. Besides this, it also gives us the option of using a developer laptop instead of an ECS instance
+for one-off or infrequent data generation.
 
 ## Pros and Cons of the Options
 
@@ -83,7 +84,7 @@ binary files in S3, then restore using \copy FROM.
 * Neutral, because although there's a storage overhead, S3 storage costs are low ($0.024/GB/month in eu-west-2).
 * Neutral, because though it requires some infrastructure setup, we can reuse our existing S3 bucket pattern.
 * Bad, because restoring the database schema must be handled separately.
-* Bad, because we would have to manage CSV file load order based on table dependencies.
+* Bad, because we would have to manage binary file load order based on table dependencies.
 * Bad, because it requires more complex scripting than pg_dump/pg_restore.
 * Bad, because the initial setup is more complex than other options.
 
