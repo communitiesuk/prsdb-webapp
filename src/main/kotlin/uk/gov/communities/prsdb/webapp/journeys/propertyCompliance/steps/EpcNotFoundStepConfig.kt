@@ -20,10 +20,7 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
             "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "searchAgainUrl" to
-                resolveNextDestination(
-                    state,
-                    Destination.VisitableStep(state.searchForEpcStep, state.journeyId),
-                ).toUrlStringOrNull(),
+                Destination.VisitableStep(state.searchForEpcStep, state.journeyId).toUrlStringOrNull(),
             "certificateNumber" to state.searchForEpcStep.formModelOrNull?.certificateNumber,
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )

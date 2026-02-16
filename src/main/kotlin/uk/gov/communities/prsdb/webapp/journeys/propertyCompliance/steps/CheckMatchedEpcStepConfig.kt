@@ -20,7 +20,7 @@ class CheckMatchedEpcStepConfig(
             mapOf(
                 "title" to "propertyCompliance.title",
                 "epcDetails" to epcDetails,
-                "epcCertificateUrl" to epcDetails.certificateNumber.let { epcCertificateUrlProvider.getEpcCertificateUrl(it) },
+                "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
                 "radioOptions" to
                     listOf(
                         RadiosButtonViewModel(
