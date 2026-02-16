@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.ArrayIndexParameterService
 
-// TODO PDJB-114: Implement CheckJointLandlordsStep
 @JourneyFrameworkComponent
 class CheckJointLandlordsConfig(
     private val urlParameterService: ArrayIndexParameterService,
@@ -19,7 +18,8 @@ class CheckJointLandlordsConfig(
 
     override fun getStepSpecificContent(state: JointLandlordsState) =
         mapOf(
-            "summaryName" to "TODO PDJB-114: Implement check joint landlords page",
+            "addAnotherTitle" to "jointLandlords.checkJointLandlords.heading",
+            "summaryName" to "jointLandlords.checkJointLandlords.summary",
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.continue",
             "summaryListData" to getEmailRows(state),
@@ -34,8 +34,6 @@ class CheckJointLandlordsConfig(
                 email,
                 Destination(state.removeJointLandlordStep).withUrlParameter(urlParameterService.getParameterPair(index)),
                 actionValue = "forms.links.remove",
-                valueUrl = null,
-                valueUrlOpensNewTab = false,
             )
         }
     }

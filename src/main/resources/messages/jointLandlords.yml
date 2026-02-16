@@ -24,4 +24,5 @@ inviteJointLandlord:
     alreadyInvited: You have already invited this email address
 checkJointLandlords:
   heading: Check joint landlords
+  summary: Already invited
   invitedEmailAddress: Joint Landlord Email
