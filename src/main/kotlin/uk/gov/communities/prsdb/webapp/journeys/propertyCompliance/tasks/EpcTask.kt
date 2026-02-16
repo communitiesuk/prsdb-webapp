@@ -49,13 +49,9 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         CheckMatchedEpcMode.EPC_COMPLIANT -> exitStep
-
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
-
                         CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
-
-                        CheckMatchedEpcMode.EPC_EXPIRED,
-                        -> journey.epcExpiryCheckStep
+                        CheckMatchedEpcMode.EPC_EXPIRED -> journey.epcExpiryCheckStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -97,13 +93,9 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         CheckMatchedEpcMode.EPC_COMPLIANT -> exitStep
-
                         CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
-
                         CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
-
-                        CheckMatchedEpcMode.EPC_EXPIRED,
-                        -> journey.epcExpiryCheckStep
+                        CheckMatchedEpcMode.EPC_EXPIRED -> journey.epcExpiryCheckStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -132,6 +124,29 @@ class EpcTask : Task<EpcState>() {
             step(journey.epcExemptionConfirmationStep) {
                 routeSegment(EpcExemptionConfirmationStep.ROUTE_SEGMENT)
                 parents { journey.epcExemptionReasonStep.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.epcExpiryCheckStep) {
+                routeSegment(EpcExpiryCheckStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        EpcExpiryCheckMode.EPC_COMPLIANT -> exitStep
+                        EpcExpiryCheckMode.EPC_EXPIRED -> journey.epcExpiredStep
+                        EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                    }
+                }
+                savable()
+            }
+            step(journey.epcExpiredStep) {
+                routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
+                parents { journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_EXPIRED) }
                 nextStep { exitStep }
                 savable()
             }
@@ -167,29 +182,6 @@ class EpcTask : Task<EpcState>() {
             step(journey.lowEnergyRatingStep) {
                 routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
                 parents { journey.meesExemptionCheckStep.hasOutcome(ExemptionMode.NO_EXEMPTION) }
-                nextStep { exitStep }
-                savable()
-            }
-            step(journey.epcExpiryCheckStep) {
-                routeSegment(EpcExpiryCheckStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
-                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
-                    )
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        EpcExpiryCheckMode.EPC_COMPLIANT -> exitStep
-                        EpcExpiryCheckMode.EPC_EXPIRED -> journey.epcExpiredStep
-                        EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
-                    }
-                }
-                savable()
-            }
-            step(journey.epcExpiredStep) {
-                routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
-                parents { journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_EXPIRED) }
                 nextStep { exitStep }
                 savable()
             }
