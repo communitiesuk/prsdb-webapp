@@ -1,0 +1,33 @@
+title: Join a registered property as a joint landlord
+heading: Join a registered property as a joint landlord
+insetText: If a property has multiple landlords, they must all register onto the property.
+intro:
+  one: Add your details to a property that's already on the service.
+  two: Do this if you know the property's already been registered by someone you're a joint landlord with.
+howWeConfirm:
+  heading: How we'll confirm you're a landlord
+  paragraph:
+    one: We'll ask the property's registered landlords to confirm your request.
+    two: "They'll see:"
+  bullets:
+    one: your name
+    two: your email address
+    three: if you've proven your identity with GOV.UK One Login
+identityInfo:
+  heading: How we use your identity information
+  paragraph:
+    one: If you've proven your identity with GOV.UK One Login, we'll only share that you've confirmed who you are. This is to let the other landlords know you're not an impersonator. We'll never show your actual ID to anyone.
+    two: You can still continue if you have not proven your identity. You may want to let the other landlords know beforehand to expect your request.
+otherWays:
+  summary: Other ways to confirm you're a landlord
+  content:
+    paragraph: You can also contact us to get added to a property. We'll need to see proof that you're a landlord.
+    phone: "Phone: 0009 988 8799"
+    phoneHours: Monday to Friday, 9am to 5pm
+    email: "Email:"
+    emailAddress: mhclg@example.com
+responsibilities:
+  heading: Your responsibilities after joining
+  paragraph:
+    one: You'll be able to update this property's details. All landlords have a shared responsibility to keep this property up to date.
+    two: The local council will also be able to see your contact details. They may contact you if they need to speak to someone about the property.
