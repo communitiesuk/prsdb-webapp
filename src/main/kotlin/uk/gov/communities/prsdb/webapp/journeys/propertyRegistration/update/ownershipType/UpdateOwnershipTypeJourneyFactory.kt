@@ -3,14 +3,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.own
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import java.security.Principal
 
 @PrsdbWebService
@@ -29,13 +29,15 @@ class UpdateOwnershipTypeJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
         return journey(state) {
             unreachableStepUrl { "/" }
             step(journey.ownershipTypeStep) {
                 routeSegment("ownership-type")
+                nextUrl { propertyDetailsRoute }
+                backUrl { propertyDetailsRoute }
                 initialStep()
-                nextUrl { LANDLORD_PROPERTY_DETAILS_ROUTE }
-                checkable()
             }
         }
     }
@@ -84,7 +86,7 @@ class UpdateOwnershipJourney(
     }
 }
 
-interface UpdateOwnershipTypeJourneyState {
+interface UpdateOwnershipTypeJourneyState : JourneyState {
     val ownershipTypeStep: UpdateOwnershipTypeStep
     val propertyId: Long
 }
