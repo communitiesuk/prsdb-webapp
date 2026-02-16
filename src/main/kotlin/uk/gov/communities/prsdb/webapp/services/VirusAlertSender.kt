@@ -38,18 +38,18 @@ class VirusAlertSender(
     private fun certificateDescriptionForSubject(category: FileCategory): String =
         when (category) {
             FileCategory.GasSafetyCert -> "A gas safety certificate"
-            FileCategory.Eirc -> "An EICR"
+            FileCategory.Eicr -> "An EICR"
         }
 
     private fun certificateDescriptionForHeading(category: FileCategory): String =
         when (category) {
             FileCategory.GasSafetyCert -> "gas safety certificate"
-            FileCategory.Eirc -> "Electrical Installation Condition Report (EICR)"
+            FileCategory.Eicr -> "Electrical Installation Condition Report (EICR)"
         }
 
     private fun certificateDescriptionForBody(category: FileCategory): String =
         when (category) {
             FileCategory.GasSafetyCert -> "gas safety certificate"
-            FileCategory.Eirc -> "EICR"
+            FileCategory.Eicr -> "EICR"
         }
 }

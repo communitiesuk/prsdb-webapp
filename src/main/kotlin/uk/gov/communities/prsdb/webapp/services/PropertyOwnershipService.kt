@@ -298,6 +298,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
+    // TODO PDJB-467 - add implementation of this for the new journey framework
     @Transactional
     fun deleteIncompleteComplianceForm(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
@@ -308,6 +309,7 @@ class PropertyOwnershipService(
         }
     }
 
+    // TODO PDJB-467 - add implementation of this for the new journey framework
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
         propertyOwnershipRepository
             .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
@@ -315,6 +317,7 @@ class PropertyOwnershipService(
                 0,
             )
 
+    // TODO PDJB-467 - add implementation of this for the new journey framework
     fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
 

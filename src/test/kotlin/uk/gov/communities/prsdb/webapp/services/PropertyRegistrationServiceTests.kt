@@ -58,6 +58,9 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockPropertyRegistrationConfirmationService: PropertyRegistrationConfirmationService
 
+    @Mock
+    private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
+
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
 
@@ -380,5 +383,229 @@ class PropertyRegistrationServiceTests {
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+    }
+
+    @Test
+    fun `registerProperty sends joint landlord invitation emails when joint landlord emails are provided`() {
+        // Arrange
+        val jointLandlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
+        val ownershipType = OwnershipType.FREEHOLD
+        val numberOfHouseholds = 1
+        val numberOfPeople = 2
+        val landlord = MockLandlordData.createLandlord()
+        val propertyType = PropertyType.DETACHED_HOUSE
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val licenceType = LicensingType.SELECTIVE_LICENCE
+        val licenceNumber = "Licence123"
+        val license = License(licenceType, licenceNumber)
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                ownershipType = ownershipType,
+                currentNumHouseholds = numberOfHouseholds,
+                currentNumTenants = numberOfPeople,
+                primaryLandlord = landlord,
+                propertyBuildType = propertyType,
+                address = address,
+                license = license,
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockLicenseService.createLicense(licenceType, licenceNumber)).thenReturn(license)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = ownershipType,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                primaryLandlord = landlord,
+                propertyBuildType = propertyType,
+                address = address,
+                license = license,
+                isActive = true,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            propertyType,
+            licenceType,
+            licenceNumber,
+            ownershipType,
+            numberOfHouseholds,
+            numberOfPeople,
+            landlord.baseUser.id,
+            null,
+            null,
+            null,
+            null,
+            RentFrequency.MONTHLY,
+            null,
+            123.toBigDecimal(),
+            jointLandlordEmails,
+        )
+
+        // Assert
+        verify(mockJointLandlordInvitationService).sendInvitationEmails(
+            eq(jointLandlordEmails),
+            eq(expectedPropertyOwnership),
+        )
+    }
+
+    @Test
+    fun `registerProperty does not send joint landlord invitation emails when no joint landlord emails provided`() {
+        // Arrange
+        val ownershipType = OwnershipType.FREEHOLD
+        val numberOfHouseholds = 1
+        val numberOfPeople = 2
+        val landlord = MockLandlordData.createLandlord()
+        val propertyType = PropertyType.DETACHED_HOUSE
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val licenceType = LicensingType.NO_LICENSING
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                ownershipType = ownershipType,
+                currentNumHouseholds = numberOfHouseholds,
+                currentNumTenants = numberOfPeople,
+                primaryLandlord = landlord,
+                propertyBuildType = propertyType,
+                address = address,
+                license = null,
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = ownershipType,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                primaryLandlord = landlord,
+                propertyBuildType = propertyType,
+                address = address,
+                license = null,
+                isActive = true,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            propertyType,
+            licenceType,
+            "",
+            ownershipType,
+            numberOfHouseholds,
+            numberOfPeople,
+            landlord.baseUser.id,
+            null,
+            null,
+            null,
+            null,
+            RentFrequency.MONTHLY,
+            null,
+            123.toBigDecimal(),
+            null,
+        )
+
+        // Assert
+        org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationService)
+    }
+
+    @Test
+    fun `registerProperty does not send joint landlord invitation emails when empty list provided`() {
+        // Arrange
+        val jointLandlordEmails = emptyList<String>()
+        val ownershipType = OwnershipType.FREEHOLD
+        val numberOfHouseholds = 1
+        val numberOfPeople = 2
+        val landlord = MockLandlordData.createLandlord()
+        val propertyType = PropertyType.DETACHED_HOUSE
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val licenceType = LicensingType.NO_LICENSING
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                ownershipType = ownershipType,
+                currentNumHouseholds = numberOfHouseholds,
+                currentNumTenants = numberOfPeople,
+                primaryLandlord = landlord,
+                propertyBuildType = propertyType,
+                address = address,
+                license = null,
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = ownershipType,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                primaryLandlord = landlord,
+                propertyBuildType = propertyType,
+                address = address,
+                license = null,
+                isActive = true,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            propertyType,
+            licenceType,
+            "",
+            ownershipType,
+            numberOfHouseholds,
+            numberOfPeople,
+            landlord.baseUser.id,
+            null,
+            null,
+            null,
+            null,
+            RentFrequency.MONTHLY,
+            null,
+            123.toBigDecimal(),
+            jointLandlordEmails,
+        )
+
+        // Assert
+        org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationService)
     }
 }

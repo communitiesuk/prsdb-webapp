@@ -5,15 +5,15 @@ import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.EpcJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.example.ExampleEpcJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcJourneyState>() {
+class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, ExampleEpcJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: EpcJourneyState) =
+    override fun getStepSpecificContent(state: ExampleEpcJourneyState) =
         mapOf(
             "title" to "propertyCompliance.title",
             "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
@@ -23,12 +23,12 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
-    override fun chooseTemplate(state: EpcJourneyState): String = "forms/epcNotFoundForm"
+    override fun chooseTemplate(state: ExampleEpcJourneyState): String = "forms/epcNotFoundForm"
 
-    override fun mode(state: EpcJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: ExampleEpcJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class EpcNotFoundStep(
     stepConfig: EpcNotFoundStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, EpcJourneyState>(stepConfig)
+) : RequestableStep<Complete, NoInputFormModel, ExampleEpcJourneyState>(stepConfig)

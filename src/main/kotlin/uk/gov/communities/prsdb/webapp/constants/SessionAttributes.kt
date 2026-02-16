@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.constants
 
 const val LOCAL_COUNCIL_USER_INVITATION_TOKEN: String = "local-council-user-invitation-token"
 
+const val JOINT_LANDLORD_INVITATION_TOKEN: String = "joint-landlord-invitation-token"
+
 const val LOCAL_COUNCIL_USER_ID = "local-council-user-id"
 
 const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"

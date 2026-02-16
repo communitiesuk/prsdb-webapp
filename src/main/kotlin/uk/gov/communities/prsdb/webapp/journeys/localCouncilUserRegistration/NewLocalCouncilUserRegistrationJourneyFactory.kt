@@ -19,26 +19,27 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LandingPageStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LocalCouncilUserCyaStep
-import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 
 @PrsdbWebService
 class NewLocalCouncilUserRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LocalCouncilUserRegistrationJourney>,
 ) {
-    fun createJourneySteps(invitationId: Long): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(token: String): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
-            state.invitationId = invitationId
+            state.invitationToken = token
             state.isStateInitialized = true
         }
 
-        if (state.invitationId != invitationId) {
-            throw PrsdbWebException("Journey state invitationId ${state.invitationId} does not match provided invitationId $invitationId")
+        if (state.invitationToken != token) {
+            throw PrsdbWebException("Journey state token ${state.invitationToken} does not match provided token $token")
         }
 
         return journey(state) {
@@ -77,7 +78,7 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(invitation: LocalCouncilInvitation): String = stateFactory.getObject().initializeState(invitation.id)
+    fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
 
 @JourneyFrameworkComponent
@@ -87,18 +88,22 @@ class LocalCouncilUserRegistrationJourney(
     override val nameStep: NameStep,
     override val emailStep: EmailStep,
     override val cyaStep: LocalCouncilUserCyaStep,
+    private val invitationService: LocalCouncilInvitationService,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
-    override var invitationId: Long by delegateProvider.requiredImmutableDelegate("invitationId")
+    override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
+    override val invitation: LocalCouncilInvitation
+        get() = invitationService.getValidInvitationFromToken(invitationToken)
+
     override fun generateJourneyId(seed: Any?): String {
-        val invitationId = seed as? Long
+        val token = seed as? String
         return super<AbstractJourneyState>.generateJourneyId(
-            invitationId?.let { "LC user reg journey for invitation $it" },
+            token?.let { "LC user reg journey for token $it" },
         )
     }
 }
@@ -111,5 +116,6 @@ interface LocalCouncilUserRegistrationJourneyState :
     val nameStep: NameStep
     val emailStep: EmailStep
     override val cyaStep: LocalCouncilUserCyaStep
-    val invitationId: Long
+    val invitationToken: String
+    val invitation: LocalCouncilInvitation
 }

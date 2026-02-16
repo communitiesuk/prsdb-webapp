@@ -36,6 +36,7 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
     companion object {
+        // TODO PDJB-467 - add a version of this for the new journey framework
         fun fromIncompleteComplianceForm(propertyOwnership: PropertyOwnership): ComplianceStatusDataModel {
             val incompleteComplianceForm =
                 propertyOwnership.incompleteComplianceForm?.toJourneyData()
