@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
@@ -36,7 +37,7 @@ class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMod
         val tenancyStartedBeforeExpiry = getFormModelFromStateOrNull(state)?.tenancyStartedBeforeExpiry ?: return null
         if (!tenancyStartedBeforeExpiry) return EpcExpiryCheckMode.EPC_EXPIRED
 
-        val epcDetails = state.acceptedEpc ?: return null
+        val epcDetails = state.acceptedEpc ?: throw PrsdbWebException("Attempting to check EPC expiry without an accepted EPC in state")
         if (epcDetails.isEnergyRatingEOrBetter()) return EpcExpiryCheckMode.EPC_COMPLIANT
         return EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING
     }
