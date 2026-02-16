@@ -157,14 +157,10 @@ class NftDataSeederRepository(
         return connection.prepareStatement(query)
     }
 
-    fun findNthAddressId(n: Int): Long {
-        val query = "SELECT id FROM address LIMIT 1 OFFSET :n"
-        return session.createNativeQuery(query, Long::class.java).setParameter("n", n).singleResult
-    }
-
-    fun findAvailableAddresses(
+    fun findAddresses(
         limit: Int,
         offset: Int,
+        restrictToAvailable: Boolean = false,
     ): List<Address> {
         val query =
             """
@@ -174,19 +170,20 @@ class NftDataSeederRepository(
                 SELECT 1 FROM property_ownership po
                 WHERE po.is_active AND po.address_id = a.id
             )
+            OR NOT :restrictToAvailable
             LIMIT :limit OFFSET :offset
             """
         return session
             .createNativeQuery(query, Address::class.java)
+            .setParameter("restrictToAvailable", restrictToAvailable)
             .setParameter("limit", limit)
             .setParameter("offset", offset)
             .resultList
     }
 
-    fun findRegistrationNumbersIn(numbers: Set<Long>): Set<Long> {
+    fun findRegistrationNumbersIn(numbers: Set<Long>): List<Long> {
         val query = "SELECT number FROM registration_number WHERE number IN :numbers"
-        val resultList = session.createNativeQuery(query, Long::class.java).setParameter("numbers", numbers).resultList
-        return resultList.toSet()
+        return session.createNativeQuery(query, Long::class.java).setParameter("numbers", numbers).resultList
     }
 
     fun updateIdSequences() {
