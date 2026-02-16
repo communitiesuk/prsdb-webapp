@@ -83,7 +83,8 @@ class UpdateLicensingJourney(
     override val cyaStep: UpdateLicensingCyaStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
-) : AbstractUpdateJourneyState(journeyStateService, delegateProvider, "licence"),
+    journeyName: String = "licence",
+) : AbstractUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
     UpdateLicensingJourneyState {
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
