@@ -5,7 +5,7 @@ import java.security.Principal
 abstract class AbstractUpdateJourneyState(
     private val journeyStateService: JourneyStateService,
     private val delegateProvider: JourneyStateDelegateProvider,
-    private val updateJourneyType: String,
+    private val updateJourneyName: String,
 ) : AbstractJourneyState(journeyStateService) {
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
@@ -14,7 +14,7 @@ abstract class AbstractUpdateJourneyState(
 
         return super.generateJourneyId(
             ownershipUserPair?.let {
-                generateSeedForPropertyOwnershipAndUser(it.first, it.second, updateJourneyType)
+                generateSeedForPropertyOwnershipAndUser(it.first, it.second, updateJourneyName)
             },
         )
     }
@@ -32,7 +32,7 @@ abstract class AbstractUpdateJourneyState(
         fun generateSeedForPropertyOwnershipAndUser(
             ownershipId: Long,
             user: Principal,
-            updateJourneyType: String,
-        ): String = "Update $updateJourneyType for property $ownershipId by user ${user.name}"
+            updateJourneyName: String,
+        ): String = "Update $updateJourneyName for property $ownershipId by user ${user.name}"
     }
 }
