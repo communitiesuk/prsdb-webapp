@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
@@ -36,7 +37,8 @@ class SearchForEpcStepConfig(
     }
 
     override fun afterStepDataIsAdded(state: EpcState) {
-        val formModel = getFormModelFromStateOrNull(state) ?: return
+        val formModel =
+            getFormModelFromStateOrNull(state) ?: throw PrsdbWebException("Form model not be null after step data has been added")
         val epc = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
         state.searchedEpc = epc
     }
