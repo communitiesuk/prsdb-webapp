@@ -1,21 +1,21 @@
-package uk.gov.communities.prsdb.webapp.journeys.example.steps
+package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.example.ExampleEpcJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 
 @JourneyFrameworkComponent
-class SearchEpcStepConfig(
+class SearchForEpcStepConfig(
     private val epcLookupService: EpcLookupService,
-) : AbstractRequestableStepConfig<EpcSearchResult, EpcLookupFormModel, ExampleEpcJourneyState>() {
+) : AbstractRequestableStepConfig<EpcSearchResult, EpcLookupFormModel, EpcState>() {
     override val formModelClass = EpcLookupFormModel::class
 
-    override fun getStepSpecificContent(state: ExampleEpcJourneyState) =
+    override fun getStepSpecificContent(state: EpcState) =
         mapOf(
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.epcLookup.fieldSetHeading",
@@ -24,9 +24,9 @@ class SearchEpcStepConfig(
             "getNewEpcUrl" to GET_NEW_EPC_URL,
         )
 
-    override fun chooseTemplate(state: ExampleEpcJourneyState): String = "forms/epcLookupForm"
+    override fun chooseTemplate(state: EpcState): String = "forms/epcLookupForm"
 
-    override fun mode(state: ExampleEpcJourneyState): EpcSearchResult? {
+    override fun mode(state: EpcState): EpcSearchResult? {
         val epc = state.searchedEpc
         return when {
             epc == null -> EpcSearchResult.NOT_FOUND
@@ -35,7 +35,7 @@ class SearchEpcStepConfig(
         }
     }
 
-    override fun afterStepDataIsAdded(state: ExampleEpcJourneyState) {
+    override fun afterStepDataIsAdded(state: EpcState) {
         val formModel = getFormModelFromStateOrNull(state) ?: return
         val epc = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
         state.searchedEpc = epc
@@ -43,6 +43,16 @@ class SearchEpcStepConfig(
 }
 
 @JourneyFrameworkComponent
-final class SearchEpcStep(
-    stepConfig: SearchEpcStepConfig,
-) : RequestableStep<EpcSearchResult, EpcLookupFormModel, ExampleEpcJourneyState>(stepConfig)
+final class SearchForEpcStep(
+    stepConfig: SearchForEpcStepConfig,
+) : RequestableStep<EpcSearchResult, EpcLookupFormModel, EpcState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "search-for-epc"
+    }
+}
+
+enum class EpcSearchResult {
+    FOUND,
+    SUPERSEDED,
+    NOT_FOUND,
+}
