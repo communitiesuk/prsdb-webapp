@@ -8,10 +8,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.ArrayIndexParameterService
 
 // TODO PDJB-114: Implement CheckJointLandlordsStep
 @JourneyFrameworkComponent
-class CheckJointLandlordsConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JointLandlordsState>() {
+class CheckJointLandlordsConfig(
+    private val urlParameterService: ArrayIndexParameterService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, JointLandlordsState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JointLandlordsState) =
@@ -29,7 +32,7 @@ class CheckJointLandlordsConfig : AbstractRequestableStepConfig<Complete, NoInpu
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "jointLandlords.checkJointLandlords.invitedEmailAddress",
                 email,
-                Destination(state.removeJointLandlordStep).withUrlParameter("index", index.toString()),
+                Destination(state.removeJointLandlordStep).withUrlParameter(urlParameterService.getParameterPair(index)),
                 actionValue = "forms.links.remove",
                 valueUrl = null,
                 valueUrlOpensNewTab = false,

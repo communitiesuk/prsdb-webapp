@@ -18,6 +18,8 @@ sealed class Destination {
         parameterValue: String,
     ): Destination = this
 
+    fun withUrlParameter(parameterPair: Pair<String, String>): Destination = withUrlParameter(parameterPair.first, parameterPair.second)
+
     class VisitableStep(
         val step: JourneyStep.RequestableStep<*, *, *>,
         val journeyId: String,
