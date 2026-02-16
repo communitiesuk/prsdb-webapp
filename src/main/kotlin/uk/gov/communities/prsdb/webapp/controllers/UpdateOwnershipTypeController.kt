@@ -13,7 +13,6 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -63,7 +62,7 @@ class UpdateOwnershipTypeController(
         }
 
     companion object {
-        const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/$UPDATE_PATH_SEGMENT"
+        const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-ownership-type"
         val UPDATE_OWNERSHIP_TYPE_ROUTE = "$UPDATE_ROUTE/${RegisterPropertyStepId.OwnershipType.urlPathSegment}"
 
         fun getUpdateOwnershipTypeRouteWithPropertyOwnershipId(propertyOwnershipId: Long): String =
