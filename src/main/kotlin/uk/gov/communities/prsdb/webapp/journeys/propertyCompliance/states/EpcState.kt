@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExem
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotAutomatchedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
@@ -24,7 +25,8 @@ interface EpcState : JourneyState {
     val propertyId: Long
 
     val epcQuestionStep: EpcQuestionStep
-    val checkMatchedEpcStep: CheckMatchedEpcStep
+    val checkAutomatchedEpcStep: CheckMatchedEpcStep
+    val epcNotAutomatchedStep: EpcNotAutomatchedStep
     val searchForEpcStep: SearchForEpcStep
     val epcSupersededStep: EpcSupersededStep
     val checkSearchedEpcStep: CheckMatchedEpcStep

@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExem
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotAutomatchedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
@@ -190,6 +191,7 @@ class PropertyComplianceJourney(
     override val epcTask: EpcTask,
     override val epcQuestionStep: EpcQuestionStep,
     override val checkAutomatchedEpcStep: CheckMatchedEpcStep,
+    override val epcNotAutomatchedStep: EpcNotAutomatchedStep,
     override val searchForEpcStep: SearchForEpcStep,
     override val epcSupersededStep: EpcSupersededStep,
     override val checkMatchedEpcStep: CheckMatchedEpcStep,

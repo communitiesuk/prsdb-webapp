@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpi
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotAutomatchedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSearchResult
@@ -36,7 +37,7 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         EpcStatusMode.AUTOMATCHED -> journey.checkAutomatchedEpcStep
-                        EpcStatusMode.NOT_AUTOMATCHED -> journey.searchForEpcStep
+                        EpcStatusMode.NOT_AUTOMATCHED -> journey.epcNotAutomatchedStep
                         EpcStatusMode.NO_EPC -> journey.epcMissingStep
                         EpcStatusMode.EPC_NOT_REQUIRED -> journey.epcExemptionReasonStep
                     }
@@ -59,11 +60,17 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
+            step(journey.epcNotAutomatchedStep) {
+                routeSegment(EpcNotAutomatchedStep.ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.NOT_AUTOMATCHED) }
+                nextStep { journey.searchForEpcStep }
+                savable()
+            }
             step(journey.searchForEpcStep) {
                 routeSegment(SearchForEpcStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.epcQuestionStep.hasOutcome(EpcStatusMode.NOT_AUTOMATCHED),
+                        journey.epcNotAutomatchedStep.hasOutcome(Complete.COMPLETE),
                         journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_INCORRECT),
                     )
                 }
