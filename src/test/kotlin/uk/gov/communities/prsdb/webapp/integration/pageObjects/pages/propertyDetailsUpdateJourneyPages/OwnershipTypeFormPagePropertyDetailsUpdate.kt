@@ -9,5 +9,5 @@ class OwnershipTypeFormPagePropertyDetailsUpdate(
     urlArguments: Map<String, String>,
 ) : OwnershipTypeFormPage(
         page,
-        UpdateOwnershipTypeController.getUpdateOwnershipTypePathWithUpdateStep(urlArguments["propertyOwnershipId"]!!.toLong()),
+        UpdateOwnershipTypeController.getUpdateOwnershipTypeRouteWithPropertyOwnershipId(urlArguments["propertyOwnershipId"]!!.toLong()),
     )
