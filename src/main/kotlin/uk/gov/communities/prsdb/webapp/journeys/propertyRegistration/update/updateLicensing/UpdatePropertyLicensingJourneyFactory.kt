@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AbstractUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -83,38 +83,11 @@ class UpdateLicensingJourney(
     override val cyaStep: UpdateLicensingCyaStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
-) : AbstractJourneyState(journeyStateService),
+) : AbstractUpdateJourneyState(journeyStateService, delegateProvider, "licence"),
     UpdateLicensingJourneyState {
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
-    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-
-    override fun generateJourneyId(seed: Any?): String {
-        val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
-
-        return super<AbstractJourneyState>.generateJourneyId(
-            ownershipUserPair?.let {
-                generateSeedForPropertyOwnershipAndUser(it.first, it.second)
-            },
-        )
-    }
-
-    private fun convertSeedToOwnershipUserPairOrNull(seed: Any?): Pair<Long, Principal>? =
-        (seed as? Pair<*, *>)?.let {
-            (it.first as? Long)?.let { ownershipId ->
-                (it.second as? Principal)?.let { user ->
-                    Pair(ownershipId, user)
-                }
-            }
-        }
-
-    companion object {
-        fun generateSeedForPropertyOwnershipAndUser(
-            ownershipId: Long,
-            user: Principal,
-        ): String = "Update licence for property $ownershipId by user ${user.name}"
-    }
 }
 
 interface UpdateLicensingJourneyState :

@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AbstractUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -54,36 +54,10 @@ class UpdateOwnershipJourney(
     override val ownershipTypeStep: UpdateOwnershipTypeStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
-) : AbstractJourneyState(journeyStateService),
+    journeyName: String = "ownership type",
+) : AbstractUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
     UpdateOwnershipTypeJourneyState {
-    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-
-    override fun generateJourneyId(seed: Any?): String {
-        val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
-
-        return super<AbstractJourneyState>.generateJourneyId(
-            ownershipUserPair?.let {
-                generateSeedForPropertyOwnershipAndUser(it.first, it.second)
-            },
-        )
-    }
-
-    private fun convertSeedToOwnershipUserPairOrNull(seed: Any?): Pair<Long, Principal>? =
-        (seed as? Pair<*, *>)?.let {
-            (it.first as? Long)?.let { ownershipId ->
-                (it.second as? Principal)?.let { user ->
-                    Pair(ownershipId, user)
-                }
-            }
-        }
-
-    companion object {
-        fun generateSeedForPropertyOwnershipAndUser(
-            ownershipId: Long,
-            user: Principal,
-        ): String = "Update ownership type for property $ownershipId by user ${user.name}"
-    }
 }
 
 interface UpdateOwnershipTypeJourneyState : JourneyState {
