@@ -26,7 +26,6 @@ class MeesExemptionCheckStepConfigTests {
     fun `mode returns null when form model is not present`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(null)
 
         // Act
         val result = stepConfig.mode(mockEpcState)
