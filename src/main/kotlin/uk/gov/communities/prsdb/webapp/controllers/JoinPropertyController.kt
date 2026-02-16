@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -10,14 +11,15 @@ import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 
+@PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
 @RequestMapping(JOIN_PROPERTY_ROUTE)
 class JoinPropertyController {
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStartPage(model: Model): String {
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-        // TODO: Update continueUrl when next step is implemented
-        model.addAttribute("continueUrl", JOIN_PROPERTY_START_PAGE_ROUTE)
+        // TODO: PDJB-274 - Update continueUrl when next step is implemented
+        model.addAttribute("continueUrl", "#")
 
         return "joinPropertyStartPage"
     }
