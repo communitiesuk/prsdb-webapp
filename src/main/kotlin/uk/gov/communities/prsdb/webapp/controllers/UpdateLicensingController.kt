@@ -27,7 +27,7 @@ class UpdateLicensingController(
     private val journeyFactory: UpdateLicensingJourneyFactory,
 ) {
     @GetMapping("{stepName}")
-    fun getNewUpdateStep(
+    fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
@@ -43,7 +43,7 @@ class UpdateLicensingController(
         }
 
     @PostMapping("{stepName}")
-    fun postNewUpdateStep(
+    fun postUpdateStep(
         model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -62,5 +62,8 @@ class UpdateLicensingController(
 
     companion object {
         const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-licensing"
+
+        fun getUpdateLicensingBaseRoute(propertyOwnershipId: Long): String =
+            UPDATE_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
     }
 }
