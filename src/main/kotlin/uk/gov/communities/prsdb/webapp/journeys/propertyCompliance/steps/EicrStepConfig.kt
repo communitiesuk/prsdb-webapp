@@ -16,7 +16,6 @@ class EicrStepConfig(
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.eicr.fieldSetHeading",
             "fieldSetHint" to "forms.eicr.fieldSetHint",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),

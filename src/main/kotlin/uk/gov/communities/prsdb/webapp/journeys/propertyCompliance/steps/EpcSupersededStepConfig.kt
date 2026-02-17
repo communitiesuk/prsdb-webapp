@@ -13,7 +13,6 @@ class EpcSupersededStepConfig : AbstractRequestableStepConfig<Complete, NoInputF
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "certificateNumber" to state.searchForEpcStep.formModelOrNull?.certificateNumber,
         )
 

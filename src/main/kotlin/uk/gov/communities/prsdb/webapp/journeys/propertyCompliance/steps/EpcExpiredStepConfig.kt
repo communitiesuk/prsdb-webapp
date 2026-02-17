@@ -17,7 +17,6 @@ class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "expiryDateAsJavaLocalDate" to (state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate),
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,

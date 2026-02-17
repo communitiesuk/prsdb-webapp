@@ -11,10 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class EpcNotAutomatchedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState) =
-        mapOf(
-            "title" to "propertyCompliance.title",
-        )
+    override fun getStepSpecificContent(state: EpcState) = emptyMap<String, String>()
 
     override fun chooseTemplate(state: EpcState): String = "forms/epcNotAutoMatchedForm"
 

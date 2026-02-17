@@ -15,7 +15,6 @@ class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "prsExemptionGuideUrl" to PRS_EXEMPTION_GUIDE_URL,
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",

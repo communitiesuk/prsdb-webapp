@@ -17,7 +17,6 @@ class EpcMissingStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,

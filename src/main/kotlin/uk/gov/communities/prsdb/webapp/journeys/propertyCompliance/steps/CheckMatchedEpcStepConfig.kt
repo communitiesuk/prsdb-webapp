@@ -19,7 +19,6 @@ class CheckMatchedEpcStepConfig(
     override fun getStepSpecificContent(state: EpcState) =
         getReleventEpc(state)?.let { epcDetails ->
             mapOf(
-                "title" to "propertyCompliance.title",
                 "epcDetails" to epcDetails,
                 "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
                 "radioOptions" to

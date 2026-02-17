@@ -14,7 +14,6 @@ class MeesExemptionConfirmationStepConfig : AbstractRequestableStepConfig<Comple
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )

@@ -13,7 +13,6 @@ class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMod
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "expiryDate" to (state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate),
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )

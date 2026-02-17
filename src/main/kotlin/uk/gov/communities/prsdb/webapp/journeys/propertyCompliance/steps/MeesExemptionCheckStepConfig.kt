@@ -18,7 +18,6 @@ class MeesExemptionCheckStepConfig(
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "singleLineAddress" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,

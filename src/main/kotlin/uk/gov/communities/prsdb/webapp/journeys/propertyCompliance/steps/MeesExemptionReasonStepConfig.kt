@@ -15,7 +15,6 @@ class MeesExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, Me
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.meesExemptionReason.fieldSetHeading",
             "radioOptions" to
                 listOf(

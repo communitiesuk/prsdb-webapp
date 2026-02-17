@@ -17,7 +17,6 @@ class SearchForEpcStepConfig(
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.epcLookup.fieldSetHeading",
             "fieldSetHint" to "forms.epcLookup.fieldSetHint",
             "findEpcUrl" to FIND_EPC_URL,

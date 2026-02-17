@@ -15,7 +15,6 @@ class GasSafetyExemptionReasonStepConfig :
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafetyExemptionReason.fieldSetHeading",
             "radioOptions" to
                 listOf(

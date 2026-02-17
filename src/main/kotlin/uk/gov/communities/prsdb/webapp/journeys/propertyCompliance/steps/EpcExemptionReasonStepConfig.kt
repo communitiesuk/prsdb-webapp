@@ -16,7 +16,6 @@ class EpcExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, Epc
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.epcExemptionReason.fieldSetHeading",
             "epcGuideUrl" to EPC_GUIDE_URL,
             "radioOptions" to

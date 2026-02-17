@@ -14,7 +14,6 @@ class EicrExemptionStepConfig : AbstractRequestableStepConfig<ExemptionMode, Eic
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.eicrExemption.fieldSetHeading",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )

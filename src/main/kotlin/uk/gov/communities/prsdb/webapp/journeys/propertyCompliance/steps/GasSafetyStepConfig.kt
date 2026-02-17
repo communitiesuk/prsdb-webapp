@@ -16,7 +16,6 @@ class GasSafetyStepConfig(
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafety.fieldSetHeading",
             "fieldSetHint" to "forms.gasSafety.fieldSetHint",
             "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,

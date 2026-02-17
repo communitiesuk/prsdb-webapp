@@ -13,7 +13,6 @@ class EpcExemptionConfirmationStepConfig : AbstractRequestableStepConfig<Complet
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
