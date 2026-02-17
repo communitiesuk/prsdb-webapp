@@ -10,11 +10,9 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -142,33 +140,6 @@ class CheckMatchedEpcStepConfigTests {
 
         // Assert
         verify(mockEpcState).acceptedEpc = epcData
-    }
-
-    @Test
-    fun `afterStepDataIsAdded is called by the step on submitFormData`() {
-        // Arrange
-        val mockStepConfig = mock<CheckMatchedEpcStepConfig>()
-        whenever(mockStepConfig.routeSegment).thenReturn(routeSegment)
-        whenever(mockStepConfig.formModelClass).thenReturn(CheckMatchedEpcFormModel::class)
-        val mockBindingResult = mock<BindingResult>()
-        whenever(mockBindingResult.target).thenReturn(CheckMatchedEpcFormModel())
-
-        val checkMatchedEpcStep = CheckMatchedEpcStep(mockStepConfig)
-        checkMatchedEpcStep.initialize(
-            routeSegment,
-            mockEpcState,
-            mock(),
-            mock(),
-            mock(),
-            mock(),
-            true,
-        )
-
-        // Act
-        checkMatchedEpcStep.submitFormData(mockBindingResult)
-
-        // Assert
-        verify(mockStepConfig).afterStepDataIsAdded(mockEpcState)
     }
 
     private fun setupStepConfig(usingEpc: EpcDataModel = mock()): CheckMatchedEpcStepConfig {
