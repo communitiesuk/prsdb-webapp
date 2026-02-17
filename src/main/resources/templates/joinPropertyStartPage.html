@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="continueUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="main-content" th:replace="~{fragments/layout :: layout(#{joinProperty.title},~{::#main-content/content()}, false)}">
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{${title}},~{::#main-content/content()}, false)}">
 <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
 <main class="govuk-main-wrapper">
     <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
@@ -47,7 +47,9 @@
             <p class="govuk-body" th:text="#{joinProperty.responsibilities.paragraph.two}">joinProperty.responsibilities.paragraph.two</p>
         </section>
         <section>
-            <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${continueUrl}, #{forms.buttons.continue})}"></button>
+            <form th:action="@{''}" method="post">
+                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+            </form>
         </section>
     </div>
 </main>
