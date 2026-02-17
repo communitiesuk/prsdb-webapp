@@ -4,8 +4,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService

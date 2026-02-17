@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
@@ -21,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class GasSafetyTask : Task<GasSafetyState>() {

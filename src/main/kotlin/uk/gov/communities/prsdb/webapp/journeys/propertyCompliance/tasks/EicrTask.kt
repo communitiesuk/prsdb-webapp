@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
@@ -20,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrSte
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class EicrTask : Task<EicrState>() {

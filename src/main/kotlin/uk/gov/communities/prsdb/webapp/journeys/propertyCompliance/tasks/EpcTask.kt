@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
@@ -27,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class EpcTask : Task<EpcState>() {

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
