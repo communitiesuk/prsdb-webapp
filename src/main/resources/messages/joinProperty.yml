@@ -22,6 +22,7 @@ otherWays:
   summary: Other ways to confirm you're a landlord
   content:
     paragraph: You can also contact us to get added to a property. We'll need to see proof that you're a landlord.
+    # TODO: PDJB-616 - Replace placeholder contact information with real values
     phone: "Phone: 0009 988 8799"
     phoneHours: Monday to Friday, 9am to 5pm
     email: "Email:"
