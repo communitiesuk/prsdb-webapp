@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import java.security.Principal
 
 @PrsdbWebService
@@ -35,9 +37,21 @@ class UpdateOwnershipTypeJourneyFactory(
             unreachableStepUrl { "/" }
             step(journey.ownershipTypeStep) {
                 routeSegment("ownership-type")
-                nextUrl { propertyDetailsRoute }
                 backUrl { propertyDetailsRoute }
+                nextStep { journey.completeOwnershipTypeUpdateStep }
                 initialStep()
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to "forms.update.ownershipType.fieldSetHeading",
+                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "showWarning" to true,
+                    )
+                }
+            }
+            step(journey.completeOwnershipTypeUpdateStep) {
+                parents { journey.ownershipTypeStep.isComplete() }
+                nextUrl { propertyDetailsRoute }
             }
         }
     }
@@ -51,7 +65,8 @@ class UpdateOwnershipTypeJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateOwnershipJourney(
     // OwnershipTypeStep
-    override val ownershipTypeStep: UpdateOwnershipTypeStep,
+    override val ownershipTypeStep: OwnershipTypeStep,
+    override val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "ownership type",
@@ -61,6 +76,7 @@ class UpdateOwnershipJourney(
 }
 
 interface UpdateOwnershipTypeJourneyState : JourneyState {
-    val ownershipTypeStep: UpdateOwnershipTypeStep
+    val ownershipTypeStep: OwnershipTypeStep
+    val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep
     val propertyId: Long
 }
