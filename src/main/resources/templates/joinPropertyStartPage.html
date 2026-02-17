@@ -29,7 +29,7 @@
             <p class="govuk-body" th:text="#{joinProperty.identityInfo.paragraph.two}">joinProperty.identityInfo.paragraph.two</p>
         </section>
         <section>
-            <details th:replace="~{fragments/details :: details(#{joinProperty.otherWays.summary}, ~{::#other-ways-content})}">
+            <details th:replace="~{fragments/details :: details(#{joinProperty.otherWays.summary}, ~{::#other-ways-content/content()})}">
                 <div id="other-ways-content">
                     <p class="govuk-body" th:text="#{joinProperty.otherWays.content.paragraph}">joinProperty.otherWays.content.paragraph</p>
                     <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phone}">joinProperty.otherWays.content.phone</p>
