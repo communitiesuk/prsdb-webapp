@@ -29,7 +29,7 @@ interface EpcState : JourneyState {
     val epcNotAutomatchedStep: EpcNotAutomatchedStep
     val searchForEpcStep: SearchForEpcStep
     val epcSupersededStep: EpcSupersededStep
-    val checkSearchedEpcStep: CheckMatchedEpcStep
+    val checkMatchedEpcStep: CheckMatchedEpcStep
     val epcNotFoundStep: EpcNotFoundStep
     val epcMissingStep: EpcMissingStep
     val epcExemptionReasonStep: EpcExemptionReasonStep
