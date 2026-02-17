@@ -36,7 +36,7 @@ class GasSafetyExemptionReasonStepConfig :
                 ),
         )
 
-    override fun chooseTemplate(state: JourneyState): String = "forms/exemptionReasonForm.html"
+    override fun chooseTemplate(state: JourneyState): String = "forms/exemptionReasonForm"
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.let {

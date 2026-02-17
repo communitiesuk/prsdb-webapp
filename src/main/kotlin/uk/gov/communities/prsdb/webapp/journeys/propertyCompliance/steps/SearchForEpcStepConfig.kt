@@ -38,7 +38,7 @@ class SearchForEpcStepConfig(
 
     override fun afterStepDataIsAdded(state: EpcState) {
         val formModel =
-            getFormModelFromStateOrNull(state) ?: throw PrsdbWebException("Form model not be null after step data has been added")
+            getFormModelFromStateOrNull(state) ?: throw PrsdbWebException("Form model must not be null after step data has been added")
         val epc = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
         state.searchedEpc = epc
     }

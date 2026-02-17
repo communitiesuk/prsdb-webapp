@@ -45,7 +45,7 @@ class EpcExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, Epc
                 ),
         )
 
-    override fun chooseTemplate(state: EpcState): String = "forms/epcExemptionReasonForm.html"
+    override fun chooseTemplate(state: EpcState): String = "forms/epcExemptionReasonForm"
 
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.exemptionReason?.let { Complete.COMPLETE }
 }
