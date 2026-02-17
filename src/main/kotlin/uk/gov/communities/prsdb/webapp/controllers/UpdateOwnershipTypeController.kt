@@ -28,7 +28,7 @@ class UpdateOwnershipTypeController(
     private val journeyFactory: UpdateOwnershipTypeJourneyFactory,
 ) {
     @GetMapping("{stepName}")
-    fun getNewUpdateStep(
+    fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
@@ -44,7 +44,7 @@ class UpdateOwnershipTypeController(
         }
 
     @PostMapping("{stepName}")
-    fun postNewUpdateStep(
+    fun postUpdateStep(
         model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -65,7 +65,7 @@ class UpdateOwnershipTypeController(
         const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-ownership-type"
         val UPDATE_OWNERSHIP_TYPE_ROUTE = "$UPDATE_ROUTE/${RegisterPropertyStepId.OwnershipType.urlPathSegment}"
 
-        fun getUpdateOwnershipTypeRouteWithPropertyOwnershipId(propertyOwnershipId: Long): String =
+        fun getUpdateOwnershipTypeRoute(propertyOwnershipId: Long): String =
             UPDATE_OWNERSHIP_TYPE_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
     }
 }

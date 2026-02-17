@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import java.security.Principal
 
-abstract class AbstractUpdateJourneyState(
+abstract class AbstractPropertyOwnershipUpdateJourneyState(
     private val journeyStateService: JourneyStateService,
     private val delegateProvider: JourneyStateDelegateProvider,
     private val updateJourneyName: String,
