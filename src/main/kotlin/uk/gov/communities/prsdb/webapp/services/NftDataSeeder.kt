@@ -37,8 +37,6 @@ class NftDataSeeder(
     private val addressGenerator = AddressGenerator()
     private val availableAddressGenerator = AddressGenerator(restrictToAvailable = true)
 
-    private val addressCount by lazy { addressRepository.count().toInt() }
-
     fun seedDatabase() {
         val statelessSession = sessionFactory.openStatelessSession()
         statelessSession.use { session ->
@@ -168,8 +166,7 @@ class NftDataSeeder(
                 registrationNumberGenerator.forgetUsedValues()
                 addressGenerator.forgetUsedValues()
 
-                val landlordsAdded = landlordIdRange.last
-                log("Seeded $landlordsAdded landlords")
+                log("Seeded ${landlordIdRange.last} landlords")
 
                 coreDetailsForLandlords.forEach { landlord ->
                     val numOfPropertiesLeft = NUM_OF_PROPERTIES - propertyRegistrationsAdded()
@@ -396,7 +393,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(7, registrationNumberId)
         propertyOwnershipStmt.setLong(8, landlordDetails.id)
         propertyOwnershipStmt.setLongOrNull(9, licenceIdIfHasLicence)
-        // TODO: probabilistically add incomplete compliance form (after migration to saved journey state)
+        // TODO PDJB-239: probabilistically add incomplete compliance form (after migration to saved journey state)
         propertyOwnershipStmt.setLongOrNull(10, null)
         propertyOwnershipStmt.setInt(11, NftDataFaker.generatePropertyAndOtherType().first.ordinal)
         propertyOwnershipStmt.setLong(12, availableAddressGenerator.next().id)
@@ -506,7 +503,7 @@ class NftDataSeeder(
         return updatedFileUploadCount
     }
 
-    // TODO: Upload files to S3
+    // TODO PDJB-239: Upload files to S3
     private fun addFileUploadToBatch(
         fileUploadStmt: PreparedStatement,
         certificateUploadStmt: PreparedStatement,
@@ -570,6 +567,8 @@ class NftDataSeeder(
             values = (valueSet + newNumbers).toList()
         }
     }
+
+    private val addressCount by lazy { addressRepository.count().toInt() }
 
     private inner class AddressGenerator(
         private val restrictToAvailable: Boolean = false,
