@@ -11,10 +11,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
@@ -22,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertTrue
 
@@ -615,6 +620,37 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
             BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
             BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+        }
+    }
+
+    @Nested
+    inner class ManagingJointLandlords {
+        @Test
+        fun `Removing joint landlords works as expected`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("alpha@example.com")
+
+            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            firstCheckJointLandlordPage.form.addAnotherButton.clickAndWait()
+
+            val inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+            inviteAnotherJointLandlordPage.submitEmail("beta@example.com")
+
+            val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(secondCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            secondCheckJointLandlordPage.summaryList.firstRow.clickActionLinkAndWait()
+
+            val firstRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
+            firstRemoveJointLandlordPage.form.submit()
+
+            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText("beta@example.com")
+            finalCheckJointLandlordPage.summaryList.firstRow.clickActionLinkAndWait()
+
+            val secondRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
+            secondRemoveJointLandlordPage.form.submit()
+
+            assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
         }
     }
 

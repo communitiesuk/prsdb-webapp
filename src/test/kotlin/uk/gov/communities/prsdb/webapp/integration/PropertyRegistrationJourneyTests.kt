@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
@@ -217,7 +218,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
 
         // TODO PDJB-117: Implement joint landlord task test case
-        checkJointLandlordsPage.form.submit()
+        checkJointLandlordsPage
+            .form
+            .addAnotherButton
+            .clickAndWait()
+
+        val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+        addAnotherPage.submitEmail("email2@address.com")
+
+        val newCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        newCheckJointLandlordsPage.form
+            .submit()
+
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
@@ -243,7 +255,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "1 Fictional Road, FA1 1AA",
                 absoluteLandlordUrl,
                 true,
-                listOf("email@address.com"),
+                listOf("email@address.com", "email2@address.com"),
             ),
         )
 
