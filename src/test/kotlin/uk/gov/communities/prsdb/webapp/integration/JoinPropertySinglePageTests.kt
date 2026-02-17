@@ -19,7 +19,7 @@ class JoinPropertySinglePageTests : IntegrationTestWithImmutableData("data-local
         // Verify details component
         assertThat(joinPropertyStartPage.detailsSummary).containsText("Other ways to confirm you're a landlord")
 
-        // Verify continue button is present and functional
+        // TODO: PDJB-274 - Click continue button and verify navigation to next step
         assertThat(joinPropertyStartPage.continueButton.locator).isVisible()
     }
 }
