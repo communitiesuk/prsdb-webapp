@@ -17,7 +17,7 @@ class JoinPropertySinglePageTests : IntegrationTestWithImmutableData("data-local
         assertThat(joinPropertyStartPage.insetText).containsText("If a property has multiple landlords")
 
         // Verify details component
-        assertThat(joinPropertyStartPage.detailsSummary).containsText("Other ways to confirm you're a landlord")
+        assertThat(joinPropertyStartPage.detailsSummary).containsText("Other ways to confirm you’re a landlord")
 
         // TODO: PDJB-274 - Click continue button and verify navigation to next step
         assertThat(joinPropertyStartPage.continueButton.locator).isVisible()
