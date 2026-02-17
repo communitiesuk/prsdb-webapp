@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.ExemptionMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
 @JourneyFrameworkComponent
 class EicrExemptionStepConfig : AbstractRequestableStepConfig<ExemptionMode, EicrExemptionFormModel, JourneyState>() {
@@ -16,19 +16,7 @@ class EicrExemptionStepConfig : AbstractRequestableStepConfig<ExemptionMode, Eic
         mapOf(
             "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.eicrExemption.fieldSetHeading",
-            "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        valueStr = "yes",
-                        labelMsgKey = "forms.radios.option.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        valueStr = "no",
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
-                ),
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/exemptionForm"
