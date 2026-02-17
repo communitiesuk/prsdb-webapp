@@ -4,7 +4,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.EicrSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.EpcSummaryRowsFactory
-import uk.gov.communities.prsdb.webapp.forms.pages.cya.GasSafetySummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyGasSafetySummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
@@ -27,7 +27,7 @@ class PropertyComplianceCheckAnswersPage(
         missingAnswersRedirect = missingAnswersRedirect,
     ) {
     private val gasSafetyDataFactory =
-        GasSafetySummaryRowsFactory(
+        LegacyGasSafetySummaryRowsFactory(
             doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },
             gasSafetyStartingStep = PropertyComplianceStepId.GasSafety,
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
