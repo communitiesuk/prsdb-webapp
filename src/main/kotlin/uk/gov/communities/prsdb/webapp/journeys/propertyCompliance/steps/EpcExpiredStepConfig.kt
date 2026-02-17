@@ -18,7 +18,7 @@ class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
             "title" to "propertyCompliance.title",
-            "expiryDateAsJavaLocalDate" to (state.acceptedEpc?.expiryDateAsJavaLocalDate ?: ""),
+            "expiryDateAsJavaLocalDate" to (state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate),
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
@@ -27,7 +27,7 @@ class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
         )
 
     override fun chooseTemplate(state: EpcState): String =
-        if (state.acceptedEpc?.isEnergyRatingEOrBetter() == true) {
+        if (state.getNotNullAcceptedEpc().isEnergyRatingEOrBetter()) {
             "forms/epcExpiredForm"
         } else {
             "forms/epcExpiredLowRatingForm"

@@ -1,12 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
 @JourneyFrameworkComponent
 class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMode, EpcExpiryCheckFormModel, EpcState>() {
@@ -15,20 +14,8 @@ class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMod
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
             "title" to "propertyCompliance.title",
-            "expiryDate" to (state.acceptedEpc?.expiryDateAsJavaLocalDate ?: ""),
-            "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        valueStr = "yes",
-                        labelMsgKey = "forms.radios.option.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        valueStr = "no",
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
-                ),
+            "expiryDate" to (state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate),
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/epcExpiryCheckForm"
@@ -37,8 +24,7 @@ class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMod
         val tenancyStartedBeforeExpiry = getFormModelFromStateOrNull(state)?.tenancyStartedBeforeExpiry ?: return null
         if (!tenancyStartedBeforeExpiry) return EpcExpiryCheckMode.EPC_EXPIRED
 
-        val epcDetails = state.acceptedEpc ?: throw PrsdbWebException("Attempting to check EPC expiry without an accepted EPC in state")
-        if (epcDetails.isEnergyRatingEOrBetter()) return EpcExpiryCheckMode.EPC_COMPLIANT
+        if (state.getNotNullAcceptedEpc().isEnergyRatingEOrBetter()) return EpcExpiryCheckMode.EPC_COMPLIANT
         return EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
@@ -20,7 +21,7 @@ class CheckMatchedEpcStepConfig(
             mapOf(
                 "title" to "propertyCompliance.title",
                 "epcDetails" to epcDetails,
-                "epcCertificateUrl" to epcDetails.certificateNumber.let { epcCertificateUrlProvider.getEpcCertificateUrl(it) },
+                "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
                 "radioOptions" to
                     listOf(
                         RadiosButtonViewModel(
@@ -35,7 +36,7 @@ class CheckMatchedEpcStepConfig(
                         ),
                     ),
             )
-        } ?: emptyMap()
+        } ?: throw PrsdbWebException("Attempting to access releventEpc for CheckMatchedEpcStepConfig but it was null.")
 
     override fun chooseTemplate(state: EpcState): String = "forms/checkMatchedEpcForm"
 

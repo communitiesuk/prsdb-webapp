@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
@@ -40,4 +41,6 @@ interface EpcState : JourneyState {
     val lowEnergyRatingStep: LowEnergyRatingStep
     val epcExpiryCheckStep: EpcExpiryCheckStep
     val epcExpiredStep: EpcExpiredStep
+
+    fun getNotNullAcceptedEpc() = acceptedEpc ?: throw PrsdbWebException("Attempting to access accepted EPC when it is null in state")
 }
