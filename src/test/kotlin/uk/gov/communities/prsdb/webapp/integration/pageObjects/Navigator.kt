@@ -146,6 +146,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
@@ -526,14 +527,22 @@ class Navigator(
         return createValidPage(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationInviteJointLandlordPage(
-        alreadyInvitedEmails: MutableList<String>? = null,
-    ): InviteJointLandlordFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationInviteJointLandlordPage(): InviteJointLandlordFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords().build(),
         )
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
         return createValidPage(page, InviteJointLandlordFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationInviteAnotherJointLandlordPage(
+        alreadyInvitedEmails: MutableList<String>? = null,
+    ): InviteAnotherJointLandlordFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep("invite-another-joint-landlord")
+        return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {

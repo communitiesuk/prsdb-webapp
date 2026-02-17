@@ -14,3 +14,12 @@ class InviteJointLandlordFormPagePropertyRegistration(
     ) {
     val heading = Heading(page.locator("h1"))
 }
+
+class InviteAnotherJointLandlordFormPagePropertyRegistration(
+    page: Page,
+) : EmailFormPage(
+        page,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/invite-another-joint-landlord",
+    ) {
+    val heading = Heading(page.locator("h1"))
+}

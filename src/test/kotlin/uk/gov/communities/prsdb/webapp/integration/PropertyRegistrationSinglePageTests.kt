@@ -635,12 +635,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(inviteJointLandlordsPage.form.getErrorMessage())
                 .containsText("Enter an email address in the correct format, like name@example.com")
         }
+    }
 
+    @Nested
+    inner class InviteAnotherJointLandlordsStep {
         @Test
         fun `Submitting with an already invited email returns an error`(page: Page) {
             val alreadyInvitedEmail = "already@invited.com"
             val inviteJointLandlordsPage =
-                navigator.skipToPropertyRegistrationInviteJointLandlordPage(mutableListOf(alreadyInvitedEmail))
+                navigator.skipToPropertyRegistrationInviteAnotherJointLandlordPage(mutableListOf(alreadyInvitedEmail))
             inviteJointLandlordsPage.submitEmail(alreadyInvitedEmail)
             assertThat(inviteJointLandlordsPage.form.getErrorMessage())
                 .containsText("You have already invited this email address")
