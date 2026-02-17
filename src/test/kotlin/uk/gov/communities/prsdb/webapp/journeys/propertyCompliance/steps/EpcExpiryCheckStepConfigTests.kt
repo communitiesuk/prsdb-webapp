@@ -3,12 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -59,17 +57,6 @@ class EpcExpiryCheckStepConfigTests {
     }
 
     @Test
-    fun `mode throws when checking an acceptedEpc which is null`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("tenancyStartedBeforeExpiry" to true))
-        whenever(mockEpcState.acceptedEpc).thenReturn(null)
-
-        // Act, Assert
-        assertThrows<PrsdbWebException> { stepConfig.mode(mockEpcState) }
-    }
-
-    @Test
     fun `mode returns EPC_COMPLIANT when tenancyStartedBeforeExpiry is true and energy rating higher than E`() {
         // Arrange
         val stepConfig = setupStepConfig()
@@ -77,7 +64,7 @@ class EpcExpiryCheckStepConfigTests {
             MockEpcData.createEpcDataModel(
                 energyRating = "B",
             )
-        whenever(mockEpcState.acceptedEpc).thenReturn(epcDetails)
+        whenever(mockEpcState.getNotNullAcceptedEpc()).thenReturn(epcDetails)
         whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("tenancyStartedBeforeExpiry" to true))
 
         // Act
@@ -95,7 +82,7 @@ class EpcExpiryCheckStepConfigTests {
             MockEpcData.createEpcDataModel(
                 energyRating = "E",
             )
-        whenever(mockEpcState.acceptedEpc).thenReturn(epcDetails)
+        whenever(mockEpcState.getNotNullAcceptedEpc()).thenReturn(epcDetails)
         whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("tenancyStartedBeforeExpiry" to true))
 
         // Act
@@ -113,7 +100,7 @@ class EpcExpiryCheckStepConfigTests {
             MockEpcData.createEpcDataModel(
                 energyRating = "F",
             )
-        whenever(mockEpcState.acceptedEpc).thenReturn(epcDetails)
+        whenever(mockEpcState.getNotNullAcceptedEpc()).thenReturn(epcDetails)
         whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("tenancyStartedBeforeExpiry" to true))
 
         // Act
