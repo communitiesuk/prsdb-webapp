@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -114,7 +115,7 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
                     isTenantedKey,
                     changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+                    UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id),
                     withChangeLinks,
                 )
                 if (propertyOwnership.isOccupied) {

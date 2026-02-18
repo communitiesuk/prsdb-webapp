@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occ
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -74,14 +73,6 @@ class UpdateOccupancyCyaConfig(
                     null
                 },
         )
-    }
-
-    override fun resolveNextDestination(
-        state: UpdateOccupancyJourneyState,
-        defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
     }
 }
 
