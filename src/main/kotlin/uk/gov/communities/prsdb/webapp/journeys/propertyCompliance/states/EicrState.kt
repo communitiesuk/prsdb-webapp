@@ -14,8 +14,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
-interface EicrState : JourneyState {
+interface EicrState :
+    JourneyState,
+    CheckYourAnswersJourneyState {
     val eicrStep: EicrStep
     val eicrIssueDateStep: EicrIssueDateStep
     val eicrUploadStep: EicrUploadStep
