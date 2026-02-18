@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
-import org.springframework.http.HttpStatus
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -31,14 +29,7 @@ class AreYouSureStepConfig(
         }
 
     private fun getPropertySingleLineAddress(propertyOwnershipId: Long): String =
-        propertyOwnershipService
-            .retrievePropertyOwnershipById(propertyOwnershipId)
-            ?.address
-            ?.singleLineAddress
-            ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Address for property ownership id $propertyOwnershipId not found",
-            )
+        propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).address.singleLineAddress
 }
 
 @JourneyFrameworkComponent
