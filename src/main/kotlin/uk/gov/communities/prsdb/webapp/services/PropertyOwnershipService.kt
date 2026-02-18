@@ -226,6 +226,32 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateOccupancy(
+        id: Long,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        numBedrooms: Int?,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus?,
+        rentFrequency: RentFrequency?,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal?,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.numBedrooms = numBedrooms
+        propertyOwnership.billsIncludedList = billsIncludedList
+        propertyOwnership.customBillsIncluded = customBillsIncluded
+        propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,

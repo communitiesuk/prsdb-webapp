@@ -1,0 +1,108 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy
+
+import org.springframework.beans.factory.ObjectFactory
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import java.security.Principal
+
+@PrsdbWebService
+class UpdateOccupancyJourneyFactory(
+    private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
+) {
+    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+        val state = stateFactory.getObject()
+
+        if (!state.isStateInitialized) {
+            state.propertyId = propertyId
+            state.isStateInitialized = true
+        }
+
+        if (state.propertyId != propertyId) {
+            throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
+        }
+
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { "/" }
+            task(journey.occupationTask) {
+                initialStep()
+                nextStep { journey.cyaStep }
+                checkable()
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
+                }
+            }
+            step(journey.cyaStep) {
+                routeSegment("check-occupancy-answers")
+                parents { journey.occupationTask.isComplete() }
+                nextUrl { propertyDetailsRoute }
+            }
+            configureStep(journey.occupied) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
+                }
+            }
+            checkYourAnswersJourney()
+        }
+    }
+
+    fun initializeJourneyState(
+        ownershipId: Long,
+        user: Principal,
+    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+}
+
+@JourneyFrameworkComponent
+class UpdateOccupancyJourney(
+    // Occupancy task
+    override val occupationTask: OccupationTask,
+    override val occupied: OccupiedStep,
+    override val households: HouseholdStep,
+    override val tenants: TenantsStep,
+    override val bedrooms: BedroomsStep,
+    override val rentIncludesBills: RentIncludesBillsStep,
+    override val billsIncluded: BillsIncludedStep,
+    override val furnishedStatus: FurnishedStatusStep,
+    override val rentFrequency: RentFrequencyStep,
+    override val rentAmount: RentAmountStep,
+    // Check your answers step
+    override val cyaStep: UpdateOccupancyCyaStep,
+    journeyStateService: JourneyStateService,
+    delegateProvider: JourneyStateDelegateProvider,
+    journeyName: String = "occupancy",
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+    UpdateOccupancyJourneyState {
+    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+}
+
+interface UpdateOccupancyJourneyState :
+    OccupationState,
+    CheckYourAnswersJourneyState {
+    val occupationTask: OccupationTask
+    override val cyaStep: UpdateOccupancyCyaStep
+    val propertyId: Long
+}
