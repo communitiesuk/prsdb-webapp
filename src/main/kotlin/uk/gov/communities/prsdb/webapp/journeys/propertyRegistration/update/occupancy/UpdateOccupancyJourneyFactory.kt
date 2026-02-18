@@ -25,17 +25,21 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
+import java.time.Instant
 
 @PrsdbWebService
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
+            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated()
             state.isStateInitialized = true
         }
 
@@ -97,6 +101,7 @@ class UpdateOccupancyJourney(
     UpdateOccupancyJourneyState {
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+    override var lastModifiedDate: Instant by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
 
 interface UpdateOccupancyJourneyState :
@@ -105,4 +110,5 @@ interface UpdateOccupancyJourneyState :
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
     val propertyId: Long
+    val lastModifiedDate: Instant
 }

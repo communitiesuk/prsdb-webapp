@@ -31,11 +31,11 @@ class UpdateOccupancyCyaConfig(
         )
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
-        // TODO PDJB-105 can we commonise this with PropertyRegistrationCyaStepConfig?
+        // TODO PDJB-106 can we commonise this with PropertyRegistrationCyaStepConfig?
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         propertyOwnershipService.updateOccupancy(
-            state.propertyId,
+            id = state.propertyId,
             numberOfHouseholds =
                 if (isOccupied) {
                     state.households.formModel
@@ -72,6 +72,7 @@ class UpdateOccupancyCyaConfig(
                 } else {
                     null
                 },
+            lastModifiedDate = state.lastModifiedDate,
         )
     }
 }

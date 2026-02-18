@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
+import java.time.Instant
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -237,18 +238,27 @@ class PropertyOwnershipService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
+        lastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
-        propertyOwnership.currentNumHouseholds = numberOfHouseholds
-        propertyOwnership.currentNumTenants = numberOfPeople
-        propertyOwnership.numBedrooms = numBedrooms
-        propertyOwnership.billsIncludedList = billsIncludedList
-        propertyOwnership.customBillsIncluded = customBillsIncluded
-        propertyOwnership.furnishedStatus = furnishedStatus
-        propertyOwnership.rentFrequency = rentFrequency
-        propertyOwnership.customRentFrequency = customRentFrequency
-        propertyOwnership.rentAmount = rentAmount
-        propertyOwnershipRepository.save(propertyOwnership)
+        if (propertyOwnership.getMostRecentlyUpdated() == lastModifiedDate) {
+            propertyOwnership.currentNumHouseholds = numberOfHouseholds
+            propertyOwnership.currentNumTenants = numberOfPeople
+            propertyOwnership.numBedrooms = numBedrooms
+            propertyOwnership.billsIncludedList = billsIncludedList
+            propertyOwnership.customBillsIncluded = customBillsIncluded
+            propertyOwnership.furnishedStatus = furnishedStatus
+            propertyOwnership.rentFrequency = rentFrequency
+            propertyOwnership.customRentFrequency = customRentFrequency
+            propertyOwnership.rentAmount = rentAmount
+            propertyOwnershipRepository.save(propertyOwnership)
+        } else {
+            // TODO PDJB-106 - what should this exception actually be??
+            throw ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "The property ownership record has been updated since it was loaded. Please refresh and try again.",
+            )
+        }
     }
 
     @Transactional
