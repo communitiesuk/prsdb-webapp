@@ -3,12 +3,13 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.EicrCyaSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.EpcCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.GasSafetyCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class PropertyComplianceCyaStepConfig(
     private val uploadService: UploadService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
@@ -48,7 +50,13 @@ class PropertyComplianceCyaStepConfig(
             childJourneyId,
         ).createRows()
 
-    fun getEpcData(state: PropertyComplianceJourneyState) = emptyList<SummaryListRowViewModel>()
+    fun getEpcData(state: PropertyComplianceJourneyState) =
+        EpcCyaSummaryRowsFactory(
+            Destination.VisitableStep(state.epcQuestionStep, childJourneyId),
+            epcCertificateUrlProvider,
+            state,
+            childJourneyId,
+        ).createRows()
 }
 
 @JourneyFrameworkComponent

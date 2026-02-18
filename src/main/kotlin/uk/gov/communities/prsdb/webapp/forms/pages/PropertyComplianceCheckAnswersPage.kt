@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.cya.EpcSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEicrSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEpcSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyGasSafetySummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
@@ -43,7 +43,7 @@ class PropertyComplianceCheckAnswersPage(
         )
 
     private val epcDataFactory =
-        EpcSummaryRowsFactory(
+        LegacyEpcSummaryRowsFactory(
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             epcStartingStep = PropertyComplianceStepId.EPC,
             stepFactory = stepFactory,

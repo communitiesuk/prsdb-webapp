@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
-class EpcSummaryRowsFactory(
+class LegacyEpcSummaryRowsFactory(
     val epcStartingStep: PropertyComplianceStepId,
     val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     val stepFactory: PropertyComplianceSharedStepFactory,
