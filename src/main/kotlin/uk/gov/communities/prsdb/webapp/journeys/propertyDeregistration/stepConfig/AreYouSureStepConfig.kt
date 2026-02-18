@@ -1,36 +1,26 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class AreYouSureStepConfig :
-    AbstractRequestableStepConfig<AreYouSureMode, PropertyDeregistrationAreYouSureFormModel, PropertyDeregistrationJourneyState>() {
+class AreYouSureStepConfig(
+    private val propertyOwnershipService: PropertyOwnershipService,
+) : AbstractRequestableStepConfig<AreYouSureMode, PropertyDeregistrationAreYouSureFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = PropertyDeregistrationAreYouSureFormModel::class
 
     override fun getStepSpecificContent(state: PropertyDeregistrationJourneyState) =
         mapOf(
             "fieldSetHeading" to "forms.areYouSure.propertyDeregistration.fieldSetHeading",
-            "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        valueStr = "yes",
-                        labelMsgKey = "forms.radios.option.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        valueStr = "no",
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
-                ),
-            "optionalFieldSetHeadingParam" to state.getPropertySingleLineAddress(),
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "optionalFieldSetHeadingParam" to getPropertySingleLineAddress(state.propertyOwnershipId),
         )
 
     override fun chooseTemplate(state: PropertyDeregistrationJourneyState) = "forms/areYouSureForm"
@@ -40,15 +30,15 @@ class AreYouSureStepConfig :
             if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
         }
 
-    override fun resolveNextDestination(
-        state: PropertyDeregistrationJourneyState,
-        defaultDestination: Destination,
-    ): Destination =
-        if (mode(state) == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
-            Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(state.propertyOwnershipId))
-        } else {
-            defaultDestination
-        }
+    private fun getPropertySingleLineAddress(propertyOwnershipId: Long): String =
+        propertyOwnershipService
+            .retrievePropertyOwnershipById(propertyOwnershipId)
+            ?.address
+            ?.singleLineAddress
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Address for property ownership id $propertyOwnershipId not found",
+            )
 }
 
 @JourneyFrameworkComponent
