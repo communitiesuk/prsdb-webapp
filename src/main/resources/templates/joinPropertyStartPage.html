@@ -30,7 +30,7 @@
         </section>
         <section>
             <details th:replace="~{fragments/details :: details(#{joinProperty.otherWays.summary}, ~{::#other-ways-content})}">
-                <div id="other-ways-content">
+                <div id="other-ways-content" class="govuk-details__text">
                     <p class="govuk-body" th:text="#{joinProperty.otherWays.content.paragraph}">joinProperty.otherWays.content.paragraph</p>
                     <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phone}">joinProperty.otherWays.content.phone</p>
                     <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phoneHours}">joinProperty.otherWays.content.phoneHours</p>

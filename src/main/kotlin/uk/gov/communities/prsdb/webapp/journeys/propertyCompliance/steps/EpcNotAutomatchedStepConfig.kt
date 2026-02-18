@@ -8,24 +8,21 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class EpcSupersededStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
+class EpcNotAutomatchedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState) =
-        mapOf(
-            "certificateNumber" to state.searchForEpcStep.formModelOrNull?.certificateNumber,
-        )
+    override fun getStepSpecificContent(state: EpcState) = emptyMap<String, String>()
 
-    override fun chooseTemplate(state: EpcState): String = "forms/epcSupersededForm"
+    override fun chooseTemplate(state: EpcState): String = "forms/epcNotAutoMatchedForm"
 
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
-final class EpcSupersededStep(
-    stepConfig: EpcSupersededStepConfig,
+final class EpcNotAutomatchedStep(
+    stepConfig: EpcNotAutomatchedStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, EpcState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "epc-superseded"
+        const val ROUTE_SEGMENT = "epc-not-automatched"
     }
 }

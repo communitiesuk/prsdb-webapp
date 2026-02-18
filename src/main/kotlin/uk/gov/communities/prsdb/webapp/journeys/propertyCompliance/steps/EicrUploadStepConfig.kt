@@ -20,7 +20,6 @@ class EicrUploadStepConfig(
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
             "alreadyUploaded" to (getFormModelFromStateOrNull(state)?.fileUploadId != null),

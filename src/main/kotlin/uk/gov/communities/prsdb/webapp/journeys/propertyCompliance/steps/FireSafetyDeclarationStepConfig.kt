@@ -15,7 +15,6 @@ class FireSafetyDeclarationStepConfig : AbstractRequestableStepConfig<Complete, 
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "housesInMultipleOccupationUrl" to HOUSES_IN_MULTIPLE_OCCUPATION_URL,
             "options" to
                 listOf(

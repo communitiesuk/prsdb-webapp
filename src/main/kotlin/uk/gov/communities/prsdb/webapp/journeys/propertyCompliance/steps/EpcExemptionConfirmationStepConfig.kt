@@ -8,24 +8,24 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class EpcSupersededStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
+class EpcExemptionConfirmationStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "certificateNumber" to state.searchForEpcStep.formModelOrNull?.certificateNumber,
+            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
-    override fun chooseTemplate(state: EpcState): String = "forms/epcSupersededForm"
+    override fun chooseTemplate(state: EpcState): String = "forms/epcExemptionConfirmationForm"
 
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
-final class EpcSupersededStep(
-    stepConfig: EpcSupersededStepConfig,
+final class EpcExemptionConfirmationStep(
+    stepConfig: EpcExemptionConfirmationStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, EpcState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "epc-superseded"
+        const val ROUTE_SEGMENT = "epc-exemption-confirmation"
     }
 }
