@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -12,9 +14,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class ReasonStepConfig(
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
     private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
 ) : AbstractRequestableStepConfig<Complete, PropertyDeregistrationReasonFormModel, PropertyDeregistrationJourneyState>() {
@@ -33,7 +37,7 @@ class ReasonStepConfig(
     override fun mode(state: PropertyDeregistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
-        val propertyOwnership = state.getPropertyOwnership()
+        val propertyOwnership = getPropertyOwnership(state.propertyOwnershipId)
 
         val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
@@ -59,6 +63,13 @@ class ReasonStepConfig(
         state.deleteJourney()
         return defaultDestination
     }
+
+    private fun getPropertyOwnership(propertyOwnershipId: Long) =
+        propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Property ownership $propertyOwnershipId not found",
+            )
 }
 
 @JourneyFrameworkComponent
