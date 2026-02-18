@@ -48,6 +48,27 @@ class GasSafetyStateTests {
     }
 
     @Test
+    fun `getGasSafetyExpiryDate returns the expiry date`() {
+        // Arrange
+        val issueDate = LocalDate.of(2020, 1, 1)
+        val expectedExpiryDate = issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate()
+        val issueDateformModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
+        val state = buildTestGasSafetyState(issueDateFormModel = issueDateformModel)
+
+        // Act
+        val retrievedExpiryDate = state.getGasSafetyExpiryDate()
+
+        // Assert
+        assertEquals(expectedExpiryDate, retrievedExpiryDate)
+    }
+
+    @Test
+    fun `getGasSafetyExpiryDate returns null if the issue date is not set`() {
+        val state = buildTestGasSafetyState()
+        assertNull(state.getGasSafetyExpiryDate())
+    }
+
+    @Test
     fun `getGasSafetyCertificateIsOutdated returns true if the certificate is older than GAS_SAFETY_CERT_VALIDITY_YEARS`() {
         // Arrange
         val issueDate = LocalDate.now().minusYears((GAS_SAFETY_CERT_VALIDITY_YEARS).toLong()).minusDays(5)

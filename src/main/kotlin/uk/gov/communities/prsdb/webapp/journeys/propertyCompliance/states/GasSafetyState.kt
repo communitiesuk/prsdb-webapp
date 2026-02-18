@@ -40,7 +40,6 @@ interface GasSafetyState :
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
-    // TODO PDJB-467 add test for more of these
     fun getGasSafetyExpiryDate() = getGasSafetyCertificateIssueDate()?.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
