@@ -5,9 +5,9 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationComplete
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStep
-import uk.gov.communities.prsdb.webapp.journeys.NavigationalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
 interface BuildableElement {
@@ -16,6 +16,11 @@ interface BuildableElement {
     fun configure(configuration: ConfigurableElement<*>.() -> Unit)
 
     fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit)
+
+    fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    )
 }
 
 abstract class AbstractJourneyBuilder<TState : JourneyState>(
@@ -26,7 +31,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     private var unreachableStepDestination: (() -> Destination)? = null
 
-    private var additionalConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
+    private var additionalConfiguration: MutableList<ConditionalElementConfiguration> = mutableListOf()
     private var additionalFirstElementConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
     override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
@@ -34,14 +39,15 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
         configure {
             unreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
-            additionalConfiguration.forEach { it() }
         }
+
+        additionalConfiguration.forEach { this.conditionallyConfigure(it.condition, it.configuration) }
 
         return build()
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
-        additionalConfiguration.add(configuration)
+        additionalConfiguration.add(ConditionalElementConfiguration({ journeyElements.any { this === it } }, configuration))
     }
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) {
@@ -76,6 +82,13 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
+    override fun conditionallyConfigure(
+        condition: ConfigurableElement<*>.() -> Boolean,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        additionalConfiguration.add(ConditionalElementConfiguration(condition, configuration))
+    }
+
     fun unreachableStepUrl(getUrl: () -> String) {
         if (unreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepDestination has already been set")
@@ -94,28 +107,36 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         tag: String,
         configuration: ConfigurableElement<*>.() -> Unit,
     ) {
-        configure {
-            if (tags.contains(tag)) {
-                configuration()
-            }
-        }
+        additionalConfiguration.add(ConditionalElementConfiguration({ tags.contains(tag) }, configuration))
+    }
+
+    fun configureStep(
+        step: JourneyStep<*, *, *>,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        additionalConfiguration.add(
+            ConditionalElementConfiguration(
+                { this is StepInitialiser<*, *, *> && isForStep(step) },
+                configuration,
+            ),
+        )
     }
 }
 
 open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
-    exitStepOverride: NavigationalStep? = null,
+    exitStepOverride: SubjourneyExitStep? = null,
 ) : AbstractJourneyBuilder<TState>(journey) {
-    var exitInits: MutableList<StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit> = mutableListOf()
+    var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> = mutableListOf()
         private set
 
-    val exitStep = exitStepOverride ?: NavigationalStep(NavigationalStepConfig())
+    val exitStep = exitStepOverride ?: SubjourneyExitStep(SubjourneyExitStepConfig())
 
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
 
     override fun build(): List<JourneyStep<*, *, *>> {
-        step<NavigationComplete, NavigationalStepConfig>(exitStep) {
+        step<SubjourneyComplete, SubjourneyExitStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
         val built = super.build()
@@ -123,7 +144,7 @@ open class SubJourneyBuilder<TState : JourneyState>(
         return built
     }
 
-    fun exitStep(init: StepInitialiser<NavigationalStepConfig, TState, NavigationComplete>.() -> Unit) {
+    fun exitStep(init: StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit) {
         exitInits.add(init)
     }
 }

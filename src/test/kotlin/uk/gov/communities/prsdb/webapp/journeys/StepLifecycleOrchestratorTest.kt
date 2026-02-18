@@ -8,39 +8,26 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
 class StepLifecycleOrchestratorTest {
     @Test
-    fun `when used like a naive constructor, StepLifecycleOrchestrator returns a corresponding orchestrator`() {
-        // Arrange
-        val internalStep = mock<JourneyStep.InternalStep<*, *, *>>()
-        val requestableStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-
-        // Act
-        val notionalOrchestrator = StepLifecycleOrchestrator(internalStep)
-        val visitableOrchestrator = StepLifecycleOrchestrator(requestableStep)
-
-        // Assert
-        assertTrue(notionalOrchestrator is StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator)
-        assertTrue(visitableOrchestrator is StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator)
-    }
-
-    @Test
     fun `when visitable step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.isStepReachable).thenReturn(false)
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = VisitableStepLifecycleOrchestrator(step)
+        whenever(step.isStepReachable).thenReturn(false)
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+        whenever(step.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).getUnreachableStepDestination()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).getUnreachableStepDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -50,22 +37,22 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when visitable step is reachable, getStepModelAndView calls all step methods in the correct order and returns the content and view`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.attemptToReachStep()).thenReturn(true)
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = VisitableStepLifecycleOrchestrator(step)
+        whenever(step.attemptToReachStep()).thenReturn(true)
         val contentMap = mapOf("key" to "value")
         val templateName = "templateName"
-        whenever(stepConfig.getPageVisitContent()).thenReturn(contentMap)
-        whenever(stepConfig.chooseTemplate()).thenReturn(Destination.Template(templateName))
+        whenever(step.getPageVisitContent()).thenReturn(contentMap)
+        whenever(step.chooseTemplate()).thenReturn(Destination.Template(templateName))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).getPageVisitContent()
-        myInOrder.verify(stepConfig).chooseTemplate()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).getPageVisitContent()
+        myInOrder.verify(step).chooseTemplate()
 
         assertEquals(modelAndView.model, contentMap)
         assertEquals(modelAndView.viewName, templateName)
@@ -74,19 +61,19 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when visitable step is unreachable, postStepModelAndView calls step methods in the correct order and returns redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.attemptToReachStep()).thenReturn(false)
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = VisitableStepLifecycleOrchestrator(step)
+        whenever(step.attemptToReachStep()).thenReturn(false)
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+        whenever(step.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).getUnreachableStepDestination()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).getUnreachableStepDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -95,28 +82,28 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when invalid data is posted, postStepModelAndView calls step methods in the correct order and returns error content and view`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.attemptToReachStep()).thenReturn(true)
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = VisitableStepLifecycleOrchestrator(step)
+        whenever(step.attemptToReachStep()).thenReturn(true)
 
         val bindingResult = mock<BindingResult>()
         whenever(bindingResult.hasErrors()).thenReturn(true)
-        whenever(stepConfig.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
+        whenever(step.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
 
         val contentMap = mapOf("key" to "value", "error" to "content")
         val templateName = "templateName"
-        whenever(stepConfig.getInvalidSubmissionContent(anyOrNull())).thenReturn(contentMap)
-        whenever(stepConfig.chooseTemplate()).thenReturn(Destination.Template(templateName))
+        whenever(step.getInvalidSubmissionContent(anyOrNull())).thenReturn(contentMap)
+        whenever(step.chooseTemplate()).thenReturn(Destination.Template(templateName))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).validateSubmittedData(anyOrNull())
-        myInOrder.verify(stepConfig).getInvalidSubmissionContent(anyOrNull())
-        myInOrder.verify(stepConfig).chooseTemplate()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).validateSubmittedData(anyOrNull())
+        myInOrder.verify(step).getInvalidSubmissionContent(anyOrNull())
+        myInOrder.verify(step).chooseTemplate()
 
         assertEquals(modelAndView.model, contentMap)
         assertEquals(modelAndView.viewName, templateName)
@@ -125,47 +112,48 @@ class StepLifecycleOrchestratorTest {
     @Test
     fun `when valid data is posted, postStepModelAndView calls step methods in the correct order and returns redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.RequestableStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.attemptToReachStep()).thenReturn(true)
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = VisitableStepLifecycleOrchestrator(step)
+        whenever(step.attemptToReachStep()).thenReturn(true)
 
         val bindingResult = mock<BindingResult>()
         whenever(bindingResult.hasErrors()).thenReturn(false)
-        whenever(stepConfig.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
+        whenever(step.validateSubmittedData(anyOrNull())).thenReturn(bindingResult)
 
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.getNextDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+        whenever(step.getNextDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.postStepModelAndView(mapOf())
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).validateSubmittedData(anyOrNull())
-        myInOrder.verify(stepConfig).submitFormData(anyOrNull())
-        myInOrder.verify(stepConfig).getNextDestination()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).validateSubmittedData(anyOrNull())
+        myInOrder.verify(step).submitFormData(anyOrNull())
+        myInOrder.verify(step).saveStateIfAllowed()
+        myInOrder.verify(step).getNextDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
     }
 
     @Test
-    fun `when notional step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
+    fun `when internal step is unreachable, getStepModelAndView calls all step methods in the correct order and returns a redirect`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.InternalStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.attemptToReachStep()).thenReturn(false)
+        val step = mock<JourneyStep.InternalStep<*, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = RedirectingStepLifecycleOrchestrator(step)
+        whenever(step.attemptToReachStep()).thenReturn(false)
         val redirectUrl = "redirectUrl"
-        whenever(stepConfig.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
+        whenever(step.getUnreachableStepDestination()).thenReturn(Destination.ExternalUrl(redirectUrl))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).getUnreachableStepDestination()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).getUnreachableStepDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$redirectUrl")
@@ -173,21 +161,21 @@ class StepLifecycleOrchestratorTest {
 
     @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `when notional step is reachable, getStepModelAndView calls all step methods in the correct order and returns the next destination`() {
+    fun `when internal step is reachable, getStepModelAndView calls all step methods in the correct order and returns the next destination`() {
         // Arrange
-        val stepConfig = mock<JourneyStep.InternalStep<*, *, *>>()
-        val myInOrder = inOrder(stepConfig)
-        val orchestrator = StepLifecycleOrchestrator(stepConfig)
-        whenever(stepConfig.attemptToReachStep()).thenReturn(true)
+        val step = mock<JourneyStep.InternalStep<*, *>>()
+        val myInOrder = inOrder(step)
+        val orchestrator = RedirectingStepLifecycleOrchestrator(step)
+        whenever(step.attemptToReachStep()).thenReturn(true)
         val nextUrl = "nextUrl"
-        whenever(stepConfig.getNextDestination()).thenReturn(Destination.ExternalUrl(nextUrl))
+        whenever(step.getNextDestination()).thenReturn(Destination.ExternalUrl(nextUrl))
 
         // Act
         val modelAndView = orchestrator.getStepModelAndView()
 
         // Assert
-        myInOrder.verify(stepConfig).attemptToReachStep()
-        myInOrder.verify(stepConfig).getNextDestination()
+        myInOrder.verify(step).attemptToReachStep()
+        myInOrder.verify(step).getNextDestination()
 
         assertTrue(modelAndView.model.isEmpty())
         assertEquals(modelAndView.viewName, "redirect:$nextUrl")

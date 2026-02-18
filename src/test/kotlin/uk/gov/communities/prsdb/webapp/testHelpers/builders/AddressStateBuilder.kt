@@ -1,13 +1,12 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -34,7 +33,7 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
             CountryOfResidenceFormModel().apply {
                 livesInEnglandOrWales = true
             }
-        withSubmittedValue(LandlordRegistrationStepId.CountryOfResidence.urlPathSegment, countryOfResidenceFormModel)
+        withSubmittedValue(CountryOfResidenceStep.ROUTE_SEGMENT, countryOfResidenceFormModel)
         return self()
     }
 

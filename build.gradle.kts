@@ -4,8 +4,8 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.5.6"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.5.10"
+    id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.flywaydb.flyway") version "10.18.0"
@@ -32,29 +32,29 @@ repositories {
 
 dependencies {
     // Spring Boot Web
-    implementation("org.springframework.boot:spring-boot-starter-web:3.4.10")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.boot:spring-boot-starter-validation:3.4.10")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // Database
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.10")
-    runtimeOnly("org.postgresql:postgresql:42.7.7")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    runtimeOnly("org.postgresql:postgresql")
 
     // Migrations
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
 
     // Redis
-    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.4.10")
-    implementation("org.springframework.session:spring-session-data-redis:4.0.0-M2")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.session:spring-session-data-redis")
 
     // Auth
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client:3.4.10")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
     // Templating
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:3.4.10")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 
     // External service clients
@@ -64,15 +64,15 @@ dependencies {
     implementation("software.amazon.awssdk:s3-transfer-manager:2.22.13")
 
     // Development
-    developmentOnly("org.springframework.boot:spring-boot-devtools:3.4.10")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Test dependencies
-    testImplementation("org.springframework.boot:spring-boot-starter-test:3.4.10")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers:3.4.10")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
-    testImplementation("org.springframework.security:spring-security-test:6.4.11")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.microsoft.playwright:playwright:1.47.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")

@@ -6,6 +6,7 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
@@ -17,7 +18,8 @@ class PropertyStateSessionBuilder(
 ) : JourneyStateSessionBuilder<PropertyStateSessionBuilder>(),
     AddressStateBuilder<PropertyStateSessionBuilder>,
     LicensingStateBuilder<PropertyStateSessionBuilder>,
-    OccupancyStateBuilder<PropertyStateSessionBuilder> {
+    OccupancyStateBuilder<PropertyStateSessionBuilder>,
+    JointLandlordsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
         additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
         return this
@@ -94,7 +96,26 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationBillsIncluded() = beforePropertyRegistrationRentIncludesBills().withRentIncludesBills(true)
 
-        fun beforePropertyRegistrationCheckAnswers() = beforePropertyRegistrationOccupancy().withOccupancyStatus(false)
+        fun beforePropertyRegistrationFurnished() = beforePropertyRegistrationBillsIncluded().withBillsIncluded()
+
+        fun beforePropertyRegistrationRentFrequency() = beforePropertyRegistrationFurnished().withFurnished()
+
+        fun beforePropertyRegistrationRentAmount(rentFrequency: RentFrequency) =
+            beforePropertyRegistrationRentFrequency().withRentFrequency(
+                rentFrequency,
+            )
+
+        fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount()
+
+        fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>?) =
+            if (alreadyInvitedEmails != null) {
+                beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
+            } else {
+                beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
+            }
+
+        fun beforePropertyRegistrationCheckAnswers() =
+            beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withHasNoJointLandlords()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }

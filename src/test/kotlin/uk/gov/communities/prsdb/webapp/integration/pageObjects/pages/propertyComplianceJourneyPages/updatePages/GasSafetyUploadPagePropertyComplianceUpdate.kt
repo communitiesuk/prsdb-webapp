@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UploadCertificateFormPage
 
@@ -10,7 +10,7 @@ class GasSafetyUploadPagePropertyComplianceUpdate(
     urlArguments: Map<String, String>,
 ) : UploadCertificateFormPage(
         page,
-        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+        LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
             PropertyComplianceStepId.GasSafetyUpload,
         ),

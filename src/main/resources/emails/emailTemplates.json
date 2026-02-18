@@ -28,8 +28,8 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "d9250d23-8930-4649-91ab-0c682490da06",
-    "prod_id": "2d48a8e6-9d12-4c2f-8c61-ec0ffb6b7c11",
+    "test_id": "93fdf7e6-78ce-4175-a0a0-4ffe0ba24b47",
+    "prod_id": "de96877f-3f1a-4a5c-9b8d-d21f69d92ce9",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "GOV.UK - Your registered property on the PRS Database",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
@@ -196,10 +196,17 @@
     "bodyLocation": "/emails/LocalCouncilUserInvitationInformAdminEmail.md"
   },
   {
-    "test_id": "4d32e9f2-3c82-4ec4-a1d2-2037e76c2ad2",
-    "prod_id": "4c367b23-8797-4305-8e40-5d368a38940e",
+    "test_id": "9013fb3f-d3b3-4f46-8d76-46f0dcb47ec5",
+    "prod_id": "7cd893b9-46f3-4649-845a-45823e5f088b",
     "enumName": "INCOMPLETE_PROPERTY_REMINDER_EMAIL",
     "subject": "GOV.UK - You have an incomplete property registration",
     "bodyLocation": "/emails/IncompletePropertyReminder.md"
+  },
+  {
+    "test_id": "ff043b63-a77a-48d4-929a-fc9a523c3cb6",
+    "prod_id": "324209b0-8f9c-4a7a-8bd7-ca43cee6079f",
+    "enumName": "JOINT_LANDLORD_INVITATION_EMAIL",
+    "subject": "You've been invited to join a rental property registration",
+    "bodyLocation": "/emails/JointLandlordInvitation.md"
   }
 ]

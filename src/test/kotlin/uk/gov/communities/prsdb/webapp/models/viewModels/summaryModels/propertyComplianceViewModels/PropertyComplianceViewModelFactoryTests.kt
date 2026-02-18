@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.mock
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.Test
@@ -57,7 +57,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -68,7 +68,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -79,7 +79,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -103,7 +103,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -114,7 +114,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -138,7 +138,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -149,7 +149,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -173,7 +173,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -184,7 +184,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -208,7 +208,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -232,7 +232,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -256,7 +256,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -280,7 +280,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -291,7 +291,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -302,7 +302,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -326,7 +326,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -337,7 +337,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -361,7 +361,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -372,7 +372,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -396,7 +396,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -407,7 +407,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -431,7 +431,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateGasSafety,
                             ),
@@ -455,7 +455,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEICR,
                             ),
@@ -479,7 +479,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),
@@ -503,7 +503,7 @@ class PropertyComplianceViewModelFactoryTests {
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
                         PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            PropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
                                 PropertyComplianceStepId.UpdateEpc,
                             ),

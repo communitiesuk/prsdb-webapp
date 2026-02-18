@@ -8,7 +8,7 @@ import org.hibernate.StatelessSession
 import org.json.JSONArray
 import org.json.JSONObject
 import org.springframework.core.env.Environment
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
@@ -20,8 +20,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.zip.ZipInputStream
 
-// TODO PRSD-1021: Change annotation to PrsdbProcessService when ExampleOsDownloadsController is deleted
-@Service
+@PrsdbTaskService
 class NgdAddressLoader(
     private val sessionFactory: SessionFactory,
     private val osDownloadsClient: OsDownloadsClient,
@@ -141,20 +140,31 @@ class NgdAddressLoader(
             session.doWork { connection ->
                 ngdAddressLoaderRepository.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
                     var batchRecordCount = 0
+                    val upsertedAddressUprns = mutableSetOf<Long>()
                     csvParser.forEachIndexed { index, record ->
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
-                        if (hasRecordBeenAdded) batchRecordCount++
+                        if (hasRecordBeenAdded) {
+                            batchRecordCount++
+                            val uprn = record.get("uprn").toLong()
+                            upsertedAddressUprns.add(uprn)
+                        }
 
-                        if (batchRecordCount >= BATCH_SIZE || !csvParser.iterator().hasNext()) {
+                        if (batchRecordCount >= BATCH_SIZE) {
                             preparedStatement.executeBatch()
                             batchRecordCount = 0
                         }
 
+                        if (upsertedAddressUprns.size >= UPRN_BATCH_SIZE) {
+                            ngdAddressLoaderRepository.updatePropertyOwnershipAddresses(upsertedAddressUprns)
+                            upsertedAddressUprns.clear()
+                        }
+
                         if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
+                    if (batchRecordCount > 0) preparedStatement.executeBatch()
+                    if (upsertedAddressUprns.isNotEmpty()) ngdAddressLoaderRepository.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                 }
             }
-            updatePropertyOwnershipAddresses()
             setStoredDataPackageVersionId(dataPackageVersionId)
             transaction.commit()
         } catch (exception: Exception) {
@@ -183,8 +193,8 @@ class NgdAddressLoader(
 
         val custodianCode = csvRecord.get("localcustodiancode")
         val localCouncilId =
-            // We only keep English LA records
-            // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LA
+            // We only keep English LC records
+            // The custodian code 7655 is for address records maintained by Ordnance Survey rather than an LC
             if (country != "England" || custodianCode == "7655") {
                 null
             } else {
@@ -208,12 +218,6 @@ class NgdAddressLoader(
 
         preparedStatement.addBatch()
         return true
-    }
-
-    private fun updatePropertyOwnershipAddresses() {
-        log("Starting to update property ownership addresses")
-        ngdAddressLoaderRepository.updatePropertyOwnershipAddresses()
-        log("Property ownership addresses updated")
     }
 
     private fun deleteUnusedInactiveAddresses(session: StatelessSession) {
@@ -241,6 +245,7 @@ class NgdAddressLoader(
         const val DATA_PACKAGE_FILE_NAME = "add_gb_builtaddress"
 
         const val BATCH_SIZE = 5000
+        const val UPRN_BATCH_SIZE = 20000
 
         private val deleteChangeTypes =
             listOf("End Of Life", "Moved To A Different Feature Type")

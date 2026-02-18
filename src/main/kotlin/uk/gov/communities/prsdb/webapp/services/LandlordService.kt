@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -8,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
@@ -127,20 +129,24 @@ class LandlordService(
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val landlordPage =
-            if (lrn == null) {
-                landlordRepository.searchMatching(
-                    searchTerm,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    pageRequest,
-                )
-            } else {
-                landlordRepository.searchMatchingLRN(
-                    lrn.number,
-                    localCouncilBaseUserId,
-                    restrictToLocalCouncil,
-                    pageRequest,
-                )
+            try {
+                if (lrn == null) {
+                    landlordRepository.searchMatching(
+                        searchTerm,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        pageRequest,
+                    )
+                } else {
+                    landlordRepository.searchMatchingLRN(
+                        lrn.number,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        pageRequest,
+                    )
+                }
+            } catch (_: QueryTimeoutException) {
+                throw RepositoryQueryTimeoutException("Landlord search with query '$searchTerm' timed out")
             }
 
         return landlordPage.map { LandlordSearchResultViewModel.fromDataModel(it, backLinkService.storeCurrentUrlReturningKey()) }

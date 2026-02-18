@@ -27,6 +27,16 @@
             </div>
         </section>
         <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.joinProperty.heading}">landlord.dashboard.joinProperty.heading</h2>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${joinPropertyUrl}, #{landlord.dashboard.joinProperty.button})}">
+                        landlord.dashboard.joinProperty.button
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section class="prsd-dashboard__section">
             <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.viewAndUpdateRecords.heading}">landlord.dashboard.viewAndUpdateRecords.heading</h2>
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">

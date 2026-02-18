@@ -17,7 +17,6 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
@@ -27,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusAlertSender
@@ -80,13 +80,6 @@ class PrsdbWebappApplicationTests {
     @MockitoBean
     lateinit var epcCertificateUrlProvider: EpcCertificateUrlProvider
 
-    // TODO 1021: Remove OS Download beans when ExampleOsDownloadsController is removed
-    @MockitoBean
-    lateinit var osDownloadsConfig: OsDownloadsConfig
-
-    @MockitoBean
-    lateinit var osDownloadsClient: OsDownloadsClient
-
     @Test
     fun contextLoads() {
     }
@@ -102,9 +95,8 @@ class PrsdbWebappApplicationTests {
                 UploadDequarantiner::class.simpleBeanName,
                 VirusScanProcessingService::class.simpleBeanName,
                 VirusAlertSender::class.simpleBeanName,
-                // TODO 1021: Uncomment when ExampleOsDownloadsController is removed
-                // OsDownloadsConfig::class.simpleBeanName,
-                // NgdAddressLoader::class.simpleBeanName,
+                OsDownloadsConfig::class.simpleBeanName,
+                NgdAddressLoader::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
