@@ -408,3 +408,9 @@ VALUES (1, 1),
        (1, 3),
        (1, 4),
        (1, 5);
+
+-- Joint landlord invitation for property ownership ID 1 (used in property deregistration tests)
+INSERT INTO joint_landlord_invitation (id, created_date, token, invited_email, registered_propertyid)
+VALUES (1, '01/15/25', '11111111-1111-1111-1111-111111111111', 'jointlandlord@example.com', 1);
+
+SELECT setval(pg_get_serial_sequence('joint_landlord_invitation', 'id'), (SELECT MAX(id) FROM joint_landlord_invitation));
