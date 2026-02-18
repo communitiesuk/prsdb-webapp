@@ -1,6 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
+import kotlinx.datetime.toJavaLocalDate
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.EicrCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.EpcCyaSummaryRowsFactory
@@ -8,8 +12,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.GasSafetyCyaS
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
@@ -18,6 +30,11 @@ class PropertyComplianceCyaStepConfig(
     private val uploadService: UploadService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val propertyComplianceService: PropertyComplianceService,
+    private val messageSource: MessageSource,
+    private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
+    private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
@@ -29,6 +46,66 @@ class PropertyComplianceCyaStepConfig(
             "epcData" to getEpcData(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
+
+    override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
+        val epcDetails = state.acceptedEpc
+
+        val propertyCompliance =
+            propertyComplianceService.createPropertyCompliance(
+                propertyOwnershipId = state.propertyId,
+                gasSafetyCertUploadId = state.getGasSafetyCertificateFileUploadId(),
+                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDate()?.toJavaLocalDate(),
+                gasSafetyCertEngineerNum = state.gasSafetyEngineerNumberStep.formModelOrNull?.engineerNumber,
+                gasSafetyCertExemptionReason = state.gasSafetyExemptionReasonStep.formModelOrNull?.exemptionReason,
+                gasSafetyCertExemptionOtherReason = state.gasSafetyExemptionOtherReasonStep.formModelOrNull?.otherReason,
+                eicrUploadId = state.getEicrCertificateFileUploadId(),
+                eicrIssueDate = state.getEicrCertificateIssueDate()?.toJavaLocalDate(),
+                eicrExemptionReason = state.eicrExemptionReasonStep.formModelOrNull?.exemptionReason,
+                eicrExemptionOtherReason = state.eicrExemptionOtherReasonStep.formModelOrNull?.otherReason,
+                epcUrl = epcDetails?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
+                epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
+                tenancyStartedBeforeEpcExpiry = state.epcExpiryCheckStep.formModelOrNull?.tenancyStartedBeforeExpiry,
+                epcEnergyRating = epcDetails?.energyRating,
+                epcExemptionReason = state.epcExemptionReasonStep.formModelOrNull?.exemptionReason,
+                epcMeesExemptionReason = state.meesExemptionReasonStep.formModelOrNull?.exemptionReason,
+            )
+
+        sendConfirmationEmail(propertyCompliance)
+
+        propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(state.propertyId)
+
+        propertyOwnershipService.deleteIncompleteComplianceForm(state.propertyId)
+    }
+
+    private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
+        val landlordEmail = propertyCompliance.propertyOwnership.primaryLandlord.email
+        val propertyAddress = propertyCompliance.propertyOwnership.address.singleLineAddress
+
+        val confirmationMsgKeys = PropertyComplianceConfirmationMessageKeys(propertyCompliance)
+        val compliantMsgs = confirmationMsgKeys.compliantMsgKeys.map { messageSource.getMessageForKey(it) }
+        val nonCompliantMsgs = confirmationMsgKeys.nonCompliantMsgKeys.map { messageSource.getMessageForKey(it) }
+
+        if (nonCompliantMsgs.isEmpty()) {
+            fullPropertyComplianceConfirmationEmailService.sendEmail(
+                landlordEmail,
+                FullPropertyComplianceConfirmationEmail(
+                    propertyAddress,
+                    EmailBulletPointList(compliantMsgs),
+                    absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                ),
+            )
+        } else {
+            partialPropertyComplianceConfirmationEmailService.sendEmail(
+                landlordEmail,
+                PartialPropertyComplianceConfirmationEmail(
+                    propertyAddress,
+                    RegistrationNumberDataModel.fromRegistrationNumber(propertyCompliance.propertyOwnership.registrationNumber),
+                    EmailBulletPointList(nonCompliantMsgs),
+                    absoluteUrlProvider.buildComplianceInformationUri(propertyCompliance.propertyOwnership.id).toString(),
+                ),
+            )
+        }
+    }
 
     fun getGasSafetyData(state: PropertyComplianceJourneyState) =
         GasSafetyCyaSummaryRowsFactory(

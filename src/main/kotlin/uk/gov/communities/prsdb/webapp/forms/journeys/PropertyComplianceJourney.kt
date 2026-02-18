@@ -497,8 +497,14 @@ class PropertyComplianceJourney(
                     Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
                 }
             }
-            HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
-            HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+
+            HasEpc.NO -> {
+                Pair(PropertyComplianceStepId.EpcMissing, null)
+            }
+
+            HasEpc.NOT_REQUIRED -> {
+                Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+            }
         }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {
@@ -558,6 +564,7 @@ class PropertyComplianceJourney(
 
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
+        // TODO PDJB-467 - make sure this behavious is migrated
         return if (propertyCompliance.propertyOwnership.primaryLandlord.shouldSeeFeedback) {
             FEEDBACK_PATH_SEGMENT
         } else {
