@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance
 
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
@@ -87,12 +88,12 @@ class GasSafetyCyaSummaryRowsFactory(
     private fun getGasSafetyCertDetailRows() =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val issueDate = state.getGasSafetyCertificateIssueDateIfReachable()
                 addAll(
                     listOf(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.issueDate",
-                            issueDate,
+                            state.getGasSafetyCertificateIssueDateIfReachable()
+                                ?: throw NotNullFormModelValueIsNullException("Gas safety issue date is null"),
                             Destination.VisitableStep(state.gasSafetyIssueDateStep, childJourneyId),
                         ),
                         SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -100,30 +101,43 @@ class GasSafetyCyaSummaryRowsFactory(
                             state.getGasSafetyExpiryDate(),
                             null,
                         ),
-                    ),
-                )
-
-                val engineerNum = state.gasSafetyEngineerNumberStep.formModelOrNull?.engineerNumber
-                if (engineerNum != null && !state.getGasSafetyCertificateIsOutdated()!!) {
-                    add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.gasSafety.engineerNumber",
-                            engineerNum,
+                            state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber
+                                ?: throw NotNullFormModelValueIsNullException("Gas safety engineer number is null"),
                             Destination.VisitableStep(state.gasSafetyEngineerNumberStep, childJourneyId),
                         ),
-                    )
-                }
+                    ),
+                )
             }.toList()
 
     private fun getGasSafetyExemptionRow(): SummaryListRowViewModel {
-        val exemptionReason = state.gasSafetyExemptionReasonStep.formModelOrNull?.exemptionReason
+        val exemptionReason = state.gasSafetyExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason
+        val fieldValue2 =
+            when (exemptionReason) {
+                null -> {
+                    "commonText.none"
+                }
+
+                GasSafetyExemptionReason.OTHER -> {
+                    listOf(
+                        exemptionReason,
+                        state.gasSafetyExemptionOtherReasonStep.formModel.otherReason,
+                    )
+                }
+
+                else -> {
+                    exemptionReason
+                }
+            }
+
         val fieldValue =
-            if ((state.gasSafetyExemptionStep.formModelOrNull?.hasExemption != true) || exemptionReason == null) {
+            if ((exemptionReason == null)) {
                 "commonText.none"
             } else if (exemptionReason == GasSafetyExemptionReason.OTHER) {
                 listOf(
                     exemptionReason,
-                    state.gasSafetyExemptionOtherReasonStep.formModelOrNull?.otherReason,
+                    state.gasSafetyExemptionOtherReasonStep.formModel.otherReason,
                 )
             } else {
                 exemptionReason

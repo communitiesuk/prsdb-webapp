@@ -108,17 +108,23 @@ class EicrCyaSummaryRowsFactory(
             }.toList()
 
     private fun getEicrExemptionRow(): SummaryListRowViewModel {
-        val exemptionReason = state.eicrExemptionReasonStep.formModelOrNull?.exemptionReason
+        val exemptionReason = state.eicrExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason
         val fieldValue =
-            if ((state.eicrExemptionStep.formModelOrNull?.hasExemption != true) || exemptionReason == null) {
-                "commonText.none"
-            } else if (exemptionReason == EicrExemptionReason.OTHER) {
-                listOf(
-                    exemptionReason,
-                    state.eicrExemptionOtherReasonStep.formModelOrNull?.otherReason,
-                )
-            } else {
-                exemptionReason
+            when (exemptionReason) {
+                null -> {
+                    "commonText.none"
+                }
+
+                EicrExemptionReason.OTHER -> {
+                    listOf(
+                        exemptionReason,
+                        state.eicrExemptionOtherReasonStep.formModel.otherReason,
+                    )
+                }
+
+                else -> {
+                    exemptionReason
+                }
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(

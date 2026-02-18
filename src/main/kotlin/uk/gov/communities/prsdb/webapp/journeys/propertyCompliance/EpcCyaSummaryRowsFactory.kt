@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance
 
-import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -65,7 +64,7 @@ class EpcCyaSummaryRowsFactory(
                     ),
                 )
 
-                val expiryCheckResult = state.epcExpiryCheckStep.formModelOrNull?.tenancyStartedBeforeExpiry
+                val expiryCheckResult = state.epcExpiryCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry
                 if (expiryCheckResult != null) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -84,8 +83,8 @@ class EpcCyaSummaryRowsFactory(
                     ),
                 )
 
-                if (epcDetails.energyRating.uppercase() !in EPC_ACCEPTABLE_RATING_RANGE) {
-                    val exemptionReason = state.meesExemptionReasonStep.formModelOrNull?.exemptionReason
+                if (state.meesExemptionCheckStep.isStepReachable) {
+                    val exemptionReason = state.meesExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason
                     val changeUrl =
                         if (state.epcExpiredStep.outcome == Complete.COMPLETE) {
                             epcStartingStep
@@ -115,7 +114,7 @@ class EpcCyaSummaryRowsFactory(
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkComplianceAnswers.epc.exemption",
-            state.epcExemptionReasonStep.formModelOrNull?.exemptionReason ?: "commonText.none",
+            state.epcExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason ?: "commonText.none",
             changeUrl,
         )
     }
