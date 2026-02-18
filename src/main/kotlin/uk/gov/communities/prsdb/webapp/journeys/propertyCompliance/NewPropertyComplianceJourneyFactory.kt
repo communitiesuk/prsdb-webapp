@@ -62,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.EicrTas
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -153,6 +154,7 @@ class NewPropertyComplianceJourneyFactory(
                     nextUrl { PropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId) }
                 }
             }
+            checkYourAnswersJourney()
         }
     }
 
