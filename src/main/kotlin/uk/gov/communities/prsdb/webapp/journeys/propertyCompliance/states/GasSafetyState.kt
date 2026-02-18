@@ -17,8 +17,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
-interface GasSafetyState : JourneyState {
+interface GasSafetyState :
+    JourneyState,
+    CheckYourAnswersJourneyState {
     val gasSafetyStep: GasSafetyStep
     val gasSafetyIssueDateStep: GasSafetyIssueDateStep
     val gasSafetyEngineerNumberStep: GasSafetyEngineerNumberStep
