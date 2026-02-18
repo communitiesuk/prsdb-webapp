@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.UpdateOwnershipTypeJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
@@ -26,6 +27,7 @@ import java.security.Principal
 @PreAuthorize("hasRole('LANDLORD')")
 class UpdateOwnershipTypeController(
     private val journeyFactory: UpdateOwnershipTypeJourneyFactory,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("{stepName}")
     fun getUpdateStep(
@@ -33,14 +35,21 @@ class UpdateOwnershipTypeController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView =
-        try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
+        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
+            try {
+                val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
+                journeyMap[stepName]?.getStepModelAndView()
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+            } catch (_: NoSuchJourneyException) {
+                val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
+                val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+                ModelAndView("redirect:$redirectUrl")
+            }
+        } else {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
+            )
         }
 
     @PostMapping("{stepName}")
@@ -51,14 +60,21 @@ class UpdateOwnershipTypeController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView =
-        try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
+        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
+            try {
+                val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
+                journeyMap[stepName]?.postStepModelAndView(formData)
+                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+            } catch (_: NoSuchJourneyException) {
+                val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
+                val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+                ModelAndView("redirect:$redirectUrl")
+            }
+        } else {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
+            )
         }
 
     companion object {
