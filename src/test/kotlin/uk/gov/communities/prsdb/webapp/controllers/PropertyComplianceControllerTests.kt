@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSES_IN_MULTIPLE_OCCUPATION_U
 import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
+import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -827,6 +828,61 @@ class PropertyComplianceControllerTests(
                     attribute("propertyComplianceUrl", expectedPropertyComplianceUrl)
                 }
             }
+        }
+    }
+
+    @Nested
+    inner class GetCurrentUserShouldSeeFeedbackPages {
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getCurrentUserShouldSeeFeedbackPages uses database value when session value is not present`() {
+            val expectedUsername = "user"
+            whenever(mockLandlordService.getLandlordUserShouldSeeFeedbackPages(expectedUsername)).thenReturn(true)
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId, true))
+                .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+
+            mvc.get(validPropertyComplianceStepUrl).andExpect {
+                status { isOk() }
+            }
+
+            verify(mockLandlordService).getLandlordUserShouldSeeFeedbackPages(expectedUsername)
+            verify(mockPropertyComplianceJourneyFactory).createJourneySteps(validPropertyOwnershipId, true)
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getCurrentUserShouldSeeFeedbackPages uses session value if present and does not call database`() {
+            val expectedUsername = "user"
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId, true))
+                .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+
+            mvc
+                .get(validPropertyComplianceStepUrl) {
+                    sessionAttr(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES, true)
+                }.andExpect {
+                    status { isOk() }
+                }
+
+            verify(mockLandlordService, never()).getLandlordUserShouldSeeFeedbackPages(expectedUsername)
+            verify(mockPropertyComplianceJourneyFactory).createJourneySteps(validPropertyOwnershipId, true)
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getCurrentUserShouldSeeFeedbackPages stores database value in session`() {
+            val expectedUsername = "user"
+            whenever(mockLandlordService.getLandlordUserShouldSeeFeedbackPages(expectedUsername)).thenReturn(false)
+            whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId, false))
+                .thenReturn(mapOf(GasSafetyEngineerNumberStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+
+            mvc.get(validPropertyComplianceStepUrl).andExpect {
+                status { isOk() }
+                request {
+                    sessionAttribute(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES, false)
+                }
+            }
+
+            verify(mockLandlordService).getLandlordUserShouldSeeFeedbackPages(expectedUsername)
         }
     }
 

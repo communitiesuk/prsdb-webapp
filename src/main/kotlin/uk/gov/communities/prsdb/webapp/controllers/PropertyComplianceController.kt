@@ -441,14 +441,13 @@ class PropertyComplianceController(
         return formData + (UploadCertificateFormModel::isUserSubmittedMetadataOnly.name to true)
     }
 
-    // TODO PDJB-467 - add tests to check this including that it only calls db if it can't find this in the session
     private fun getCurrentUserShouldSeeFeedbackPages(principal: Principal): Boolean {
         val userShouldSeeFeebackSessionValue = session.getAttribute(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES) as Boolean?
         if (userShouldSeeFeebackSessionValue != null) return userShouldSeeFeebackSessionValue
 
         val userShouldSeeFeebackDatabaseValue = landlordService.getLandlordUserShouldSeeFeedbackPages(principal.name)
         session.setAttribute(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES, userShouldSeeFeebackDatabaseValue)
-        return landlordService.getLandlordUserShouldSeeFeedbackPages(principal.name)
+        return userShouldSeeFeebackDatabaseValue
     }
 
     companion object {
