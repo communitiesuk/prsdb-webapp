@@ -28,6 +28,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotAutomatchedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
@@ -44,6 +50,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
@@ -181,10 +191,20 @@ class PropertyComplianceJourney(
     override val epcTask: EpcTask,
     override val epcQuestionStep: EpcQuestionStep,
     override val checkAutomatchedEpcStep: CheckMatchedEpcStep,
+    override val epcNotAutomatchedStep: EpcNotAutomatchedStep,
     override val searchForEpcStep: SearchForEpcStep,
     override val epcSupersededStep: EpcSupersededStep,
     override val checkMatchedEpcStep: CheckMatchedEpcStep,
     override val epcNotFoundStep: EpcNotFoundStep,
+    override val epcMissingStep: EpcMissingStep,
+    override val epcExemptionReasonStep: EpcExemptionReasonStep,
+    override val epcExemptionConfirmationStep: EpcExemptionConfirmationStep,
+    override val meesExemptionCheckStep: MeesExemptionCheckStep,
+    override val meesExemptionReasonStep: MeesExemptionReasonStep,
+    override val meesExemptionConfirmationStep: MeesExemptionConfirmationStep,
+    override val lowEnergyRatingStep: LowEnergyRatingStep,
+    override val epcExpiryCheckStep: EpcExpiryCheckStep,
+    override val epcExpiredStep: EpcExpiredStep,
     // Landlord Responsibilties
     override val fireSafetyStep: FireSafetyDeclarationStep,
     override val keepPropertySafeStep: KeepPropertySafeStep,
@@ -197,6 +217,7 @@ class PropertyComplianceJourney(
     PropertyComplianceJourneyState {
     override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
     override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
+    override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")

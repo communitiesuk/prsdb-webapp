@@ -20,7 +20,6 @@ class GasSafetyCertificateUploadStepConfig(
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
             "alreadyUploaded" to (getFormModelFromStateOrNull(state)?.fileUploadId != null),

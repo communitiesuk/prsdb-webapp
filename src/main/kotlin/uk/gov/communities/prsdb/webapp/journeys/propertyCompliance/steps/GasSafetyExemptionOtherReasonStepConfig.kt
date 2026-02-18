@@ -15,7 +15,6 @@ class GasSafetyExemptionOtherReasonStepConfig :
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
             "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
             "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
