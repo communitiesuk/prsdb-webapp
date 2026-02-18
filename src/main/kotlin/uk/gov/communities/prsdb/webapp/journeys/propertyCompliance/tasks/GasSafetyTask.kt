@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class GasSafetyTask : Task<GasSafetyState>() {
-    // TODO PDJB-467 - check submit button text for steps that finish at the exit step
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {
             step(journey.gasSafetyStep) {

@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
@@ -120,5 +121,7 @@ class GasSafetyStateTests {
                 mock<GasSafetyCertificateUploadStep>().apply {
                     whenever(this.formModelOrNull).thenReturn(gasSafetyUploadFormModel)
                 }
+            override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
+            override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
         }
 }

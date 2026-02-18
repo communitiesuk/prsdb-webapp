@@ -45,5 +45,6 @@ interface EpcState :
     val epcExpiryCheckStep: EpcExpiryCheckStep
     val epcExpiredStep: EpcExpiredStep
 
+    // TODO PDJB-467 - need tests for this
     fun getNotNullAcceptedEpc() = acceptedEpc ?: throw PrsdbWebException("Attempting to access accepted EPC when it is null in state")
 }

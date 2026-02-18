@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
@@ -118,5 +119,7 @@ class EicrStateTests {
                 mock<EicrUploadStep>().apply {
                     whenever(this.formModelOrNull).thenReturn(eicrUploadFormModel)
                 }
+            override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
+            override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
         }
 }

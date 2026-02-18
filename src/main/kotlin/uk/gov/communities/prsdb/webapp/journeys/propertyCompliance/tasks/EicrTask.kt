@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class EicrTask : Task<EicrState>() {
-    // TODO PDJB-467 - check submit button text for steps that finish at the exit step
     override fun makeSubJourney(state: EicrState) =
         subJourney(state) {
             step(journey.eicrStep) {
