@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
@@ -16,23 +16,10 @@ class GasSafetyStepConfig(
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafety.fieldSetHeading",
             "fieldSetHint" to "forms.gasSafety.fieldSetHint",
             "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
-            "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        valueStr = "yes",
-                        labelMsgKey = "forms.radios.option.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        valueStr = "no",
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
-                ),
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/certificateForm"

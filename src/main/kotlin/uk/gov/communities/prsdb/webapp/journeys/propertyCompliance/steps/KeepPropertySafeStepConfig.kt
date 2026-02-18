@@ -16,7 +16,6 @@ class KeepPropertySafeStepConfig : AbstractRequestableStepConfig<Complete, KeepP
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "housingHealthAndSafetyRatingSystemUrl" to HOUSING_HEALTH_AND_SAFETY_RATING_SYSTEM_URL,
             "homesAct2018Url" to HOMES_ACT_2018_URL,
             "options" to

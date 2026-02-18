@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.ExampleFeatureFlagTestController
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
+import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -82,6 +83,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlag
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -1413,6 +1415,11 @@ class Navigator(
             )
         assertTrue(response.ok(), "Failed to store invitation token. Received status code: ${response.status()}")
         response.dispose()
+    }
+
+    fun goToJoinPropertyStartPage(): JoinPropertyStartPage {
+        navigate(JoinPropertyController.JOIN_PROPERTY_START_PAGE_ROUTE)
+        return createValidPage(page, JoinPropertyStartPage::class)
     }
 
     companion object {

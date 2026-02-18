@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,11 +37,11 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         assertPageIs(page, LandlordIncompletePropertiesPage::class)
     }
 
-    // TODO: PDJB-273 - Update test to navigate to join registered property page once implemented
     @Test
-    fun `the join registered property button is displayed`() {
+    fun `the join registered property button links to the join property start page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
-        assertThat(dashboard.joinRegisteredPropertyButton).isVisible()
+        dashboard.joinRegisteredPropertyButton.clickAndWait()
+        assertPageIs(page, JoinPropertyStartPage::class)
     }
 
     @Test

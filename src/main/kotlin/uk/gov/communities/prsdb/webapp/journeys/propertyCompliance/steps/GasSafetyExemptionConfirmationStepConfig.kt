@@ -13,7 +13,6 @@ class GasSafetyExemptionConfirmationStepConfig : AbstractRequestableStepConfig<C
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 

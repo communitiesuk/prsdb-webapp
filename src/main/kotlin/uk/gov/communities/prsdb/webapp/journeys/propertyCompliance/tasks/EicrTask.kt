@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonStep
@@ -20,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrSte
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class EicrTask : Task<EicrState>() {
@@ -70,14 +70,14 @@ class EicrTask : Task<EicrState>() {
                 parents { journey.eicrStep.hasOutcome(EicrMode.NO_CERTIFICATE) }
                 nextStep { mode ->
                     when (mode) {
-                        EicrExemptionMode.HAS_EXEMPTION -> journey.eicrExemptionReasonStep
-                        EicrExemptionMode.NO_EXEMPTION -> journey.eicrExemptionMissingStep
+                        ExemptionMode.HAS_EXEMPTION -> journey.eicrExemptionReasonStep
+                        ExemptionMode.NO_EXEMPTION -> journey.eicrExemptionMissingStep
                     }
                 }
             }
             step(journey.eicrExemptionReasonStep) {
                 routeSegment(EicrExemptionReasonStep.ROUTE_SEGMENT)
-                parents { journey.eicrExemptionStep.hasOutcome(EicrExemptionMode.HAS_EXEMPTION) }
+                parents { journey.eicrExemptionStep.hasOutcome(ExemptionMode.HAS_EXEMPTION) }
                 nextStep { mode ->
                     when (mode) {
                         EicrExemptionReasonMode.LISTED_REASON_SELECTED -> journey.eicrExemptionConfirmationStep
@@ -102,7 +102,7 @@ class EicrTask : Task<EicrState>() {
             }
             step(journey.eicrExemptionMissingStep) {
                 routeSegment(EicrExemptionMissingStep.ROUTE_SEGMENT)
-                parents { journey.eicrExemptionStep.hasOutcome(EicrExemptionMode.NO_EXEMPTION) }
+                parents { journey.eicrExemptionStep.hasOutcome(ExemptionMode.NO_EXEMPTION) }
                 nextStep { exitStep }
             }
             exitStep {

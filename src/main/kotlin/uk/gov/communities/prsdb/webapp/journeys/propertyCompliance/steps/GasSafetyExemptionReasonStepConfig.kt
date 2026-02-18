@@ -15,7 +15,6 @@ class GasSafetyExemptionReasonStepConfig :
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafetyExemptionReason.fieldSetHeading",
             "radioOptions" to
                 listOf(
@@ -36,7 +35,7 @@ class GasSafetyExemptionReasonStepConfig :
                 ),
         )
 
-    override fun chooseTemplate(state: JourneyState): String = "forms/exemptionReasonForm.html"
+    override fun chooseTemplate(state: JourneyState): String = "forms/exemptionReasonForm"
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.let {

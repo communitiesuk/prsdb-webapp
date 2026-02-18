@@ -12,7 +12,6 @@ class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<GasSafetyIssu
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHeading",
             "fieldSetHint" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",

@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
@@ -16,22 +16,9 @@ class EicrStepConfig(
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.eicr.fieldSetHeading",
             "fieldSetHint" to "forms.eicr.fieldSetHint",
-            "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        valueStr = "yes",
-                        labelMsgKey = "forms.radios.option.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        valueStr = "no",
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
-                ),
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
         )
 

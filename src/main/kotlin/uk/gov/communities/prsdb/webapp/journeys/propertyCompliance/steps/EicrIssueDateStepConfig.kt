@@ -12,7 +12,6 @@ class EicrIssueDateStepConfig : AbstractRequestableStepConfig<EicrIssueDateMode,
 
     override fun getStepSpecificContent(state: EicrState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.todayOrPastDate.eicr.fieldSetHeading",
             "fieldSetHint" to "forms.todayOrPastDate.eicr.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
