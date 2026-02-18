@@ -48,26 +48,27 @@ class PropertyComplianceCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
+        // TODO PDJB-467 - will this save certificates and exemptions if both have been added but some data should not be reachable?
         val epcDetails = state.acceptedEpc
 
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(
                 propertyOwnershipId = state.propertyId,
-                gasSafetyCertUploadId = state.getGasSafetyCertificateFileUploadId(),
-                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDate()?.toJavaLocalDate(),
-                gasSafetyCertEngineerNum = state.gasSafetyEngineerNumberStep.formModelOrNull?.engineerNumber,
-                gasSafetyCertExemptionReason = state.gasSafetyExemptionReasonStep.formModelOrNull?.exemptionReason,
-                gasSafetyCertExemptionOtherReason = state.gasSafetyExemptionOtherReasonStep.formModelOrNull?.otherReason,
+                gasSafetyCertUploadId = state.getGasSafetyCertificateFileUploadIdIfReachable(),
+                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
+                gasSafetyCertEngineerNum = state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber,
+                gasSafetyCertExemptionReason = state.gasSafetyExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason,
+                gasSafetyCertExemptionOtherReason = state.gasSafetyExemptionOtherReasonStep.formModelIfReachableOrNull?.otherReason,
                 eicrUploadId = state.getEicrCertificateFileUploadId(),
                 eicrIssueDate = state.getEicrCertificateIssueDate()?.toJavaLocalDate(),
-                eicrExemptionReason = state.eicrExemptionReasonStep.formModelOrNull?.exemptionReason,
-                eicrExemptionOtherReason = state.eicrExemptionOtherReasonStep.formModelOrNull?.otherReason,
+                eicrExemptionReason = state.eicrExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason,
+                eicrExemptionOtherReason = state.eicrExemptionOtherReasonStep.formModelIfReachableOrNull?.otherReason,
                 epcUrl = epcDetails?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
                 epcExpiryDate = epcDetails?.expiryDate?.toJavaLocalDate(),
-                tenancyStartedBeforeEpcExpiry = state.epcExpiryCheckStep.formModelOrNull?.tenancyStartedBeforeExpiry,
+                tenancyStartedBeforeEpcExpiry = state.epcExpiryCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
                 epcEnergyRating = epcDetails?.energyRating,
-                epcExemptionReason = state.epcExemptionReasonStep.formModelOrNull?.exemptionReason,
-                epcMeesExemptionReason = state.meesExemptionReasonStep.formModelOrNull?.exemptionReason,
+                epcExemptionReason = state.epcExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason,
+                epcMeesExemptionReason = state.meesExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason,
             )
 
         sendConfirmationEmail(propertyCompliance)

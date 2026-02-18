@@ -59,7 +59,7 @@ class GasSafetyCyaSummaryRowsFactory(
             when (GasSafetyStatus.fromState(state)) {
                 GasSafetyStatus.UPLOADED -> {
                     createGasSafetyCertificateValueForFileUpload(
-                        state.getGasSafetyCertificateFileUploadId()!!,
+                        state.getGasSafetyCertificateFileUploadIdIfReachable()!!,
                     )
                 }
 
@@ -87,7 +87,7 @@ class GasSafetyCyaSummaryRowsFactory(
     private fun getGasSafetyCertDetailRows() =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val issueDate = state.getGasSafetyCertificateIssueDate()
+                val issueDate = state.getGasSafetyCertificateIssueDateIfReachable()
                 addAll(
                     listOf(
                         SummaryListRowViewModel.forCheckYourAnswersPage(

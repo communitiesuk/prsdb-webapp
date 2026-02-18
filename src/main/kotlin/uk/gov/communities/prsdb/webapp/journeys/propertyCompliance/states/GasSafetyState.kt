@@ -35,18 +35,18 @@ interface GasSafetyState :
     val gasSafetyExemptionMissingStep: GasSafetyExemptionMissingStep
     val propertyId: Long
 
-    fun getGasSafetyCertificateIssueDate() =
-        gasSafetyIssueDateStep.formModelOrNull?.let { date ->
+    fun getGasSafetyCertificateIssueDateIfReachable() =
+        gasSafetyIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
-    fun getGasSafetyExpiryDate() = getGasSafetyCertificateIssueDate()?.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+    fun getGasSafetyExpiryDate() = getGasSafetyCertificateIssueDateIfReachable()?.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
-        getGasSafetyCertificateIssueDate()?.let { issueDate ->
+        getGasSafetyCertificateIssueDateIfReachable()?.let { issueDate ->
             val today = DateTimeHelper().getCurrentDateInUK()
             issueDate.yearsUntil(today) >= GAS_SAFETY_CERT_VALIDITY_YEARS
         }
 
-    fun getGasSafetyCertificateFileUploadId(): Long? = gasSafetyCertificateUploadStep.formModelOrNull?.fileUploadId
+    fun getGasSafetyCertificateFileUploadIdIfReachable(): Long? = gasSafetyCertificateUploadStep.formModelIfReachableOrNull?.fileUploadId
 }

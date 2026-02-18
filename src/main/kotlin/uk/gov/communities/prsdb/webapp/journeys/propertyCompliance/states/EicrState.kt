@@ -32,7 +32,7 @@ interface EicrState :
     val propertyId: Long
 
     fun getEicrCertificateIssueDate() =
-        eicrIssueDateStep.formModelOrNull?.let { date ->
+        eicrIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
@@ -42,5 +42,5 @@ interface EicrState :
             issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
         }
 
-    fun getEicrCertificateFileUploadId() = eicrUploadStep.formModelOrNull?.fileUploadId
+    fun getEicrCertificateFileUploadId() = eicrUploadStep.formModelIfReachableOrNull?.fileUploadId
 }

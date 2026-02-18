@@ -38,7 +38,7 @@ class GasSafetyCertificateUploadStepConfig(
         state: GasSafetyState,
         saveStateId: SavedJourneyState,
     ) {
-        state.getGasSafetyCertificateFileUploadId()?.let { fileUploadId ->
+        state.getGasSafetyCertificateFileUploadIdIfReachable()?.let { fileUploadId ->
             certificateUploadService.saveCertificateUpload(
                 state.propertyId,
                 fileUploadId,

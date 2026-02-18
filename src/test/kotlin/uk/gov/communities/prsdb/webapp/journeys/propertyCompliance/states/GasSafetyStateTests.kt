@@ -28,23 +28,23 @@ import java.time.LocalDate
 
 class GasSafetyStateTests {
     @Test
-    fun `getGasSafetyCertificateIssueDate returns the issue date from state as a LocalDate`() {
+    fun `getGasSafetyCertificateIssueDateIfReachable returns the issue date from state as a LocalDate`() {
         // Arrange
         val issueDate = LocalDate.of(2020, 1, 1)
         val issueDateformModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestGasSafetyState(issueDateFormModel = issueDateformModel)
 
         // Act
-        val retrievedIssueDate = state.getGasSafetyCertificateIssueDate()
+        val retrievedIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()
 
         // Assert
         assertEquals(issueDate.toKotlinLocalDate(), retrievedIssueDate)
     }
 
     @Test
-    fun `getGasSafetyCertificateIssueDate returns null if the issue date is not set`() {
+    fun `getGasSafetyCertificateIssueDateIfReachable returns null if the issue date is not set`() {
         val state = buildTestGasSafetyState()
-        assertNull(state.getGasSafetyCertificateIssueDate())
+        assertNull(state.getGasSafetyCertificateIssueDateIfReachable())
     }
 
     @Test
@@ -97,7 +97,7 @@ class GasSafetyStateTests {
     }
 
     @Test
-    fun `getGasSafetyCertificateFileUploadId returns the fileUploadId from state if found`() {
+    fun `getGasSafetyCertificateFileUploadIdIfReachable returns the fileUploadId from state if found`() {
         // Arrange
         val fileUploadId = 123L
         val gasSafetyUploadFormModel = GasSafetyUploadCertificateFormModel()
@@ -105,16 +105,16 @@ class GasSafetyStateTests {
         val state = buildTestGasSafetyState(gasSafetyUploadFormModel = gasSafetyUploadFormModel)
 
         // Act
-        val retrievedFileUploadId = state.getGasSafetyCertificateFileUploadId()
+        val retrievedFileUploadId = state.getGasSafetyCertificateFileUploadIdIfReachable()
 
         // Assert
         assertEquals(fileUploadId, retrievedFileUploadId)
     }
 
     @Test
-    fun `getGasSafetyCertificateFileUploadId returns null if the fileUploadId is not found in state`() {
+    fun `getGasSafetyCertificateFileUploadIdIfReachable returns null if the fileUploadId is not found in state`() {
         val state = buildTestGasSafetyState()
-        assertNull(state.getGasSafetyCertificateFileUploadId())
+        assertNull(state.getGasSafetyCertificateFileUploadIdIfReachable())
     }
 
     private fun buildTestGasSafetyState(
@@ -135,12 +135,12 @@ class GasSafetyStateTests {
 
             override val gasSafetyIssueDateStep =
                 mock<GasSafetyIssueDateStep>().apply {
-                    whenever(this.formModelOrNull).thenReturn(issueDateFormModel)
+                    whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
                 }
 
             override val gasSafetyCertificateUploadStep =
                 mock<GasSafetyCertificateUploadStep>().apply {
-                    whenever(this.formModelOrNull).thenReturn(gasSafetyUploadFormModel)
+                    whenever(this.formModelIfReachableOrNull).thenReturn(gasSafetyUploadFormModel)
                 }
             override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
             override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"

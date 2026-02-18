@@ -112,12 +112,12 @@ class EicrStateTests {
 
             override val eicrIssueDateStep =
                 mock<EicrIssueDateStep>().apply {
-                    whenever(this.formModelOrNull).thenReturn(issueDateFormModel)
+                    whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
                 }
 
             override val eicrUploadStep =
                 mock<EicrUploadStep>().apply {
-                    whenever(this.formModelOrNull).thenReturn(eicrUploadFormModel)
+                    whenever(this.formModelIfReachableOrNull).thenReturn(eicrUploadFormModel)
                 }
             override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
             override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
