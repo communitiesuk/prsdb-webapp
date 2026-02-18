@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.forms.pages
 
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.cya.EicrSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEicrSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
@@ -24,7 +24,7 @@ class CheckUpdateEicrAnswersPage(
         missingAnswersRedirect = missingAnswersRedirect,
     ) {
     val eicrDataFactory =
-        EicrSummaryRowsFactory(
+        LegacyEicrSummaryRowsFactory(
             doesDataHaveEicr = { data -> data.getHasNewEICR()!! },
             eicrStartingStep = PropertyComplianceStepId.UpdateEICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemptionReason,

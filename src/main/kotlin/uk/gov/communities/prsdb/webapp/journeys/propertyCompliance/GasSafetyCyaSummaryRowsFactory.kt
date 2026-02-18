@@ -115,7 +115,6 @@ class GasSafetyCyaSummaryRowsFactory(
                 }
             }.toList()
 
-    // TODO PDHB-467 - check how we want to deal with not having filtered journey data - so these steps are filled in even though they are no longer reachable
     private fun getGasSafetyExemptionRow(): SummaryListRowViewModel {
         val exemptionReason = state.gasSafetyExemptionReasonStep.formModelOrNull?.exemptionReason
         val fieldValue =

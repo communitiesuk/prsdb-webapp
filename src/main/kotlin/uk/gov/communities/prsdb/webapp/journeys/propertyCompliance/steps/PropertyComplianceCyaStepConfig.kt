@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.EicrCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.GasSafetyCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -37,7 +38,15 @@ class PropertyComplianceCyaStepConfig(
             childJourneyId,
         ).createRows()
 
-    fun getEicrData(state: PropertyComplianceJourneyState) = emptyList<SummaryListRowViewModel>()
+    fun getEicrData(state: PropertyComplianceJourneyState) =
+        EicrCyaSummaryRowsFactory(
+            state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE,
+            Destination.VisitableStep(state.eicrStep, childJourneyId),
+            Destination.VisitableStep(state.eicrExemptionStep, childJourneyId),
+            uploadService,
+            state,
+            childJourneyId,
+        ).createRows()
 
     fun getEpcData(state: PropertyComplianceJourneyState) = emptyList<SummaryListRowViewModel>()
 }
