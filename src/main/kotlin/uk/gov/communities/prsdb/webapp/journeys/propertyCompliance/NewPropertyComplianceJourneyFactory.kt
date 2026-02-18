@@ -72,11 +72,15 @@ import java.security.Principal
 class NewPropertyComplianceJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyComplianceJourney>,
 ) {
-    fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(
+        propertyId: Long,
+        userShouldSeeFeedbackPage: Boolean,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
+            state.userShouldSeeFeedbackPages = userShouldSeeFeedbackPage
             state.isStateInitialized = true
         }
 
@@ -151,7 +155,13 @@ class NewPropertyComplianceJourneyFactory(
                             journey.responsibilityToTenantsStep.isComplete(),
                         )
                     }
-                    nextUrl { PropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId) }
+                    nextUrl {
+                        if (userShouldSeeFeedbackPage) {
+                            PropertyComplianceController.getPropertyComplianceFeedbackPath(propertyId)
+                        } else {
+                            PropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId)
+                        }
+                    }
                 }
             }
             checkYourAnswersJourney()
@@ -221,6 +231,7 @@ class PropertyComplianceJourney(
     override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
+    var userShouldSeeFeedbackPages: Boolean by delegateProvider.requiredDelegate("userShouldSeeFeedbackPage")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
 }

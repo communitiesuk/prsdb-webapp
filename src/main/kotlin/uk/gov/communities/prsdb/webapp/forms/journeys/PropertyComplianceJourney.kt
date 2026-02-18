@@ -564,7 +564,6 @@ class PropertyComplianceJourney(
 
         propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnershipId)
 
-        // TODO PDJB-467 - make sure this behavious is migrated
         return if (propertyCompliance.propertyOwnership.primaryLandlord.shouldSeeFeedback) {
             FEEDBACK_PATH_SEGMENT
         } else {

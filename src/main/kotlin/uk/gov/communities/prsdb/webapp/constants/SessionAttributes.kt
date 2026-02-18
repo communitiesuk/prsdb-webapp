@@ -37,3 +37,5 @@ const val LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION = "localCouncilUsersInvitedTh
 const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePropertyFormContextsDeletedThisSession"
 
 const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
+
+const val LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES = "loggedInLandlordShouldSeeFeedbackPages"
