@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_START_PAGE_ROUTE
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.StartPageStep
@@ -51,7 +52,7 @@ class JoinPropertyControllerTests(
             .get("$JOIN_PROPERTY_ROUTE/${StartPageStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl("${StartPageStep.ROUTE_SEGMENT}?journeyId=$journeyId")
+                redirectedUrl(JourneyStateService.urlWithJourneyState(StartPageStep.ROUTE_SEGMENT, journeyId))
             }
     }
 }
