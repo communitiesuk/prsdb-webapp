@@ -3,34 +3,207 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.example.steps.EpcStatus
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotAutomatchedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSearchResult
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcStatusMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
-        // TODO PDJB-467: Configure this task - some steps may exist in ExampleEpcTask but should be checked to make sure they are correct
         subJourney(state) {
             step(journey.epcQuestionStep) {
-                routeSegment("has-epc")
-                nextStep { exitStep }
-                /*nextStep { mode ->
+                routeSegment(EpcQuestionStep.ROUTE_SEGMENT)
+                nextStep { mode ->
                     when (mode) {
-                        EpcStatus.AUTOMATCHED -> journey.checkAutomatchedEpc
-                        EpcStatus.NOT_AUTOMATCHED -> journey.searchForEpc
-                        EpcStatus.NO_EPC -> exitStep
+                        EpcStatusMode.AUTOMATCHED -> journey.checkAutomatchedEpcStep
+                        EpcStatusMode.NOT_AUTOMATCHED -> journey.epcNotAutomatchedStep
+                        EpcStatusMode.NO_EPC -> journey.epcMissingStep
+                        EpcStatusMode.EPC_NOT_REQUIRED -> journey.epcExemptionReasonStep
                     }
-                }*/
+                }
+                savable()
+            }
+            step<CheckMatchedEpcMode, CheckMatchedEpcStepConfig>(journey.checkAutomatchedEpcStep) {
+                routeSegment(CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.AUTOMATCHED) }
+                nextStep { mode ->
+                    when (mode) {
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> exitStep
+                        CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                        CheckMatchedEpcMode.EPC_EXPIRED -> journey.epcExpiryCheckStep
+                    }
+                }
+                stepSpecificInitialisation {
+                    usingEpc { automatchedEpc }
+                }
+                savable()
+            }
+            step(journey.epcNotAutomatchedStep) {
+                routeSegment(EpcNotAutomatchedStep.ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.NOT_AUTOMATCHED) }
+                nextStep { journey.searchForEpcStep }
+                savable()
+            }
+            step(journey.searchForEpcStep) {
+                routeSegment(SearchForEpcStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.epcNotAutomatchedStep.hasOutcome(Complete.COMPLETE),
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_INCORRECT),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        EpcSearchResult.FOUND -> journey.checkMatchedEpcStep
+                        EpcSearchResult.SUPERSEDED -> journey.epcSupersededStep
+                        EpcSearchResult.NOT_FOUND -> journey.epcNotFoundStep
+                    }
+                }
+                savable()
+            }
+            step(journey.epcSupersededStep) {
+                routeSegment(EpcSupersededStep.ROUTE_SEGMENT)
+                parents { journey.searchForEpcStep.hasOutcome(EpcSearchResult.SUPERSEDED) }
+                nextStep { journey.checkMatchedEpcStep }
+                savable()
+            }
+            step<CheckMatchedEpcMode, CheckMatchedEpcStepConfig>(journey.checkMatchedEpcStep) {
+                routeSegment(CheckMatchedEpcStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.searchForEpcStep.hasOutcome(EpcSearchResult.FOUND),
+                        journey.epcSupersededStep.hasOutcome(Complete.COMPLETE),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> exitStep
+                        CheckMatchedEpcMode.EPC_INCORRECT -> journey.searchForEpcStep
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                        CheckMatchedEpcMode.EPC_EXPIRED -> journey.epcExpiryCheckStep
+                    }
+                }
+                stepSpecificInitialisation {
+                    usingEpc { searchedEpc }
+                }
+                savable()
+            }
+            step(journey.epcNotFoundStep) {
+                routeSegment(EpcNotFoundStep.ROUTE_SEGMENT)
+                parents { journey.searchForEpcStep.hasOutcome(EpcSearchResult.NOT_FOUND) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.epcMissingStep) {
+                routeSegment(EpcMissingStep.ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.NO_EPC) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.epcExemptionReasonStep) {
+                routeSegment(EpcExemptionReasonStep.ROUTE_SEGMENT)
+                parents { journey.epcQuestionStep.hasOutcome(EpcStatusMode.EPC_NOT_REQUIRED) }
+                nextStep { journey.epcExemptionConfirmationStep }
+                savable()
+            }
+            step(journey.epcExemptionConfirmationStep) {
+                routeSegment(EpcExemptionConfirmationStep.ROUTE_SEGMENT)
+                parents { journey.epcExemptionReasonStep.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.epcExpiryCheckStep) {
+                routeSegment(EpcExpiryCheckStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_EXPIRED),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        EpcExpiryCheckMode.EPC_COMPLIANT -> exitStep
+                        EpcExpiryCheckMode.EPC_EXPIRED -> journey.epcExpiredStep
+                        EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING -> journey.meesExemptionCheckStep
+                    }
+                }
+                savable()
+            }
+            step(journey.epcExpiredStep) {
+                routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
+                parents { journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_EXPIRED) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.meesExemptionCheckStep) {
+                routeSegment(MeesExemptionCheckStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_LOW_ENERGY_RATING),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        ExemptionMode.HAS_EXEMPTION -> journey.meesExemptionReasonStep
+                        ExemptionMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
+                    }
+                }
+                savable()
+            }
+            step(journey.meesExemptionReasonStep) {
+                routeSegment(MeesExemptionReasonStep.ROUTE_SEGMENT)
+                parents { journey.meesExemptionCheckStep.hasOutcome(ExemptionMode.HAS_EXEMPTION) }
+                nextStep { journey.meesExemptionConfirmationStep }
+                savable()
+            }
+            step(journey.meesExemptionConfirmationStep) {
+                routeSegment(MeesExemptionConfirmationStep.ROUTE_SEGMENT)
+                parents { journey.meesExemptionReasonStep.hasOutcome(Complete.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.lowEnergyRatingStep) {
+                routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
+                parents { journey.meesExemptionCheckStep.hasOutcome(ExemptionMode.NO_EXEMPTION) }
+                nextStep { exitStep }
                 savable()
             }
             exitStep {
                 parents {
                     OrParents(
-                        journey.epcQuestionStep.hasOutcome(EpcStatus.NO_EPC),
-                      /*  journey.checkAutomatchedEpc.hasOutcome(YesOrNo.YES),
-                        journey.checkSearchedEpc.hasOutcome(YesOrNo.YES),
-                        journey.epcNotFound.hasOutcome(Complete.COMPLETE),*/
+                        journey.checkAutomatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
+                        journey.checkMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
+                        journey.epcNotFoundStep.hasOutcome(Complete.COMPLETE),
+                        journey.epcMissingStep.hasOutcome(Complete.COMPLETE),
+                        journey.epcExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
+                        journey.meesExemptionConfirmationStep.hasOutcome(Complete.COMPLETE),
+                        journey.lowEnergyRatingStep.hasOutcome(Complete.COMPLETE),
+                        journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.EPC_COMPLIANT),
+                        journey.epcExpiredStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
             }

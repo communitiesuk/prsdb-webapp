@@ -37,7 +37,7 @@ class VirusAlertSenderTests {
         fun certificateTestParameters(): List<Array<Any>> =
             listOf(
                 arrayOf(FileCategory.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
-                arrayOf(FileCategory.Eirc, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
+                arrayOf(FileCategory.Eicr, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
             )
     }
 
