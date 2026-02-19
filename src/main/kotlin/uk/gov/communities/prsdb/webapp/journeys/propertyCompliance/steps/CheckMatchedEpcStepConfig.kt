@@ -60,7 +60,9 @@ class CheckMatchedEpcStepConfig(
     }
 
     override fun afterStepDataIsAdded(state: EpcState) {
-        state.acceptedEpc = getReleventEpc(state)
+        if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == true) {
+            state.acceptedEpc = getReleventEpc(state)
+        }
     }
 }
 
