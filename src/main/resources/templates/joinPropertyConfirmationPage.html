@@ -10,7 +10,7 @@
                 <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.confirmationPage.whatHappensNext</h2>
                 <p class="govuk-body">TODO: PDJB-285 - Add confirmation page content</p>
             </section>
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${backUrl}}, #{common.confirmationPage.goToDashboard})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
                 common.confirmationPage.goToDashboard
             </a>
         </div>

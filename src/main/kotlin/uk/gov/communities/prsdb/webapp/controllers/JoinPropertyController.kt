@@ -42,7 +42,7 @@ class JoinPropertyController(
     // TODO: PDJB-285 - Request Sent confirmation page
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(model: Model): String {
-        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
         // TODO: Add confirmation page content
         return "joinPropertyConfirmationPage"
     }
