@@ -47,9 +47,7 @@
             <p class="govuk-body" th:text="#{joinProperty.responsibilities.paragraph.two}">joinProperty.responsibilities.paragraph.two</p>
         </section>
         <section>
-            <form th:action="@{${joinPropertyInitialStep}}" method="post">
-                <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
-            </form>
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${joinPropertyInitialStep}, #{forms.buttons.continue})}"></a>
         </section>
     </div>
 </main>
