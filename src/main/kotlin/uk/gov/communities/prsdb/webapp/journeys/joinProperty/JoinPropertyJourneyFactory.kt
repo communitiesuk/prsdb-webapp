@@ -37,66 +37,66 @@ class JoinPropertyJourneyFactory(
 
             // All steps in linear path for viewability during development
             // Address search path
+            // TODO: PDJB-274 - Add conditional routing based on search results
             step(journey.findPropertyStep) {
                 routeSegment(FindPropertyStep.ROUTE_SEGMENT)
                 initialStep()
-                // TODO: PDJB-274 - Add conditional routing based on search results
                 nextStep { journey.noMatchingPropertiesStep }
             }
+            // TODO: PDJB-276 - Connect when no properties match search
             step(journey.noMatchingPropertiesStep) {
                 routeSegment(NoMatchingPropertiesStep.ROUTE_SEGMENT)
                 parents { journey.findPropertyStep.isComplete() }
-                // TODO: PDJB-276 - Connect when no properties match search
                 nextStep { journey.propertyNotRegisteredStep }
             }
+            // TODO: PDJB-283 - Connect when property is not registered
             step(journey.propertyNotRegisteredStep) {
                 routeSegment(PropertyNotRegisteredStep.ROUTE_SEGMENT)
                 parents { journey.noMatchingPropertiesStep.isComplete() }
-                // TODO: PDJB-283 - Connect when property is not registered
                 nextStep { journey.selectPropertyStep }
             }
+            // TODO: PDJB-275 - Add conditional routing to error pages
             step(journey.selectPropertyStep) {
                 routeSegment(SelectPropertyStep.ROUTE_SEGMENT)
                 parents { journey.propertyNotRegisteredStep.isComplete() }
-                // TODO: PDJB-275 - Add conditional routing to error pages
                 nextStep { journey.findPropertyByPrnStep }
             }
 
             // PRN search path
+            // TODO: PDJB-277 - Connect from FindProperty page link
             step(journey.findPropertyByPrnStep) {
                 routeSegment(FindPropertyByPrnStep.ROUTE_SEGMENT)
                 parents { journey.selectPropertyStep.isComplete() }
-                // TODO: PDJB-277 - Connect from FindProperty page link
                 nextStep { journey.prnNotFoundStep }
             }
+            // TODO: PDJB-279 - Connect when PRN not found
             step(journey.prnNotFoundStep) {
                 routeSegment(PrnNotFoundStep.ROUTE_SEGMENT)
                 parents { journey.findPropertyByPrnStep.isComplete() }
-                // TODO: PDJB-279 - Connect when PRN not found
                 nextStep { journey.alreadyRegisteredStep }
             }
+            // TODO: PDJB-280 - Connect when user is already registered
             step(journey.alreadyRegisteredStep) {
                 routeSegment(JoinPropertyAlreadyRegisteredStep.ROUTE_SEGMENT)
                 parents { journey.prnNotFoundStep.isComplete() }
-                // TODO: PDJB-280 - Connect when user is already registered
                 nextStep { journey.pendingRequestStep }
             }
+            // TODO: PDJB-281 - Connect when user has pending request
             step(journey.pendingRequestStep) {
                 routeSegment(PendingRequestStep.ROUTE_SEGMENT)
                 parents { journey.alreadyRegisteredStep.isComplete() }
-                // TODO: PDJB-281 - Connect when user has pending request
                 nextStep { journey.requestRejectedStep }
             }
+            // TODO: PDJB-282 - Entry point from dashboard notification
             step(journey.requestRejectedStep) {
                 routeSegment(RequestRejectedStep.ROUTE_SEGMENT)
                 parents { journey.pendingRequestStep.isComplete() }
-                // TODO: PDJB-282 - Entry point from dashboard notification
                 nextStep { journey.confirmPropertyStep }
             }
+            // TODO: PDJB-278 - Add conditional routing to error pages
             step(journey.confirmPropertyStep) {
                 routeSegment(ConfirmPropertyStep.ROUTE_SEGMENT)
                 parents { journey.requestRejectedStep.isComplete() }
-                // TODO: PDJB-278 - Add conditional routing to error pages
                 nextUrl { JOIN_PROPERTY_CONFIRMATION_ROUTE }
             }
         }
