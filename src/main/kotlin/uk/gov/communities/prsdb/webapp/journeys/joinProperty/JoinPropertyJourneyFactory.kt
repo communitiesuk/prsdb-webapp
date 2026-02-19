@@ -11,10 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.ConfirmPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyByPrnStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.JoinPropertyAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PendingRequestStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PrnNotFoundStep
@@ -62,7 +62,7 @@ class JoinPropertyJourneyFactory(
                 nextStep { journey.alreadyRegisteredStep }
             }
             step(journey.alreadyRegisteredStep) {
-                routeSegment(AlreadyRegisteredStep.ROUTE_SEGMENT)
+                routeSegment(JoinPropertyAlreadyRegisteredStep.ROUTE_SEGMENT)
                 parents { journey.selectPropertyStep.isComplete() }
                 // TODO: PDJB-280 - Connect when user is already registered
                 nextStep { journey.pendingRequestStep }
@@ -111,7 +111,7 @@ class JoinPropertyJourney(
     override val findPropertyByPrnStep: FindPropertyByPrnStep,
     override val selectPropertyStep: SelectPropertyStep,
     override val confirmPropertyStep: ConfirmPropertyStep,
-    override val alreadyRegisteredStep: AlreadyRegisteredStep,
+    override val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep,
     override val pendingRequestStep: PendingRequestStep,
     override val requestRejectedStep: RequestRejectedStep,
     override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
@@ -137,7 +137,7 @@ interface JoinPropertyJourneyState : JourneyState {
     val findPropertyByPrnStep: FindPropertyByPrnStep
     val selectPropertyStep: SelectPropertyStep
     val confirmPropertyStep: ConfirmPropertyStep
-    val alreadyRegisteredStep: AlreadyRegisteredStep
+    val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep
     val pendingRequestStep: PendingRequestStep
     val requestRejectedStep: RequestRejectedStep
     val noMatchingPropertiesStep: NoMatchingPropertiesStep
