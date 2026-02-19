@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PrnNotFoundSt
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.RequestRejectedStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SendRequestStep
 import java.security.Principal
 
 @PrsdbWebService
@@ -98,6 +99,12 @@ class JoinPropertyJourneyFactory(
             step(journey.confirmPropertyStep) {
                 routeSegment(ConfirmPropertyStep.ROUTE_SEGMENT)
                 parents { journey.requestRejectedStep.isComplete() }
+                nextStep { journey.sendRequestStep }
+            }
+            // TODO: PDJB-284 - Send request declaration page with responsibilities
+            step(journey.sendRequestStep) {
+                routeSegment(SendRequestStep.ROUTE_SEGMENT)
+                parents { journey.confirmPropertyStep.isComplete() }
                 nextUrl { JOIN_PROPERTY_CONFIRMATION_ROUTE }
             }
         }
@@ -118,6 +125,7 @@ class JoinPropertyJourney(
     override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
     override val propertyNotRegisteredStep: PropertyNotRegisteredStep,
     override val prnNotFoundStep: PrnNotFoundStep,
+    override val sendRequestStep: SendRequestStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
@@ -144,4 +152,5 @@ interface JoinPropertyJourneyState : JourneyState {
     val noMatchingPropertiesStep: NoMatchingPropertiesStep
     val propertyNotRegisteredStep: PropertyNotRegisteredStep
     val prnNotFoundStep: PrnNotFoundStep
+    val sendRequestStep: SendRequestStep
 }

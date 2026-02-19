@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
+import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
