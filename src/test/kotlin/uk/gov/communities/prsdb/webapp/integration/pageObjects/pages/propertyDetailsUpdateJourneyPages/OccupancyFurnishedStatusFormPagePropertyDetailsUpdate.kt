@@ -3,13 +3,13 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.OccupancyFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.FurnishedStatusFormBasePage
 
-class OccupancyFormPagePropertyDetailsUpdate(
+class OccupancyFurnishedStatusFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
-) : OccupancyFormPage(
+) : FurnishedStatusFormBasePage(
         page,
         UpdateOccupancyController.getUpdateOccupancyRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
+            "/${RegisterPropertyStepId.FurnishedStatus.urlPathSegment}",
     )
