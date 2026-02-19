@@ -14,7 +14,6 @@ class EicrExemptionOtherReasonStepConfig : AbstractRequestableStepConfig<Complet
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.eicrExemptionOtherReason.fieldSetHeading",
             "fieldSetHint" to "forms.eicrExemptionOtherReason.fieldSetHint",
             "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,

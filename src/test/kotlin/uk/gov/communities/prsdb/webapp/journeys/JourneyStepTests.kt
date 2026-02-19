@@ -268,6 +268,37 @@ class JourneyStepTests {
     }
 
     @Test
+    fun `submitFormData calls step methods in the correct order for a visitable step`() {
+        // Arrange
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
+        whenever(stepConfig.routeSegment).thenReturn("stepId")
+        val state = mock<JourneyState>()
+        step.initialize(
+            "stepId",
+            state,
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            mock(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+        val formModel = TestFormModel().apply { field = "submittedValue" }
+        val bindingResult: BindingResult = mock()
+        whenever(bindingResult.target).thenReturn(formModel)
+
+        // Act
+        step.submitFormData(bindingResult)
+
+        // Assert
+        val inOrder = org.mockito.kotlin.inOrder(stepConfig, state)
+        inOrder.verify(stepConfig).beforeStepDataIsAdded(state, formModel.toPageData())
+        inOrder.verify(state).addStepData("stepId", formModel.toPageData())
+        inOrder.verify(stepConfig).afterStepDataIsAdded(state)
+    }
+
+    @Test
     fun `submitFormData saves does nothing for a InternalStep`() {
         // Arrange
         val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
