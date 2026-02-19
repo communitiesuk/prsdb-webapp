@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!-- TODO: PDJB-285 - Request Sent confirmation page -->
+<html th:replace="~{fragments/layout :: layout(#{joinProperty.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+
+            <div id="confirmation-banner" th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{joinProperty.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}"></div>
+
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.confirmationPage.whatHappensNext</h2>
+                <p class="govuk-body">TODO: PDJB-285 - Add confirmation page content</p>
+            </section>
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${backUrl}}, #{common.confirmationPage.goToDashboard})}">
+                common.confirmationPage.goToDashboard
+            </a>
+        </div>
+    </main>
+</html>

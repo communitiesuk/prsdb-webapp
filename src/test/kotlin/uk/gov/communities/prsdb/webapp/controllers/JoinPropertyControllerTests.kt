@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -71,7 +72,7 @@ class JoinPropertyControllerTests(
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
         whenever(joinPropertyJourneyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
-        whenever(joinPropertyJourneyFactory.initializeJourneyState(org.mockito.kotlin.any())).thenReturn(journeyId)
+        whenever(joinPropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
         mvc
             .get("$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}")
