@@ -46,6 +46,12 @@ class PropertyComplianceBuilder {
         return this
     }
 
+    fun withGasSafetyCertOtherExemption(otherExemptionReason: String = "Other reason"): PropertyComplianceBuilder {
+        propertyCompliance.gasSafetyCertExemptionReason = GasSafetyExemptionReason.OTHER
+        propertyCompliance.gasSafetyCertExemptionOtherReason = otherExemptionReason
+        return this
+    }
+
     fun withEicr(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
         propertyCompliance.eicrFileUpload = FileUpload(FileUploadStatus.SCANNED, "property_1_eicr.pdf", "pdf", "etag", "versionId")
         propertyCompliance.eicrIssueDate = issueDate
@@ -59,6 +65,12 @@ class PropertyComplianceBuilder {
 
     fun withEicrExemption(exemption: EicrExemptionReason = EicrExemptionReason.LONG_LEASE): PropertyComplianceBuilder {
         propertyCompliance.eicrExemptionReason = exemption
+        return this
+    }
+
+    fun withEicrOtherExemption(otherExemptionReason: String = "Other reason"): PropertyComplianceBuilder {
+        propertyCompliance.eicrExemptionReason = EicrExemptionReason.OTHER
+        propertyCompliance.eicrExemptionOtherReason = otherExemptionReason
         return this
     }
 
@@ -211,6 +223,17 @@ class PropertyComplianceBuilder {
             .withPropertyOwnership()
             .withGasSafetyCertExemption(gasExemption)
             .withEicrExemption(eicrExemption)
+            .withEpcExemption(epcExemption)
+            .build()
+
+        fun createWithCertOtherExemptions(
+            gasOtherExemptionReason: String = "Other gas exemption reason",
+            eicrOtherExemptionReason: String = "Other EICR exemption reason",
+            epcExemption: EpcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+        ) = PropertyComplianceBuilder()
+            .withPropertyOwnership()
+            .withGasSafetyCertOtherExemption(gasOtherExemptionReason)
+            .withEicrOtherExemption(eicrOtherExemptionReason)
             .withEpcExemption(epcExemption)
             .build()
 
