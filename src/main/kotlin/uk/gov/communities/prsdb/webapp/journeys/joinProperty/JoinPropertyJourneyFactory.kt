@@ -31,6 +31,7 @@ class JoinPropertyJourneyFactory(
         val state = stateFactory.getObject()
 
         return journey(state) {
+            unreachableStepStep { journey.findPropertyStep }
             configure {
                 withAdditionalContentProperty { "title" to "joinProperty.title" }
             }
