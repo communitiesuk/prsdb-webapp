@@ -7,8 +7,9 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
+// TODO: PDJB-280 - Already Registered as Landlord error page
 @JourneyFrameworkComponent
-class JoinPropertyAlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class AlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-280 - Already Registered as Landlord")
@@ -19,8 +20,8 @@ class JoinPropertyAlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Co
 }
 
 @JourneyFrameworkComponent
-final class JoinPropertyAlreadyRegisteredStep(
-    stepConfig: JoinPropertyAlreadyRegisteredStepConfig,
+final class AlreadyRegisteredStep(
+    stepConfig: AlreadyRegisteredStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "already-registered"

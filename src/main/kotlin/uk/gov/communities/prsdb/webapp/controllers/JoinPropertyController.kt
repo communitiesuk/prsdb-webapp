@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,14 +11,17 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOIN_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
@@ -26,6 +30,33 @@ import java.security.Principal
 class JoinPropertyController(
     private val joinPropertyJourneyFactory: JoinPropertyJourneyFactory,
 ) {
+    @GetMapping
+    fun index(model: Model): String {
+        model.addAttribute(
+            "joinPropertyInitialStep",
+            "$JOIN_PROPERTY_ROUTE/$START_PAGE_PATH_SEGMENT",
+        )
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+        model.addAttribute("title", "joinProperty.title")
+
+        return "joinPropertyStartPage"
+    }
+
+    @GetMapping("/$START_PAGE_PATH_SEGMENT")
+    fun getStart(principal: Principal): String {
+        val journeyId = joinPropertyJourneyFactory.initializeJourneyState(principal)
+        val redirectUrl = JourneyStateService.urlWithJourneyState(FindPropertyStep.ROUTE_SEGMENT, journeyId)
+        return "redirect:$redirectUrl"
+    }
+
+    // TODO: PDJB-285 - Request Sent confirmation page
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    fun getConfirmation(model: Model): String {
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+        // TODO: Add confirmation page content
+        return "joinPropertyConfirmationPage"
+    }
+
     @GetMapping("/{stepRouteSegment}")
     fun getJourneyStep(
         @PathVariable stepRouteSegment: String,
@@ -60,5 +91,6 @@ class JoinPropertyController(
     companion object {
         const val JOIN_PROPERTY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$JOIN_PROPERTY_PATH_SEGMENT"
         const val JOIN_PROPERTY_START_PAGE_ROUTE = "$JOIN_PROPERTY_ROUTE/$START_PAGE_PATH_SEGMENT"
+        const val JOIN_PROPERTY_CONFIRMATION_ROUTE = "$JOIN_PROPERTY_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }
 }

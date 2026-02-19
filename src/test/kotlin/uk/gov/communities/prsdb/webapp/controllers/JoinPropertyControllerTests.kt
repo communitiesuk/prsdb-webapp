@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Compan
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.StartPageStep
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
 
 @WebMvcTest(JoinPropertyController::class)
 class JoinPropertyControllerTests(
@@ -23,9 +23,9 @@ class JoinPropertyControllerTests(
     private lateinit var joinPropertyJourneyFactory: JoinPropertyJourneyFactory
 
     @Test
-    fun `getJourneyStep returns a redirect for unauthenticated user`() {
+    fun `index returns a redirect for unauthenticated user`() {
         mvc
-            .get(JOIN_PROPERTY_START_PAGE_ROUTE)
+            .get(JOIN_PROPERTY_ROUTE)
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -33,11 +33,36 @@ class JoinPropertyControllerTests(
 
     @Test
     @WithMockUser
-    fun `getJourneyStep returns 403 for unauthorized user`() {
+    fun `index returns 403 for unauthorized user`() {
+        mvc
+            .get(JOIN_PROPERTY_ROUTE)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `index returns start page for authorized landlord`() {
+        mvc
+            .get(JOIN_PROPERTY_ROUTE)
+            .andExpect {
+                status { isOk() }
+                view { name("joinPropertyStartPage") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getStart redirects to find property step with journey state`() {
+        val journeyId = "test-journey-id"
+        whenever(joinPropertyJourneyFactory.initializeJourneyState(org.mockito.kotlin.any())).thenReturn(journeyId)
+
         mvc
             .get(JOIN_PROPERTY_START_PAGE_ROUTE)
             .andExpect {
-                status { isForbidden() }
+                status { is3xxRedirection() }
+                redirectedUrl(JourneyStateService.urlWithJourneyState(FindPropertyStep.ROUTE_SEGMENT, journeyId))
             }
     }
 
@@ -49,10 +74,10 @@ class JoinPropertyControllerTests(
         whenever(joinPropertyJourneyFactory.initializeJourneyState(org.mockito.kotlin.any())).thenReturn(journeyId)
 
         mvc
-            .get("$JOIN_PROPERTY_ROUTE/${StartPageStep.ROUTE_SEGMENT}")
+            .get("$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(StartPageStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl(JourneyStateService.urlWithJourneyState(FindPropertyStep.ROUTE_SEGMENT, journeyId))
             }
     }
 }

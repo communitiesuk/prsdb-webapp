@@ -7,11 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
+// TODO: PDJB-277 - Find Property by PRN Search
 @JourneyFrameworkComponent
-class RequestSentStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class FindPropertyByPrnStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-285 - Request Sent (Confirmation)")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-277 - Find Property (PRN Search)")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -19,10 +20,10 @@ class RequestSentStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 }
 
 @JourneyFrameworkComponent
-final class RequestSentStep(
-    stepConfig: RequestSentStepConfig,
+final class FindPropertyByPrnStep(
+    stepConfig: FindPropertyByPrnStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "confirmation"
+        const val ROUTE_SEGMENT = "find-property-by-prn"
     }
 }
