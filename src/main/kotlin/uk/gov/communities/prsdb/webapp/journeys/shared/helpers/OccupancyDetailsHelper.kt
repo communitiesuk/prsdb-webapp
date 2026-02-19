@@ -56,28 +56,28 @@ class OccupancyDetailsHelper {
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.households",
                     householdsStep.formModel.numberOfHouseholds,
-                    Destination(householdsStep),
+                    Destination.VisitableStep(householdsStep, childJourneyId),
                 ),
             )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.people",
                     tenantsStep.formModel.numberOfPeople,
-                    Destination(tenantsStep),
+                    Destination.VisitableStep(tenantsStep, childJourneyId),
                 ),
             )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
                     bedroomsStep.formModel.numberOfBedrooms,
-                    Destination(bedroomsStep),
+                    Destination.VisitableStep(bedroomsStep, childJourneyId),
                 ),
             )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
                     rentIncludesBills,
-                    Destination(rentIncludesBillsStep),
+                    Destination.VisitableStep(rentIncludesBillsStep, childJourneyId),
                 ),
             )
             if (rentIncludesBills) {
@@ -85,7 +85,7 @@ class OccupancyDetailsHelper {
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
                         state.getBillsIncluded(messageSource),
-                        Destination(billsIncludedStep),
+                        Destination.VisitableStep(billsIncludedStep, childJourneyId),
                     ),
                 )
             }
@@ -93,21 +93,21 @@ class OccupancyDetailsHelper {
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
                     furnishedStatusStep.formModel.furnishedStatus,
-                    Destination(furnishedStatusStep),
+                    Destination.VisitableStep(furnishedStatusStep, childJourneyId),
                 ),
             )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
                     RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-                    Destination(rentFrequencyStep),
+                    Destination.VisitableStep(rentFrequencyStep, childJourneyId),
                 ),
             )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
                     state.getRentAmount(messageSource),
-                    Destination(rentAmountStep),
+                    Destination.VisitableStep(rentAmountStep, childJourneyId),
                 ),
             )
         }

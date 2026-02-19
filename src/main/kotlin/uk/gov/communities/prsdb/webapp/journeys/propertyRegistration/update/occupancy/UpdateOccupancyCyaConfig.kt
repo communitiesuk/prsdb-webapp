@@ -29,11 +29,15 @@ class UpdateOccupancyCyaConfig(
             "insetText" to true,
             "summaryListData" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId, messageSource),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
-            "summaryName" to "forms.update.checkOccupancy.summaryName",
+            "summaryName" to
+                if (isOccupied(state)) {
+                    "forms.update.checkOccupancy.occupied.summaryName"
+                } else {
+                    "forms.update.checkOccupancy.notOccupied.summaryName"
+                },
         )
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
-        // TODO PDJB-106 can we commonise this with PropertyRegistrationCyaStepConfig?
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         propertyOwnershipService.updateOccupancy(
@@ -77,6 +81,8 @@ class UpdateOccupancyCyaConfig(
             lastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
     }
+
+    private fun isOccupied(state: UpdateOccupancyJourneyState) = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
 }
 
 @JourneyFrameworkComponent

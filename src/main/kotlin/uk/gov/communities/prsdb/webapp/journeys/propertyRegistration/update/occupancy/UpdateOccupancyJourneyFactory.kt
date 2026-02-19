@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occ
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
@@ -26,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -69,6 +72,46 @@ class UpdateOccupancyJourneyFactory(
                     "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
                 }
             }
+            configureStep(journey.households) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
+                }
+            }
+            configureStep(journey.tenants) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
+                }
+            }
+            configureStep(journey.bedrooms) {
+                withAdditionalContentProperty {
+                    "heading" to "forms.update.numberOfBedrooms.heading"
+                }
+            }
+            configureStep(journey.rentIncludesBills) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
+                }
+            }
+            configureStep(journey.billsIncluded) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
+                }
+            }
+            configureStep(journey.furnishedStatus) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading"
+                }
+            }
+            configureStep(journey.rentFrequency) {
+                withAdditionalContentProperty {
+                    "heading" to "forms.update.rentFrequency.heading"
+                }
+            }
+            configureStep(journey.rentAmount) {
+                withAdditionalContentProperty {
+                    "heading" to getRentAmountHeading(state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency))
+                }
+            }
             checkYourAnswersJourney()
         }
     }
@@ -77,6 +120,13 @@ class UpdateOccupancyJourneyFactory(
         ownershipId: Long,
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+
+    private fun getRentAmountHeading(rentFrequency: RentFrequency): String =
+        when (rentFrequency) {
+            RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
+            RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
+            else -> "forms.update.rentAmount.monthly.fieldSetHeading"
+        }
 }
 
 @JourneyFrameworkComponent
