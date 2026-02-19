@@ -142,6 +142,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         return self()
     }
 
+    // TODO PDJB-467 - we might not need this
     fun withMissingGasSafetyExemption(): PropertyComplianceStateSessionBuilder {
         withGasSafetyCertStatus(false)
         withGasSafetyCertExemptionStatus(false)

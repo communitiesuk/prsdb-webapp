@@ -6,6 +6,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toKotlinLocalDate
 import org.json.JSONObject
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -23,7 +24,11 @@ class MockEpcData {
             certificateNumber: String = DEFAULT_EPC_CERTIFICATE_NUMBER,
             singleLineAddress: String = "1 Example Street, Example Town, EX1 1EX",
             energyRating: String = "C",
-            expiryDate: LocalDate = LocalDate(2027, 1, 1),
+            expiryDate: LocalDate =
+                java.time.LocalDate
+                    .now()
+                    .plusDays(5)
+                    .toKotlinLocalDate(),
             latestCertificateNumberForThisProperty: String? = DEFAULT_EPC_CERTIFICATE_NUMBER,
         ) = EpcDataModel(
             certificateNumber = certificateNumber,
