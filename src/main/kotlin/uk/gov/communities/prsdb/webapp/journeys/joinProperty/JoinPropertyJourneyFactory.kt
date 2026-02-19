@@ -59,11 +59,25 @@ class JoinPropertyJourneyFactory(
                 routeSegment(SelectPropertyStep.ROUTE_SEGMENT)
                 parents { journey.propertyNotRegisteredStep.isComplete() }
                 // TODO: PDJB-275 - Add conditional routing to error pages
+                nextStep { journey.findPropertyByPrnStep }
+            }
+
+            // PRN search path
+            step(journey.findPropertyByPrnStep) {
+                routeSegment(FindPropertyByPrnStep.ROUTE_SEGMENT)
+                parents { journey.selectPropertyStep.isComplete() }
+                // TODO: PDJB-277 - Connect from FindProperty page link
+                nextStep { journey.prnNotFoundStep }
+            }
+            step(journey.prnNotFoundStep) {
+                routeSegment(PrnNotFoundStep.ROUTE_SEGMENT)
+                parents { journey.findPropertyByPrnStep.isComplete() }
+                // TODO: PDJB-279 - Connect when PRN not found
                 nextStep { journey.alreadyRegisteredStep }
             }
             step(journey.alreadyRegisteredStep) {
                 routeSegment(JoinPropertyAlreadyRegisteredStep.ROUTE_SEGMENT)
-                parents { journey.selectPropertyStep.isComplete() }
+                parents { journey.prnNotFoundStep.isComplete() }
                 // TODO: PDJB-280 - Connect when user is already registered
                 nextStep { journey.pendingRequestStep }
             }
@@ -77,25 +91,11 @@ class JoinPropertyJourneyFactory(
                 routeSegment(RequestRejectedStep.ROUTE_SEGMENT)
                 parents { journey.pendingRequestStep.isComplete() }
                 // TODO: PDJB-282 - Entry point from dashboard notification
-                nextStep { journey.findPropertyByPrnStep }
-            }
-
-            // PRN search path
-            step(journey.findPropertyByPrnStep) {
-                routeSegment(FindPropertyByPrnStep.ROUTE_SEGMENT)
-                parents { journey.requestRejectedStep.isComplete() }
-                // TODO: PDJB-277 - Connect from FindProperty page link
-                nextStep { journey.prnNotFoundStep }
-            }
-            step(journey.prnNotFoundStep) {
-                routeSegment(PrnNotFoundStep.ROUTE_SEGMENT)
-                parents { journey.findPropertyByPrnStep.isComplete() }
-                // TODO: PDJB-279 - Connect when PRN not found
                 nextStep { journey.confirmPropertyStep }
             }
             step(journey.confirmPropertyStep) {
                 routeSegment(ConfirmPropertyStep.ROUTE_SEGMENT)
-                parents { journey.prnNotFoundStep.isComplete() }
+                parents { journey.requestRejectedStep.isComplete() }
                 // TODO: PDJB-278 - Add conditional routing to error pages
                 nextUrl { JOIN_PROPERTY_CONFIRMATION_ROUTE }
             }
