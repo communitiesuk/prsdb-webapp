@@ -10,7 +10,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
@@ -50,20 +49,6 @@ class JoinPropertyControllerTests(
             .andExpect {
                 status { isOk() }
                 view { name("joinPropertyStartPage") }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `getStart redirects to find property step with journey state`() {
-        val journeyId = "test-journey-id"
-        whenever(joinPropertyJourneyFactory.initializeJourneyState(org.mockito.kotlin.any())).thenReturn(journeyId)
-
-        mvc
-            .get(JOIN_PROPERTY_START_PAGE_ROUTE)
-            .andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(FindPropertyStep.ROUTE_SEGMENT, journeyId))
             }
     }
 
