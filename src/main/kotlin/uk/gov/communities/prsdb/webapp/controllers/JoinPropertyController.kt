@@ -35,7 +35,6 @@ class JoinPropertyController(
             "$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-        model.addAttribute("title", "joinProperty.title")
 
         return "joinPropertyStartPage"
     }
