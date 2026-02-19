@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -27,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
-import java.time.Instant
 
 @PrsdbWebService
 class UpdateOccupancyJourneyFactory(
@@ -39,7 +39,7 @@ class UpdateOccupancyJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated()
+            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
             state.isStateInitialized = true
         }
 
@@ -60,7 +60,7 @@ class UpdateOccupancyJourneyFactory(
                 }
             }
             step(journey.cyaStep) {
-                routeSegment("check-occupancy-answers")
+                routeSegment(RegisterPropertyStepId.CheckAnswers.urlPathSegment)
                 parents { journey.occupationTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
@@ -101,7 +101,7 @@ class UpdateOccupancyJourney(
     UpdateOccupancyJourneyState {
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: Instant by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
 
 interface UpdateOccupancyJourneyState :
@@ -110,5 +110,5 @@ interface UpdateOccupancyJourneyState :
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
     val propertyId: Long
-    val lastModifiedDate: Instant
+    val lastModifiedDate: String
 }

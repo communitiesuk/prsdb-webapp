@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -72,7 +74,7 @@ class UpdateOccupancyCyaConfig(
                 } else {
                     null
                 },
-            lastModifiedDate = state.lastModifiedDate,
+            lastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
     }
 }

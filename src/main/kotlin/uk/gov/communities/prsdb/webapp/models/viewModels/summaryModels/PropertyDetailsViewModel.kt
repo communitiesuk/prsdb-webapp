@@ -115,7 +115,8 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
                     isTenantedKey,
                     changeLinkMessageKey,
-                    UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id),
+                    UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
+                        "/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.isOccupied) {

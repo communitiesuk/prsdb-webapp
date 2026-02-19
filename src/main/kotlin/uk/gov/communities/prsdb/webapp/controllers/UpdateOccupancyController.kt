@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController.Companion.UPDATE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyFactory
@@ -79,9 +78,8 @@ class UpdateOccupancyController(
 
     companion object {
         const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-occupancy"
-        val UPDATE_OCCUPANCY_ROUTE = "$UPDATE_ROUTE/${RegisterPropertyStepId.Occupancy.urlPathSegment}"
 
         fun getUpdateOccupancyRoute(propertyOwnershipId: Long): String =
-            UPDATE_OCCUPANCY_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+            UPDATE_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
     }
 }
