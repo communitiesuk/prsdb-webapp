@@ -1,0 +1,61 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
+<!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="findByPrnUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, null)}">
+    <th:block id="question-content">
+        <header>
+            <p class="govuk-caption-l" th:text="#{joinProperty.title}">joinProperty.title</p>
+            <h1 class="govuk-heading-l" th:text="#{joinProperty.noMatchingProperties.heading}">
+                joinProperty.noMatchingProperties.heading
+            </h1>
+        </header>
+        <p class="govuk-body" th:text="${#messages.msg('joinProperty.noMatchingProperties.paragraph.one', postcode, houseNameOrNumber)}">
+            joinProperty.noMatchingProperties.paragraph.one
+        </p>
+        <p class="govuk-body">
+            <span th:text="#{joinProperty.noMatchingProperties.paragraph.two.beforeLink}" th:remove="tag">
+                joinProperty.noMatchingProperties.paragraph.two.beforeLink
+            </span>
+            <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{joinProperty.noMatchingProperties.paragraph.two.linkText}">
+                joinProperty.noMatchingProperties.paragraph.two.linkText
+            </a><span th:text="#{joinProperty.noMatchingProperties.paragraph.two.afterLink}" th:remove="tag">joinProperty.noMatchingProperties.paragraph.two.afterLink</span>
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.heading}">
+            joinProperty.noMatchingProperties.ifDetailsCorrect.heading
+        </h2>
+        <p class="govuk-body">
+            <span th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.prnLink.beforeLink}" th:remove="tag">
+                joinProperty.noMatchingProperties.ifDetailsCorrect.prnLink.beforeLink
+            </span>
+            <a class="govuk-link" th:href="@{${findByPrnUrl}}" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.prnLink.linkText}">
+                joinProperty.noMatchingProperties.ifDetailsCorrect.prnLink.linkText
+            </a><span th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.prnLink.afterLink}" th:remove="tag">joinProperty.noMatchingProperties.ifDetailsCorrect.prnLink.afterLink</span>
+        </p>
+        <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.askLandlord}">
+            joinProperty.noMatchingProperties.ifDetailsCorrect.askLandlord
+        </p>
+        <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.contactUs}">
+            joinProperty.noMatchingProperties.ifDetailsCorrect.contactUs
+        </p>
+        <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.phone}">
+            joinProperty.noMatchingProperties.ifDetailsCorrect.phone
+        </p>
+        <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.phoneHours}">
+            joinProperty.noMatchingProperties.ifDetailsCorrect.phoneHours
+        </p>
+        <p class="govuk-body">
+            <span th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.email}" th:remove="tag">joinProperty.noMatchingProperties.ifDetailsCorrect.email</span>
+            <a class="govuk-link" th:href="'mailto:' + #{joinProperty.noMatchingProperties.ifDetailsCorrect.emailAddress}" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.emailAddress}">
+                joinProperty.noMatchingProperties.ifDetailsCorrect.emailAddress
+            </a>
+        </p>
+    </th:block>
+    <th:block id="form-content">
+        <!-- No form submission needed - this is an informational page with navigation links -->
+    </th:block>
+</html>
