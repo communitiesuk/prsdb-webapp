@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPro
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
 
-interface AddressSearchState : JourneyState {
+interface PropertyAddressSearchState : JourneyState {
     val findPropertyStep: FindPropertyStep
     val noMatchingPropertiesStep: NoMatchingPropertiesStep
     val selectPropertyStep: SelectPropertyStep

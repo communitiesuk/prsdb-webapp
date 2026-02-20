@@ -3,15 +3,15 @@ package uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.AddressSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
 
 @JourneyFrameworkComponent
-class AddressSearchTask : Task<AddressSearchState>() {
-    override fun makeSubJourney(state: AddressSearchState) =
+class PropertyAddressSearchTask : Task<PropertyAddressSearchState>() {
+    override fun makeSubJourney(state: PropertyAddressSearchState) =
         subJourney(state) {
             // TODO: PDJB-274 - Add conditional routing based on search results
             step(journey.findPropertyStep) {
