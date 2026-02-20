@@ -21,20 +21,28 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/emailForm"
 
-    override fun mode(state: JointLandlordsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: JointLandlordsState) =
+        if (state.invitedJointLandlords.isEmpty()) {
+            null
+        } else {
+            Complete.COMPLETE
+        }
 
     override fun enrichSubmittedDataBeforeValidation(
         state: JointLandlordsState,
         formData: PageData,
     ): PageData =
         super.enrichSubmittedDataBeforeValidation(state, formData) +
-            (InviteJointLandlordsFormModel::invitedEmailAddresses.name to (state.invitedJointLandlordEmails ?: emptyList()))
+            (InviteJointLandlordsFormModel::invitedEmailAddresses.name to state.invitedJointLandlords)
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
         val formModel = getFormModelFromState(state)
-        val currentList = state.invitedJointLandlordEmails?.toMutableList() ?: mutableListOf()
-        formModel.emailAddress?.let { currentList.add(it) }
-        state.invitedJointLandlordEmails = currentList
+        val currentMap = state.invitedJointLandlordEmailsMap?.toMutableMap() ?: mutableMapOf()
+        val nextKey = (currentMap.keys.maxOrNull() ?: 0) + 1
+        formModel.emailAddress?.let { currentMap[nextKey] = it }
+        state.invitedJointLandlordEmailsMap = currentMap
+        state.inviteJointLandlordStep.clearFormData()
+        state.inviteAnotherJointLandlordStep.clearFormData()
     }
 }
 
