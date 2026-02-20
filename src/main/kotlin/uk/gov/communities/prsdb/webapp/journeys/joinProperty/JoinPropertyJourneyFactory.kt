@@ -5,12 +5,13 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.AddressSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PrnSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.ConfirmPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyByPrnStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
@@ -22,6 +23,8 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRe
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.RequestRejectedStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SendRequestStep
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks.AddressSearchTask
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks.PrnSearchTask
 import java.security.Principal
 
 @PrsdbWebService
@@ -32,55 +35,28 @@ class JoinPropertyJourneyFactory(
         val state = stateFactory.getObject()
 
         return journey(state) {
-            unreachableStepStep { journey.findPropertyStep }
+            unreachableStepStep { journey.addressSearchTask.firstStep }
             configure {
                 withAdditionalContentProperty { "title" to "joinProperty.title" }
             }
 
-            // All steps in linear path for viewability during development
-            // Address search path
-            // TODO: PDJB-274 - Add conditional routing based on search results
-            step(journey.findPropertyStep) {
-                routeSegment(FindPropertyStep.ROUTE_SEGMENT)
+            // Address search task
+            task(journey.addressSearchTask) {
                 initialStep()
-                nextStep { journey.noMatchingPropertiesStep }
-            }
-            // TODO: PDJB-276 - Connect when no properties match search
-            step(journey.noMatchingPropertiesStep) {
-                routeSegment(NoMatchingPropertiesStep.ROUTE_SEGMENT)
-                parents { journey.findPropertyStep.isComplete() }
-                nextStep { journey.selectPropertyStep }
-            }
-            // TODO: PDJB-275 - Add conditional routing to error pages
-            step(journey.selectPropertyStep) {
-                routeSegment(SelectPropertyStep.ROUTE_SEGMENT)
-                parents { journey.noMatchingPropertiesStep.isComplete() }
-                nextStep { journey.propertyNotRegisteredStep }
-            }
-            // TODO: PDJB-283 - Connect when property is not registered
-            step(journey.propertyNotRegisteredStep) {
-                routeSegment(PropertyNotRegisteredStep.ROUTE_SEGMENT)
-                parents { journey.selectPropertyStep.isComplete() }
-                nextStep { journey.findPropertyByPrnStep }
+                nextStep { journey.prnSearchTask.firstStep }
             }
 
-            // PRN search path
-            // TODO: PDJB-277 - Connect from FindProperty page link
-            step(journey.findPropertyByPrnStep) {
-                routeSegment(FindPropertyByPrnStep.ROUTE_SEGMENT)
-                parents { journey.propertyNotRegisteredStep.isComplete() }
-                nextStep { journey.prnNotFoundStep }
-            }
-            // TODO: PDJB-279 - Connect when PRN not found
-            step(journey.prnNotFoundStep) {
-                routeSegment(PrnNotFoundStep.ROUTE_SEGMENT)
-                parents { journey.findPropertyByPrnStep.isComplete() }
+            // PRN search task
+            task(journey.prnSearchTask) {
+                parents { journey.addressSearchTask.isComplete() }
                 nextStep { journey.alreadyRegisteredStep }
             }
+
+            // Remaining steps after search tasks
             // TODO: PDJB-280 - Connect when user is already registered
             step(journey.alreadyRegisteredStep) {
                 routeSegment(JoinPropertyAlreadyRegisteredStep.ROUTE_SEGMENT)
-                parents { journey.prnNotFoundStep.isComplete() }
+                parents { journey.prnSearchTask.isComplete() }
                 nextStep { journey.pendingRequestStep }
             }
             // TODO: PDJB-281 - Connect when user has pending request
@@ -115,16 +91,21 @@ class JoinPropertyJourneyFactory(
 
 @JourneyFrameworkComponent
 class JoinPropertyJourney(
+    // Address search task
+    override val addressSearchTask: AddressSearchTask,
     override val findPropertyStep: FindPropertyStep,
-    override val findPropertyByPrnStep: FindPropertyByPrnStep,
+    override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
     override val selectPropertyStep: SelectPropertyStep,
-    override val confirmPropertyStep: ConfirmPropertyStep,
+    override val propertyNotRegisteredStep: PropertyNotRegisteredStep,
+    // PRN search task
+    override val prnSearchTask: PrnSearchTask,
+    override val findPropertyByPrnStep: FindPropertyByPrnStep,
+    override val prnNotFoundStep: PrnNotFoundStep,
+    // Remaining steps
     override val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep,
     override val pendingRequestStep: PendingRequestStep,
     override val requestRejectedStep: RequestRejectedStep,
-    override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
-    override val propertyNotRegisteredStep: PropertyNotRegisteredStep,
-    override val prnNotFoundStep: PrnNotFoundStep,
+    override val confirmPropertyStep: ConfirmPropertyStep,
     override val sendRequestStep: SendRequestStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
@@ -141,16 +122,14 @@ class JoinPropertyJourney(
     }
 }
 
-interface JoinPropertyJourneyState : JourneyState {
-    val findPropertyStep: FindPropertyStep
-    val findPropertyByPrnStep: FindPropertyByPrnStep
-    val selectPropertyStep: SelectPropertyStep
-    val confirmPropertyStep: ConfirmPropertyStep
+interface JoinPropertyJourneyState :
+    AddressSearchState,
+    PrnSearchState {
+    val addressSearchTask: AddressSearchTask
+    val prnSearchTask: PrnSearchTask
     val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep
     val pendingRequestStep: PendingRequestStep
     val requestRejectedStep: RequestRejectedStep
-    val noMatchingPropertiesStep: NoMatchingPropertiesStep
-    val propertyNotRegisteredStep: PropertyNotRegisteredStep
-    val prnNotFoundStep: PrnNotFoundStep
+    val confirmPropertyStep: ConfirmPropertyStep
     val sendRequestStep: SendRequestStep
 }
