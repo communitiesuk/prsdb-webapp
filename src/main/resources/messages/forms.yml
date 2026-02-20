@@ -92,6 +92,17 @@ nonEnglandOrWalesAddress:
   paragraph:
     one: You cannot currently register without a contact address in England or Wales.
     two: 'In the future, landlords outside this area will be able to access the database.'
+findProperty:
+  title: Find a property
+  caption: Join a registered property as a joint landlord
+  postcode:
+    label: Postcode
+    hint: For example, SW1A 2AA
+  houseNameOrNumber:
+    label: Property name or number
+    hint: For example, 15 or Prospect Cottage
+  submit: Find property
+  alternativeLink: Find using the Property Registration Number instead
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
