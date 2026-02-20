@@ -49,18 +49,18 @@ class JoinPropertyJourneyFactory(
             step(journey.noMatchingPropertiesStep) {
                 routeSegment(NoMatchingPropertiesStep.ROUTE_SEGMENT)
                 parents { journey.findPropertyStep.isComplete() }
-                nextStep { journey.propertyNotRegisteredStep }
-            }
-            // TODO: PDJB-283 - Connect when property is not registered
-            step(journey.propertyNotRegisteredStep) {
-                routeSegment(PropertyNotRegisteredStep.ROUTE_SEGMENT)
-                parents { journey.noMatchingPropertiesStep.isComplete() }
                 nextStep { journey.selectPropertyStep }
             }
             // TODO: PDJB-275 - Add conditional routing to error pages
             step(journey.selectPropertyStep) {
                 routeSegment(SelectPropertyStep.ROUTE_SEGMENT)
-                parents { journey.propertyNotRegisteredStep.isComplete() }
+                parents { journey.noMatchingPropertiesStep.isComplete() }
+                nextStep { journey.propertyNotRegisteredStep }
+            }
+            // TODO: PDJB-283 - Connect when property is not registered
+            step(journey.propertyNotRegisteredStep) {
+                routeSegment(PropertyNotRegisteredStep.ROUTE_SEGMENT)
+                parents { journey.selectPropertyStep.isComplete() }
                 nextStep { journey.findPropertyByPrnStep }
             }
 
@@ -68,7 +68,7 @@ class JoinPropertyJourneyFactory(
             // TODO: PDJB-277 - Connect from FindProperty page link
             step(journey.findPropertyByPrnStep) {
                 routeSegment(FindPropertyByPrnStep.ROUTE_SEGMENT)
-                parents { journey.selectPropertyStep.isComplete() }
+                parents { journey.propertyNotRegisteredStep.isComplete() }
                 nextStep { journey.prnNotFoundStep }
             }
             // TODO: PDJB-279 - Connect when PRN not found
