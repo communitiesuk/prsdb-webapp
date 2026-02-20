@@ -17,7 +17,7 @@ import java.security.Principal
 
 @PrsdbWebService
 class UpdateOwnershipTypeJourneyFactory(
-    private val stateFactory: ObjectFactory<UpdateOwnershipJourney>,
+    private val stateFactory: ObjectFactory<UpdateOwnershipTypeJourney>,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -63,7 +63,7 @@ class UpdateOwnershipTypeJourneyFactory(
 }
 
 @JourneyFrameworkComponent
-class UpdateOwnershipJourney(
+class UpdateOwnershipTypeJourney(
     // OwnershipTypeStep
     override val ownershipTypeStep: OwnershipTypeStep,
     override val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep,

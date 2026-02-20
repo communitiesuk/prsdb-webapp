@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.OwnershipTypeFormPage
 
 class OwnershipTypeFormPagePropertyDetailsUpdate(
@@ -9,5 +10,6 @@ class OwnershipTypeFormPagePropertyDetailsUpdate(
     urlArguments: Map<String, String>,
 ) : OwnershipTypeFormPage(
         page,
-        UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(urlArguments["propertyOwnershipId"]!!.toLong()),
+        UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
+            "$/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
     )

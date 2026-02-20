@@ -1099,7 +1099,8 @@ class Navigator(
 
     fun goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId: Long): OwnershipTypeFormPagePropertyDetailsUpdate {
         navigate(
-            UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnershipId),
+            UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnershipId) +
+                "$/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
         )
         return createValidPage(
             page,
