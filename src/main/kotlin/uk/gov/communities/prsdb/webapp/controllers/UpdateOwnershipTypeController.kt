@@ -14,19 +14,19 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.UPDATE_LICENSING_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController.Companion.UPDATE_OWNERSHIP_TYPE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.UpdateOwnershipTypeJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_LICENSING_ROUTE)
+@RequestMapping(UPDATE_OWNERSHIP_TYPE_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateLicensingController(
-    private val journeyFactory: UpdateLicensingJourneyFactory,
+class UpdateOwnershipTypeController(
+    private val journeyFactory: UpdateOwnershipTypeJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("{stepName}")
@@ -80,9 +80,10 @@ class UpdateLicensingController(
     }
 
     companion object {
-        const val UPDATE_LICENSING_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-licensing"
+        const val UPDATE_OWNERSHIP_TYPE_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-ownership-type"
 
-        fun getUpdateLicensingBaseRoute(propertyOwnershipId: Long): String =
-            UriTemplate(UPDATE_LICENSING_ROUTE).expand(propertyOwnershipId).toASCIIString()
+        fun getUpdateOwnershipTypeRoute(propertyOwnershipId: Long): String =
+            UriTemplate(UPDATE_OWNERSHIP_TYPE_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }
 }

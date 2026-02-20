@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
@@ -1109,8 +1110,8 @@ class Navigator(
 
     fun goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId: Long): OwnershipTypeFormPagePropertyDetailsUpdate {
         navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
+            UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnershipId) +
+                "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
         )
         return createValidPage(
             page,

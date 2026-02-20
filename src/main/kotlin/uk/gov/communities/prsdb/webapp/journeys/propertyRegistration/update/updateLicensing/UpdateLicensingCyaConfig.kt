@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.updateLicensing
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
