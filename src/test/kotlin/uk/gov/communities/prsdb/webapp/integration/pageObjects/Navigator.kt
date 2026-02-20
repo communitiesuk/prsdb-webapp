@@ -89,6 +89,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlag
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.SelectPropertyPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -994,8 +995,8 @@ class Navigator(
 
     fun goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId: Long): OwnershipTypeFormPagePropertyDetailsUpdate {
         navigate(
-            UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnershipId) +
-                "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
+                "/${UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment}",
         )
         return createValidPage(
             page,
@@ -1308,6 +1309,18 @@ class Navigator(
         val startPage = goToJoinPropertyStartPage()
         startPage.continueButton.clickAndWait()
         return createValidPage(page, FindPropertyPageJoinProperty::class)
+    }
+
+    fun skipToSelectPropertyPage(): SelectPropertyPage {
+        val findPropertyPage = goToFindPropertyPageJoinProperty()
+        page.waitForURL("**/find-property**")
+        // Submit the find-property placeholder step (use main content button to avoid cookie/feedback buttons)
+        page.locator("#main-content button[type='submit']").click()
+        page.waitForURL("**/no-matching-properties**")
+        // Submit the no-matching-properties placeholder step
+        page.locator("#main-content button[type='submit']").click()
+        page.waitForURL("**/select-property**")
+        return createValidPage(page, SelectPropertyPage::class)
     }
 
     companion object {
