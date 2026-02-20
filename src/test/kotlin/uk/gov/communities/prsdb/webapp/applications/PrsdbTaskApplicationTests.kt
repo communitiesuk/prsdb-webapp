@@ -27,7 +27,9 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.NftDataSeeder
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
@@ -81,6 +83,8 @@ class PrsdbTaskApplicationTests {
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                NftDataSeeder::class.simpleBeanName,
+                EpcCertificateUrlProvider::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

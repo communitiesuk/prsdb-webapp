@@ -81,6 +81,11 @@ class JourneyStateService(
         setValue(STEP_DATA_KEY, newJourneyData)
     }
 
+    fun clearStepData(key: String) {
+        val newJourneyData = getSubmittedStepData() - key
+        setValue(STEP_DATA_KEY, newJourneyData)
+    }
+
     fun getSubmittedStepData() = objectToStringKeyedMap(getValue(STEP_DATA_KEY)) ?: emptyMap()
 
     fun setValue(
@@ -152,11 +157,13 @@ class JourneyStateService(
         fun urlWithJourneyState(
             path: String,
             journeyId: String,
+            urlParams: Map<String, String> = mapOf(),
         ): String =
             UriComponentsBuilder
                 .newInstance()
                 .path(path)
                 .queryParam(JOURNEY_ID_PARAM, journeyId)
+                .apply { urlParams.forEach { (key, value) -> queryParam(key, value) } }
                 .build(true)
                 .toUriString()
     }

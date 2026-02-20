@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
@@ -39,7 +40,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
@@ -217,10 +217,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         inviteJointLandlordPage.submitEmail("email@address.com")
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
 
-        // TODO PDJB-114, PDJB-117: Implement joint landlord task test case
-        checkJointLandlordsPage.form.submit()
-        val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
-        removeJointLandlordsPage.form.submit()
+        // TODO PDJB-117: Implement joint landlord task test case
+        checkJointLandlordsPage
+            .form
+            .addAnotherButton
+            .clickAndWait()
+
+        val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+        addAnotherPage.submitEmail("email2@address.com")
+
+        val newCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        newCheckJointLandlordsPage.form
+            .submit()
+
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
@@ -246,7 +255,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "1 Fictional Road, FA1 1AA",
                 absoluteLandlordUrl,
                 true,
-                listOf("email@address.com"),
+                listOf("email@address.com", "email2@address.com"),
             ),
         )
 

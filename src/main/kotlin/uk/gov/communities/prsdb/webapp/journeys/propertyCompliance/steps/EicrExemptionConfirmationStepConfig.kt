@@ -13,7 +13,6 @@ class EicrExemptionConfirmationStepConfig : AbstractRequestableStepConfig<Comple
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "submitButtonText" to "forms.buttons.saveAndContinueToEPC",
         )
 

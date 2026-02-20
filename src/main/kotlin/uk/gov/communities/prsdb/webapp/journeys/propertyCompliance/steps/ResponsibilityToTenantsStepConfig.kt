@@ -17,7 +17,6 @@ class ResponsibilityToTenantsStepConfig : AbstractRequestableStepConfig<Complete
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "landlordResponsibilitiesUrl" to LANDLORD_RESPONSIBILITIES_URL,
             "governmentApprovedDepositProtectionSchemeUrl" to GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL,
             "howToRentGuideUrl" to HOW_TO_RENT_GUIDE_URL,

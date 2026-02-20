@@ -12,4 +12,9 @@ enum class BillsIncluded {
     GARDENING,
     CLEANER_FOR_COMMUNAL_AREAS,
     SOMETHING_ELSE,
+    ;
+
+    companion object {
+        val standardEntries = entries.minus(SOMETHING_ELSE)
+    }
 }

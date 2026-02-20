@@ -15,7 +15,6 @@ class EicrOutdatedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFo
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "electricalSafetyStandardsInspectionUrl" to ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL,
             "electricalSafetyStandardsGuideUrl" to ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL,
             "submitButtonText" to "forms.buttons.saveAndContinueToEPC",

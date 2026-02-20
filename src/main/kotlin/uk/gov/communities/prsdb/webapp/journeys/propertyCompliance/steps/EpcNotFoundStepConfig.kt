@@ -16,7 +16,6 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "title" to "propertyCompliance.title",
             "contactAssessorUrl" to CONTACT_EPC_ASSESSOR_URL,
             "getNewEpcUrl" to GET_NEW_EPC_URL,
             "searchAgainUrl" to
