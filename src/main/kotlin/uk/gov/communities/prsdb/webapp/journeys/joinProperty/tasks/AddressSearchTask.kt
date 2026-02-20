@@ -1,33 +1,42 @@
 package uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PropertyAddressSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.FindPropertySearchResult
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.AddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
 
 @JourneyFrameworkComponent
-class PropertyAddressSearchTask : Task<PropertyAddressSearchState>() {
-    override fun makeSubJourney(state: PropertyAddressSearchState) =
+class AddressSearchTask : Task<AddressSearchState>() {
+    override fun makeSubJourney(state: AddressSearchState) =
         subJourney(state) {
-            // TODO: PDJB-274 - Add conditional routing based on search results
             step(journey.findPropertyStep) {
                 routeSegment(FindPropertyStep.ROUTE_SEGMENT)
-                nextStep { journey.noMatchingPropertiesStep }
+                backUrl { JOIN_PROPERTY_ROUTE }
+                nextStep { mode ->
+                    when (mode) {
+                        FindPropertySearchResult.RESULTS_FOUND -> journey.selectPropertyStep
+                        FindPropertySearchResult.NO_RESULTS -> journey.noMatchingPropertiesStep
+                    }
+                }
             }
             // TODO: PDJB-276 - Connect when no properties match search
             step(journey.noMatchingPropertiesStep) {
                 routeSegment(NoMatchingPropertiesStep.ROUTE_SEGMENT)
-                parents { journey.findPropertyStep.isComplete() }
-                nextStep { journey.selectPropertyStep }
+                parents { journey.findPropertyStep.hasOutcome(FindPropertySearchResult.NO_RESULTS) }
+                nextStep { exitStep }
             }
             // TODO: PDJB-275 - Add conditional routing to error pages
             step(journey.selectPropertyStep) {
                 routeSegment(SelectPropertyStep.ROUTE_SEGMENT)
-                parents { journey.noMatchingPropertiesStep.isComplete() }
+                parents { journey.findPropertyStep.hasOutcome(FindPropertySearchResult.RESULTS_FOUND) }
                 nextStep { journey.propertyNotRegisteredStep }
             }
             // TODO: PDJB-283 - Connect when property is not registered
@@ -37,7 +46,12 @@ class PropertyAddressSearchTask : Task<PropertyAddressSearchState>() {
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.propertyNotRegisteredStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.propertyNotRegisteredStep.isComplete(),
+                        journey.noMatchingPropertiesStep.isComplete(),
+                    )
+                }
             }
         }
 }
