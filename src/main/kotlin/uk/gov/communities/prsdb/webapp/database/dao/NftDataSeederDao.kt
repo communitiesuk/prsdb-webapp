@@ -1,0 +1,205 @@
+package uk.gov.communities.prsdb.webapp.database.dao
+
+import org.hibernate.StatelessSession
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.database.entity.Address
+import java.sql.Connection
+import java.sql.PreparedStatement
+
+class NftDataSeederDao(
+    private val session: StatelessSession,
+    private val connection: Connection,
+) {
+    fun prepareOneLoginUserStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO one_login_user 
+            (id, created_date) 
+            VALUES (?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareSystemOperatorStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO system_operator 
+            (created_date, last_modified_date, subject_identifier) 
+            VALUES (?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareLocalCouncilInvitationStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO local_council_invitation 
+            (created_date, token, invited_email, invited_as_admin, inviting_council_id) 
+            VALUES (?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareLocalCouncilUserStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO local_council_user 
+            (created_date, last_modified_date, subject_identifier, is_manager, name, email, local_council_id, has_accepted_privacy_notice) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, true)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareRegistrationNumberStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO registration_number 
+            (id, created_date, number, type) 
+            VALUES (?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareLandlordStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO landlord 
+            (id, created_date, last_modified_date, subject_identifier, name, email, phone_number, address_id, date_of_birth, 
+             registration_number_id, has_responded_to_feedback, is_verified, country_of_residence, is_active, has_accepted_privacy_notice) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareLicenceStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO license 
+            (id, created_date, last_modified_date, license_type, license_number) 
+            VALUES (?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun preparePropertyOwnershipStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO property_ownership 
+            (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
+             primary_landlord_id, license_id, incomplete_compliance_form_id, property_build_type, address_id, num_bedrooms, 
+             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_active) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareFileUploadStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO file_upload 
+            (id, created_date, last_modified_date, object_key, e_tag, status, extension) 
+            VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png')
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareCertificateUploadStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO certificate_upload 
+            (created_date, last_modified_date, category, property_ownership_id, file_upload_id) 
+            VALUES (?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun preparePropertyComplianceStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO property_compliance 
+            (created_date, last_modified_date, property_ownership_id, gas_safety_upload_id, gas_safety_cert_issue_date, 
+             gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason, eicr_upload_id, 
+             eicr_issue_date, eicr_exemption_reason,eicr_exemption_other_reason, epc_url, epc_expiry_date, 
+             tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareReminderEmailSentStatement(): PreparedStatement {
+        val query =
+            """ 
+            INSERT INTO reminder_email_sent 
+            (id, last_reminder_email_sent_date) 
+            VALUES (?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareSavedJourneyStateStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO saved_journey_state 
+            (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier, reminder_email_sent_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareLandlordIncompletePropertyStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO landlord_incomplete_properties 
+            (landlord_id, saved_journey_state_id) 
+            VALUES (?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun findAddresses(
+        limit: Int,
+        offset: Int,
+        restrictToAvailable: Boolean = false,
+    ): List<Address> {
+        val query =
+            """
+            SELECT * FROM address a
+            WHERE a.local_council_id IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1 FROM property_ownership po
+                WHERE po.is_active AND po.address_id = a.id
+            )
+            OR NOT :restrictToAvailable
+            LIMIT :limit OFFSET :offset
+            """
+        return session
+            .createNativeQuery(query, Address::class.java)
+            .setParameter("restrictToAvailable", restrictToAvailable)
+            .setParameter("limit", limit)
+            .setParameter("offset", offset)
+            .resultList
+    }
+
+    fun findRegistrationNumbersIn(numbers: Set<Long>): List<Long> {
+        val query = "SELECT number FROM registration_number WHERE number IN :numbers"
+        return session.createNativeQuery(query, Long::class.java).setParameter("numbers", numbers).resultList
+    }
+
+    fun updateIdSequences() {
+        val manuallyInsertedIdTables =
+            listOf(
+                "registration_number",
+                "landlord",
+                "license",
+                "property_ownership",
+                "file_upload",
+                "reminder_email_sent",
+                "saved_journey_state",
+            )
+        manuallyInsertedIdTables.forEach { table ->
+            val query = "SELECT setval(pg_get_serial_sequence('$table', 'id'), (SELECT COALESCE(MAX(id), 1) FROM $table))"
+            session.createNativeQuery(query, Long::class.java).singleResult
+        }
+    }
+}

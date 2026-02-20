@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_
 class Address() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long = 0
+    val id: Long = 0
 
     @Column(unique = true)
     var uprn: Long? = null
