@@ -66,8 +66,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     abstract fun submitFormData(bindingResult: BindingResult)
 
     fun attemptToReachStep(): Boolean {
-        stepConfig.beforeAttemptingToReachStep(state)
-        if (isStepReachable) {
+        if (stepConfig.beforeAttemptingToReachStep(state) && isStepReachable) {
             stepConfig.afterStepIsReached(state)
             return true
         }
