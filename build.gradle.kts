@@ -1,3 +1,4 @@
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -95,6 +96,9 @@ dependencies {
 
     // FF4J feature flags
     implementation("org.ff4j:ff4j-spring-boot-starter-webmvc:2.1")
+
+    // Fake data generation
+    implementation("net.datafaker:datafaker:2.4.2")
 }
 
 kotlin {
@@ -112,7 +116,7 @@ val frontendAssetsSpec: CopySpec =
 tasks.register<Exec>("buildFrontendAssets") {
     group = "build"
     description = "Build frontend JavaScript and CSS assets using npm"
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+    if (OperatingSystem.current().isWindows) {
         commandLine("cmd", "/c", "npm", "run", "build")
     } else {
         commandLine("npm", "run", "build")

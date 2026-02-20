@@ -6,16 +6,26 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-// TODO PDJB-114, PDJB-117: Implement joint landlord task logic
+// TODO PDJB-117: Implement joint landlord task logic
 @JourneyFrameworkComponent
 class JointLandlordsTask : Task<JointLandlordsState>() {
     override fun makeSubJourney(state: JointLandlordsState) =
         subJourney(state) {
+            step(journey.hasAnyJointLandlordsInvitedStep) {
+                nextStep { mode ->
+                    when (mode) {
+                        AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
+                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.checkJointLandlordsStep
+                    }
+                }
+            }
             step(journey.hasJointLandlordsStep) {
                 routeSegment(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
+                parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS) }
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.inviteJointLandlordStep
@@ -31,20 +41,38 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
             }
             step(journey.checkJointLandlordsStep) {
                 routeSegment(RegisterPropertyStepId.CheckJointLandlords.urlPathSegment)
-                parents { journey.inviteJointLandlordStep.isComplete() }
-                nextStep { journey.removeJointLandlordStep }
+                parents {
+                    OrParents(
+                        journey.inviteJointLandlordStep.isComplete(),
+                        journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS),
+                    )
+                }
+                nextStep { exitStep }
+            }
+            step(journey.inviteAnotherJointLandlordStep) {
+                routeSegment("invite-another-joint-landlord")
+                parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
+                nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.removeJointLandlordStep) {
                 routeSegment(RegisterPropertyStepId.RemoveJointLandlord.urlPathSegment)
-                parents { journey.checkJointLandlordsStep.isComplete() }
-                nextStep { exitStep }
-            }
-            exitStep {
                 parents {
-                    OrParents(
-                        journey.removeJointLandlordStep.isComplete(),
-                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
-                    )
+                    journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS)
+                }
+                backStep { journey.checkJointLandlordsStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.checkJointLandlordsStep
+                        AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
+                    }
+                }
+                exitStep {
+                    parents {
+                        OrParents(
+                            journey.checkJointLandlordsStep.isComplete(),
+                            journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
+                        )
+                    }
                 }
             }
         }

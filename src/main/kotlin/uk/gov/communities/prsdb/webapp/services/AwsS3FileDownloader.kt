@@ -34,7 +34,7 @@ class AwsS3FileDownloader(
                 .builder()
                 .bucket(safeBucketName)
                 .key(fileUpload.objectKey)
-                .versionId(fileUpload.versionId)
+                .let { if (fileUpload.versionId != null) it.versionId(fileUpload.versionId) else it }
 
         if (fileName != null) {
             objectRequestBuilder.responseContentDisposition("attachment; filename=\"$fileName\"")
