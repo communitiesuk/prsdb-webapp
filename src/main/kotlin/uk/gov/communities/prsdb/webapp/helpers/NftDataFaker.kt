@@ -37,12 +37,7 @@ object NftDataFaker {
 
     fun generateNumberLessThan(max: Int): Int = faker.random().nextInt(max)
 
-    fun generateCreatedDate(after: Timestamp? = null): Timestamp =
-        if (after != null) {
-            generateDateAfter(after)
-        } else {
-            Timestamp.from(faker.timeAndDate().past(365, TimeUnit.DAYS))
-        }
+    fun generateCreatedDate(after: Timestamp = LocalDate.now().minusYears(1).toTimestamp()): Timestamp = generateDateAfter(after)
 
     fun generateLastModifiedDate(createdDate: Timestamp): Timestamp? =
         if (generateBoolean(probabilityTrue = 0.6)) {
@@ -72,7 +67,7 @@ object NftDataFaker {
     }
 
     fun generateLastEmailReminderSentDate(createdDate: Timestamp): Timestamp =
-        createdDate.toLocalDateTime().plusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()).toTimestamp()
+        Timestamp.valueOf(createdDate.toLocalDateTime().plusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()))
 
     fun generateInvitationToken(): UUID = UUID.fromString(faker.internet().uuid())
 
@@ -193,10 +188,10 @@ object NftDataFaker {
     fun generatePropertyComplianceData(createdDateTimestamp: Timestamp): PropertyComplianceData {
         val createdDate = Date.valueOf(createdDateTimestamp.toLocalDateTime().toLocalDate())
 
-        val hasGasSafetyExemption = generateBoolean(probabilityTrue = 0.25)
+        val hasGasSafetyExemption = generateBoolean(probabilityTrue = 0.15)
         val gasSafetyExemptionReason = if (hasGasSafetyExemption) generateGasSafetyExemptionReason() else null
 
-        val gasSafetyMissing = !hasGasSafetyExemption && generateBoolean(probabilityTrue = 0.2)
+        val gasSafetyMissing = !hasGasSafetyExemption && generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
             if (!hasGasSafetyExemption && !gasSafetyMissing) {
                 generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
@@ -215,10 +210,10 @@ object NftDataFaker {
                 null
             }
 
-        val hasEicrExemption = generateBoolean(probabilityTrue = 0.25)
+        val hasEicrExemption = generateBoolean(probabilityTrue = 0.01)
         val eicrExemptionReason = if (hasEicrExemption) generateEicrExemptionReason() else null
 
-        val eicrMissing = !hasEicrExemption && generateBoolean(probabilityTrue = 0.2)
+        val eicrMissing = !hasEicrExemption && generateBoolean(probabilityTrue = 0.1)
         val eicrIssueDate =
             if (!hasEicrExemption && !eicrMissing) {
                 generateDateBefore(createdDate, (EICR_VALIDITY_YEARS * 365 * 1.5).toLong())
@@ -226,10 +221,10 @@ object NftDataFaker {
                 null
             }
 
-        val hasEpcExemption = generateBoolean(probabilityTrue = 0.25)
+        val hasEpcExemption = generateBoolean(probabilityTrue = 0.05)
         val epcExemptionReason = if (hasEpcExemption) faker.options().option(EpcExemptionReason::class.java) else null
 
-        val epcMissing = !hasEpcExemption && generateBoolean(probabilityTrue = 0.2)
+        val epcMissing = !hasEpcExemption && generateBoolean(probabilityTrue = 0.01)
         val epcNumber =
             if (!hasEpcExemption && !epcMissing) {
                 faker.options().option(*epcNumbers)
@@ -241,8 +236,8 @@ object NftDataFaker {
             if (epcNumber != null) {
                 val expiryDate =
                     faker.timeAndDate().between(
-                        createdDate.toLocalDate().minusYears(3).toInstant(),
-                        createdDate.toLocalDate().plusYears(6).toInstant(),
+                        createdDate.toLocalDate().minusYears(5).toInstant(),
+                        createdDate.toLocalDate().plusYears(10).toInstant(),
                     )
                 Date.valueOf(expiryDate.toLocalDate())
             } else {
@@ -257,7 +252,7 @@ object NftDataFaker {
                 null
             }
 
-        val epcHasAcceptableRating = epcNumber != null && generateBoolean(probabilityTrue = 0.8)
+        val epcHasAcceptableRating = epcNumber != null && generateBoolean(probabilityTrue = 0.9)
         val epcEnergyRating =
             if (epcNumber != null) {
                 if (epcHasAcceptableRating) {

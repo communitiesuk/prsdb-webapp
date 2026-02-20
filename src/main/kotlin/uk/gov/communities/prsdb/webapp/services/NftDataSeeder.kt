@@ -4,10 +4,10 @@ import org.hibernate.SessionFactory
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
-import uk.gov.communities.prsdb.webapp.database.repository.NftDataSeederRepository
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.CoreLandlordDetails
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
@@ -31,7 +31,7 @@ class NftDataSeeder(
     private val addressRepository: AddressRepository,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) {
-    private lateinit var nftDataSeederRepository: NftDataSeederRepository
+    private lateinit var nftDataSeederDao: NftDataSeederDao
 
     private val registrationNumberGenerator = RegistrationNumberGenerator()
     private val addressGenerator = AddressGenerator()
@@ -43,11 +43,11 @@ class NftDataSeeder(
             val transaction = session.beginTransaction()
             try {
                 session.doWork { connection: Connection ->
-                    nftDataSeederRepository = NftDataSeederRepository(session, connection)
+                    nftDataSeederDao = NftDataSeederDao(session, connection)
                     seedSystemOperatorData()
                     seedLocalCouncilData()
                     seedLandlordData()
-                    nftDataSeederRepository.updateIdSequences()
+                    nftDataSeederDao.updateIdSequences()
                 }
                 transaction.commit()
             } catch (e: Exception) {
@@ -60,8 +60,8 @@ class NftDataSeeder(
     private fun seedSystemOperatorData() {
         log("Starting to seed system operator data")
 
-        val oneLoginUserStmt = nftDataSeederRepository.prepareOneLoginUserStatement()
-        val systemOperatorStmt = nftDataSeederRepository.prepareSystemOperatorStatement()
+        val oneLoginUserStmt = nftDataSeederDao.prepareOneLoginUserStatement()
+        val systemOperatorStmt = nftDataSeederDao.prepareSystemOperatorStatement()
 
         try {
             repeat(NUM_OF_SYSTEM_OPERATORS) { addSystemOperatorToBatch(oneLoginUserStmt, systemOperatorStmt) }
@@ -81,9 +81,9 @@ class NftDataSeeder(
     private fun seedLocalCouncilData() {
         log("Starting to seed local council data")
 
-        val oneLoginUserStmt = nftDataSeederRepository.prepareOneLoginUserStatement()
-        val localCouncilUserStmt = nftDataSeederRepository.prepareLocalCouncilUserStatement()
-        val localCouncilInvitationStmt = nftDataSeederRepository.prepareLocalCouncilInvitationStatement()
+        val oneLoginUserStmt = nftDataSeederDao.prepareOneLoginUserStatement()
+        val localCouncilUserStmt = nftDataSeederDao.prepareLocalCouncilUserStatement()
+        val localCouncilInvitationStmt = nftDataSeederDao.prepareLocalCouncilInvitationStatement()
 
         try {
             val localCouncilIds = localCouncilRepository.findAllId()
@@ -117,20 +117,20 @@ class NftDataSeeder(
     private fun seedLandlordData() {
         log("Starting to seed landlord data")
 
-        val oneLoginUserStmt = nftDataSeederRepository.prepareOneLoginUserStatement()
-        val registrationNumberStmt = nftDataSeederRepository.prepareRegistrationNumberStatement()
-        val landlordStmt = nftDataSeederRepository.prepareLandlordStatement()
+        val oneLoginUserStmt = nftDataSeederDao.prepareOneLoginUserStatement()
+        val registrationNumberStmt = nftDataSeederDao.prepareRegistrationNumberStatement()
+        val landlordStmt = nftDataSeederDao.prepareLandlordStatement()
 
-        val licenceStmt = nftDataSeederRepository.prepareLicenceStatement()
-        val propertyOwnershipStmt = nftDataSeederRepository.preparePropertyOwnershipStatement()
+        val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
+        val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
 
-        val fileUploadStmt = nftDataSeederRepository.prepareFileUploadStatement()
-        val certificateUploadStmt = nftDataSeederRepository.prepareCertificateUploadStatement()
-        val propertyComplianceStmt = nftDataSeederRepository.preparePropertyComplianceStatement()
+        val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
+        val certificateUploadStmt = nftDataSeederDao.prepareCertificateUploadStatement()
+        val propertyComplianceStmt = nftDataSeederDao.preparePropertyComplianceStatement()
 
-        val reminderEmailSentStmt = nftDataSeederRepository.prepareReminderEmailSentStatement()
-        val savedJourneyStateStmt = nftDataSeederRepository.prepareSavedJourneyStateStatement()
-        val incompletePropertyStmt = nftDataSeederRepository.prepareLandlordIncompletePropertyStatement()
+        val reminderEmailSentStmt = nftDataSeederDao.prepareReminderEmailSentStatement()
+        val savedJourneyStateStmt = nftDataSeederDao.prepareSavedJourneyStateStatement()
+        val incompletePropertyStmt = nftDataSeederDao.prepareLandlordIncompletePropertyStatement()
 
         try {
             var registrationNumbersAdded = 0
@@ -562,7 +562,7 @@ class NftDataSeeder(
         override fun replenishValues() {
             val valueSet = values.toSet()
             val potentialNewNumbers = NftDataFaker.generateRegistrationNumbers(BATCH_SIZE * 5)
-            val alreadyUsedNumbers = nftDataSeederRepository.findRegistrationNumbersIn(potentialNewNumbers).toSet()
+            val alreadyUsedNumbers = nftDataSeederDao.findRegistrationNumbersIn(potentialNewNumbers).toSet()
             val newNumbers = potentialNewNumbers - alreadyUsedNumbers
             values = (valueSet + newNumbers).toList()
         }
@@ -578,7 +578,7 @@ class NftDataSeeder(
         override fun replenishValues() {
             val valueSet = values.toSet()
             val newAddresses =
-                nftDataSeederRepository.findAddresses(
+                nftDataSeederDao.findAddresses(
                     limit = replenishmentSize,
                     offset = NftDataFaker.generateNumberLessThan(addressCount - replenishmentSize),
                     restrictToAvailable,

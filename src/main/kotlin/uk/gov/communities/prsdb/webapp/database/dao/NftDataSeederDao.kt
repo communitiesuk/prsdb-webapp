@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.database.repository
+package uk.gov.communities.prsdb.webapp.database.dao
 
 import org.hibernate.StatelessSession
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import java.sql.Connection
 import java.sql.PreparedStatement
 
-class NftDataSeederRepository(
+class NftDataSeederDao(
     private val session: StatelessSession,
     private val connection: Connection,
 ) {
@@ -67,7 +67,7 @@ class NftDataSeederRepository(
             INSERT INTO landlord 
             (id, created_date, last_modified_date, subject_identifier, name, email, phone_number, address_id, date_of_birth, 
              registration_number_id, has_responded_to_feedback, is_verified, country_of_residence, is_active, has_accepted_privacy_notice) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '$ENGLAND_OR_WALES', true, true)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true)
             """
         return connection.prepareStatement(query)
     }

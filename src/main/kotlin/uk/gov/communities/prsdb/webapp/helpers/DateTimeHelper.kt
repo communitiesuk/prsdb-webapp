@@ -53,8 +53,6 @@ class DateTimeHelper(
 
         fun java.time.LocalDate.toTimestamp(): Timestamp = Timestamp.from(getJavaInstantFromLocalDate(this))
 
-        fun java.time.LocalDateTime.toTimestamp(): Timestamp = this.toLocalDate().toTimestamp()
-
         fun java.time.Instant.toLocalDate(): java.time.LocalDate = this.atZone(ZoneId.systemDefault()).toLocalDate()
     }
 }

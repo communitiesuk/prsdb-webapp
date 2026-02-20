@@ -10,11 +10,12 @@ import org.json.JSONObject
 import org.springframework.core.env.Environment
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.database.dao.NgdAddressLoaderDao
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
-import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.ZipInputStreamExtensions.Companion.goToEntry
+import java.sql.Connection
 import java.sql.PreparedStatement
 import java.time.Instant
 import java.time.ZoneId
@@ -27,7 +28,7 @@ class NgdAddressLoader(
     localCouncilRepository: LocalCouncilRepository,
     environment: Environment,
 ) {
-    private lateinit var ngdAddressLoaderRepository: NgdAddressLoaderRepository
+    private lateinit var ngdAddressLoaderDao: NgdAddressLoaderDao
 
     private val localCouncilCustodianCodeToId by lazy { localCouncilRepository.findAll().associate { it.custodianCode to it.id } }
 
@@ -36,7 +37,7 @@ class NgdAddressLoader(
     fun loadNewDataPackageVersions() {
         val statelessSession = sessionFactory.openStatelessSession()
         statelessSession.use { session ->
-            ngdAddressLoaderRepository = NgdAddressLoaderRepository(session)
+            ngdAddressLoaderDao = NgdAddressLoaderDao(session)
 
             val storedDataPackageVersionIdOrNull = getStoredDataPackageVersionId()
             log("Starting to load new data package versions. Version before load is $storedDataPackageVersionIdOrNull")
@@ -92,14 +93,14 @@ class NgdAddressLoader(
     }
 
     private fun getStoredDataPackageVersionId(): String? {
-        val tableComment = ngdAddressLoaderRepository.findCommentOnAddressTable() ?: return null
+        val tableComment = ngdAddressLoaderDao.findCommentOnAddressTable() ?: return null
         val dataPackageVersionId = tableComment.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
         return dataPackageVersionId.ifEmpty { null }
     }
 
     private fun setStoredDataPackageVersionId(dataPackageVersionId: String) {
         val comment = "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$dataPackageVersionId"
-        ngdAddressLoaderRepository.saveCommentOnAddressTable(comment)
+        ngdAddressLoaderDao.saveCommentOnAddressTable(comment)
     }
 
     private fun getInitialDataPackageVersionId(): String {
@@ -137,8 +138,8 @@ class NgdAddressLoader(
     ) {
         val transaction = session.beginTransaction()
         try {
-            session.doWork { connection ->
-                ngdAddressLoaderRepository.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
+            session.doWork { connection: Connection ->
+                ngdAddressLoaderDao.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
                     var batchRecordCount = 0
                     val upsertedAddressUprns = mutableSetOf<Long>()
                     csvParser.forEachIndexed { index, record ->
@@ -155,14 +156,14 @@ class NgdAddressLoader(
                         }
 
                         if (upsertedAddressUprns.size >= UPRN_BATCH_SIZE) {
-                            ngdAddressLoaderRepository.updatePropertyOwnershipAddresses(upsertedAddressUprns)
+                            ngdAddressLoaderDao.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                             upsertedAddressUprns.clear()
                         }
 
                         if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
                     }
                     if (batchRecordCount > 0) preparedStatement.executeBatch()
-                    if (upsertedAddressUprns.isNotEmpty()) ngdAddressLoaderRepository.updatePropertyOwnershipAddresses(upsertedAddressUprns)
+                    if (upsertedAddressUprns.isNotEmpty()) ngdAddressLoaderDao.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                 }
             }
             setStoredDataPackageVersionId(dataPackageVersionId)
@@ -224,12 +225,13 @@ class NgdAddressLoader(
         val transaction = session.beginTransaction()
         try {
             log("Starting to delete unused inactive addresses")
-            ngdAddressLoaderRepository.deleteUnusedInactiveAddresses()
+            ngdAddressLoaderDao.deleteUnusedInactiveAddresses()
             transaction.commit()
             log("Unused inactive addresses deleted")
         } catch (exception: Exception) {
-            log("Error while deleting unused inactive addresses:")
             transaction.rollback()
+            log("Error while deleting unused inactive addresses:")
+            throw exception
         }
     }
 
