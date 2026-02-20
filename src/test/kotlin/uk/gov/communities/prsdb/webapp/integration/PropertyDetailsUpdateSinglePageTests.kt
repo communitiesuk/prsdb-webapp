@@ -59,8 +59,9 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
 
     @Test
     fun `Submitting a CYA page with stale data redirects to an error page`(browserContext: BrowserContext) {
-        // Create two pages
+        // TODO PDJB-106 update journey data to new system
         val (page1, navigator1) = createPageAndNavigator(browserContext)
+        // Create two pages
         val (_, navigator2) = createPageAndNavigator(browserContext)
 
         // Navigate to the occupancy check answers page on page1 with an occupied property
