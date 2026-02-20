@@ -176,7 +176,7 @@ class PropertyRegistrationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
-    override var invitedJointLandlordEmailsMap: List<String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
+    override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

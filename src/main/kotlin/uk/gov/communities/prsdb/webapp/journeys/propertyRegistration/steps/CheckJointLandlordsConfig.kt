@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.ArrayIndexParameterService
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
 class CheckJointLandlordsConfig(
-    private val urlParameterService: ArrayIndexParameterService,
+    private val urlParameterService: CollectionKeyParameterService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, JointLandlordsState>() {
     override val formModelClass = NoInputFormModel::class
 

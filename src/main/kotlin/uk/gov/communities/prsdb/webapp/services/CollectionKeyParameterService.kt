@@ -6,14 +6,14 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 
 @PrsdbWebService
 @RequestScope
-class ArrayIndexParameterService(
+class CollectionKeyParameterService(
     request: ServletRequest,
 ) : UrlParameterService<Int>(request) {
     override fun getParameterOrNull(): Int? = getParameterOrNull(PARAMETER_NAME)?.toIntOrNull()
 
-    override fun createParameterPair(index: Int): Pair<String, String> = PARAMETER_NAME to index.toString()
+    override fun createParameterPair(value: Int): Pair<String, String> = PARAMETER_NAME to value.toString()
 
     companion object {
-        private const val PARAMETER_NAME = "index"
+        private const val PARAMETER_NAME = "memberId"
     }
 }

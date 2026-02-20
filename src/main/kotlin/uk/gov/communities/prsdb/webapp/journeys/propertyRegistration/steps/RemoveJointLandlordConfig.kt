@@ -6,12 +6,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.ArrayIndexParameterService
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 // TODO PDJB-117: Implement RemoveJointLandlordStep
 @JourneyFrameworkComponent
 class RemoveJointLandlordConfig(
-    private val urlParameterService: ArrayIndexParameterService,
+    private val urlParameterService: CollectionKeyParameterService,
 ) : AbstractRequestableStepConfig<AnyLandlordsInvited, NoInputFormModel, JointLandlordsState>() {
     override val formModelClass = NoInputFormModel::class
 

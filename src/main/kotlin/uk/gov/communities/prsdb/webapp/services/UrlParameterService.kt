@@ -9,5 +9,5 @@ abstract class UrlParameterService<T>(
 
     abstract fun getParameterOrNull(): T?
 
-    abstract fun createParameterPair(index: T): Pair<String, String>
+    abstract fun createParameterPair(value: T): Pair<String, String>
 }
