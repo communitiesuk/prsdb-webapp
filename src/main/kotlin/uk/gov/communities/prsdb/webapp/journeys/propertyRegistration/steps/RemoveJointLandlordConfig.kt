@@ -31,15 +31,16 @@ class RemoveJointLandlordConfig(
         }
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
-        val indexToRemove = urlParameterService.getParameterOrNull()
+        val keyToRemove = urlParameterService.getParameterOrNull()
+        val currentMap = state.invitedJointLandlordEmailsMap?.toMutableMap() ?: mutableMapOf()
 
-        if (indexToRemove == null || indexToRemove < 0 || indexToRemove >= state.invitedJointLandlords.size) {
+        // TODO PDJB-117: Move check to `beforeAttemptingToReachStep` and refactor `attemptToReachStep` to allow that to make it unreachable
+        if (keyToRemove == null || keyToRemove !in currentMap.keys) {
             return
         }
 
-        val currentList = state.invitedJointLandlords.toMutableList()
-        currentList.removeAt(indexToRemove)
-        state.invitedJointLandlordEmails = currentList
+        currentMap.remove(keyToRemove)
+        state.invitedJointLandlordEmailsMap = currentMap
     }
 }
 

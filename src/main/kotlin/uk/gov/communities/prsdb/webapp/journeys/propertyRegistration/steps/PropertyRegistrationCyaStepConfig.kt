@@ -97,7 +97,7 @@ class PropertyRegistrationCyaStepConfig(
                         null
                     },
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = state.invitedJointLandlordEmails,
+                jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList(),
             )
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true

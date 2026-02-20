@@ -27,8 +27,8 @@ class CheckJointLandlordsConfig(
         )
 
     private fun getEmailRows(state: JointLandlordsState): List<SummaryListRowViewModel> {
-        val invitedEmails = state.invitedJointLandlords
-        return invitedEmails.mapIndexed { index, email ->
+        val invitedEmails = state.invitedJointLandlordEmailsMap ?: emptyMap()
+        return invitedEmails.map { (index, email) ->
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "jointLandlords.checkJointLandlords.invitedEmailAddress",
                 email,

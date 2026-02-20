@@ -37,9 +37,10 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
         val formModel = getFormModelFromState(state)
-        val currentList = state.invitedJointLandlords.toMutableList()
-        formModel.emailAddress?.let { currentList.add(it) }
-        state.invitedJointLandlordEmails = currentList
+        val currentMap = state.invitedJointLandlordEmailsMap?.toMutableMap() ?: mutableMapOf()
+        val nextKey = (currentMap.keys.maxOrNull() ?: 0) + 1
+        formModel.emailAddress?.let { currentMap[nextKey] = it }
+        state.invitedJointLandlordEmailsMap = currentMap
         state.inviteJointLandlordStep.clearFormData()
         state.inviteAnotherJointLandlordStep.clearFormData()
     }

@@ -15,10 +15,10 @@ interface JointLandlordsState : JourneyState {
     val checkJointLandlordsStep: CheckJointLandlordsStep
     val removeJointLandlordStep: RemoveJointLandlordStep
 
-    var invitedJointLandlordEmails: List<String>?
+    var invitedJointLandlordEmailsMap: Map<Int, String>?
 
     val invitedJointLandlords: List<String>
-        get() = invitedJointLandlordEmails ?: emptyList()
+        get() = invitedJointLandlordEmailsMap?.values?.toList() ?: emptyList()
 }
 
 enum class AnyLandlordsInvited {
