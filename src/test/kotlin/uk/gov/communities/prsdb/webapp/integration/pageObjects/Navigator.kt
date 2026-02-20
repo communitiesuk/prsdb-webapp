@@ -1427,7 +1427,7 @@ class Navigator(
     }
 
     fun goToJoinPropertyStartPage(): JoinPropertyStartPage {
-        navigate(JoinPropertyController.JOIN_PROPERTY_START_PAGE_ROUTE)
+        navigate(JoinPropertyController.JOIN_PROPERTY_ROUTE)
         return createValidPage(page, JoinPropertyStartPage::class)
     }
 
