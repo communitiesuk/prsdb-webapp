@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
-import org.springframework.http.HttpStatus
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -37,7 +35,7 @@ class ReasonStepConfig(
     override fun mode(state: PropertyDeregistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
-        val propertyOwnership = getPropertyOwnership(state.propertyOwnershipId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
 
         val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
@@ -63,13 +61,6 @@ class ReasonStepConfig(
         state.deleteJourney()
         return defaultDestination
     }
-
-    private fun getPropertyOwnership(propertyOwnershipId: Long) =
-        propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)
-            ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Property ownership $propertyOwnershipId not found",
-            )
 }
 
 @JourneyFrameworkComponent

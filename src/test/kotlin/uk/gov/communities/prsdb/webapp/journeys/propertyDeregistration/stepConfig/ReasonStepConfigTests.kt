@@ -1,19 +1,21 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
 class ReasonStepConfigTests {
@@ -29,30 +31,73 @@ class ReasonStepConfigTests {
     @Mock
     lateinit var mockState: PropertyDeregistrationJourneyState
 
+    val propertyOwnershipId = 123L
+
     @Test
-    fun `mode returns null when form model is not present`() {
+    fun `afterStepDataIsAdded deregisters the property`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(ReasonStep.ROUTE_SEGMENT)).thenReturn(null)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
         // Act
-        val result = stepConfig.mode(mockState)
+        stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        assertNull(result)
+        verify(mockPropertyDeregistrationService).deregisterProperty(propertyOwnershipId)
     }
 
     @Test
-    fun `mode returns COMPLETE when form model is present`() {
+    fun `afterStepDataIsAdded adds deregistered property ownership id to session`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(ReasonStep.ROUTE_SEGMENT)).thenReturn(mapOf("reason" to "Test reason"))
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
         // Act
-        val result = stepConfig.mode(mockState)
+        stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        assertEquals(Complete.COMPLETE, result)
+        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email to primary landlord`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val landlordEmail = "landlord@example.com"
+        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, primaryLandlord = landlord)
+        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockConfirmationEmailSender).sendEmail(eq(landlordEmail), any<PropertyDeregistrationConfirmationEmail>())
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email with correct property address`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val propertyAddress = "123 Test Street, AB1 2CD"
+        val address = MockLandlordData.createAddress(singleLineAddress = propertyAddress)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, address = address)
+        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockConfirmationEmailSender).sendEmail(
+            any(),
+            argThat<PropertyDeregistrationConfirmationEmail> { this.singleLineAddress == propertyAddress },
+        )
     }
 
     private fun setupStepConfig(): ReasonStepConfig {
