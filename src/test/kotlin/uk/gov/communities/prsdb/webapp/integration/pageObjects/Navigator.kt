@@ -1111,7 +1111,7 @@ class Navigator(
     fun goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId: Long): OwnershipTypeFormPagePropertyDetailsUpdate {
         navigate(
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnershipId) +
-                "$/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+                "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
         )
         return createValidPage(
             page,

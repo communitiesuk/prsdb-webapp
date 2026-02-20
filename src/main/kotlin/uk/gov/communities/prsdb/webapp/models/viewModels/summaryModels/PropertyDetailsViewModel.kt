@@ -81,7 +81,7 @@ class PropertyDetailsViewModel(
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
                     changeLinkMessageKey,
                     UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
-                        "$/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+                        "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
                     withChangeLinks,
                 )
             }.toList()

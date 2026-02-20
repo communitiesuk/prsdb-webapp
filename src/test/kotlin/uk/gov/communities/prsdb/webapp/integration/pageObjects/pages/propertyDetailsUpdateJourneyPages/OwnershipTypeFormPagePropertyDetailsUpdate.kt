@@ -11,5 +11,5 @@ class OwnershipTypeFormPagePropertyDetailsUpdate(
 ) : OwnershipTypeFormPage(
         page,
         UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "$/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+            "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
     )
