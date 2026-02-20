@@ -42,6 +42,16 @@ class JoinPropertyControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `index returns 403 for user with wrong role`() {
+        mvc
+            .get(JOIN_PROPERTY_ROUTE)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `index returns start page for authorized landlord`() {
         mvc
