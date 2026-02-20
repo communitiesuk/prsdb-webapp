@@ -33,7 +33,7 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
         formData: PageData,
     ): PageData =
         super.enrichSubmittedDataBeforeValidation(state, formData) +
-            (InviteJointLandlordsFormModel::invitedEmailAddresses.name to (state.invitedJointLandlordEmails ?: emptyList()))
+            (InviteJointLandlordsFormModel::invitedEmailAddresses.name to state.invitedJointLandlords)
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
         val formModel = getFormModelFromState(state)

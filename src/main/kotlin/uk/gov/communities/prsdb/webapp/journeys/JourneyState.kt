@@ -11,7 +11,7 @@ interface JourneyState {
         value: PageData,
     )
 
-    fun removeStepData(key: String)
+    fun clearStepData(key: String)
 
     fun getSubmittedStepData(): Map<String, Any?>
 

@@ -81,7 +81,7 @@ class JourneyStateService(
         setValue(STEP_DATA_KEY, newJourneyData)
     }
 
-    fun removeSingleStepData(key: String) {
+    fun clearStepData(key: String) {
         val newJourneyData = getSubmittedStepData() - key
         setValue(STEP_DATA_KEY, newJourneyData)
     }
@@ -163,7 +163,7 @@ class JourneyStateService(
                 .newInstance()
                 .path(path)
                 .queryParam(JOURNEY_ID_PARAM, journeyId)
-                .apply { urlParams.forEach { (key, values) -> values.forEach { value -> queryParam(key, value) } } }
+                .apply { urlParams.forEach { (key, value) -> queryParam(key, value) } }
                 .build(true)
                 .toUriString()
     }

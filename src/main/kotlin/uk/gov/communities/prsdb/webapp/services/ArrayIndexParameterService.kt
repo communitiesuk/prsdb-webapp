@@ -11,7 +11,7 @@ class ArrayIndexParameterService(
 ) : UrlParameterService<Int>(request) {
     override fun getParameterOrNull(): Int? = getParameterOrNull(PARAMETER_NAME)?.toIntOrNull()
 
-    override fun getParameterPair(index: Int): Pair<String, String> = PARAMETER_NAME to index.toString()
+    override fun createParameterPair(index: Int): Pair<String, String> = PARAMETER_NAME to index.toString()
 
     companion object {
         private const val PARAMETER_NAME = "index"

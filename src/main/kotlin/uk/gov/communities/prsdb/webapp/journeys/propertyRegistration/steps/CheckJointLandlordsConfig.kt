@@ -27,12 +27,12 @@ class CheckJointLandlordsConfig(
         )
 
     private fun getEmailRows(state: JointLandlordsState): List<SummaryListRowViewModel> {
-        val invitedEmails = state.invitedJointLandlordEmails ?: emptyList()
+        val invitedEmails = state.invitedJointLandlords
         return invitedEmails.mapIndexed { index, email ->
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "jointLandlords.checkJointLandlords.invitedEmailAddress",
                 email,
-                Destination(state.removeJointLandlordStep).withUrlParameter(urlParameterService.getParameterPair(index)),
+                Destination(state.removeJointLandlordStep).withUrlParameter(urlParameterService.createParameterPair(index)),
                 actionValue = "forms.links.remove",
             )
         }

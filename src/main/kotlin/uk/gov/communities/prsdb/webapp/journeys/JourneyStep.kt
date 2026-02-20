@@ -113,7 +113,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     }
 
     fun clearFormData(routeSegment: String) {
-        state.removeStepData(routeSegment)
+        state.clearStepData(routeSegment)
     }
 
     fun saveStateIfAllowed() {
