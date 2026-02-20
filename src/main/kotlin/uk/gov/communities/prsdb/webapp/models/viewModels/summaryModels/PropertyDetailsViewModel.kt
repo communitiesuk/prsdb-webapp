@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
@@ -31,8 +31,6 @@ class PropertyDetailsViewModel(
     private val changeLinkMessageKey = "forms.links.change"
 
     val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
-
-    val isRentFrequencyCustom: Boolean = propertyOwnership.rentFrequency == RentFrequency.OTHER
 
     val keyDetails: List<SummaryListRowViewModel> =
         listOf(
@@ -97,7 +95,8 @@ class PropertyDetailsViewModel(
                         MessageKeyConverter.convert(it.licenseType)
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
+                    getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                        "/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.license != null && propertyOwnership.license!!.licenseType != LicensingType.NO_LICENSING) {
