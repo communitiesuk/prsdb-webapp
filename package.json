@@ -24,6 +24,7 @@
     "@rollup/plugin-node-resolve": "^15.3.0",
     "csv-parser": "^3.2.0",
     "global-jsdom": "^26.0.0",
+    "playwright": "^1.57.0",
     "rollup": "^4.22.5",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-delete": "^2.1.0",
@@ -31,6 +32,7 @@
   },
   "dependencies": {
     "@ministryofjustice/frontend": "^3.3.1",
+    "@playwright/test": "^1.58.2",
     "accessible-autocomplete": "^3.0.1",
     "cookie": "^1.0.2",
     "govuk-frontend": "^5.11.0",

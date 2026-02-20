@@ -61,3 +61,7 @@ scripts/plausible/node_modules
 
 ### Copilot ###
 .github/copilot-instructions.md
+.github/instructions
+
+# Jira session cookies
+scripts/jira-cookies.json
