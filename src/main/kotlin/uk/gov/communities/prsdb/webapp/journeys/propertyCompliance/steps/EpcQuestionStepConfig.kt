@@ -22,7 +22,6 @@ class EpcQuestionStepConfig(
         mapOf(
             "formModel" to EpcFormModel(),
             "address" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.epc.fieldSetHeading",
             "fieldSetHint" to "forms.epc.fieldSetHint",
             "radioOptions" to

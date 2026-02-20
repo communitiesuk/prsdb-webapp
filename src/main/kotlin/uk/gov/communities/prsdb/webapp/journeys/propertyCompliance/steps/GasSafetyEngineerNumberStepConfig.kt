@@ -14,7 +14,6 @@ class GasSafetyEngineerNumberStepConfig : AbstractRequestableStepConfig<Complete
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyCompliance.title",
             "fieldSetHeading" to "forms.gasSafeEngineerNum.fieldSetHeading",
             "fieldSetHint" to "forms.gasSafeEngineerNum.fieldSetHint",
             "gasSafeRegisterURL" to CHECK_GAS_SAFE_REGISTER_URL,

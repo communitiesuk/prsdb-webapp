@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionOtherReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionReasonMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionReasonStep
@@ -21,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
 @JourneyFrameworkComponent
 class GasSafetyTask : Task<GasSafetyState>() {
@@ -77,15 +77,15 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 parents { journey.gasSafetyStep.hasOutcome(GasSafetyMode.NO_CERTIFICATE) }
                 nextStep { mode ->
                     when (mode) {
-                        GasSafetyExemptionMode.HAS_EXEMPTION -> journey.gasSafetyExemptionReasonStep
-                        GasSafetyExemptionMode.NO_EXEMPTION -> journey.gasSafetyExemptionMissingStep
+                        ExemptionMode.HAS_EXEMPTION -> journey.gasSafetyExemptionReasonStep
+                        ExemptionMode.NO_EXEMPTION -> journey.gasSafetyExemptionMissingStep
                     }
                 }
                 savable()
             }
             step(journey.gasSafetyExemptionReasonStep) {
                 routeSegment(GasSafetyExemptionReasonStep.ROUTE_SEGMENT)
-                parents { journey.gasSafetyExemptionStep.hasOutcome(GasSafetyExemptionMode.HAS_EXEMPTION) }
+                parents { journey.gasSafetyExemptionStep.hasOutcome(ExemptionMode.HAS_EXEMPTION) }
                 nextStep { mode ->
                     when (mode) {
                         GasSafetyExemptionReasonMode.LISTED_REASON_SELECTED -> journey.gasSafetyExemptionConfirmationStep
@@ -113,7 +113,7 @@ class GasSafetyTask : Task<GasSafetyState>() {
             }
             step(journey.gasSafetyExemptionMissingStep) {
                 routeSegment(GasSafetyExemptionMissingStep.ROUTE_SEGMENT)
-                parents { journey.gasSafetyExemptionStep.hasOutcome(GasSafetyExemptionMode.NO_EXEMPTION) }
+                parents { journey.gasSafetyExemptionStep.hasOutcome(ExemptionMode.NO_EXEMPTION) }
                 nextStep { exitStep }
                 savable()
             }
