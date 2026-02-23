@@ -647,7 +647,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User can navigate EPC task if pages are filled in correctly (EPC not found)`(page: Page) {
         // EPC page
-        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
         whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
         epcPage.submitHasCert()
         val epcNotAutomatched = assertPageIs(page, EpcNotAutoMatchedPagePropertyCompliance::class, urlArguments)
@@ -679,7 +679,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User can navigate EPC task if pages are filled in correctly (MEES exemption)`(page: Page) {
         // EPC page
-        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
         whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
             MockEpcData.createEpcRegisterClientEpcFoundResponse(
                 energyRating = "G",
