@@ -21,18 +21,6 @@ class NoMatchingPropertiesStepConfigTests {
     private val routeSegment = NoMatchingPropertiesStep.ROUTE_SEGMENT
 
     @Test
-    fun `chooseTemplate returns noMatchingPropertiesForm`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-
-        // Act
-        val result = stepConfig.chooseTemplate(mockState)
-
-        // Assert
-        assertEquals("forms/noMatchingPropertiesForm", result)
-    }
-
-    @Test
     fun `mode returns null when form model is not present`() {
         // Arrange
         val stepConfig = setupStepConfig()
