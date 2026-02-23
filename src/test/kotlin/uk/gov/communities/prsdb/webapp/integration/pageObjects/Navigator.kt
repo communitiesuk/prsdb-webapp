@@ -605,6 +605,7 @@ class Navigator(
     }
 
     fun goToPropertyComplianceGasSafetyPage(propertyOwnershipId: Long): GasSafetyPagePropertyCompliance {
+        setJourneyStateInSession(emptyMap())
         navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
@@ -676,6 +677,7 @@ class Navigator(
     }
 
     fun goToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
+        setJourneyStateInSession(emptyMap())
         navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
@@ -735,6 +737,7 @@ class Navigator(
     }
 
     fun goToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
+        setJourneyStateInSession(emptyMap())
         navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EpcQuestionStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
