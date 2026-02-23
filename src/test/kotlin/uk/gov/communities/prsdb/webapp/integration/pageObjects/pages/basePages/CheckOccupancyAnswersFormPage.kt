@@ -17,8 +17,14 @@ abstract class CheckOccupancyAnswersFormPage(
     class CheckOccupancyAnswersPropertyDetailsSummaryList(
         page: Page,
     ) : SummaryList(page) {
-        val occupancyRow = getRow("Is your property occupied by tenants?")
-        val numberOfHouseholdsRow = getRow("Households in your property")
-        val numberOfPeopleRow = getRow("How many people live in your property?")
+        val occupancyRow = getRow("Occupied by tenants")
+        val numberOfHouseholdsRow = getRow("Number of households")
+        val numberOfPeopleRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentFrequencyRow = getRow("When rent is paid")
+        val rentAmountRow = getRow("Rent amount")
     }
 }

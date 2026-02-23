@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CYA_ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FILE_TOO_LARGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.UPDATE_CONFLICT_ERROR_PATH_SEGMENT
 
 @PrsdbController
 @RequestMapping(ERROR_PATH_SEGMENT)
@@ -22,6 +23,11 @@ class CustomErrorController : ErrorController {
     // so that we can track how often this error is occurring
     @GetMapping("/$CYA_ERROR_PATH_SEGMENT")
     fun cyaErrorPage(): String = "error/500"
+
+    // We are sending conflict on update errors to this endpoint
+    // so that we can track how often this error is occurring
+    @GetMapping("/$UPDATE_CONFLICT_ERROR_PATH_SEGMENT")
+    fun updateConflictErrorPage(): String = "error/500"
 
     @RequestMapping
     fun handleError(
@@ -40,5 +46,6 @@ class CustomErrorController : ErrorController {
     companion object {
         const val CYA_ERROR_ROUTE = "/$ERROR_PATH_SEGMENT/$CYA_ERROR_PATH_SEGMENT"
         const val FILE_TOO_LARGE_ERROR_ROUTE = "/$ERROR_PATH_SEGMENT/$FILE_TOO_LARGE_PATH_SEGMENT"
+        const val UPDATE_CONFLICT_ERROR_ROUTE = "/$ERROR_PATH_SEGMENT/$UPDATE_CONFLICT_ERROR_PATH_SEGMENT"
     }
 }

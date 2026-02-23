@@ -190,6 +190,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -1124,29 +1125,15 @@ class Navigator(
     fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withNewOccupants()
-                .build(),
-        )
+        UpdateOccupancyJourneyStateSessionBuilder.withTenants().build()
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
 
     fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withIsOccupiedUpdate(false)
-                .build(),
+        setJourneyStateInSession(
+            UpdateOccupancyJourneyStateSessionBuilder.withNoTenants().build(),
         )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }

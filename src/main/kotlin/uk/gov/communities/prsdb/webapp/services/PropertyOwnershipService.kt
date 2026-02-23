@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -241,24 +242,21 @@ class PropertyOwnershipService(
         lastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
-        if (propertyOwnership.getMostRecentlyUpdated() == lastModifiedDate) {
-            propertyOwnership.currentNumHouseholds = numberOfHouseholds
-            propertyOwnership.currentNumTenants = numberOfPeople
-            propertyOwnership.numBedrooms = numBedrooms
-            propertyOwnership.billsIncludedList = billsIncludedList
-            propertyOwnership.customBillsIncluded = customBillsIncluded
-            propertyOwnership.furnishedStatus = furnishedStatus
-            propertyOwnership.rentFrequency = rentFrequency
-            propertyOwnership.customRentFrequency = customRentFrequency
-            propertyOwnership.rentAmount = rentAmount
-            propertyOwnershipRepository.save(propertyOwnership)
-        } else {
-            // TODO PDJB-106 - what should this exception actually be??
-            throw ResponseStatusException(
-                HttpStatus.CONFLICT,
-                "The property ownership record has been updated since it was loaded. Please refresh and try again.",
+        if (propertyOwnership.getMostRecentlyUpdated() != lastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
             )
         }
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.numBedrooms = numBedrooms
+        propertyOwnership.billsIncludedList = billsIncludedList
+        propertyOwnership.customBillsIncluded = customBillsIncluded
+        propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
+        propertyOwnershipRepository.save(propertyOwnership)
     }
 
     @Transactional

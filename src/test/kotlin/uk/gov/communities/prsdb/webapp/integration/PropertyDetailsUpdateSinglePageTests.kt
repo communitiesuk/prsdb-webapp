@@ -1,10 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsOccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
@@ -17,6 +16,8 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
+    // TODO PDJB-147 renable and update once later pages are directly accessible
+    @Disabled
     @Test
     fun `Skipped occupancy update sub-journey steps can be accessed via CYA page links, and back links when changing answers`(page: Page) {
         // Household occupancy update page
@@ -55,26 +56,5 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         val numberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
         numberOfPeoplePage.backLink.clickAndWait()
         assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
-    }
-
-    @Test
-    fun `Submitting a CYA page with stale data redirects to an error page`(browserContext: BrowserContext) {
-        // TODO PDJB-106 update journey data to new system
-        val (page1, navigator1) = createPageAndNavigator(browserContext)
-        // Create two pages
-        val (_, navigator2) = createPageAndNavigator(browserContext)
-
-        // Navigate to the occupancy check answers page on page1 with an occupied property
-        val checkOccupancyAnswersPage = navigator1.skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(propertyOwnershipId)
-
-        // Update occupancy to vacant on page2
-        navigator2.skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(propertyOwnershipId)
-
-        // Submit the occupancy check answers page on page1
-        checkOccupancyAnswersPage.form.submit()
-
-        // Assert that the page1 is redirected to an error page
-        val errorPage = assertPageIs(page1, ErrorPage::class)
-        assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
     }
 }

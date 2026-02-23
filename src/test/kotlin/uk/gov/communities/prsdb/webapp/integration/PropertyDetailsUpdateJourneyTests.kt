@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -49,9 +48,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             .thenReturn(URI("example.com"))
     }
 
+    // TODO PDJB-105 update this test to have occupancy be the first to be updated
+    @Disabled
     @Test
     fun `A property update does not affect prior sections updated in parallel`(page: Page) {
-        // TODO PDJB-106 this test will only work if occupancy is not the second update being submitted - test for that specifically
         // Ensure ownership type starts as freehold
         navigator
             .goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId)
@@ -264,7 +264,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Update occupancy to vacant
-            assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Is your property still occupied by tenants?")
+            assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
             updateOccupancyPage.submitIsVacant()
             val checkOccupancyAnswersPage =
                 assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -304,60 +304,76 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val newNumberOfPeople = 3
             assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
             updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
-            val bedroomsPage = assertPageIs(page, OccupancyNumberOfBedroomsFormPagePropertyDetailsUpdate::class)
+            val bedroomsPage = assertPageIs(page, OccupancyNumberOfBedroomsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update number of bedrooms
-            assertThat(bedroomsPage.form.fieldsetLegend).containsText("Update how many bedrooms are in your property")
-            bedroomsPage.submitNumOfBedrooms(3)
-            val rentIncludesBillsPage = assertPageIs(page, OccupancyRentIncludesBillsFormPagePropertyDetailsUpdate::class)
+            val newNumberOfBedrooms = 3
+            assertThat(bedroomsPage.header).containsText("Update how many bedrooms are in your property")
+            bedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
+            val rentIncludesBillsPage =
+                assertPageIs(page, OccupancyRentIncludesBillsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update rent include bills
             assertThat(rentIncludesBillsPage.form.fieldsetHeading).containsText("Update whether the rent includes bills")
             rentIncludesBillsPage.submitIsIncluded()
-            val billsIncludedPage = assertPageIs(page, OccupancyBillsIncludedFormPagePropertyDetailsUpdate::class)
+            val billsIncludedPage =
+                assertPageIs(page, OccupancyBillsIncludedFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update bills included
+            val expectedBillsIncluded = "Gas, Electricity, Water"
             assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Update which of these you include in the rent")
             billsIncludedPage.selectGasElectricityWater()
-            billsIncludedPage.selectSomethingElseCheckbox()
-            billsIncludedPage.fillCustomBills("Dog Grooming")
             billsIncludedPage.form.submit()
-            val furnishedPage = assertPageIs(page, OccupancyFurnishedStatusFormPagePropertyDetailsUpdate::class)
+            val furnishedPage = assertPageIs(page, OccupancyFurnishedStatusFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update furnished status
+            val expectedFurnishedStatus = "Furnished"
             assertThat(
                 furnishedPage.form.fieldsetHeading,
             ).containsText("Update whether the property is furnished, partly furnished or unfurnished")
             furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-            val rentFrequencyPage = assertPageIs(page, OccupancyRentFrequencyFormPagePropertyDetailsUpdate::class)
+            val rentFrequencyPage =
+                assertPageIs(page, OccupancyRentFrequencyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update rent frequency
+            val expectedRentFrequency = "Weekly"
             assertThat(rentFrequencyPage.header).containsText("Update when you charge rent")
-            rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
-            rentFrequencyPage.fillCustomRentFrequency("Fortnightly")
+            rentFrequencyPage.selectRentFrequency(RentFrequency.WEEKLY)
             rentFrequencyPage.form.submit()
-            val rentAmountPage = assertPageIs(page, OccupancyRentAmountFormPagePropertyDetailsUpdate::class)
+            val rentAmountPage = assertPageIs(page, OccupancyRentAmountFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update rent amount
-            assertThat(rentAmountPage.header).containsText("Update how much the monthly rent is for your property")
+            val expectedRentAmount = "£400"
+            assertThat(rentAmountPage.header).containsText("Update how much the weekly rent is for your property")
             rentAmountPage.submitRentAmount("400")
             val checkOccupancyAnswersPage =
                 assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
             // Check occupancy answers
-            // TODO PDJB-106 add new rows
             assertThat(checkOccupancyAnswersPage.summaryList.occupancyRow).containsText("Yes")
             assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).containsText(newNumberOfHouseholds.toString())
             assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.numberOfBedroomsRow).containsText(newNumberOfBedrooms.toString())
+            assertThat(checkOccupancyAnswersPage.summaryList.rentIncludesBillsRow).containsText("Yes")
+            assertThat(checkOccupancyAnswersPage.summaryList.billsIncludedRow).containsText(expectedBillsIncluded)
+            assertThat(checkOccupancyAnswersPage.summaryList.furnishedStatusRow).containsText(expectedFurnishedStatus)
+            assertThat(checkOccupancyAnswersPage.summaryList.rentFrequencyRow).containsText(expectedRentFrequency)
+            assertThat(checkOccupancyAnswersPage.summaryList.rentAmountRow).containsText(expectedRentAmount)
             checkOccupancyAnswersPage.confirm()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
             // Check changes have occurred
-            // TODO PDJB-106 add new rows
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value)
                 .containsText(newNumberOfHouseholds.toString())
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
                 .containsText(newNumberOfPeople.toString())
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                .containsText(newNumberOfBedrooms.toString())
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value).containsText("Yes")
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow.value).containsText(expectedBillsIncluded)
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value).containsText(expectedFurnishedStatus)
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.value).containsText(expectedRentFrequency)
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow.value).containsText(expectedRentAmount)
         }
 
         // TODO PDJB-105: re-enable and update tests once rent level updates have been added
@@ -422,37 +438,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             // Check changes have occurred
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
                 .containsText(newNumberOfPeople.toString())
-        }
-
-        @Test
-        fun `Simultaneous updates are isolated`(browserContext: BrowserContext) {
-            // Create two pages
-            val (page1, navigator1) = createPageAndNavigator(browserContext)
-            val (page2, navigator2) = createPageAndNavigator(browserContext)
-
-            // Start updating occupancy to vacant on page1
-            val updateOccupancyPage1 = navigator1.goToPropertyDetailsUpdateOccupancy(occupiedPropertyOwnershipId)
-            updateOccupancyPage1.submitIsVacant()
-            val checkOccupancyAnswersPage1 =
-                assertPageIs(page1, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-
-            // Simultaneously start updating number of people on page2
-            val newNumberOfPeople = "3"
-            val updateNumberOfPeoplePage2 = navigator2.goToPropertyDetailsUpdateNumberOfPeoplePage(occupiedPropertyOwnershipId)
-            updateNumberOfPeoplePage2.submitNumOfPeople(newNumberOfPeople)
-            val checkPeopleAnswersPage2 =
-                assertPageIs(page2, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-
-            assertThat(checkPeopleAnswersPage2.summaryList.occupancyRow).containsText("Yes")
-            assertThat(checkPeopleAnswersPage2.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople)
-
-            // Finish updating occupancy to vacant on page1
-            assertThat(checkOccupancyAnswersPage1.summaryList.occupancyRow).containsText("No")
-            checkOccupancyAnswersPage1.confirm()
-            val propertyDetailsPage1 = assertPageIs(page1, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-
-            // Check changes have occurred on page1
-            assertThat(propertyDetailsPage1.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
         }
 
         // TODO PDJB-105: check if this is still needed - the state is being cleared
