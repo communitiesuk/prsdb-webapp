@@ -13,12 +13,12 @@
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
         <div id="selectedOption-hint" class="govuk-hint">
-            <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforePostcode(${addressCount})}">forms.selectAddress.fieldSetHint.beforePostcode</span>
+            <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeCount(${addressCount})}">forms.selectAddress.fieldSetHint.beforeCount</span>
             <strong th:text="${postcode}"></strong>
-            <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeHouseNameOrNumber}">forms.selectAddress.fieldSetHint.beforeHouseNameOrNumber</span>
+            <span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber}">forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber</span>
             <strong th:text="${houseNameOrNumber}">
-            </strong><span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeLink}">forms.selectAddress.fieldSetHint.beforeLink</span>
-            <a class=govuk-link th:href="@{${searchAgainUrl}}" th:text="#{forms.selectAddress.fieldSetHint.link}"></a>
+            </strong><span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.afterHouseNameOrNumber}">forms.selectFromList.fieldSetHint.afterHouseNameOrNumber</span>
+            <a class=govuk-link th:href="@{${searchAgainUrl}}" th:text="#{forms.selectFromList.fieldSetHint.searchAgainLink}"></a>
         </div>
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'selectedOption',null, ${options})}"></th:block>
     </th:block>

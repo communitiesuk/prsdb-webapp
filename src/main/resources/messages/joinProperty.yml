@@ -37,9 +37,6 @@ selectProperty:
   heading: Select a property
   fieldSetHint:
     beforeCount: "{0} properties found for "
-    beforeHouseNameOrNumber: " and "
-    afterHouseNameOrNumber: ". "
-    searchAgainLink: Search again
   notListed:
     summary: The property I'm looking for is not listed
     prnText: "If you know it, you can "

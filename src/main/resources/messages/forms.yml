@@ -112,13 +112,15 @@ lookupAddress:
     hint: 'For example, 15 or Prospect Cottage'
     error:
       missing: Enter a house name or number
+selectFromList:
+  fieldSetHint:
+    beforeHouseNameOrNumber: " and "
+    afterHouseNameOrNumber: ". "
+    searchAgainLink: Search again
 selectAddress:
   fieldSetHeading: Select an address
   fieldSetHint:
-    beforePostcode: '{0,,addressCount} addresses found for'
-    beforeHouseNameOrNumber: and
-    beforeLink: .
-    link: Search again
+    beforeCount: '{0,,addressCount} addresses found for'
   error:
     missing: Select an address
   addAddressManually: I want to manually enter my address
