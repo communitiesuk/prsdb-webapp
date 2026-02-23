@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -52,7 +51,6 @@ class UpdateEmailJourney(
     override val emailStep: EmailStep,
     override val completeEmailUpdateStep: CompleteEmailUpdateStep,
     journeyStateService: JourneyStateService,
-    @Suppress("UNUSED_PARAMETER") delegateProvider: JourneyStateDelegateProvider,
     private val journeyName: String = "email",
 ) : AbstractJourneyState(journeyStateService),
     UpdateEmailJourneyState {
