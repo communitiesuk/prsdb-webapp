@@ -882,7 +882,7 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceCheckAnswersPage(propertyOwnershipId: Long): CheckAndSubmitPagePropertyCompliance {
+    fun skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(propertyOwnershipId: Long): CheckAndSubmitPagePropertyCompliance {
         setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeCheckAnswersWithMissingCompliances().build())
         navigateToPropertyComplianceJourneyStep(propertyOwnershipId, AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(

@@ -409,6 +409,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
             PropertyComplianceStateSessionBuilder()
                 .withMissingGasSafetyExemption()
                 .withMissingEicrExemption()
+                .withEpcStatus(HasEpc.NO)
                 .withEpcMissing()
                 .withFireSafetyDeclaration()
                 .withKeepPropertySafeDeclaration()
