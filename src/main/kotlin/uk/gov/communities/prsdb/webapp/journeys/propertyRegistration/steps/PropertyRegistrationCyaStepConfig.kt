@@ -97,7 +97,7 @@ class PropertyRegistrationCyaStepConfig(
                         null
                     },
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = state.invitedJointLandlordEmails,
+                jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList(),
             )
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true
@@ -248,7 +248,7 @@ class PropertyRegistrationCyaStepConfig(
         return if (hasJointLandlords) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-                state.getAllInvitedJointLandlordEmails(),
+                state.invitedJointLandlords,
                 Destination(state.hasJointLandlordsStep),
             )
         } else {

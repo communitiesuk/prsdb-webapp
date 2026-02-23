@@ -48,7 +48,6 @@ class PropertyComplianceCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
-        // TODO PDJB-467 - will this save certificates and exemptions if both have been added but some data should not be reachable?
         val epcDetails = state.acceptedEpc
 
         val propertyCompliance =

@@ -175,6 +175,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `A property can have its licensing removed`(page: Page) {
+            // A property ownership with an existing licence
+            val propertyOwnershipId = 7L
+            val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()

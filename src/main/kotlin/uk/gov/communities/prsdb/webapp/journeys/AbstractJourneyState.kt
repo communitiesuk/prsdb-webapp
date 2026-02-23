@@ -14,6 +14,8 @@ abstract class AbstractJourneyState(
         value: PageData,
     ) = journeyStateService.addSingleStepData(key, value)
 
+    override fun clearStepData(key: String) = journeyStateService.clearStepData(key)
+
     override val journeyId: String
         get() = journeyStateService.journeyId
 

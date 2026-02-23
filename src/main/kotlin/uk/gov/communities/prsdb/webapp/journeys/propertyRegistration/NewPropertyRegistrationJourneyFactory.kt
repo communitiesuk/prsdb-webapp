@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bedro
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
@@ -160,8 +161,10 @@ class PropertyRegistrationJourney(
     override val rentAmount: RentAmountStep,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
+    override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
+    override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordStep: RemoveJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step
@@ -173,7 +176,7 @@ class PropertyRegistrationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
-    override var invitedJointLandlordEmails: List<String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
+    override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
