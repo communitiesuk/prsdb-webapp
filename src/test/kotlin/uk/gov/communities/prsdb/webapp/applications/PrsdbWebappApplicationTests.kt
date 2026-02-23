@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.NftDataSeeder
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
@@ -97,6 +98,7 @@ class PrsdbWebappApplicationTests {
                 VirusAlertSender::class.simpleBeanName,
                 OsDownloadsConfig::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
+                NftDataSeeder::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

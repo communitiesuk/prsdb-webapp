@@ -24,7 +24,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     abstract val formModelClass: KClass<TFormModel>
 
-    open fun beforeAttemptingToReachStep(state: TState) {}
+    open fun beforeAttemptingToReachStep(state: TState): Boolean = true
 
     open fun afterStepIsReached(state: TState) {}
 

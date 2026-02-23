@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class JoinPropertyStartPage(
     page: Page,
-) : BasePage(page, JoinPropertyController.JOIN_PROPERTY_START_PAGE_ROUTE) {
+) : BasePage(page, JoinPropertyController.JOIN_PROPERTY_ROUTE) {
     val heading: Heading = Heading(page.locator("main h1"))
     val continueButton = Button.byText(page, "Continue")
     val insetText = page.locator(".govuk-inset-text")
