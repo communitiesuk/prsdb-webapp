@@ -6,14 +6,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.FindPropertySearchResult
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.PropertySearchResultDataModel
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.AddressSearchState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class FindPropertyStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractRequestableStepConfig<FindPropertySearchResult, FindPropertyFormModel, AddressSearchState>() {
-    override val formModelClass = FindPropertyFormModel::class
+) : AbstractRequestableStepConfig<FindPropertySearchResult, LookupAddressFormModel, AddressSearchState>() {
+    override val formModelClass = LookupAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressSearchState) = emptyMap<String, Any?>()
 
@@ -53,7 +53,7 @@ class FindPropertyStepConfig(
 @JourneyFrameworkComponent
 final class FindPropertyStep(
     stepConfig: FindPropertyStepConfig,
-) : RequestableStep<FindPropertySearchResult, FindPropertyFormModel, AddressSearchState>(stepConfig) {
+) : RequestableStep<FindPropertySearchResult, LookupAddressFormModel, AddressSearchState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "find-property"
     }
