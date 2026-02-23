@@ -120,7 +120,10 @@ selectFromList:
 selectAddress:
   fieldSetHeading: Select an address
   fieldSetHint:
-    beforeCount: '{0,,addressCount} addresses found for'
+    beforePostcode: '{0,,addressCount} addresses found for'
+    beforeHouseNameOrNumber: and
+    beforeLink: .
+    link: Search again
   error:
     missing: Select an address
   addAddressManually: I want to manually enter my address

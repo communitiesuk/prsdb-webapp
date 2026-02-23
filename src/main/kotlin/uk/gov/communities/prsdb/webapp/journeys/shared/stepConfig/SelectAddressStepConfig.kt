@@ -41,15 +41,16 @@ class SelectAddressStepConfig(
         return mapOf(
             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
             "submitButtonText" to "forms.buttons.useThisAddress",
+            "beforeCountMessageKey" to "forms.selectAddress.fieldSetHint.beforePostcode",
+            "resultCount" to lookedUpAddresses.size,
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "houseNameOrNumber" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber),
             "postcode" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::postcode),
-            "addressCount" to lookedUpAddresses.size,
             "options" to addressRadiosViewModel,
         )
     }
 
-    override fun chooseTemplate(state: AddressState) = "forms/selectAddressForm"
+    override fun chooseTemplate(state: AddressState) = "forms/selectFromListForm"
 
     override fun mode(state: AddressState) =
         getFormModelFromStateOrNull(state)?.selectedOption?.let { selectedAddress ->

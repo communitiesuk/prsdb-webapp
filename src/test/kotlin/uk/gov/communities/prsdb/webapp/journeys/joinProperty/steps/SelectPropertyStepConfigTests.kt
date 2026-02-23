@@ -79,9 +79,11 @@ class SelectPropertyStepConfigTests {
 
         // Assert
         assertEquals("joinProperty.selectProperty.heading", content["fieldSetHeading"])
+        assertEquals("forms.buttons.continue", content["submitButtonText"])
+        assertEquals("joinProperty.selectProperty.fieldSetHint.beforeCount", content["beforeCountMessageKey"])
+        assertEquals(3, content["resultCount"])
         assertEquals("SW9 0HD", content["postcode"])
         assertEquals("9", content["houseNameOrNumber"])
-        assertEquals(3, content["propertyCount"])
         assertEquals("$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}", content["searchAgainUrl"])
         assertEquals("$JOIN_PROPERTY_ROUTE/${FindPropertyByPrnStep.ROUTE_SEGMENT}", content["prnLookupUrl"])
 
@@ -94,7 +96,7 @@ class SelectPropertyStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns selectPropertyForm`() {
+    fun `chooseTemplate returns selectFromListForm`() {
         // Arrange
         val stepConfig = setupStepConfig()
 
@@ -102,7 +104,7 @@ class SelectPropertyStepConfigTests {
         val template = stepConfig.chooseTemplate(mockPropertyAddressSearchState)
 
         // Assert
-        assertEquals("forms/selectPropertyForm", template)
+        assertEquals("forms/selectFromListForm", template)
     }
 
     private fun setupStepConfig(): SelectPropertyStepConfig {
