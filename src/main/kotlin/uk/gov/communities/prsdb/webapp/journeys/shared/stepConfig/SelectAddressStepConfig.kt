@@ -68,9 +68,15 @@ class SelectAddressStepConfig(
         val formModel = bindingResult.target as SelectFromListFormModel
         val selectedOption = formModel.selectedOption
         if (selectedOption == null) {
-            bindingResult.rejectValue(SelectFromListFormModel::selectedOption.name, "forms.selectAddress.error.missing")
+            bindingResult.rejectValueWithMessageKey(
+                SelectFromListFormModel::selectedOption.name,
+                "forms.selectAddress.error.missing",
+            )
         } else if (selectedOption != MANUAL_ADDRESS_CHOSEN && state.getMatchingAddress(selectedOption) == null) {
-            bindingResult.rejectValue(SelectFromListFormModel::selectedOption.name, "forms.selectAddress.error.invalidSelection")
+            bindingResult.rejectValueWithMessageKey(
+                SelectFromListFormModel::selectedOption.name,
+                "forms.selectAddress.error.invalidSelection",
+            )
         }
     }
 
