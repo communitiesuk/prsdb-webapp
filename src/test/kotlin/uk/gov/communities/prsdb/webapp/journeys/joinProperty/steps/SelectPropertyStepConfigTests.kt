@@ -11,7 +11,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -43,7 +43,7 @@ class SelectPropertyStepConfigTests {
     fun `mode returns null when property is null`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        val formModel = SelectPropertyFormModel().apply { property = null }
+        val formModel = SelectFromListFormModel().apply { selectedOption = null }
         whenever(mockPropertyAddressSearchState.selectPropertyStep).thenReturn(mockSelectPropertyStep)
         whenever(mockSelectPropertyStep.formModelOrNull).thenReturn(formModel)
 
@@ -58,7 +58,7 @@ class SelectPropertyStepConfigTests {
     fun `mode returns COMPLETE when property is selected`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        val formModel = SelectPropertyFormModel().apply { property = "1" }
+        val formModel = SelectFromListFormModel().apply { selectedOption = "1" }
         whenever(mockPropertyAddressSearchState.selectPropertyStep).thenReturn(mockSelectPropertyStep)
         whenever(mockSelectPropertyStep.formModelOrNull).thenReturn(formModel)
 

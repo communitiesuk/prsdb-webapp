@@ -28,7 +28,7 @@ interface AddressState : AddressSearchState {
         }
 
     fun getAddress(): AddressDataModel {
-        val selectedAddress = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it) }
+        val selectedAddress = selectAddressStep.formModelOrNull?.selectedOption?.let { getMatchingAddress(it) }
         return selectedAddress ?: getManualAddressOrNull() ?: throw NotNullFormModelValueIsNullException("No address found in AddressState")
     }
 }

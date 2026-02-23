@@ -11,8 +11,8 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null)}">
-        <div id="address-hint" class="govuk-hint">
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
+        <div id="selectedOption-hint" class="govuk-hint">
             <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforePostcode(${addressCount})}">forms.selectAddress.fieldSetHint.beforePostcode</span>
             <strong th:text="${postcode}"></strong>
             <span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeHouseNameOrNumber}">forms.selectAddress.fieldSetHint.beforeHouseNameOrNumber</span>
@@ -20,7 +20,7 @@
             </strong><span th:remove="tag" th:text="#{forms.selectAddress.fieldSetHint.beforeLink}">forms.selectAddress.fieldSetHint.beforeLink</span>
             <a class=govuk-link th:href="@{${searchAgainUrl}}" th:text="#{forms.selectAddress.fieldSetHint.link}"></a>
         </div>
-        <th:block th:replace="~{fragments/forms/radios :: radios(null,'address',null, ${options})}"></th:block>
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'selectedOption',null, ${options})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>
