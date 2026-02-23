@@ -3,24 +3,26 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
-<!--/*@thymesVar id="propertyCount" type="java.lang.Integer"*/-->
+<!--/*@thymesVar id="beforeCountMessageKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="resultCount" type="java.lang.Integer"*/-->
 <!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
 <!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="prnLookupUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="prnLookupUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
         <div id="selectedOption-hint" class="govuk-hint">
-            <span th:remove="tag" th:text="#{joinProperty.selectProperty.fieldSetHint.beforeCount(${propertyCount})}">joinProperty.selectProperty.fieldSetHint.beforeCount</span>
+            <span th:remove="tag" th:text="#{${beforeCountMessageKey}(${resultCount})}">beforeCount</span>
             <strong th:text="${postcode}"></strong>
             <span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber}">forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber</span>
             <strong th:text="${houseNameOrNumber}"></strong><span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.afterHouseNameOrNumber}">forms.selectFromList.fieldSetHint.afterHouseNameOrNumber</span>
             <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{forms.selectFromList.fieldSetHint.searchAgainLink}">Search again</a>
         </div>
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'selectedOption',null, ${options})}"></th:block>
-        <details class="govuk-details govuk-!-margin-top-6">
+        <details th:if="${prnLookupUrl}" class="govuk-details govuk-!-margin-top-6">
             <summary class="govuk-details__summary">
                 <span class="govuk-details__summary-text" th:text="#{joinProperty.selectProperty.notListed.summary}">
                     The property I'm looking for is not listed
@@ -46,5 +48,5 @@
             </div>
         </details>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

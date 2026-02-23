@@ -30,16 +30,18 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectF
 
         return mapOf(
             "fieldSetHeading" to "joinProperty.selectProperty.heading",
+            "submitButtonText" to "forms.buttons.continue",
+            "beforeCountMessageKey" to "joinProperty.selectProperty.fieldSetHint.beforeCount",
+            "resultCount" to mockProperties.size,
             "postcode" to "SW9 0HD",
             "houseNameOrNumber" to "9",
-            "propertyCount" to mockProperties.size,
             "searchAgainUrl" to "$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}",
             "prnLookupUrl" to "$JOIN_PROPERTY_ROUTE/${FindPropertyByPrnStep.ROUTE_SEGMENT}",
             "options" to propertyRadiosViewModel,
         )
     }
 
-    override fun chooseTemplate(state: PropertyAddressSearchState) = "forms/selectPropertyForm"
+    override fun chooseTemplate(state: PropertyAddressSearchState) = "forms/selectFromListForm"
 
     override fun mode(state: PropertyAddressSearchState) =
         state.selectPropertyStep.formModelOrNull?.selectedOption?.let { Complete.COMPLETE }
