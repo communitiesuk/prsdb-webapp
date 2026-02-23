@@ -159,7 +159,6 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     val formModel: TFormModel
         get() = stepConfig.getFormModelFromState(state)
 
-    // TODO PDJB-467 - add tests
     val formModelIfReachableOrNull: TFormModel?
         get() = if (isStepReachable) formModelOrNull else null
 
