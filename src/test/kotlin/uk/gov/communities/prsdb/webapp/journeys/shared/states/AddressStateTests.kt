@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
 
 class AddressStateTests {
     @Test
@@ -88,7 +88,7 @@ class AddressStateTests {
     fun `getAddress returns selected address if present`() {
         // Arrange
         val address = AddressDataModel("1 Test St, City, AB1 2CD")
-        val selectForm = SelectAddressFormModel().apply { this.address = address.singleLineAddress }
+        val selectForm = SelectFromListFormModel().apply { this.selectedOption = address.singleLineAddress }
         val state = buildTestAddressState(selectAddressFormModel = selectForm, cachedAddresses = listOf(address))
 
         // Act & Assert
@@ -123,7 +123,7 @@ class AddressStateTests {
     }
 
     private fun buildTestAddressState(
-        selectAddressFormModel: SelectAddressFormModel? = null,
+        selectAddressFormModel: SelectFromListFormModel? = null,
         manualAddressFormModel: ManualAddressFormModel? = null,
         cachedAddresses: List<AddressDataModel>? = null,
     ): AddressState =

@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectPropertyFormModel, PropertyAddressSearchState>() {
-    override val formModelClass = SelectPropertyFormModel::class
+class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectFromListFormModel, PropertyAddressSearchState>() {
+    override val formModelClass = SelectFromListFormModel::class
 
     override fun getStepSpecificContent(state: PropertyAddressSearchState): Map<String, Any?> {
         // TODO: PDJB-274 - Replace mock data with actual search results from FindPropertyStep
@@ -41,18 +41,25 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectP
 
     override fun chooseTemplate(state: PropertyAddressSearchState) = "forms/selectPropertyForm"
 
-    override fun mode(state: PropertyAddressSearchState) = state.selectPropertyStep.formModelOrNull?.property?.let { Complete.COMPLETE }
+    override fun mode(state: PropertyAddressSearchState) =
+        state.selectPropertyStep.formModelOrNull?.selectedOption?.let { Complete.COMPLETE }
 
     override fun afterPrimaryValidation(
         state: PropertyAddressSearchState,
         bindingResult: BindingResult,
     ) {
-        val selectPropertyFormModel = bindingResult.target as SelectPropertyFormModel
-        selectPropertyFormModel.property?.let { selectedProperty ->
+        val formModel = bindingResult.target as SelectFromListFormModel
+        val selectedOption = formModel.selectedOption
+        if (selectedOption == null) {
+            bindingResult.rejectValue(SelectFromListFormModel::selectedOption.name, "joinProperty.selectProperty.error.missing")
+        } else {
             // TODO: PDJB-274 - Validate against actual search results from state
             val validSelections = listOf("1", "2", "3")
-            if (selectedProperty !in validSelections) {
-                bindingResult.rejectValue(SelectPropertyFormModel::property.name, "joinProperty.selectProperty.error.invalidSelection")
+            if (selectedOption !in validSelections) {
+                bindingResult.rejectValue(
+                    SelectFromListFormModel::selectedOption.name,
+                    "joinProperty.selectProperty.error.invalidSelection",
+                )
             }
         }
     }
@@ -61,7 +68,7 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectP
 @JourneyFrameworkComponent
 final class SelectPropertyStep(
     stepConfig: SelectPropertyStepConfig,
-) : RequestableStep<Complete, SelectPropertyFormModel, PropertyAddressSearchState>(stepConfig) {
+) : RequestableStep<Complete, SelectFromListFormModel, PropertyAddressSearchState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "select-property"
     }

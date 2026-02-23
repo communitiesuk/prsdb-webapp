@@ -14,7 +14,7 @@ class AlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Nothing, NoInp
     override fun getStepSpecificContent(state: PropertyRegistrationAddressState) =
         mapOf(
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
-            "singleLineAddress" to state.selectAddressStep.formModel.address,
+            "singleLineAddress" to state.selectAddressStep.formModel.selectedOption,
         )
 
     override fun chooseTemplate(state: PropertyRegistrationAddressState) = "alreadyRegisteredPropertyPage"
