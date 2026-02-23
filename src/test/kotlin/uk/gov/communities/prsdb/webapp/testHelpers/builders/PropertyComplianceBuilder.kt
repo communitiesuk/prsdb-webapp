@@ -26,11 +26,21 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withGasSafetyCert(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyFileUpload =
-            FileUpload(FileUploadStatus.SCANNED, "property_1_gas_safety_certificate", "pdf", "etag", "versionId")
+    fun withGasSafetyCert(
+        issueDate: LocalDate = LocalDate.now(),
+        engineerNum: String? = "1234567",
+        fileUpload: FileUpload? =
+            FileUpload(
+                FileUploadStatus.SCANNED,
+                "property_1_gas_safety_certificate",
+                "pdf",
+                "etag",
+                "versionId",
+            ),
+    ): PropertyComplianceBuilder {
+        propertyCompliance.gasSafetyFileUpload = fileUpload
         propertyCompliance.gasSafetyCertIssueDate = issueDate
-        propertyCompliance.gasSafetyCertEngineerNum = "1234567"
+        propertyCompliance.gasSafetyCertEngineerNum = engineerNum
         return this
     }
 
@@ -52,8 +62,19 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withEicr(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
-        propertyCompliance.eicrFileUpload = FileUpload(FileUploadStatus.SCANNED, "property_1_eicr.pdf", "pdf", "etag", "versionId")
+    // Combined convenience method for EICR
+    fun withEicr(
+        issueDate: LocalDate = LocalDate.now(),
+        fileUpload: FileUpload =
+            FileUpload(
+                FileUploadStatus.SCANNED,
+                "property_1_eicr.pdf",
+                "pdf",
+                "etag",
+                "versionId",
+            ),
+    ): PropertyComplianceBuilder {
+        propertyCompliance.eicrFileUpload = fileUpload
         propertyCompliance.eicrIssueDate = issueDate
         return this
     }
@@ -74,28 +95,33 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withEpc(expiryDate: LocalDate = LocalDate.now().plusYears(1)): PropertyComplianceBuilder {
-        propertyCompliance.epcUrl = "$TEST_EPC_BASE_URL/0000-0000-0000-0000-0000"
+    // Individual EPC setters
+    fun withTenancyStartedBeforeEpcExpiry(started: Boolean? = true): PropertyComplianceBuilder {
+        propertyCompliance.tenancyStartedBeforeEpcExpiry = started
+        return this
+    }
+
+    fun withEpc(
+        expiryDate: LocalDate = LocalDate.now().plusYears(1),
+        energyRating: String = "C",
+        epcUrl: String = "$TEST_EPC_BASE_URL/0000-0000-0000-0000-0000",
+    ): PropertyComplianceBuilder {
+        propertyCompliance.epcUrl = epcUrl
         propertyCompliance.epcExpiryDate = expiryDate
         if (expiryDate.isBefore(LocalDate.now())) propertyCompliance.tenancyStartedBeforeEpcExpiry = false
-        propertyCompliance.epcEnergyRating = "C"
+        propertyCompliance.epcEnergyRating = energyRating
         return this
     }
 
     fun withExpiredEpc(): PropertyComplianceBuilder = this.withEpc(expiryDate = LocalDate.now().minusYears(1))
 
-    fun withTenancyStartedBeforeEpcExpiry(): PropertyComplianceBuilder {
-        propertyCompliance.tenancyStartedBeforeEpcExpiry = true
+    fun withLowEpcRating(): PropertyComplianceBuilder {
+        propertyCompliance.epcEnergyRating = "F"
         return this
     }
 
     fun withEpcExemption(exemption: EpcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION): PropertyComplianceBuilder {
         propertyCompliance.epcExemptionReason = exemption
-        return this
-    }
-
-    fun withLowEpcRating(): PropertyComplianceBuilder {
-        propertyCompliance.epcEnergyRating = "F"
         return this
     }
 
@@ -223,17 +249,6 @@ class PropertyComplianceBuilder {
             .withPropertyOwnership()
             .withGasSafetyCertExemption(gasExemption)
             .withEicrExemption(eicrExemption)
-            .withEpcExemption(epcExemption)
-            .build()
-
-        fun createWithCertOtherExemptions(
-            gasOtherExemptionReason: String = "Other gas exemption reason",
-            eicrOtherExemptionReason: String = "Other EICR exemption reason",
-            epcExemption: EpcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
-        ) = PropertyComplianceBuilder()
-            .withPropertyOwnership()
-            .withGasSafetyCertOtherExemption(gasOtherExemptionReason)
-            .withEicrOtherExemption(eicrOtherExemptionReason)
             .withEpcExemption(epcExemption)
             .build()
 
