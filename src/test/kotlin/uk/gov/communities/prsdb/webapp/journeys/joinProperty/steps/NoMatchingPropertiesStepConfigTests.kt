@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 class NoMatchingPropertiesStepConfigTests {
     private val mockState: JoinPropertyAddressSearchState = mock()
     private val mockLookupAddressStep: LookupAddressStep = mock()
+    private val mockFindPropertyByPrnStep: FindPropertyByPrnStep = mock()
 
     private val routeSegment = NoMatchingPropertiesStep.ROUTE_SEGMENT
 
@@ -62,17 +63,20 @@ class NoMatchingPropertiesStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         val journeyId = "test-journey-id"
-        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.lookupAddressStep).thenReturn(mockLookupAddressStep)
+        whenever(mockLookupAddressStep.currentJourneyId).thenReturn(journeyId)
         whenever(mockLookupAddressStep.isStepReachable).thenReturn(true)
         whenever(mockLookupAddressStep.routeSegment).thenReturn(LookupAddressStep.ROUTE_SEGMENT)
+        whenever(mockState.findPropertyByPrnStep).thenReturn(mockFindPropertyByPrnStep)
+        whenever(mockFindPropertyByPrnStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockFindPropertyByPrnStep.isStepReachable).thenReturn(true)
+        whenever(mockFindPropertyByPrnStep.routeSegment).thenReturn(FindPropertyByPrnStep.ROUTE_SEGMENT)
 
         // Act
         val result = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
         assertEquals("${LookupAddressStep.ROUTE_SEGMENT}?journeyId=$journeyId", result["searchAgainUrl"])
-        // PRN URL is built directly using JourneyStateService.urlWithJourneyState
         assertEquals("${FindPropertyByPrnStep.ROUTE_SEGMENT}?journeyId=$journeyId", result["findByPrnUrl"])
     }
 
@@ -80,10 +84,14 @@ class NoMatchingPropertiesStepConfigTests {
     fun `getStepSpecificContent returns postcode from state when available`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.lookupAddressStep).thenReturn(mockLookupAddressStep)
+        whenever(mockLookupAddressStep.currentJourneyId).thenReturn("test-journey-id")
         whenever(mockLookupAddressStep.isStepReachable).thenReturn(true)
         whenever(mockLookupAddressStep.routeSegment).thenReturn(LookupAddressStep.ROUTE_SEGMENT)
+        whenever(mockState.findPropertyByPrnStep).thenReturn(mockFindPropertyByPrnStep)
+        whenever(mockFindPropertyByPrnStep.currentJourneyId).thenReturn("test-journey-id")
+        whenever(mockFindPropertyByPrnStep.isStepReachable).thenReturn(true)
+        whenever(mockFindPropertyByPrnStep.routeSegment).thenReturn(FindPropertyByPrnStep.ROUTE_SEGMENT)
         whenever(mockState.getStepData(LookupAddressStep.ROUTE_SEGMENT))
             .thenReturn(mapOf("postcode" to "NW1 1AA", "houseNameOrNumber" to "42"))
 
@@ -99,10 +107,14 @@ class NoMatchingPropertiesStepConfigTests {
     fun `getStepSpecificContent returns placeholder values when state has no find property data`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.lookupAddressStep).thenReturn(mockLookupAddressStep)
+        whenever(mockLookupAddressStep.currentJourneyId).thenReturn("test-journey-id")
         whenever(mockLookupAddressStep.isStepReachable).thenReturn(true)
         whenever(mockLookupAddressStep.routeSegment).thenReturn(LookupAddressStep.ROUTE_SEGMENT)
+        whenever(mockState.findPropertyByPrnStep).thenReturn(mockFindPropertyByPrnStep)
+        whenever(mockFindPropertyByPrnStep.currentJourneyId).thenReturn("test-journey-id")
+        whenever(mockFindPropertyByPrnStep.isStepReachable).thenReturn(true)
+        whenever(mockFindPropertyByPrnStep.routeSegment).thenReturn(FindPropertyByPrnStep.ROUTE_SEGMENT)
         whenever(mockState.getStepData(LookupAddressStep.ROUTE_SEGMENT)).thenReturn(null)
 
         // Act
