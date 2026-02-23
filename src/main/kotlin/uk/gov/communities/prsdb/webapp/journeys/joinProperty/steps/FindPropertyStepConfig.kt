@@ -15,7 +15,7 @@ class FindPropertyStepConfig(
 ) : AbstractRequestableStepConfig<FindPropertySearchResult, FindPropertyFormModel, AddressSearchState>() {
     override val formModelClass = FindPropertyFormModel::class
 
-    override fun getStepSpecificContent(state: AddressSearchState) = mapOf<String, Any?>()
+    override fun getStepSpecificContent(state: AddressSearchState) = emptyMap<String, Any?>()
 
     override fun chooseTemplate(state: AddressSearchState) = "findProperty"
 
