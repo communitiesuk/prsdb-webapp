@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -43,6 +44,7 @@ class JoinPropertyJourneyFactory(
             // Address search task
             task(journey.addressSearchTask) {
                 initialStep()
+                backUrl { JOIN_PROPERTY_ROUTE }
                 nextStep { journey.prnSearchTask.firstStep }
             }
 

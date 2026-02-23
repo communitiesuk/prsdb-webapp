@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -19,7 +18,6 @@ class AddressSearchTask : Task<AddressSearchState>() {
         subJourney(state) {
             step(journey.findPropertyStep) {
                 routeSegment(FindPropertyStep.ROUTE_SEGMENT)
-                backUrl { JOIN_PROPERTY_ROUTE }
                 nextStep { mode ->
                     when (mode) {
                         FindPropertySearchResult.RESULTS_FOUND -> journey.selectPropertyStep
