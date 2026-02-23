@@ -104,7 +104,7 @@ class PropertyComplianceControllerTests(
     private val invalidPropertyComplianceFileUploadUrl = "$invalidPropertyComplianceUrl/${GasSafetyCertificateUploadStep.ROUTE_SEGMENT}"
     private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
 
-    private val userShouldSeeFeedback = true
+    private val userShouldSeeFeedback = false
 
     @BeforeEach
     fun setUp() {
