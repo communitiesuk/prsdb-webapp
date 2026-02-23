@@ -95,16 +95,6 @@ nonEnglandOrWalesAddress:
 findProperty:
   title: Find a property
   caption: Join a registered property as a joint landlord
-  postcode:
-    label: Postcode
-    hint: For example, SW1A 2AA
-    error:
-      missing: Enter a postcode
-  houseNameOrNumber:
-    label: Property name or number
-    hint: For example, 15 or Prospect Cottage
-    error:
-      missing: Enter a property name or number
   submit: Find property
   alternativeLink: Find using the Property Registration Number instead
 lookupAddress:

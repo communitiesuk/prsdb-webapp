@@ -8,8 +8,8 @@
                 <span class="govuk-caption-l" th:text="#{forms.findProperty.caption}">Join a registered property as a joint landlord</span>
                 <h1 class="govuk-fieldset__heading" th:text="#{forms.findProperty.title}">Find a property</h1>
             </legend>
-            <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{forms.findProperty.postcode.label}, 'postcode', #{forms.findProperty.postcode.hint})}"></div>
-            <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{forms.findProperty.houseNameOrNumber.label}, 'houseNameOrNumber', #{forms.findProperty.houseNameOrNumber.hint})}"></div>
+            <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{forms.lookupAddress.postcode.label}, 'postcode', #{forms.lookupAddress.postcode.hint})}"></div>
+            <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{forms.lookupAddress.houseNameOrNumber.label}, 'houseNameOrNumber', #{forms.lookupAddress.houseNameOrNumber.hint})}"></div>
         </fieldset>
     </div>
     <div class="govuk-button-group">
