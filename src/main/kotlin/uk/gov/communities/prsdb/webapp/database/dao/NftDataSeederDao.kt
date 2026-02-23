@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.database.dao
 
 import org.hibernate.StatelessSession
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -98,8 +97,8 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO file_upload 
-            (id, created_date, last_modified_date, object_key, e_tag, status, extension) 
-            VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png')
+            (id, created_date, last_modified_date, status, object_key, e_tag, extension) 
+            VALUES (?, ?, ?, ?, ?, ?, 'png')
             """
         return connection.prepareStatement(query)
     }
