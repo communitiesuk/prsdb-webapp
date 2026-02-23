@@ -13,7 +13,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController.Companion.UPDATE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController.Companion.UPDATE_OCCUPANCY_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_ROUTE)
+@RequestMapping(UPDATE_OCCUPANCY_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
 class UpdateOccupancyController(
     private val journeyFactory: UpdateOccupancyJourneyFactory,
@@ -77,9 +77,9 @@ class UpdateOccupancyController(
         }
 
     companion object {
-        const val UPDATE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-occupancy"
+        const val UPDATE_OCCUPANCY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-occupancy"
 
         fun getUpdateOccupancyRoute(propertyOwnershipId: Long): String =
-            UPDATE_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+            UPDATE_OCCUPANCY_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
     }
 }

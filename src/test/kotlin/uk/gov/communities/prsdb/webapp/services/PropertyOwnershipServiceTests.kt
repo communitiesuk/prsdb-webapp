@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
@@ -56,6 +57,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
 import java.net.URI
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -872,6 +874,74 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertNull(propertyOwnership.license)
+    }
+
+    @Nested
+    inner class UpdateOccupancy {
+        @Test
+        fun `updateOccupancy updates the property's occupancy status`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    id = 1,
+                    currentNumTenants = 4,
+                )
+            val newNumberOfTenants = 5
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateOccupancy(
+                propertyOwnership.id,
+                numberOfPeople = newNumberOfTenants,
+                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
+                numBedrooms = propertyOwnership.numBedrooms,
+                billsIncludedList = propertyOwnership.billsIncludedList,
+                customBillsIncluded = propertyOwnership.customBillsIncluded,
+                furnishedStatus = propertyOwnership.furnishedStatus,
+                rentFrequency = propertyOwnership.rentFrequency,
+                customRentFrequency = propertyOwnership.customRentFrequency,
+                rentAmount = propertyOwnership.rentAmount,
+                lastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(newNumberOfTenants, propertyOwnership.currentNumTenants)
+        }
+
+        @Test
+        fun `updateOccupancy throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateOccupancy(
+                        propertyOwnership.id,
+                        numberOfPeople = 6,
+                        numberOfHouseholds = propertyOwnership.currentNumHouseholds,
+                        numBedrooms = propertyOwnership.numBedrooms,
+                        billsIncludedList = propertyOwnership.billsIncludedList,
+                        customBillsIncluded = propertyOwnership.customBillsIncluded,
+                        furnishedStatus = propertyOwnership.furnishedStatus,
+                        rentFrequency = propertyOwnership.rentFrequency,
+                        customRentFrequency = propertyOwnership.customRentFrequency,
+                        rentAmount = propertyOwnership.rentAmount,
+                        lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+        }
     }
 
     @Test
