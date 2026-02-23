@@ -92,7 +92,7 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.8")
 
     // Streaming upload without storing on local system
-    implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
+    implementation("org.apache.commons:commons-fileupload2-jakarta-servlet6:2.0.0-M5")
 
     // FF4J feature flags
     implementation("org.ff4j:ff4j-spring-boot-starter-webmvc:2.1")
