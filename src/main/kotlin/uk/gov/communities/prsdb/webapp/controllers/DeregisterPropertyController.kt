@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_DEREGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -33,6 +35,7 @@ class DeregisterPropertyController(
     private val propertyDeregistrationService: PropertyDeregistrationService,
 ) {
     @GetMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_DEREGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
@@ -51,6 +54,7 @@ class DeregisterPropertyController(
     }
 
     @PostMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_DEREGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
@@ -91,6 +95,7 @@ class DeregisterPropertyController(
             .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_DEREGISTRATION)
     fun getConfirmation(
         model: Model,
         principal: Principal,

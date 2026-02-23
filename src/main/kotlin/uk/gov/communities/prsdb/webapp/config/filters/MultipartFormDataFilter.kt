@@ -4,7 +4,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInputIterator
-import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload
 import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.web.filter.OncePerRequestFilter
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
