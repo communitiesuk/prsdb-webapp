@@ -53,12 +53,15 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectF
         val formModel = bindingResult.target as SelectFromListFormModel
         val selectedOption = formModel.selectedOption
         if (selectedOption == null) {
-            bindingResult.rejectValue(SelectFromListFormModel::selectedOption.name, "joinProperty.selectProperty.error.missing")
+            bindingResult.rejectValueWithMessageKey(
+                SelectFromListFormModel::selectedOption.name,
+                "joinProperty.selectProperty.error.missing",
+            )
         } else {
             // TODO: PDJB-274 - Validate against actual search results from state
             val validSelections = listOf("1", "2", "3")
             if (selectedOption !in validSelections) {
-                bindingResult.rejectValue(
+                bindingResult.rejectValueWithMessageKey(
                     SelectFromListFormModel::selectedOption.name,
                     "joinProperty.selectProperty.error.invalidSelection",
                 )
