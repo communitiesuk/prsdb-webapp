@@ -42,7 +42,13 @@ class EicrStateTests {
 
     @Test
     fun `getEicrCertificateIssueDate returns null if the issue date is not set`() {
-        val state = buildTestEicrState()
+        val state = buildTestEicrState(issueDateStepShouldBeReachable = true)
+        assertNull(state.getEicrCertificateIssueDate())
+    }
+
+    @Test
+    fun `getEicrCertificateIssueDate returns null if formModelIfReachableOrNull is null`() {
+        val state = buildTestEicrState(issueDateStepShouldBeReachable = false)
         assertNull(state.getEicrCertificateIssueDate())
     }
 
@@ -91,13 +97,21 @@ class EicrStateTests {
 
     @Test
     fun `getEicrCertificateFileUploadId returns null if the fileUploadId is not found in state`() {
-        val state = buildTestEicrState()
+        val state = buildTestEicrState(uploadStepShouldBeReachable = true)
+        assertNull(state.getEicrCertificateFileUploadId())
+    }
+
+    @Test
+    fun `getEicrCertificateFileUploadId returns null if formModelIfReachableOrNull is null`() {
+        val state = buildTestEicrState(uploadStepShouldBeReachable = false)
         assertNull(state.getEicrCertificateFileUploadId())
     }
 
     private fun buildTestEicrState(
         issueDateFormModel: TodayOrPastDateFormModel = TodayOrPastDateFormModel(),
         eicrUploadFormModel: EicrUploadCertificateFormModel = EicrUploadCertificateFormModel(),
+        issueDateStepShouldBeReachable: Boolean = true,
+        uploadStepShouldBeReachable: Boolean = true,
     ): EicrState =
         object : AbstractJourneyState(journeyStateService = mock()), EicrState {
             override val eicrStep = mock<EicrStep>()
@@ -112,12 +126,20 @@ class EicrStateTests {
 
             override val eicrIssueDateStep =
                 mock<EicrIssueDateStep>().apply {
-                    whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
+                    if (issueDateStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
                 }
 
             override val eicrUploadStep =
                 mock<EicrUploadStep>().apply {
-                    whenever(this.formModelIfReachableOrNull).thenReturn(eicrUploadFormModel)
+                    if (uploadStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(eicrUploadFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
                 }
             override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
             override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
