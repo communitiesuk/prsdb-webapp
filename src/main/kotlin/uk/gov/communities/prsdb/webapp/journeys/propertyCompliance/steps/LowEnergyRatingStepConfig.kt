@@ -17,7 +17,8 @@ class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
         mapOf(
             "prsExemptionGuideUrl" to PRS_EXEMPTION_GUIDE_URL,
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
-            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
+            "submitButtonText" to
+                if (state.isCheckingAnswers) "forms.buttons.saveAndContinue" else "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/lowEnergyRatingForm"

@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-class GasSafetySummaryRowsFactory(
+class LegacyGasSafetySummaryRowsFactory(
     val doesDataHaveGasSafetyCert: (JourneyData) -> Boolean,
     val gasSafetyStartingStep: PropertyComplianceStepId,
     val changeExemptionStep: PropertyComplianceStepId,
@@ -48,25 +48,42 @@ class GasSafetySummaryRowsFactory(
             val fileUpload = uploadService.getFileUploadById(fileId)
 
             return when (fileUpload.status) {
-                FileUploadStatus.QUARANTINED -> GasSafetyCertificateValue("propertyCompliance.uploadedFile.virusScanPending")
-                FileUploadStatus.DELETED -> GasSafetyCertificateValue("propertyCompliance.uploadedFile.virusScanFailed")
-                FileUploadStatus.SCANNED ->
+                FileUploadStatus.QUARANTINED -> {
+                    GasSafetyCertificateValue("propertyCompliance.uploadedFile.virusScanPending")
+                }
+
+                FileUploadStatus.DELETED -> {
+                    GasSafetyCertificateValue("propertyCompliance.uploadedFile.virusScanFailed")
+                }
+
+                FileUploadStatus.SCANNED -> {
                     GasSafetyCertificateValue(
                         "forms.checkComplianceAnswers.gasSafety.download",
                         uploadService.getDownloadUrl(fileUpload, "gas_safety_certificate.${fileUpload.extension}"),
                     )
+                }
             }
         }
 
         val gasSafetyCertificateValue =
             when (GasSafetyStatus.fromJourneyData(filteredJourneyData)) {
-                GasSafetyStatus.UPLOADED ->
+                GasSafetyStatus.UPLOADED -> {
                     createGasSafetyCertificateValueForFileUpload(
                         filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
                     )
-                GasSafetyStatus.EXEMPTION -> GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.notRequired")
-                GasSafetyStatus.MISSING -> GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.notAdded")
-                GasSafetyStatus.OUTDATED -> GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.expired")
+                }
+
+                GasSafetyStatus.EXEMPTION -> {
+                    GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.notRequired")
+                }
+
+                GasSafetyStatus.MISSING -> {
+                    GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.notAdded")
+                }
+
+                GasSafetyStatus.OUTDATED -> {
+                    GasSafetyCertificateValue("forms.checkComplianceAnswers.certificate.expired")
+                }
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(

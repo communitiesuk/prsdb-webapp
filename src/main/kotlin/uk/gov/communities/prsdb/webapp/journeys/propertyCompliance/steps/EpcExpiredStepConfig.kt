@@ -22,7 +22,8 @@ class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
             "findEpcUrl" to FIND_EPC_URL,
-            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
+            "submitButtonText" to
+                if (state.isCheckingAnswers) "forms.buttons.saveAndContinue" else "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
     override fun chooseTemplate(state: EpcState): String =

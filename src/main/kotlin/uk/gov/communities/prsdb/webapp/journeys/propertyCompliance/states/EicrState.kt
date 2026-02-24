@@ -14,8 +14,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
-interface EicrState : JourneyState {
+interface EicrState :
+    JourneyState,
+    CheckYourAnswersJourneyState {
     val eicrStep: EicrStep
     val eicrIssueDateStep: EicrIssueDateStep
     val eicrUploadStep: EicrUploadStep
@@ -29,7 +32,7 @@ interface EicrState : JourneyState {
     val propertyId: Long
 
     fun getEicrCertificateIssueDate() =
-        eicrIssueDateStep.formModelOrNull?.let { date ->
+        eicrIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
@@ -39,5 +42,5 @@ interface EicrState : JourneyState {
             issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
         }
 
-    fun getEicrCertificateFileUploadId() = eicrUploadStep.formModelOrNull?.fileUploadId
+    fun getEicrCertificateFileUploadId() = eicrUploadStep.formModelIfReachableOrNull?.fileUploadId
 }

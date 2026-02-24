@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-class EicrSummaryRowsFactory(
+class LegacyEicrSummaryRowsFactory(
     val doesDataHaveEicr: (JourneyData) -> Boolean,
     val eicrStartingStep: PropertyComplianceStepId,
     val changeExemptionStep: PropertyComplianceStepId,
@@ -46,13 +46,20 @@ class EicrSummaryRowsFactory(
             val fileUpload = uploadService.getFileUploadById(fileId)
 
             return when (fileUpload.status) {
-                FileUploadStatus.QUARANTINED -> EicrValue("propertyCompliance.uploadedFile.virusScanPending")
-                FileUploadStatus.DELETED -> EicrValue("propertyCompliance.uploadedFile.virusScanFailed")
-                FileUploadStatus.SCANNED ->
+                FileUploadStatus.QUARANTINED -> {
+                    EicrValue("propertyCompliance.uploadedFile.virusScanPending")
+                }
+
+                FileUploadStatus.DELETED -> {
+                    EicrValue("propertyCompliance.uploadedFile.virusScanFailed")
+                }
+
+                FileUploadStatus.SCANNED -> {
                     EicrValue(
                         "forms.checkComplianceAnswers.eicr.download",
                         uploadService.getDownloadUrl(fileUpload, "eicr.${fileUpload.extension}"),
                     )
+                }
             }
         }
 

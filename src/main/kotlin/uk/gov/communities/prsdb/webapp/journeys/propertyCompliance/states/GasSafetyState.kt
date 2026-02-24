@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.plus
 import kotlinx.datetime.yearsUntil
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -15,8 +17,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
-interface GasSafetyState : JourneyState {
+interface GasSafetyState :
+    JourneyState,
+    CheckYourAnswersJourneyState {
     val gasSafetyStep: GasSafetyStep
     val gasSafetyIssueDateStep: GasSafetyIssueDateStep
     val gasSafetyEngineerNumberStep: GasSafetyEngineerNumberStep
@@ -30,16 +35,18 @@ interface GasSafetyState : JourneyState {
     val gasSafetyExemptionMissingStep: GasSafetyExemptionMissingStep
     val propertyId: Long
 
-    fun getGasSafetyCertificateIssueDate() =
-        gasSafetyIssueDateStep.formModelOrNull?.let { date ->
+    fun getGasSafetyCertificateIssueDateIfReachable() =
+        gasSafetyIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
+    fun getGasSafetyExpiryDate() = getGasSafetyCertificateIssueDateIfReachable()?.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
-        getGasSafetyCertificateIssueDate()?.let { issueDate ->
+        getGasSafetyCertificateIssueDateIfReachable()?.let { issueDate ->
             val today = DateTimeHelper().getCurrentDateInUK()
             issueDate.yearsUntil(today) >= GAS_SAFETY_CERT_VALIDITY_YEARS
         }
 
-    fun getGasSafetyCertificateFileUploadId(): Long? = gasSafetyCertificateUploadStep.formModelOrNull?.fileUploadId
+    fun getGasSafetyCertificateFileUploadIdIfReachable(): Long? = gasSafetyCertificateUploadStep.formModelIfReachableOrNull?.fileUploadId
 }

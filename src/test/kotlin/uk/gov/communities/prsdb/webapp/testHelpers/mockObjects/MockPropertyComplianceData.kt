@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import kotlinx.datetime.toJavaLocalDate
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -49,5 +50,19 @@ class MockPropertyComplianceData {
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = epcMeesExemptionReason,
         )
+
+        fun createFileUpload(uploadId: Long = 123L): FileUpload {
+            val fileUpload =
+                FileUpload(
+                    FileUploadStatus.SCANNED,
+                    "objectKey-$uploadId",
+                    "pdf",
+                    "etag-$uploadId",
+                    "versionId-$uploadId",
+                )
+            ReflectionTestUtils.setField(fileUpload, "id", uploadId)
+
+            return fileUpload
+        }
     }
 }

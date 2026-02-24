@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpSession
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.apache.commons.io.FilenameUtils
@@ -44,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
+import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
@@ -84,6 +86,7 @@ class PropertyComplianceController(
     private val propertyComplianceService: PropertyComplianceService,
     private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
     private val landlordService: LandlordService,
+    private val session: HttpSession,
 ) {
     @GetMapping
     fun index(
@@ -112,9 +115,10 @@ class PropertyComplianceController(
         response: HttpServletResponse,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        val userShouldSeeFeedbackPage = getCurrentUserShouldSeeFeedbackPages(principal)
         val modelAndView =
             try {
-                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId)
+                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId, userShouldSeeFeedbackPage)
                 journeyMap[stepName]?.getStepModelAndView()
                     ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
             } catch (_: NoSuchJourneyException) {
@@ -328,7 +332,9 @@ class PropertyComplianceController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId)
+            val journeyMap =
+                propertyComplianceJourneyFactory
+                    .createJourneySteps(propertyOwnershipId, getCurrentUserShouldSeeFeedbackPages(principal))
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -435,6 +441,15 @@ class PropertyComplianceController(
         return formData + (UploadCertificateFormModel::isUserSubmittedMetadataOnly.name to true)
     }
 
+    private fun getCurrentUserShouldSeeFeedbackPages(principal: Principal): Boolean {
+        val userShouldSeeFeebackSessionValue = session.getAttribute(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES) as Boolean?
+        if (userShouldSeeFeebackSessionValue != null) return userShouldSeeFeebackSessionValue
+
+        val userShouldSeeFeebackDatabaseValue = landlordService.getLandlordUserShouldSeeFeedbackPages(principal.name)
+        session.setAttribute(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES, userShouldSeeFeebackDatabaseValue)
+        return userShouldSeeFeebackDatabaseValue
+    }
+
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT/{propertyOwnershipId}"
 
@@ -457,5 +472,8 @@ class PropertyComplianceController(
 
         fun getPropertyComplianceConfirmationPath(propertyOwnershipId: Long): String =
             UriTemplate("$PROPERTY_COMPLIANCE_ROUTE/$CONFIRMATION_PATH_SEGMENT").expand(propertyOwnershipId).toASCIIString()
+
+        fun getPropertyComplianceFeedbackPath(propertyOwnershipId: Long): String =
+            UriTemplate("$PROPERTY_COMPLIANCE_ROUTE/$FEEDBACK_PATH_SEGMENT").expand(propertyOwnershipId).toASCIIString()
     }
 }

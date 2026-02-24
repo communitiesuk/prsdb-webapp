@@ -5,32 +5,32 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.HSE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class GasSafetyOutdatedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class GasSafetyOutdatedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
         mapOf(
             "gasSafeRegisterUrl" to GAS_SAFE_REGISTER_URL,
             "hseUrl" to HSE_URL,
             "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
-            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "submitButtonText" to if (state.isCheckingAnswers) "forms.buttons.saveAndContinue" else "forms.buttons.saveAndContinueToEICR",
         )
 
-    override fun chooseTemplate(state: JourneyState): String = "forms/gasSafetyOutdatedForm"
+    override fun chooseTemplate(state: GasSafetyState): String = "forms/gasSafetyOutdatedForm"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class GasSafetyOutdatedStep(
     stepConfig: GasSafetyOutdatedStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, GasSafetyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-outdated"
     }
