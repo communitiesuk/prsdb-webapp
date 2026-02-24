@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
@@ -24,11 +23,9 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
         page: Page,
     ) {
         val privacyNoticePage = navigator.goToLandlordPrivacyNoticePage()
-        val newPage =
-            browserContext.waitForPage {
-                privacyNoticePage.mhclgComplaintsLink.clickAndWait()
-            }
-        assertTrue(newPage.url().contains(COMPLAINTS_PROCEDURE_URL))
+        assertThat(privacyNoticePage.mhclgComplaintsLink).hasAttribute("href", COMPLAINTS_PROCEDURE_URL)
+        assertThat(privacyNoticePage.mhclgComplaintsLink).hasAttribute("rel", "noreferrer noopener")
+        assertThat(privacyNoticePage.mhclgComplaintsLink).hasAttribute("target", "_blank")
     }
 
     @Test
@@ -44,10 +41,8 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
         page: Page,
     ) {
         val privacyNoticePage = navigator.goToLandlordPrivacyNoticePage()
-        val newPage =
-            browserContext.waitForPage {
-                privacyNoticePage.icoLink.clickAndWait()
-            }
-        assertTrue(newPage.url().contains(INFORMATION_COMMISSIONERS_OFFICE_URL))
+        assertThat(privacyNoticePage.icoLink).hasAttribute("href", INFORMATION_COMMISSIONERS_OFFICE_URL)
+        assertThat(privacyNoticePage.icoLink).hasAttribute("rel", "noreferrer noopener")
+        assertThat(privacyNoticePage.icoLink).hasAttribute("target", "_blank")
     }
 }

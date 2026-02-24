@@ -1,17 +1,15 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.repository.findByIdOrNull
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordWithListedPropertyCountRepository
+import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
@@ -25,7 +23,6 @@ import kotlin.String
 class LandlordService(
     private val landlordRepository: LandlordRepository,
     private val oneLoginUserService: OneLoginUserService,
-    private val landlordWithListedPropertyCountRepository: LandlordWithListedPropertyCountRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
@@ -42,7 +39,7 @@ class LandlordService(
 
     fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
 
-    fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findByIdOrNull(id)
+    fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
     @Transactional
     fun createLandlord(
@@ -116,7 +113,6 @@ class LandlordService(
         return landlordEntity
     }
 
-    @Transactional
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
         landlord.hasRespondedToFeedback = true
         return landlordRepository.save(landlord)
@@ -124,8 +120,8 @@ class LandlordService(
 
     fun searchForLandlords(
         searchTerm: String,
-        laBaseUserId: String,
-        restrictToLA: Boolean = false,
+        localCouncilBaseUserId: String,
+        restrictToLocalCouncil: Boolean = false,
         requestedPageIndex: Int = 0,
         pageSize: Int = MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE,
     ): Page<LandlordSearchResultViewModel> {
@@ -133,31 +129,27 @@ class LandlordService(
         val pageRequest = PageRequest.of(requestedPageIndex, pageSize)
 
         val landlordPage =
-            if (lrn == null) {
-                landlordRepository.searchMatching(searchTerm, laBaseUserId, restrictToLA, pageRequest)
-            } else {
-                landlordRepository.searchMatchingLRN(lrn.number, laBaseUserId, restrictToLA, pageRequest)
+            try {
+                if (lrn == null) {
+                    landlordRepository.searchMatching(
+                        searchTerm,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        pageRequest,
+                    )
+                } else {
+                    landlordRepository.searchMatchingLRN(
+                        lrn.number,
+                        localCouncilBaseUserId,
+                        restrictToLocalCouncil,
+                        pageRequest,
+                    )
+                }
+            } catch (_: QueryTimeoutException) {
+                throw RepositoryQueryTimeoutException("Landlord search with query '$searchTerm' timed out")
             }
 
-        return PageImpl(
-            landlordWithListedPropertyCountRepository
-                .findByLandlordIdIn(landlordPage.content.map { it.id })
-                .map {
-                    LandlordSearchResultViewModel.fromLandlordWithListedPropertyCount(
-                        it,
-                        backLinkService.storeCurrentUrlReturningKey(),
-                    )
-                },
-            pageRequest,
-            landlordPage.totalElements,
-        )
-    }
-
-    fun getLandlordHasRegisteredProperties(baseUserId: String): Boolean {
-        val landlordWithListedPropertyCount =
-            landlordWithListedPropertyCountRepository.findByLandlord_BaseUser_Id(baseUserId)
-                ?: throw EntityNotFoundException("Landlord with baseUserId $baseUserId not found")
-        return landlordWithListedPropertyCount.listedPropertyCount > 0
+        return landlordPage.map { LandlordSearchResultViewModel.fromDataModel(it, backLinkService.storeCurrentUrlReturningKey()) }
     }
 
     private fun sendUpdateConfirmationEmail(

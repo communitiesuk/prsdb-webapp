@@ -3,12 +3,11 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
 import kotlin.String
 
@@ -18,40 +17,39 @@ class EmailTemplateModelsTests {
         private fun templateList() =
             listOf(
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationEmail(
-                        localAuthority = createLocalAuthority(1, "name"),
-                        invitationUri = URI("https://example.com"),
-                        prsdUrl = "https://example.com",
-                        oneLoginUrl = ONE_LOGIN_INFO_URL,
+                    LocalCouncilInvitationEmail(
+                        MockLocalCouncilData.createLocalCouncil(),
+                        URI("invitationUri"),
+                        "prsdUrl",
+                        ONE_LOGIN_INFO_URL,
                     ),
-                    "/emails/LocalAuthorityInvitation.md",
+                    "/emails/LocalCouncilInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityInvitationCancellationEmail(createLocalAuthority(1, "name")),
-                    "/emails/LocalAuthorityInvitationCancellation.md",
+                    LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalCouncil()),
+                    "/emails/LocalCouncilInvitationCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LocalAuthorityAdminInvitationEmail(createLocalAuthority(1, "name"), URI("https://example.com")),
-                    "/emails/LocalAuthorityAdminInvitation.md",
+                    LocalCouncilAdminInvitationEmail(MockLocalCouncilData.createLocalCouncil(), URI("invitationUri")),
+                    "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "https://emample.com"),
+                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        "www.example.com",
-                        true,
+                        "1 Street Name, AB1 2CD",
+                        "prsdUrl",
+                        isOccupied = true,
+                        jointLandlordEmails = listOf("joint1@example.com", "joint2@example.com"),
                     ),
                     "/emails/PropertyRegistrationConfirmation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    PropertyDeregistrationConfirmationEmail(
-                        "P-XXX-YYY",
-                        "1 Street Name, Town, Country, AB1 2CD",
-                    ),
+                    PropertyDeregistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
                     "/emails/PropertyDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
@@ -61,7 +59,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     LandlordWithPropertiesDeregistrationConfirmationEmail(
                         PropertyDetailsEmailSectionList(
-                            listOf(PropertyDetailsEmailSection(1, "P-WWW-XXX", "1 Fake Street, Mirageville")),
+                            listOf(PropertyDetailsEmailSection(propertyNumber = 1, "P-WWW-XXX", "1 Fake Street, Mirageville")),
                         ),
                     ),
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
@@ -70,16 +68,16 @@ class EmailTemplateModelsTests {
                     FullPropertyComplianceConfirmationEmail(
                         "1 Street Name, Town, Country, AB1 2CD",
                         EmailBulletPointList("certificate 1", "certificate 2"),
-                        "https://emample.com",
+                        "prsdUrl",
                     ),
                     "/emails/FullPropertyComplianceConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     PartialPropertyComplianceConfirmationEmail(
                         "1 Street Name, Town, Country, AB1 2CD",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 12345L),
+                        RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 12345L),
                         EmailBulletPointList("certificate 3", "certificate 4"),
-                        "https://emample.com",
+                        "updateComplianceUrl",
                     ),
                     "/emails/PartialPropertyComplianceConfirmation.md",
                 ),
@@ -89,8 +87,8 @@ class EmailTemplateModelsTests {
                         "Heading for certificate",
                         "Body for certificate",
                         "1 Street Name, Town, Country, AB1 2CD",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 12345L).toString(),
-                        URI("https://example.com/property/12345"),
+                        "P-XXXX-XXXX",
+                        URI("propertyUrl"),
                     ),
                     "/emails/VirusScanUnsuccessful.md",
                 ),
@@ -98,17 +96,13 @@ class EmailTemplateModelsTests {
                     PropertyUpdateConfirmation(
                         "1 Street Name, Town, Country, AB1 2CD",
                         "P-XXX-YYY",
-                        URI("https://example.com"),
+                        URI("prsdUrl"),
                         EmailBulletPointList("Thing you changed"),
                     ),
                     "/emails/PropertyUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordUpdateConfirmation(
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        URI("https://example.com"),
-                        "Thing you changed",
-                    ),
+                    LandlordUpdateConfirmation("L-XXXX-XXXX", URI("dashboardUrl"), "Thing you changed"),
                     "/emails/LandlordUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
@@ -116,13 +110,77 @@ class EmailTemplateModelsTests {
                     "/emails/GiveFeedbackLater.md",
                 ),
                 EmailTemplateTestData(
+                    BetaFeedbackEmail("feedback", "email@test.com", "referrer"),
+                    "/emails/BetaFeedbackEmail.md",
+                ),
+                EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                        ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION,
                     ),
-                    "/emails/EnergyPerformanceRemovedUpdateConfirmation.md",
+                    "/emails/GasSafetyUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        URI("dashboardUrl"),
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION,
+                    ),
+                    "/emails/GasSafetyExpiredUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        URI("dashboardUrl"),
+                        ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION,
+                    ),
+                    "/emails/ElectricalSafetyUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        URI("dashboardUrl"),
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION,
+                    ),
+                    "/emails/ElectricalSafetyExpiredUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        URI("dashboardUrl"),
+                        ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        URI("dashboardUrl"),
+                        ComplianceUpdateConfirmationEmail.UpdateType.LOW_RATED_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceLowUpdateConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        "propertyAddress",
+                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        URI("dashboardUrl"),
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION,
+                    ),
+                    "/emails/EnergyPerformanceExpiredUpdateConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
@@ -140,83 +198,37 @@ class EmailTemplateModelsTests {
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
+                        ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION,
                     ),
-                    "/emails/EnergyPerformanceExpiredUpdateConfirmation.md",
+                    "/emails/EnergyPerformanceRemovedUpdateConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceLowUpdateConfirmation.md",
+                    LocalCouncilRegistrationConfirmationEmail("councilName", "prsdUrl", isAdmin = true),
+                    "/emails/LocalCouncilRegistrationConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceUpdateConfirmation.md",
-                    allowExtraKeys = true,
+                    LocalCouncilUserDeletionEmail("councilName"),
+                    "/emails/LocalCouncilUserDeletion.md",
                 ),
                 EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/ElectricalSafetyExpiredUpdateConfirmation.md",
-                    allowExtraKeys = true,
+                    LocalCouncilUserDeletionInformAdminEmail("councilName", "email", "userName", "prsdUrl"),
+                    "/emails/LocalCouncilUserDeletionAdminEmail.md",
                 ),
                 EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/ElectricalSafetyUpdateConfirmation.md",
-                    allowExtraKeys = true,
+                    LocalCouncilUserInvitationInformAdminEmail("councilName", "email", "prsdURL"),
+                    "/emails/LocalCouncilUserInvitationInformAdminEmail.md",
                 ),
                 EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/GasSafetyExpiredUpdateConfirmation.md",
-                    allowExtraKeys = true,
+                    IncompletePropertyReminderEmail("propertyAddress", 7, "prsdUrl"),
+                    "/emails/IncompletePropertyReminder.md",
                 ),
                 EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/GasSafetyUpdateConfirmation.md",
-                    allowExtraKeys = true,
+                    JointLandlordInvitationEmail("John Smith", "1 Fake Street, London", URI("invitationUrl")),
+                    "/emails/JointLandlordInvitation.md",
                 ),
             )
-
-        private fun createLocalAuthority(
-            id: Int,
-            name: String,
-        ): LocalAuthority {
-            val localAuthority = LocalAuthority()
-            ReflectionTestUtils.setField(localAuthority, "id", id)
-            ReflectionTestUtils.setField(localAuthority, "name", name)
-
-            return localAuthority
-        }
     }
 
     data class EmailTemplateTestData(

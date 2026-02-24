@@ -1,0 +1,53 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{joinProperty.title},~{::#main-content/content()}, false)}">
+<a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+<main class="govuk-main-wrapper">
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{joinProperty.heading}">joinProperty.heading</h1>
+        </header>
+        <div class="govuk-inset-text" th:text="#{joinProperty.insetText}">joinProperty.insetText</div>
+        <section>
+            <p class="govuk-body" th:text="#{joinProperty.intro.one}">joinProperty.intro.one</p>
+            <p class="govuk-body" th:text="#{joinProperty.intro.two}">joinProperty.intro.two</p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{joinProperty.howWeConfirm.heading}">joinProperty.howWeConfirm.heading</h2>
+            <p class="govuk-body" th:text="#{joinProperty.howWeConfirm.paragraph.one}">joinProperty.howWeConfirm.paragraph.one</p>
+            <p class="govuk-body" th:text="#{joinProperty.howWeConfirm.paragraph.two}">joinProperty.howWeConfirm.paragraph.two</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{joinProperty.howWeConfirm.bullets.one}">joinProperty.howWeConfirm.bullets.one</li>
+                <li th:text="#{joinProperty.howWeConfirm.bullets.two}">joinProperty.howWeConfirm.bullets.two</li>
+                <li th:text="#{joinProperty.howWeConfirm.bullets.three}">joinProperty.howWeConfirm.bullets.three</li>
+            </ul>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{joinProperty.identityInfo.heading}">joinProperty.identityInfo.heading</h2>
+            <p class="govuk-body" th:text="#{joinProperty.identityInfo.paragraph.one}">joinProperty.identityInfo.paragraph.one</p>
+            <p class="govuk-body" th:text="#{joinProperty.identityInfo.paragraph.two}">joinProperty.identityInfo.paragraph.two</p>
+        </section>
+        <section>
+            <details th:replace="~{fragments/details :: details(#{joinProperty.otherWays.summary}, ~{::#other-ways-content})}">
+                <div id="other-ways-content" class="govuk-details__text">
+                    <p class="govuk-body" th:text="#{joinProperty.otherWays.content.paragraph}">joinProperty.otherWays.content.paragraph</p>
+                    <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phone}">joinProperty.otherWays.content.phone</p>
+                    <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phoneHours}">joinProperty.otherWays.content.phoneHours</p>
+                    <p class="govuk-body">
+                        <span th:text="#{joinProperty.otherWays.content.email}">joinProperty.otherWays.content.email</span>
+                        <a class="govuk-link" th:href="'mailto:' + #{joinProperty.otherWays.content.emailAddress}" th:text="#{joinProperty.otherWays.content.emailAddress}">joinProperty.otherWays.content.emailAddress</a>
+                    </p>
+                </div>
+            </details>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{joinProperty.responsibilities.heading}">joinProperty.responsibilities.heading</h2>
+            <p class="govuk-body" th:text="#{joinProperty.responsibilities.paragraph.one}">joinProperty.responsibilities.paragraph.one</p>
+            <p class="govuk-body" th:text="#{joinProperty.responsibilities.paragraph.two}">joinProperty.responsibilities.paragraph.two</p>
+        </section>
+        <section>
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${joinPropertyInitialStep}, #{forms.buttons.continue})}"></a>
+        </section>
+    </div>
+</main>
+</html>

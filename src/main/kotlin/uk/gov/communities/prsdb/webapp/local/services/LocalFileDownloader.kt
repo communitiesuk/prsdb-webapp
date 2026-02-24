@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.local.services
 
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.services.FileDownloader

@@ -1,8 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -14,23 +13,19 @@ class CheckLicensingAnswersPagePropertyDetailsUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyDetailsController.getUpdatePropertyDetailsPath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        UpdateLicensingController.getUpdateLicensingBaseRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment}",
     ) {
-    val form = CheckLicensingAnswersPropertyDetailsUpdateForm(page)
+    val form = Form(page)
+
+    val summaryName = Heading(page.locator("#summary-name"))
+    val summaryList = CheckLicensingAnswersPropertyDetailsSummaryList(page)
 
     fun confirm() = form.submit()
 
-    class CheckLicensingAnswersPropertyDetailsUpdateForm(
-        page: Page,
-    ) : Form(page) {
-        val summaryName = Heading(page.locator("form h2"))
-        val summaryList = CheckLicensingAnswersPropertyDetailsSummaryList(locator)
-    }
-
     class CheckLicensingAnswersPropertyDetailsSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
+        page: Page,
+    ) : SummaryList(page) {
         val licensingTypeRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
     }

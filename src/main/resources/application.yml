@@ -8,7 +8,7 @@ spring:
     password: ${RDS_PASSWORD}
 
     hikari:
-      connection-init-sql: SET pg_trgm.word_similarity_threshold = 0.2
+      connection-init-sql: SET pg_trgm.strict_word_similarity_threshold = 0.7;
 
     jpa:
       hibernate:
@@ -20,20 +20,6 @@ spring:
 
   flyway:
     enabled: false
-
-  sql:
-    init:
-      mode: always
-      platform: ${ENVIRONMENT_NAME}
-      continue-on-error: true
-
-  data:
-    redis:
-      host: ${ELASTICACHE_URL}
-      port: ${ELASTICACHE_PORT}
-      password: ${ELASTICACHE_PASSWORD}
-      ssl:
-        enabled: true
 
   mvc.format.date: "d MMMM yyyy"
 
@@ -57,9 +43,9 @@ notify:
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
 
-os-places:
-  api-key: ${OS_PLACES_API_KEY}
-  base-url: https://api.os.uk/search/places/v1
+os:
+  api-key: ${OS_API_KEY}
+  downloads.base-url: https://api.os.uk/downloads/v1
 
 epc:
   base-url: ${EPC_REGISTER_BASE_URL}
@@ -80,7 +66,7 @@ aws:
 
 base-url:
   landlord: ${LANDLORD_BASE_URL}
-  local-authority: ${LOCAL_AUTHORITY_BASE_URL}
+  local-council: ${LOCAL_COUNCIL_BASE_URL}
 
 plausible:
   domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
@@ -91,6 +77,52 @@ google-analytics:
 
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
+
+ff4j:
+  web-console:
+    enabled: false
+
+# TODO PDJB-467: enabled migrate-property-compliance by default when complete
+features:
+  feature-flags:
+    - name: "example-feature-flag-one"
+      enabled: true
+      expiry-date: "2030-01-12"
+    - name: "example-feature-flag-two"
+      enabled: true
+      expiry-date: "2030-01-07"
+      release: "release-1-0"
+    - name: "example-feature-flag-three"
+      enabled: false
+      expiry-date: "2030-01-07"
+      release: "release-1-0"
+    - name: "example-feature-flag-four"
+      enabled: true
+      expiry-date: "2030-01-07"
+      release: "release-with-strategy"
+    - name: "failover-test-endpoints"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "migrate-property-registration"
+      enabled: true
+      expiry-date: "2026-02-28"
+    - name: "migrate-local-council-user-registration"
+      enabled: false
+      expiry-date: "2026-02-28"
+    - name: "migrate-property-compliance"
+      enabled: false
+      expiry-date: "2026-06-30"
+    - name: "migrate-property-deregistration"
+      enabled: true
+      expiry-date: "2026-06-30"
+  releases:
+    - name: "release-1-0"
+      enabled: true
+    - name: "release-with-strategy"
+      enabled: true
+      strategy-config:
+        release-date: "2025-06-01"
+
 ---
 
 spring:
@@ -117,6 +149,20 @@ spring:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
+
+  data:
+    redis:
+      host: ${ELASTICACHE_URL}
+      port: ${ELASTICACHE_PORT}
+      password: ${ELASTICACHE_PASSWORD}
+      ssl:
+        enabled: true
+
+  sql:
+    init:
+      mode: always
+      platform: ${ENVIRONMENT_NAME}
+      continue-on-error: true
 
 ---
 

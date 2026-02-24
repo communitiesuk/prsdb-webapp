@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 @Serializable
 data class AddressDataModel(
     val singleLineAddress: String,
-    val localAuthorityId: Int? = null,
+    val localCouncilId: Int? = null,
     val uprn: Long? = null,
     val organisation: String? = null,
     val subBuilding: String? = null,
@@ -24,14 +24,14 @@ data class AddressDataModel(
             postcode: String,
             addressLineTwo: String? = null,
             county: String? = null,
-            localAuthorityId: Int? = null,
+            localCouncilId: Int? = null,
         ): AddressDataModel =
             AddressDataModel(
                 singleLineAddress =
                     manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode, addressLineTwo, county),
                 townName = townOrCity,
                 postcode = postcode,
-                localAuthorityId = localAuthorityId,
+                localCouncilId = localCouncilId,
             )
 
         fun manualAddressDataToSingleLineAddress(
@@ -47,7 +47,7 @@ data class AddressDataModel(
         fun fromAddress(address: Address) =
             AddressDataModel(
                 singleLineAddress = address.singleLineAddress,
-                localAuthorityId = address.localAuthority?.id,
+                localCouncilId = address.localCouncil?.id,
                 uprn = address.uprn,
                 organisation = address.organisation,
                 subBuilding = address.subBuilding,

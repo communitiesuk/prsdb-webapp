@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -38,7 +38,7 @@ class PropertyComplianceViewModelFactory(
             if (landlordView) {
                 "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
             } else {
-                "propertyDetails.complianceInformation.landlordResponsibilities.localAuthority.hintText"
+                "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
             }
         return PropertyComplianceViewModel(
             gasSafetySummaryList = gasSafetySummaryList,
@@ -59,7 +59,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isGasSafetyCertExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateGasSafety,
                         ),
@@ -71,7 +71,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isGasSafetyCertMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateGasSafety,
                         ),
@@ -83,7 +83,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEicrExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateEICR,
                         ),
@@ -95,7 +95,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEicrMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateEICR,
                         ),
@@ -107,7 +107,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateEpc,
                         ),
@@ -119,7 +119,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcRatingLow == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateEpc,
                         ),
@@ -133,7 +133,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        PropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
+                        LegacyPropertyComplianceController.Companion.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
                             PropertyComplianceStepId.UpdateEpc,
                         ),

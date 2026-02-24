@@ -1,0 +1,1 @@
+DROP VIEW landlord_with_listed_property_count;

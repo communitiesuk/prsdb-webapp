@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 
-@Service
+@PrsdbTaskService
 class VirusAlertSender(
     private val emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -30,7 +30,7 @@ class VirusAlertSender(
             certificateDescriptionForSubject(fileCategory),
             certificateDescriptionForHeading(fileCategory),
             certificateDescriptionForBody(fileCategory),
-            propertyOwnership.property.address.singleLineAddress,
+            propertyOwnership.address.singleLineAddress,
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
             absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
         )
@@ -38,18 +38,18 @@ class VirusAlertSender(
     private fun certificateDescriptionForSubject(category: FileCategory): String =
         when (category) {
             FileCategory.GasSafetyCert -> "A gas safety certificate"
-            FileCategory.Eirc -> "An EICR"
+            FileCategory.Eicr -> "An EICR"
         }
 
     private fun certificateDescriptionForHeading(category: FileCategory): String =
         when (category) {
             FileCategory.GasSafetyCert -> "gas safety certificate"
-            FileCategory.Eirc -> "Electrical Installation Condition Report (EICR)"
+            FileCategory.Eicr -> "Electrical Installation Condition Report (EICR)"
         }
 
     private fun certificateDescriptionForBody(category: FileCategory): String =
         when (category) {
             FileCategory.GasSafetyCert -> "gas safety certificate"
-            FileCategory.Eirc -> "EICR"
+            FileCategory.Eicr -> "EICR"
         }
 }

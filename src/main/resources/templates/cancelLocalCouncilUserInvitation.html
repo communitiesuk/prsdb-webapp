@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{cancelLocalCouncilUserInvitation.title}, ~{::body/content()}, false)}">
+<a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
+<th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+    <main class="govuk-main-wrapper">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{cancelLocalCouncilUserInvitation.heading}">cancelLocalCouncilUserInvitation.heading</h1>
+        </header>
+        <section data-testid="user-details-section">
+            <p class="govuk-body">
+                <strong th:text="#{cancelLocalCouncilUserInvitation.emailLabel}+':'">cancelLocalCouncilUserInvitation.emailLabel:</strong>
+                <span th:text="${email}" th:remove="tag">email</span>
+            </p>
+        </section>
+        <section>
+            <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitation.para.one}">cancelLocalCouncilUserInvitation.para.one</p>
+            <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitation.para.two}">cancelLocalCouncilUserInvitation.para.two</p>
+            <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitation.para.three}">cancelLocalCouncilUserInvitation.para.two</p>
+        </section>
+        <form method="post" th:action="@{''}">
+            <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{cancelLocalCouncilUserInvitation.cancelButton})}"></button>
+        </form>
+    </main>
+</th:block>
+</body>
+</html>

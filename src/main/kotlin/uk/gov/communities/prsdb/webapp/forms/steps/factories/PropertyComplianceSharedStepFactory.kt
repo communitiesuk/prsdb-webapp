@@ -98,7 +98,7 @@ class PropertyComplianceSharedStepFactory(
 
     val skippedStepIds =
         when (stepGroupId) {
-            PropertyComplianceGroupIdentifier.Mees ->
+            PropertyComplianceGroupIdentifier.Mees -> {
                 listOf(
                     PropertyComplianceStepId.UpdateEpc,
                     epcNotAutomatchedStepId,
@@ -111,17 +111,25 @@ class PropertyComplianceSharedStepFactory(
                     epcExemptionReasonStepId,
                     epcExemptionConfirmationStepId,
                 )
-            else -> emptyList()
+            }
+
+            else -> {
+                emptyList()
+            }
         }
 
     val skippedNonStepJourneyDataKeys =
         when (stepGroupId) {
-            PropertyComplianceGroupIdentifier.Mees ->
+            PropertyComplianceGroupIdentifier.Mees -> {
                 listOf(
                     NonStepJourneyDataKey.LookedUpEpc.key,
                     NonStepJourneyDataKey.AutoMatchedEpc.key,
                 )
-            else -> emptyList()
+            }
+
+            else -> {
+                emptyList()
+            }
         }
 
     private val nextActionAfterGasSafetyTask =
@@ -422,7 +430,7 @@ class PropertyComplianceSharedStepFactory(
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
-                    FileCategory.Eirc,
+                    FileCategory.Eicr,
                 )
                 eicrUploadNextStepUrl(checkingFor)
             },
@@ -791,7 +799,6 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "fieldSetHeading" to "forms.epcExpiryCheck.fieldSetHeading",
                             "expiryDate" to (getAcceptedEpcDetailsFromSession()?.expiryDateAsJavaLocalDate ?: ""),
                             "radioOptions" to
                                 listOf(
@@ -1052,7 +1059,6 @@ class PropertyComplianceSharedStepFactory(
             content =
                 mapOf(
                     "title" to "propertyCompliance.title",
-                    "fieldSetHeading" to "forms.checkMatchedEpc.fieldSetHeading",
                     "epcDetails" to (epcDetails ?: ""),
                     "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails?.certificateNumber ?: ""),
                     "radioOptions" to

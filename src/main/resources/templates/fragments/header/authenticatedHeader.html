@@ -1,3 +1,4 @@
+<!--/*@thymesVar id="confirmSignOutUrl" type="java.lang.String"*/-->
 <header th:fragment="loggedInHeader(navLinks)" class="rebranded-cross-service-header" data-module="one-login-header"
         role="banner">
     <div class="rebranded-one-login-header" data-one-login-header-nav>
@@ -59,7 +60,7 @@
                         </a>
                     </li>
                     <li class="rebranded-one-login-header__nav__list-item">
-                        <a class="rebranded-one-login-header__nav__link" th:href="@{/confirm-sign-out}">
+                        <a class="rebranded-one-login-header__nav__link" th:href="@{${confirmSignOutUrl}}">
                             <span class="rebranded-one-login-header__nav__link-content rebranded-one-login-header__nav__link-content--sign-out"
                                   th:text="#{oneLoginHeader.logout}">oneLoginHeader.logout</span>
                         </a>

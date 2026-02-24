@@ -5,47 +5,35 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.oauth2.jwt.JwtException
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.constants.VERIFIED_IDENTITY_CACHE_KEY
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidCoreIdentityException
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedCredentialModel
-
-private const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
+import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 
 @PrsdbWebService
 class OneLoginIdentityService(
     private val decoderFactory: JwtDecoderFactory<Unit>,
     private val session: HttpSession,
 ) {
-    fun getVerifiedIdentityData(user: OidcUser): Map<String, Any?>? {
+    fun getVerifiedIdentityData(user: OidcUser): VerifiedIdentityDataModel? {
         val cachedVerifiedIdentity = retrieveCachedVerifiedIdentity()
         if (cachedVerifiedIdentity != null) {
             return cachedVerifiedIdentity
         }
 
-        val idClaimString = user.claims[OneLoginClaimKeys.CORE_IDENTITY] as? String
-        if (idClaimString != null) {
-            val idClaimJwt = decodeCoreIdentityJwt(idClaimString)
-            val verifiedIdentity = extractVerifiedIdentity(idClaimJwt)
-            cacheVerifiedIdentity(verifiedIdentity)
-            return verifiedIdentity
-        }
-
-        return null
+        val idClaimString = user.claims[OneLoginClaimKeys.CORE_IDENTITY] as? String ?: return null
+        val idClaimJwt = decodeCoreIdentityJwt(idClaimString)
+        val verifiedIdentity = extractVerifiedIdentity(idClaimJwt)
+        cacheVerifiedIdentity(verifiedIdentity)
+        return verifiedIdentity
     }
 
-    private fun cacheVerifiedIdentity(verifiedIdentity: Map<String, Any?>) {
+    private fun retrieveCachedVerifiedIdentity() = session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY) as? VerifiedIdentityDataModel
+
+    private fun cacheVerifiedIdentity(verifiedIdentity: VerifiedIdentityDataModel) {
         session.setAttribute(VERIFIED_IDENTITY_CACHE_KEY, verifiedIdentity)
-    }
-
-    private fun extractVerifiedIdentity(idClaimJwt: Jwt): Map<String, Any?> {
-        val verifiableCredentialMap = idClaimJwt.claims["vc"] as? Map<*, *>
-        val verifiableCredential = VerifiedCredentialModel.fromUnknownMap(verifiableCredentialMap)
-
-        return mapOf(
-            "name" to verifiableCredential.credentialSubject.getCurrentName(),
-            "birthDate" to verifiableCredential.credentialSubject.birthDate,
-        )
     }
 
     private fun decodeCoreIdentityJwt(idClaimString: String): Jwt {
@@ -57,12 +45,13 @@ class OneLoginIdentityService(
         }
     }
 
-    private fun retrieveCachedVerifiedIdentity(): Map<String, Any?>? {
-        val cached = session.getAttribute(VERIFIED_IDENTITY_CACHE_KEY) as? Map<*, *>
-        return cached
-            ?.map { (key, value) ->
-                if (key !is String) return null
-                key to value
-            }?.associate { it }
+    private fun extractVerifiedIdentity(idClaimJwt: Jwt): VerifiedIdentityDataModel {
+        val verifiableCredentialMap = idClaimJwt.claims["vc"] as? Map<*, *>
+        val verifiableCredential = VerifiedCredentialModel.fromUnknownMap(verifiableCredentialMap)
+
+        return VerifiedIdentityDataModel(
+            verifiableCredential.credentialSubject.getCurrentName(),
+            verifiableCredential.credentialSubject.birthDate,
+        )
     }
 }

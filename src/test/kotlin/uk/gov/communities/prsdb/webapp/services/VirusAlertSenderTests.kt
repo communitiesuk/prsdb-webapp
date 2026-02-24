@@ -37,7 +37,7 @@ class VirusAlertSenderTests {
         fun certificateTestParameters(): List<Array<Any>> =
             listOf(
                 arrayOf(FileCategory.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
-                arrayOf(FileCategory.Eirc, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
+                arrayOf(FileCategory.Eicr, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
             )
     }
 
@@ -56,10 +56,7 @@ class VirusAlertSenderTests {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = MockLandlordData.createLandlord(email = landlordEmail),
-                property =
-                    MockLandlordData.createProperty(
-                        address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
-                    ),
+                address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
             )
 

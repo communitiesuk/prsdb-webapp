@@ -11,6 +11,8 @@ open class SummaryList(
 
     protected fun getRow(key: String) = SummaryListRow.byKey(locator, key)
 
+    protected fun getRow(index: Int) = SummaryListRow.byIndex(locator, index)
+
     class SummaryListRow(
         locator: Locator,
     ) : BaseComponent(locator) {
@@ -29,6 +31,13 @@ open class SummaryList(
                         ),
                     ),
                 ),
+            )
+
+            fun byIndex(
+                parentLocator: Locator,
+                index: Int,
+            ) = SummaryListRow(
+                parentLocator.locator(".govuk-summary-list__row").nth(index),
             )
         }
 

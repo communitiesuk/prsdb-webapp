@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController
+import uk.gov.communities.prsdb.webapp.controllers.IncompletePropertiesController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addAction
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -18,7 +18,7 @@ class IncompletePropertyViewModelBuilder {
                 cardNumber = (index + 1).toString(),
                 title = "landlord.incompleteProperties.summaryCardTitle",
                 summaryList = getSummaryList(dataModel),
-                actions = getActions(dataModel.contextId, currentUrlKey),
+                actions = getActions(dataModel.journeyId, currentUrlKey),
             )
 
         private fun getSummaryList(dataModel: IncompletePropertiesDataModel): List<SummaryListRowViewModel> =
@@ -35,18 +35,18 @@ class IncompletePropertyViewModelBuilder {
                 }.toList()
 
         private fun getActions(
-            contextId: Long,
+            journeyId: String,
             currentUrlKey: Int?,
         ): List<SummaryCardActionViewModel> =
             mutableListOf<SummaryCardActionViewModel>()
                 .apply {
                     addAction(
                         "landlord.incompleteProperties.action.continue",
-                        RegisterPropertyController.getResumePropertyRegistrationPath(contextId).overrideBackLinkForUrl(currentUrlKey),
+                        RegisterPropertyController.getResumePropertyRegistrationPath(journeyId).overrideBackLinkForUrl(currentUrlKey),
                     )
                     addAction(
                         "landlord.incompleteProperties.action.delete",
-                        LandlordController.deleteIncompletePropertyPath(contextId),
+                        IncompletePropertiesController.getDeleteIncompletePropertyPath(journeyId),
                     )
                 }.toList()
     }

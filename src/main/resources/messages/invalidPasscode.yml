@@ -1,0 +1,6 @@
+title: Invalid Passcode
+heading: You cannot access the service with this passcode
+paragraph:
+  one: The passcode you entered is either incorrect or already used by someone else.
+  two: 'Check the passcode and try again. If it still does not work, contact your local council to get a new one.'
+cta: Enter a passcode

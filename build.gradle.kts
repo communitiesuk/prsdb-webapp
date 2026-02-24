@@ -1,11 +1,12 @@
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.4.4"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.5.10"
+    id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.flywaydb.flyway") version "10.18.0"
@@ -16,7 +17,7 @@ version = "latest"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -59,9 +60,9 @@ dependencies {
 
     // External service clients
     implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
-    implementation("software.amazon.awssdk:s3:2.31.5")
+    implementation("software.amazon.awssdk:s3:2.31.78")
     implementation("software.amazon.awssdk.crt:aws-crt:0.36.3")
-    implementation("software.amazon.awssdk:s3-transfer-manager:2.22.0")
+    implementation("software.amazon.awssdk:s3-transfer-manager:2.22.13")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -88,10 +89,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
     // CSV Data Loading
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
+    implementation("org.apache.commons:commons-csv:1.8")
 
     // Streaming upload without storing on local system
-    implementation("org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1")
+    implementation("org.apache.commons:commons-fileupload2-jakarta-servlet6:2.0.0-M5")
+
+    // FF4J feature flags
+    implementation("org.ff4j:ff4j-spring-boot-starter-webmvc:2.1")
+
+    // Fake data generation
+    implementation("net.datafaker:datafaker:2.4.2")
 }
 
 kotlin {
@@ -100,23 +107,35 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
 val frontendAssetsSpec: CopySpec =
     copySpec {
         from("dist")
         include("**/*")
     }
 
+tasks.register<Exec>("buildFrontendAssets") {
+    group = "build"
+    description = "Build frontend JavaScript and CSS assets using npm"
+    if (OperatingSystem.current().isWindows) {
+        commandLine("cmd", "/c", "npm", "run", "build")
+    } else {
+        commandLine("npm", "run", "build")
+    }
+}
+
 tasks.register<Copy>("copyBuiltAssets") {
+    dependsOn("buildFrontendAssets")
     into(layout.buildDirectory.dir("resources/main/static/assets"))
     with(frontendAssetsSpec)
     outputs.upToDateWhen { false }
 }
 
 tasks.withType<KotlinCompile> {
+    dependsOn("copyBuiltAssets")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
     dependsOn("copyBuiltAssets")
 }
 
@@ -135,7 +154,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.4")
+        classpath("org.postgresql:postgresql:42.7.7")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
     }
 }

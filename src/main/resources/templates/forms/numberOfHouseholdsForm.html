@@ -6,27 +6,36 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
-    <h1 class="govuk-heading-l" th:text="#{forms.numberOfHouseholds.heading}">
+    <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}">
         forms.numberOfHouseholds.heading
     </h1>
     <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.one}">
         forms.numberOfHouseholds.paragraph.one
     </p>
+    <h2 class="govuk-heading-m" th:text="#{forms.numberOfHouseholds.heading.two}">
+        forms.numberOfHouseholds.heading.two
+    </h2>
     <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.two}">
         forms.numberOfHouseholds.paragraph.two
     </p>
     <ul class="govuk-list govuk-list--bullet">
         <li th:text="#{forms.numberOfHouseholds.bullet.point.one}">forms.numberOfHouseholds.bullet.point.one</li>
         <li th:text="#{forms.numberOfHouseholds.bullet.point.two}">forms.numberOfHouseholds.bullet.point.two</li>
-        <li th:text="#{forms.numberOfHouseholds.bullet.point.three}">forms.numberOfHouseholds.bullet.point.three</li>
     </ul>
     <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.three}">
         forms.numberOfHouseholds.paragraph.three
     </p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{forms.numberOfHouseholds.bullet.point.three}">forms.numberOfHouseholds.bullet.point.three</li>
+        <li th:text="#{forms.numberOfHouseholds.bullet.point.four}">forms.numberOfHouseholds.bullet.point.four</li>
+    </ul>
+    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.four}">
+        forms.numberOfHouseholds.paragraph.four
+    </p>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{forms.numberOfHouseholds.fieldSetHeading}, null)}">
         <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfHouseholds', null, 2)}">
         </div>
     </th:block>

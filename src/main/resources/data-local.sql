@@ -38,7 +38,7 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25');
 
 INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localAuthorityId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
+VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localCouncilId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}','urn:fdc:gov.uk:2022:UVWXY'),
        (2, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
        (3, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
        (4, '01/15/25', '01/15/25', 7, '{}','urn:fdc:gov.uk:2022:UVWXY'),
@@ -48,33 +48,33 @@ VALUES (1, current_date, current_date, 3, '{"lookup-address":{"houseNameOrNumber
 
 SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
-INSERT INTO local_authority_user (subject_identifier, is_manager, local_authority_id, created_date, last_modified_date,
+INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
-VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 2, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 2, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
-       ('urn:fdc:gov.uk:2022:PQRST', false, 2, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
-       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 2, '10/09/24', '10/09/24',
+VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
+       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
+       ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24',
         'Jasmin Conterio',
         'jasmin.conterio@softwire.com', true),
-       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 2, '10/02/24', '10/02/24',
+       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 1, '10/02/24', '10/02/24',
         'Isobel Ibironke',
         'isobel.ibironke@softwire.com', true),
-       ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 2, '10/15/24', '10/15/24',
+       ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 1, '10/15/24', '10/15/24',
         'PRSDB LA Admin',
         'Team-PRSDB+laadmin@softwire.com', true),
-       ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 2, '10/15/24', '10/15/24',
+       ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24',
         'PRSDB La User',
         'Team-PRSDB+lauser@softwire.com', true);
 
-SELECT setval(pg_get_serial_sequence('local_authority_user', 'id'), (SELECT MAX(id) FROM local_authority_user));
+SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
-INSERT INTO local_authority_invitation (invited_email, inviting_authority_id, token, invited_as_admin, created_date)
-VALUES ('expired.invitation+a@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111a', false, '05/05/2025'),
-       ('expired.invitation+b@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111b', false, '05/05/2025'),
-       ('expired.invitation+c@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111c', false, '05/05/2025'),
-       ('expired.invitation+d@example.com', 2, '1234abcd-5678-abcd-1234-567abcd1111d', false, '05/05/2025');
+INSERT INTO local_council_invitation (invited_email, inviting_council_id, token, invited_as_admin, created_date)
+VALUES ('expired.invitation+a@example.com', 1, '1234abcd-5678-abcd-1234-567abcd1111a', false, '05/05/2025'),
+       ('expired.invitation+b@example.com', 1, '1234abcd-5678-abcd-1234-567abcd1111b', false, '05/05/2025'),
+       ('expired.invitation+c@example.com', 1, '1234abcd-5678-abcd-1234-567abcd1111c', false, '05/05/2025'),
+       ('expired.invitation+d@example.com', 1, '1234abcd-5678-abcd-1234-567abcd1111d', false, '05/05/2025');
 
-SELECT setval(pg_get_serial_sequence('local_authority_invitation', 'id'), (SELECT MAX(id) FROM local_authority_invitation));
+SELECT setval(pg_get_serial_sequence('local_council_invitation', 'id'), (SELECT MAX(id) FROM local_council_invitation));
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
@@ -143,51 +143,59 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (64, '12/10/24', 0006001032, 0),
        (65, '2025-01-15 00:00:00+00', 83811499802, 0),
        (66, '2025-01-15 00:00:00+00', 40666195053, 0),
-       (67, '2025-01-15 00:00:00+00', 150242309330, 0);
+       (67, '2025-01-15 00:00:00+00', 150242309330, 0),
+       (68, '2025-01-15', 1502423330, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_authority_id)
-VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2),
-       (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2),
-       (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 2),
-       (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', 2),
-       (5, '09/13/24', '09/13/24', 5, '5 Mythical Place', 2),
-       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG', 2),
-       (7, '09/13/24', '09/13/24', 6, '2 Fictional Road', 2),
-       (8, '09/13/24', '09/13/24', 7, '3 Fake Way', 3),
-       (9, '09/13/24', '09/13/24', 100090154790, '4 Imaginary Street', 2),
-       (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', 2),
-       (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 2),
-       (12, '09/13/24', '09/13/24', null, '6 Mythical Place', 2),
-       (13, '05/02/25', '05/02/25', 1013, '1 PRSDB Square, EG1 2AA', 2),
-       (14, '05/02/25', '05/02/25', 1014, '2 PRSDB Square, EG1 2AB', 2),
-       (15, '05/02/25', '05/02/25', 1015, '3 PRSDB Square, EG1 2AC', 2),
-       (16, '05/02/25', '05/02/25', 1016, '4 PRSDB Square, EG1 2AD', 2),
-       (17, '05/02/25', '05/02/25', 1017, '5 PRSDB Square, EG1 2AE', 2),
-       (18, '05/02/25', '05/02/25', 1018, '6 PRSDB Square, EG1 2AF', 2),
-       (19, '05/02/25', '05/02/25', 1019, '7 PRSDB Square, EG1 2AG', 2),
-       (20, '05/02/25', '05/02/25', 1020, '8 PRSDB Square, EG1 2AH', 2),
-       (21, '05/02/25', '05/02/25', 1021, '9 PRSDB Square, EG1 2AI', 2),
-       (22, '05/02/25', '05/02/25', 1022, '10 PRSDB Square, EG1 2AJ', 2),
-       (23, '05/02/25', '05/02/25', 1023, '11 PRSDB Square, EG1 2AK', 2),
-       (24, '05/02/25', '05/02/25', 1024, '12 PRSDB Square, EG1 2AL', 2),
-       (25, '05/02/25', '05/02/25', 1025, '13 PRSDB Square, EG1 2AM', 2),
-       (26, '05/02/25', '05/02/25', 1026, '14 PRSDB Square, EG1 2AN', 2),
-       (27, '05/02/25', '05/02/25', 1027, '15 PRSDB Square, EG1 2AO', 2),
-       (28, '05/02/25', '05/02/25', 1028, '16 PRSDB Square, EG1 2AP', 2),
-       (29, '05/02/25', '05/02/25', 1029, '17 PRSDB Square, EG1 2AQ', 2),
-       (30, '05/02/25', '05/02/25', 1030, '18 PRSDB Square, EG1 2AR', 2),
-       (31, '05/02/25', '05/02/25', 1031, '19 PRSDB Square, EG1 2AS', 2),
-       (32, '05/02/25', '05/02/25', 1032, '20 PRSDB Square, EG1 2AT', 2),
-       (33, '05/02/25', '05/02/25', 1033, '21 PRSDB Square, EG1 2AU', 2),
-       (34, '05/02/25', '05/02/25', 1034, '22 PRSDB Square, EG1 2AV', 2),
-       (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 3),
-       (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 3),
-       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 3),
-       (38, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (39, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21),
-       (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 21);
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode, building_number)
+VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA', '1'),
+       (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 1, 'FA1 1AB', '2'),
+       (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 1, 'FA1 1AC', '3'),
+       (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', 1, 'FA1 1AD', '4'),
+       (5, '09/13/24', '09/13/24', 5, '5 Mythical Place', 1, 'FA1 1AE', '5'),
+       (6, '12/10/2024', '12/10/2024', 1123456, '1, Example Road, EG1 1AA', 1, 'EG1 1AA', '1'),
+       (7, '09/13/24', '09/13/24', 6, '2 Fictional Road', 1, 'FA1 1AF', '2'),
+       (8, '09/13/24', '09/13/24', 7, '3 Fake Way', 2, 'FA1 1AG', '3'),
+       (9, '09/13/24', '09/13/24', 100090154790, '4 Imaginary Street', 1, 'FA1 1AH', '4'),
+       (10, '09/13/24', '09/13/24', 9, '5 Pretend Crescent', 1, 'FA1 1AJ', '5'),
+       (11, '09/13/24', '09/13/24', 10, '6 Mythical Place', 1, 'FA1 1AK', '6'),
+       (12, '09/13/24', '09/13/24', null, '6 Mythical Place', 1, 'FA1 1AL', '6'),
+       (13, '05/02/25', '05/02/25', 1013, '1 PRSDB Square, EG1 2AA', 1, 'EG1 2AA', '1'),
+       (14, '05/02/25', '05/02/25', 1014, '2 PRSDB Square, EG1 2AA', 1, 'EG1 2AA', '2'),
+       (15, '05/02/25', '05/02/25', 1015, '3 PRSDB Square, EG1 2AA', 1, 'EG1 2AA', '3'),
+       (16, '05/02/25', '05/02/25', 1016, '4 PRSDB Square, EG1 2AA', 1, 'EG1 2AA', '4'),
+       (17, '05/02/25', '05/02/25', 1017, '5 PRSDB Square, EG1 2AA', 1, 'EG1 2AA', '5'),
+       (18, '05/02/25', '05/02/25', 1018, '1 PRSDB Square, EG1 2AF', 1, 'EG1 2AF', '1'),
+       (19, '05/02/25', '05/02/25', 1019, '1 PRSDB Square, EG1 2AG', 1, 'EG1 2AG', '1'),
+       (20, '05/02/25', '05/02/25', 1020, '1 PRSDB Square, EG1 2AH', 1, 'EG1 2AH', '1'),
+       (21, '05/02/25', '05/02/25', 1021, '9 PRSDB Square, EG1 2AI', 1, 'EG1 2AI', '9'),
+       (22, '05/02/25', '05/02/25', 1022, '10 PRSDB Square, EG1 2AJ', 1, 'EG1 2AJ', '10'),
+       (23, '05/02/25', '05/02/25', 1023, '11 PRSDB Square, EG1 2AK', 1, 'EG1 2AK', '11'),
+       (24, '05/02/25', '05/02/25', 1024, '12 PRSDB Square, EG1 2AL', 1, 'EG1 2AL', '12'),
+       (25, '05/02/25', '05/02/25', 1025, '13 PRSDB Square, EG1 2AM', 1, 'EG1 2AM', '13'),
+       (26, '05/02/25', '05/02/25', 1026, '14 PRSDB Square, EG1 2AN', 1, 'EG1 2AN', '14'),
+       (27, '05/02/25', '05/02/25', 1027, '15 PRSDB Square, EG1 2AO', 1, 'EG1 2AO', '15'),
+       (28, '05/02/25', '05/02/25', 1028, '16 PRSDB Square, EG1 2AP', 1, 'EG1 2AP', '16'),
+       (29, '05/02/25', '05/02/25', 1029, '17 PRSDB Square, EG1 2AQ', 1, 'EG1 2AQ', '17'),
+       (30, '05/02/25', '05/02/25', 1030, '18 PRSDB Square, EG1 2AR', 1, 'EG1 2AR', '18'),
+       (31, '05/02/25', '05/02/25', 1031, '19 PRSDB Square, EG1 2AS', 1, 'EG1 2AS', '19'),
+       (32, '05/02/25', '05/02/25', 1032, '20 PRSDB Square, EG1 2AT', 1, 'EG1 2AT', '20'),
+       (33, '05/02/25', '05/02/25', 1033, '21 PRSDB Square, EG1 2AU', 1, 'EG1 2AU', '21'),
+       (34, '05/02/25', '05/02/25', 1034, '22 PRSDB Square, EG1 2AV', 1, 'EG1 2AV', '22'),
+       (35, '05/02/25', '05/02/25', 1035, '23 PRSDB Square, EG1 2AW', 2, 'EG1 2AW', '23'),
+       (36, '05/02/25', '05/02/25', 1036, '24 PRSDB Square, EG1 2AX', 2, 'EG1 2AX', '24'),
+       (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 2, 'EG1 2AY', '25'),
+       (38, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '5'),
+       (39, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '1'),
+       (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2');
+
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode, building_name)
+VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Registered House'),
+       (42, '09/13/24', '09/13/24', 1039, 'Stage House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Stage House'),
+       (43, '09/13/24', '09/13/24', 1040, 'Slate House, PRSDB Square, AA3 1AB ', 1, 'AA3 1AB ', 'Slate House'),
+       (44, '09/13/24', '09/13/24', 1041, 'Grate House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Grate House'),
+       (45, '09/13/24', '09/13/24', 1042, 'Slate House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Slate House');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -238,45 +246,6 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO property (id, status, is_active, property_build_type, address_id)
-VALUES (1, 1, true, 1, 6),
-       (2, 1, true, 1, 7),
-       (3, 1, true, 1, 8),
-       (4, 1, true, 1, 9),
-       (5, 1, true, 1, 10),
-       (6, 1, false, 1, 11),
-       (7, 1, true, 1, 12),
-       (8, 1, true, 1, 13),
-       (9, 1, true, 1, 14),
-       (10, 1, true, 1, 15),
-       (11, 1, true, 1, 16),
-       (12, 1, true, 1, 17),
-       (13, 1, true, 1, 18),
-       (14, 1, true, 1, 19),
-       (15, 1, true, 1, 20),
-       (16, 1, true, 1, 21),
-       (17, 1, true, 1, 22),
-       (18, 1, true, 1, 23),
-       (19, 1, true, 1, 24),
-       (20, 1, true, 1, 25),
-       (21, 1, true, 1, 26),
-       (22, 1, true, 1, 27),
-       (23, 1, true, 1, 28),
-       (24, 1, true, 1, 29),
-       (25, 1, true, 1, 30),
-       (26, 1, true, 1, 31),
-       (27, 1, true, 1, 32),
-       (28, 1, true, 1, 33),
-       (29, 1, true, 1, 34),
-       (30, 1, true, 1, 35),
-       (31, 1, true, 1, 36),
-       (32, 1, true, 1, 37),
-       (33, 1, true, 1, 38),
-       (34, 1, true, 1, 39),
-       (35, 1, true, 1, 40);
-
-SELECT setval(pg_get_serial_sequence('property', 'id'), (SELECT MAX(id) FROM property));
-
 INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'L12345678'),
        (2, 2, 'L12345678'),
@@ -289,42 +258,80 @@ VALUES (1, 1, 'L12345678'),
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
-INSERT INTO property_ownership (id, is_active, occupancy_type, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, property_id, created_date, last_modified_date, license_id, incomplete_compliance_form_id)
-VALUES (1, true, 0, 1, 1, 2, 6, 1, 1, '01/15/25', '02/02/25', null, 2),
-       (2, false, 0, 1, 1, 2, 34, 2, 2, '01/15/25', '01/15/25', null, null),
-       (3, true, 0, 1, 1, 2, 35, 4, 3, '01/15/25', '01/15/25', null, null),
-       (4, true, 0, 1, 1, 2, 36, 1, 4, '01/15/25', '01/15/25', null, 3),
-       (5, true, 0, 1, 1, 2, 37, 1, 5, '01/15/25', '01/15/25', null, null),
-       (6, false, 0, 1, 1, 2, 38, 1, 6, '01/15/25', '01/15/25', null, null),
-       (7, true, 0, 1, 0, 0, 39, 1, 7, '02/02/25', '02/02/25', 1, 4),
-       (8, true, 0, 1, 1, 1, 40, 1, 8, '05/02/25', '01/15/25', null, null),
-       (9, true, 0, 1, 0, 0, 41, 1, 9, '05/02/25', '01/15/25', null, null),
-       (10, true, 0, 1, 0, 0, 42, 1, 10, '05/02/25', '01/15/25', null, null),
-       (11, true, 0, 1, 0, 0, 43, 1, 11, '05/02/25', '01/15/25', null, null),
-       (12, true, 0, 1, 0, 0, 44, 1, 12, '05/02/25', '01/15/25', null, null),
-       (13, true, 0, 1, 0, 0, 45, 1, 13, '05/02/25', '01/15/25', null, null),
-       (14, true, 0, 1, 0, 0, 46, 1, 14, '05/02/25', '01/15/25', null, null),
-       (15, true, 0, 1, 0, 0, 47, 1, 15, '05/02/25', '01/15/25', null, null),
-       (16, true, 0, 1, 0, 0, 48, 1, 16, '05/02/25', '01/15/25', null, null),
-       (17, true, 0, 1, 0, 0, 49, 1, 17, '05/02/25', '01/15/25', null, null),
-       (18, true, 0, 1, 0, 0, 50, 1, 18, '05/02/25', '01/15/25', null, null),
-       (19, true, 0, 1, 0, 0, 51, 1, 19, '05/02/25', '01/15/25', null, null),
-       (20, true, 0, 1, 0, 0, 52, 1, 20, '05/02/25', '01/15/25', null, null),
-       (21, true, 0, 1, 0, 0, 53, 1, 21, '05/02/25', '01/15/25', null, null),
-       (22, true, 0, 1, 0, 0, 54, 1, 22, '05/02/25', '01/15/25', null, null),
-       (23, true, 0, 1, 0, 0, 55, 1, 23, '05/02/25', '01/15/25', null, null),
-       (24, true, 0, 1, 0, 0, 56, 1, 24, '05/02/25', '01/15/25', null, null),
-       (25, true, 0, 1, 0, 0, 57, 1, 25, '05/02/25', '01/15/25', null, null),
-       (26, true, 0, 1, 0, 0, 58, 1, 26, '05/02/25', '01/15/25', 2, null),
-       (27, true, 0, 1, 0, 0, 59, 1, 27, '05/02/25', '01/15/25', 3, null),
-       (28, true, 0, 1, 0, 0, 60, 1, 28, '05/02/25', '01/15/25', 4, null),
-       (29, true, 0, 1, 0, 0, 61, 1, 29, '05/02/25', '01/15/25', 5, null),
-       (30, true, 0, 1, 0, 0, 62, 1, 30, '05/02/25', '01/15/25', 6, null),
-       (31, true, 0, 1, 0, 0, 63, 1, 31, '05/02/25', '01/15/25', 7, null),
-       (32, true, 0, 1, 0, 0, 64, 1, 32, '05/02/25', '01/15/25', 8, null),
-       (33, true, 0, 0, 0, 0, 65, 1, 33,'2025-01-15 00:00:00+00', null, null, 5),
-       (34, true, 0, 0, 0, 0, 66, 1, 34,'2025-01-15 00:00:00+00', null, null, 6),
-       (35, true, 0, 0, 0, 0, 67, 1, 35,'2025-01-15 00:00:00+00', null, null, 7);
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, last_modified_date, license_id, incomplete_compliance_form_id, property_build_type,
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
+VALUES (1, true, 1, 1, 2, 6, 1, 6, '01/15/25', '02/02/25', null, 2, 1,
+        1, null, null, 2, 1, null, 123.12),
+       (2, false, 1, 1, 2, 34, 2, 7, '01/15/25', '01/15/25', null, null, 1,
+           1, null, null, 2, 1, null, 123.12),
+       (3, true, 1, 1, 2, 35, 4, 8, '01/15/25', '01/15/25', null, null, 1,
+        1, null, null, 2, 1, null, 123.12),
+       (4, true, 1, 1, 2, 36, 1, 9, '01/15/25', '01/15/25', null, 3, 1,
+        1, null, null, 2, 1, null, 123.12),
+       (5, true, 1, 1, 2, 37, 1, 10, '01/15/25', '01/15/25', null, null, 1,
+        1, null, null, 2, 1, null, 123.12),
+       (6, false, 1, 1, 2, 38, 1, 11, '01/15/25', '01/15/25', null, null, 1,
+        1, null, null, 2, 1, null, 123.12),
+       (7, true, 1, 0, 0, 39, 1, 12, '02/02/25', '02/02/25', 1, 4, 1,
+        null, null, null, null, null, null, null),
+       (8, true, 1, 1, 1, 40, 1, 13, '05/02/25', '01/15/25', null, null, 1,
+        1, null, null, 2, 1, null, 123.12),
+       (9, true, 1, 0, 0, 41, 1, 14, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (10, true, 1, 0, 0, 42, 1, 15, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (11, true, 1, 0, 0, 43, 1, 16, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (12, true, 1, 0, 0, 44, 1, 17, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (13, true, 1, 0, 0, 45, 1, 18, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (14, true, 1, 0, 0, 46, 1, 19, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (15, true, 1, 0, 0, 47, 1, 20, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (16, true, 1, 0, 0, 48, 1, 21, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (17, true, 1, 0, 0, 49, 1, 22, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (18, true, 1, 0, 0, 50, 1, 23, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (19, true, 1, 0, 0, 51, 1, 24, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (20, true, 1, 0, 0, 52, 1, 25, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (21, true, 1, 0, 0, 53, 1, 26, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (22, true, 1, 0, 0, 54, 1, 27, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (23, true, 1, 0, 0, 55, 1, 28, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (24, true, 1, 0, 0, 56, 1, 29, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (25, true, 1, 0, 0, 57, 1, 30, '05/02/25', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null),
+       (26, true, 1, 0, 0, 58, 1, 31, '05/02/25', '01/15/25', 2, null, 1,
+        null, null, null, null, null, null, null),
+       (27, true, 1, 0, 0, 59, 1, 32, '05/02/25', '01/15/25', 3, null, 1,
+        null, null, null, null, null, null, null),
+       (28, true, 1, 0, 0, 60, 1, 33, '05/02/25', '01/15/25', 4, null, 1,
+        null, null, null, null, null, null, null),
+       (29, true, 1, 0, 0, 61, 1, 34, '05/02/25', '01/15/25', 5, null, 1,
+        null, null, null, null, null, null, null),
+       (30, true, 1, 0, 0, 62, 1, 35, '05/02/25', '01/15/25', 6, null, 1,
+        null, null, null, null, null, null, null),
+       (31, true, 1, 0, 0, 63, 1, 36, '05/02/25', '01/15/25', 7, null, 1,
+        null, null, null, null, null, null, null),
+       (32, true, 1, 0, 0, 64, 1, 37, '05/02/25', '01/15/25', 8, null, 1,
+        null, null, null, null, null, null, null),
+       (33, true, 0, 0, 0, 65, 1, 38,'2025-01-15 00:00:00+00', null, null, 5, 1,
+        null, null, null, null, null, null, null),
+       (34, true, 0, 0, 0, 66, 1, 39,'2025-01-15 00:00:00+00', null, null, 6, 1,
+        null, null, null, null, null, null, null),
+       (35, true, 0, 0, 0, 67, 1, 40,'2025-01-15 00:00:00+00', null, null, 7, 1,
+        null, null, null, null, null, null, null),
+       (36, true, 0, 0, 0, 68, 1, 41,'2025-01-15', '01/15/25', null, null, 1,
+        null, null, null, null, null, null, null);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -336,7 +343,7 @@ SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) F
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,
                                  gas_safety_upload_id, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason,
-                                 eicr_id, eicr_issue_date, eicr_exemption_reason, eicr_exemption_other_reason,
+                                 eicr_upload_id, eicr_issue_date, eicr_exemption_reason, eicr_exemption_other_reason,
                                  epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES (1, 8, '01/01/25', '01/01/25',
@@ -380,3 +387,24 @@ SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM 
 INSERT INTO certificate_upload (id, created_date, file_upload_id, property_ownership_id, category)
 VALUES (1, '09/13/24', 1, 1, 1);
 SELECT setval(pg_get_serial_sequence('certificate_upload', 'id'), (SELECT MAX(id) FROM certificate_upload));
+
+INSERT INTO reminder_email_sent (id,last_reminder_email_sent_date)
+VALUES (1, current_date-1),
+       (2, current_date-1);
+SELECT setval(pg_get_serial_sequence('reminder_email_sent', 'id'), (SELECT MAX(id) FROM reminder_email_sent));
+
+INSERT INTO saved_journey_state (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier,reminder_email_sent_id)
+VALUES (1, current_date-22,current_date-22, 'example-incomplete-journey1', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', 1),
+       (2, current_date-22,current_date-29, 'example-incomplete-journey2', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
+       (3, current_date-9,current_date-9, 'example-incomplete-journey3', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
+       (4, current_date-29,current_date-29, 'example-incomplete-journey4', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', 2),
+       (5, current_date-23,current_date-23, 'example-incomplete-journey5', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null);
+
+SELECT setval(pg_get_serial_sequence('saved_journey_state', 'id'), (SELECT MAX(id) FROM saved_journey_state));
+
+INSERT INTO landlord_incomplete_properties (landlord_id, saved_journey_state_id)
+VALUES (1, 1),
+       (1, 2),
+       (1, 3),
+       (1, 4),
+       (1, 5);

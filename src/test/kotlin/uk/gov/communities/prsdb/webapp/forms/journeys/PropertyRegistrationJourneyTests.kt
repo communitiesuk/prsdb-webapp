@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -15,9 +16,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.services.AddressLookupService
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LegacyAddressCheckingService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
@@ -31,10 +33,13 @@ class PropertyRegistrationJourneyTests {
     lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     @Mock
-    lateinit var localAuthorityService: LocalAuthorityService
+    lateinit var localCouncilService: LocalCouncilService
 
     @Mock
-    lateinit var addressLookupService: AddressLookupService
+    lateinit var addressService: AddressService
+
+    @Mock
+    lateinit var addressCheckingService: LegacyAddressCheckingService
 
     val alwaysTrueValidator: AlwaysTrueValidator = AlwaysTrueValidator()
 
@@ -42,8 +47,9 @@ class PropertyRegistrationJourneyTests {
     fun setup() {
         mockJourneyDataService = mock()
         mockPropertyRegistrationService = mock()
-        localAuthorityService = mock()
-        addressLookupService = mock()
+        localCouncilService = mock()
+        addressService = mock()
+        addressCheckingService = mock()
     }
 
     @Nested
@@ -64,6 +70,14 @@ class PropertyRegistrationJourneyTests {
                     any(),
                     any(),
                     any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    anyOrNull(),
                 ),
             ).thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 57))
 
@@ -71,9 +85,10 @@ class PropertyRegistrationJourneyTests {
                 PropertyRegistrationJourney(
                     validator = alwaysTrueValidator,
                     journeyDataService = mockJourneyDataService,
-                    addressLookupService = addressLookupService,
+                    addressService = addressService,
                     propertyRegistrationService = mockPropertyRegistrationService,
-                    localAuthorityService = localAuthorityService,
+                    addressCheckingService = addressCheckingService,
+                    localCouncilService = localCouncilService,
                 )
             JourneyTestHelper.setMockUser(principalName)
         }
@@ -83,7 +98,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withTenants(3, 7)
                     .withOccupiedSetToFalse()
                     .build()
@@ -103,6 +118,14 @@ class PropertyRegistrationJourneyTests {
                 argThat { households -> households == 0 },
                 argThat { tenants -> tenants == 0 },
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -111,7 +134,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withPropertyType(PropertyType.OTHER, "Bungalow")
                     .withPropertyType(PropertyType.FLAT)
                     .build()
@@ -131,6 +154,14 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -139,7 +170,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withLicensing(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensing(
                         LicensingType.HMO_MANDATORY_LICENCE,
@@ -161,6 +192,14 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -169,7 +208,7 @@ class PropertyRegistrationJourneyTests {
             // Arrange
             val journeyData =
                 JourneyDataBuilder
-                    .propertyDefault(localAuthorityService)
+                    .propertyDefault(localCouncilService)
                     .withLicensing(LicensingType.SELECTIVE_LICENCE, LicensingType.SELECTIVE_LICENCE.toString())
                     .withLicensing(LicensingType.NO_LICENSING)
                     .build()
@@ -189,6 +228,14 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
             )
         }
 

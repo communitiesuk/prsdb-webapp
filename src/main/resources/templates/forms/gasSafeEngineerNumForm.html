@@ -12,12 +12,9 @@
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
     <details id="details-content" th:replace="~{fragments/details :: details(#{forms.gasSafeEngineerNum.detail.summary}, ~{::#details-content/content()})}">
         <div class="govuk-details__text">
-            <span th:text="#{forms.gasSafeEngineerNum.detail.text.beforeLink}">
-                forms.gasSafeEngineerNum.detail.text.beforeLink
-            </span>
-            <a th:text="#{forms.gasSafeEngineerNum.detail.text.link}" th:href="${gasSafeRegisterURL}" rel="noreferrer noopener" target="_blank">
-                forms.gasSafeEngineerNum.detail.text.link
-            </a>
+            <span th:remove="tag" th:text="#{forms.gasSafeEngineerNum.detail.text.beforeLink}">forms.gasSafeEngineerNum.detail.text.beforeLink</span>
+            <a th:text="#{forms.gasSafeEngineerNum.detail.text.link}" th:href="${gasSafeRegisterURL}" rel="noreferrer noopener" target="_blank">forms.gasSafeEngineerNum.detail.text.link
+            </a><span th:remove="tag" th:text="#{forms.gasSafeEngineerNum.detail.text.afterLink}">forms.gasSafeEngineerNum.detail.text.afterLink</span>
         </div>
     </details>
 </html>

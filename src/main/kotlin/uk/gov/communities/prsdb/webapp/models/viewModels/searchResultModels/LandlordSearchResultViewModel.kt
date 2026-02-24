@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class LandlordSearchResultViewModel(
@@ -13,26 +14,23 @@ data class LandlordSearchResultViewModel(
     val email: String,
     val phoneNumber: String,
     val recordLink: String,
-    val listedPropertyCount: Int = 0,
+    val propertyCount: Int,
 ) {
     companion object {
-        fun fromLandlordWithListedPropertyCount(
-            landlordWithListedPropertyCount: LandlordWithListedPropertyCount,
+        fun fromDataModel(
+            dataModel: LandlordSearchResultDataModel,
             currentUrlKey: Int? = null,
         ) = LandlordSearchResultViewModel(
-            id = landlordWithListedPropertyCount.landlord.id,
-            name = landlordWithListedPropertyCount.landlord.name,
-            registrationNumber =
-                RegistrationNumberDataModel
-                    .fromRegistrationNumber(landlordWithListedPropertyCount.landlord.registrationNumber)
-                    .toString(),
-            contactAddress = landlordWithListedPropertyCount.landlord.address.singleLineAddress,
-            email = landlordWithListedPropertyCount.landlord.email,
-            phoneNumber = landlordWithListedPropertyCount.landlord.phoneNumber,
-            listedPropertyCount = landlordWithListedPropertyCount.listedPropertyCount,
+            id = dataModel.id,
+            name = dataModel.name,
+            registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, dataModel.registrationNumber).toString(),
+            contactAddress = dataModel.singleLineAddress,
+            email = dataModel.email,
+            phoneNumber = dataModel.phoneNumber,
+            propertyCount = dataModel.propertyCount.toInt(),
             recordLink =
                 LandlordDetailsController
-                    .getLandlordDetailsForLaUserPath(landlordWithListedPropertyCount.landlord.id)
+                    .getLandlordDetailsForLocalCouncilUserPath(dataModel.id)
                     .overrideBackLinkForUrl(currentUrlKey),
         )
     }

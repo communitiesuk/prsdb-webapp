@@ -14,13 +14,21 @@
                         </tr>
                     </tbody>
                 </table>
-                <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
+                <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.confirmationPage.whatHappensNext</h2>
                 <p class="govuk-body" th:utext="#{registerProperty.confirmation.whatHappensNext.paragraph.one}">
                     registerProperty.confirmation.whatHappensNext.paragraph.one
                 </p>
-                <p class="govuk-body" th:if="${isOccupied}" th:text="#{registerProperty.confirmation.common.usePrnInAdverts.paragraph}">
+                <p class="govuk-body" th:text="#{registerProperty.confirmation.whatHappensNext.paragraph.two}">
                     registerProperty.confirmation.whatHappensNext.paragraph.two
                 </p>
+                <h2 th:unless="${isOccupied}" class="govuk-heading-m" th:text="#{registerProperty.confirmation.beforeYouLetThisProperty.heading}">
+                    registerProperty.confirmation.beforeYouLetThisProperty.heading
+                </h2>
+                <p class="govuk-body" th:text="#{registerProperty.confirmation.whatHappensNext.paragraph.three}">registerProperty.confirmation.whatHappensNext.paragraph.three</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.bullet.one}">registerProperty.confirmation.whatHappensNext.bullet.one</li>
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.bullet.two}">registerProperty.confirmation.whatHappensNext.bullet.two</li>
+                </ul>
             </section>
             <th:block th:if="${isOccupied}">
                 <section th:replace="~{fragments/content/propertyRegistrationConfirmationOccupiedContent :: propertyRegistrationConfirmationOccupiedContent()}">
@@ -37,11 +45,10 @@
             </th:block>
             <th:block th:unless="${isOccupied}">
                 <section th:replace="~{fragments/content/propertyRegistrationConfirmationUnoccupiedContent :: propertyRegistrationConfirmationUnoccupiedContent()}"></section>
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.returnToDashboard})}">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
                     common.confirmationPage.goToDashboard
                 </a>
             </th:block>
-
         </div>
     </main>
 </html>

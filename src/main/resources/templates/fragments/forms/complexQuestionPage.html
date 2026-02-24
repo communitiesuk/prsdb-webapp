@@ -1,9 +1,9 @@
 <th:block th:fragment="complexQuestionPage(title, formModel, formContent, questionContent, backUrl, sectionHeaderInfo)" th:with="enctype=${enctype ?: 'application/x-www-form-urlencoded'}, formId=${formId}">
-    <th:block id="main-content"
-              th:replace="~{fragments/layout :: layout(${title}, ~{::#main-content/content()}, ${#fields.hasErrors('${formModel.*}')})}">
+    <th:block id="question-fragment-content"
+              th:replace="~{fragments/layout :: layout(${title}, ~{::#question-fragment-content/content()}, ${#fields.hasErrors('${formModel.*}')})}">
         <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back
             link</a>
-        <main class="govuk-main-wrapper">
+        <main class="govuk-main-wrapper" id="main-content">
             <div id="page-content"
                  th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
                 <th:block th:object="${formModel}">

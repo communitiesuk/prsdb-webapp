@@ -1,0 +1,32 @@
+package uk.gov.communities.prsdb.webapp.controllers
+
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
+import uk.gov.communities.prsdb.webapp.constants.DATA_PROTECTION_COMMUNITIES_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.DPO_COMMUNITIES_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController.Companion.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE
+
+@PrsdbController
+@RequestMapping(LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
+class LocalCouncilPrivacyNoticeController {
+    @GetMapping
+    fun getPrivacyNoticePage(model: Model): String {
+        model.addAttribute("complaintsProcedureUrl", COMPLAINTS_PROCEDURE_URL)
+        model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
+        model.addAttribute("informationCommissionersOfficeUrl", INFORMATION_COMMISSIONERS_OFFICE_URL)
+        model.addAttribute("dataProtectionCommunitiesEmails", DATA_PROTECTION_COMMUNITIES_EMAILS)
+        model.addAttribute("dataProtectionOfficerEmail", DPO_COMMUNITIES_EMAILS)
+        return "localCouncilPrivacyNotice"
+    }
+
+    companion object {
+        const val LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PRIVACY_NOTICE_PATH_SEGMENT"
+    }
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <body th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUser.title}, ~{::body/content()}, false)}">
+        <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
+        <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
+        <main class="govuk-main-wrapper" id="main-content">
+            <header id="header">
+                <h1 class="govuk-heading-l" th:text="#{deleteLocalCouncilUser.heading}">deleteLocalCouncilUser.heading</h1>
+            </header>
+            <section data-testid="user-details-section">
+                <p class="govuk-body">
+                    <strong th:text="${user.name}">user.name</strong>
+                </p>
+                <p class="govuk-body">
+                    <strong th:text="#{deleteLocalCouncilUser.emailLabel}+':'">deleteLocalCouncilUser.emailLabel:</strong>
+                    <span th:text="${user.email}" th:remove="tag">user.email</span>
+                </p>
+            </section>
+            <hr class="govuk-section-break govuk-section-break--m">
+            <section>
+                <p class="govuk-body" th:text="#{deleteLocalCouncilUser.para.one}">deleteLocalCouncilUser.para.one</p>
+                <p class="govuk-body" th:text="#{deleteLocalCouncilUser.para.two}">deleteLocalCouncilUser.para.two</p>
+                <p class="govuk-body" th:text="#{deleteLocalCouncilUser.para.three}">deleteLocalCouncilUser.para.three</p>
+            </section>
+            <form method="post" th:action="@{''}">
+                <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{deleteLocalCouncilUser.deleteAccountButton})}"></button>
+            </form>
+        </main>
+        </th:block>
+    </body>
+</html>

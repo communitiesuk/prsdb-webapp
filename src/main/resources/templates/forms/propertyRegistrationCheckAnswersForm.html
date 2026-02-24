@@ -5,21 +5,33 @@
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="tenancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-        <h1 class="govuk-fieldset__heading">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l">
             <span th:text="#{forms.checkPropertyAnswers.headingPrefix}"></span>
             <br>
             <span th:text="${propertyName}"></span>
         </h1>
-    </legend>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
-    <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
-    <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
-    <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+        <th:block th:if="${insetText == true}">
+            <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
+        </th:block>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
+        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
+        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
+    </th:block>
+    <th:block id="form-content">
+        <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>

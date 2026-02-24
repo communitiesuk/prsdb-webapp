@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MaintenancePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
@@ -21,7 +21,7 @@ class MaintenanceModeTests : MaintenancePageTests() {
 
     @Test
     fun `User is redirected to maintenance page when accessing the local council dashboard`(page: Page) {
-        navigator.navigate(LocalAuthorityDashboardController.LOCAL_AUTHORITY_DASHBOARD_URL)
+        navigator.navigate(LocalCouncilDashboardController.LOCAL_COUNCIL_DASHBOARD_URL)
         assertPageIs(page, MaintenancePage::class)
     }
 }
@@ -34,6 +34,6 @@ class NotMaintenanceModeTests : MaintenancePageTests() {
 
     @Test
     fun `User can reach the local council dashboard`() {
-        navigator.goToLocalAuthorityDashboard()
+        navigator.goToLocalCouncilDashboard()
     }
 }

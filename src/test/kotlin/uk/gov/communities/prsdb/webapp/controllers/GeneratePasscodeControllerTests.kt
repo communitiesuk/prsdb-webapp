@@ -12,11 +12,11 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalAuthorityDashboardController.Companion.LOCAL_AUTHORITY_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityDataService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthorityUser
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
 import kotlin.test.Test
 
 @WebMvcTest(GeneratePasscodeController::class)
@@ -28,7 +28,7 @@ class GeneratePasscodeControllerTests(
     private lateinit var passcodeService: PasscodeService
 
     @MockitoBean
-    private lateinit var localAuthorityDataService: LocalAuthorityDataService
+    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @Test
     fun `generatePasscodeGet returns a redirect for unauthenticated user`() {
@@ -50,13 +50,13 @@ class GeneratePasscodeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
-    fun `generatePasscodeGet returns 200 and generates passcode for authorized LA admin`() {
-        val localAuthorityUser = createLocalAuthorityUser()
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `generatePasscodeGet returns 200 and generates passcode for authorized LC admin`() {
+        val localCouncilUser = createLocalCouncilUser()
         val testPasscode = "ABC123"
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(passcodeService.getOrGeneratePasscode(localCouncilUser.localCouncil.id.toLong()))
             .thenReturn(testPasscode)
 
         mvc
@@ -66,18 +66,18 @@ class GeneratePasscodeControllerTests(
                 view { name("generatePasscode") }
                 model {
                     attribute("passcode", testPasscode)
-                    attribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+                    attribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
                 }
             }
     }
 
     @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
     fun `generatePasscodeGet returns passcode limit error when limit exceeded`() {
-        val localAuthorityUser = createLocalAuthorityUser()
+        val localCouncilUser = createLocalCouncilUser()
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.getOrGeneratePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(passcodeService.getOrGeneratePasscode(localCouncilUser.localCouncil.id.toLong()))
             .thenThrow(PasscodeLimitExceededException("Passcode limit exceeded"))
 
         mvc
@@ -112,13 +112,13 @@ class GeneratePasscodeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
-    fun `generatePasscodePost returns 200 and generates new passcode for authorized LA admin`() {
-        val localAuthorityUser = createLocalAuthorityUser()
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `generatePasscodePost returns 200 and generates new passcode for authorized Local Council admin`() {
+        val localCouncilUser = createLocalCouncilUser()
         val testPasscode = "DEF456"
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.generateAndStorePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(passcodeService.generateAndStorePasscode(localCouncilUser.localCouncil.id.toLong()))
             .thenReturn(testPasscode)
 
         mvc
@@ -130,19 +130,19 @@ class GeneratePasscodeControllerTests(
                 view { name("generatePasscode") }
                 model {
                     attribute("passcode", testPasscode)
-                    attribute("dashboardUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
-                    attribute("backUrl", LOCAL_AUTHORITY_DASHBOARD_URL)
+                    attribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
+                    attribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
                 }
             }
     }
 
     @Test
-    @WithMockUser(roles = ["LA_ADMIN"])
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
     fun `generatePasscodePost returns passcode limit error when limit exceeded`() {
-        val localAuthorityUser = createLocalAuthorityUser()
+        val localCouncilUser = createLocalCouncilUser()
 
-        whenever(localAuthorityDataService.getLocalAuthorityUser("user")).thenReturn(localAuthorityUser)
-        whenever(passcodeService.generateAndStorePasscode(localAuthorityUser.localAuthority.id.toLong()))
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(passcodeService.generateAndStorePasscode(localCouncilUser.localCouncil.id.toLong()))
             .thenThrow(PasscodeLimitExceededException("Passcode limit exceeded"))
 
         mvc
@@ -156,8 +156,8 @@ class GeneratePasscodeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
-    fun `generatePasscodeGet returns 403 for LA_USER role (should only allow LA_ADMIN)`() {
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `generatePasscodeGet returns 403 for LOCAL_COUNCIL_USER role (should only allow LOCAL_COUNCIL_ADMIN)`() {
         mvc
             .get(GENERATE_PASSCODE_URL)
             .andExpect {
@@ -166,8 +166,8 @@ class GeneratePasscodeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LA_USER"])
-    fun `generatePasscodePost returns 403 for LA_USER role (should only allow LA_ADMIN)`() {
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `generatePasscodePost returns 403 for LOCAL_COUNCIL_USER role (should only allow LOCAL_COUNCIL_ADMIN)`() {
         mvc
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED

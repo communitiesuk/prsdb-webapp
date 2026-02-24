@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
@@ -30,6 +31,7 @@ class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
     private val landlordService: LandlordService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/${CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT}")
@@ -40,7 +42,7 @@ class DeregisterLandlordController(
         val formData =
             mutableMapOf(
                 USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
-                    to landlordService.getLandlordHasRegisteredProperties(principal.name),
+                    to propertyOwnershipService.doesLandlordHaveRegisteredProperties(principal.name),
             )
 
         return landlordDeregistrationJourneyFactory

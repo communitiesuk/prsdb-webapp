@@ -36,6 +36,7 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
     companion object {
+        // TODO PDJB-467 - add a version of this for the new journey framework
         fun fromIncompleteComplianceForm(propertyOwnership: PropertyOwnership): ComplianceStatusDataModel {
             val incompleteComplianceForm =
                 propertyOwnership.incompleteComplianceForm?.toJourneyData()
@@ -45,7 +46,7 @@ data class ComplianceStatusDataModel(
 
             return ComplianceStatusDataModel(
                 propertyOwnershipId = propertyOwnership.id,
-                singleLineAddress = propertyOwnership.property.address.singleLineAddress,
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                 gasSafetyStatus = incompleteComplianceForm.getGasSafetyStatus(),
                 eicrStatus = incompleteComplianceForm.getEicrStatus(),
@@ -57,7 +58,7 @@ data class ComplianceStatusDataModel(
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
-                singleLineAddress = propertyCompliance.propertyOwnership.property.address.singleLineAddress,
+                singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(

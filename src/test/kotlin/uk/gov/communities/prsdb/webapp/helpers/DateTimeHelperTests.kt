@@ -8,11 +8,13 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Named
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.Clock
 import java.time.ZoneId
+import java.util.Date
 import kotlin.test.assertEquals
 
 class DateTimeHelperTests {
@@ -167,5 +169,27 @@ class DateTimeHelperTests {
         val result = dateTimeHelper.isDateInPast(date)
 
         assertEquals(expectedResult, result)
+    }
+
+    @Test
+    fun `getJavaDateFromLocalDate returns correct Date`() {
+        val localDate = java.time.LocalDate.of(2020, 1, 1)
+        val millisecondsSinceEpoch = ((2020 - 1970) * 365L + 12) * 24 * 60 * 60 * 1000 // Including 12 leap years
+        val expectedDate = Date(millisecondsSinceEpoch)
+
+        val result = DateTimeHelper.getJavaDateFromLocalDate(localDate)
+
+        assertEquals(expectedDate, result)
+    }
+
+    @Test
+    fun `getJavaInstantFromLocalDate returns correct Date`() {
+        val localDate = java.time.LocalDate.of(2020, 1, 1)
+        val millisecondsSinceEpoch = ((2020 - 1970) * 365L + 12) * 24 * 60 * 60 * 1000 // Including 12 leap years
+        val expectedInstant = java.time.Instant.ofEpochMilli(millisecondsSinceEpoch)
+
+        val result = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
+
+        assertEquals(expectedInstant, result)
     }
 }

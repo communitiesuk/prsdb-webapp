@@ -47,12 +47,17 @@ class PropertyDetailsUpdateJourneyStepFactory(
 
     val skippedStepIds =
         when (stepGroupId) {
-            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
+            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> {
                 listOf(occupancyStepId)
-            UpdatePropertyDetailsGroupIdentifier.NumberOfPeople ->
+            }
+
+            UpdatePropertyDetailsGroupIdentifier.NumberOfPeople -> {
                 listOf(occupancyStepId, numberOfHouseholdsStepId)
-            else ->
+            }
+
+            else -> {
                 emptyList()
+            }
         }
 
     fun createOccupancyStep() =
@@ -90,38 +95,48 @@ class PropertyDetailsUpdateJourneyStepFactory(
 
     fun createNumberOfHouseholdsStep() =
         when (stepGroupId) {
-            UpdatePropertyDetailsGroupIdentifier.Occupancy ->
+            UpdatePropertyDetailsGroupIdentifier.Occupancy -> {
                 createNumberOfHouseholdsStep(
-                    fieldSetHeadingKey = "forms.numberOfHouseholds.fieldSetHeading",
+                    fieldSetHeadingKey = "forms.numberOfHouseholds.heading",
                 )
-            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
+            }
+
+            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> {
                 createNumberOfHouseholdsStep(
                     fieldSetHeadingKey = "forms.update.numberOfHouseholds.fieldSetHeading",
                     backUrl = propertyDetailsPath,
                 )
+            }
+
             // UpdatePropertyDetailsGroupIdentifier.NumberOfPeople or default for any non-occupancy sub-journey group ID
-            else ->
+            else -> {
                 createNumberOfHouseholdsStep(
                     fieldSetHeadingKey = "forms.update.numberOfHouseholds.fieldSetHeading",
                 )
+            }
         }
 
     fun createNumberOfPeopleStep() =
         when (stepGroupId) {
-            UpdatePropertyDetailsGroupIdentifier.Occupancy ->
+            UpdatePropertyDetailsGroupIdentifier.Occupancy -> {
                 createNumberOfPeopleStep(
                     fieldSetHeadingKey = "forms.numberOfPeople.fieldSetHeading",
                 )
-            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds ->
+            }
+
+            UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> {
                 createNumberOfPeopleStep(
                     fieldSetHeadingKey = "forms.update.numberOfPeople.fieldSetHeading",
                 )
+            }
+
             // UpdatePropertyDetailsGroupIdentifier.NumberOfPeople or default for any non-occupancy sub-journey group ID
-            else ->
+            else -> {
                 createNumberOfPeopleStep(
                     fieldSetHeadingKey = "forms.update.numberOfPeople.fieldSetHeading",
                     backUrl = propertyDetailsPath,
                 )
+            }
         }
 
     private fun createNumberOfHouseholdsStep(
@@ -195,7 +210,9 @@ class PropertyDetailsUpdateJourneyStepFactory(
         fun getOccupancyStepIdFor(stepGroupId: UpdatePropertyDetailsGroupIdentifier) =
             when (stepGroupId) {
                 UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.UpdateOccupancy
+
                 UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.UpdateHouseholdsOccupancy
+
                 // UpdatePropertyDetailsGroupIdentifier.NumberOfPeople or default for any non-occupancy sub-journey group ID
                 else -> UpdatePropertyDetailsStepId.UpdatePeopleOccupancy
             }
@@ -203,8 +220,11 @@ class PropertyDetailsUpdateJourneyStepFactory(
         fun getNumberOfHouseholdsStepIdFor(stepGroupId: UpdatePropertyDetailsGroupIdentifier) =
             when (stepGroupId) {
                 UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds
+
                 UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds
+
                 UpdatePropertyDetailsGroupIdentifier.NumberOfPeople -> UpdatePropertyDetailsStepId.UpdatePeopleNumberOfHouseholds
+
                 // UpdatePropertyDetailsGroupIdentifier.NumberOfPeople or default for any non-occupancy sub-journey group ID
                 else -> UpdatePropertyDetailsStepId.UpdatePeopleNumberOfHouseholds
             }
@@ -212,8 +232,11 @@ class PropertyDetailsUpdateJourneyStepFactory(
         fun getNumberOfPeopleStepIdFor(stepGroupId: UpdatePropertyDetailsGroupIdentifier) =
             when (stepGroupId) {
                 UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople
+
                 UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople
+
                 UpdatePropertyDetailsGroupIdentifier.NumberOfPeople -> UpdatePropertyDetailsStepId.UpdateNumberOfPeople
+
                 // UpdatePropertyDetailsGroupIdentifier.NumberOfPeople or default for any non-occupancy sub-journey group ID
                 else -> UpdatePropertyDetailsStepId.UpdateNumberOfPeople
             }
@@ -221,7 +244,9 @@ class PropertyDetailsUpdateJourneyStepFactory(
         private fun getCheckOccupancyAnswersStepIdFor(stepGroupId: UpdatePropertyDetailsGroupIdentifier) =
             when (stepGroupId) {
                 UpdatePropertyDetailsGroupIdentifier.Occupancy -> UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers
+
                 UpdatePropertyDetailsGroupIdentifier.NumberOfHouseholds -> UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers
+
                 // UpdatePropertyDetailsGroupIdentifier.NumberOfPeople or default for any non-occupancy sub-journey group ID
                 else -> UpdatePropertyDetailsStepId.CheckYourPeopleAnswers
             }
