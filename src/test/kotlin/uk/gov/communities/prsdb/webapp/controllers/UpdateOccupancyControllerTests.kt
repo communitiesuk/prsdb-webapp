@@ -9,8 +9,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -31,7 +31,7 @@ class UpdateOccupancyControllerTests(
 
     val updateOccupancyRoute =
         UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-            "/${RegisterPropertyStepId.Occupancy.urlPathSegment}"
+            "/${OccupiedStep.ROUTE_SEGMENT}"
 
     @Test
     fun `getUpdateStep returns a redirect for unauthenticated user`() {
@@ -69,7 +69,7 @@ class UpdateOccupancyControllerTests(
             .thenReturn(true)
         whenever(
             mockJourneyFactory.createJourneySteps(propertyOwnershipId),
-        ).thenReturn(mapOf(RegisterPropertyStepId.Occupancy.urlPathSegment to mockStepLifecycleOrchestrator))
+        ).thenReturn(mapOf(OccupiedStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
         ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))

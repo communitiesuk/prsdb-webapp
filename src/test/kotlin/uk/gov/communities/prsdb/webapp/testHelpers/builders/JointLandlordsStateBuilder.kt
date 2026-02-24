@@ -2,7 +2,8 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
@@ -23,12 +24,12 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
             HasJointLandlordsFormModel().apply {
                 hasJointLandlords = false
             }
-        withSubmittedValue(RegisterPropertyStepId.HasJointLandlords.urlPathSegment, hasJointLandlordsFormModel)
+        withSubmittedValue(HasJointLandlordsStep.ROUTE_SEGMENT, hasJointLandlordsFormModel)
         return self()
     }
 
     fun withHasNoJointLandlords(): SelfType {
-        submittedValueMap.remove(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
+        submittedValueMap.remove(InviteJointLandlordStep.ROUTE_SEGMENT)
         return withHasJointLandlordsSetToFalse()
     }
 
@@ -37,7 +38,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
             HasJointLandlordsFormModel().apply {
                 this.hasJointLandlords = hasJointLandlords
             }
-        withSubmittedValue(RegisterPropertyStepId.HasJointLandlords.urlPathSegment, hasJointLandlordsFormModel)
+        withSubmittedValue(HasJointLandlordsStep.ROUTE_SEGMENT, hasJointLandlordsFormModel)
         return self()
     }
 
@@ -46,7 +47,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
             InviteJointLandlordsFormModel().apply {
                 this.invitedEmailAddresses = emailAddresses
             }
-        withSubmittedValue(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment, inviteJointLandlordsFormModel)
+        withSubmittedValue(InviteJointLandlordStep.ROUTE_SEGMENT, inviteJointLandlordsFormModel)
         additionalDataMap["invitedJointLandlordEmails"] =
             Json.encodeToString(serializer(), emailAddresses.mapIndexed { index, email -> index to email }.toMap())
         return self()

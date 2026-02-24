@@ -43,4 +43,8 @@ class RentIncludesBillsStepConfig : AbstractRequestableStepConfig<YesOrNo, RentI
 @JourneyFrameworkComponent
 final class RentIncludesBillsStep(
     stepConfig: RentIncludesBillsStepConfig,
-) : RequestableStep<YesOrNo, RentIncludesBillsFormModel, OccupationState>(stepConfig)
+) : RequestableStep<YesOrNo, RentIncludesBillsFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "rent-includes-bills"
+    }
+}

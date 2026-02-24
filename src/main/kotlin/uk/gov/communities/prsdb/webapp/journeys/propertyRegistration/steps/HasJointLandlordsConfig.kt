@@ -46,4 +46,8 @@ class HasJointLandlordsConfig : AbstractRequestableStepConfig<YesOrNo, HasJointL
 @JourneyFrameworkComponent
 final class HasJointLandlordsStep(
     stepConfig: HasJointLandlordsConfig,
-) : RequestableStep<YesOrNo, HasJointLandlordsFormModel, JointLandlordsState>(stepConfig)
+) : RequestableStep<YesOrNo, HasJointLandlordsFormModel, JointLandlordsState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "has-joint-landlords"
+    }
+}

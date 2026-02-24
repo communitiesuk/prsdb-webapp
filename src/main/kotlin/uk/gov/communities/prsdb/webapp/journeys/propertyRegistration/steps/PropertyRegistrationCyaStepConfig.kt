@@ -171,4 +171,8 @@ class PropertyRegistrationCyaStepConfig(
 @JourneyFrameworkComponent
 final class PropertyRegistrationCyaStep(
     stepConfig: PropertyRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<PropertyRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<PropertyRegistrationJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-answers"
+    }
+}

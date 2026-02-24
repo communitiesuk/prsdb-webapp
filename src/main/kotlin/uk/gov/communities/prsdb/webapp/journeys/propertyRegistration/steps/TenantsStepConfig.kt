@@ -52,4 +52,8 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
 @JourneyFrameworkComponent
 final class TenantsStep(
     stepConfig: TenantsStepConfig,
-) : RequestableStep<Complete, NewNumberOfPeopleFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, NewNumberOfPeopleFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "number-of-people"
+    }
+}

@@ -46,4 +46,8 @@ class CheckJointLandlordsConfig(
 @JourneyFrameworkComponent
 final class CheckJointLandlordsStep(
     stepConfig: CheckJointLandlordsConfig,
-) : RequestableStep<Complete, NoInputFormModel, JointLandlordsState>(stepConfig)
+) : RequestableStep<Complete, NoInputFormModel, JointLandlordsState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-joint-landlords"
+    }
+}
