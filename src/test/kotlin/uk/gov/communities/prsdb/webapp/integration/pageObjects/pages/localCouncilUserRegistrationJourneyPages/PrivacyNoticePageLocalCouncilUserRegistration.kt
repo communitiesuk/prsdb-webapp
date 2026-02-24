@@ -17,7 +17,7 @@ class PrivacyNoticePageLocalCouncilUserRegistration(
     ) {
     val form = PrivacyNoticeForm(page)
 
-    val privacyNoticeLink = Link.byText(page.locator("html"), "full Private Rented Sector Database privacy notice (opens in new tab)")
+    val privacyNoticeLink = Link.byText(page, "full Private Rented Sector Database privacy notice (opens in new tab)")
 
     fun agreeAndSubmit() {
         form.iAgreeCheckbox.check()
