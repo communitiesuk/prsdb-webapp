@@ -35,6 +35,7 @@ import java.time.LocalDate
 @ExtendWith(MockitoExtension::class)
 @Suppress("UNCHECKED_CAST")
 class PropertyComplianceCheckAnswersPageTests {
+    // TODO PDJB-467 - replicate these
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
