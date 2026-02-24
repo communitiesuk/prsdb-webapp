@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -19,16 +18,10 @@ class CompleteEmailUpdateStepConfig(
 
     override fun afterStepIsReached(state: UpdateEmailJourneyState) {
         val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
-        landlordService.updateLandlordForBaseUserId(
+        landlordService.updateLandlordEmail(
             SecurityContextHolder.getContext().authentication.name,
-            LandlordUpdateModel(
-                email = email,
-                name = null,
-                phoneNumber = null,
-                address = null,
-                dateOfBirth = null,
-            ),
-        ) {}
+            email,
+        )
     }
 
     override fun resolveNextDestination(

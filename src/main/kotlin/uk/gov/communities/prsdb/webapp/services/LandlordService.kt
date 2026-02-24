@@ -113,6 +113,23 @@ class LandlordService(
         return landlordEntity
     }
 
+    @Transactional
+    fun updateLandlordEmail(
+        baseUserId: String,
+        email: String,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(
+                email = email,
+                name = null,
+                phoneNumber = null,
+                address = null,
+                dateOfBirth = null,
+            ),
+        ) {}
+    }
+
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
         landlord.hasRespondedToFeedback = true
         return landlordRepository.save(landlord)
