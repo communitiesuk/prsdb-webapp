@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -172,7 +173,7 @@ class PropertyComplianceCyaStepConfigTests {
             epcMeesExemptionReason = null,
         )
         verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
-        verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyId)
+        // TODO PDJB-467 - verify that the savedJourneyState is deleted from the database
     }
 
     @Test
@@ -315,6 +316,7 @@ class PropertyComplianceCyaStepConfigTests {
         verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
     }
 
+    @Disabled
     @Test
     fun `afterStepDataIsAdded deletes the incomplete property compliance from the database`() {
         // Arrange
@@ -325,7 +327,7 @@ class PropertyComplianceCyaStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockPropertyOwnershipService).deleteIncompleteComplianceForm(propertyId)
+        // TODO PDJB-467 - enabled this and verify that the savedJourneyState is deleted from the database
     }
 
     private fun setupValidCertificatesState() {

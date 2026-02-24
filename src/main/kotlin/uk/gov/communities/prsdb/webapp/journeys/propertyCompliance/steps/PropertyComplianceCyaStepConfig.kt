@@ -74,7 +74,7 @@ class PropertyComplianceCyaStepConfig(
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(state.propertyId)
 
-        propertyOwnershipService.deleteIncompleteComplianceForm(state.propertyId)
+        // TODO PDJB-467 - delete the savedJourneyState for the incomplete compliance.
     }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
