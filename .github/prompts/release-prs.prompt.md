@@ -17,6 +17,7 @@ Create release PRs for main -> test and main -> nft branches in **both repositor
 Based on previous releases in this repository:
 
 - Group commits by ticket number (PRSD-*, PDJB-*)
+- Order tickets by the position of their first commit in the git log (oldest first)
 - Combine related commits under a single ticket entry
 - Group PRSD-NONE/PDJB-NONE items together at the end
 - Use format: `TICKET: Brief description`
