@@ -579,11 +579,28 @@ update:
     fieldSetHeading: Update the ownership type for your property
   occupancy:
     occupied:
-      fieldSetHeading: Is your property still occupied by tenants?
+      fieldSetHeading: Update whether your property is occupied by tenants
   numberOfHouseholds:
     fieldSetHeading: Update how many households live in your property
   numberOfPeople:
     fieldSetHeading: Update how many people live in your property
+  numberOfBedrooms:
+    heading: Update how many bedrooms are in your property
+  rentIncludesBills:
+    fieldSetHeading: Update whether the rent includes bills
+  billsIncluded:
+    fieldSetHeading: Update which of these you include in the rent
+  furnishedStatus:
+    fieldSetHeading: Update whether the property is furnished, partly furnished or unfurnished
+  rentFrequency:
+    heading: Update when you charge rent
+  rentAmount:
+    weekly:
+      fieldSetHeading: Update how much the weekly rent is for your property
+    fourWeekly:
+      fieldSetHeading: Update how much the rent is for your property, charged every 4 weeks
+    monthly:
+      fieldSetHeading: Update how much the monthly rent is for your property
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
   checkLicensing:
@@ -592,7 +609,10 @@ update:
     remove:
       summaryName: You have removed this property’s licence
   checkOccupancy:
-    summaryName: You have updated whether the property is occupied by tenants
+    occupied:
+      summaryName: You updated the tenancy and rent details for this property
+    notOccupied:
+      summaryName: You have updated whether the property is occupied by tenants
     numberOfHouseholds:
       fieldSetHeading: Households in your property
   warning: 'You must not provide any false or misleading information on the database. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'

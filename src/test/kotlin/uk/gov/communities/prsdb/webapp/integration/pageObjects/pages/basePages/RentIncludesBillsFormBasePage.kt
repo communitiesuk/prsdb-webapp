@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
-abstract class RentIncludesBillsFormPage(
+abstract class RentIncludesBillsFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {

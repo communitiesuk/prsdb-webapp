@@ -6,11 +6,10 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -22,8 +21,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -33,6 +30,7 @@ class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
+    private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
@@ -45,7 +43,7 @@ class PropertyRegistrationCyaStepConfig(
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
             "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
-            "tenancyDetails" to getTenancyDetailsSummaryList(state),
+            "tenancyDetails" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId, messageSource),
             "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
@@ -151,97 +149,6 @@ class PropertyRegistrationCyaStepConfig(
             state.ownershipTypeStep.formModel.ownershipType,
             Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
         )
-
-    private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                val isOccupied = state.occupied.formModel.occupied ?: false
-                add(getOccupancyStatusRow(isOccupied, state.occupied))
-                if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state))
-            }
-
-    private fun getOccupancyStatusRow(
-        isOccupied: Boolean,
-        occupiedStep: RequestableStep<*, *, *>,
-    ): SummaryListRowViewModel =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.tenancyDetails.occupied",
-            isOccupied,
-            Destination.VisitableStep(occupiedStep, childJourneyId),
-        )
-
-    private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                val householdsStep = state.households
-                val tenantsStep = state.tenants
-                val bedroomsStep = state.bedrooms
-                val rentIncludesBillsStep = state.rentIncludesBills
-                val billsIncludedStep = state.billsIncluded
-                val furnishedStatusStep = state.furnishedStatus
-                val rentFrequencyStep = state.rentFrequency
-                val rentAmountStep = state.rentAmount
-                val rentIncludesBills = rentIncludesBillsStep.formModel.notNullValue(RentIncludesBillsFormModel::rentIncludesBills)
-                val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.households",
-                        householdsStep.formModel.numberOfHouseholds,
-                        Destination(householdsStep),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.people",
-                        tenantsStep.formModel.numberOfPeople,
-                        Destination(tenantsStep),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
-                        bedroomsStep.formModel.numberOfBedrooms,
-                        Destination(bedroomsStep),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
-                        rentIncludesBills,
-                        Destination(rentIncludesBillsStep),
-                    ),
-                )
-                if (rentIncludesBills) {
-                    add(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getBillsIncluded(messageSource),
-                            Destination(billsIncludedStep),
-                        ),
-                    )
-                }
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
-                        furnishedStatusStep.formModel.furnishedStatus,
-                        Destination(furnishedStatusStep),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-                        Destination(rentFrequencyStep),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getRentAmount(messageSource),
-                        Destination(rentAmountStep),
-                    ),
-                )
-            }
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)

@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
@@ -189,6 +190,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -1123,14 +1125,8 @@ class Navigator(
     fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withNewOccupants()
-                .build(),
+        setJourneyStateInSession(
+            UpdateOccupancyJourneyStateSessionBuilder.withTenants().build(),
         )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
@@ -1138,22 +1134,16 @@ class Navigator(
     fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withIsOccupiedUpdate(false)
-                .build(),
+        setJourneyStateInSession(
+            UpdateOccupancyJourneyStateSessionBuilder.withNoTenants().build(),
         )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
 
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
+                "/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
         )
         return createValidPage(
             page,
@@ -1164,8 +1154,8 @@ class Navigator(
 
     fun goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId: Long): CheckOccupancyAnswersPagePropertyDetailsUpdate {
         navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment}",
+            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
+                "/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}",
         )
         return createValidPage(
             page,

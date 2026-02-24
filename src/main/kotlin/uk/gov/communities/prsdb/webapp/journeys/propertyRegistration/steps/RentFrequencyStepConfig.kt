@@ -15,6 +15,7 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
+            "heading" to "forms.rentFrequency.heading",
             "fieldSetHeading" to "forms.rentFrequency.fieldSetHeading",
             "radioOptions" to
                 listOf(
