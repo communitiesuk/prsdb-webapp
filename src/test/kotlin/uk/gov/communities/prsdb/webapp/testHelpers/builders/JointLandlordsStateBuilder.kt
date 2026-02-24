@@ -47,7 +47,8 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
                 this.invitedEmailAddresses = emailAddresses
             }
         withSubmittedValue(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment, inviteJointLandlordsFormModel)
-        additionalDataMap["invitedJointLandlordEmails"] = Json.encodeToString(serializer(), emailAddresses.toList())
+        additionalDataMap["invitedJointLandlordEmails"] =
+            Json.encodeToString(serializer(), emailAddresses.mapIndexed { index, email -> index to email }.toMap())
         return self()
     }
 

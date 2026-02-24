@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -13,7 +13,7 @@ class CheckLicensingAnswersPagePropertyDetailsUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        PropertyDetailsController.getUpdatePropertyDetailsPath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        UpdateLicensingController.getUpdateLicensingBaseRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment}",
     ) {
     val form = Form(page)
