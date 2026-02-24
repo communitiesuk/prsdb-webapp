@@ -1,10 +1,10 @@
-package uk.gov.communities.prsdb.webapp.database.repository
+package uk.gov.communities.prsdb.webapp.database.dao
 
 import org.hibernate.StatelessSession
 import java.sql.Connection
 import java.sql.PreparedStatement
 
-class NgdAddressLoaderRepository(
+class NgdAddressLoaderDao(
     private val session: StatelessSession,
 ) {
     fun saveCommentOnAddressTable(comment: String) {

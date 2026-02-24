@@ -25,9 +25,11 @@ buttons:
   confirmAndSubmitCompliance: Confirm and submit compliance information
   returnToPropertyRecord: Return to property record
   uploadAndContinue: Upload and continue
+  addAnother: Add another
 links:
   change: Change
   view: View
+  remove: Remove
 textArea:
   infoText: 'You can enter up to {0,,limit} characters'
 radios:

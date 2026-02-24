@@ -1,0 +1,31 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="summaryName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryListData" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addAnotherUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{${addAnotherTitle}}">add another title</h1>
+    <h2 class="govuk-heading-m" th:text="#{${summaryName}}" id="summary-name">summary name</h2>
+    <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
+    </th:block>
+</th:block>
+<th:block id="form-content">
+    <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+        <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addAnotherUrl}, #{forms.buttons.addAnother})}">
+            landlord.dashboard.viewLandlordRecord.button
+        </a>
+    </div>
+</th:block>
+</html>

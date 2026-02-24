@@ -32,8 +32,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.core.env.Environment
 import org.springframework.util.ResourceUtils
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.database.dao.NgdAddressLoaderDao
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
-import uk.gov.communities.prsdb.webapp.database.repository.NgdAddressLoaderRepository
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH_SIZE
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
@@ -78,10 +78,10 @@ class NgdAddressLoaderTests {
     @Mock
     private lateinit var mockPreparedStatement: PreparedStatement
 
-    private lateinit var ngdAddressLoaderRepositoryMockConstructor: MockedConstruction<NgdAddressLoaderRepository>
+    private lateinit var ngdAddressLoaderDaoMockConstructor: MockedConstruction<NgdAddressLoaderDao>
 
-    private val mockNgdAddressLoaderRepository
-        get() = ngdAddressLoaderRepositoryMockConstructor.constructed()[0]
+    private val mockNgdAddressLoaderDao
+        get() = ngdAddressLoaderDaoMockConstructor.constructed()[0]
 
     @BeforeEach
     fun setUp() {
@@ -96,9 +96,9 @@ class NgdAddressLoaderTests {
         whenever(mockEnvironment.activeProfiles).thenReturn(arrayOf("local"))
     }
 
-    private fun setUpMockNgdAddressLoaderRepository(mockInitializer: (mock: NgdAddressLoaderRepository) -> Unit) {
-        ngdAddressLoaderRepositoryMockConstructor =
-            mockConstruction(NgdAddressLoaderRepository::class.java) { mock, _ ->
+    private fun setUpMockNgdAddressLoaderDao(mockInitializer: (mock: NgdAddressLoaderDao) -> Unit) {
+        ngdAddressLoaderDaoMockConstructor =
+            mockConstruction(NgdAddressLoaderDao::class.java) { mock, _ ->
                 whenever(mock.getLoadAddressPreparedStatement(any())).thenReturn(mockPreparedStatement)
                 mockInitializer(mock)
             }
@@ -106,14 +106,14 @@ class NgdAddressLoaderTests {
 
     @AfterEach
     fun tearDown() {
-        ngdAddressLoaderRepositoryMockConstructor.close()
+        ngdAddressLoaderDaoMockConstructor.close()
     }
 
     @ParameterizedTest(name = "when {0}")
     @MethodSource("provideNoDataPackageVersionIdComments")
     fun `loadNewDataPackageVersions loads initial data package version when`(commentOnAddressTable: String?) {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn(commentOnAddressTable)
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionHistory(DATA_PACKAGE_ID)).thenReturn(versionHistory)
@@ -126,7 +126,7 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        verify(mockNgdAddressLoaderRepository).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
+        verify(mockNgdAddressLoaderDao).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
     }
 
     @ParameterizedTest(name = "due to {0}")
@@ -135,7 +135,7 @@ class NgdAddressLoaderTests {
         osDownloadsClientResponse: () -> String,
     ) {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionHistory(DATA_PACKAGE_ID)).doAnswer { osDownloadsClientResponse() }
@@ -147,7 +147,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions loads next data package versions when there's already one loaded`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
@@ -168,7 +168,7 @@ class NgdAddressLoaderTests {
 
         // Assert
         val commentCaptor = argumentCaptor<String>()
-        verify(mockNgdAddressLoaderRepository, times(2)).saveCommentOnAddressTable(commentCaptor.capture())
+        verify(mockNgdAddressLoaderDao, times(2)).saveCommentOnAddressTable(commentCaptor.capture())
         assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID", commentCaptor.firstValue)
         assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID", commentCaptor.secondValue)
     }
@@ -176,7 +176,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions throws exception when information about next data package version can't be found`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID)).doAnswer { throw HttpException() }
@@ -188,7 +188,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions rolls-back current load and doesn't load next versions when error is thrown`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionHistory(DATA_PACKAGE_ID)).thenReturn(versionHistory)
@@ -211,7 +211,7 @@ class NgdAddressLoaderTests {
     @MethodSource("provideNoNextDataPackageVersionIdResponses")
     fun `loadNewDataPackageVersions loads no data when there's no next version`(osDownloadsClientResponse: String) {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
@@ -221,13 +221,13 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        verify(mockNgdAddressLoaderRepository, never()).saveCommentOnAddressTable(any())
+        verify(mockNgdAddressLoaderDao, never()).saveCommentOnAddressTable(any())
     }
 
     @Test
     fun `loadNewDataPackageVersions updates property ownership addresses in batches during data package loads`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
 
@@ -245,13 +245,13 @@ class NgdAddressLoaderTests {
 
         // Assert
         val expectedBatchCount = ceil(LARGE_CSV_LINE_COUNT / UPRN_BATCH_SIZE).toInt()
-        verify(mockNgdAddressLoaderRepository, times(expectedBatchCount)).updatePropertyOwnershipAddresses(any())
+        verify(mockNgdAddressLoaderDao, times(expectedBatchCount)).updatePropertyOwnershipAddresses(any())
     }
 
     @Test
     fun `loadNewDataPackageVersions deletes unused inactive addresses after all data packages have been loaded`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID))
@@ -264,13 +264,13 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert
-        verify(mockNgdAddressLoaderRepository).deleteUnusedInactiveAddresses()
+        verify(mockNgdAddressLoaderDao).deleteUnusedInactiveAddresses()
     }
 
     @Test
     fun `loadNewDataPackageVersions throws exception when a data package version's ZIP file is missing`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
@@ -285,7 +285,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions throws exception when a data package version's CSV file is missing`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
@@ -300,7 +300,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions handles (deactivates, upserts or ignores) each record in a data package version accordingly`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
 
@@ -343,13 +343,13 @@ class NgdAddressLoaderTests {
         // 'No' change type - ignore (fourth record isn't processed)
         verify(mockPreparedStatement, times(3)).addBatch()
 
-        verify(mockNgdAddressLoaderRepository).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID")
+        verify(mockNgdAddressLoaderDao).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID")
     }
 
     @Test
     fun `loadNewDataPackageVersions handles data package version records in batches`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
 
@@ -373,7 +373,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions throws exception when an unknown change type is encountered`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
@@ -390,7 +390,7 @@ class NgdAddressLoaderTests {
     @Test
     fun `loadNewDataPackageVersions throws exception when an unknown custodian code is encountered`() {
         // Arrange
-        setUpMockNgdAddressLoaderRepository { mock ->
+        setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$INITIAL_VERSION_ID")
         }
 

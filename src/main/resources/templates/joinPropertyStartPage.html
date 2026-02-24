@@ -1,5 +1,4 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="continueUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{joinProperty.title},~{::#main-content/content()}, false)}">
 <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
@@ -47,7 +46,7 @@
             <p class="govuk-body" th:text="#{joinProperty.responsibilities.paragraph.two}">joinProperty.responsibilities.paragraph.two</p>
         </section>
         <section>
-            <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${continueUrl}, #{forms.buttons.continue})}"></button>
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${joinPropertyInitialStep}, #{forms.buttons.continue})}"></a>
         </section>
     </div>
 </main>
