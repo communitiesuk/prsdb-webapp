@@ -43,7 +43,13 @@ class GasSafetyStateTests {
 
     @Test
     fun `getGasSafetyCertificateIssueDateIfReachable returns null if the issue date is not set`() {
-        val state = buildTestGasSafetyState()
+        val state = buildTestGasSafetyState(issueDateStepShouldBeReachable = true)
+        assertNull(state.getGasSafetyCertificateIssueDateIfReachable())
+    }
+
+    @Test
+    fun `getGasSafetyCertificateIssueDateIfReachable returns null if formModelIfReachableOrNull is null`() {
+        val state = buildTestGasSafetyState(issueDateStepShouldBeReachable = false)
         assertNull(state.getGasSafetyCertificateIssueDateIfReachable())
     }
 
@@ -113,13 +119,21 @@ class GasSafetyStateTests {
 
     @Test
     fun `getGasSafetyCertificateFileUploadIdIfReachable returns null if the fileUploadId is not found in state`() {
-        val state = buildTestGasSafetyState()
+        val state = buildTestGasSafetyState(uploadStepShouldBeReachable = true)
+        assertNull(state.getGasSafetyCertificateFileUploadIdIfReachable())
+    }
+
+    @Test
+    fun `getGasSafetyCertificateFileUploadIdIfReachable returns null if formModelIfReachableOrNull is null`() {
+        val state = buildTestGasSafetyState(uploadStepShouldBeReachable = false)
         assertNull(state.getGasSafetyCertificateFileUploadIdIfReachable())
     }
 
     private fun buildTestGasSafetyState(
         issueDateFormModel: TodayOrPastDateFormModel = TodayOrPastDateFormModel(),
         gasSafetyUploadFormModel: GasSafetyUploadCertificateFormModel = GasSafetyUploadCertificateFormModel(),
+        issueDateStepShouldBeReachable: Boolean = true,
+        uploadStepShouldBeReachable: Boolean = true,
     ): GasSafetyState =
         object : AbstractJourneyState(journeyStateService = mock()), GasSafetyState {
             override val gasSafetyStep = mock<GasSafetyStep>()
@@ -135,12 +149,20 @@ class GasSafetyStateTests {
 
             override val gasSafetyIssueDateStep =
                 mock<GasSafetyIssueDateStep>().apply {
-                    whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
+                    if (issueDateStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
                 }
 
             override val gasSafetyCertificateUploadStep =
                 mock<GasSafetyCertificateUploadStep>().apply {
-                    whenever(this.formModelIfReachableOrNull).thenReturn(gasSafetyUploadFormModel)
+                    if (uploadStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(gasSafetyUploadFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
                 }
             override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
             override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
