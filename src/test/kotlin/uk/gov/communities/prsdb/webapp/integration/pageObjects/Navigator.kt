@@ -1125,7 +1125,9 @@ class Navigator(
     fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        UpdateOccupancyJourneyStateSessionBuilder.withTenants().build()
+        setJourneyStateInSession(
+            UpdateOccupancyJourneyStateSessionBuilder.withTenants().build(),
+        )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
 

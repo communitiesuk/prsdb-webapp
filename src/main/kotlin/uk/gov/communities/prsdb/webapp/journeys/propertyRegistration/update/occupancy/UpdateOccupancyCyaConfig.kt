@@ -38,7 +38,7 @@ class UpdateOccupancyCyaConfig(
         )
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
-        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        val isOccupied = isOccupied(state)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         propertyOwnershipService.updateOccupancy(
             id = state.propertyId,
@@ -78,7 +78,7 @@ class UpdateOccupancyCyaConfig(
                 } else {
                     null
                 },
-            lastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
     }
 
@@ -88,4 +88,8 @@ class UpdateOccupancyCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateOccupancyCyaStep(
     stepConfig: UpdateOccupancyCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateOccupancyJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<UpdateOccupancyJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "occupancy-check-your-answers"
+    }
+}

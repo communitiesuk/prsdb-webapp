@@ -903,7 +903,7 @@ class PropertyOwnershipServiceTests {
                 rentFrequency = propertyOwnership.rentFrequency,
                 customRentFrequency = propertyOwnership.customRentFrequency,
                 rentAmount = propertyOwnership.rentAmount,
-                lastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
             )
 
             // Assert
@@ -933,7 +933,7 @@ class PropertyOwnershipServiceTests {
                         rentFrequency = propertyOwnership.rentFrequency,
                         customRentFrequency = propertyOwnership.customRentFrequency,
                         rentAmount = propertyOwnership.rentAmount,
-                        lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                     )
                 }
 

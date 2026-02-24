@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -63,7 +62,7 @@ class UpdateOccupancyJourneyFactory(
                 }
             }
             step(journey.cyaStep) {
-                routeSegment(RegisterPropertyStepId.CheckAnswers.urlPathSegment)
+                routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
                 parents { journey.occupationTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
@@ -109,7 +108,7 @@ class UpdateOccupancyJourneyFactory(
             }
             configureStep(journey.rentAmount) {
                 withAdditionalContentProperty {
-                    "heading" to getRentAmountHeading(state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency))
+                    "heading" to getRentAmountHeading(state)
                 }
             }
             checkYourAnswersJourney()
@@ -121,12 +120,14 @@ class UpdateOccupancyJourneyFactory(
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
-    private fun getRentAmountHeading(rentFrequency: RentFrequency): String =
-        when (rentFrequency) {
+    private fun getRentAmountHeading(state: UpdateOccupancyJourneyState): String {
+        val rentFrequency = state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+        return when (rentFrequency) {
             RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
             RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
             else -> "forms.update.rentAmount.monthly.fieldSetHeading"
         }
+    }
 }
 
 @JourneyFrameworkComponent

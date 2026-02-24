@@ -239,10 +239,10 @@ class PropertyOwnershipService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
-        lastModifiedDate: Instant,
+        initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
-        if (propertyOwnership.getMostRecentlyUpdated() != lastModifiedDate) {
+        if (propertyOwnership.getMostRecentlyUpdated() != initialLastModifiedDate) {
             throw UpdateConflictException(
                 "The property ownership record has been updated since this update session started.",
             )

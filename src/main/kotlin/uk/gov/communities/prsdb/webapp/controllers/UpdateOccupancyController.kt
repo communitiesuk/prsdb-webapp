@@ -33,23 +33,18 @@ class UpdateOccupancyController(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
-    ): ModelAndView =
-        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
-            try {
-                val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-                journeyMap[stepName]?.getStepModelAndView()
-                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-            } catch (_: NoSuchJourneyException) {
-                val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-                val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-                ModelAndView("redirect:$redirectUrl")
-            }
-        } else {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
-            )
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        return try {
+            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
+            journeyMap[stepName]?.getStepModelAndView()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
         }
+    }
 
     @PostMapping("{stepName}")
     fun postUpdateStep(
@@ -58,23 +53,30 @@ class UpdateOccupancyController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
-    ): ModelAndView =
-        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
-            try {
-                val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-                journeyMap[stepName]?.postStepModelAndView(formData)
-                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-            } catch (_: NoSuchJourneyException) {
-                val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-                val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-                ModelAndView("redirect:$redirectUrl")
-            }
-        } else {
+    ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        return try {
+            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
+            journeyMap[stepName]?.postStepModelAndView(formData)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
+        }
+    }
+
+    private fun throwErrorIfUserIsNotAuthorized(
+        baseUserId: String,
+        propertyOwnershipId: Long,
+    ) {
+        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
+                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
             )
         }
+    }
 
     companion object {
         const val UPDATE_OCCUPANCY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-occupancy"
