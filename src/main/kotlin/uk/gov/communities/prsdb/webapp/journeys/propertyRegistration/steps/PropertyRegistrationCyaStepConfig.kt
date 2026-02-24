@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
+import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.CheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -34,11 +36,15 @@ class PropertyRegistrationCyaStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
     private val messageSource: MessageSource,
+    private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) =
-        mapOf(
+    private lateinit var newStateId: String
+
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        createCyaJourneyStates(state)
+        return mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
@@ -49,6 +55,16 @@ class PropertyRegistrationCyaStepConfig(
             "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
+    }
+
+    private fun createCyaJourneyStates(state: PropertyRegistrationJourneyState) {
+        val newId = "my-new-id"
+        state.copyJourneyTo(newId)
+        val newState = stateFactory.getObject().apply { setJourneyId(newId) }
+        newStateId = newState.journeyId
+        newState.checkingAnswersFor = CheckableElements.PROPERTY_TYPE
+        newState.realBaseJourneyIdForCya = state.journeyId
+    }
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {
@@ -141,7 +157,7 @@ class PropertyRegistrationCyaStepConfig(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            Destination.VisitableStep(state.propertyTypeStep, childJourneyId),
+            Destination.VisitableStep(state.propertyTypeStep, newStateId),
         )
     }
 

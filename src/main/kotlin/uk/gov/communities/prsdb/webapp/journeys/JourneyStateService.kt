@@ -69,6 +69,13 @@ class JourneyStateService(
         return metadata
     }
 
+    fun copyJourneyTo(newJourneyId: String) {
+        val journeyState = session.getAttribute(journeyMetadata.dataKey) ?: mapOf<String, Any?>()
+        val newMetadata = journeyStateMetadataMap[newJourneyId] ?: JourneyMetadata.withNewDataKey()
+        journeyStateMetadataMap += (newJourneyId to newMetadata)
+        session.setAttribute(newMetadata.dataKey, journeyState)
+    }
+
     fun save(): SavedJourneyState {
         val journeyState = session.getAttribute(journeyMetadata.dataKey) ?: mapOf<String, Any?>()
         return persistenceService.saveJourneyStateData(journeyState, journeyId)

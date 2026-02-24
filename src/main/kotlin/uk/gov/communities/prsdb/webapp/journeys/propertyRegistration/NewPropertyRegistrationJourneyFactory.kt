@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Alrea
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
@@ -62,7 +64,49 @@ class NewPropertyRegistrationJourneyFactory(
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        return journey(state) {
+        return when (state.checkingAnswersFor) {
+            null -> mainJourneyMap(state)
+            CheckableElements.PROPERTY_TYPE -> checkPropertyTypeMap(state)
+            CheckableElements.OWNERSHIP_TYPE -> TODO()
+            CheckableElements.LICENSING -> TODO()
+            CheckableElements.OCCUPATION -> TODO()
+            CheckableElements.HOUSEHOLDS -> TODO()
+            CheckableElements.TENANTS -> TODO()
+            CheckableElements.RENT_LEVELS -> TODO()
+            CheckableElements.JOINT_LANDLORDS -> TODO()
+        }
+    }
+
+    private fun checkPropertyTypeMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            step(journey.propertyTypeStep) {
+                backDestination {
+                    Destination.ExternalUrl(
+                        "check-answers",
+                        mapOf("journeyId" to (journey.realBaseJourneyIdForCya ?: journey.journeyId)),
+                    )
+                }
+                routeSegment("property-type")
+                initialStep()
+                nextStep { journey.finishCyaStep }
+            }
+            step(journey.finishCyaStep) {
+                parents { journey.propertyTypeStep.isComplete() }
+                nextDestination { Destination.Nowhere() }
+            }
+            unreachableStepDestination {
+                Destination.ExternalUrl(
+                    "check-answers",
+                    mapOf("journeyId" to (journey.realBaseJourneyIdForCya ?: journey.journeyId)),
+                )
+            }
+            configure {
+                withAdditionalContentProperty { "title" to "registerProperty.title" }
+            }
+        }
+
+    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
@@ -122,7 +166,6 @@ class NewPropertyRegistrationJourneyFactory(
             }
             checkYourAnswersJourney()
         }
-    }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
@@ -169,6 +212,7 @@ class PropertyRegistrationJourney(
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
@@ -177,6 +221,8 @@ class PropertyRegistrationJourney(
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
+    override var checkingAnswersFor: CheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var realBaseJourneyIdForCya: String? by delegateProvider.nullableDelegate("realBaseJourneyIdForCya")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -202,5 +248,20 @@ interface PropertyRegistrationJourneyState :
     val licensingTask: LicensingTask
     val occupationTask: OccupationTask
     val jointLandlordsTask: JointLandlordsTask
+    val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: PropertyRegistrationCyaStep
+
+    var realBaseJourneyIdForCya: String?
+    var checkingAnswersFor: CheckableElements?
+}
+
+enum class CheckableElements {
+    PROPERTY_TYPE,
+    OWNERSHIP_TYPE,
+    LICENSING,
+    OCCUPATION,
+    HOUSEHOLDS,
+    TENANTS,
+    RENT_LEVELS,
+    JOINT_LANDLORDS,
 }

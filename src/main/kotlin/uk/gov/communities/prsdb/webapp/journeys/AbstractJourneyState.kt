@@ -53,4 +53,6 @@ abstract class AbstractJourneyState(
     }
 
     override fun setJourneyId(newJourneyId: String) = journeyStateService.setJourneyId(newJourneyId)
+
+    override fun copyJourneyTo(newJourneyId: String) = journeyStateService.copyJourneyTo(newJourneyId)
 }
