@@ -126,6 +126,7 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
                         changeLinkMessageKey,
+                        // TODO PDJB-146: Update link when update step is created
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
                         withChangeLinks,
                     )
@@ -133,6 +134,7 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                         changeLinkMessageKey,
+                        // TODO PDJB-146: Update link when update step is created
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
                         withChangeLinks,
                     )
@@ -140,7 +142,7 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
                         propertyOwnership.numBedrooms,
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-148: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
@@ -148,7 +150,7 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
                         MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-149: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
@@ -157,7 +159,7 @@ class PropertyDetailsViewModel(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
                             BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource),
                             changeLinkMessageKey,
-                            // TODO PDJB-105: Add link when update step is created
+                            // TODO PDJB-149: Add link when update step is created
                             null,
                             withChangeLinks,
                         )
@@ -167,7 +169,7 @@ class PropertyDetailsViewModel(
                         // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-151: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
@@ -176,7 +178,7 @@ class PropertyDetailsViewModel(
                         // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-152: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
@@ -189,7 +191,7 @@ class PropertyDetailsViewModel(
                             messageSource,
                         ),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-153: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
