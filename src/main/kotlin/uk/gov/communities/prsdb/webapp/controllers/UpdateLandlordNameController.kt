@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.name.UpdateNameJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @PrsdbController
@@ -26,6 +27,7 @@ import java.security.Principal
 @PreAuthorize("hasRole('LANDLORD')")
 class UpdateLandlordNameController(
     private val journeyFactory: UpdateNameJourneyFactory,
+    private val landlordService: LandlordService,
 ) {
     @GetMapping("{stepName}")
     @AvailableWhenFeatureEnabled(MIGRATE_LANDLORD_NAME_UPDATE)
@@ -33,6 +35,7 @@ class UpdateLandlordNameController(
         principal: Principal,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView {
+        verifyLandlordIsNotIdentityVerified(principal)
         return try {
             val journeyMap = journeyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
@@ -51,6 +54,7 @@ class UpdateLandlordNameController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView {
+        verifyLandlordIsNotIdentityVerified(principal)
         return try {
             val journeyMap = journeyFactory.createJourneySteps()
             journeyMap[stepName]?.postStepModelAndView(formData)
@@ -59,6 +63,13 @@ class UpdateLandlordNameController(
             val journeyId = journeyFactory.initializeJourneyState(principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
+        }
+    }
+
+    private fun verifyLandlordIsNotIdentityVerified(principal: Principal) {
+        val landlord = landlordService.retrieveLandlordByBaseUserId(principal.name)
+        if (landlord?.isVerified == true) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND)
         }
     }
 

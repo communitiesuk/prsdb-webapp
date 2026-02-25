@@ -9,10 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.shared.IdentityVerificationStatus
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckLandlordIdentityVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import java.security.Principal
 
@@ -25,15 +22,11 @@ class UpdateNameJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-            step(journey.checkLandlordIdentityVerifiedStep) {
-                initialStep()
-                nextStep { journey.nameStep }
-            }
             step(journey.nameStep) {
                 routeSegment(NameStep.ROUTE_SEGMENT)
-                parents { journey.checkLandlordIdentityVerifiedStep.hasOutcome(IdentityVerificationStatus.NOT_VERIFIED) }
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
                 nextStep { journey.completeNameUpdateStep }
+                initialStep()
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "landlordDetails.update.title",
@@ -55,7 +48,6 @@ class UpdateNameJourneyFactory(
 
 @JourneyFrameworkComponent
 class UpdateNameJourney(
-    override val checkLandlordIdentityVerifiedStep: CheckLandlordIdentityVerifiedStep,
     override val nameStep: NameStep,
     override val completeNameUpdateStep: CompleteNameUpdateStep,
     journeyStateService: JourneyStateService,
@@ -72,7 +64,6 @@ class UpdateNameJourney(
 }
 
 interface UpdateNameJourneyState : JourneyState {
-    val checkLandlordIdentityVerifiedStep: CheckLandlordIdentityVerifiedStep
     val nameStep: NameStep
     val completeNameUpdateStep: CompleteNameUpdateStep
 }
