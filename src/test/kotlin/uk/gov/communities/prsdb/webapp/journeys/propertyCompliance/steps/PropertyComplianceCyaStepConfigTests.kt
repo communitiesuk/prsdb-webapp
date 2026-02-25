@@ -179,6 +179,7 @@ class PropertyComplianceCyaStepConfigTests {
     private val propertyId = 123L
     private val gasFileUploadId = 123L
     private val validGasSafetyIssueDate = LocalDate.now().minusDays(5)
+    private val expiredGasSafetyIssueDate = LocalDate.now().minusYears((GAS_SAFETY_CERT_VALIDITY_YEARS + 1).toLong())
     private val gasEngineerNumber = "1234567"
     private val eicrFileUploadId = 456L
     private val validEicrIssueDate = LocalDate.now().minusDays(5)
@@ -604,7 +605,6 @@ class PropertyComplianceCyaStepConfigTests {
         @Test
         fun `getGasSafetyData returns correct rows when expired certificate has been provided`() {
             // Arrange
-            val expiredGasIssueDate = LocalDate.now().minusYears(2)
             setupStateWithExpiredGasCertificate()
 
             val expectedRows =
@@ -616,12 +616,12 @@ class PropertyComplianceCyaStepConfigTests {
                     ),
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkComplianceAnswers.certificate.issueDate",
-                        expiredGasIssueDate.toKotlinLocalDate(),
+                        expiredGasSafetyIssueDate.toKotlinLocalDate(),
                         Destination.VisitableStep(mockState.gasSafetyIssueDateStep, childJourneyId),
                     ),
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkComplianceAnswers.certificate.validUntil",
-                        expiredGasIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate(),
+                        expiredGasSafetyIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate(),
                         Destination.Nowhere(),
                     ),
                 )
@@ -1229,15 +1229,12 @@ class PropertyComplianceCyaStepConfigTests {
 
         whenever(mockState.gasSafetyIssueDateStep).thenReturn(mockGasSafetyIssueDateStep)
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(validGasSafetyIssueDate.toKotlinLocalDate())
-        whenever(mockGasSafetyIssueDateStep.outcome).thenReturn(GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE)
+        whenever(mockState.getGasSafetyExpiryDate())
+            .thenReturn(validGasSafetyIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate())
 
         whenever(mockState.gasSafetyEngineerNumberStep).thenReturn(mockGasSafetyEngineerNumberStep)
         val engineerFormModel = GasSafeEngineerNumFormModel().apply { engineerNumber = gasEngineerNumber }
         whenever(mockGasSafetyEngineerNumberStep.formModelIfReachableOrNull).thenReturn(engineerFormModel)
-        whenever(mockGasSafetyEngineerNumberStep.outcome).thenReturn(Complete.COMPLETE)
-
-        whenever(mockState.gasSafetyCertificateUploadStep).thenReturn(mockGasSafetyCertificateUploadStep)
-        whenever(mockGasSafetyCertificateUploadStep.outcome).thenReturn(Complete.COMPLETE)
 
         whenever(mockState.gasSafetyUploadConfirmationStep).thenReturn(mockGasSafetyUploadConfirmationStep)
         whenever(mockState.getGasSafetyCertificateFileUploadIdIfReachable()).thenReturn(gasFileUploadId)
@@ -1251,9 +1248,12 @@ class PropertyComplianceCyaStepConfigTests {
         whenever(mockGasSafetyStep.outcome).thenReturn(GasSafetyMode.HAS_CERTIFICATE)
 
         whenever(mockState.gasSafetyIssueDateStep).thenReturn(mockGasSafetyIssueDateStep)
-        whenever(mockGasSafetyIssueDateStep.outcome).thenReturn(GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED)
+        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(expiredGasSafetyIssueDate.toKotlinLocalDate())
+        whenever(mockState.getGasSafetyExpiryDate())
+            .thenReturn(expiredGasSafetyIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).toKotlinLocalDate())
 
         whenever(mockGasSafetyOutdatedStep.outcome).thenReturn(Complete.COMPLETE)
+        whenever(mockState.gasSafetyEngineerNumberStep).thenReturn(mockGasSafetyEngineerNumberStep)
     }
 
     private fun setupStateWithMissingGasCertificate() {

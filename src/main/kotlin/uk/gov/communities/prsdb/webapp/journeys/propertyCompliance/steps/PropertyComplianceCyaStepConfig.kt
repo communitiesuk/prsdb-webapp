@@ -109,8 +109,7 @@ class PropertyComplianceCyaStepConfig(
 
     fun getGasSafetyData(state: PropertyComplianceJourneyState) =
         GasSafetyCyaSummaryRowsFactory(
-            (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE) &&
-                (state.gasSafetyIssueDateStep.outcome == GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE),
+            (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE),
             Destination.VisitableStep(state.gasSafetyStep, childJourneyId),
             Destination.VisitableStep(state.gasSafetyExemptionStep, childJourneyId),
             uploadService,
@@ -120,8 +119,7 @@ class PropertyComplianceCyaStepConfig(
 
     fun getEicrData(state: PropertyComplianceJourneyState) =
         EicrCyaSummaryRowsFactory(
-            (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE) &&
-                (state.eicrIssueDateStep.outcome == EicrIssueDateMode.EICR_CERTIFICATE_IN_DATE),
+            (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE),
             Destination.VisitableStep(state.eicrStep, childJourneyId),
             Destination.VisitableStep(state.eicrExemptionStep, childJourneyId),
             uploadService,

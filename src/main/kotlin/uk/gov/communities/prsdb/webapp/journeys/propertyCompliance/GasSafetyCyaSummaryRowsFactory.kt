@@ -101,14 +101,19 @@ class GasSafetyCyaSummaryRowsFactory(
                             state.getGasSafetyExpiryDate(),
                             null,
                         ),
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkComplianceAnswers.gasSafety.engineerNumber",
-                            state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber
-                                ?: throw NotNullFormModelValueIsNullException("Gas safety engineer number is null"),
-                            Destination.VisitableStep(state.gasSafetyEngineerNumberStep, childJourneyId),
-                        ),
                     ),
                 )
+
+                val engineerNum = state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber
+                if (engineerNum != null) {
+                    add(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "forms.checkComplianceAnswers.gasSafety.engineerNumber",
+                            engineerNum,
+                            Destination.VisitableStep(state.gasSafetyEngineerNumberStep, childJourneyId),
+                        ),
+                    )
+                }
             }.toList()
 
     private fun getGasSafetyExemptionRow(): SummaryListRowViewModel {
