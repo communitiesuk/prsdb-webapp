@@ -68,7 +68,10 @@ class UpdateLandlordNameController(
 
     private fun throwIfLandlordIsIdentityVerified(principal: Principal) {
         val landlord = landlordService.retrieveLandlordByBaseUserId(principal.name)
-        if (landlord?.isVerified == true) {
+        if (landlord == null) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        }
+        if (landlord.isVerified) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
         }
     }

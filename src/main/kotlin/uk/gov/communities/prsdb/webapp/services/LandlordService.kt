@@ -148,6 +148,7 @@ class LandlordService(
         ) {}
     }
 
+    @Transactional
     fun updateLandlordName(
         baseUserId: String,
         name: String,
