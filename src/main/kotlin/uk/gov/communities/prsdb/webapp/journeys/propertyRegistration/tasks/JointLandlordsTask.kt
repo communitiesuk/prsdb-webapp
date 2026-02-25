@@ -55,6 +55,7 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
             step(journey.inviteAnotherJointLandlordStep) {
                 routeSegment(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
                 parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
+                backStep { journey.checkJointLandlordsStep }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.removeJointLandlordStep) {
