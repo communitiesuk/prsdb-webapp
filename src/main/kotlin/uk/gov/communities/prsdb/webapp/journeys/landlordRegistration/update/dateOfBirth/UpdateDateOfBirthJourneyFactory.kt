@@ -9,7 +9,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.shared.IdentityVerificationStatus
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckLandlordIdentityVerifiedStep
 import java.security.Principal
 
 @PrsdbWebService
@@ -21,11 +24,15 @@ class UpdateDateOfBirthJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
+            step(journey.checkLandlordIdentityVerifiedStep) {
+                initialStep()
+                nextStep { journey.dateOfBirthStep }
+            }
             step(journey.dateOfBirthStep) {
                 routeSegment(UpdateDateOfBirthStep.ROUTE_SEGMENT)
+                parents { journey.checkLandlordIdentityVerifiedStep.hasOutcome(IdentityVerificationStatus.NOT_VERIFIED) }
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
                 nextStep { journey.completeDateOfBirthUpdateStep }
-                initialStep()
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "landlordDetails.update.title",
@@ -46,6 +53,7 @@ class UpdateDateOfBirthJourneyFactory(
 
 @JourneyFrameworkComponent
 class UpdateDateOfBirthJourney(
+    override val checkLandlordIdentityVerifiedStep: CheckLandlordIdentityVerifiedStep,
     override val dateOfBirthStep: UpdateDateOfBirthStep,
     override val completeDateOfBirthUpdateStep: CompleteDateOfBirthUpdateStep,
     journeyStateService: JourneyStateService,
@@ -62,6 +70,7 @@ class UpdateDateOfBirthJourney(
 }
 
 interface UpdateDateOfBirthJourneyState : JourneyState {
+    val checkLandlordIdentityVerifiedStep: CheckLandlordIdentityVerifiedStep
     val dateOfBirthStep: UpdateDateOfBirthStep
     val completeDateOfBirthUpdateStep: CompleteDateOfBirthUpdateStep
 }
