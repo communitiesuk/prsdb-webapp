@@ -147,23 +147,6 @@ class LandlordService(
         ) {}
     }
 
-    @Transactional
-    fun updateLandlordName(
-        baseUserId: String,
-        name: String,
-    ) {
-        updateLandlordForBaseUserId(
-            baseUserId,
-            LandlordUpdateModel(
-                email = null,
-                name = name,
-                phoneNumber = null,
-                address = null,
-                dateOfBirth = null,
-            ),
-        ) {}
-    }
-
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
         landlord.hasRespondedToFeedback = true
         return landlordRepository.save(landlord)
