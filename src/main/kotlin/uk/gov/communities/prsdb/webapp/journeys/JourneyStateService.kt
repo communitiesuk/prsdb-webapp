@@ -1,14 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import jakarta.servlet.ServletRequest
 import jakarta.servlet.http.HttpSession
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
 import org.springframework.web.util.UriComponentsBuilder
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.PageData
@@ -26,25 +23,31 @@ data class JourneyMetadata(
     }
 }
 
-@PrsdbWebService
-@Scope("request")
+@JourneyFrameworkComponent
 class JourneyStateService(
     private val session: HttpSession,
-    private val journeyIdOrNull: String?,
+    private val journeyIdProvider: JourneyIdProvider,
     private val persistenceService: JourneyStatePersistenceService,
 ) {
-    val journeyId: String get() = journeyIdOrNull ?: throw NoSuchJourneyException()
+    private var _journeyId: String? = null
 
-    @Autowired
-    constructor(
-        session: HttpSession,
-        request: ServletRequest,
-        persistenceService: JourneyStatePersistenceService,
-    ) : this(
-        session,
-        request.getParameter(JOURNEY_ID_PARAM),
-        persistenceService,
-    )
+    val journeyId: String
+        get() {
+            _journeyId?.let { return it }
+            val idFromRequest = journeyIdProvider.getParameterOrNull()
+            if (idFromRequest != null) {
+                _journeyId = idFromRequest
+                return idFromRequest
+            }
+            throw NoSuchJourneyException()
+        }
+
+    fun setJourneyId(id: String) {
+        if (_journeyId != null) {
+            throw JourneyInitialisationException("Journey ID has already been set to $_journeyId and cannot be changed")
+        }
+        _journeyId = id
+    }
 
     var journeyStateMetadataMap: Map<String, JourneyMetadata>
         get() = session.getAttribute(JOURNEY_STATE_METADATA_STORE_KEY)?.let { it as? String }?.let { Json.decodeFromString(it) } ?: mapOf()
@@ -112,7 +115,9 @@ class JourneyStateService(
             throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
         }
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
-        JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
+        val newService = JourneyStateService(session, journeyIdProvider, persistenceService)
+        newService.setJourneyId(newJourneyId)
+        newService.stateInitialiser()
     }
 
     fun initialiseOrRestoreJourneyWithId(
@@ -129,7 +134,9 @@ class JourneyStateService(
         }
 
         journeyStateMetadataMap += (newJourneyId to JourneyMetadata.withNewDataKey())
-        JourneyStateService(session, newJourneyId, persistenceService).stateInitialiser()
+        val newService = JourneyStateService(session, journeyIdProvider, persistenceService)
+        newService.setJourneyId(newJourneyId)
+        newService.stateInitialiser()
     }
 
     fun initialiseChildJourney(
@@ -152,7 +159,6 @@ class JourneyStateService(
     companion object {
         private const val STEP_DATA_KEY = "journeyData"
         private const val JOURNEY_STATE_METADATA_STORE_KEY = "journeyStateKeyStore"
-        private const val JOURNEY_ID_PARAM = "journeyId"
 
         fun urlWithJourneyState(
             path: String,
@@ -162,7 +168,7 @@ class JourneyStateService(
             UriComponentsBuilder
                 .newInstance()
                 .path(path)
-                .queryParam(JOURNEY_ID_PARAM, journeyId)
+                .queryParam(JourneyIdProvider.PARAMETER_NAME, journeyId)
                 .apply { urlParams.forEach { (key, value) -> queryParam(key, value) } }
                 .build(true)
                 .toUriString()
