@@ -35,7 +35,7 @@ class UpdateLandlordNameController(
         principal: Principal,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView {
-        verifyLandlordIsNotIdentityVerified(principal)
+        throwIfLandlordIsIdentityVerified(principal)
         return try {
             val journeyMap = journeyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
@@ -54,7 +54,7 @@ class UpdateLandlordNameController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView {
-        verifyLandlordIsNotIdentityVerified(principal)
+        throwIfLandlordIsIdentityVerified(principal)
         return try {
             val journeyMap = journeyFactory.createJourneySteps()
             journeyMap[stepName]?.postStepModelAndView(formData)
@@ -66,7 +66,7 @@ class UpdateLandlordNameController(
         }
     }
 
-    private fun verifyLandlordIsNotIdentityVerified(principal: Principal) {
+    private fun throwIfLandlordIsIdentityVerified(principal: Principal) {
         val landlord = landlordService.retrieveLandlordByBaseUserId(principal.name)
         if (landlord?.isVerified == true) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
