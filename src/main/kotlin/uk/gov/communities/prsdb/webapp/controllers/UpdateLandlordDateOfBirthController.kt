@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController.Companion.UPDATE_DATE_OF_BIRTH_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -35,7 +36,7 @@ class UpdateLandlordDateOfBirthController(
         principal: Principal,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView {
-        throwIfLandlordIsIdentityVerified(principal)
+        redirectIfLandlordIsIdentityVerified(principal)?.let { return it }
         return try {
             val journeyMap = journeyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
@@ -54,7 +55,7 @@ class UpdateLandlordDateOfBirthController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: PageData,
     ): ModelAndView {
-        throwIfLandlordIsIdentityVerified(principal)
+        redirectIfLandlordIsIdentityVerified(principal)?.let { return it }
         return try {
             val journeyMap = journeyFactory.createJourneySteps()
             journeyMap[stepName]?.postStepModelAndView(formData)
@@ -66,10 +67,12 @@ class UpdateLandlordDateOfBirthController(
         }
     }
 
-    private fun throwIfLandlordIsIdentityVerified(principal: Principal) {
+    private fun redirectIfLandlordIsIdentityVerified(principal: Principal): ModelAndView? {
         val landlord = landlordService.retrieveLandlordByBaseUserId(principal.name)
-        if (landlord == null || landlord.isVerified) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        return if (landlord == null || landlord.isVerified) {
+            ModelAndView("redirect:$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE")
+        } else {
+            null
         }
     }
 
