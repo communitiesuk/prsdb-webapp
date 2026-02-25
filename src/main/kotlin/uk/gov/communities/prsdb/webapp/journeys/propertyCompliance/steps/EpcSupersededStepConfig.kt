@@ -24,7 +24,6 @@ class EpcSupersededStepConfig(
 
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    // TODO PDJB-467 - add tests for this
     override fun afterStepDataIsAdded(state: EpcState) {
         val certificateNumber =
             state.searchedEpc?.latestCertificateNumberForThisProperty
