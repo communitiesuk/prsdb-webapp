@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.RentIncludesBillsFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.RentIncludesBillsFormBasePage
 
 class RentIncludesBillsFormPagePropertyRegistration(
     page: Page,
-) : RentIncludesBillsFormPage(
+) : RentIncludesBillsFormBasePage(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.RentIncludesBills.urlPathSegment}",
     )

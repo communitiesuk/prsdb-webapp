@@ -347,6 +347,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
     }
 
     companion object {
+        // Common journey states (similar to LandlordStateSessionBuilder.beforeName(), etc.)
         fun beforeGasSafetyIssueDate() = PropertyComplianceStateSessionBuilder().withGasSafetyCertStatus(true)
 
         fun beforeGasSafetyEngineerNum() = beforeGasSafetyIssueDate().withGasSafetyIssueDate()

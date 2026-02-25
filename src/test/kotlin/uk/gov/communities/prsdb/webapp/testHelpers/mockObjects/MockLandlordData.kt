@@ -149,8 +149,10 @@ class MockLandlordData {
             rentFrequency: RentFrequency = RentFrequency.OTHER,
             customRentFrequency: String? = "Fortnightly",
             rentAmount: BigDecimal = BigDecimal(200),
+            id: Long = 1,
         ): PropertyOwnership {
             return createPropertyOwnership(
+                id = id,
                 ownershipType = ownershipType,
                 currentNumHouseholds = currentNumHouseholds,
                 currentNumTenants = currentNumTenants,
