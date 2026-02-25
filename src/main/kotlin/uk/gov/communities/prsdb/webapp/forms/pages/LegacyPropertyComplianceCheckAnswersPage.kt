@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-class PropertyComplianceCheckAnswersPage(
+class LegacyPropertyComplianceCheckAnswersPage(
     journeyDataService: JourneyDataService,
     epcCertificateUrlProvider: EpcCertificateUrlProvider,
     missingAnswersRedirect: String,
