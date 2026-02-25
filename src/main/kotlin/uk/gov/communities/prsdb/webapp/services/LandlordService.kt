@@ -121,13 +121,7 @@ class LandlordService(
     ) {
         updateLandlordForBaseUserId(
             baseUserId,
-            LandlordUpdateModel(
-                email = email,
-                name = null,
-                phoneNumber = null,
-                address = null,
-                dateOfBirth = null,
-            ),
+            LandlordUpdateModel(email = email),
         ) {}
     }
 
@@ -138,13 +132,7 @@ class LandlordService(
     ) {
         updateLandlordForBaseUserId(
             baseUserId,
-            LandlordUpdateModel(
-                email = null,
-                name = null,
-                phoneNumber = phoneNumber,
-                address = null,
-                dateOfBirth = null,
-            ),
+            LandlordUpdateModel(phoneNumber = phoneNumber),
         ) {}
     }
 
@@ -155,13 +143,7 @@ class LandlordService(
     ) {
         updateLandlordForBaseUserId(
             baseUserId,
-            LandlordUpdateModel(
-                email = null,
-                name = name,
-                phoneNumber = null,
-                address = null,
-                dateOfBirth = null,
-            ),
+            LandlordUpdateModel(name = name),
         ) {}
     }
 
