@@ -42,7 +42,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
-            unreachableStepUrl { "/" }
+            unreachableStepUrl { propertyDetailsRoute }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
                 nextStep { journey.cyaStep }
