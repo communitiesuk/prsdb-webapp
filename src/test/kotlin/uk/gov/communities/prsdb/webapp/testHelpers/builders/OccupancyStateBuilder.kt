@@ -3,7 +3,15 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
@@ -26,14 +34,14 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
     fun self(): SelfType
 
     fun withNoTenants(): SelfType {
-        submittedValueMap.remove(RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.NumberOfPeople.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.RentIncludesBills.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.FurnishedStatus.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.RentFrequency.urlPathSegment)
-        submittedValueMap.remove(RegisterPropertyStepId.RentAmount.urlPathSegment)
+        submittedValueMap.remove(HouseholdStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(TenantsStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(BedroomsStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(RentIncludesBillsStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(BillsIncludedStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(FurnishedStatusStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(RentFrequencyStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(RentAmountStep.ROUTE_SEGMENT)
         return withOccupiedSetToFalse()
     }
 
@@ -51,7 +59,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             OccupancyFormModel().apply {
                 this.occupied = occupied
             }
-        withSubmittedValue(RegisterPropertyStepId.Occupancy.urlPathSegment, occupancyFormModel)
+        withSubmittedValue(OccupiedStep.ROUTE_SEGMENT, occupancyFormModel)
         return self()
     }
 
@@ -60,7 +68,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             NumberOfHouseholdsFormModel().apply {
                 numberOfHouseholds = households.toString()
             }
-        withSubmittedValue(RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment, numberOfHouseholdsFormModel)
+        withSubmittedValue(HouseholdStep.ROUTE_SEGMENT, numberOfHouseholdsFormModel)
         return self()
     }
 
@@ -69,7 +77,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             NumberOfPeopleFormModel().apply {
                 numberOfPeople = people.toString()
             }
-        withSubmittedValue(RegisterPropertyStepId.NumberOfPeople.urlPathSegment, numberOfPeopleFormModel)
+        withSubmittedValue(TenantsStep.ROUTE_SEGMENT, numberOfPeopleFormModel)
         return self()
     }
 
@@ -78,7 +86,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             NumberOfBedroomsFormModel().apply {
                 numberOfBedrooms = bedrooms.toString()
             }
-        withSubmittedValue(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment, numberOfBedroomsFormModel)
+        withSubmittedValue(BedroomsStep.ROUTE_SEGMENT, numberOfBedroomsFormModel)
         return self()
     }
 
@@ -87,7 +95,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             RentIncludesBillsFormModel().apply {
                 this.rentIncludesBills = rentIncludesBills
             }
-        withSubmittedValue(RegisterPropertyStepId.RentIncludesBills.urlPathSegment, rentIncludesBillsFormModel)
+        withSubmittedValue(RentIncludesBillsStep.ROUTE_SEGMENT, rentIncludesBillsFormModel)
         return self()
     }
 
@@ -96,7 +104,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             BillsIncludedFormModel().apply {
                 this.billsIncluded = billsIncluded
             }
-        withSubmittedValue(RegisterPropertyStepId.BillsIncluded.urlPathSegment, billsIncludedFormModel)
+        withSubmittedValue(BillsIncludedStep.ROUTE_SEGMENT, billsIncludedFormModel)
         return self()
     }
 
@@ -105,7 +113,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             FurnishedStatusFormModel().apply {
                 this.furnishedStatus = furnishedStatus
             }
-        withSubmittedValue(RegisterPropertyStepId.FurnishedStatus.urlPathSegment, furnishedStatusFormModel)
+        withSubmittedValue(FurnishedStatusStep.ROUTE_SEGMENT, furnishedStatusFormModel)
         return self()
     }
 
@@ -114,7 +122,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             RentFrequencyFormModel().apply {
                 this.rentFrequency = rentFrequency
             }
-        withSubmittedValue(RegisterPropertyStepId.RentFrequency.urlPathSegment, rentFrequencyFormModel)
+        withSubmittedValue(RentFrequencyStep.ROUTE_SEGMENT, rentFrequencyFormModel)
         return self()
     }
 
@@ -123,7 +131,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             RentAmountFormModel().apply {
                 this.rentAmount = rentAmount
             }
-        withSubmittedValue(RegisterPropertyStepId.RentAmount.urlPathSegment, rentAmountFormModel)
+        withSubmittedValue(RentAmountStep.ROUTE_SEGMENT, rentAmountFormModel)
         return self()
     }
 

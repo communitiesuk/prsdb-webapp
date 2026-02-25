@@ -5,8 +5,8 @@ import kotlinx.serialization.serializer
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -131,7 +131,7 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
                 SelectLocalCouncilFormModel().apply {
                     localCouncilId = localCouncil.id
                 }
-            withSubmittedValue(RegisterPropertyStepId.LocalCouncil.urlPathSegment, selectLocalCouncilFormModel)
+            withSubmittedValue(LocalCouncilStep.ROUTE_SEGMENT, selectLocalCouncilFormModel)
         }
 
         return self()
