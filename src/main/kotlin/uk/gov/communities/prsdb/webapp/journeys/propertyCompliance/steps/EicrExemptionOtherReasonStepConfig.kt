@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -16,7 +15,6 @@ class EicrExemptionOtherReasonStepConfig : AbstractRequestableStepConfig<Complet
         mapOf(
             "fieldSetHeading" to "forms.eicrExemptionOtherReason.fieldSetHeading",
             "fieldSetHint" to "forms.eicrExemptionOtherReason.fieldSetHint",
-            "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/exemptionOtherReasonForm"
