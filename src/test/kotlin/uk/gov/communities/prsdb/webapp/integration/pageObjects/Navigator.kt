@@ -554,7 +554,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(InviteJointLandlordStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
         return createValidPage(page, InviteJointLandlordFormPagePropertyRegistration::class)
     }
 

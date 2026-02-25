@@ -29,7 +29,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
     }
 
     fun withHasNoJointLandlords(): SelfType {
-        submittedValueMap.remove(InviteJointLandlordStep.ROUTE_SEGMENT)
+        submittedValueMap.remove(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
         return withHasJointLandlordsSetToFalse()
     }
 
@@ -47,7 +47,7 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
             InviteJointLandlordsFormModel().apply {
                 this.invitedEmailAddresses = emailAddresses
             }
-        withSubmittedValue(InviteJointLandlordStep.ROUTE_SEGMENT, inviteJointLandlordsFormModel)
+        withSubmittedValue(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT, inviteJointLandlordsFormModel)
         additionalDataMap["invitedJointLandlordEmails"] =
             Json.encodeToString(serializer(), emailAddresses.mapIndexed { index, email -> index to email }.toMap())
         return self()

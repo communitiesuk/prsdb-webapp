@@ -38,7 +38,7 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 savable()
             }
             step(journey.inviteJointLandlordStep) {
-                routeSegment(InviteJointLandlordStep.ROUTE_SEGMENT)
+                routeSegment(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkJointLandlordsStep }
             }
@@ -53,7 +53,7 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 nextStep { exitStep }
             }
             step(journey.inviteAnotherJointLandlordStep) {
-                routeSegment(InviteJointLandlordStep.ROUTE_SEGMENT)
+                routeSegment(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
                 parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
                 nextStep { journey.checkJointLandlordsStep }
             }

@@ -10,7 +10,7 @@ class InviteJointLandlordFormPagePropertyRegistration(
     page: Page,
 ) : EmailFormPage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${InviteJointLandlordStep.ROUTE_SEGMENT}",
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT}",
     ) {
     val heading = Heading(page.locator("h1"))
 }
