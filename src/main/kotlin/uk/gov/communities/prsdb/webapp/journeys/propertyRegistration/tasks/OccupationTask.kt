@@ -31,15 +31,8 @@ class OccupationTask : Task<OccupationState>() {
                 }
                 savable()
             }
-            step(journey.households) {
-                routeSegment(HouseholdStep.ROUTE_SEGMENT)
+            task(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.tenants }
-                savable()
-            }
-            step(journey.tenants) {
-                routeSegment(TenantsStep.ROUTE_SEGMENT)
-                parents { journey.households.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.bedrooms }
                 savable()
             }
