@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController.Companion.UPDATE_DATE_OF_BIRTH_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController.Companion.UPDATE_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController.Companion.UPDATE_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController.Companion.UPDATE_PHONE_NUMBER_ROUTE
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.dateOfBirth.UpdateDateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -51,7 +53,7 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     changeLinkMessageKey,
-                    if (!landlord.isVerified) "$UPDATE_ROUTE/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}" else null,
+                    if (!landlord.isVerified) "$UPDATE_DATE_OF_BIRTH_ROUTE/${UpdateDateOfBirthStep.ROUTE_SEGMENT}" else null,
                     withActionLink = withChangeLinks,
                 )
                 addRow(

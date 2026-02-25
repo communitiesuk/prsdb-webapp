@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
@@ -50,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsU
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -173,25 +175,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.dateOfBirth.UpdateDateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -391,7 +375,7 @@ class Navigator(
     }
 
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
-        navigateToPropertyRegistrationJourneyStep(LookupAddressStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.LookupAddress.urlPathSegment)
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
     }
 
@@ -401,7 +385,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationSelectAddress(customLookedUpAddresses).build(),
         )
-        navigateToPropertyRegistrationJourneyStep(SelectAddressStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.SelectAddress.urlPathSegment)
         return createValidPage(page, SelectAddressFormPagePropertyRegistration::class)
     }
 
@@ -409,7 +393,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationManualAddress().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(ManualAddressStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.ManualAddress.urlPathSegment)
         return createValidPage(page, ManualAddressFormPagePropertyRegistration::class)
     }
 
@@ -417,7 +401,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationSelectLocalCouncil().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(LocalCouncilStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.LocalCouncil.urlPathSegment)
         return createValidPage(page, SelectLocalCouncilFormPagePropertyRegistration::class)
     }
 
@@ -425,7 +409,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationPropertyType().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(PropertyTypeStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.PropertyType.urlPathSegment)
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
     }
 
@@ -433,7 +417,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(OwnershipTypeStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.OwnershipType.urlPathSegment)
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
@@ -441,7 +425,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationLicensingType().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(LicensingTypeStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.LicensingType.urlPathSegment)
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
@@ -449,7 +433,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationSelectiveLicence().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(SelectiveLicenceStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.SelectiveLicence.urlPathSegment)
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
@@ -457,7 +441,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHmoMandatoryLicence().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(HmoMandatoryLicenceStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment)
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
@@ -465,7 +449,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHmoAdditionalLicence().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(HmoAdditionalLicenceStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.HmoAdditionalLicence.urlPathSegment)
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
     }
 
@@ -473,7 +457,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(OccupiedStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.Occupancy.urlPathSegment)
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
@@ -481,7 +465,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHouseholds().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(HouseholdStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment)
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
     }
 
@@ -489,7 +473,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationPeople().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(TenantsStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.NumberOfPeople.urlPathSegment)
         return createValidPage(page, NumberOfPeopleFormPagePropertyRegistration::class)
     }
 
@@ -497,7 +481,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationBedrooms().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(BedroomsStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.NumberOfBedrooms.urlPathSegment)
         return createValidPage(page, NumberOfBedroomsFormPagePropertyRegistration::class)
     }
 
@@ -505,7 +489,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentIncludesBills().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(RentIncludesBillsStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentIncludesBills.urlPathSegment)
         return createValidPage(page, RentIncludesBillsFormPagePropertyRegistration::class)
     }
 
@@ -513,7 +497,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationBillsIncluded().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(BillsIncludedStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.BillsIncluded.urlPathSegment)
         return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
     }
 
@@ -521,7 +505,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationFurnished().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(FurnishedStatusStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.FurnishedStatus.urlPathSegment)
         return createValidPage(page, FurnishedStatusFormPagePropertyRegistration::class)
     }
 
@@ -529,7 +513,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentFrequency().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(RentFrequencyStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentFrequency.urlPathSegment)
         return createValidPage(page, RentFrequencyFormPagePropertyRegistration::class)
     }
 
@@ -539,7 +523,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentAmount(rentFrequency).build(),
         )
-        navigateToPropertyRegistrationJourneyStep(RentAmountStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.RentAmount.urlPathSegment)
         return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
     }
 
@@ -547,7 +531,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHasJointLandlords().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(HasJointLandlordsStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
         return createValidPage(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
     }
 
@@ -555,7 +539,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
         return createValidPage(page, InviteJointLandlordFormPagePropertyRegistration::class)
     }
 
@@ -571,7 +555,7 @@ class Navigator(
 
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().build())
-        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.CheckAnswers.urlPathSegment)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
@@ -1108,7 +1092,7 @@ class Navigator(
     }
 
     fun navigateToLandlordDetailsUpdateDateOfBirthPage() {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}")
+        navigate("${UpdateLandlordDateOfBirthController.UPDATE_DATE_OF_BIRTH_ROUTE}/${UpdateDateOfBirthStep.ROUTE_SEGMENT}")
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
@@ -1132,7 +1116,7 @@ class Navigator(
     fun goToPropertyDetailsUpdateOwnershipTypePage(propertyOwnershipId: Long): OwnershipTypeFormPagePropertyDetailsUpdate {
         navigate(
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnershipId) +
-                "/${OwnershipTypeStep.ROUTE_SEGMENT}",
+                "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
         )
         return createValidPage(
             page,
@@ -1162,7 +1146,7 @@ class Navigator(
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-                "/${OccupiedStep.ROUTE_SEGMENT}",
+                "/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
         )
         return createValidPage(
             page,
@@ -1174,7 +1158,7 @@ class Navigator(
     fun goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId: Long): CheckOccupancyAnswersPagePropertyDetailsUpdate {
         navigate(
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-                "/${PropertyRegistrationCyaStep.ROUTE_SEGMENT}",
+                "/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}",
         )
         return createValidPage(
             page,

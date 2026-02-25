@@ -194,6 +194,11 @@ class DateOfBirthFormModel : DateFormModel() {
 
     fun isValidDateOfBirth(): Boolean = isValidDate() && isValidDateForMinimumAge() && isValidDateForMaximumAge()
 
+    fun toLocalDate(): java.time.LocalDate =
+        toLocalDateOrNull() ?: throw uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException(
+            "DateOfBirthFormModel date fields are null or invalid when a valid date was expected",
+        )
+
     companion object {
         fun fromLandlord(landlord: Landlord): DateOfBirthFormModel =
             DateOfBirthFormModel().apply {
