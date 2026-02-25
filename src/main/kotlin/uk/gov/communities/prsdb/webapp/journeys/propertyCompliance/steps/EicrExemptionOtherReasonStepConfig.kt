@@ -16,7 +16,6 @@ class EicrExemptionOtherReasonStepConfig : AbstractRequestableStepConfig<Complet
         mapOf(
             "fieldSetHeading" to "forms.eicrExemptionOtherReason.fieldSetHeading",
             "fieldSetHint" to "forms.eicrExemptionOtherReason.fieldSetHint",
-            "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/exemptionOtherReasonForm"

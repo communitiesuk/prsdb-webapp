@@ -17,7 +17,6 @@ class GasSafetyExemptionOtherReasonStepConfig :
         mapOf(
             "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
             "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
-            "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/exemptionOtherReasonForm"

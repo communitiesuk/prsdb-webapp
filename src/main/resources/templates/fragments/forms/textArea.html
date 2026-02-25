@@ -1,4 +1,4 @@
-<th:block id="textArea-content" th:fragment="textArea(label, fieldName, hint, limit)" th:with="ariaLabel=${ariaLabel}"
+<th:block id="textArea-content" th:fragment="textArea(label, fieldName, hint)" th:with="ariaLabel=${ariaLabel}"
           th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#textArea-content/content()}, ${hint})}">
     <textarea class="govuk-textarea"
               th:classappend='${#fields.hasErrors(fieldName) ? "govuk-textarea--error" : ""}'

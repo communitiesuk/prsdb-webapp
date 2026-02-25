@@ -103,7 +103,6 @@ class LandlordDeregistrationJourney(
                         mapOf(
                             "title" to "deregisterLandlord.title",
                             "fieldSetHeading" to "forms.reason.landlordDeregistration.fieldSetHeading",
-                            "limit" to DEREGISTRATION_REASON_MAX_LENGTH,
                             "submitButtonText" to "forms.buttons.continue",
                         ),
                 ),

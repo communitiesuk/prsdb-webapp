@@ -26,7 +26,6 @@ class ReasonStepConfig(
         mapOf(
             "fieldSetHeading" to "forms.reason.propertyDeregistration.fieldSetHeading",
             "fieldSetHint" to "forms.reason.propertyDeregistration.fieldSetHint",
-            "limit" to DEREGISTRATION_REASON_MAX_LENGTH,
             "submitButtonText" to "forms.buttons.continue",
         )
 
