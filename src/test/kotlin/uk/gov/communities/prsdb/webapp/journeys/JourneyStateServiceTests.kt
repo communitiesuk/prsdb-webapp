@@ -107,7 +107,7 @@ class JourneyStateServiceTests {
         val service = createJourneyStateServiceWithJourneyId(session, "null")
 
         // Act
-        val actualMetadataMap = service.journeyStateMetadataMap
+        val actualMetadataMap = service.journeyStateMetadataStore
 
         // Assert
         assertEquals(expectedMetadataMap, actualMetadataMap)
@@ -121,7 +121,7 @@ class JourneyStateServiceTests {
         val service = createJourneyStateServiceWithJourneyId(session, "null")
 
         // Act
-        val actualMetadataMap = service.journeyStateMetadataMap
+        val actualMetadataMap = service.journeyStateMetadataStore
 
         // Assert
         assertTrue(actualMetadataMap.isEmpty())
@@ -279,7 +279,7 @@ class JourneyStateServiceTests {
         service.addSingleStepData(newStepDataKey, newStepDataValue)
 
         // Assert
-        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyMetadata.dataKey))!!
+        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyMetadata.journeyId))!!
         val stepData = objectToTypedStringKeyedMap<Map<String, String>>(updatedJourneyData["journeyData"])
 
         assertEquals("value1", stepData?.get("step-1")?.get("field1"))
@@ -300,7 +300,7 @@ class JourneyStateServiceTests {
 
         // Assert
 
-        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyMetadata.dataKey))!!
+        val updatedJourneyData = objectToStringKeyedMap(session.getAttribute(service.journeyMetadata.journeyId))!!
 
         assertEquals("existingValue", updatedJourneyData["existingKey"])
         assertEquals(17, updatedJourneyData["newKey"])
@@ -325,7 +325,7 @@ class JourneyStateServiceTests {
 
         assertNotNull(updatedMetadataMap)
         assertNull(updatedMetadataMap[journeyId])
-        assertEquals("data-key-2", updatedMetadataMap["journey-2"]?.dataKey)
+        assertEquals("data-key-2", updatedMetadataMap["journey-2"]?.journeyId)
     }
 
     @Test
@@ -388,7 +388,7 @@ class JourneyStateServiceTests {
         // Assert
         val updatedMetadataMap = session.getJourneyStateMetadataMap()
         val newMetadata = (updatedMetadataMap?.get(newJourneyId) as? JourneyMetadata)!!
-        val newJourneyData = objectToStringKeyedMap(session.getAttribute(newMetadata.dataKey))
+        val newJourneyData = objectToStringKeyedMap(session.getAttribute(newMetadata.journeyId))
         assertEquals("initialValue", newJourneyData?.get("initialKey"))
     }
 
@@ -424,7 +424,7 @@ class JourneyStateServiceTests {
         val updatedMetadataMap = session.getJourneyStateMetadataMap()
         val childMetadata = updatedMetadataMap?.get(childJourneyId) as? JourneyMetadata
         assertNotNull(childMetadata)
-        assertEquals(dataKey, childMetadata.dataKey)
+        assertEquals(dataKey, childMetadata.journeyId)
         assertEquals(parentJourneyId, childMetadata.baseJourneyId)
         assertEquals(subJourneyName, childMetadata.childJourneyName)
     }

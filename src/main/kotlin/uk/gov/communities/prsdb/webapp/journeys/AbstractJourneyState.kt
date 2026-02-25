@@ -42,16 +42,6 @@ abstract class AbstractJourneyState(
 
     override fun save(): SavedJourneyState = journeyStateService.save()
 
-    override fun initializeChildState(
-        childJourneyName: String,
-        seed: Any?,
-    ): String {
-        val newJourneyId = generateJourneyId(seed)
-
-        journeyStateService.initialiseChildJourney(newJourneyId, childJourneyName)
-        return newJourneyId
-    }
-
     override fun setJourneyId(newJourneyId: String) = journeyStateService.setJourneyId(newJourneyId)
 
     override fun copyJourneyTo(newJourneyId: String) = journeyStateService.copyJourneyTo(newJourneyId)

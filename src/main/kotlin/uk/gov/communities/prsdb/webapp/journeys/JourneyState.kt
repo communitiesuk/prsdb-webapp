@@ -20,11 +20,6 @@ interface JourneyState {
 
     fun deleteJourney()
 
-    fun initializeChildState(
-        childJourneyName: String,
-        seed: Any? = null,
-    ): String
-
     fun initializeState(seed: Any? = null): String
 
     fun initializeOrRestoreState(seed: Any?): String

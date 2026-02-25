@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
-import org.springframework.beans.factory.ObjectFactory
 import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -12,9 +11,9 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.CheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig2
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
@@ -36,34 +35,29 @@ class PropertyRegistrationCyaStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
     private val messageSource: MessageSource,
-    private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
-) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig2<CheckableElements, PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
-    private lateinit var newStateId: String
-
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        createCyaJourneyStates(state)
-        return mapOf(
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
+        mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
-            "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
+            "licensingDetails" to
+                licensingHelper.getCheckYourAnswersSummaryList(state, state.getCyaJourneyId(CheckableElements.LICENSING)),
             "tenancyDetails" to getTenancyDetailsSummaryList(state),
             "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
 
-    private fun createCyaJourneyStates(state: PropertyRegistrationJourneyState) {
-        val newId = "my-new-id"
-        state.copyJourneyTo(newId)
-        val newState = stateFactory.getObject().apply { setJourneyId(newId) }
-        newStateId = newState.journeyId
-        newState.checkingAnswersFor = CheckableElements.PROPERTY_TYPE
-        newState.realBaseJourneyIdForCya = state.journeyId
+    override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
+        CheckableElements.entries.forEach { checkableElement ->
+            if (!state.cyaJourneys.contains(checkableElement)) {
+                state.initialiseCyaChildJourney(childJourneyId(checkableElement), checkableElement)
+            }
+        }
     }
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
@@ -125,7 +119,7 @@ class PropertyRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
-            Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
+            Destination(state.alreadyRegisteredStep)
         } else {
             super.resolveNextDestination(state, defaultDestination)
         }
@@ -141,12 +135,12 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination.VisitableStep(state.lookupAddressStep, childJourneyId),
+                    Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(CheckableElements.ADDRESS)),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                     localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination.VisitableStep(state.localCouncilStep, childJourneyId),
+                    Destination.VisitableStep(state.localCouncilStep, state.getCyaJourneyId(CheckableElements.COUNCIL)),
                 ),
             )
         }
@@ -157,7 +151,7 @@ class PropertyRegistrationCyaStepConfig(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            Destination.VisitableStep(state.propertyTypeStep, newStateId),
+            Destination.VisitableStep(state.propertyTypeStep, state.getCyaJourneyId(CheckableElements.PROPERTY_TYPE)),
         )
     }
 
@@ -165,25 +159,25 @@ class PropertyRegistrationCyaStepConfig(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             state.ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
+            Destination.VisitableStep(state.ownershipTypeStep, state.getCyaJourneyId(CheckableElements.OWNERSHIP_TYPE)),
         )
 
     private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = state.occupied.formModel.occupied ?: false
-                add(getOccupancyStatusRow(isOccupied, state.occupied))
+                add(getOccupancyStatusRow(isOccupied, state))
                 if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state))
             }
 
     private fun getOccupancyStatusRow(
         isOccupied: Boolean,
-        occupiedStep: RequestableStep<*, *, *>,
+        state: PropertyRegistrationJourneyState,
     ): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.tenancyDetails.occupied",
             isOccupied,
-            Destination.VisitableStep(occupiedStep, childJourneyId),
+            Destination.VisitableStep(state.occupied, state.getCyaJourneyId(CheckableElements.OCCUPATION)),
         )
 
     private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
@@ -280,4 +274,4 @@ class PropertyRegistrationCyaStepConfig(
 @JourneyFrameworkComponent
 final class PropertyRegistrationCyaStep(
     stepConfig: PropertyRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<PropertyRegistrationJourneyState>(stepConfig)
+) : RequestableStep<Complete, CheckAnswersFormModel, PropertyRegistrationJourneyState>(stepConfig)

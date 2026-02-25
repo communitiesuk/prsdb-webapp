@@ -47,9 +47,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Joint
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -64,6 +63,8 @@ class NewPropertyRegistrationJourneyFactory(
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
+        val output = state.isAddressAlreadyRegistered
+
         return when (state.checkingAnswersFor) {
             null -> mainJourneyMap(state)
             CheckableElements.PROPERTY_TYPE -> checkPropertyTypeMap(state)
@@ -74,6 +75,8 @@ class NewPropertyRegistrationJourneyFactory(
             CheckableElements.TENANTS -> TODO()
             CheckableElements.RENT_LEVELS -> TODO()
             CheckableElements.JOINT_LANDLORDS -> TODO()
+            CheckableElements.ADDRESS -> TODO()
+            CheckableElements.COUNCIL -> TODO()
         }
     }
 
@@ -83,7 +86,7 @@ class NewPropertyRegistrationJourneyFactory(
                 backDestination {
                     Destination.ExternalUrl(
                         "check-answers",
-                        mapOf("journeyId" to (journey.realBaseJourneyIdForCya ?: journey.journeyId)),
+                        mapOf("journeyId" to journey.baseJourneyId),
                     )
                 }
                 routeSegment("property-type")
@@ -97,7 +100,7 @@ class NewPropertyRegistrationJourneyFactory(
             unreachableStepDestination {
                 Destination.ExternalUrl(
                     "check-answers",
-                    mapOf("journeyId" to (journey.realBaseJourneyIdForCya ?: journey.journeyId)),
+                    mapOf("journeyId" to journey.baseJourneyId),
                 )
             }
             configure {
@@ -164,7 +167,6 @@ class NewPropertyRegistrationJourneyFactory(
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
-            checkYourAnswersJourney()
         }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
@@ -214,15 +216,23 @@ class PropertyRegistrationJourney(
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
+    private val objectFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var cyaJourneys: Map<CheckableElements, String> by delegateProvider.requiredDelegate(
+        "checkYourAnswersChildJourneyId",
+        mapOf(),
+    )
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var checkingAnswersFor: CheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
-    override var realBaseJourneyIdForCya: String? by delegateProvider.nullableDelegate("realBaseJourneyIdForCya")
+
+    override fun createChildJourneyState(cyaJourneyId: String): PropertyRegistrationJourneyState {
+        copyJourneyTo(cyaJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    }
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -240,7 +250,7 @@ interface PropertyRegistrationJourneyState :
     LicensingState,
     OccupationState,
     JointLandlordsState,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState2<CheckableElements> {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
     val propertyTypeStep: PropertyTypeStep
@@ -250,12 +260,11 @@ interface PropertyRegistrationJourneyState :
     val jointLandlordsTask: JointLandlordsTask
     val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: PropertyRegistrationCyaStep
-
-    var realBaseJourneyIdForCya: String?
-    var checkingAnswersFor: CheckableElements?
 }
 
 enum class CheckableElements {
+    ADDRESS,
+    COUNCIL,
     PROPERTY_TYPE,
     OWNERSHIP_TYPE,
     LICENSING,

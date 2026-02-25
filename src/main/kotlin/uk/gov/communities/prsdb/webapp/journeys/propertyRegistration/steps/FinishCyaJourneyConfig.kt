@@ -19,11 +19,12 @@ class FinishCyaJourneyConfig(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination {
-        val originalId = state.realBaseJourneyIdForCya!!
+        val originalId = state.baseJourneyId
         val destination = Destination.ExternalUrl("check-answers", mapOf("journeyId" to originalId))
         state.copyJourneyTo(originalId)
         val originalState = stateFactory.getObject().apply { setJourneyId(originalId) }
         originalState.checkingAnswersFor = null
+        state.checkingAnswersFor?.let { originalState.cyaJourneys -= it }
         state.deleteJourney()
         return destination
     }
