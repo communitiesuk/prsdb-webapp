@@ -43,4 +43,6 @@ interface JourneyState {
         }
 
     fun save(): SavedJourneyState
+
+    fun setJourneyId(newJourneyId: String)
 }

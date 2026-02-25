@@ -51,4 +51,6 @@ abstract class AbstractJourneyState(
         journeyStateService.initialiseChildJourney(newJourneyId, childJourneyName)
         return newJourneyId
     }
+
+    override fun setJourneyId(newJourneyId: String) = journeyStateService.setJourneyId(newJourneyId)
 }
