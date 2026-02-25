@@ -113,7 +113,7 @@ class GasSafetyCyaSummaryRowsFactory(
 
     private fun getGasSafetyExemptionRow(): SummaryListRowViewModel {
         val exemptionReason = state.gasSafetyExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason
-        val fieldValue2 =
+        val fieldValue =
             when (exemptionReason) {
                 null -> {
                     "commonText.none"
@@ -129,18 +129,6 @@ class GasSafetyCyaSummaryRowsFactory(
                 else -> {
                     exemptionReason
                 }
-            }
-
-        val fieldValue =
-            if ((exemptionReason == null)) {
-                "commonText.none"
-            } else if (exemptionReason == GasSafetyExemptionReason.OTHER) {
-                listOf(
-                    exemptionReason,
-                    state.gasSafetyExemptionOtherReasonStep.formModel.otherReason,
-                )
-            } else {
-                exemptionReason
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
