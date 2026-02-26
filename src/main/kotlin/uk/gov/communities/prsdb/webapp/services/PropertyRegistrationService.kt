@@ -46,6 +46,7 @@ class PropertyRegistrationService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
+        customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -79,6 +80,7 @@ class PropertyRegistrationService(
                 rentAmount = rentAmount,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = license,
             )

@@ -90,6 +90,7 @@ class PropertyRegistrationServiceTests {
                     RentFrequency.MONTHLY,
                     null,
                     123.toBigDecimal(),
+                    null,
                 )
             }
 
@@ -121,6 +122,7 @@ class PropertyRegistrationServiceTests {
                     RentFrequency.MONTHLY,
                     null,
                     123.toBigDecimal(),
+                    null,
                 )
             }
 
@@ -178,6 +180,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = licence,
                 numBedrooms = numberOfBedrooms,
@@ -209,6 +212,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency,
                 customRentFrequency,
                 rentAmount,
+                null,
             )
 
         // Assert
@@ -219,6 +223,7 @@ class PropertyRegistrationServiceTests {
             numberOfPeople = numberOfPeople,
             primaryLandlord = landlord,
             propertyBuildType = propertyType,
+            customPropertyType = null,
             address = address,
             license = licence,
             numBedrooms = numberOfBedrooms,
@@ -253,6 +258,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = any(),
                 primaryLandlord = any(),
                 propertyBuildType = any(),
+                customPropertyType = anyOrNull(),
                 address = any(),
                 license = anyOrNull(),
                 isActive = any(),
@@ -286,6 +292,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
         )
 
         // Assert
@@ -350,6 +357,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = null,
                 numBedrooms = numberOfBedrooms,
@@ -380,6 +388,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency,
                 customRentFrequency,
                 rentAmount,
+                null,
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
@@ -423,6 +432,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = license,
                 isActive = true,
@@ -454,6 +464,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
             jointLandlordEmails,
         )
 
@@ -498,6 +509,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = null,
                 isActive = true,
@@ -529,6 +541,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
             null,
         )
 
@@ -571,6 +584,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = null,
                 isActive = true,
@@ -602,6 +616,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
             jointLandlordEmails,
         )
 
