@@ -95,7 +95,8 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createLandlord()
-        val propertyBuildType = PropertyType.FLAT
+        val propertyBuildType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val license = License()
         val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
@@ -115,7 +116,7 @@ class PropertyOwnershipServiceTests {
                 registrationNumber = registrationNumber,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyBuildType,
-                customPropertyType = null,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
@@ -144,6 +145,7 @@ class PropertyOwnershipServiceTests {
             numberOfPeople = tenants,
             primaryLandlord = landlord,
             propertyBuildType = propertyBuildType,
+            customPropertyType = customPropertyType,
             address = address,
             license = license,
             numBedrooms = numberOfBedrooms,
@@ -153,7 +155,6 @@ class PropertyOwnershipServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            customPropertyType = null,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -168,7 +169,8 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createLandlord()
-        val propertyBuildType = PropertyType.FLAT
+        val propertyBuildType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
         val numberOfBedrooms = 1
@@ -187,7 +189,7 @@ class PropertyOwnershipServiceTests {
                 registrationNumber = registrationNumber,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyBuildType,
-                customPropertyType = null,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = null,
                 incompleteComplianceForm = incompleteComplianceForm,
@@ -216,8 +218,8 @@ class PropertyOwnershipServiceTests {
             numberOfPeople = tenants,
             primaryLandlord = landlord,
             propertyBuildType = propertyBuildType,
+            customPropertyType = customPropertyType,
             address = address,
-            customPropertyType = null,
             numBedrooms = numberOfBedrooms,
             billsIncludedList = billsIncludedList,
             customBillsIncluded = customBillsIncluded,

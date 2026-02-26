@@ -136,7 +136,8 @@ class PropertyRegistrationServiceTests {
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
-        val propertyType = PropertyType.DETACHED_HOUSE
+        val propertyType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val licenceType = LicensingType.SELECTIVE_LICENCE
@@ -158,6 +159,7 @@ class PropertyRegistrationServiceTests {
                 currentNumTenants = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = licence,
                 registrationNumber = registrationNumber,
@@ -180,7 +182,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
-                customPropertyType = null,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = licence,
                 numBedrooms = numberOfBedrooms,
@@ -316,7 +318,8 @@ class PropertyRegistrationServiceTests {
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
-        val propertyType = PropertyType.DETACHED_HOUSE
+        val propertyType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val licenceType = LicensingType.NO_LICENSING
@@ -357,7 +360,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
-                customPropertyType = null,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = null,
                 numBedrooms = numberOfBedrooms,
