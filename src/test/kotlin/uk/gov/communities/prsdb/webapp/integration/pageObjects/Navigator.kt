@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.FindPropertyPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
@@ -1422,6 +1423,12 @@ class Navigator(
     fun goToJoinPropertyStartPage(): JoinPropertyStartPage {
         navigate(JoinPropertyController.JOIN_PROPERTY_ROUTE)
         return createValidPage(page, JoinPropertyStartPage::class)
+    }
+
+    fun goToFindPropertyPage(): FindPropertyPage {
+        val startPage = goToJoinPropertyStartPage()
+        startPage.continueButton.clickAndWait()
+        return createValidPage(page, FindPropertyPage::class)
     }
 
     companion object {
