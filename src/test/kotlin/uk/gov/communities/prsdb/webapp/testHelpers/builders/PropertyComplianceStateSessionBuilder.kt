@@ -1,17 +1,15 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
-import kotlinx.datetime.todayIn
+import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
@@ -75,6 +73,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 
 class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<PropertyComplianceStateSessionBuilder>() {
     // Gas Safety Certificate
@@ -84,9 +83,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         return self()
     }
 
-    fun withGasSafetyIssueDate(
-        issueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    ): PropertyComplianceStateSessionBuilder {
+    fun withGasSafetyIssueDate(issueDate: LocalDate = DateTimeHelper().getCurrentDateInUK()): PropertyComplianceStateSessionBuilder {
         val formModel =
             TodayOrPastDateFormModel().apply {
                 day = issueDate.dayOfMonth.toString()
@@ -97,7 +94,9 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         return self()
     }
 
-    fun withGasSafeEngineerNum(engineerNum: String = "1234567"): PropertyComplianceStateSessionBuilder {
+    fun withGasSafeEngineerNum(
+        engineerNum: String = MockPropertyComplianceData.defaultGasEngineerNumber,
+    ): PropertyComplianceStateSessionBuilder {
         val formModel = GasSafeEngineerNumFormModel().apply { engineerNumber = engineerNum }
         withSubmittedValue(GasSafetyEngineerNumberStep.ROUTE_SEGMENT, formModel)
         return self()
@@ -150,6 +149,11 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         return self()
     }
 
+    fun withGasSafetyExemptionMissingConfirmation(): PropertyComplianceStateSessionBuilder {
+        withSubmittedValue(GasSafetyExemptionMissingStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     fun withMissingGasSafetyExemption(): PropertyComplianceStateSessionBuilder {
         withGasSafetyCertStatus(false)
         withGasSafetyCertExemptionStatus(false)
@@ -164,9 +168,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         return self()
     }
 
-    fun withEicrIssueDate(
-        issueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    ): PropertyComplianceStateSessionBuilder {
+    fun withEicrIssueDate(issueDate: LocalDate = DateTimeHelper().getCurrentDateInUK()): PropertyComplianceStateSessionBuilder {
         val formModel =
             TodayOrPastDateFormModel().apply {
                 day = issueDate.dayOfMonth.toString()
@@ -221,6 +223,11 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
 
     fun withEicrExemptionConfirmation(): PropertyComplianceStateSessionBuilder {
         withSubmittedValue(EicrExemptionConfirmationStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withMissingEicrExemptionConfirmation(): PropertyComplianceStateSessionBuilder {
+        withSubmittedValue(EicrExemptionMissingStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -427,20 +434,33 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
                 .withKeepPropertySafeDeclaration()
                 .withResponsibilityToTenantsDeclaration()
 
+        fun beforeCyaAllBranchesPopulatedWithAllCompliances(
+            gasSafetyCertUploadId: Long = 1L,
+            eicrUploadId: Long = 2L,
+        ) = populateAllComplianceJourneyBranches(
+            hasGasSafetyCert = true,
+            hasEicr = true,
+            hasEpc = HasEpc.YES,
+            gasSafetyUploadId = gasSafetyCertUploadId,
+            eicrUploadId = eicrUploadId,
+        )
+
         private fun populateAllComplianceJourneyBranches(
             hasGasSafetyCert: Boolean,
-            gasSafetyIssueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            gasSafetyIssueDate: LocalDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate.toKotlinLocalDate(),
             hasGasSafetyExemption: Boolean = true,
             hasEicr: Boolean,
-            eicrIssueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            eicrIssueDate: LocalDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate.toKotlinLocalDate(),
             hasEicrExemption: Boolean = true,
             hasEpc: HasEpc,
             automatchedEpcIsCorrect: Boolean = false,
             lookedUpEpcIsCorrect: Boolean = true,
-            epcEnergyRating: String,
-            epcExpiryDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(5, DAY),
+            epcEnergyRating: String = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
+            epcExpiryDate: LocalDate = MockPropertyComplianceData.defaultEpcExpiryDate.toKotlinLocalDate(),
             tenancyStartedBeforeEpcExpiry: Boolean = true,
             hasMeesExemption: Boolean = true,
+            gasSafetyUploadId: Long,
+            eicrUploadId: Long,
         ): PropertyComplianceStateSessionBuilder {
             val automatchedEpc =
                 MockEpcData.createEpcDataModel(
@@ -469,32 +489,30 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
                 // Gas safety upload path
                 .withGasSafetyIssueDate(gasSafetyIssueDate)
                 .withGasSafeEngineerNum()
-                .withGasCertFileUploadId(uploadId = 1L)
+                .withGasCertFileUploadId(uploadId = gasSafetyUploadId)
                 .withGasSafetyUploadConfirmation()
                 // Expired gas safety
                 .withGasSafetyOutdatedConfirmation()
                 // Gas Safety Exemption path
                 .withGasSafetyCertExemptionStatus(hasGasSafetyExemption)
-                .withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
                 .withGasSafetyCertExemptionOtherReason("Other reason")
                 .withGasSafetyExemptionConfirmation()
                 // Missing GasSafety
-                .withMissingGasSafetyExemption()
+                .withGasSafetyExemptionMissingConfirmation()
                 // EICR
                 .withEicrStatus(hasEicr)
                 // EICR upload path
                 .withEicrIssueDate(eicrIssueDate)
-                .withEicrUploadId(uploadId = 2L)
+                .withEicrUploadId(uploadId = eicrUploadId)
                 .withEicrUploadConfirmation()
                 // Expired EICR
                 .withEicrOutdatedConfirmation()
                 // EICR Exemption path
                 .withEicrExemptionStatus(hasEicrExemption)
-                .withEicrExemptionReason(EicrExemptionReason.OTHER)
                 .withEicrExemptionOtherReason("Other reason")
                 .withEicrExemptionConfirmation()
                 // Missing EICR
-                .withMissingEicrExemption()
+                .withMissingEicrExemptionConfirmation()
                 // EPC - automatched
                 .withEpcStatus(hasEpc)
                 .withAutoMatchedEpcDetails(automatchedEpc)
@@ -519,6 +537,9 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
                 .withEpcExemptionReason(EpcExemptionReason.DUE_FOR_DEMOLITION)
                 .withEpcExemptionConfirmation()
                 .withMissingEpc()
+                .withFireSafetyDeclaration()
+                .withKeepPropertySafeDeclaration()
+                .withResponsibilityToTenantsDeclaration()
         }
     }
 }

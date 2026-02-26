@@ -8,12 +8,15 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
@@ -72,6 +75,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.local.services.LocalFileDownloader
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
@@ -79,7 +83,10 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropert
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData.Companion.DEFAULT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.net.URI
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertContains
@@ -100,6 +107,12 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @MockitoBean
     private lateinit var fileUploader: FileUploader
 
+    @MockitoBean
+    private lateinit var localFileDownloader: LocalFileDownloader
+
+    @MockitoSpyBean
+    private lateinit var propertyComplianceService: PropertyComplianceService
+
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
@@ -107,6 +120,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(ABSOLUTE_DASHBOARD_URL))
         whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI(ABSOLUTE_COMPLIANCE_INFO_URL))
+        whenever(localFileDownloader.getDownloadUrl(any(), anyOrNull())).thenReturn("/mock-download-url")
     }
 
     @Test
@@ -839,6 +853,41 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             ConfirmationPagePropertyCompliance::class,
             mapOf("propertyOwnershipId" to OTHER_PROPERTY_OWNERSHIP_ID.toString()),
         )
+    }
+
+    @Nested
+    inner class CheckAnswersStepTests : NestedIntegrationTestWithMutableData("data-local.sql") {
+        @Test
+        fun `Submitting with all certificates valid saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersPageWithAllCompliances(
+                    PROPERTY_OWNERSHIP_ID,
+                    gasSafetyCertUploadId = 1L,
+                    eicrUploadId = 2L,
+                )
+
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = 1L,
+                gasSafetyCertIssueDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate,
+                gasSafetyCertEngineerNum = MockPropertyComplianceData.defaultGasEngineerNumber,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = 2L,
+                eicrIssueDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate,
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl =
+                    "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/" +
+                        DEFAULT_EPC_CERTIFICATE_NUMBER,
+                epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
+                epcExemptionReason = null,
+                epcMeesExemptionReason = null,
+            )
+        }
     }
 
     companion object {
