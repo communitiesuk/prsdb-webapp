@@ -42,4 +42,8 @@ class LocalCouncilStepConfig(
 @JourneyFrameworkComponent
 final class LocalCouncilStep(
     stepConfig: LocalCouncilStepConfig,
-) : RequestableStep<Complete, SelectLocalCouncilFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, SelectLocalCouncilFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "local-council"
+    }
+}

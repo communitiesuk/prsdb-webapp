@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.NumberOfPeopleFormPage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 
 class OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate(
     page: Page,
@@ -11,5 +11,5 @@ class OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate(
 ) : NumberOfPeopleFormPage(
         page,
         UpdateOccupancyController.getUpdateOccupancyRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}",
+            "/${TenantsStep.ROUTE_SEGMENT}",
     )
