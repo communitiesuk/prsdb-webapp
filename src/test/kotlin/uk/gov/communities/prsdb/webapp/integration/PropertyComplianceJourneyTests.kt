@@ -856,7 +856,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Nested
-    inner class CheckAnswersStepTests : NestedIntegrationTestWithMutableData("data-local.sql") {
+    inner class ComplianceCreationTests : NestedIntegrationTestWithMutableData("data-local.sql") {
         val epcUrl = "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/$DEFAULT_EPC_CERTIFICATE_NUMBER"
 
         @Test
@@ -926,6 +926,12 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 epcMeesExemptionReason = null,
             )
         }
+
+        // TODO PDJB-467 - all missing certificates
+
+        // TODO PDJB-467 - all exemptions
+
+        // TODO PDJB-467 - mees exemption
     }
 
     companion object {
