@@ -1,12 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
+import java.time.LocalDate
 
 @IsValidPrioritised
 class DateOfBirthFormModel : DateFormModel() {
@@ -193,6 +195,11 @@ class DateOfBirthFormModel : DateFormModel() {
     }
 
     fun isValidDateOfBirth(): Boolean = isValidDate() && isValidDateForMinimumAge() && isValidDateForMaximumAge()
+
+    fun toLocalDate(): LocalDate =
+        toLocalDateOrNull() ?: throw NotNullFormModelValueIsNullException(
+            "DateOfBirthFormModel date fields are null or invalid when a valid date was expected",
+        )
 
     companion object {
         fun fromLandlord(landlord: Landlord): DateOfBirthFormModel =

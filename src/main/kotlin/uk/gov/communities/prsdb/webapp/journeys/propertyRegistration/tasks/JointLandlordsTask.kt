@@ -55,6 +55,10 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
             step(journey.inviteAnotherJointLandlordStep) {
                 routeSegment(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
                 parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
+                // If no back step is set, the parent is used instead.
+                // If an internal step is the back step, the journey will go back to the nearest visitable ancestor of the internal step.
+                // In this case, we want to go back to the check step, so we need to explicitly set the back step.
+                backStep { journey.checkJointLandlordsStep }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.removeJointLandlordStep) {
