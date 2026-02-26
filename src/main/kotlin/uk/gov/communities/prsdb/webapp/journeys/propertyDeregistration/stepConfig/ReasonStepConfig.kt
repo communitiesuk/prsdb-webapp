@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTRATION_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -26,7 +25,6 @@ class ReasonStepConfig(
         mapOf(
             "fieldSetHeading" to "forms.reason.propertyDeregistration.fieldSetHeading",
             "fieldSetHint" to "forms.reason.propertyDeregistration.fieldSetHint",
-            "limit" to DEREGISTRATION_REASON_MAX_LENGTH,
             "submitButtonText" to "forms.buttons.continue",
         )
 

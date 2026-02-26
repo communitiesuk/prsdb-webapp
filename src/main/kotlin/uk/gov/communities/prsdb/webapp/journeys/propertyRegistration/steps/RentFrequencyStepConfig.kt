@@ -49,4 +49,8 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
 @JourneyFrameworkComponent
 final class RentFrequencyStep(
     stepConfig: RentFrequencyStepConfig,
-) : RequestableStep<Complete, RentFrequencyFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, RentFrequencyFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "rent-frequency"
+    }
+}

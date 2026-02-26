@@ -15,7 +15,15 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
@@ -73,8 +81,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 addressName,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.LookupAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LookupAddress.urlPathSegment}",
+                    LookupAddressStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LookupAddressStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -116,8 +124,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode),
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.LookupAddress.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LookupAddress.urlPathSegment}",
+                    LookupAddressStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LookupAddressStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -130,8 +138,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 localCouncil.name,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.LocalCouncil.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LocalCouncil.urlPathSegment}",
+                    LocalCouncilStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LocalCouncilStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -160,8 +168,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 PropertyType.DETACHED_HOUSE,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.PropertyType.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.PropertyType.urlPathSegment}",
+                    PropertyTypeStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${PropertyTypeStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -186,8 +194,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 listOf(PropertyType.OTHER, customType),
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.PropertyType.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.PropertyType.urlPathSegment}",
+                    PropertyTypeStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${PropertyTypeStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -211,8 +219,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 OwnershipType.FREEHOLD,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.OwnershipType.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+                    OwnershipTypeStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OwnershipTypeStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -236,8 +244,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 false,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.Occupancy.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.Occupancy.urlPathSegment}",
+                    OccupiedStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OccupiedStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -263,8 +271,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 true,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.Occupancy.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.Occupancy.urlPathSegment}",
+                    OccupiedStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OccupiedStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -277,8 +285,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 households,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment}",
+                    HouseholdStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${HouseholdStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails
@@ -292,8 +300,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                 people,
                 SummaryListRowActionViewModel(
                     "forms.links.change",
-                    RegisterPropertyStepId.NumberOfPeople.urlPathSegment +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.NumberOfPeople.urlPathSegment}",
+                    TenantsStep.ROUTE_SEGMENT +
+                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${TenantsStep.ROUTE_SEGMENT}",
                 ),
             ),
             propertyDetails.single {
@@ -330,8 +338,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                     LicensingType.NO_LICENSING,
                     SummaryListRowActionViewModel(
                         "forms.links.change",
-                        RegisterPropertyStepId.LicensingType.urlPathSegment +
-                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
+                        LicensingTypeStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LicensingTypeStep.ROUTE_SEGMENT}",
                     ),
                 ),
                 licensingDetails.singleOrNull(),
@@ -355,8 +363,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                     LicensingType.HMO_MANDATORY_LICENCE,
                     SummaryListRowActionViewModel(
                         "forms.links.change",
-                        RegisterPropertyStepId.LicensingType.urlPathSegment +
-                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.LicensingType.urlPathSegment}",
+                        LicensingTypeStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LicensingTypeStep.ROUTE_SEGMENT}",
                     ),
                 ),
                 licensingDetails.single {
@@ -369,8 +377,8 @@ class PropertyRegistrationCheckAnswersPageTests {
                     licenceNumber,
                     SummaryListRowActionViewModel(
                         "forms.links.change",
-                        RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment +
-                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${RegisterPropertyStepId.HmoMandatoryLicence.urlPathSegment}",
+                        HmoMandatoryLicenceStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${HmoMandatoryLicenceStep.ROUTE_SEGMENT}",
                     ),
                 ),
                 licensingDetails.single {

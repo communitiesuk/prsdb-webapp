@@ -41,6 +41,8 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
@@ -1018,11 +1020,11 @@ class Navigator(
     }
 
     fun navigateToLandlordDetailsUpdateNamePage() {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}")
+        navigate("${UpdateLandlordNameController.UPDATE_NAME_ROUTE}/${NameStep.ROUTE_SEGMENT}")
     }
 
     fun navigateToLandlordDetailsUpdateDateOfBirthPage() {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}")
+        navigate("${UpdateLandlordDateOfBirthController.UPDATE_DATE_OF_BIRTH_ROUTE}/${DateOfBirthStep.ROUTE_SEGMENT}")
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {

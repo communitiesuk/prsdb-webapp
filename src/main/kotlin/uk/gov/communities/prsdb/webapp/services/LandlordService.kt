@@ -121,13 +121,7 @@ class LandlordService(
     ) {
         updateLandlordForBaseUserId(
             baseUserId,
-            LandlordUpdateModel(
-                email = email,
-                name = null,
-                phoneNumber = null,
-                address = null,
-                dateOfBirth = null,
-            ),
+            LandlordUpdateModel(email = email),
         ) {}
     }
 
@@ -138,12 +132,34 @@ class LandlordService(
     ) {
         updateLandlordForBaseUserId(
             baseUserId,
+            LandlordUpdateModel(phoneNumber = phoneNumber),
+        ) {}
+    }
+
+    @Transactional
+    fun updateLandlordName(
+        baseUserId: String,
+        name: String,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(name = name),
+        ) {}
+    }
+
+    @Transactional
+    fun updateLandlordDateOfBirth(
+        baseUserId: String,
+        dateOfBirth: LocalDate,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
             LandlordUpdateModel(
                 email = null,
                 name = null,
-                phoneNumber = phoneNumber,
+                phoneNumber = null,
                 address = null,
-                dateOfBirth = null,
+                dateOfBirth = dateOfBirth,
             ),
         ) {}
     }

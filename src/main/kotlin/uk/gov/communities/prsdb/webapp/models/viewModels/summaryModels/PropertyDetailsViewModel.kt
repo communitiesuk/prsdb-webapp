@@ -9,13 +9,15 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Com
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsViewModel(
@@ -82,7 +84,7 @@ class PropertyDetailsViewModel(
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
                     changeLinkMessageKey,
                     UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
-                        "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+                        "/${OwnershipTypeStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
             }.toList()
@@ -97,7 +99,7 @@ class PropertyDetailsViewModel(
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     changeLinkMessageKey,
                     getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                        "/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
+                        "/${LicensingTypeStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.license != null && propertyOwnership.license!!.licenseType != LicensingType.NO_LICENSING) {
@@ -116,7 +118,7 @@ class PropertyDetailsViewModel(
                     isTenantedKey,
                     changeLinkMessageKey,
                     UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
-                        "/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
+                        "/${OccupiedStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.isOccupied) {
