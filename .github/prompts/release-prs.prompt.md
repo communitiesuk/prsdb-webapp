@@ -36,7 +36,7 @@ PRSD-NONE: Fixes bug on windows, Updates test seed data
 ## PR Title Format
 
 - main -> test: `Release main to test #N` (increment from last release)
-- main -> nft: `Release main to nft #N`
+- main -> nft: `Release main to nft #N` (increment from last release)
 
 ## Commands
 
@@ -52,6 +52,7 @@ gh pr list --repo communitiesuk/prsdb-webapp --state open --draft --search "Rele
 
 # Find previous release PR numbers
 gh pr list --repo communitiesuk/prsdb-webapp --state all --search "Release main to test" --limit 5
+gh pr list --repo communitiesuk/prsdb-webapp --state all --search "Release main to nft" --limit 5
 
 # Update existing draft PR
 gh pr edit {PR_NUMBER} --body "## Release notes
@@ -60,6 +61,9 @@ gh pr edit {PR_NUMBER} --body "## Release notes
 
 # Or create new PR if no draft exists
 gh pr create --base test --head main --title "Release main to test #N" --body "## Release notes
+
+..."
+gh pr create --base nft --head main --title "Release main to nft #N" --body "## Release notes
 
 ..."
 ```
