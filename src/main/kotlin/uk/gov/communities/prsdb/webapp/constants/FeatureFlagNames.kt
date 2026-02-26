@@ -34,6 +34,8 @@ const val MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE = "migrate-landlord-phone-number-
 
 const val MIGRATE_LANDLORD_NAME_UPDATE = "migrate-landlord-name-update"
 
+const val MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE = "migrate-landlord-date-of-birth-update"
+
 val featureFlagNames =
     listOf(
         EXAMPLE_FEATURE_FLAG_ONE,
@@ -48,4 +50,5 @@ val featureFlagNames =
         MIGRATE_LANDLORD_EMAIL_UPDATE,
         MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE,
         MIGRATE_LANDLORD_NAME_UPDATE,
+        MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE,
     )
