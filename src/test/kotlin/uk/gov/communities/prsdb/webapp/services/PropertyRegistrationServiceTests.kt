@@ -214,7 +214,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency,
                 customRentFrequency,
                 rentAmount,
-                null,
+                customPropertyType,
             )
 
         // Assert
@@ -225,7 +225,7 @@ class PropertyRegistrationServiceTests {
             numberOfPeople = numberOfPeople,
             primaryLandlord = landlord,
             propertyBuildType = propertyType,
-            customPropertyType = null,
+            customPropertyType = customPropertyType,
             address = address,
             license = licence,
             numBedrooms = numberOfBedrooms,
@@ -260,7 +260,6 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = any(),
                 primaryLandlord = any(),
                 propertyBuildType = any(),
-                customPropertyType = anyOrNull(),
                 address = any(),
                 license = anyOrNull(),
                 isActive = any(),
@@ -271,6 +270,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = anyOrNull(),
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -391,7 +391,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency,
                 customRentFrequency,
                 rentAmount,
-                null,
+                customPropertyType,
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
