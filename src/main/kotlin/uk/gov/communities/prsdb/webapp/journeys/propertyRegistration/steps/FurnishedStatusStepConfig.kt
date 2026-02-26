@@ -44,4 +44,8 @@ class FurnishedStatusStepConfig : AbstractRequestableStepConfig<Complete, Furnis
 @JourneyFrameworkComponent
 final class FurnishedStatusStep(
     stepConfig: FurnishedStatusStepConfig,
-) : RequestableStep<Complete, FurnishedStatusFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, FurnishedStatusFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "property-furnished"
+    }
+}

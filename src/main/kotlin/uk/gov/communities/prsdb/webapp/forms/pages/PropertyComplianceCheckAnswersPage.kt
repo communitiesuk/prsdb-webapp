@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.forms.pages
 
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.pages.cya.EicrSummaryRowsFactory
-import uk.gov.communities.prsdb.webapp.forms.pages.cya.EpcSummaryRowsFactory
-import uk.gov.communities.prsdb.webapp.forms.pages.cya.GasSafetySummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEicrSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEpcSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyGasSafetySummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
@@ -26,8 +26,9 @@ class PropertyComplianceCheckAnswersPage(
         templateName = "forms/propertyComplianceCheckAnswersForm",
         missingAnswersRedirect = missingAnswersRedirect,
     ) {
+    // TODO PDJB-467 - update to use new factories in integration tests
     private val gasSafetyDataFactory =
-        GasSafetySummaryRowsFactory(
+        LegacyGasSafetySummaryRowsFactory(
             doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },
             gasSafetyStartingStep = PropertyComplianceStepId.GasSafety,
             changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
@@ -35,7 +36,7 @@ class PropertyComplianceCheckAnswersPage(
         )
 
     private val eicrDataFactory =
-        EicrSummaryRowsFactory(
+        LegacyEicrSummaryRowsFactory(
             doesDataHaveEicr = { data -> data.getHasEICR()!! },
             eicrStartingStep = PropertyComplianceStepId.EICR,
             changeExemptionStep = PropertyComplianceStepId.EicrExemption,
@@ -43,7 +44,7 @@ class PropertyComplianceCheckAnswersPage(
         )
 
     private val epcDataFactory =
-        EpcSummaryRowsFactory(
+        LegacyEpcSummaryRowsFactory(
             epcCertificateUrlProvider = epcCertificateUrlProvider,
             epcStartingStep = PropertyComplianceStepId.EPC,
             stepFactory = stepFactory,

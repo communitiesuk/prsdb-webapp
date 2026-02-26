@@ -21,7 +21,8 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
             "searchAgainUrl" to
                 Destination.VisitableStep(state.searchForEpcStep, state.journeyId).toUrlStringOrNull(),
             "certificateNumber" to state.searchForEpcStep.formModelOrNull?.certificateNumber,
-            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
+            "submitButtonText" to
+                if (state.isCheckingAnswers) "forms.buttons.saveAndContinue" else "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/epcNotFoundForm"

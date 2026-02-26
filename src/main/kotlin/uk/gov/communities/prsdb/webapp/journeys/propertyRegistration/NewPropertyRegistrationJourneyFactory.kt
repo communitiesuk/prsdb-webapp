@@ -80,14 +80,14 @@ class NewPropertyRegistrationJourneyFactory(
                     checkable()
                 }
                 step(journey.propertyTypeStep) {
-                    routeSegment("property-type")
+                    routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
                     checkable()
                     saveProgress()
                 }
                 step(journey.ownershipTypeStep) {
-                    routeSegment("ownership-type")
+                    routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
                     checkable()
@@ -115,7 +115,7 @@ class NewPropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
-                    routeSegment("check-answers")
+                    routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     parents { journey.jointLandlordsTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }

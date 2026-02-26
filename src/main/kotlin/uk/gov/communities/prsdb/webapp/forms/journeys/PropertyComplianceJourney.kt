@@ -497,8 +497,14 @@ class PropertyComplianceJourney(
                     Pair(PropertyComplianceStepId.EpcNotAutoMatched, null)
                 }
             }
-            HasEpc.NO -> Pair(PropertyComplianceStepId.EpcMissing, null)
-            HasEpc.NOT_REQUIRED -> Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+
+            HasEpc.NO -> {
+                Pair(PropertyComplianceStepId.EpcMissing, null)
+            }
+
+            HasEpc.NOT_REQUIRED -> {
+                Pair(PropertyComplianceStepId.EpcExemptionReason, null)
+            }
         }
 
     private fun checkMatchedEpcStepHandleSubmitAndRedirect(filteredJourneyData: JourneyData): String {

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local, local-no-auth, use-notify" />
+    <option name="ACTIVE_PROFILES" value="local, local-no-auth" />
     <option name="ALTERNATIVE_JRE_PATH" value="corretto-21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="envFilePaths">

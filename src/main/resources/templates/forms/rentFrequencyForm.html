@@ -7,8 +7,8 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
-    <h1 class="govuk-heading-l" th:text="#{forms.rentFrequency.heading}">
-        forms.rentFrequency.heading
+    <h1 class="govuk-heading-l" th:text="#{${heading}}">
+        heading
     </h1>
     <p class="govuk-body" th:text="#{forms.rentFrequency.paragraph.one}">
         forms.rentFrequency.paragraph.one

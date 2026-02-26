@@ -13,6 +13,7 @@ class BedroomsStepConfig : AbstractRequestableStepConfig<Complete, NumberOfBedro
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
+            "heading" to "forms.numberOfBedrooms.heading",
             "fieldSetHeading" to "forms.numberOfBedrooms.fieldsetHeading",
         )
 
@@ -24,4 +25,8 @@ class BedroomsStepConfig : AbstractRequestableStepConfig<Complete, NumberOfBedro
 @JourneyFrameworkComponent
 final class BedroomsStep(
     stepConfig: BedroomsStepConfig,
-) : RequestableStep<Complete, NumberOfBedroomsFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, NumberOfBedroomsFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "number-of-bedrooms"
+    }
+}

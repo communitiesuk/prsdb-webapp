@@ -17,9 +17,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
-interface EpcState : JourneyState {
+interface EpcState :
+    JourneyState,
+    CheckYourAnswersJourneyState {
     var automatchedEpc: EpcDataModel?
     var searchedEpc: EpcDataModel?
     var acceptedEpc: EpcDataModel?

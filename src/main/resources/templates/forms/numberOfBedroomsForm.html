@@ -6,8 +6,8 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
-    <h1 class="govuk-heading-l" th:text="#{forms.numberOfBedrooms.heading}">
-        forms.numberOfBedrooms.heading
+    <h1 class="govuk-heading-l" th:text="#{${heading}}">
+        heading
     </h1>
     <h2 class="govuk-heading-m" th:text="#{forms.numberOfBedrooms.subheading}">
         forms.numberOfBedrooms.subheading

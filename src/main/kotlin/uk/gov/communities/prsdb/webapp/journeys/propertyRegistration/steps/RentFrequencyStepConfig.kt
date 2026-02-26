@@ -15,6 +15,7 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
 
     override fun getStepSpecificContent(state: OccupationState) =
         mapOf(
+            "heading" to "forms.rentFrequency.heading",
             "fieldSetHeading" to "forms.rentFrequency.fieldSetHeading",
             "radioOptions" to
                 listOf(
@@ -48,4 +49,8 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
 @JourneyFrameworkComponent
 final class RentFrequencyStep(
     stepConfig: RentFrequencyStepConfig,
-) : RequestableStep<Complete, RentFrequencyFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, RentFrequencyFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "rent-frequency"
+    }
+}
