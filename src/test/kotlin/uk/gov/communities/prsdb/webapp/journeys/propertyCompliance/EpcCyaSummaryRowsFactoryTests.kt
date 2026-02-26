@@ -1,10 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit.Companion.DAY
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.todayIn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -13,6 +10,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
@@ -55,7 +53,7 @@ class EpcCyaSummaryRowsFactoryTests {
     private val epcUrl = "https://example.com/epc"
     private val validEpcEnergyRating = "C"
     private val lowEpcEnergyRating = "F"
-    private val expiredEpcExpiryDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).minus(5, DAY)
+    private val expiredEpcExpiryDate = DateTimeHelper().getCurrentDateInUK().minus(5, DAY)
 
     @BeforeEach
     fun setupMocks() {
