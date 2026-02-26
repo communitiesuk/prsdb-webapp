@@ -139,14 +139,13 @@ class PropertyOwnershipServiceTests {
         )
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType,
-            households,
-            tenants,
-            landlord,
-            propertyBuildType,
-            address,
-            license,
-            customPropertyType = null,
+            ownershipType = ownershipType,
+            numberOfHouseholds = households,
+            numberOfPeople = tenants,
+            primaryLandlord = landlord,
+            propertyBuildType = propertyBuildType,
+            address = address,
+            license = license,
             numBedrooms = numberOfBedrooms,
             billsIncludedList = billsIncludedList,
             customBillsIncluded = customBillsIncluded,
@@ -154,6 +153,7 @@ class PropertyOwnershipServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+            customPropertyType = null,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -211,12 +211,12 @@ class PropertyOwnershipServiceTests {
         )
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType,
-            households,
-            tenants,
-            landlord,
-            propertyBuildType,
-            address,
+            ownershipType = ownershipType,
+            numberOfHouseholds = households,
+            numberOfPeople = tenants,
+            primaryLandlord = landlord,
+            propertyBuildType = propertyBuildType,
+            address = address,
             customPropertyType = null,
             numBedrooms = numberOfBedrooms,
             billsIncludedList = billsIncludedList,
