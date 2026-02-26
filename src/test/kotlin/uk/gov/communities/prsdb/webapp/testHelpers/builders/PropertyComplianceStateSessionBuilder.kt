@@ -88,7 +88,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         val formModel =
             TodayOrPastDateFormModel().apply {
                 day = issueDate.dayOfMonth.toString()
-                month = issueDate.monthNumber.toString()
+                month = issueDate.monthValue.toString()
                 year = issueDate.year.toString()
             }
         withSubmittedValue(GasSafetyIssueDateStep.ROUTE_SEGMENT, formModel)
